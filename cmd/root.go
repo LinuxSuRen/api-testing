@@ -5,6 +5,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/spf13/cobra"
 	"os"
+	"path"
 	"path/filepath"
 )
 
@@ -42,10 +43,20 @@ func (o *option) runE(cmd *cobra.Command, args []string) (err error) {
 				return
 			}
 
+			setRelativeDir(item, testcase)
+
 			if err = runner.RunTestCase(testcase); err != nil {
 				return
 			}
 		}
 	}
 	return
+}
+
+func setRelativeDir(configFile string, testcase *testing.TestCase) {
+	dir := filepath.Dir(configFile)
+
+	for i := range testcase.Prepare.Kubernetes {
+		testcase.Prepare.Kubernetes[i] = path.Join(dir, testcase.Prepare.Kubernetes[i])
+	}
 }

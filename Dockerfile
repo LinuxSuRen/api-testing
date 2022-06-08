@@ -33,5 +33,6 @@ RUN apk add --no-cache \
 COPY entrypoint.sh /entrypoint.sh
 COPY --from=builder /workspace/atest /usr/bin/atest
 COPY --from=hd /usr/local/bin/hd /usr/local/bin/hd
+RUN hd i kubernetes-sigs/kubectl
 
 ENTRYPOINT ["/entrypoint.sh"]
