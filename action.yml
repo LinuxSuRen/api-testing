@@ -1,0 +1,12 @@
+name: 'API testing'
+description: 'API testing'
+inputs:
+  pattern:
+    description: 'The pattern of the items'
+    required: true
+    default: 'testcase-*.yaml'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.pattern }}
