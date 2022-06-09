@@ -1,5 +1,5 @@
-name: 'API testing'
-description: 'API testing'
+name: 'API testing with Kubernetes'
+description: 'API testing with Kubernetes'
 inputs:
   pattern:
     description: 'The pattern of the items'
