@@ -43,6 +43,8 @@ func RunTestCase(testcase *testing.TestCase) (err error) {
 		request.Header.Add(key, val)
 	}
 
+	fmt.Println("start to send request to", testcase.Request.API)
+
 	// send the HTTP request
 	var resp *http.Response
 	if resp, err = client.Do(request); err != nil {
