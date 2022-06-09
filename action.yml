@@ -5,8 +5,20 @@ inputs:
     description: 'The pattern of the items'
     required: true
     default: 'testcase-*.yaml'
+  kustomization:
+    description: 'The kustomization file path'
+    required: true
+  waitNamespace:
+    description: 'waitNamespace'
+    required: true
+  waitResource:
+    description: 'waitResource'
+    required: true
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
     - ${{ inputs.pattern }}
+    - ${{ inputs.kustomization }}
+    - ${{ inputs.waitNamespace }}
+    - ${{ inputs.waitResource }}
