@@ -91,7 +91,8 @@ func doPrepare(testcase *testing.TestCase) (err error) {
 }
 
 func doCleanPrepare(testcase *testing.TestCase) (err error) {
-	for i := range testcase.Prepare.Kubernetes {
+	count := len(testcase.Prepare.Kubernetes)
+	for i := count - 1; i >= 0; i-- {
 		item := testcase.Prepare.Kubernetes[i]
 
 		if err = exec.RunCommand("kubectl", "delete", "-f", item); err != nil {
