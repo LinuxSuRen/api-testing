@@ -1,10 +1,12 @@
-package main
+package cmd
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	atesting "github.com/linuxsuren/api-testing/pkg/testing"
 )
-import atesting "github.com/linuxsuren/api-testing/pkg/testing"
 
 func Test_setRelativeDir(t *testing.T) {
 	type args struct {
