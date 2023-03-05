@@ -30,9 +30,8 @@ func (r *Request) Render(ctx interface{}) (err error) {
 	buf := new(bytes.Buffer)
 	if err = tpl.Execute(buf, ctx); err != nil {
 		return
-	} else {
-		r.API = buf.String()
 	}
+	r.API = buf.String()
 
 	// read body from file
 	if r.BodyFromFile != "" {
