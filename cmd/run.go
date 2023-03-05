@@ -1,18 +1,20 @@
-package main
+package cmd
 
 import (
+	"path"
+	"path/filepath"
+
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/spf13/cobra"
-	"path"
-	"path/filepath"
 )
 
 type runOption struct {
 	pattern string
 }
 
-func createRunCommand() (cmd *cobra.Command) {
+// CreateRunCommand returns the run command
+func CreateRunCommand() (cmd *cobra.Command) {
 	opt := &runOption{}
 	cmd = &cobra.Command{
 		Use:  "run",
@@ -21,26 +23,32 @@ func createRunCommand() (cmd *cobra.Command) {
 
 	// set flags
 	flags := cmd.Flags()
-	flags.StringVarP(&opt.pattern, "pattern", "p", "testcase-*.yaml",
+	flags.StringVarP(&opt.pattern, "pattern", "p", "test-suite-*.yaml",
 		"The file pattern which try to execute the test cases")
 	return
 }
 
 func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 	var files []string
+
+	ctx := map[string]interface{}{}
+
 	if files, err = filepath.Glob(o.pattern); err == nil {
 		for i := range files {
 			item := files[i]
 
-			var testcase *testing.TestCase
-			if testcase, err = testing.Parse(item); err != nil {
+			var testSuite *testing.TestSuite
+			if testSuite, err = testing.Parse(item); err != nil {
 				return
 			}
 
-			setRelativeDir(item, testcase)
-
-			if err = runner.RunTestCase(testcase); err != nil {
-				return
+			for _, testCase := range testSuite.Items {
+				setRelativeDir(item, &testCase)
+				var output interface{}
+				if output, err = runner.RunTestCase(&testCase, ctx); err != nil {
+					return
+				}
+				ctx[testCase.Name] = output
 			}
 		}
 	}

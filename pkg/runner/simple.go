@@ -2,17 +2,25 @@ package runner
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
-	"github.com/andreyvit/diff"
-	"github.com/linuxsuren/api-testing/pkg/exec"
-	"github.com/linuxsuren/api-testing/pkg/testing"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"reflect"
 	"strings"
+
+	"github.com/andreyvit/diff"
+	"github.com/antonmedv/expr"
+	"github.com/antonmedv/expr/vm"
+	"github.com/linuxsuren/api-testing/pkg/exec"
+	"github.com/linuxsuren/api-testing/pkg/testing"
+	unstructured "github.com/linuxsuren/unstructured/pkg"
 )
 
-func RunTestCase(testcase *testing.TestCase) (err error) {
+// RunTestCase runs the test case
+func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{}, err error) {
 	fmt.Printf("start to run: '%s'\n", testcase.Name)
 	if err = doPrepare(testcase); err != nil {
 		err = fmt.Errorf("failed to prepare, error: %v", err)
@@ -31,6 +39,16 @@ func RunTestCase(testcase *testing.TestCase) (err error) {
 	var requestBody io.Reader
 	if testcase.Request.Body != "" {
 		requestBody = bytes.NewBufferString(testcase.Request.Body)
+	} else if testcase.Request.BodyFromFile != "" {
+		var data []byte
+		if data, err = os.ReadFile(testcase.Request.BodyFromFile); err != nil {
+			return
+		}
+		requestBody = bytes.NewBufferString(string(data))
+	}
+
+	if err = testcase.Request.Render(ctx); err != nil {
+		return
 	}
 
 	var request *http.Request
@@ -64,16 +82,67 @@ func RunTestCase(testcase *testing.TestCase) (err error) {
 		}
 	}
 
+	var responseBodyData []byte
+	if responseBodyData, err = ioutil.ReadAll(resp.Body); err != nil {
+		return
+	}
 	if testcase.Expect.Body != "" {
-		var data []byte
-		if data, err = ioutil.ReadAll(resp.Body); err != nil {
+		if string(responseBodyData) != strings.TrimSpace(testcase.Expect.Body) {
+			err = fmt.Errorf("case: %s, got different response body, diff: \n%s", testcase.Name,
+				diff.LineDiff(testcase.Expect.Body, string(responseBodyData)))
+			return
+		}
+	}
+
+	mapOutput := map[string]interface{}{}
+	if err = json.Unmarshal(responseBodyData, &mapOutput); err != nil {
+		switch b := err.(type) {
+		case *json.UnmarshalTypeError:
+			if b.Value != "array" {
+				return
+			} else {
+				arrayOutput := []interface{}{}
+				if err = json.Unmarshal(responseBodyData, &arrayOutput); err != nil {
+					return
+				}
+				output = arrayOutput
+			}
+		default:
+			return
+		}
+	} else {
+		output = mapOutput
+	}
+
+	for key, expectVal := range testcase.Expect.BodyFieldsExpect {
+		var val interface{}
+		var ok bool
+		if val, ok, err = unstructured.NestedField(mapOutput, strings.Split(key, "/")...); err != nil {
+			err = fmt.Errorf("failed to get field: %s, %v", key, err)
+			return
+		} else if !ok {
+			err = fmt.Errorf("not found field: %s", key)
+			return
+		} else if !reflect.DeepEqual(expectVal, val) {
+			err = fmt.Errorf("field[%s] expect value: %v, actual: %v", key, expectVal, val)
+			return
+		}
+	}
+
+	for _, verify := range testcase.Expect.Verify {
+		var program *vm.Program
+		if program, err = expr.Compile(verify, expr.Env(output), expr.AsBool()); err != nil {
 			return
 		}
 
-		if string(data) != strings.TrimSpace(testcase.Expect.Body) {
-			err = fmt.Errorf("case: %s, got different response body, diff: \n%s", testcase.Name,
-				diff.LineDiff(testcase.Expect.Body, string(data)))
+		var result interface{}
+		if result, err = expr.Run(program, output); err != nil {
 			return
+		}
+
+		if !result.(bool) {
+			err = fmt.Errorf("faild to verify: %s", verify)
+			break
 		}
 	}
 	return

@@ -4,3 +4,5 @@ build:
 
 copy: build
 	cp bin/atest /usr/local/bin/
+test:
+	go test ./...

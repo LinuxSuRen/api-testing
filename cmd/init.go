@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/linuxsuren/api-testing/pkg/exec"
@@ -11,7 +11,8 @@ type initOption struct {
 	waitResource  string
 }
 
-func createInitCommand() (cmd *cobra.Command) {
+// CreateInitCommand returns the init command
+func CreateInitCommand() (cmd *cobra.Command) {
 	opt := &initOption{}
 	cmd = &cobra.Command{
 		Use:  "init",
