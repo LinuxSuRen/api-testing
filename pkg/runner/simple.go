@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"reflect"
@@ -83,7 +82,7 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 	}
 
 	var responseBodyData []byte
-	if responseBodyData, err = ioutil.ReadAll(resp.Body); err != nil {
+	if responseBodyData, err = io.ReadAll(resp.Body); err != nil {
 		return
 	}
 	if testcase.Expect.Body != "" {
@@ -100,13 +99,13 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		case *json.UnmarshalTypeError:
 			if b.Value != "array" {
 				return
-			} else {
-				arrayOutput := []interface{}{}
-				if err = json.Unmarshal(responseBodyData, &arrayOutput); err != nil {
-					return
-				}
-				output = arrayOutput
 			}
+
+			var arrayOutput []interface{}
+			if err = json.Unmarshal(responseBodyData, &arrayOutput); err != nil {
+				return
+			}
+			output = arrayOutput
 		default:
 			return
 		}
@@ -141,7 +140,7 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		}
 
 		if !result.(bool) {
-			err = fmt.Errorf("faild to verify: %s", verify)
+			err = fmt.Errorf("failed to verify: %s", verify)
 			break
 		}
 	}
