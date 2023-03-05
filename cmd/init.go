@@ -11,6 +11,7 @@ type initOption struct {
 	waitResource  string
 }
 
+// CreateInitCommand returns the init command
 func CreateInitCommand() (cmd *cobra.Command) {
 	opt := &initOption{}
 	cmd = &cobra.Command{

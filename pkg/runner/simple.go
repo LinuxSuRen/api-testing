@@ -19,6 +19,7 @@ import (
 	unstructured "github.com/linuxsuren/unstructured/pkg"
 )
 
+// RunTestCase runs the test case
 func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{}, err error) {
 	fmt.Printf("start to run: '%s'\n", testcase.Name)
 	if err = doPrepare(testcase); err != nil {
@@ -140,7 +141,7 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		}
 
 		if !result.(bool) {
-			err = fmt.Errorf("faild to verify")
+			err = fmt.Errorf("faild to verify: %s", verify)
 			break
 		}
 	}

@@ -13,6 +13,7 @@ type runOption struct {
 	pattern string
 }
 
+// CreateRunCommand returns the run command
 func CreateRunCommand() (cmd *cobra.Command) {
 	opt := &runOption{}
 	cmd = &cobra.Command{
