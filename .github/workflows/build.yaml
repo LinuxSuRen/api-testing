@@ -1,11 +1,11 @@
-name: Coverage Report
+name: Build
 
 on:
   - push
   - pull_request
 
 jobs:
-  TestAndReport:
+  Test:
     runs-on: ubuntu-20.04
     steps:
       - name: Set up Go
@@ -21,3 +21,18 @@ jobs:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         run: |
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.out --force-coverage-parser go
+
+  Build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18.x
+      - uses: actions/checkout@v3.0.0
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v4.1.1
+        with:
+          github_token: ${{ secrets.GH_PUBLISH_SECRETS }}
+          version: v1.14.0
+          args: release --skip-publish --rm-dist --snapshot

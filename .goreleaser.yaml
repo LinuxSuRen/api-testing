@@ -8,7 +8,6 @@ builds:
   - env:
       - CGO_ENABLED=0
     binary: atest
-    dir: cmd
     goos:
       - linux
       - windows
