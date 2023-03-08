@@ -104,6 +104,18 @@ func TestRender(t *testing.T) {
 			assert.Equal(t, "linuxsuren", req.Form["key"])
 		},
 		hasErr: false,
+	}, {
+		name: "header render",
+		request: &Request{
+			Header: map[string]string{
+				"key": "{{.Name}}",
+			},
+		},
+		ctx: TestCase{Name: "linuxsuren"},
+		verify: func(t *testing.T, req *Request) {
+			assert.Equal(t, "linuxsuren", req.Header["key"])
+		},
+		hasErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

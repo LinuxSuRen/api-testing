@@ -42,6 +42,16 @@ func (r *Request) Render(ctx interface{}) (err error) {
 		r.Body = strings.TrimSpace(string(data))
 	}
 
+	// template the header
+	for key, val := range r.Header {
+		if tpl, err = template.New("header").Funcs(sprig.FuncMap()).Parse(val); err == nil {
+			buf = new(bytes.Buffer)
+			if err = tpl.Execute(buf, ctx); err == nil {
+				r.Header[key] = buf.String()
+			}
+		}
+	}
+
 	// template the body
 	if tpl, err = template.New("body").Funcs(sprig.FuncMap()).Parse(r.Body); err == nil {
 		buf = new(bytes.Buffer)
