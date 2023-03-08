@@ -49,5 +49,15 @@ func (r *Request) Render(ctx interface{}) (err error) {
 			r.Body = buf.String()
 		}
 	}
+
+	// template the form
+	for key, val := range r.Form {
+		if tpl, err = template.New("form").Funcs(sprig.FuncMap()).Parse(val); err == nil {
+			buf = new(bytes.Buffer)
+			if err = tpl.Execute(buf, ctx); err == nil {
+				r.Form[key] = buf.String()
+			}
+		}
+	}
 	return
 }

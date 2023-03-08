@@ -1,6 +1,7 @@
 build:
 	mkdir -p bin
-	go build -o bin/atest cmd/*.go
+	rm -rf bin/atest
+	go build -o bin/atest main.go
 
 copy: build
 	cp bin/atest /usr/local/bin/

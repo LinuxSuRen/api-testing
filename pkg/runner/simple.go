@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"reflect"
@@ -50,6 +51,20 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		return
 	}
 
+	if len(testcase.Request.Form) > 0 {
+		if testcase.Request.Header["Content-Type"] == "multipart/form-data" {
+			multiBody := &bytes.Buffer{}
+			writer := multipart.NewWriter(multiBody)
+			for key, val := range testcase.Request.Form {
+				writer.WriteField(key, val)
+			}
+
+			_ = writer.Close()
+			requestBody = multiBody
+			testcase.Request.Header["Content-Type"] = writer.FormDataContentType()
+		}
+	}
+
 	var request *http.Request
 	if request, err = http.NewRequest(testcase.Request.Method, testcase.Request.API, requestBody); err != nil {
 		return
@@ -68,8 +83,14 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		return
 	}
 
+	var responseBodyData []byte
+	if responseBodyData, err = io.ReadAll(resp.Body); err != nil {
+		return
+	}
+
 	if testcase.Expect.StatusCode != 0 {
 		if err = expectInt(testcase.Name, testcase.Expect.StatusCode, resp.StatusCode); err != nil {
+			err = fmt.Errorf("error is: %v\n%s", err, string(responseBodyData))
 			return
 		}
 	}
@@ -81,10 +102,6 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		}
 	}
 
-	var responseBodyData []byte
-	if responseBodyData, err = io.ReadAll(resp.Body); err != nil {
-		return
-	}
 	if testcase.Expect.Body != "" {
 		if string(responseBodyData) != strings.TrimSpace(testcase.Expect.Body) {
 			err = fmt.Errorf("case: %s, got different response body, diff: \n%s", testcase.Name,
