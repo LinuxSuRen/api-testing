@@ -27,6 +27,7 @@ type Request struct {
 	Method       string            `yaml:"method"`
 	Query        map[string]string `yaml:"query"`
 	Header       map[string]string `yaml:"header"`
+	Form         map[string]string `yaml:"form"`
 	Body         string            `yaml:"body"`
 	BodyFromFile string            `yaml:"bodyFromFile"`
 }

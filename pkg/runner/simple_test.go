@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	_ "embed"
+
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/stretchr/testify/assert"
@@ -313,6 +314,27 @@ func TestTestCase(t *testing.T) {
 		verify: func(t *testing.T, output interface{}, err error) {
 			assert.NotNil(t, err)
 			assert.Contains(t, err.Error(), "template: api:1:")
+		},
+	}, {
+		name: "form request",
+		testCase: &atest.TestCase{
+			Request: atest.Request{
+				API:    "http://localhost/foo",
+				Method: http.MethodPost,
+				Header: map[string]string{
+					"Content-Type": "multipart/form-data",
+				},
+				Form: map[string]string{
+					"key": "value",
+				},
+			},
+		},
+		prepare: func() {
+			gock.New("http://localhost").
+				Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
+		},
+		verify: func(t *testing.T, output interface{}, err error) {
+			assert.Nil(t, err)
 		},
 	}}
 	for _, tt := range tests {

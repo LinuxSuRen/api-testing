@@ -3,7 +3,11 @@ module github.com/linuxsuren/api-testing
 go 1.17
 
 require (
+	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
+	github.com/antonmedv/expr v1.12.1
+	github.com/h2non/gock v1.2.0
+	github.com/linuxsuren/unstructured v0.0.1
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.8.2
 	gopkg.in/yaml.v2 v2.4.0
@@ -12,16 +16,12 @@ require (
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
-	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
-	github.com/antonmedv/expr v1.12.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/uuid v1.1.1 // indirect
-	github.com/h2non/gock v1.2.0 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/linuxsuren/unstructured v0.0.1 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
