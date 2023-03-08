@@ -31,8 +31,9 @@ func TestTestCase(t *testing.T) {
 			},
 			Expect: atest.Response{
 				StatusCode: http.StatusOK,
-				BodyFieldsExpect: map[string]string{
-					"name": "linuxsuren",
+				BodyFieldsExpect: map[string]interface{}{
+					"name":   "linuxsuren",
+					"number": 1,
 				},
 				Header: map[string]string{
 					"type": "generic",
@@ -52,7 +53,7 @@ func TestTestCase(t *testing.T) {
 		},
 		verify: func(t *testing.T, output interface{}, err error) {
 			assert.Nil(t, err)
-			assert.Equal(t, map[string]interface{}{"name": "linuxsuren"}, output)
+			assert.Equal(t, map[string]interface{}{"name": "linuxsuren", "number": float64(1)}, output)
 		},
 	}, {
 		name: "normal, response is slice",
@@ -181,7 +182,7 @@ func TestTestCase(t *testing.T) {
 				API: "http://localhost/foo",
 			},
 			Expect: atest.Response{
-				BodyFieldsExpect: map[string]string{
+				BodyFieldsExpect: map[string]interface{}{
 					"foo": "bar",
 				},
 			},
@@ -200,7 +201,7 @@ func TestTestCase(t *testing.T) {
 				API: "http://localhost/foo",
 			},
 			Expect: atest.Response{
-				BodyFieldsExpect: map[string]string{
+				BodyFieldsExpect: map[string]interface{}{
 					"name": "bar",
 				},
 			},
@@ -219,7 +220,7 @@ func TestTestCase(t *testing.T) {
 				API: "http://localhost/foo",
 			},
 			Expect: atest.Response{
-				BodyFieldsExpect: map[string]string{
+				BodyFieldsExpect: map[string]interface{}{
 					"items[1]": "bar",
 				},
 			},
@@ -316,13 +317,34 @@ func TestTestCase(t *testing.T) {
 			assert.Contains(t, err.Error(), "template: api:1:")
 		},
 	}, {
-		name: "form request",
+		name: "multipart form request",
 		testCase: &atest.TestCase{
 			Request: atest.Request{
 				API:    "http://localhost/foo",
 				Method: http.MethodPost,
 				Header: map[string]string{
 					"Content-Type": "multipart/form-data",
+				},
+				Form: map[string]string{
+					"key": "value",
+				},
+			},
+		},
+		prepare: func() {
+			gock.New("http://localhost").
+				Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
+		},
+		verify: func(t *testing.T, output interface{}, err error) {
+			assert.Nil(t, err)
+		},
+	}, {
+		name: "normal form request",
+		testCase: &atest.TestCase{
+			Request: atest.Request{
+				API:    "http://localhost/foo",
+				Method: http.MethodPost,
+				Header: map[string]string{
+					"Content-Type": "application/x-www-form-urlencoded",
 				},
 				Form: map[string]string{
 					"key": "value",

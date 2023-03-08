@@ -34,11 +34,11 @@ type Request struct {
 
 // Response is the expected response
 type Response struct {
-	StatusCode       int               `yaml:"statusCode"`
-	Body             string            `yaml:"body"`
-	Header           map[string]string `yaml:"header"`
-	BodyFieldsExpect map[string]string `yaml:"bodyFieldsExpect"`
-	Verify           []string          `yaml:"verify"`
+	StatusCode       int                    `yaml:"statusCode"`
+	Body             string                 `yaml:"body"`
+	Header           map[string]string      `yaml:"header"`
+	BodyFieldsExpect map[string]interface{} `yaml:"bodyFieldsExpect"`
+	Verify           []string               `yaml:"verify"`
 }
 
 // Clean represents the clean work after testing

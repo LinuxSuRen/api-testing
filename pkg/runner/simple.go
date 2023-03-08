@@ -7,6 +7,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"reflect"
 	"strings"
@@ -62,6 +63,12 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 			_ = writer.Close()
 			requestBody = multiBody
 			testcase.Request.Header["Content-Type"] = writer.FormDataContentType()
+		} else if testcase.Request.Header["Content-Type"] == "application/x-www-form-urlencoded" {
+			data := url.Values{}
+			for key, val := range testcase.Request.Form {
+				data.Set(key, val)
+			}
+			requestBody = strings.NewReader(data.Encode())
 		}
 	}
 
@@ -140,6 +147,11 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 			err = fmt.Errorf("not found field: %s", key)
 			return
 		} else if !reflect.DeepEqual(expectVal, val) {
+			if reflect.TypeOf(expectVal).Kind() == reflect.Int {
+				if strings.Compare(fmt.Sprintf("%v", expectVal), fmt.Sprintf("%v", val)) == 0 {
+					continue
+				}
+			}
 			err = fmt.Errorf("field[%s] expect value: %v, actual: %v", key, expectVal, val)
 			return
 		}
