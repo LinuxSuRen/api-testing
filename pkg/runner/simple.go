@@ -95,11 +95,12 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		return
 	}
 
-	if testcase.Expect.StatusCode != 0 {
-		if err = expectInt(testcase.Name, testcase.Expect.StatusCode, resp.StatusCode); err != nil {
-			err = fmt.Errorf("error is: %v\n%s", err, string(responseBodyData))
-			return
-		}
+	if err = testcase.Expect.Render(nil); err != nil {
+		return
+	}
+	if err = expectInt(testcase.Name, testcase.Expect.StatusCode, resp.StatusCode); err != nil {
+		err = fmt.Errorf("error is: %v\n%s", err, string(responseBodyData))
+		return
 	}
 
 	for key, val := range testcase.Expect.Header {

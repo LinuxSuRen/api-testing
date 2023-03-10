@@ -3,6 +3,7 @@ package testing
 // TestSuite represents a set of test cases
 type TestSuite struct {
 	Name  string     `yaml:"name"`
+	API   string     `yaml:"api"`
 	Items []TestCase `yaml:"items"`
 }
 

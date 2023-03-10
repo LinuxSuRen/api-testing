@@ -1,0 +1,5 @@
+name: Simple
+api: http://foo/
+items:
+- request:
+    api: /bar
