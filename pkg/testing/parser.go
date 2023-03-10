@@ -3,6 +3,7 @@ package testing
 import (
 	"bytes"
 	"html/template"
+	"net/http"
 	"os"
 	"strings"
 
@@ -69,5 +70,28 @@ func (r *Request) Render(ctx interface{}) (err error) {
 			}
 		}
 	}
+
+	// setting default values
+	r.Method = emptyThenDefault(r.Method, http.MethodGet)
 	return
+}
+
+// Render renders the response
+func (r *Response) Render(ctx interface{}) (err error) {
+	r.StatusCode = zeroThenDefault(r.StatusCode, http.StatusOK)
+	return
+}
+
+func zeroThenDefault(val, defVal int) int {
+	if val == 0 {
+		val = defVal
+	}
+	return val
+}
+
+func emptyThenDefault(val, defVal string) string {
+	if strings.TrimSpace(val) == "" {
+		val = defVal
+	}
+	return val
 }

@@ -24,7 +24,7 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestRender(t *testing.T) {
+func TestRequestRender(t *testing.T) {
 	tests := []struct {
 		name    string
 		request *Request
@@ -43,6 +43,13 @@ func TestRender(t *testing.T) {
 			assert.Equal(t, "http://localhost/foo", req.API)
 			assert.Equal(t, "bar", req.Body)
 		},
+	}, {
+		name:    "default values",
+		request: &Request{},
+		verify: func(t *testing.T, req *Request) {
+			assert.Equal(t, http.MethodGet, req.Method)
+		},
+		hasErr: false,
 	}, {
 		name:    "context is nil",
 		request: &Request{},
@@ -125,4 +132,62 @@ func TestRender(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestResponseRender(t *testing.T) {
+	tests := []struct {
+		name     string
+		response *Response
+		verify   func(t *testing.T, req *Response)
+		ctx      interface{}
+		hasErr   bool
+	}{{
+		name:     "blank response",
+		response: &Response{},
+		verify: func(t *testing.T, req *Response) {
+			assert.Equal(t, http.StatusOK, req.StatusCode)
+		},
+		hasErr: false,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.response.Render(tt.ctx)
+			if assert.Equal(t, tt.hasErr, err != nil, err) && tt.verify != nil {
+				tt.verify(t, tt.response)
+			}
+		})
+	}
+}
+
+func TestEmptyThenDefault(t *testing.T) {
+	tests := []struct {
+		name   string
+		val    string
+		defVal string
+		expect string
+	}{{
+		name:   "empty string",
+		val:    "",
+		defVal: "abc",
+		expect: "abc",
+	}, {
+		name:   "blank string",
+		val:    " ",
+		defVal: "abc",
+		expect: "abc",
+	}, {
+		name:   "not empty or blank string",
+		val:    "abc",
+		defVal: "def",
+		expect: "abc",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := emptyThenDefault(tt.val, tt.defVal)
+			assert.Equal(t, tt.expect, result, result)
+		})
+	}
+
+	assert.Equal(t, 1, zeroThenDefault(0, 1))
+	assert.Equal(t, 1, zeroThenDefault(1, 2))
 }
