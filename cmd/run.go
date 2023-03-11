@@ -41,7 +41,6 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 	if files, err = filepath.Glob(o.pattern); err == nil {
 		for i := range files {
 			item := files[i]
-			fmt.Println(item, "===", o.pattern, args)
 			if err = runSuite(item, ctx); err != nil {
 				return
 			}
@@ -60,7 +59,7 @@ func runSuite(suite string, ctx map[string]interface{}) (err error) {
 	for _, testCase := range testSuite.Items {
 		// reuse the API prefix
 		if strings.HasPrefix(testCase.Request.API, "/") {
-			testCase.Request.API = fmt.Sprintf("%s/%s", testSuite.API, testCase.Request.API)
+			testCase.Request.API = fmt.Sprintf("%s%s", testSuite.API, testCase.Request.API)
 		}
 
 		setRelativeDir(suite, &testCase)

@@ -4,6 +4,6 @@ build:
 	go build -o bin/atest main.go
 
 copy: build
-	cp bin/atest /usr/local/bin/
+	sudo cp bin/atest /usr/local/bin/
 test:
 	go test ./...
