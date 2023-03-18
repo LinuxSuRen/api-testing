@@ -9,7 +9,8 @@ import (
 
 func main() {
 	cmd := &cobra.Command{
-		Use: "atest",
+		Use:   "atest",
+		Short: "API testing tool",
 	}
 	cmd.AddCommand(c.CreateInitCommand(), c.CreateRunCommand())
 

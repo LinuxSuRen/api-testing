@@ -1,13 +1,11 @@
 package testing
 
 import (
-	"bytes"
-	"html/template"
 	"net/http"
 	"os"
 	"strings"
 
-	"github.com/Masterminds/sprig/v3"
+	"github.com/linuxsuren/api-testing/pkg/render"
 	"gopkg.in/yaml.v2"
 )
 
@@ -24,15 +22,12 @@ func Parse(configFile string) (testSuite *TestSuite, err error) {
 // Render injects the template based context
 func (r *Request) Render(ctx interface{}) (err error) {
 	// template the API
-	var tpl *template.Template
-	if tpl, err = template.New("api").Funcs(sprig.FuncMap()).Parse(r.API); err != nil {
+	var result string
+	if result, err = render.Render("api", r.API, ctx); err == nil {
+		r.API = result
+	} else {
 		return
 	}
-	buf := new(bytes.Buffer)
-	if err = tpl.Execute(buf, ctx); err != nil {
-		return
-	}
-	r.API = buf.String()
 
 	// read body from file
 	if r.BodyFromFile != "" {
@@ -45,29 +40,26 @@ func (r *Request) Render(ctx interface{}) (err error) {
 
 	// template the header
 	for key, val := range r.Header {
-		if tpl, err = template.New("header").Funcs(sprig.FuncMap()).Parse(val); err == nil {
-			buf = new(bytes.Buffer)
-			if err = tpl.Execute(buf, ctx); err == nil {
-				r.Header[key] = buf.String()
-			}
+		if result, err = render.Render("header", val, ctx); err == nil {
+			r.Header[key] = result
+		} else {
+			return
 		}
 	}
 
 	// template the body
-	if tpl, err = template.New("body").Funcs(sprig.FuncMap()).Parse(r.Body); err == nil {
-		buf = new(bytes.Buffer)
-		if err = tpl.Execute(buf, ctx); err == nil {
-			r.Body = buf.String()
-		}
+	if result, err = render.Render("body", r.Body, ctx); err == nil {
+		r.Body = result
+	} else {
+		return
 	}
 
 	// template the form
 	for key, val := range r.Form {
-		if tpl, err = template.New("form").Funcs(sprig.FuncMap()).Parse(val); err == nil {
-			buf = new(bytes.Buffer)
-			if err = tpl.Execute(buf, ctx); err == nil {
-				r.Form[key] = buf.String()
-			}
+		if result, err = render.Render("form", val, ctx); err == nil {
+			r.Form[key] = result
+		} else {
+			return
 		}
 	}
 

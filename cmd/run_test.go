@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -89,7 +88,6 @@ func TestRunCommand(t *testing.T) {
 
 			root.SetArgs(append([]string{"run"}, tt.args...))
 
-			fmt.Println(tt.args)
 			err := root.Execute()
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})

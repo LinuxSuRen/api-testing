@@ -11,6 +11,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
@@ -36,7 +37,9 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		}
 	}()
 
-	client := http.Client{}
+	client := http.Client{
+		Timeout: time.Second * 30,
+	}
 	var requestBody io.Reader
 	if testcase.Request.Body != "" {
 		requestBody = bytes.NewBufferString(testcase.Request.Body)
