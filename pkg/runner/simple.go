@@ -2,6 +2,7 @@ package runner
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,7 +12,6 @@ import (
 	"os"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
@@ -22,7 +22,7 @@ import (
 )
 
 // RunTestCase runs the test case
-func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{}, err error) {
+func RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error) {
 	fmt.Printf("start to run: '%s'\n", testcase.Name)
 	if err = doPrepare(testcase); err != nil {
 		err = fmt.Errorf("failed to prepare, error: %v", err)
@@ -37,9 +37,7 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		}
 	}()
 
-	client := http.Client{
-		Timeout: time.Second * 30,
-	}
+	client := http.Client{}
 	var requestBody io.Reader
 	if testcase.Request.Body != "" {
 		requestBody = bytes.NewBufferString(testcase.Request.Body)
@@ -51,7 +49,7 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 		requestBody = bytes.NewBufferString(string(data))
 	}
 
-	if err = testcase.Request.Render(ctx); err != nil {
+	if err = testcase.Request.Render(dataContext); err != nil {
 		return
 	}
 
@@ -76,7 +74,7 @@ func RunTestCase(testcase *testing.TestCase, ctx interface{}) (output interface{
 	}
 
 	var request *http.Request
-	if request, err = http.NewRequest(testcase.Request.Method, testcase.Request.API, requestBody); err != nil {
+	if request, err = http.NewRequestWithContext(ctx, testcase.Request.Method, testcase.Request.API, requestBody); err != nil {
 		return
 	}
 

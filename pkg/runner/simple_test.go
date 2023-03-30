@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"testing"
@@ -365,7 +366,7 @@ func TestTestCase(t *testing.T) {
 			if tt.prepare != nil {
 				tt.prepare()
 			}
-			output, err := RunTestCase(tt.testCase, tt.ctx)
+			output, err := RunTestCase(tt.testCase, tt.ctx, context.TODO())
 			tt.verify(t, output, err)
 		})
 	}

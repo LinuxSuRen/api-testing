@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/h2non/gock"
 	"github.com/spf13/cobra"
@@ -46,7 +48,9 @@ func TestRunSuite(t *testing.T) {
 
 			tt.prepare()
 			ctx := getDefaultContext()
-			err := runSuite(tt.suiteFile, ctx)
+			opt := &runOption{requestTimeout: 30 * time.Second}
+
+			err := opt.runSuite(tt.suiteFile, ctx, context.TODO())
 			assert.Equal(t, tt.hasError, err != nil, err)
 		})
 	}

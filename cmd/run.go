@@ -17,10 +17,12 @@ import (
 )
 
 type runOption struct {
-	pattern  string
-	duration time.Duration
-	thread   int64
-	context  context.Context
+	pattern            string
+	duration           time.Duration
+	requestTimeout     time.Duration
+	requestIgnoreError bool
+	thread             int64
+	context            context.Context
 }
 
 // CreateRunCommand returns the run command
@@ -40,6 +42,8 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.StringVarP(&opt.pattern, "pattern", "p", "test-suite-*.yaml",
 		"The file pattern which try to execute the test cases")
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
+	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
+	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
 	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
 	return
 }
@@ -69,7 +73,7 @@ func (o *runOption) runSuiteWithDuration(suite string) (err error) {
 		// make sure having a valid timer
 		timeout = time.NewTicker(time.Second)
 	}
-	errChannel := make(chan error, 10)
+	errChannel := make(chan error, 10*o.thread)
 	var wait sync.WaitGroup
 
 	for !stop {
@@ -89,13 +93,17 @@ func (o *runOption) runSuiteWithDuration(suite string) (err error) {
 				stop = true
 			}
 
-			go func(ch chan error) {
+			go func(ch chan error, sem *semaphore.Weighted) {
+				now := time.Now()
 				defer sem.Release(1)
 				defer wait.Done()
+				defer func() {
+					fmt.Println("routing end with", time.Now().Sub(now))
+				}()
 
-				ctx := getDefaultContext()
-				ch <- runSuite(suite, ctx)
-			}(errChannel)
+				dataContext := getDefaultContext()
+				ch <- o.runSuite(suite, dataContext, o.context)
+			}(errChannel, sem)
 		}
 	}
 	err = <-errChannel
@@ -103,14 +111,14 @@ func (o *runOption) runSuiteWithDuration(suite string) (err error) {
 	return
 }
 
-func runSuite(suite string, ctx map[string]interface{}) (err error) {
+func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, ctx context.Context) (err error) {
 	var testSuite *testing.TestSuite
 	if testSuite, err = testing.Parse(suite); err != nil {
 		return
 	}
 
 	var result string
-	if result, err = render.Render("base api", testSuite.API, ctx); err == nil {
+	if result, err = render.Render("base api", testSuite.API, dataContext); err == nil {
 		testSuite.API = result
 		testSuite.API = strings.TrimSuffix(testSuite.API, "/")
 	} else {
@@ -125,10 +133,11 @@ func runSuite(suite string, ctx map[string]interface{}) (err error) {
 
 		setRelativeDir(suite, &testCase)
 		var output interface{}
-		if output, err = runner.RunTestCase(&testCase, ctx); err != nil {
+		ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
+		if output, err = runner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
 			return
 		}
-		ctx[testCase.Name] = output
+		dataContext[testCase.Name] = output
 	}
 	return
 }
