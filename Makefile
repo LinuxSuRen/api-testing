@@ -6,4 +6,4 @@ build:
 copy: build
 	sudo cp bin/atest /usr/local/bin/
 test:
-	go test ./...
+	go test ./... -cover

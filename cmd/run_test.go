@@ -49,10 +49,9 @@ func TestRunSuite(t *testing.T) {
 
 			tt.prepare()
 			ctx := getDefaultContext()
-			opt := &runOption{
-				requestTimeout: 30 * time.Second,
-				limiter:        limit.NewDefaultRateLimiter(0, 0),
-			}
+			opt := newDiskCardRunOption()
+			opt.requestTimeout = 30 * time.Second
+			opt.limiter = limit.NewDefaultRateLimiter(0, 0)
 			stopSingal := make(chan struct{}, 1)
 
 			err := opt.runSuite(tt.suiteFile, ctx, context.TODO(), stopSingal)

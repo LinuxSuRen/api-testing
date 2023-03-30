@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -28,18 +29,36 @@ type runOption struct {
 	burst              int32
 	limiter            limit.RateLimiter
 	startTime          time.Time
+	reporter           runner.TestReporter
+	reportWriter       runner.ReportResultWriter
+	report             string
+}
+
+func newDefaultRunOption() *runOption {
+	return &runOption{
+		reporter:     runner.NewmemoryTestReporter(),
+		reportWriter: runner.NewResultWriter(os.Stdout),
+	}
+}
+
+func newDiskCardRunOption() *runOption {
+	return &runOption{
+		reporter:     runner.NewDiscardTestReporter(),
+		reportWriter: runner.NewDiscardResultWriter(),
+	}
 }
 
 // CreateRunCommand returns the run command
 func CreateRunCommand() (cmd *cobra.Command) {
-	opt := &runOption{}
+	opt := newDefaultRunOption()
 	cmd = &cobra.Command{
 		Use:     "run",
 		Aliases: []string{"r"},
 		Example: `atest run -p sample.yaml
 See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
-		Short: "Run the test suite",
-		RunE:  opt.runE,
+		Short:   "Run the test suite",
+		PreRunE: opt.preRunE,
+		RunE:    opt.runE,
 	}
 
 	// set flags
@@ -52,6 +71,15 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
 	flags.Int32VarP(&opt.qps, "qps", "", 5, "QPS")
 	flags.Int32VarP(&opt.burst, "burst", "", 5, "burst")
+	flags.StringVarP(&opt.report, "report", "", "", "The type of target report")
+	return
+}
+
+func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
+	switch o.report {
+	case "markdown", "md":
+		o.reportWriter = runner.NewMarkdownResultWriter(cmd.OutOrStdout())
+	}
 	return
 }
 
@@ -71,6 +99,14 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 			if err = o.runSuiteWithDuration(item); err != nil {
 				return
 			}
+		}
+	}
+
+	// print the report
+	if err == nil {
+		var results []runner.ReportResult
+		if results, err = o.reporter.ExportAllReportResults(); err == nil {
+			err = o.reportWriter.Output(results)
 		}
 	}
 	return
@@ -165,7 +201,10 @@ func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, c
 			o.limiter.Accept()
 
 			ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
-			if output, err = runner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
+
+			simpleRunner := runner.NewSimpleTestCaseRunner()
+			simpleRunner.WithTestReporter(o.reporter)
+			if output, err = simpleRunner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
 				return
 			}
 		}
