@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/h2non/gock"
+	"github.com/linuxsuren/api-testing/pkg/limit"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -48,9 +49,13 @@ func TestRunSuite(t *testing.T) {
 
 			tt.prepare()
 			ctx := getDefaultContext()
-			opt := &runOption{requestTimeout: 30 * time.Second}
+			opt := &runOption{
+				requestTimeout: 30 * time.Second,
+				limiter:        limit.NewDefaultRateLimiter(0, 0),
+			}
+			stopSingal := make(chan struct{}, 1)
 
-			err := opt.runSuite(tt.suiteFile, ctx, context.TODO())
+			err := opt.runSuite(tt.suiteFile, ctx, context.TODO(), stopSingal)
 			assert.Equal(t, tt.hasError, err != nil, err)
 		})
 	}
