@@ -12,6 +12,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
@@ -21,9 +22,94 @@ import (
 	unstructured "github.com/linuxsuren/unstructured/pkg"
 )
 
-// RunTestCase runs the test case
-func RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error) {
-	fmt.Printf("start to run: '%s'\n", testcase.Name)
+type TestCaseRunner interface {
+	RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error)
+	WithOutputWriter(io.Writer) TestCaseRunner
+	WithTestReporter(TestReporter) TestCaseRunner
+}
+
+type ReportRecord struct {
+	Method    string
+	API       string
+	BeginTime time.Time
+	EndTime   time.Time
+	Error     error
+}
+
+// Duration returns the duration between begin and end time
+func (r *ReportRecord) Duration() time.Duration {
+	return r.EndTime.Sub(r.BeginTime)
+}
+
+func (r *ReportRecord) ErrorCount() int {
+	if r.Error == nil {
+		return 0
+	}
+	return 1
+}
+
+// NewReportRecord creates a record, and set the begin time to be now
+func NewReportRecord() *ReportRecord {
+	return &ReportRecord{
+		BeginTime: time.Now(),
+	}
+}
+
+type ReportResult struct {
+	API     string
+	Count   int
+	Average time.Duration
+	Max     time.Duration
+	Min     time.Duration
+	Error   int
+}
+
+type ReportResultSlice []ReportResult
+
+func (r ReportResultSlice) Len() int {
+	return len(r)
+}
+
+func (r ReportResultSlice) Less(i, j int) bool {
+	return r[i].Average > r[j].Average
+}
+
+func (r ReportResultSlice) Swap(i, j int) {
+	tmp := r[i]
+	r[i] = r[j]
+	r[j] = tmp
+}
+
+type ReportResultWriter interface {
+	Output([]ReportResult) error
+}
+
+type TestReporter interface {
+	PutRecord(*ReportRecord)
+	GetAllRecords() []*ReportRecord
+	ExportAllReportResults() (ReportResultSlice, error)
+}
+
+type simpleTestCaseRunner struct {
+	testReporter TestReporter
+	writer       io.Writer
+}
+
+// NewSimpleTestCaseRunner creates the instance of the simple test case runner
+func NewSimpleTestCaseRunner() TestCaseRunner {
+	runner := &simpleTestCaseRunner{}
+	return runner.WithOutputWriter(io.Discard).WithTestReporter(NewDiscardTestReporter())
+}
+
+func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error) {
+	fmt.Fprintf(r.writer, "start to run: '%s'\n", testcase.Name)
+	record := NewReportRecord()
+	defer func(rr *ReportRecord) {
+		rr.EndTime = time.Now()
+		rr.Error = err
+		r.testReporter.PutRecord(rr)
+	}(record)
+
 	if err = doPrepare(testcase); err != nil {
 		err = fmt.Errorf("failed to prepare, error: %v", err)
 		return
@@ -77,13 +163,15 @@ func RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx contex
 	if request, err = http.NewRequestWithContext(ctx, testcase.Request.Method, testcase.Request.API, requestBody); err != nil {
 		return
 	}
+	record.API = testcase.Request.API
+	record.Method = testcase.Request.Method
 
 	// set headers
 	for key, val := range testcase.Request.Header {
 		request.Header.Add(key, val)
 	}
 
-	fmt.Println("start to send request to", testcase.Request.API)
+	fmt.Fprintf(r.writer, "start to send request to %s\n", testcase.Request.API)
 
 	// send the HTTP request
 	var resp *http.Response
@@ -176,6 +264,22 @@ func RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx contex
 		}
 	}
 	return
+}
+
+func (r *simpleTestCaseRunner) WithOutputWriter(writer io.Writer) TestCaseRunner {
+	r.writer = writer
+	return r
+}
+
+func (r *simpleTestCaseRunner) WithTestReporter(reporter TestReporter) TestCaseRunner {
+	r.testReporter = reporter
+	return r
+}
+
+// Deprecated
+// RunTestCase runs the test case.
+func RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error) {
+	return NewSimpleTestCaseRunner().WithOutputWriter(os.Stdout).RunTestCase(testcase, dataContext, ctx)
 }
 
 func doPrepare(testcase *testing.TestCase) (err error) {
