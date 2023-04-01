@@ -9,24 +9,30 @@ type memoryTestReporter struct {
 	records []*ReportRecord
 }
 
-// NewmemoryTestReporter creates a memory based test reporter
-func NewmemoryTestReporter() TestReporter {
+// NewMemoryTestReporter creates a memory based test reporter
+func NewMemoryTestReporter() TestReporter {
 	return &memoryTestReporter{
 		records: []*ReportRecord{},
 	}
 }
 
+// ReportResultWithTotal holds the total duration base on ReportResult
 type ReportResultWithTotal struct {
 	ReportResult
 	Total time.Duration
 }
 
+// PutRecord puts the record to memory
 func (r *memoryTestReporter) PutRecord(record *ReportRecord) {
 	r.records = append(r.records, record)
 }
+
+// GetAllRecords returns all the records
 func (r *memoryTestReporter) GetAllRecords() []*ReportRecord {
 	return r.records
 }
+
+// ExportAllReportResults exports all the report results
 func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice, err error) {
 	resultWithTotal := map[string]*ReportResultWithTotal{}
 	for _, record := range r.records {

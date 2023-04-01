@@ -36,7 +36,7 @@ type runOption struct {
 
 func newDefaultRunOption() *runOption {
 	return &runOption{
-		reporter:     runner.NewmemoryTestReporter(),
+		reporter:     runner.NewMemoryTestReporter(),
 		reportWriter: runner.NewResultWriter(os.Stdout),
 	}
 }
@@ -206,6 +206,8 @@ func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, c
 			simpleRunner.WithTestReporter(o.reporter)
 			if output, err = simpleRunner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
 				return
+			} else {
+				err = nil
 			}
 		}
 		dataContext[testCase.Name] = output
