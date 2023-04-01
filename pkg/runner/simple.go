@@ -28,6 +28,7 @@ type TestCaseRunner interface {
 	WithTestReporter(TestReporter) TestCaseRunner
 }
 
+// ReportRecord represents the raw data of a HTTP request
 type ReportRecord struct {
 	Method    string
 	API       string
@@ -41,6 +42,7 @@ func (r *ReportRecord) Duration() time.Duration {
 	return r.EndTime.Sub(r.BeginTime)
 }
 
+// ErrorCount returns the count number of errors
 func (r *ReportRecord) ErrorCount() int {
 	if r.Error == nil {
 		return 0
@@ -55,6 +57,7 @@ func NewReportRecord() *ReportRecord {
 	}
 }
 
+// ReportResult represents the report result of a set of the same API requests
 type ReportResult struct {
 	API     string
 	Count   int
@@ -64,26 +67,32 @@ type ReportResult struct {
 	Error   int
 }
 
+// ReportResultSlice is the alias type of ReportResult slice
 type ReportResultSlice []ReportResult
 
+// Len returns the count of slice items
 func (r ReportResultSlice) Len() int {
 	return len(r)
 }
 
+// Less returns if i bigger than j
 func (r ReportResultSlice) Less(i, j int) bool {
 	return r[i].Average > r[j].Average
 }
 
+// Swap swaps the items
 func (r ReportResultSlice) Swap(i, j int) {
 	tmp := r[i]
 	r[i] = r[j]
 	r[j] = tmp
 }
 
+// ReportResultWriter is the interface of the report writer
 type ReportResultWriter interface {
 	Output([]ReportResult) error
 }
 
+// TestReporter is the interface of the report
 type TestReporter interface {
 	PutRecord(*ReportRecord)
 	GetAllRecords() []*ReportRecord
@@ -101,12 +110,15 @@ func NewSimpleTestCaseRunner() TestCaseRunner {
 	return runner.WithOutputWriter(io.Discard).WithTestReporter(NewDiscardTestReporter())
 }
 
+// RunTestCase is the main entry point of a test case
 func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error) {
 	fmt.Fprintf(r.writer, "start to run: '%s'\n", testcase.Name)
 	record := NewReportRecord()
 	defer func(rr *ReportRecord) {
 		rr.EndTime = time.Now()
 		rr.Error = err
+		rr.API = testcase.Request.API
+		rr.Method = testcase.Request.Method
 		r.testReporter.PutRecord(rr)
 	}(record)
 
@@ -163,8 +175,6 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	if request, err = http.NewRequestWithContext(ctx, testcase.Request.Method, testcase.Request.API, requestBody); err != nil {
 		return
 	}
-	record.API = testcase.Request.API
-	record.Method = testcase.Request.Method
 
 	// set headers
 	for key, val := range testcase.Request.Header {
@@ -266,11 +276,13 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	return
 }
 
+// WithOutputWriter sets the io.Writer
 func (r *simpleTestCaseRunner) WithOutputWriter(writer io.Writer) TestCaseRunner {
 	r.writer = writer
 	return r
 }
 
+// WithTestReporter sets the TestReporter
 func (r *simpleTestCaseRunner) WithTestReporter(reporter TestReporter) TestCaseRunner {
 	r.testReporter = reporter
 	return r

@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
-	"os"
 	"text/template"
 )
 
@@ -13,6 +12,7 @@ type stdResultWriter struct {
 	writer io.Writer
 }
 
+// NewResultWriter creates a result writer with the specific io.Writer
 func NewResultWriter(writer io.Writer) ReportResultWriter {
 	return &stdResultWriter{writer: writer}
 }
@@ -22,6 +22,7 @@ func NewDiscardResultWriter() ReportResultWriter {
 	return &stdResultWriter{writer: io.Discard}
 }
 
+// Output writer the report to target writer
 func (w *stdResultWriter) Output(result []ReportResult) error {
 	fmt.Fprintf(w.writer, "API Average Max Min Count Error\n")
 	for _, r := range result {
@@ -35,13 +36,12 @@ type markdownResultWriter struct {
 	writer io.Writer
 }
 
+// NewMarkdownResultWriter creates the Markdown writer
 func NewMarkdownResultWriter(writer io.Writer) ReportResultWriter {
-	if writer == nil {
-		writer = os.Stdout
-	}
 	return &markdownResultWriter{writer: writer}
 }
 
+// Output writer the Markdown based report to target writer
 func (w *markdownResultWriter) Output(result []ReportResult) (err error) {
 	var tpl *template.Template
 	if tpl, err = template.New("report").Parse(markDownReport); err == nil {
