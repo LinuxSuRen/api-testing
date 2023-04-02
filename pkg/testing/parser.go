@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -13,9 +14,22 @@ import (
 func Parse(configFile string) (testSuite *TestSuite, err error) {
 	var data []byte
 	if data, err = os.ReadFile(configFile); err == nil {
-		testSuite = &TestSuite{}
-		err = yaml.Unmarshal(data, testSuite)
+		testSuite, err = ParseFromData(data)
 	}
+	return
+}
+
+// ParseFromData parses data and returns the test suite
+func ParseFromData(data []byte) (testSuite *TestSuite, err error) {
+	testSuite = &TestSuite{}
+	err = yaml.Unmarshal(data, testSuite)
+	return
+}
+
+// ParseTestCaseFromData parses the data to a test case
+func ParseTestCaseFromData(data []byte) (testCase *TestCase, err error) {
+	testCase = &TestCase{}
+	err = yaml.Unmarshal(data, testCase)
 	return
 }
 
@@ -26,6 +40,7 @@ func (r *Request) Render(ctx interface{}) (err error) {
 	if result, err = render.Render("api", r.API, ctx); err == nil {
 		r.API = result
 	} else {
+		err = fmt.Errorf("failed render '%s', %v", r.API, err)
 		return
 	}
 

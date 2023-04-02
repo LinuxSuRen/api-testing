@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "github.com/linuxsuren/api-testing/pkg/server";
+
+package server;
+
+service Runner {
+    rpc Run (TestTask) returns (HelloReply) {}
+}
+
+message TestTask {
+    string data = 1;
+    string kind = 2;
+}
+
+message HelloReply {
+  string message = 1;
+}

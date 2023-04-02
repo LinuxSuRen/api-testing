@@ -32,6 +32,7 @@ type runOption struct {
 	reporter           runner.TestReporter
 	reportWriter       runner.ReportResultWriter
 	report             string
+	reportIgnore       bool
 }
 
 func newDefaultRunOption() *runOption {
@@ -71,14 +72,22 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
 	flags.Int32VarP(&opt.qps, "qps", "", 5, "QPS")
 	flags.Int32VarP(&opt.burst, "burst", "", 5, "burst")
-	flags.StringVarP(&opt.report, "report", "", "", "The type of target report")
+	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, discard, std")
 	return
 }
 
 func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
+	writer := cmd.OutOrStdout()
+
 	switch o.report {
 	case "markdown", "md":
-		o.reportWriter = runner.NewMarkdownResultWriter(cmd.OutOrStdout())
+		o.reportWriter = runner.NewMarkdownResultWriter(writer)
+	case "discard":
+		o.reportWriter = runner.NewDiscardResultWriter()
+	case "", "std":
+		o.reportWriter = runner.NewResultWriter(writer)
+	default:
+		err = fmt.Errorf("not supported report type: '%s'", o.report)
 	}
 	return
 }
@@ -97,17 +106,18 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 		for i := range files {
 			item := files[i]
 			if err = o.runSuiteWithDuration(item); err != nil {
-				return
+				break
 			}
 		}
 	}
 
 	// print the report
-	if err == nil {
-		var results []runner.ReportResult
-		if results, err = o.reporter.ExportAllReportResults(); err == nil {
-			err = o.reportWriter.Output(results)
+	if results, reportErr := o.reporter.ExportAllReportResults(); reportErr == nil {
+		if reportErr = o.reportWriter.Output(results); reportErr != nil {
+			cmd.Println("failed to Output all reports", reportErr)
 		}
+	} else {
+		cmd.Println("failed to export all reports", reportErr)
 	}
 	return
 }
@@ -205,6 +215,7 @@ func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, c
 			simpleRunner := runner.NewSimpleTestCaseRunner()
 			simpleRunner.WithTestReporter(o.reporter)
 			if output, err = simpleRunner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
+				err = fmt.Errorf("failed to run '%s', %v", testCase.Name, err)
 				return
 			} else {
 				err = nil

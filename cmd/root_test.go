@@ -45,4 +45,8 @@ func TestCreateRunCommand(t *testing.T) {
 
 	init := createInitCommand()
 	assert.Equal(t, "init", init.Use)
+
+	server := createServerCmd()
+	assert.NotNil(t, server)
+	assert.Equal(t, "server", server.Use)
 }

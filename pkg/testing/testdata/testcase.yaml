@@ -1,0 +1,5 @@
+name: projects
+request:
+  api: https://foo
+expect:
+  statusCode: 200
