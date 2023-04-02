@@ -24,10 +24,10 @@ func NewDiscardResultWriter() ReportResultWriter {
 
 // Output writer the report to target writer
 func (w *stdResultWriter) Output(result []ReportResult) error {
-	fmt.Fprintf(w.writer, "API Average Max Min Count Error\n")
+	fmt.Fprintf(w.writer, "API Average Max Min QPS Count Error\n")
 	for _, r := range result {
-		fmt.Fprintf(w.writer, "%s %v %v %v %d %d\n", r.API, r.Average, r.Max,
-			r.Min, r.Count, r.Error)
+		fmt.Fprintf(w.writer, "%s %v %v %v %d %d %d\n", r.API, r.Average, r.Max,
+			r.Min, r.QPS, r.Count, r.Error)
 	}
 	return nil
 }

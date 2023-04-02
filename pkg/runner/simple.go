@@ -64,6 +64,7 @@ type ReportResult struct {
 	Average time.Duration
 	Max     time.Duration
 	Min     time.Duration
+	QPS     int
 	Error   int
 }
 

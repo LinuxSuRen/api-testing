@@ -20,6 +20,8 @@ func NewMemoryTestReporter() TestReporter {
 type ReportResultWithTotal struct {
 	ReportResult
 	Total time.Duration
+	First time.Time
+	Last  time.Time
 }
 
 // PutRecord puts the record to memory
@@ -50,6 +52,13 @@ func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice,
 			item.Error += record.ErrorCount()
 			item.Total += duration
 			item.Count += 1
+
+			if record.EndTime.After(item.Last) {
+				item.Last = record.EndTime
+			}
+			if record.BeginTime.Before(item.First) {
+				item.First = record.BeginTime
+			}
 		} else {
 			resultWithTotal[api] = &ReportResultWithTotal{
 				ReportResult: ReportResult{
@@ -59,6 +68,8 @@ func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice,
 					Min:   duration,
 					Error: record.ErrorCount(),
 				},
+				First: record.BeginTime,
+				Last:  record.EndTime,
 				Total: duration,
 			}
 		}
@@ -66,6 +77,9 @@ func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice,
 
 	for _, r := range resultWithTotal {
 		r.Average = r.Total / time.Duration(r.Count)
+		if duration := int(r.Last.Sub(r.First).Seconds()); duration > 0 {
+			r.QPS = r.Count / duration
+		}
 		result = append(result, r.ReportResult)
 	}
 
