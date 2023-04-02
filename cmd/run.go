@@ -48,8 +48,8 @@ func newDiskCardRunOption() *runOption {
 	}
 }
 
-// CreateRunCommand returns the run command
-func CreateRunCommand() (cmd *cobra.Command) {
+// createRunCommand returns the run command
+func createRunCommand() (cmd *cobra.Command) {
 	opt := newDefaultRunOption()
 	cmd = &cobra.Command{
 		Use:     "run",

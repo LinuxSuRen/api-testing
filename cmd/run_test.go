@@ -92,7 +92,7 @@ func TestRunCommand(t *testing.T) {
 			tt.prepare()
 
 			root := &cobra.Command{Use: "root"}
-			root.AddCommand(CreateRunCommand())
+			root.AddCommand(createRunCommand())
 
 			root.SetArgs(append([]string{"run"}, tt.args...))
 
@@ -100,4 +100,10 @@ func TestRunCommand(t *testing.T) {
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})
 	}
+}
+
+func TestRootCmd(t *testing.T) {
+	c := NewRootCmd()
+	assert.NotNil(t, c)
+	assert.Equal(t, "atest", c.Use)
 }
