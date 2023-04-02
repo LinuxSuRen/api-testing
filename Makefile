@@ -6,4 +6,5 @@ build:
 copy: build
 	sudo cp bin/atest /usr/local/bin/
 test:
-	go test ./... -cover
+	go test ./... -cover -v -coverprofile=coverage.out
+	go tool cover -func=coverage.out

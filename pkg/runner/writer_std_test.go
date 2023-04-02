@@ -45,7 +45,7 @@ func TestNewStdResultWriter(t *testing.T) {
 		name:    "result is nil",
 		buf:     new(bytes.Buffer),
 		results: nil,
-		expect: `API Average Max Min Count Error
+		expect: `API Average Max Min QPS Count Error
 `,
 	}, {
 		name: "have one item",
@@ -55,11 +55,12 @@ func TestNewStdResultWriter(t *testing.T) {
 			Average: 1,
 			Max:     1,
 			Min:     1,
+			QPS:     10,
 			Count:   1,
 			Error:   0,
 		}},
-		expect: `API Average Max Min Count Error
-api 1ns 1ns 1ns 1 0
+		expect: `API Average Max Min QPS Count Error
+api 1ns 1ns 1ns 10 1 0
 `,
 	}}
 	for _, tt := range tests {

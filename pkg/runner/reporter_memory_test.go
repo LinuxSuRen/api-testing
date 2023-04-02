@@ -69,6 +69,7 @@ func TestExportAllReportResults(t *testing.T) {
 			Average: time.Second,
 			Max:     time.Second,
 			Min:     time.Second,
+			QPS:     1,
 			Count:   1,
 			Error:   0,
 		}},
