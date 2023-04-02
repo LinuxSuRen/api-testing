@@ -40,9 +40,9 @@ func Test_setRelativeDir(t *testing.T) {
 }
 
 func TestCreateRunCommand(t *testing.T) {
-	cmd := CreateRunCommand()
+	cmd := createRunCommand()
 	assert.Equal(t, "run", cmd.Use)
 
-	init := CreateInitCommand()
+	init := createInitCommand()
 	assert.Equal(t, "init", init.Use)
 }

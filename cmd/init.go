@@ -11,13 +11,14 @@ type initOption struct {
 	waitResource  string
 }
 
-// CreateInitCommand returns the init command
-func CreateInitCommand() (cmd *cobra.Command) {
+// createInitCommand returns the init command
+func createInitCommand() (cmd *cobra.Command) {
 	opt := &initOption{}
 	cmd = &cobra.Command{
-		Use:  "init",
-		Long: "Support to init Kubernetes cluster with kustomization, and wait it with command: kubectl wait",
-		RunE: opt.runE,
+		Use:    "init",
+		Long:   "Support to init Kubernetes cluster with kustomization, and wait it with command: kubectl wait",
+		Hidden: true,
+		RunE:   opt.runE,
 	}
 
 	flags := cmd.Flags()
