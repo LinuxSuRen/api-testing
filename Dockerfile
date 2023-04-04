@@ -3,9 +3,7 @@ FROM golang:1.17 as builder
 WORKDIR /workspace
 COPY . .
 RUN go mod download
-RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest cmd/*.go
-
-FROM ghcr.io/linuxsuren/hd:v0.0.67 as hd
+RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest .
 
 FROM alpine:3.10
 
