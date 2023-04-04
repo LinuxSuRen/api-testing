@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"testing"
 
+	_ "embed"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -191,3 +193,20 @@ func TestEmptyThenDefault(t *testing.T) {
 	assert.Equal(t, 1, zeroThenDefault(0, 1))
 	assert.Equal(t, 1, zeroThenDefault(1, 2))
 }
+
+func TestTestCase(t *testing.T) {
+	testCase, err := ParseTestCaseFromData([]byte(testCaseContent))
+	assert.Nil(t, err)
+	assert.Equal(t, &TestCase{
+		Name: "projects",
+		Request: Request{
+			API: "https://foo",
+		},
+		Expect: Response{
+			StatusCode: http.StatusOK,
+		},
+	}, testCase)
+}
+
+//go:embed testdata/testcase.yaml
+var testCaseContent string

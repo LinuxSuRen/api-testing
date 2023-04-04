@@ -1,3 +1,4 @@
 bin/
 .idea/
 coverage.out
+dist/

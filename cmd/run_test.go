@@ -107,3 +107,72 @@ func TestRootCmd(t *testing.T) {
 	assert.NotNil(t, c)
 	assert.Equal(t, "atest", c.Use)
 }
+
+func TestPreRunE(t *testing.T) {
+	tests := []struct {
+		name   string
+		opt    *runOption
+		verify func(*testing.T, *runOption, error)
+	}{{
+		name: "markdown report",
+		opt: &runOption{
+			report: "markdown",
+		},
+		verify: func(t *testing.T, ro *runOption, err error) {
+			assert.Nil(t, err)
+			assert.NotNil(t, ro.reportWriter)
+		},
+	}, {
+		name: "md report",
+		opt: &runOption{
+			report: "md",
+		},
+		verify: func(t *testing.T, ro *runOption, err error) {
+			assert.Nil(t, err)
+			assert.NotNil(t, ro.reportWriter)
+		},
+	}, {
+		name: "discard report",
+		opt: &runOption{
+			report: "discard",
+		},
+		verify: func(t *testing.T, ro *runOption, err error) {
+			assert.Nil(t, err)
+			assert.NotNil(t, ro.reportWriter)
+		},
+	}, {
+		name: "std report",
+		opt: &runOption{
+			report: "std",
+		},
+		verify: func(t *testing.T, ro *runOption, err error) {
+			assert.Nil(t, err)
+			assert.NotNil(t, ro.reportWriter)
+		},
+	}, {
+		name: "empty report",
+		opt: &runOption{
+			report: "",
+		},
+		verify: func(t *testing.T, ro *runOption, err error) {
+			assert.Nil(t, err)
+			assert.NotNil(t, ro.reportWriter)
+		},
+	}, {
+		name: "invalid report",
+		opt: &runOption{
+			report: "fake",
+		},
+		verify: func(t *testing.T, ro *runOption, err error) {
+			assert.NotNil(t, err)
+			assert.Nil(t, ro.reportWriter)
+		},
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &cobra.Command{}
+			err := tt.opt.preRunE(c, nil)
+			tt.verify(t, tt.opt, err)
+		})
+	}
+}

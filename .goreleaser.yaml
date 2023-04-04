@@ -12,6 +12,10 @@ builds:
       - linux
       - windows
       - darwin
+    ldflags:
+      - -w
+      - -s
+      - -X github.com/linuxsuren/api-testing/cmd.version={{.Version}}
 archives:
   - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
     format_overrides:
