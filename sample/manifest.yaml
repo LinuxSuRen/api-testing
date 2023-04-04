@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: api-testing
+  name: api-testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-testing
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: api-testing
+    spec:
+      containers:
+      - image: ghcr.io/linuxsuren/api-testing
+        name: server
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: "100m"
+            memory: 100m
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-testing
+spec:
+  ports:
+  - name: server
+    port: 9090
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app: api-testing
+  sessionAffinity: None
+  type: NodePort
