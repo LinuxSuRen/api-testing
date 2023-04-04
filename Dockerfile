@@ -5,7 +5,7 @@ COPY . .
 RUN go mod download
 RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest .
 
-FROM alpine:3.10
+FROM ubuntu:23.04
 
 LABEL "com.github.actions.name"="API testing"
 LABEL "com.github.actions.description"="API testing"
@@ -18,6 +18,6 @@ LABEL "maintainer"="Rick <linuxsuren@gmail.com>"
 
 LABEL "Name"="API testing"
 
-COPY --from=builder /workspace/atest /usr/bin/atest
+COPY --from=builder /workspace/atest /usr/local/bin/atest
 
-ENTRYPOINT [atest, server]
+CMD ["atest", "server"]
