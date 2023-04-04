@@ -20,20 +20,6 @@ LABEL "maintainer"="Rick <linuxsuren@gmail.com>"
 
 LABEL "Name"="API testing"
 
-ENV LC_ALL C.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
-
-RUN apk add --no-cache \
-        git \
-        openssh-client \
-        libc6-compat \
-        libstdc++
-
-COPY entrypoint.sh /entrypoint.sh
 COPY --from=builder /workspace/atest /usr/bin/atest
-COPY --from=hd /usr/local/bin/hd /usr/local/bin/hd
-RUN hd i kubernetes-sigs/kubectl && \
-    hd i k3d
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT [atest, server]

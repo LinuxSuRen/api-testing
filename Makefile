@@ -4,6 +4,8 @@ build:
 	go build -o bin/atest main.go
 goreleaser:
 	goreleaser build --rm-dist --snapshot
+build-image:
+	docker build -t ghcr.io/linuxsuren/api-testing:dev .
 copy: build
 	sudo cp bin/atest /usr/local/bin/
 test:

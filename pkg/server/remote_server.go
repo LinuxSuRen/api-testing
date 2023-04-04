@@ -5,7 +5,9 @@ import (
 	"bytes"
 	context "context"
 	"fmt"
+	"strings"
 
+	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
@@ -45,11 +47,25 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 	}
 
 	dataContext := map[string]interface{}{}
+
+	var result string
+	if result, err = render.Render("base api", suite.API, dataContext); err == nil {
+		suite.API = result
+		suite.API = strings.TrimSuffix(suite.API, "/")
+	} else {
+		return
+	}
+
 	buf := new(bytes.Buffer)
 
 	for _, testCase := range suite.Items {
 		simpleRunner := runner.NewSimpleTestCaseRunner()
 		simpleRunner.WithOutputWriter(buf)
+
+		// reuse the API prefix
+		if strings.HasPrefix(testCase.Request.API, "/") {
+			testCase.Request.API = fmt.Sprintf("%s%s", suite.API, testCase.Request.API)
+		}
 
 		var output interface{}
 		if output, err = simpleRunner.RunTestCase(&testCase, dataContext, ctx); err == nil {

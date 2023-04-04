@@ -36,3 +36,5 @@ jobs:
           github_token: ${{ secrets.GH_PUBLISH_SECRETS }}
           version: v1.14.0
           args: release --skip-publish --rm-dist --snapshot
+      - name: Image
+        run: make build-image
