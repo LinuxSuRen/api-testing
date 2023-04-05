@@ -10,6 +10,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/version"
 )
 
 type server struct {
@@ -40,6 +41,28 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		}
 		suite = &testing.TestSuite{
 			Items: []testing.TestCase{*testCase},
+		}
+	case "testcaseInSuite":
+		if suite, err = testing.ParseFromData([]byte(task.Data)); err != nil {
+			return
+		} else if suite == nil || suite.Items == nil {
+			err = fmt.Errorf("no test suite found")
+			return
+		}
+
+		var targetTestcase *testing.TestCase
+		for _, item := range suite.Items {
+			if item.Name == task.CaseName {
+				targetTestcase = &item
+				break
+			}
+		}
+
+		if targetTestcase != nil {
+			suite.Items = []testing.TestCase{*targetTestcase}
+		} else {
+			err = fmt.Errorf("cannot found testcase %s", task.CaseName)
+			return
 		}
 	default:
 		err = fmt.Errorf("not support '%s'", task.Kind)
@@ -75,5 +98,11 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		}
 	}
 	reply = &HelloReply{Message: buf.String()}
+	return
+}
+
+// GetVersion returns the version
+func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
+	reply = &HelloReply{Message: version.GetVersion()}
 	return
 }

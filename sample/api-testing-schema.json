@@ -1,0 +1,126 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/APITesting",
+    "definitions": {
+        "APITesting": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Item"
+                    }
+                }
+            },
+            "required": [
+                "items",
+                "name"
+            ],
+            "title": "APITesting"
+        },
+        "Item": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "request": {
+                    "$ref": "#/definitions/Request"
+                },
+                "expect": {
+                    "$ref": "#/definitions/Expect"
+                }
+            },
+            "required": [
+                "name",
+                "request"
+            ],
+            "title": "Item"
+        },
+        "Expect": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "statusCode": {
+                    "type": "integer"
+                },
+                "body": {
+                    "type": "string"
+                },
+                "header": {
+                    "description": "HTTP response header",
+                    "type": "object",
+                    "title": "Header",
+                    "additionalProperties": true
+                },
+                "bodyFieldsExpect": {
+                    "description": "Body fields expect",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "verify": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "statusCode"
+            ],
+            "title": "Expect"
+        },
+        "Request": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "api": {
+                    "type": "string",
+                    "qt-uri-protocols": [
+                        "https"
+                    ]
+                }, 
+                "method": {
+                    "type": "string",
+                    "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+                },
+                "query": {
+                    "description": "HTTP request query",
+                    "type": "object",
+                    "title": "Query",
+                    "additionalProperties": true
+                },
+                "header": {
+                    "description": "HTTP request header",
+                    "type": "object",
+                    "title": "Header",
+                    "additionalProperties": true
+                },
+                "form": {
+                    "description": "HTTP request form",
+                    "type": "object",
+                    "title": "Form",
+                    "additionalProperties": true
+                },
+                "body": {
+                    "type": "string"
+                },
+                "bodyFromFile": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "api"
+            ],
+            "title": "Request"
+        }
+    }
+}

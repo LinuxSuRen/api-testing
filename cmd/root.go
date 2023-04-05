@@ -1,9 +1,9 @@
 package cmd
 
-import "github.com/spf13/cobra"
-
-// should be injected during the build process
-var version string
+import (
+	"github.com/linuxsuren/api-testing/pkg/version"
+	"github.com/spf13/cobra"
+)
 
 // NewRootCmd creates the root command
 func NewRootCmd() (c *cobra.Command) {
@@ -11,7 +11,7 @@ func NewRootCmd() (c *cobra.Command) {
 		Use:   "atest",
 		Short: "API testing tool",
 	}
-	c.Version = version
+	c.Version = version.GetVersion()
 	c.AddCommand(createInitCommand(),
 		createRunCommand(), createSampleCmd(),
 		createServerCmd())
