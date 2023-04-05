@@ -1,5 +1,9 @@
 name: simple
+api: http://foo
 items:
   - name: get
     request:
       api: http://foo
+  - name: query
+    request:
+      api: /

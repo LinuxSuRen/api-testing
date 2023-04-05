@@ -6,13 +6,18 @@ package server;
 
 service Runner {
     rpc Run (TestTask) returns (HelloReply) {}
+    rpc GetVersion(Empty) returns (HelloReply) {}
 }
 
 message TestTask {
     string data = 1;
     string kind = 2;
+    string caseName = 3;
 }
 
 message HelloReply {
   string message = 1;
+}
+
+message Empty {
 }

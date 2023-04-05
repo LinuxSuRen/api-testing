@@ -8,6 +8,8 @@ This is a API testing tool.
 * Response Body fields equation check  
 * Response Body [eval](https://expr.medv.io/)  
 * Output reference between TestCase  
+* Run in server mode, and provide the gRPC endpoint
+* [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
 
 ## Template
 The following fields are templated with [sprig](http://masterminds.github.io/sprig/):

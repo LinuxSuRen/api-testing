@@ -15,7 +15,7 @@ builds:
     ldflags:
       - -w
       - -s
-      - -X github.com/linuxsuren/api-testing/cmd.version={{.Version}}
+      - -X github.com/linuxsuren/api-testing/pkg/version.version={{.Version}}
 archives:
   - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
     format_overrides:

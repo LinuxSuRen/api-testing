@@ -19,6 +19,7 @@ func TestRemoteServer(t *testing.T) {
 	assert.NotNil(t, err)
 
 	gock.New("http://foo").Get("/").Reply(http.StatusOK).JSON(&server)
+	gock.New("http://foo").Get("/").Reply(http.StatusOK).JSON(&server)
 	_, err = server.Run(context.TODO(), &TestTask{
 		Kind: "suite",
 		Data: simpleSuite,
@@ -30,6 +31,27 @@ func TestRemoteServer(t *testing.T) {
 		Kind: "testcase",
 		Data: simpleTestCase,
 	})
+	assert.Nil(t, err)
+
+	gock.New("http://foo").Get("/").Reply(http.StatusOK).JSON(&server)
+	_, err = server.Run(context.TODO(), &TestTask{
+		Kind:     "testcaseInSuite",
+		Data:     simpleSuite,
+		CaseName: "get",
+	})
+	assert.Nil(t, err)
+
+	gock.New("http://foo").Get("/").Reply(http.StatusOK).JSON(&server)
+	_, err = server.Run(context.TODO(), &TestTask{
+		Kind:     "testcaseInSuite",
+		Data:     simpleSuite,
+		CaseName: "fake",
+	})
+	assert.NotNil(t, err)
+
+	var ver *HelloReply
+	ver, err = server.GetVersion(context.TODO(), &Empty{})
+	assert.Empty(t, ver.Message)
 	assert.Nil(t, err)
 }
 
