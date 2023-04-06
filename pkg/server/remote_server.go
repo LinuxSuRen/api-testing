@@ -6,6 +6,7 @@ import (
 	context "context"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/linuxsuren/api-testing/pkg/render"
@@ -76,7 +77,8 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		}
 
 		if targetTestcase != nil {
-			suite.Items = []testing.TestCase{*targetTestcase}
+			parentCases := findParentTestCases(targetTestcase, suite)
+			suite.Items = append(parentCases, *targetTestcase)
 		} else {
 			err = fmt.Errorf("cannot found testcase %s", task.CaseName)
 			return
@@ -122,5 +124,29 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 // GetVersion returns the version
 func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
 	reply = &HelloReply{Message: version.GetVersion()}
+	return
+}
+
+func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (testcases []testing.TestCase) {
+	reg, matchErr := regexp.Compile(`.*\{\{\.\w*\..*}\}.*`)
+	targetReg, targetErr := regexp.Compile(`\{\{\.\w*\.`)
+
+	if matchErr == nil && targetErr == nil {
+		expectName := ""
+		for _, val := range testcase.Request.Header {
+			if matched := reg.MatchString(val); matched {
+				expectName = targetReg.FindString(val)
+				expectName = strings.TrimPrefix(expectName, "{{.")
+				expectName = strings.TrimSuffix(expectName, ".")
+				break
+			}
+		}
+
+		for _, item := range suite.Items {
+			if item.Name == expectName {
+				testcases = append(testcases, item)
+			}
+		}
+	}
 	return
 }
