@@ -5,6 +5,7 @@ import (
 	"bytes"
 	context "context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/linuxsuren/api-testing/pkg/render"
@@ -25,6 +26,22 @@ func NewRemoteServer() RunnerServer {
 // Run start to run the test task
 func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, err error) {
 	var suite *testing.TestSuite
+	if task.Env == nil {
+		task.Env = map[string]string{}
+	}
+
+	// TODO may not safe in multiple threads
+	oldEnv := map[string]string{}
+	for key, val := range task.Env {
+		oldEnv[key] = os.Getenv(key)
+		os.Setenv(key, val)
+	}
+
+	defer func() {
+		for key, val := range oldEnv {
+			os.Setenv(key, val)
+		}
+	}()
 
 	switch task.Kind {
 	case "suite":
@@ -69,6 +86,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		return
 	}
 
+	fmt.Println("prepare to run:", suite.Name)
 	dataContext := map[string]interface{}{}
 
 	var result string

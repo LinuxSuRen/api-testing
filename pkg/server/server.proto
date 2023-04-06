@@ -13,6 +13,7 @@ message TestTask {
     string data = 1;
     string kind = 2;
     string caseName = 3;
+    map<string, string> env = 4;
 }
 
 message HelloReply {

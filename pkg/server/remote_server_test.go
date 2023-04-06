@@ -46,6 +46,9 @@ func TestRemoteServer(t *testing.T) {
 		Kind:     "testcaseInSuite",
 		Data:     simpleSuite,
 		CaseName: "fake",
+		Env: map[string]string{
+			"SERVER": "http://localhost:9090",
+		},
 	})
 	assert.NotNil(t, err)
 
