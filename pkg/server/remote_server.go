@@ -26,6 +26,10 @@ func NewRemoteServer() RunnerServer {
 
 // Run start to run the test task
 func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, err error) {
+	if task.Level == "" {
+		task.Level = "info"
+	}
+
 	var suite *testing.TestSuite
 	if task.Env == nil {
 		task.Env = map[string]string{}
@@ -88,7 +92,8 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		return
 	}
 
-	fmt.Println("prepare to run:", suite.Name)
+	fmt.Printf("prepare to run: %s, with level: %s\n", suite.Name, task.Level)
+	fmt.Printf("task kind: %s, %d to run\n", task.Kind, len(suite.Items))
 	dataContext := map[string]interface{}{}
 
 	var result string
@@ -104,6 +109,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 	for _, testCase := range suite.Items {
 		simpleRunner := runner.NewSimpleTestCaseRunner()
 		simpleRunner.WithOutputWriter(buf)
+		simpleRunner.WithWriteLevel(task.Level)
 
 		// reuse the API prefix
 		if strings.HasPrefix(testCase.Request.API, "/") {
@@ -128,17 +134,23 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 }
 
 func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (testcases []testing.TestCase) {
-	reg, matchErr := regexp.Compile(`.*\{\{\.\w*\..*}\}.*`)
-	targetReg, targetErr := regexp.Compile(`\{\{\.\w*\.`)
+	reg, matchErr := regexp.Compile(`.*\{\{.*\.\w*.*}\}.*`)
+	targetReg, targetErr := regexp.Compile(`\.\w*`)
 
 	if matchErr == nil && targetErr == nil {
 		expectName := ""
 		for _, val := range testcase.Request.Header {
 			if matched := reg.MatchString(val); matched {
 				expectName = targetReg.FindString(val)
-				expectName = strings.TrimPrefix(expectName, "{{.")
-				expectName = strings.TrimSuffix(expectName, ".")
+				expectName = strings.TrimPrefix(expectName, ".")
 				break
+			}
+		}
+
+		if expectName == "" {
+			if mached := reg.MatchString(testcase.Request.API); mached {
+				expectName = targetReg.FindString(testcase.Request.API)
+				expectName = strings.TrimPrefix(expectName, ".")
 			}
 		}
 

@@ -33,6 +33,7 @@ type runOption struct {
 	reportWriter       runner.ReportResultWriter
 	report             string
 	reportIgnore       bool
+	level              string
 }
 
 func newDefaultRunOption() *runOption {
@@ -66,6 +67,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags := cmd.Flags()
 	flags.StringVarP(&opt.pattern, "pattern", "p", "test-suite-*.yaml",
 		"The file pattern which try to execute the test cases")
+	flags.StringVarP(&opt.level, "level", "l", "info", "Set the output log level")
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
