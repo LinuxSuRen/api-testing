@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"net/http"
@@ -40,7 +41,7 @@ func TestTestCase(t *testing.T) {
 					"type": "generic",
 				},
 				Verify: []string{
-					`name == "linuxsuren"`,
+					`data.name == "linuxsuren"`,
 				},
 			},
 		},
@@ -242,7 +243,7 @@ func TestTestCase(t *testing.T) {
 			},
 			Expect: atest.Response{
 				Verify: []string{
-					"len(items) > 0",
+					"len(data.items) > 0",
 				},
 			},
 		},
@@ -369,6 +370,34 @@ func TestTestCase(t *testing.T) {
 			output, err := RunTestCase(tt.testCase, tt.ctx, context.TODO())
 			tt.verify(t, output, err)
 		})
+	}
+}
+
+func TestLevelWriter(t *testing.T) {
+	tests := []struct {
+		name   string
+		buf    *bytes.Buffer
+		level  string
+		expect string
+	}{{
+		name:   "debug",
+		buf:    new(bytes.Buffer),
+		level:  "debug",
+		expect: "debuginfo",
+	}, {
+		name:   "info",
+		buf:    new(bytes.Buffer),
+		level:  "info",
+		expect: "info",
+	}}
+	for _, tt := range tests {
+		writer := NewDefaultLevelWriter(tt.level, tt.buf)
+		if assert.NotNil(t, writer) {
+			writer.Debug("debug")
+			writer.Info("info")
+
+			assert.Equal(t, tt.expect, tt.buf.String())
+		}
 	}
 }
 

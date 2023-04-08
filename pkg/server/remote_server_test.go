@@ -86,6 +86,27 @@ func TestFindParentTestCases(t *testing.T) {
 		name:     "empty cases",
 		testcase: &atesting.TestCase{},
 		suite:    &atesting.TestSuite{},
+	}, {
+		name: "complex",
+		testcase: &atesting.TestCase{
+			Name: "user",
+			Request: atesting.Request{
+				API: "/users/{{(index .login 0).name}}",
+			},
+		},
+		suite: &atesting.TestSuite{
+			Items: []atesting.TestCase{{
+				Name: "login",
+			}, {
+				Name: "user",
+				Request: atesting.Request{
+					API: "/users/{{(index .login 0).name}}",
+				},
+			}},
+		},
+		expect: []atesting.TestCase{{
+			Name: "login",
+		}},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

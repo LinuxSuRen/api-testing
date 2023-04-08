@@ -1,3 +1,4 @@
+#!api-testing
 # yaml-language-server: $schema=api-testing-schema.json
 # https://docs.gitlab.com/ee/api/api_resources.html
 name: Gitlab
