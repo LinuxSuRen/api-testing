@@ -105,6 +105,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 	}
 
 	buf := new(bytes.Buffer)
+	reply = &HelloReply{}
 
 	for _, testCase := range suite.Items {
 		simpleRunner := runner.NewSimpleTestCaseRunner()
@@ -116,14 +117,14 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 			testCase.Request.API = fmt.Sprintf("%s%s", suite.API, testCase.Request.API)
 		}
 
-		var output interface{}
-		if output, err = simpleRunner.RunTestCase(&testCase, dataContext, ctx); err == nil {
+		if output, testErr := simpleRunner.RunTestCase(&testCase, dataContext, ctx); testErr == nil {
 			dataContext[testCase.Name] = output
 		} else {
+			reply.Error = testErr.Error()
 			break
 		}
 	}
-	reply = &HelloReply{Message: buf.String()}
+	reply.Message = buf.String()
 	return
 }
 

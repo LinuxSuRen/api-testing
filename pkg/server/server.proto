@@ -19,6 +19,7 @@ message TestTask {
 
 message HelloReply {
   string message = 1;
+  string error = 2;
 }
 
 message Empty {

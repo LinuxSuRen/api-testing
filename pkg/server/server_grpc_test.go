@@ -19,6 +19,7 @@ func TestUnimplement(t *testing.T) {
 
 	var reply *server.HelloReply
 	assert.Empty(t, reply.GetMessage())
+	assert.Empty(t, reply.GetError())
 	assert.Empty(t, &server.Empty{})
 
 	var task *server.TestTask
@@ -47,6 +48,7 @@ func TestServer(t *testing.T) {
 	reply, err := client.GetVersion(context.Background(), &server.Empty{})
 	assert.NotNil(t, reply)
 	assert.Equal(t, "version", reply.GetMessage())
+	assert.Empty(t, reply.GetError())
 	assert.Nil(t, err)
 
 	reply, err = client.Run(context.Background(), &server.TestTask{})
