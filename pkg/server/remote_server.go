@@ -46,6 +46,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		for key, val := range oldEnv {
 			os.Setenv(key, val)
 		}
+		fmt.Println(reply, err)
 	}()
 
 	switch task.Kind {
@@ -82,6 +83,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 
 		if targetTestcase != nil {
 			parentCases := findParentTestCases(targetTestcase, suite)
+			fmt.Printf("find %d parent cases\n", len(parentCases))
 			suite.Items = append(parentCases, *targetTestcase)
 		} else {
 			err = fmt.Errorf("cannot found testcase %s", task.CaseName)
@@ -101,6 +103,8 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		suite.API = result
 		suite.API = strings.TrimSuffix(suite.API, "/")
 	} else {
+		reply.Error = err.Error()
+		err = nil
 		return
 	}
 
@@ -138,28 +142,71 @@ func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (
 	reg, matchErr := regexp.Compile(`.*\{\{.*\.\w*.*}\}.*`)
 	targetReg, targetErr := regexp.Compile(`\.\w*`)
 
+	expectNames := new(UniqueSlice[string])
 	if matchErr == nil && targetErr == nil {
-		expectName := ""
+		var expectName string
 		for _, val := range testcase.Request.Header {
 			if matched := reg.MatchString(val); matched {
 				expectName = targetReg.FindString(val)
 				expectName = strings.TrimPrefix(expectName, ".")
-				break
+				expectNames.Push(expectName)
 			}
 		}
 
-		if expectName == "" {
-			if mached := reg.MatchString(testcase.Request.API); mached {
-				expectName = targetReg.FindString(testcase.Request.API)
+		if mached := reg.MatchString(testcase.Request.API); mached {
+			// remove {{ and }}
+			if left, leftErr := regexp.Compile(`.*\{\{`); leftErr == nil {
+				api := left.ReplaceAllString(testcase.Request.API, "")
+
+				expectName = targetReg.FindString(api)
 				expectName = strings.TrimPrefix(expectName, ".")
+				expectNames.Push(expectName)
 			}
 		}
 
+		fmt.Println("expect test case names", expectNames.GetAll())
 		for _, item := range suite.Items {
-			if item.Name == expectName {
+			if expectNames.Exist(item.Name) {
 				testcases = append(testcases, item)
 			}
 		}
 	}
 	return
+}
+
+// UniqueSlice represents an unique slice
+type UniqueSlice[T comparable] struct {
+	data []T
+}
+
+// Push pushes an item if it's not exist
+func (s *UniqueSlice[T]) Push(item T) *UniqueSlice[T] {
+	if s.data == nil {
+		s.data = []T{item}
+	} else {
+		for _, it := range s.data {
+			if it == item {
+				return s
+			}
+		}
+		s.data = append(s.data, item)
+	}
+	return s
+}
+
+// Exist checks if the item exist, return true it exists
+func (s *UniqueSlice[T]) Exist(item T) bool {
+	if s.data != nil {
+		for _, it := range s.data {
+			if it == item {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// GetAll returns all the items
+func (s *UniqueSlice[T]) GetAll() []T {
+	return s.data
 }
