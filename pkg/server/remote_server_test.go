@@ -107,6 +107,43 @@ func TestFindParentTestCases(t *testing.T) {
 		expect: []atesting.TestCase{{
 			Name: "login",
 		}},
+	}, {
+		name: "nest dep",
+		testcase: &atesting.TestCase{
+			Name: "user",
+			Request: atesting.Request{
+				API: "/users/{{(index .users 0).name}}",
+				Header: map[string]string{
+					"Authorization": "Bearer {{.login.data.access_token}}",
+				},
+			},
+		},
+		suite: &atesting.TestSuite{
+			Items: []atesting.TestCase{{
+				Name: "login",
+			}, {
+				Name: "users",
+				Request: atesting.Request{
+					API: "/users",
+				},
+			}, {
+				Name: "user",
+				Request: atesting.Request{
+					API: "/users/{{(index .users 0).name}}",
+					Header: map[string]string{
+						"Authorization": "Bearer {{.login.data.access_token}}",
+					},
+				},
+			}},
+		},
+		expect: []atesting.TestCase{{
+			Name: "login",
+		}, {
+			Name: "users",
+			Request: atesting.Request{
+				API: "/users",
+			},
+		}},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -114,6 +151,12 @@ func TestFindParentTestCases(t *testing.T) {
 			assert.Equal(t, tt.expect, result)
 		})
 	}
+}
+
+func TestUniqueSlice(t *testing.T) {
+	uniqueSlice := new(UniqueSlice[string])
+	uniqueSlice.Push("a").Push("a").Push("b")
+	assert.Equal(t, []string{"a", "b"}, uniqueSlice.GetAll())
 }
 
 //go:embed testdata/simple.yaml
