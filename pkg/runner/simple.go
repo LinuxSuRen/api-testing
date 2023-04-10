@@ -256,7 +256,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		return
 	}
 	if err = expectInt(testcase.Name, testcase.Expect.StatusCode, resp.StatusCode); err != nil {
-		err = fmt.Errorf("error is: %v\n%s", err, string(responseBodyData))
+		err = fmt.Errorf("error is: %v", err)
 		return
 	}
 
