@@ -46,7 +46,6 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		for key, val := range oldEnv {
 			os.Setenv(key, val)
 		}
-		fmt.Println(reply, err)
 	}()
 
 	switch task.Kind {
