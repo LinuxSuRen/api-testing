@@ -21,6 +21,10 @@ func TestParse(t *testing.T) {
 			},
 			Expect: Response{
 				StatusCode: http.StatusOK,
+				Schema: `{
+  "type": "array"
+}
+`,
 			},
 		}, suite.Items[0])
 	}

@@ -40,6 +40,7 @@ type Response struct {
 	Header           map[string]string      `yaml:"header" json:"header,omitempty"`
 	BodyFieldsExpect map[string]interface{} `yaml:"bodyFieldsExpect" json:"bodyFieldsExpect,omitempty"`
 	Verify           []string               `yaml:"verify" json:"verify,omitempty"`
+	Schema           string                 `yaml:"schema" json:"schema,omitempty"`
 }
 
 // Clean represents the clean work after testing

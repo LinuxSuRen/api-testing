@@ -48,7 +48,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/linuxsuren/api-testing
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
@@ -72,7 +72,7 @@ jobs:
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
         with:
           registry: ${{ env.REGISTRY_DOCKERHUB }}
-          username: ${{ github.actor }}
+          username: linuxsuren
           password: ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }}
       - name: Extract Docker metadata
         id: meta
