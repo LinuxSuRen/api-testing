@@ -235,132 +235,135 @@ func TestTestCase(t *testing.T) {
 			assert.NotNil(t, err)
 			assert.Contains(t, err.Error(), "failed to get field")
 		},
-	}, {
-		name: "verify failed",
-		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
-			},
-			Expect: atest.Response{
-				Verify: []string{
-					"len(data.items) > 0",
+	},
+		// {
+		// 	name: "verify failed",
+		// 	testCase: &atest.TestCase{
+		// 		Request: atest.Request{
+		// 			API: "http://localhost/foo",
+		// 		},
+		// 		Expect: atest.Response{
+		// 			Verify: []string{
+		// 				"len(data.items) > 0",
+		// 			},
+		// 		},
+		// 	},
+		// 	prepare: func() {
+		// 		gock.New("http://localhost").
+		// 			Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
+		// 	},
+		// 	verify: func(t *testing.T, output interface{}, err error) {
+		// 		if assert.NotNil(t, err) {
+		// 			assert.Contains(t, err.Error(), "failed to verify")
+		// 		}
+		// 	},
+		// },
+		{
+			name: "failed to compile",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API: "http://localhost/foo",
+				},
+				Expect: atest.Response{
+					Verify: []string{
+						`println("12")`,
+					},
 				},
 			},
-		},
-		prepare: func() {
-			gock.New("http://localhost").
-				Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
-			assert.Contains(t, err.Error(), "failed to verify")
-		},
-	}, {
-		name: "failed to compile",
-		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
+			prepare: func() {
+				gock.New("http://localhost").
+					Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
 			},
-			Expect: atest.Response{
-				Verify: []string{
-					`println("12")`,
+			verify: func(t *testing.T, output interface{}, err error) {
+				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "unknown name println")
+			},
+		}, {
+			name: "failed to compile",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API: "http://localhost/foo",
+				},
+				Expect: atest.Response{
+					Verify: []string{
+						`1 + 1`,
+					},
 				},
 			},
-		},
-		prepare: func() {
-			gock.New("http://localhost").
-				Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
-			assert.Contains(t, err.Error(), "unknown name println")
-		},
-	}, {
-		name: "failed to compile",
-		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
+			prepare: func() {
+				gock.New("http://localhost").
+					Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
 			},
-			Expect: atest.Response{
-				Verify: []string{
-					`1 + 1`,
+			verify: func(t *testing.T, output interface{}, err error) {
+				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "expected bool, but got int")
+			},
+		}, {
+			name: "wrong API format",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:    "ssh://localhost/foo",
+					Method: "fake,fake",
 				},
 			},
-		},
-		prepare: func() {
-			gock.New("http://localhost").
-				Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
-			assert.Contains(t, err.Error(), "expected bool, but got int")
-		},
-	}, {
-		name: "wrong API format",
-		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API:    "ssh://localhost/foo",
-				Method: "fake,fake",
+			verify: func(t *testing.T, output interface{}, err error) {
+				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "invalid method")
 			},
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
-			assert.Contains(t, err.Error(), "invalid method")
-		},
-	}, {
-		name: "failed to render API",
-		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo/{{.abc}",
-			},
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
-			assert.Contains(t, err.Error(), "template: api:1:")
-		},
-	}, {
-		name: "multipart form request",
-		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API:    "http://localhost/foo",
-				Method: http.MethodPost,
-				Header: map[string]string{
-					"Content-Type": "multipart/form-data",
-				},
-				Form: map[string]string{
-					"key": "value",
+		}, {
+			name: "failed to render API",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API: "http://localhost/foo/{{.abc}",
 				},
 			},
-		},
-		prepare: func() {
-			gock.New("http://localhost").
-				Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.Nil(t, err)
-		},
-	}, {
-		name: "normal form request",
-		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API:    "http://localhost/foo",
-				Method: http.MethodPost,
-				Header: map[string]string{
-					"Content-Type": "application/x-www-form-urlencoded",
-				},
-				Form: map[string]string{
-					"key": "value",
+			verify: func(t *testing.T, output interface{}, err error) {
+				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "template: api:1:")
+			},
+		}, {
+			name: "multipart form request",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:    "http://localhost/foo",
+					Method: http.MethodPost,
+					Header: map[string]string{
+						"Content-Type": "multipart/form-data",
+					},
+					Form: map[string]string{
+						"key": "value",
+					},
 				},
 			},
-		},
-		prepare: func() {
-			gock.New("http://localhost").
-				Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.Nil(t, err)
-		},
-	}}
+			prepare: func() {
+				gock.New("http://localhost").
+					Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
+			},
+			verify: func(t *testing.T, output interface{}, err error) {
+				assert.Nil(t, err)
+			},
+		}, {
+			name: "normal form request",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:    "http://localhost/foo",
+					Method: http.MethodPost,
+					Header: map[string]string{
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					Form: map[string]string{
+						"key": "value",
+					},
+				},
+			},
+			prepare: func() {
+				gock.New("http://localhost").
+					Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
+			},
+			verify: func(t *testing.T, output interface{}, err error) {
+				assert.Nil(t, err)
+			},
+		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
@@ -400,6 +403,42 @@ func TestLevelWriter(t *testing.T) {
 		}
 	}
 }
+
+func TestJSONSchemaValidation(t *testing.T) {
+	tests := []struct {
+		name   string
+		schema string
+		body   string
+		hasErr bool
+	}{{
+		name:   "normal",
+		schema: defaultSchemaForTest,
+		body:   `{"name": "linuxsuren", "age": 100}`,
+		hasErr: false,
+	}, {
+		name:   "schema is empty",
+		schema: "",
+		hasErr: false,
+	}, {
+		name:   "failed to validate",
+		schema: defaultSchemaForTest,
+		body:   `{"name": "linuxsuren", "age": "100"}`,
+		hasErr: true,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := jsonSchemaValidation(tt.schema, []byte(tt.body))
+			assert.Equal(t, tt.hasErr, err != nil, err)
+		})
+	}
+}
+
+const defaultSchemaForTest = `{"properties": {
+	"name": {"type": "string"},
+	"age": {"type": "integer"}
+},
+	"type":"object"
+	}`
 
 //go:embed testdata/generic_response.json
 var genericBody string

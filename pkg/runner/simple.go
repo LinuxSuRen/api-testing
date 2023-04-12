@@ -20,6 +20,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/exec"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	unstructured "github.com/linuxsuren/unstructured/pkg"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 // LevelWriter represents a writer with level
@@ -337,6 +338,8 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 			break
 		}
 	}
+
+	err = jsonSchemaValidation(testcase.Expect.Schema, responseBodyData)
 	return
 }
 
@@ -399,6 +402,21 @@ func expectInt(name string, expect, actual int) (err error) {
 func expectString(name, expect, actual string) (err error) {
 	if expect != actual {
 		err = fmt.Errorf("case: %s, expect %s, actual %s", name, expect, actual)
+	}
+	return
+}
+
+func jsonSchemaValidation(schema string, body []byte) (err error) {
+	if schema == "" {
+		return
+	}
+
+	schemaLoader := gojsonschema.NewStringLoader(schema)
+	jsonLoader := gojsonschema.NewBytesLoader(body)
+
+	var result *gojsonschema.Result
+	if result, err = gojsonschema.Validate(schemaLoader, jsonLoader); err == nil && !result.Valid() {
+		err = fmt.Errorf("JSON schema validation failed: %v", result.Errors())
 	}
 	return
 }

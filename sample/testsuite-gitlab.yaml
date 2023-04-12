@@ -8,6 +8,10 @@ items:
     api: https://gitlab.com/api/v4/projects
   expect:
     statusCode: 200
+    schema: |
+      {
+        "type": "array"
+      }
 - name: project
   request:
     api: https://gitlab.com/api/v4/projects/{{int64 (index .projects 0).id}}
@@ -16,7 +20,7 @@ items:
     # bodyFieldsExpect:
     #   http_url_to_repo: https://gitlab.com/senghuy/sr_chea_senghuy_spring_homework001.git
     verify:
-    - http_url_to_repo startsWith "https"
-    - http_url_to_repo endsWith ".git"
-    - default_branch == 'master' or default_branch == 'main'
-    - len(topics) >= 0
+    - data.http_url_to_repo startsWith "https"
+    - data.http_url_to_repo endsWith ".git"
+    - data.default_branch == 'master' or data.default_branch == 'main'
+    - len(data.topics) >= 0
