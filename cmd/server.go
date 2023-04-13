@@ -19,7 +19,7 @@ func createServerCmd() (c *cobra.Command) {
 		RunE:  opt.runE,
 	}
 	flags := c.Flags()
-	flags.IntVarP(&opt.port, "port", "p", 9090, "The RPC server port")
+	flags.IntVarP(&opt.port, "port", "p", 7070, "The RPC server port")
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
 	return
 }

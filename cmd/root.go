@@ -17,6 +17,7 @@ func NewRootCmd() (c *cobra.Command) {
 	c.Version = version.GetVersion()
 	c.AddCommand(createInitCommand(),
 		createRunCommand(), createSampleCmd(),
-		createServerCmd(), createJSONSchemaCmd())
+		createServerCmd(), createJSONSchemaCmd(),
+		createServiceCommand())
 	return
 }
