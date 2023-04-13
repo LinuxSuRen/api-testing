@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	atesting "github.com/linuxsuren/api-testing/pkg/testing"
+	exec "github.com/linuxsuren/go-fake-runtime"
 )
 
 func Test_setRelativeDir(t *testing.T) {
@@ -43,10 +44,15 @@ func TestCreateRunCommand(t *testing.T) {
 	cmd := createRunCommand()
 	assert.Equal(t, "run", cmd.Use)
 
-	init := createInitCommand()
+	init := createInitCommand(exec.FakeExecer{})
 	assert.Equal(t, "init", init.Use)
 
-	server := createServerCmd()
+	server := createServerCmd(&fakeGRPCServer{})
 	assert.NotNil(t, server)
 	assert.Equal(t, "server", server.Use)
+
+	root := NewRootCmd(exec.FakeExecer{})
+	root.SetArgs([]string{"init", "-k=demo.yaml", "--wait-namespace", "demo", "--wait-resource", "demo"})
+	err := root.Execute()
+	assert.Nil(t, err)
 }

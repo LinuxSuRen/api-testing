@@ -17,8 +17,8 @@ import (
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
-	"github.com/linuxsuren/api-testing/pkg/exec"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	unstructured "github.com/linuxsuren/unstructured/pkg"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -78,6 +78,7 @@ type TestCaseRunner interface {
 	WithOutputWriter(io.Writer) TestCaseRunner
 	WithWriteLevel(level string) TestCaseRunner
 	WithTestReporter(TestReporter) TestCaseRunner
+	WithExecer(fakeruntime.Execer) TestCaseRunner
 }
 
 // ReportRecord represents the raw data of a HTTP request
@@ -157,6 +158,7 @@ type simpleTestCaseRunner struct {
 	testReporter TestReporter
 	writer       io.Writer
 	log          LevelWriter
+	execer       fakeruntime.Execer
 }
 
 // NewSimpleTestCaseRunner creates the instance of the simple test case runner
@@ -164,7 +166,8 @@ func NewSimpleTestCaseRunner() TestCaseRunner {
 	runner := &simpleTestCaseRunner{}
 	return runner.WithOutputWriter(io.Discard).
 		WithWriteLevel("info").
-		WithTestReporter(NewDiscardTestReporter())
+		WithTestReporter(NewDiscardTestReporter()).
+		WithExecer(fakeruntime.DefaultExecer{})
 }
 
 // RunTestCase is the main entry point of a test case
@@ -179,16 +182,14 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		r.testReporter.PutRecord(rr)
 	}(record)
 
-	if err = doPrepare(testcase); err != nil {
+	if err = r.doPrepare(testcase); err != nil {
 		err = fmt.Errorf("failed to prepare, error: %v", err)
 		return
 	}
 
 	defer func() {
 		if testcase.Clean.CleanPrepare {
-			if err = doCleanPrepare(testcase); err != nil {
-				return
-			}
+			err = r.doCleanPrepare(testcase)
 		}
 	}()
 
@@ -363,29 +364,29 @@ func (r *simpleTestCaseRunner) WithTestReporter(reporter TestReporter) TestCaseR
 	return r
 }
 
-// Deprecated
-// RunTestCase runs the test case.
-func RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error) {
-	return NewSimpleTestCaseRunner().WithOutputWriter(os.Stdout).RunTestCase(testcase, dataContext, ctx)
+// WithExecer sets the execer
+func (r *simpleTestCaseRunner) WithExecer(execer fakeruntime.Execer) TestCaseRunner {
+	r.execer = execer
+	return r
 }
 
-func doPrepare(testcase *testing.TestCase) (err error) {
+func (r *simpleTestCaseRunner) doPrepare(testcase *testing.TestCase) (err error) {
 	for i := range testcase.Prepare.Kubernetes {
 		item := testcase.Prepare.Kubernetes[i]
 
-		if err = exec.RunCommand("kubectl", "apply", "-f", item); err != nil {
+		if err = r.execer.RunCommand("kubectl", "apply", "-f", item); err != nil {
 			return
 		}
 	}
 	return
 }
 
-func doCleanPrepare(testcase *testing.TestCase) (err error) {
+func (r *simpleTestCaseRunner) doCleanPrepare(testcase *testing.TestCase) (err error) {
 	count := len(testcase.Prepare.Kubernetes)
 	for i := count - 1; i >= 0; i-- {
 		item := testcase.Prepare.Kubernetes[i]
 
-		if err = exec.RunCommand("kubectl", "delete", "-f", item); err != nil {
+		if err = r.execer.RunCommand("kubectl", "delete", "-f", item); err != nil {
 			return
 		}
 	}

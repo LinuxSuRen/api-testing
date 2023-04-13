@@ -1,3 +1,4 @@
+// Package cmd provides a service command
 package cmd
 
 import (

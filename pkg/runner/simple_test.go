@@ -5,23 +5,37 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
 	"testing"
 
 	_ "embed"
 
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTestCase(t *testing.T) {
 	tests := []struct {
 		name     string
+		execer   fakeruntime.Execer
 		testCase *atest.TestCase
 		ctx      interface{}
 		prepare  func()
 		verify   func(t *testing.T, output interface{}, err error)
 	}{{
+		name: "failed during the prepare stage",
+		testCase: &atest.TestCase{
+			Prepare: atest.Prepare{
+				Kubernetes: []string{"demo.yaml"},
+			},
+		},
+		execer: fakeruntime.FakeExecer{ExpectError: errors.New("fake")},
+		verify: func(t *testing.T, output interface{}, err error) {
+			assert.NotNil(t, err)
+		},
+	}, {
 		name: "normal, response is map",
 		testCase: &atest.TestCase{
 			Request: atest.Request{
@@ -44,7 +58,14 @@ func TestTestCase(t *testing.T) {
 					`data.name == "linuxsuren"`,
 				},
 			},
+			Prepare: atest.Prepare{
+				Kubernetes: []string{"demo.yaml"},
+			},
+			Clean: atest.Clean{
+				CleanPrepare: true,
+			},
 		},
+		execer: fakeruntime.FakeExecer{},
 		prepare: func() {
 			gock.New("http://localhost").
 				Get("/foo").
@@ -370,7 +391,11 @@ func TestTestCase(t *testing.T) {
 			if tt.prepare != nil {
 				tt.prepare()
 			}
-			output, err := RunTestCase(tt.testCase, tt.ctx, context.TODO())
+			runner := NewSimpleTestCaseRunner().WithOutputWriter(os.Stdout)
+			if tt.execer != nil {
+				runner.WithExecer(tt.execer)
+			}
+			output, err := runner.RunTestCase(tt.testCase, tt.ctx, context.TODO())
 			tt.verify(t, output, err)
 		})
 	}

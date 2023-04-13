@@ -6,6 +6,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/version"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 )
 
 // NewRootCmd creates the root command
@@ -16,9 +17,10 @@ func NewRootCmd(execer fakeruntime.Execer) (c *cobra.Command) {
 	}
 	c.SetOut(os.Stdout)
 	c.Version = version.GetVersion()
-	c.AddCommand(createInitCommand(),
+	gRPCServer := grpc.NewServer()
+	c.AddCommand(createInitCommand(execer),
 		createRunCommand(), createSampleCmd(),
-		createServerCmd(), createJSONSchemaCmd(),
+		createServerCmd(gRPCServer), createJSONSchemaCmd(),
 		createServiceCommand(execer))
 	return
 }

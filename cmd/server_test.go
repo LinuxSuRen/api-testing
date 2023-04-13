@@ -38,4 +38,8 @@ func TestPrintProto(t *testing.T) {
 			tt.verify(t, buf, err)
 		})
 	}
+
+	server := createServerCmd(&fakeGRPCServer{})
+	err := server.Execute()
+	assert.Nil(t, err)
 }
