@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +31,7 @@ func TestPrintProto(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			root := NewRootCmd()
+			root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"})
 			root.SetOut(buf)
 			root.SetArgs(tt.args)
 			err := root.Execute()

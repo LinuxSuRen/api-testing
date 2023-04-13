@@ -8,6 +8,7 @@ import (
 
 	"github.com/h2non/gock"
 	"github.com/linuxsuren/api-testing/pkg/limit"
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -103,7 +104,7 @@ func TestRunCommand(t *testing.T) {
 }
 
 func TestRootCmd(t *testing.T) {
-	c := NewRootCmd()
+	c := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"})
 	assert.NotNil(t, c)
 	assert.Equal(t, "atest", c.Use)
 }

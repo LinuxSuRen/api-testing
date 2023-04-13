@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	"github.com/linuxsuren/api-testing/cmd"
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestJSONSchemaCmd(t *testing.T) {
-	c := cmd.NewRootCmd()
+	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"})
 
 	buf := new(bytes.Buffer)
 	c.SetOut(buf)
