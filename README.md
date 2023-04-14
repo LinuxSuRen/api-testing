@@ -8,6 +8,7 @@ This is a API testing tool.
 
 *   Response Body fields equation check
 *   Response Body [eval](https://expr.medv.io/)
+*   Verify the Kubernetes resources
 *   Validate the response body with [JSON schema](https://json-schema.org/)
 *   Output reference between TestCase
 *   Run in server mode, and provide the gRPC endpoint
