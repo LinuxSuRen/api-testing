@@ -28,6 +28,7 @@ require (
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/invopop/jsonschema v0.7.0 // indirect
+	github.com/linuxsuren/go-fake-runtime v0.0.0-20230413085645-15e77ab55dbd // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

@@ -1,19 +1,20 @@
 package cmd
 
 import (
-	"github.com/linuxsuren/api-testing/pkg/exec"
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/spf13/cobra"
 )
 
 type initOption struct {
+	execer        fakeruntime.Execer
 	kustomization string
 	waitNamespace string
 	waitResource  string
 }
 
 // createInitCommand returns the init command
-func createInitCommand() (cmd *cobra.Command) {
-	opt := &initOption{}
+func createInitCommand(execer fakeruntime.Execer) (cmd *cobra.Command) {
+	opt := &initOption{execer: execer}
 	cmd = &cobra.Command{
 		Use:    "init",
 		Long:   "Support to init Kubernetes cluster with kustomization, and wait it with command: kubectl wait",
@@ -30,13 +31,13 @@ func createInitCommand() (cmd *cobra.Command) {
 
 func (o *initOption) runE(cmd *cobra.Command, args []string) (err error) {
 	if o.kustomization != "" {
-		if err = exec.RunCommand("kubectl", "apply", "-k", o.kustomization, "--wait=true"); err != nil {
+		if err = o.execer.RunCommand("kubectl", "apply", "-k", o.kustomization, "--wait=true"); err != nil {
 			return
 		}
 	}
 
 	if o.waitNamespace != "" && o.waitResource != "" {
-		if err = exec.RunCommand("kubectl", "wait", "-n", o.waitNamespace, o.waitResource, "--for", "condition=Available=True", "--timeout=900s"); err != nil {
+		if err = o.execer.RunCommand("kubectl", "wait", "-n", o.waitNamespace, o.waitResource, "--for", "condition=Available=True", "--timeout=900s"); err != nil {
 			return
 		}
 	}

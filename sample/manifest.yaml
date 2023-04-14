@@ -37,9 +37,9 @@ metadata:
 spec:
   ports:
   - name: server
-    port: 9090
+    port: 7070
     protocol: TCP
-    targetPort: 9090
+    targetPort: 7070
   selector:
     app: api-testing
   sessionAffinity: None

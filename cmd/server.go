@@ -11,20 +11,21 @@ import (
 	"google.golang.org/grpc"
 )
 
-func createServerCmd() (c *cobra.Command) {
-	opt := &serverOption{}
+func createServerCmd(gRPCServer gRPCServer) (c *cobra.Command) {
+	opt := &serverOption{gRPCServer: gRPCServer}
 	c = &cobra.Command{
 		Use:   "server",
 		Short: "Run as a server mode",
 		RunE:  opt.runE,
 	}
 	flags := c.Flags()
-	flags.IntVarP(&opt.port, "port", "p", 9090, "The RPC server port")
+	flags.IntVarP(&opt.port, "port", "p", 7070, "The RPC server port")
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
 	return
 }
 
 type serverOption struct {
+	gRPCServer gRPCServer
 	port       int
 	printProto bool
 }
@@ -43,9 +44,26 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	s := grpc.NewServer()
+	s := o.gRPCServer
 	server.RegisterRunnerServer(s, server.NewRemoteServer())
 	log.Printf("server listening at %v", lis.Addr())
 	s.Serve(lis)
 	return
+}
+
+type gRPCServer interface {
+	Serve(lis net.Listener) error
+	grpc.ServiceRegistrar
+}
+
+type fakeGRPCServer struct {
+}
+
+// Serve is a fake method
+func (s *fakeGRPCServer) Serve(net.Listener) error {
+	return nil
+}
+
+// RegisterService is a fake method
+func (s *fakeGRPCServer) RegisterService(desc *grpc.ServiceDesc, impl interface{}) {
 }
