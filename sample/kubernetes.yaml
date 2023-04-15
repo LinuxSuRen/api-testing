@@ -13,5 +13,7 @@ items:
     - pod("kube-system", "kube-ovn-cni-55bz9").Exist()
     - k8s("pods", "kube-system", "kube-ovn-cni-55bz9").Exist()
     - k8s("deployments", "kube-system", "coredns").Exist()
+    - k8s("deployments", "kube-system", "coredns").ExpectField(2, "spec", "replicas")
+    - k8s("deployments", "kube-system", "coredns").ExpectField("kube-dns", "metadata", "labels", "k8s-app")
     - k8s("daemonsets", "kube-system", "kube-ovn-cni").Exist()
     - k8s({"kind":"virtualmachines","group":"kubevirt.io"}, "vm-test", "vm-win10-dkkhl").Exist()

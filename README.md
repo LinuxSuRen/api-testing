@@ -63,6 +63,15 @@ The following fields are templated with [sprig](http://masterminds.github.io/spr
 *   Request Body
 *   Request Header
 
+## Verify against Kubernetes
+
+It could verify any kinds of Kubernetes resources. Please set the environment variables before using it:
+
+*   `KUBERNETES_SERVER`
+*   `KUBERNETES_TOKEN`
+
+See also the [example](sample/kubernetes.yaml).
+
 ## TODO
 
 *   Reduce the size of context

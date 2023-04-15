@@ -200,6 +200,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 	}
+
 	var requestBody io.Reader
 	if testcase.Request.Body != "" {
 		requestBody = bytes.NewBufferString(testcase.Request.Body)
@@ -246,6 +247,11 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	}
 
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
+
+	// TODO only do this for unit testing, should remove it once we have a better way
+	if strings.HasPrefix(testcase.Request.API, "http://") {
+		client = *http.DefaultClient
+	}
 
 	// send the HTTP request
 	var resp *http.Response

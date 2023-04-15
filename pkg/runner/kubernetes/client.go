@@ -10,14 +10,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/antonmedv/expr"
+	unstructured "github.com/linuxsuren/unstructured/pkg"
 )
 
 // Reader represents a reader interface
 type Reader interface {
-	GetPod(namespace, name string) map[string]interface{}
-	GetDeploy(namespace, name string) map[string]interface{}
-	GetResource(group, kind, version, namespace, name string) map[string]interface{}
+	GetResource(group, kind, version, namespace, name string) (map[string]interface{}, error)
 }
 
 type defualtReader struct {
@@ -33,19 +31,7 @@ func NewDefaultReader(server, token string) Reader {
 	}
 }
 
-// GetPod gets a pod by namespace and name
-func (r *defualtReader) GetPod(namespace, name string) (result map[string]interface{}) {
-	api := fmt.Sprintf("%s/api/v1/namespaces/%s/pods/%s", r.server, namespace, name)
-	return r.request(api)
-}
-
-// GetDeploy gets a pod by namespace and name
-func (r *defualtReader) GetDeploy(namespace, name string) (result map[string]interface{}) {
-	api := fmt.Sprintf("%s/api/v1/namespaces/%s/deployments/%s", r.server, namespace, name)
-	return r.request(api)
-}
-
-func (r *defualtReader) GetResource(group, kind, version, namespace, name string) (result map[string]interface{}) {
+func (r *defualtReader) GetResource(group, kind, version, namespace, name string) (map[string]interface{}, error) {
 	api := fmt.Sprintf("%s/api/%s/%s/namespaces/%s/%s/%s", r.server, group, version, namespace, kind, name)
 	api = strings.ReplaceAll(api, "api//", "api/")
 	if !strings.Contains(api, "api/v1") {
@@ -54,19 +40,19 @@ func (r *defualtReader) GetResource(group, kind, version, namespace, name string
 	return r.request(api)
 }
 
-func (r *defualtReader) request(api string) (result map[string]interface{}) {
+func (r *defualtReader) request(api string) (result map[string]interface{}, err error) {
 	client := GetClient()
+	var req *http.Request
+	if req, err = http.NewRequest(http.MethodGet, api, nil); err == nil {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", r.token))
+		var resp *http.Response
+		if resp, err = client.Do(req); err == nil && resp.StatusCode == http.StatusOK {
+			var data []byte
+			if data, err = io.ReadAll(resp.Body); err == nil {
+				result = make(map[string]interface{})
 
-	req, err := http.NewRequest(http.MethodGet, api, nil)
-	if err != nil {
-		return
-	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", r.token))
-	if resp, err := client.Do(req); err == nil && resp.StatusCode == http.StatusOK {
-		if data, err := io.ReadAll(resp.Body); err == nil {
-			result = make(map[string]interface{})
-
-			_ = json.Unmarshal(data, &result)
+				err = json.Unmarshal(data, &result)
+			}
 		}
 	}
 	return
@@ -88,14 +74,32 @@ func GetClient() *http.Client {
 
 type ResourceValidator interface {
 	Exist() bool
+	ExpectField(value interface{}, fields ...string) bool
 }
 
 type defaultResourceValidator struct {
 	data map[string]interface{}
+	err  error
 }
 
 func (v *defaultResourceValidator) Exist() bool {
+	if v.err != nil {
+		fmt.Println(v.err)
+		return false
+	}
 	return v.data != nil && len(v.data) > 0
+}
+
+func (v *defaultResourceValidator) ExpectField(value interface{}, fields ...string) (result bool) {
+	val, ok, err := unstructured.NestedField(v.data, fields...)
+	if !ok || err != nil {
+		fmt.Printf("cannot find '%v',error: %v\n", fields, err)
+		return
+	}
+	if result = fmt.Sprintf("%v", val) == fmt.Sprintf("%v", value); !result {
+		fmt.Printf("expect: '%v', actual: '%v'\n", value, val)
+	}
+	return
 }
 
 func podValidator(params ...interface{}) (validator interface{}, err error) {
@@ -143,17 +147,10 @@ func resourceValidator(params ...interface{}) (validator interface{}, err error)
 		return
 	}
 	reader := NewDefaultReader(server, token)
+	data, err := reader.GetResource(group, kind, version, params[1].(string), params[2].(string))
 	validator = &defaultResourceValidator{
-		data: reader.GetResource(group, kind, version, params[1].(string), params[2].(string)),
+		data: data,
+		err:  err,
 	}
 	return
-}
-
-// PodValidatorFunc returns a expr for checking pod existing
-func PodValidatorFunc() expr.Option {
-	return expr.Function("pod", podValidator, new(func(...string) ResourceValidator))
-}
-
-func KubernetesValidatorFunc() expr.Option {
-	return expr.Function("k8s", resourceValidator, new(func(interface{}, ...string) ResourceValidator))
 }

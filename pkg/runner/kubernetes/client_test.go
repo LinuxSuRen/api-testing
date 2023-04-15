@@ -12,11 +12,16 @@ import (
 func TestGetPod(t *testing.T) {
 	tests := []struct {
 		name           string
+		group          string
+		version        string
+		kind           string
 		namespacedName namespacedName
 		prepare        func()
 		expect         map[string]interface{}
 	}{{
-		name: "normal",
+		name:    "normal",
+		kind:    "pods",
+		version: "v1",
 		namespacedName: namespacedName{
 			namespace: "ns",
 			name:      "fake",
@@ -31,14 +36,34 @@ func TestGetPod(t *testing.T) {
 		expect: map[string]interface{}{
 			"kind": "pod",
 		},
+	}, {
+		name:    "deployments",
+		kind:    "deployments",
+		version: "v1",
+		group:   "apps",
+		namespacedName: namespacedName{
+			namespace: "ns",
+			name:      "fake",
+		},
+		prepare: func() {
+			gock.New("http://foo").
+				Get("/apis/apps/v1/namespaces/ns/deployments/fake").
+				Reply(http.StatusOK).
+				JSON(`{"kind":"deployment"}`)
+			gock.InterceptClient(kubernetes.GetClient())
+		},
+		expect: map[string]interface{}{
+			"kind": "deployment",
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
 			tt.prepare()
 			reader := kubernetes.NewDefaultReader("http://foo", "")
-			result := reader.GetPod(tt.namespacedName.namespace, tt.namespacedName.name)
+			result, err := reader.GetResource(tt.group, tt.kind, tt.version, tt.namespacedName.namespace, tt.namespacedName.name)
 			assert.Equal(t, tt.expect, result)
+			assert.Nil(t, err)
 		})
 	}
 }

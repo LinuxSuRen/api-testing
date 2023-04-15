@@ -104,7 +104,7 @@ func TestRunCommand(t *testing.T) {
 }
 
 func TestRootCmd(t *testing.T) {
-	c := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"})
+	c := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, NewFakeGRPCServer())
 	assert.NotNil(t, c)
 	assert.Equal(t, "atest", c.Use)
 }

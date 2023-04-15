@@ -59,6 +59,11 @@ type gRPCServer interface {
 type fakeGRPCServer struct {
 }
 
+// NewFakeGRPCServer creates a fake gRPC server
+func NewFakeGRPCServer() gRPCServer {
+	return &fakeGRPCServer{}
+}
+
 // Serve is a fake method
 func (s *fakeGRPCServer) Serve(net.Listener) error {
 	return nil

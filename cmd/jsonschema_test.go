@@ -11,7 +11,7 @@ import (
 )
 
 func TestJSONSchemaCmd(t *testing.T) {
-	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"})
+	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, cmd.NewFakeGRPCServer())
 
 	buf := new(bytes.Buffer)
 	c.SetOut(buf)

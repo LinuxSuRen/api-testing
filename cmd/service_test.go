@@ -10,12 +10,12 @@ import (
 )
 
 func TestService(t *testing.T) {
-	root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"})
+	root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, NewFakeGRPCServer())
 	root.SetArgs([]string{"service", "fake"})
 	err := root.Execute()
 	assert.NotNil(t, err)
 
-	notLinux := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "fake"})
+	notLinux := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "fake"}, NewFakeGRPCServer())
 	notLinux.SetArgs([]string{"service", "--action", "install"})
 	err = notLinux.Execute()
 	assert.NotNil(t, err)
@@ -26,7 +26,7 @@ func TestService(t *testing.T) {
 		os.RemoveAll(tmpFile.Name())
 	}()
 
-	targetScript := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"})
+	targetScript := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, NewFakeGRPCServer())
 	targetScript.SetArgs([]string{"service", "--action", "install", "--script-path", tmpFile.Name()})
 	err = targetScript.Execute()
 	assert.Nil(t, err)
@@ -58,7 +58,7 @@ func TestService(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			normalRoot := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux", ExpectOutput: tt.expectOutput})
+			normalRoot := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux", ExpectOutput: tt.expectOutput}, NewFakeGRPCServer())
 			normalRoot.SetOut(buf)
 			normalRoot.SetArgs([]string{"service", "--action", tt.action})
 			err = normalRoot.Execute()
