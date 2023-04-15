@@ -332,7 +332,8 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	for _, verify := range testcase.Expect.Verify {
 		var program *vm.Program
 		if program, err = expr.Compile(verify, expr.Env(mapOutput),
-			expr.AsBool(), kubernetes.PodExistFunc()); err != nil {
+			expr.AsBool(), kubernetes.PodValidatorFunc(),
+			kubernetes.KubernetesValidatorFunc()); err != nil {
 			return
 		}
 

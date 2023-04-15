@@ -36,7 +36,7 @@ func TestGetPod(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
 			tt.prepare()
-			reader := kubernetes.NewDefualtReader("http://foo", "")
+			reader := kubernetes.NewDefaultReader("http://foo", "")
 			result := reader.GetPod(tt.namespacedName.namespace, tt.namespacedName.name)
 			assert.Equal(t, tt.expect, result)
 		})

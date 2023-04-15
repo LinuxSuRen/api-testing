@@ -10,4 +10,8 @@ items:
   expect:
     verify:
     - data.kind == "PodList"
-    - podExist("kube-system", "coredns-558bd4d5db-9b2vw")
+    - pod("kube-system", "kube-ovn-cni-55bz9").Exist()
+    - k8s("pods", "kube-system", "kube-ovn-cni-55bz9").Exist()
+    - k8s("deployments", "kube-system", "coredns").Exist()
+    - k8s("daemonsets", "kube-system", "kube-ovn-cni").Exist()
+    - k8s({"kind":"virtualmachines","group":"kubevirt.io"}, "vm-test", "vm-win10-dkkhl").Exist()
