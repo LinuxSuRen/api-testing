@@ -31,6 +31,7 @@ func NewDefaultReader(server, token string) Reader {
 	}
 }
 
+// GetResource returns the resource
 func (r *defualtReader) GetResource(group, kind, version, namespace, name string) (map[string]interface{}, error) {
 	api := fmt.Sprintf("%s/api/%s/%s/namespaces/%s/%s/%s", r.server, group, version, namespace, kind, name)
 	api = strings.ReplaceAll(api, "api//", "api/")
@@ -72,6 +73,7 @@ func GetClient() *http.Client {
 	return client
 }
 
+// ResourceValidator represents a generic resource validator
 type ResourceValidator interface {
 	Exist() bool
 	ExpectField(value interface{}, fields ...string) bool
