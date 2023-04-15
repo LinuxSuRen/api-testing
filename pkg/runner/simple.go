@@ -3,6 +3,7 @@ package runner
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,6 +18,7 @@ import (
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
+	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	unstructured "github.com/linuxsuren/unstructured/pkg"
@@ -193,7 +195,12 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		}
 	}()
 
-	client := http.Client{}
+	client := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
 	var requestBody io.Reader
 	if testcase.Request.Body != "" {
 		requestBody = bytes.NewBufferString(testcase.Request.Body)
@@ -240,6 +247,11 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	}
 
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
+
+	// TODO only do this for unit testing, should remove it once we have a better way
+	if strings.HasPrefix(testcase.Request.API, "http://") {
+		client = *http.DefaultClient
+	}
 
 	// send the HTTP request
 	var resp *http.Response
@@ -325,7 +337,9 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 	for _, verify := range testcase.Expect.Verify {
 		var program *vm.Program
-		if program, err = expr.Compile(verify, expr.Env(mapOutput), expr.AsBool()); err != nil {
+		if program, err = expr.Compile(verify, expr.Env(mapOutput),
+			expr.AsBool(), kubernetes.PodValidatorFunc(),
+			kubernetes.KubernetesValidatorFunc()); err != nil {
 			return
 		}
 
@@ -336,6 +350,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 		if !result.(bool) {
 			err = fmt.Errorf("failed to verify: %s", verify)
+			fmt.Println(err)
 			break
 		}
 	}

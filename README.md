@@ -8,6 +8,7 @@ This is a API testing tool.
 
 *   Response Body fields equation check
 *   Response Body [eval](https://expr.medv.io/)
+*   Verify the Kubernetes resources
 *   Validate the response body with [JSON schema](https://json-schema.org/)
 *   Output reference between TestCase
 *   Run in server mode, and provide the gRPC endpoint
@@ -61,6 +62,15 @@ The following fields are templated with [sprig](http://masterminds.github.io/spr
 *   API
 *   Request Body
 *   Request Header
+
+## Verify against Kubernetes
+
+It could verify any kinds of Kubernetes resources. Please set the environment variables before using it:
+
+*   `KUBERNETES_SERVER`
+*   `KUBERNETES_TOKEN`
+
+See also the [example](sample/kubernetes.yaml).
 
 ## TODO
 

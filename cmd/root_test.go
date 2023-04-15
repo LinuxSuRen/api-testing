@@ -51,7 +51,7 @@ func TestCreateRunCommand(t *testing.T) {
 	assert.NotNil(t, server)
 	assert.Equal(t, "server", server.Use)
 
-	root := NewRootCmd(exec.FakeExecer{})
+	root := NewRootCmd(exec.FakeExecer{}, NewFakeGRPCServer())
 	root.SetArgs([]string{"init", "-k=demo.yaml", "--wait-namespace", "demo", "--wait-resource", "demo"})
 	err := root.Execute()
 	assert.Nil(t, err)

@@ -10,6 +10,10 @@ run-image:
 	docker run ghcr.io/linuxsuren/api-testing:dev
 copy: build
 	sudo cp bin/atest /usr/local/bin/
+copy-restart:
+	atest service stop
+	make copy
+	atest service restart
 test:
 	go test ./... -cover -v -coverprofile=coverage.out
 	go tool cover -func=coverage.out
