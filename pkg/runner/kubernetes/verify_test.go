@@ -8,6 +8,7 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/h2non/gock"
 	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,7 +48,6 @@ func TestKubernetesValidatorFunc(t *testing.T) {
 	}, {
 		name:       "no enough params",
 		expression: `k8s('crd')`,
-		prepare:    emptyPrepare,
 		expectBool: false,
 		expectErr:  true,
 	}, {
@@ -73,11 +73,11 @@ func TestKubernetesValidatorFunc(t *testing.T) {
 	}, {
 		name:       "no kind",
 		expression: `k8s({"foo": "bar"}, "ns", "foo").Exist()`,
-		prepare:    emptyPrepare,
 		expectErr:  true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.prepare = util.MakeSureNotNil(tt.prepare)
 			tt.prepare()
 			vm, err := expr.Compile(tt.expression, kubernetes.KubernetesValidatorFunc(),
 				kubernetes.PodValidatorFunc())
@@ -90,10 +90,6 @@ func TestKubernetesValidatorFunc(t *testing.T) {
 			}
 		})
 	}
-}
-
-func emptyPrepare() {
-	// only for testing
 }
 
 func preparePod() {

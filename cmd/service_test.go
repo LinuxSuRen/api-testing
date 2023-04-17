@@ -16,7 +16,7 @@ func TestService(t *testing.T) {
 	assert.NotNil(t, err)
 
 	notLinux := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "fake"}, NewFakeGRPCServer())
-	notLinux.SetArgs([]string{"service", "--action", "install"})
+	notLinux.SetArgs([]string{"service", paramAction, "install"})
 	err = notLinux.Execute()
 	assert.NotNil(t, err)
 
@@ -27,7 +27,7 @@ func TestService(t *testing.T) {
 	}()
 
 	targetScript := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, NewFakeGRPCServer())
-	targetScript.SetArgs([]string{"service", "--action", "install", "--script-path", tmpFile.Name()})
+	targetScript.SetArgs([]string{"service", paramAction, "install", "--script-path", tmpFile.Name()})
 	err = targetScript.Execute()
 	assert.Nil(t, err)
 	data, err := os.ReadFile(tmpFile.Name())
@@ -67,3 +67,5 @@ func TestService(t *testing.T) {
 		})
 	}
 }
+
+const paramAction = "--action"

@@ -27,7 +27,7 @@ func TestGetPod(t *testing.T) {
 			name:      "fake",
 		},
 		prepare: func() {
-			gock.New("http://foo").
+			gock.New(urlFoo).
 				Get("/api/v1/namespaces/ns/pods/fake").
 				Reply(http.StatusOK).
 				JSON(`{"kind":"pod"}`)
@@ -46,7 +46,7 @@ func TestGetPod(t *testing.T) {
 			name:      "fake",
 		},
 		prepare: func() {
-			gock.New("http://foo").
+			gock.New(urlFoo).
 				Get("/apis/apps/v1/namespaces/ns/deployments/fake").
 				Reply(http.StatusOK).
 				JSON(`{"kind":"deployment"}`)
@@ -60,7 +60,7 @@ func TestGetPod(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
 			tt.prepare()
-			reader := kubernetes.NewDefaultReader("http://foo", "")
+			reader := kubernetes.NewDefaultReader(urlFoo, "")
 			result, err := reader.GetResource(tt.group, tt.kind, tt.version, tt.namespacedName.namespace, tt.namespacedName.name)
 			assert.Equal(t, tt.expect, result)
 			assert.Nil(t, err)
