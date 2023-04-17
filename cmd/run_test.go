@@ -21,9 +21,9 @@ func TestRunSuite(t *testing.T) {
 		hasError  bool
 	}{{
 		name:      "simple",
-		suiteFile: "testdata/simple-suite.yaml",
+		suiteFile: simpleSuite,
 		prepare: func() {
-			gock.New("http://foo").
+			gock.New(urlFoo).
 				Get("/bar").
 				Reply(http.StatusOK).
 				JSON("{}")
@@ -31,9 +31,9 @@ func TestRunSuite(t *testing.T) {
 		hasError: false,
 	}, {
 		name:      "response is not JSON",
-		suiteFile: "testdata/simple-suite.yaml",
+		suiteFile: simpleSuite,
 		prepare: func() {
-			gock.New("http://foo").
+			gock.New(urlFoo).
 				Get("/bar").
 				Reply(http.StatusOK)
 		},
@@ -69,9 +69,9 @@ func TestRunCommand(t *testing.T) {
 		hasErr  bool
 	}{{
 		name: "status code is not match",
-		args: []string{"-p", "testdata/simple-suite.yaml"},
+		args: []string{"-p", simpleSuite},
 		prepare: func() {
-			gock.New("http://foo").Get("/bar")
+			gock.New(urlFoo).Get("/bar")
 		},
 		hasErr: true,
 	}, {
@@ -81,9 +81,9 @@ func TestRunCommand(t *testing.T) {
 		hasErr:  false,
 	}, {
 		name: "normal case",
-		args: []string{"-p", "testdata/simple-suite.yaml"},
+		args: []string{"-p", simpleSuite},
 		prepare: func() {
-			gock.New("http://foo").Get("/bar").Reply(http.StatusOK).JSON("{}")
+			gock.New(urlFoo).Get("/bar").Reply(http.StatusOK).JSON("{}")
 		},
 		hasErr: false,
 	}}
@@ -177,3 +177,6 @@ func TestPreRunE(t *testing.T) {
 		})
 	}
 }
+
+const urlFoo = "http://foo"
+const simpleSuite = "testdata/simple-suite.yaml"

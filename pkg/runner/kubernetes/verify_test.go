@@ -12,7 +12,7 @@ import (
 )
 
 func TestKubernetesValidatorFunc(t *testing.T) {
-	os.Setenv("KUBERNETES_SERVER", "http://foo")
+	os.Setenv("KUBERNETES_SERVER", urlFoo)
 	os.Setenv("KUBERNETES_TOKEN", "token")
 	gock.InterceptClient(kubernetes.GetClient())
 	defer gock.RestoreClient(http.DefaultClient)
@@ -92,44 +92,49 @@ func TestKubernetesValidatorFunc(t *testing.T) {
 	}
 }
 
-func emptyPrepare() {}
+func emptyPrepare() {
+	// only for testing
+}
 
 func preparePod() {
-	gock.New("http://foo").
+	gock.New(urlFoo).
 		Get("/api/v1/namespaces/ns/pods/foo").
-		MatchHeader("Authorization", "Bearer token").
+		MatchHeader("Authorization", defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"pod"}`)
 }
 
 func prepareDeploy() {
-	gock.New("http://foo").
+	gock.New(urlFoo).
 		Get("/apis/apps/v1/namespaces/ns/deployments/foo").
-		MatchHeader("Authorization", "Bearer token").
+		MatchHeader("Authorization", defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"deploy"}`)
 }
 
 func prepareStatefulset() {
-	gock.New("http://foo").
+	gock.New(urlFoo).
 		Get("/apis/apps/v1/namespaces/ns/statefulsets/foo").
-		MatchHeader("Authorization", "Bearer token").
+		MatchHeader("Authorization", defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"statefulset"}`)
 }
 
 func prepareDaemonset() {
-	gock.New("http://foo").
+	gock.New(urlFoo).
 		Get("/apis/apps/v1/namespaces/ns/daemonsets/foo").
-		MatchHeader("Authorization", "Bearer token").
+		MatchHeader("Authorization", defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"daemonset"}`)
 }
 
 func prepareCRDVM() {
-	gock.New("http://foo").
+	gock.New(urlFoo).
 		Get("/apis/bar/v2/namespaces/ns/vms/foo").
-		MatchHeader("Authorization", "Bearer token").
+		MatchHeader("Authorization", defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"vm"}`)
 }
+
+const urlFoo = "http://foo"
+const defaultToken = "Bearer token"

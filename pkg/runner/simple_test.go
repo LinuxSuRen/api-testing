@@ -17,6 +17,10 @@ import (
 )
 
 func TestTestCase(t *testing.T) {
+	fooRequst := atest.Request{
+		API: urlFoo,
+	}
+
 	tests := []struct {
 		name     string
 		execer   fakeruntime.Execer
@@ -32,14 +36,11 @@ func TestTestCase(t *testing.T) {
 			},
 		},
 		execer: fakeruntime.FakeExecer{ExpectError: errors.New("fake")},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
-		},
 	}, {
 		name: "normal, response is map",
 		testCase: &atest.TestCase{
 			Request: atest.Request{
-				API: "http://localhost/foo",
+				API: urlFoo,
 				Header: map[string]string{
 					"key": "value",
 				},
@@ -67,7 +68,7 @@ func TestTestCase(t *testing.T) {
 		},
 		execer: fakeruntime.FakeExecer{},
 		prepare: func() {
-			gock.New("http://localhost").
+			gock.New(urlLocalhost).
 				Get("/foo").
 				MatchHeader("key", "value").
 				Reply(http.StatusOK).
@@ -81,16 +82,14 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "normal, response is slice",
 		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
-			},
+			Request: fooRequst,
 			Expect: atest.Response{
 				StatusCode: http.StatusOK,
 				Body:       `["foo", "bar"]`,
 			},
 		},
 		prepare: func() {
-			gock.New("http://localhost").
+			gock.New(urlLocalhost).
 				Get("/foo").
 				Reply(http.StatusOK).
 				BodyString(`["foo", "bar"]`)
@@ -103,7 +102,7 @@ func TestTestCase(t *testing.T) {
 		name: "normal, response from file",
 		testCase: &atest.TestCase{
 			Request: atest.Request{
-				API:          "http://localhost/foo",
+				API:          urlFoo,
 				Method:       http.MethodPost,
 				BodyFromFile: "testdata/generic_response.json",
 			},
@@ -112,79 +111,56 @@ func TestTestCase(t *testing.T) {
 			},
 		},
 		prepare: func() {
-			gock.New("http://localhost").
+			gock.New(urlLocalhost).
 				Post("/foo").BodyString(genericBody).
 				Reply(http.StatusOK).BodyString("123")
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
 		},
 	}, {
 		name: "response from a not found file",
 		testCase: &atest.TestCase{
 			Request: atest.Request{
-				API:          "http://localhost/foo",
+				API:          urlFoo,
 				Method:       http.MethodPost,
 				BodyFromFile: "testdata/fake.json",
 			},
 		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
-		},
 	}, {
 		name: "bad request",
 		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
-			},
+			Request: fooRequst,
 			Expect: atest.Response{
 				StatusCode: http.StatusOK,
 			},
 		},
 		prepare: func() {
-			gock.New("http://localhost").
+			gock.New(urlLocalhost).
 				Get("/foo").Reply(http.StatusBadRequest)
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
 		},
 	}, {
 		name: "error with request",
 		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
-			},
+			Request: fooRequst,
 		},
 		prepare: func() {
-			gock.New("http://localhost").
+			gock.New(urlLocalhost).
 				Get("/foo").ReplyError(errors.New("error"))
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
 		},
 	}, {
 		name: "not match with body",
 		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
-			},
+			Request: fooRequst,
 			Expect: atest.Response{
 				Body: "bar",
 			},
 		},
 		prepare: func() {
-			gock.New("http://localhost").
+			gock.New(urlLocalhost).
 				Get("/foo").Reply(http.StatusOK).BodyString("foo")
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
 		},
 	}, {
 		name: "not match with header",
 		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
-			},
+			Request: fooRequst,
 			Expect: atest.Response{
 				Header: map[string]string{
 					"foo": "bar",
@@ -192,56 +168,35 @@ func TestTestCase(t *testing.T) {
 			},
 		},
 		prepare: func() {
-			gock.New("http://localhost").
+			gock.New(urlLocalhost).
 				Get("/foo").Reply(http.StatusOK).SetHeader("foo", "value")
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
 		},
 	}, {
 		name: "not found from fields",
 		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
-			},
+			Request: fooRequst,
 			Expect: atest.Response{
 				BodyFieldsExpect: map[string]interface{}{
 					"foo": "bar",
 				},
 			},
 		},
-		prepare: func() {
-			gock.New("http://localhost").
-				Get("/foo").Reply(http.StatusOK).BodyString(genericBody)
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
-		},
+		prepare: prepareForFoo,
 	}, {
 		name: "body filed not match",
 		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
-			},
+			Request: fooRequst,
 			Expect: atest.Response{
 				BodyFieldsExpect: map[string]interface{}{
 					"name": "bar",
 				},
 			},
 		},
-		prepare: func() {
-			gock.New("http://localhost").
-				Get("/foo").Reply(http.StatusOK).BodyString(genericBody)
-		},
-		verify: func(t *testing.T, output interface{}, err error) {
-			assert.NotNil(t, err)
-		},
+		prepare: prepareForFoo,
 	}, {
 		name: "invalid filed finding",
 		testCase: &atest.TestCase{
-			Request: atest.Request{
-				API: "http://localhost/foo",
-			},
+			Request: fooRequst,
 			Expect: atest.Response{
 				BodyFieldsExpect: map[string]interface{}{
 					"items[1]": "bar",
@@ -249,7 +204,7 @@ func TestTestCase(t *testing.T) {
 			},
 		},
 		prepare: func() {
-			gock.New("http://localhost").
+			gock.New(urlLocalhost).
 				Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
 		},
 		verify: func(t *testing.T, output interface{}, err error) {
@@ -261,7 +216,7 @@ func TestTestCase(t *testing.T) {
 		// 	name: "verify failed",
 		// 	testCase: &atest.TestCase{
 		// 		Request: atest.Request{
-		// 			API: "http://localhost/foo",
+		// 			API: urlFoo,
 		// 		},
 		// 		Expect: atest.Response{
 		// 			Verify: []string{
@@ -270,7 +225,7 @@ func TestTestCase(t *testing.T) {
 		// 		},
 		// 	},
 		// 	prepare: func() {
-		// 		gock.New("http://localhost").
+		// 		gock.New(urlLocalhost).
 		// 			Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
 		// 	},
 		// 	verify: func(t *testing.T, output interface{}, err error) {
@@ -282,9 +237,7 @@ func TestTestCase(t *testing.T) {
 		{
 			name: "failed to compile",
 			testCase: &atest.TestCase{
-				Request: atest.Request{
-					API: "http://localhost/foo",
-				},
+				Request: fooRequst,
 				Expect: atest.Response{
 					Verify: []string{
 						`println("12")`,
@@ -292,7 +245,7 @@ func TestTestCase(t *testing.T) {
 				},
 			},
 			prepare: func() {
-				gock.New("http://localhost").
+				gock.New(urlLocalhost).
 					Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
 			},
 			verify: func(t *testing.T, output interface{}, err error) {
@@ -302,9 +255,7 @@ func TestTestCase(t *testing.T) {
 		}, {
 			name: "failed to compile",
 			testCase: &atest.TestCase{
-				Request: atest.Request{
-					API: "http://localhost/foo",
-				},
+				Request: fooRequst,
 				Expect: atest.Response{
 					Verify: []string{
 						`1 + 1`,
@@ -312,7 +263,7 @@ func TestTestCase(t *testing.T) {
 				},
 			},
 			prepare: func() {
-				gock.New("http://localhost").
+				gock.New(urlLocalhost).
 					Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
 			},
 			verify: func(t *testing.T, output interface{}, err error) {
@@ -346,10 +297,10 @@ func TestTestCase(t *testing.T) {
 			name: "multipart form request",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:    "http://localhost/foo",
+					API:    urlFoo,
 					Method: http.MethodPost,
 					Header: map[string]string{
-						"Content-Type": "multipart/form-data",
+						contentType: "multipart/form-data",
 					},
 					Form: map[string]string{
 						"key": "value",
@@ -357,20 +308,18 @@ func TestTestCase(t *testing.T) {
 				},
 			},
 			prepare: func() {
-				gock.New("http://localhost").
+				gock.New(urlLocalhost).
 					Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
 			},
-			verify: func(t *testing.T, output interface{}, err error) {
-				assert.Nil(t, err)
-			},
+			verify: noError,
 		}, {
 			name: "normal form request",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:    "http://localhost/foo",
+					API:    urlFoo,
 					Method: http.MethodPost,
 					Header: map[string]string{
-						"Content-Type": "application/x-www-form-urlencoded",
+						contentType: "application/x-www-form-urlencoded",
 					},
 					Form: map[string]string{
 						"key": "value",
@@ -378,18 +327,19 @@ func TestTestCase(t *testing.T) {
 				},
 			},
 			prepare: func() {
-				gock.New("http://localhost").
+				gock.New(urlLocalhost).
 					Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
 			},
-			verify: func(t *testing.T, output interface{}, err error) {
-				assert.Nil(t, err)
-			},
+			verify: noError,
 		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
 			if tt.prepare != nil {
 				tt.prepare()
+			}
+			if tt.verify == nil {
+				tt.verify = hasError
 			}
 			runner := NewSimpleTestCaseRunner().WithOutputWriter(os.Stdout)
 			if tt.execer != nil {
@@ -465,5 +415,21 @@ const defaultSchemaForTest = `{"properties": {
 	"type":"object"
 	}`
 
+func hasError(t *testing.T, output interface{}, err error) {
+	assert.NotNil(t, err)
+}
+
+func noError(t *testing.T, output interface{}, err error) {
+	assert.Nil(t, err)
+}
+
+func prepareForFoo() {
+	gock.New(urlLocalhost).
+		Get("/foo").Reply(http.StatusOK).BodyString(genericBody)
+}
+
 //go:embed testdata/generic_response.json
 var genericBody string
+
+const urlFoo = "http://localhost/foo"
+const urlLocalhost = "http://localhost"

@@ -159,6 +159,13 @@ func TestUniqueSlice(t *testing.T) {
 	assert.Equal(t, []string{"a", "b"}, uniqueSlice.GetAll())
 }
 
+func TestWithDefaultValue(t *testing.T) {
+	assert.Equal(t, withDefaultValue("a", "b"), "a")
+	assert.Equal(t, withDefaultValue("", "b"), "b")
+	assert.Equal(t, withDefaultValue(nil, map[string]string{"key": "val"}), map[string]string{"key": "val"})
+	assert.Equal(t, withDefaultValue(map[string]string{"key": "val"}, map[string]string{"key": "value"}), map[string]string{"key": "val"})
+}
+
 //go:embed testdata/simple.yaml
 var simpleSuite string
 

@@ -24,16 +24,19 @@ func NewRemoteServer() RunnerServer {
 	return &server{}
 }
 
+func withDefaultValue(old, defVal any) any {
+	if old == "" || old == nil {
+		old = defVal
+	}
+	return old
+}
+
 // Run start to run the test task
 func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, err error) {
-	if task.Level == "" {
-		task.Level = "info"
-	}
+	task.Level = withDefaultValue(task.Level, "info").(string)
+	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
 
 	var suite *testing.TestSuite
-	if task.Env == nil {
-		task.Env = map[string]string{}
-	}
 
 	// TODO may not safe in multiple threads
 	oldEnv := map[string]string{}

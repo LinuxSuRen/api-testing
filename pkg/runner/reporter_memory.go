@@ -34,6 +34,17 @@ func (r *memoryTestReporter) GetAllRecords() []*ReportRecord {
 	return r.records
 }
 
+func getMaxAndMin(max, min, duration time.Duration) (time.Duration, time.Duration) {
+	if max < duration {
+		max = duration
+	}
+
+	if min > duration {
+		min = duration
+	}
+	return max, min
+}
+
 // ExportAllReportResults exports all the report results
 func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice, err error) {
 	resultWithTotal := map[string]*ReportResultWithTotal{}
@@ -42,13 +53,7 @@ func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice,
 		duration := record.Duration()
 
 		if item, ok := resultWithTotal[api]; ok {
-			if item.Max < duration {
-				item.Max = duration
-			}
-
-			if item.Min > duration {
-				item.Min = duration
-			}
+			item.Max, item.Min = getMaxAndMin(item.Max, item.Min, duration)
 			item.Error += record.ErrorCount()
 			item.Total += duration
 			item.Count += 1
