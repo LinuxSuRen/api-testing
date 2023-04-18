@@ -9,7 +9,9 @@ func NewDiscardTestReporter() TestReporter {
 }
 
 // PutRecord does nothing
-func (r *discardTestReporter) PutRecord(*ReportRecord) {}
+func (r *discardTestReporter) PutRecord(*ReportRecord) {
+	// Do nothing which is the design purpose
+}
 
 // GetAllRecords does nothing
 func (r *discardTestReporter) GetAllRecords() []*ReportRecord {

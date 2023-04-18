@@ -9,7 +9,7 @@ import (
 	exec "github.com/linuxsuren/go-fake-runtime"
 )
 
-func Test_setRelativeDir(t *testing.T) {
+func TestSetRelativeDir(t *testing.T) {
 	type args struct {
 		configFile string
 		testcase   *atesting.TestCase

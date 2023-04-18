@@ -10,6 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const urlFoo = "http://foo"
+const urlBar = "http://bar"
+const urlFake = "http://fake"
+
 func TestExportAllReportResults(t *testing.T) {
 	now := time.Now()
 
@@ -24,28 +28,28 @@ func TestExportAllReportResults(t *testing.T) {
 	}, {
 		name: "normal",
 		records: []*runner.ReportRecord{{
-			API:       "http://foo",
+			API:       urlFoo,
 			Method:    http.MethodGet,
 			BeginTime: now,
 			EndTime:   now.Add(time.Second * 3),
 		}, {
-			API:       "http://foo",
+			API:       urlFoo,
 			Method:    http.MethodGet,
 			BeginTime: now,
 			EndTime:   now.Add(time.Second * 4),
 			Error:     errors.New("fake"),
 		}, {
-			API:       "http://foo",
+			API:       urlFoo,
 			Method:    http.MethodGet,
 			BeginTime: now,
 			EndTime:   now.Add(time.Second * 2),
 		}, {
-			API:       "http://bar",
+			API:       urlBar,
 			Method:    http.MethodGet,
 			BeginTime: now,
 			EndTime:   now.Add(time.Second),
 		}, {
-			API:       "http://fake",
+			API:       urlFake,
 			Method:    http.MethodGet,
 			BeginTime: now,
 			EndTime:   now.Add(time.Second * 5),

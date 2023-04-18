@@ -217,7 +217,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	}
 
 	if len(testcase.Request.Form) > 0 {
-		if testcase.Request.Header["Content-Type"] == "multipart/form-data" {
+		if testcase.Request.Header[contentType] == "multipart/form-data" {
 			multiBody := &bytes.Buffer{}
 			writer := multipart.NewWriter(multiBody)
 			for key, val := range testcase.Request.Form {
@@ -226,8 +226,8 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 			_ = writer.Close()
 			requestBody = multiBody
-			testcase.Request.Header["Content-Type"] = writer.FormDataContentType()
-		} else if testcase.Request.Header["Content-Type"] == "application/x-www-form-urlencoded" {
+			testcase.Request.Header[contentType] = writer.FormDataContentType()
+		} else if testcase.Request.Header[contentType] == "application/x-www-form-urlencoded" {
 			data := url.Values{}
 			for key, val := range testcase.Request.Form {
 				data.Set(key, val)
@@ -436,3 +436,5 @@ func jsonSchemaValidation(schema string, body []byte) (err error) {
 	}
 	return
 }
+
+const contentType = "Content-Type"

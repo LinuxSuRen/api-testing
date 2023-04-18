@@ -1,7 +1,15 @@
-FROM golang:1.18 as builder
+FROM golang:1.18 AS builder
 
 WORKDIR /workspace
-COPY . .
+COPY cmd/ cmd/
+COPY pkg/ pkg/
+COPY sample/ sample/
+COPY go.mod go.mod
+COPY go.sum go.sum
+COPY main.go main.go
+COPY README.md README.md
+COPY LICENSE LICENSE
+
 RUN go mod download
 RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest .
 
@@ -19,5 +27,7 @@ LABEL "maintainer"="Rick <linuxsuren@gmail.com>"
 LABEL "Name"="API testing"
 
 COPY --from=builder /workspace/atest /usr/local/bin/atest
+COPY --from=builder /workspace/LICENSE /LICENSE
+COPY --from=builder /workspace/README.md /README.md
 
 CMD ["atest", "server"]
