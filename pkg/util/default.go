@@ -19,3 +19,10 @@ func MakeSureNotNil[T any](inter T) T {
 	}
 	return inter
 }
+
+// ContentType is the HTTP header key
+const (
+	ContentType       = "Content-Type"
+	MultiPartFormData = "multipart/form-data"
+	Form              = "application/x-www-form-urlencoded"
+)

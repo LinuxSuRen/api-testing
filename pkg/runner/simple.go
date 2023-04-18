@@ -1,16 +1,12 @@
 package runner
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
-	"net/url"
-	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -202,38 +198,12 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	}
 
 	var requestBody io.Reader
-	if testcase.Request.Body != "" {
-		requestBody = bytes.NewBufferString(testcase.Request.Body)
-	} else if testcase.Request.BodyFromFile != "" {
-		var data []byte
-		if data, err = os.ReadFile(testcase.Request.BodyFromFile); err != nil {
-			return
-		}
-		requestBody = bytes.NewBufferString(string(data))
+	if requestBody, err = testcase.Request.GetBody(); err != nil {
+		return
 	}
 
 	if err = testcase.Request.Render(dataContext); err != nil {
 		return
-	}
-
-	if len(testcase.Request.Form) > 0 {
-		if testcase.Request.Header[contentType] == "multipart/form-data" {
-			multiBody := &bytes.Buffer{}
-			writer := multipart.NewWriter(multiBody)
-			for key, val := range testcase.Request.Form {
-				writer.WriteField(key, val)
-			}
-
-			_ = writer.Close()
-			requestBody = multiBody
-			testcase.Request.Header[contentType] = writer.FormDataContentType()
-		} else if testcase.Request.Header[contentType] == "application/x-www-form-urlencoded" {
-			data := url.Values{}
-			for key, val := range testcase.Request.Form {
-				data.Set(key, val)
-			}
-			requestBody = strings.NewReader(data.Encode())
-		}
 	}
 
 	var request *http.Request
@@ -436,5 +406,3 @@ func jsonSchemaValidation(schema string, body []byte) (err error) {
 	}
 	return
 }
-
-const contentType = "Content-Type"
