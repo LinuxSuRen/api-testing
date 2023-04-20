@@ -114,13 +114,13 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// print the report
-	if results, reportErr := o.reporter.ExportAllReportResults(); reportErr == nil {
-		if reportErr = o.reportWriter.Output(results); reportErr != nil {
-			cmd.Println("failed to Output all reports", reportErr)
-		}
-	} else {
-		cmd.Println("failed to export all reports", reportErr)
+	var reportErr error
+	var results runner.ReportResultSlice
+	if results, reportErr = o.reporter.ExportAllReportResults(); reportErr == nil {
+		outputErr := o.reportWriter.Output(results)
+		println(cmd, outputErr, "failed to Output all reports", outputErr)
 	}
+	println(cmd, reportErr, "failed to export all reports", reportErr)
 	return
 }
 

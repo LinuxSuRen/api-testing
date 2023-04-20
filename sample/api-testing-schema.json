@@ -76,9 +76,6 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "statusCode"
-            ],
             "title": "Expect"
         },
         "Request": {

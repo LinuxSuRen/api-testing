@@ -30,6 +30,9 @@ func TestParse(t *testing.T) {
 			},
 		}, suite.Items[0])
 	}
+
+	_, err = Parse("testdata/invalid-testcase.yaml")
+	assert.NotNil(t, err)
 }
 
 func TestRequestRender(t *testing.T) {

@@ -35,7 +35,7 @@ type Request struct {
 
 // Response is the expected response
 type Response struct {
-	StatusCode       int                    `yaml:"statusCode" json:"bodyFromFile,omitempty"`
+	StatusCode       int                    `yaml:"statusCode" json:"statusCode,omitempty"`
 	Body             string                 `yaml:"body" json:"body,omitempty"`
 	Header           map[string]string      `yaml:"header" json:"header,omitempty"`
 	BodyFieldsExpect map[string]interface{} `yaml:"bodyFieldsExpect" json:"bodyFieldsExpect,omitempty"`
