@@ -47,7 +47,7 @@ Use "atest [command] --help" for more information about a command.
 
 below is an example of the usage, and you could see the report as well:
 
-`atest run -p sample/testsuite-gitlab.yaml --duration 1m --thread 3  --report m`
+`atest run -p sample/testsuite-gitlab.yaml --duration 1m --thread 3  --report md`
 
 | API | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
