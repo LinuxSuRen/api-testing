@@ -34,6 +34,7 @@ type runOption struct {
 	report             string
 	reportIgnore       bool
 	level              string
+	caseItems          []string
 }
 
 func newDefaultRunOption() *runOption {
@@ -71,6 +72,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
+	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
 	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
 	flags.Int32VarP(&opt.qps, "qps", "", 5, "QPS")
 	flags.Int32VarP(&opt.burst, "burst", "", 5, "burst")
@@ -91,6 +93,8 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	default:
 		err = fmt.Errorf("not supported report type: '%s'", o.report)
 	}
+
+	o.caseItems = args
 	return
 }
 
@@ -100,7 +104,7 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 	o.context = cmd.Context()
 	o.limiter = limit.NewDefaultRateLimiter(o.qps, o.burst)
 	defer func() {
-		cmd.Printf("consume: %s\n", time.Now().Sub(o.startTime).String())
+		cmd.Printf("consume: %s\n", time.Since(o.startTime).String())
 		o.limiter.Stop()
 	}()
 
@@ -111,6 +115,10 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 				break
 			}
 		}
+	}
+
+	if o.reportIgnore {
+		return
 	}
 
 	// print the report
@@ -194,6 +202,10 @@ func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, c
 	}
 
 	for _, testCase := range testSuite.Items {
+		if !testCase.InScope(o.caseItems) {
+			continue
+		}
+
 		// reuse the API prefix
 		if strings.HasPrefix(testCase.Request.API, "/") {
 			testCase.Request.API = fmt.Sprintf("%s%s", testSuite.API, testCase.Request.API)
@@ -204,11 +216,6 @@ func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, c
 		case <-stopSingal:
 			return
 		default:
-			// reuse the API prefix
-			if strings.HasPrefix(testCase.Request.API, "/") {
-				testCase.Request.API = fmt.Sprintf("%s%s", testSuite.API, testCase.Request.API)
-			}
-
 			setRelativeDir(suite, &testCase)
 			o.limiter.Accept()
 

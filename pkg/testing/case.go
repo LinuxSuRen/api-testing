@@ -17,6 +17,20 @@ type TestCase struct {
 	Clean   Clean    `yaml:"clean" json:"-"`
 }
 
+// InScope returns true if the test case is in scope with the given items.
+// Returns true if the items is empty.
+func (c *TestCase) InScope(items []string) bool {
+	if len(items) == 0 {
+		return true
+	}
+	for _, item := range items {
+		if item == c.Name {
+			return true
+		}
+	}
+	return false
+}
+
 // Prepare does the prepare work
 type Prepare struct {
 	Kubernetes []string `yaml:"kubernetes"`

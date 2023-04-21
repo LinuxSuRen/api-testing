@@ -1,0 +1,6 @@
+name: Simple
+api: "{{.api}"
+item:
+- requests:
+    api: /bar
+    method: POSt

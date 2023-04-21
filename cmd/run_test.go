@@ -63,6 +63,10 @@ func TestRunSuite(t *testing.T) {
 }
 
 func TestRunCommand(t *testing.T) {
+	fooPrepare := func() {
+		gock.New(urlFoo).Get("/bar").Reply(http.StatusOK).JSON("{}")
+	}
+
 	tests := []struct {
 		name    string
 		args    []string
@@ -76,16 +80,27 @@ func TestRunCommand(t *testing.T) {
 		},
 		hasErr: true,
 	}, {
-		name:   "file not found",
-		args:   []string{"--pattern", "fake"},
-		hasErr: false,
+		name: "file not found",
+		args: []string{"--pattern", "fake"},
 	}, {
-		name: "normal case",
-		args: []string{"-p", simpleSuite},
-		prepare: func() {
-			gock.New(urlFoo).Get("/bar").Reply(http.StatusOK).JSON("{}")
-		},
-		hasErr: false,
+		name:    "normal case",
+		args:    []string{"-p", simpleSuite},
+		prepare: fooPrepare,
+	}, {
+		name:    "report ignore",
+		args:    []string{"-p", simpleSuite, "--report-ignore"},
+		prepare: fooPrepare,
+	}, {
+		name: "specify a test case",
+		args: []string{"-p", simpleSuite, "fake"},
+	}, {
+		name:   "invalid api",
+		args:   []string{"-p", "testdata/invalid-api.yaml"},
+		hasErr: true,
+	}, {
+		name:   "invalid schema",
+		args:   []string{"-p", "testdata/invalid-schema.yaml"},
+		hasErr: true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
