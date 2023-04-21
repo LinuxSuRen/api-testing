@@ -1,12 +1,13 @@
 #!api-testing
 name: Kubernetes
-api: https://192.168.123.121:6443
+api: |
+  {{default "https://172.11.0.18:6443" (env "SERVER")}}
 items:
 - name: pods
   request:
     api: /api/v1/namespaces/kube-system/pods
     header:
-      Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Il9zTmhqWDI0aUZadURCWkpCeUhuLUl2S1pYMjczZWJVdFh5M0lwVzkwTzgifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJjbHVzdGVyLWFkbWluLXRva2VuLWg5NTZjIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImNsdXN0ZXItYWRtaW4iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiIyZGQ0NzcyNy0wNDEyLTQyYzYtOTg0NC05OWFiM2JlMDkzMDEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06Y2x1c3Rlci1hZG1pbiJ9.fp7kcr2Tgg7O01C0rCs1YEUGynBHKflKnN0K94hTAtelP9CDwTRMj2Y3rHXrvVisjPMXQ_qJtUb9cLL_QXtihgWIQkGZJYD6uQeatWPqRfAE26BZA-bc3Y4RvuTjgWkwR3PNhfoCDiWx-Y0OkLONG90n40f-1Bq_B5zsf_yVHukeUln8UCL0o8Bi7k2TQXycUOToI_BRC1-q7bkME8-WUFMdbbjKkJzW5FHQg1Y4OL2Dd5_Bv24sT6-P5k8DV8btYYUbvpeYMIP_Vzg8T5N9G4TULPGb41KJ1dm66JNNFFjGB7bqOdC7RR32xrB2mNYodP8tDSyeR_as1BxyQoXkZg
+      Authorization: Bearer {{env "K8S_TOKEN"}}
   expect:
     verify:
     - data.kind == "PodList"
@@ -17,3 +18,73 @@ items:
     - k8s("deployments", "kube-system", "coredns").ExpectField("kube-dns", "metadata", "labels", "k8s-app")
     - k8s("daemonsets", "kube-system", "kube-ovn-cni").Exist()
     - k8s({"kind":"virtualmachines","group":"kubevirt.io"}, "vm-test", "vm-win10-dkkhl").Exist()
+- name: create-configmap
+  request:
+    api: /api/v1/namespaces/default/configmaps
+    header:
+      Authorization: Bearer {{env "K8S_TOKEN"}}
+    method: POST
+    body: |
+      {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "config",
+          "namespace": "default"
+        },
+        "data": {
+          "key": "value"
+        }
+      }
+  expect:
+    statusCode: 201
+- name: update-configmap
+  request:
+    api: /api/v1/namespaces/default/configmaps/config
+    header:
+      Authorization: Bearer {{env "K8S_TOKEN"}}
+    method: PUT
+    body: |
+      {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "config",
+          "namespace": "default"
+        },
+        "data": {
+          "key": "new value"
+        }
+      }
+  expect:
+    statusCode: 200
+- name: get-configmap
+  request:
+    api: /api/v1/namespaces/default/configmaps/config
+    header:
+      Authorization: Bearer {{env "K8S_TOKEN"}}
+    method: PUT
+    body: |
+      {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "config",
+          "namespace": "default"
+        },
+        "data": {
+          "key": "new value"
+        }
+      }
+  expect:
+    statusCode: 200
+    bodyFieldsExpect:
+      "data/key": "new value"
+- name: delete-configmap
+  request:
+    api: /api/v1/namespaces/default/configmaps/config
+    header:
+      Authorization: Bearer {{env "K8S_TOKEN"}}
+    method: DELETE
+  expect:
+    statusCode: 200
