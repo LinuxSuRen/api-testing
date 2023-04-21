@@ -8,6 +8,7 @@ import (
 
 	"github.com/h2non/gock"
 	"github.com/linuxsuren/api-testing/pkg/limit"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -41,14 +42,12 @@ func TestRunSuite(t *testing.T) {
 	}, {
 		name:      "not found file",
 		suiteFile: "testdata/fake.yaml",
-		prepare:   func() {},
 		hasError:  true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
-
-			tt.prepare()
+			util.MakeSureNotNil(tt.prepare)()
 			ctx := getDefaultContext()
 			opt := newDiskCardRunOption()
 			opt.requestTimeout = 30 * time.Second
@@ -75,10 +74,9 @@ func TestRunCommand(t *testing.T) {
 		},
 		hasErr: true,
 	}, {
-		name:    "file not found",
-		args:    []string{"--pattern", "fake"},
-		prepare: func() {},
-		hasErr:  false,
+		name:   "file not found",
+		args:   []string{"--pattern", "fake"},
+		hasErr: false,
 	}, {
 		name: "normal case",
 		args: []string{"-p", simpleSuite},
@@ -90,8 +88,7 @@ func TestRunCommand(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
-			tt.prepare()
-
+			util.MakeSureNotNil(tt.prepare)()
 			root := &cobra.Command{Use: "root"}
 			root.AddCommand(createRunCommand())
 

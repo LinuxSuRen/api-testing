@@ -1,11 +1,13 @@
 package testing
 
 import (
+	"io"
 	"net/http"
 	"testing"
 
 	_ "embed"
 
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -210,6 +212,65 @@ func TestTestCase(t *testing.T) {
 			StatusCode: http.StatusOK,
 		},
 	}, testCase)
+}
+
+func TestGetBody(t *testing.T) {
+	defaultBody := "fake body"
+
+	tests := []struct {
+		name        string
+		req         *Request
+		expectBody  string
+		containBody string
+		expectErr   bool
+	}{{
+		name:       "normal body",
+		req:        &Request{Body: defaultBody},
+		expectBody: defaultBody,
+	}, {
+		name:       "body from file",
+		req:        &Request{BodyFromFile: "testdata/testcase.yaml"},
+		expectBody: testCaseContent,
+	}, {
+		name: "multipart form data",
+		req: &Request{
+			Header: map[string]string{
+				util.ContentType: util.MultiPartFormData,
+			},
+			Form: map[string]string{
+				"key": "value",
+			},
+		},
+		containBody: "name=\"key\"\r\n\r\nvalue\r\n",
+	}, {
+		name: "normal form",
+		req: &Request{
+			Header: map[string]string{
+				util.ContentType: util.Form,
+			},
+			Form: map[string]string{
+				"name": "linuxsuren",
+			},
+		},
+		expectBody: "name=linuxsuren",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			reader, err := tt.req.GetBody()
+			if tt.expectErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.NotNil(t, reader)
+				data, err := io.ReadAll(reader)
+				assert.Nil(t, err)
+				if tt.expectBody != "" {
+					assert.Equal(t, tt.expectBody, string(data))
+				} else {
+					assert.Contains(t, string(data), tt.containBody)
+				}
+			}
+		})
+	}
 }
 
 //go:embed testdata/testcase.yaml

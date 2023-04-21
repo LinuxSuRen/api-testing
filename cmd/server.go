@@ -71,4 +71,5 @@ func (s *fakeGRPCServer) Serve(net.Listener) error {
 
 // RegisterService is a fake method
 func (s *fakeGRPCServer) RegisterService(desc *grpc.ServiceDesc, impl interface{}) {
+	// Do nothing due to this is a fake method
 }

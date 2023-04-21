@@ -12,6 +12,7 @@ import (
 
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
 )
@@ -300,7 +301,7 @@ func TestTestCase(t *testing.T) {
 					API:    urlFoo,
 					Method: http.MethodPost,
 					Header: map[string]string{
-						contentType: "multipart/form-data",
+						util.ContentType: "multipart/form-data",
 					},
 					Form: map[string]string{
 						"key": "value",
@@ -319,7 +320,7 @@ func TestTestCase(t *testing.T) {
 					API:    urlFoo,
 					Method: http.MethodPost,
 					Header: map[string]string{
-						contentType: "application/x-www-form-urlencoded",
+						util.ContentType: "application/x-www-form-urlencoded",
 					},
 					Form: map[string]string{
 						"key": "value",

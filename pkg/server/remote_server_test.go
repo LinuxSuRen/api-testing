@@ -19,22 +19,22 @@ func TestRemoteServer(t *testing.T) {
 	})
 	assert.NotNil(t, err)
 
-	gock.New("http://foo").Get("/").Reply(http.StatusOK).JSON(&server)
-	gock.New("http://foo").Get("/").Reply(http.StatusOK).JSON(&server)
+	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
+	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
 	_, err = server.Run(context.TODO(), &TestTask{
 		Kind: "suite",
 		Data: simpleSuite,
 	})
 	assert.Nil(t, err)
 
-	gock.New("http://bar").Get("/").Reply(http.StatusOK).JSON(&server)
+	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
 	_, err = server.Run(context.TODO(), &TestTask{
 		Kind: "testcase",
 		Data: simpleTestCase,
 	})
 	assert.Nil(t, err)
 
-	gock.New("http://foo").Get("/").Reply(http.StatusOK).JSON(&server)
+	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
 	_, err = server.Run(context.TODO(), &TestTask{
 		Kind:     "testcaseInSuite",
 		Data:     simpleSuite,
@@ -42,7 +42,7 @@ func TestRemoteServer(t *testing.T) {
 	})
 	assert.Nil(t, err)
 
-	gock.New("http://foo").Get("/").Reply(http.StatusOK).JSON(&server)
+	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
 	_, err = server.Run(context.TODO(), &TestTask{
 		Kind:     "testcaseInSuite",
 		Data:     simpleSuite,
@@ -171,3 +171,5 @@ var simpleSuite string
 
 //go:embed testdata/simple_testcase.yaml
 var simpleTestCase string
+
+const urlFoo = "http://foo"

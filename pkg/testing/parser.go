@@ -1,12 +1,17 @@
 package testing
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
 	"github.com/linuxsuren/api-testing/pkg/render"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"gopkg.in/yaml.v2"
 )
 
@@ -80,6 +85,37 @@ func (r *Request) Render(ctx interface{}) (err error) {
 
 	// setting default values
 	r.Method = emptyThenDefault(r.Method, http.MethodGet)
+	return
+}
+
+// GetBody returns the request body
+func (r *Request) GetBody() (reader io.Reader, err error) {
+	if len(r.Form) > 0 {
+		if r.Header[util.ContentType] == util.MultiPartFormData {
+			multiBody := &bytes.Buffer{}
+			writer := multipart.NewWriter(multiBody)
+			for key, val := range r.Form {
+				writer.WriteField(key, val)
+			}
+
+			_ = writer.Close()
+			reader = multiBody
+			r.Header[util.ContentType] = writer.FormDataContentType()
+		} else if r.Header[util.ContentType] == util.Form {
+			data := url.Values{}
+			for key, val := range r.Form {
+				data.Set(key, val)
+			}
+			reader = strings.NewReader(data.Encode())
+		}
+	} else if r.Body != "" {
+		reader = bytes.NewBufferString(r.Body)
+	} else if r.BodyFromFile != "" {
+		var data []byte
+		if data, err = os.ReadFile(r.BodyFromFile); err == nil {
+			reader = bytes.NewBufferString(string(data))
+		}
+	}
 	return
 }
 
