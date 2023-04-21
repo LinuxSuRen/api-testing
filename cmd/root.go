@@ -22,3 +22,13 @@ func NewRootCmd(execer fakeruntime.Execer, gRPCServer gRPCServer) (c *cobra.Comm
 		createServiceCommand(execer))
 	return
 }
+
+type printer interface {
+	Println(i ...interface{})
+}
+
+func println(printer printer, err error, i ...interface{}) {
+	if err != nil {
+		printer.Println(i...)
+	}
+}

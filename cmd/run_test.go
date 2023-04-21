@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"testing"
 	"time"
@@ -173,6 +175,18 @@ func TestPreRunE(t *testing.T) {
 			tt.verify(t, tt.opt, err)
 		})
 	}
+}
+
+func TestPrinter(t *testing.T) {
+	buf := new(bytes.Buffer)
+	c := &cobra.Command{}
+	c.SetOutput(buf)
+
+	println(c, nil, "foo")
+	assert.Empty(t, buf.String())
+
+	println(c, errors.New("bar"), "foo")
+	assert.Equal(t, "foo\n", buf.String())
 }
 
 const urlFoo = "http://foo"

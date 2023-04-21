@@ -10,9 +10,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ghodss/yaml"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/util"
-	"gopkg.in/yaml.v2"
+	"github.com/linuxsuren/api-testing/sample"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 // Parse parses a file and returns the test suite
@@ -20,6 +22,23 @@ func Parse(configFile string) (testSuite *TestSuite, err error) {
 	var data []byte
 	if data, err = os.ReadFile(configFile); err == nil {
 		testSuite, err = ParseFromData(data)
+	}
+
+	// schema validation
+	if err == nil {
+		// convert YAML to JSON
+		var jsonData []byte
+		if jsonData, err = yaml.YAMLToJSON(data); err == nil {
+			schemaLoader := gojsonschema.NewStringLoader(sample.Schema)
+			documentLoader := gojsonschema.NewBytesLoader(jsonData)
+
+			var result *gojsonschema.Result
+			if result, err = gojsonschema.Validate(schemaLoader, documentLoader); err == nil {
+				if !result.Valid() {
+					err = fmt.Errorf("%v", result.Errors())
+				}
+			}
+		}
 	}
 	return
 }
