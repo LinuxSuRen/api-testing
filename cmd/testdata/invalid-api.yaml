@@ -1,0 +1,6 @@
+name: Simple
+api: "{{.api}"
+items:
+- request:
+    api: /bar
+  name: bar
