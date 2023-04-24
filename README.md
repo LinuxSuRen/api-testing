@@ -63,6 +63,14 @@ The following fields are templated with [sprig](http://masterminds.github.io/spr
 *   Request Body
 *   Request Header
 
+### Functions
+
+You could use all the common functions which comes from [sprig](http://masterminds.github.io/sprig/). Besides some specific functions are available:
+
+| Name | Usage |
+|---|---|
+| `randomKubernetesName` | `{{randomKubernetesName}}` to generate Kubernetes resource name randomly, the name will have 8  chars |
+
 ## Verify against Kubernetes
 
 It could verify any kinds of Kubernetes resources. Please set the environment variables before using it:

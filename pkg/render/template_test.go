@@ -12,6 +12,7 @@ func TestRender(t *testing.T) {
 		text   string
 		ctx    interface{}
 		expect string
+		verify func(*testing.T, string)
 	}{{
 		name:   "default",
 		text:   `{{default "hello" .Bar}}`,
@@ -22,12 +23,23 @@ func TestRender(t *testing.T) {
 		text:   `{{trim "   hello    "}}`,
 		ctx:    "",
 		expect: "hello",
+	}, {
+		name: "randomKubernetesName",
+		text: `{{randomKubernetesName}}`,
+		verify: func(t *testing.T, s string) {
+			assert.Equal(t, 8, len(s))
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := Render(tt.name, tt.text, tt.ctx)
 			assert.Nil(t, err)
-			assert.Equal(t, tt.expect, result)
+			if tt.expect != "" {
+				assert.Equal(t, tt.expect, result)
+			}
+			if tt.verify != nil {
+				tt.verify(t, result)
+			}
 		})
 	}
 }

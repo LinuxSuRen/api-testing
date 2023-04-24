@@ -21,6 +21,17 @@ func TestTestCase(t *testing.T) {
 	fooRequst := atest.Request{
 		API: urlFoo,
 	}
+	defaultForm := map[string]string{
+		"key": "value",
+	}
+	defaultPrepare := func() {
+		gock.New(urlLocalhost).
+			Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
+	}
+	defaultPostPrepare := func() {
+		gock.New(urlLocalhost).
+			Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
+	}
 
 	tests := []struct {
 		name     string
@@ -41,11 +52,9 @@ func TestTestCase(t *testing.T) {
 		name: "normal, response is map",
 		testCase: &atest.TestCase{
 			Request: atest.Request{
-				API: urlFoo,
-				Header: map[string]string{
-					"key": "value",
-				},
-				Body: `{"foo":"bar"}`,
+				API:    urlFoo,
+				Header: defaultForm,
+				Body:   `{"foo":"bar"}`,
 			},
 			Expect: atest.Response{
 				StatusCode: http.StatusOK,
@@ -204,10 +213,7 @@ func TestTestCase(t *testing.T) {
 				},
 			},
 		},
-		prepare: func() {
-			gock.New(urlLocalhost).
-				Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-		},
+		prepare: defaultPrepare,
 		verify: func(t *testing.T, output interface{}, err error) {
 			assert.NotNil(t, err)
 			assert.Contains(t, err.Error(), "failed to get field")
@@ -225,10 +231,7 @@ func TestTestCase(t *testing.T) {
 		// 			},
 		// 		},
 		// 	},
-		// 	prepare: func() {
-		// 		gock.New(urlLocalhost).
-		// 			Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-		// 	},
+		// 	prepare: defaultPrepare,
 		// 	verify: func(t *testing.T, output interface{}, err error) {
 		// 		if assert.NotNil(t, err) {
 		// 			assert.Contains(t, err.Error(), "failed to verify")
@@ -245,10 +248,7 @@ func TestTestCase(t *testing.T) {
 					},
 				},
 			},
-			prepare: func() {
-				gock.New(urlLocalhost).
-					Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-			},
+			prepare: defaultPrepare,
 			verify: func(t *testing.T, output interface{}, err error) {
 				assert.NotNil(t, err)
 				assert.Contains(t, err.Error(), "unknown name println")
@@ -263,10 +263,7 @@ func TestTestCase(t *testing.T) {
 					},
 				},
 			},
-			prepare: func() {
-				gock.New(urlLocalhost).
-					Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-			},
+			prepare: defaultPrepare,
 			verify: func(t *testing.T, output interface{}, err error) {
 				assert.NotNil(t, err)
 				assert.Contains(t, err.Error(), "expected bool, but got int")
@@ -303,16 +300,11 @@ func TestTestCase(t *testing.T) {
 					Header: map[string]string{
 						util.ContentType: "multipart/form-data",
 					},
-					Form: map[string]string{
-						"key": "value",
-					},
+					Form: defaultForm,
 				},
 			},
-			prepare: func() {
-				gock.New(urlLocalhost).
-					Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
-			},
-			verify: noError,
+			prepare: defaultPostPrepare,
+			verify:  noError,
 		}, {
 			name: "normal form request",
 			testCase: &atest.TestCase{
@@ -322,14 +314,24 @@ func TestTestCase(t *testing.T) {
 					Header: map[string]string{
 						util.ContentType: "application/x-www-form-urlencoded",
 					},
-					Form: map[string]string{
-						"key": "value",
-					},
+					Form: defaultForm,
+				},
+			},
+			prepare: defaultPostPrepare,
+			verify:  noError,
+		}, {
+			name: "body is a template",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:    urlFoo,
+					Method: http.MethodPost,
+					Body:   `{"name":"{{lower "HELLO"}}"}`,
 				},
 			},
 			prepare: func() {
 				gock.New(urlLocalhost).
-					Post("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
+					Post("/foo").BodyString(`{"name":"hello"}`).
+					Reply(http.StatusOK).BodyString(`{}`)
 			},
 			verify: noError,
 		}}

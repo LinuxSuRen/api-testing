@@ -197,12 +197,12 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		},
 	}
 
-	var requestBody io.Reader
-	if requestBody, err = testcase.Request.GetBody(); err != nil {
+	if err = testcase.Request.Render(dataContext); err != nil {
 		return
 	}
 
-	if err = testcase.Request.Render(dataContext); err != nil {
+	var requestBody io.Reader
+	if requestBody, err = testcase.Request.GetBody(); err != nil {
 		return
 	}
 
