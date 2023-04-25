@@ -141,7 +141,7 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 }
 
 func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (testcases []testing.TestCase) {
-	reg, matchErr := regexp.Compile(`.*\{\{.*\.\w*.*}\}.*`)
+	reg, matchErr := regexp.Compile(`(.*?\{\{.*\.\w*.*?\}\})`)
 	targetReg, targetErr := regexp.Compile(`\.\w*`)
 
 	expectNames := new(UniqueSlice[string])
@@ -155,10 +155,10 @@ func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (
 			}
 		}
 
-		if mached := reg.MatchString(testcase.Request.API); mached {
+		for _, sub := range reg.FindStringSubmatch(testcase.Request.API) {
 			// remove {{ and }}
 			if left, leftErr := regexp.Compile(`.*\{\{`); leftErr == nil {
-				api := left.ReplaceAllString(testcase.Request.API, "")
+				api := left.ReplaceAllString(sub, "")
 
 				expectName = targetReg.FindString(api)
 				expectName = strings.TrimPrefix(expectName, ".")

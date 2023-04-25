@@ -1,5 +1,6 @@
 {
     "recommendations": [
-        "linuxsuren.api-testing"
+        "linuxsuren.api-testing",
+        "redhat.vscode-yaml"
     ]
 }
