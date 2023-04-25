@@ -71,6 +71,11 @@ func TestKubernetesValidatorFunc(t *testing.T) {
 		prepare:    prepareDaemonset,
 		expectBool: true,
 	}, {
+		name:       "daemonset count",
+		expression: `k8s("daemonsets", "ns", "foo").ExpectCount(0)`,
+		prepare:    prepareDaemonset,
+		expectBool: true,
+	}, {
 		name:       "no kind",
 		expression: `k8s({"foo": "bar"}, "ns", "foo").Exist()`,
 		expectErr:  true,
@@ -121,7 +126,7 @@ func prepareDaemonset() {
 		Get("/apis/apps/v1/namespaces/ns/daemonsets/foo").
 		MatchHeader("Authorization", defaultToken).
 		Reply(http.StatusOK).
-		JSON(`{"kind":"daemonset"}`)
+		JSON(`{"kind":"daemonset","items":[]}`)
 }
 
 func prepareCRDVM() {

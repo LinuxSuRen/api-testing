@@ -76,6 +76,8 @@ func GetClient() *http.Client {
 // ResourceValidator represents a generic resource validator
 type ResourceValidator interface {
 	Exist() bool
+	Count() int
+	ExpectCount(int) bool
 	ExpectField(value interface{}, fields ...string) bool
 }
 
@@ -90,6 +92,19 @@ func (v *defaultResourceValidator) Exist() bool {
 		return false
 	}
 	return v.data != nil && len(v.data) > 0
+}
+
+func (v *defaultResourceValidator) Count() int {
+	val, ok, err := unstructured.NestedField(v.data, "items")
+	if ok && err == nil {
+		items := val.([]interface{})
+		return len(items)
+	}
+	return -1
+}
+
+func (v *defaultResourceValidator) ExpectCount(expect int) bool {
+	return expect == v.Count()
 }
 
 func (v *defaultResourceValidator) ExpectField(value interface{}, fields ...string) (result bool) {
