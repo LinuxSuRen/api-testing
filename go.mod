@@ -10,7 +10,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/h2non/gock v1.2.0
 	github.com/invopop/jsonschema v0.7.0
-	github.com/linuxsuren/go-fake-runtime v0.0.0-20230413085645-15e77ab55dbd
+	github.com/linuxsuren/go-fake-runtime v0.0.0-20230426144714-1a7a0d160d3f
 	github.com/linuxsuren/unstructured v0.0.1
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.2
