@@ -112,7 +112,7 @@ func TestFindParentTestCases(t *testing.T) {
 		testcase: &atesting.TestCase{
 			Name: "user",
 			Request: atesting.Request{
-				API: "/users/{{(index .users 0).name}}",
+				API: "/users/{{(index .users 0).name}}{{randomKubernetesName}}",
 				Header: map[string]string{
 					"Authorization": "Bearer {{.login.data.access_token}}",
 				},

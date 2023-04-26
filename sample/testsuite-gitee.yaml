@@ -1,4 +1,5 @@
 #!api-testing
+# yaml-language-server: $schema=https://gitee.com/linuxsuren/api-testing/raw/master/sample/api-testing-schema.json
 name: Gitee
 api: https://gitee.com/api/v5
 items:
