@@ -46,7 +46,9 @@ func (o *serviceOption) runE(c *cobra.Command, args []string) (err error) {
 	var output string
 	switch o.action {
 	case "install", "i":
-		err = os.WriteFile(o.scriptPath, []byte(script), os.ModeAppend)
+		if err = os.WriteFile(o.scriptPath, []byte(script), os.ModeAppend); err == nil {
+			output, err = o.Execer.RunCommandAndReturn("systemctl", "", "enable", "atest")
+		}
 	case "start":
 		output, err = o.Execer.RunCommandAndReturn("systemctl", "", "start", "atest")
 	case "stop":

@@ -2,3 +2,4 @@ bin/
 .idea/
 coverage.out
 dist/
+.vscode/launch.json
