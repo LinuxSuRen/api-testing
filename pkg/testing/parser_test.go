@@ -35,6 +35,14 @@ func TestParse(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestDuplicatedNames(t *testing.T) {
+	_, err := Parse("testdata/duplicated-names.yaml")
+	assert.NotNil(t, err)
+
+	_, err = ParseFromData([]byte("fake"))
+	assert.NotNil(t, err)
+}
+
 func TestRequestRender(t *testing.T) {
 	tests := []struct {
 		name    string

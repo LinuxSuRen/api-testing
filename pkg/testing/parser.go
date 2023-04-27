@@ -46,7 +46,19 @@ func Parse(configFile string) (testSuite *TestSuite, err error) {
 // ParseFromData parses data and returns the test suite
 func ParseFromData(data []byte) (testSuite *TestSuite, err error) {
 	testSuite = &TestSuite{}
-	err = yaml.Unmarshal(data, testSuite)
+	if err = yaml.Unmarshal(data, testSuite); err != nil {
+		return
+	}
+
+	names := map[string]struct{}{}
+	for _, item := range testSuite.Items {
+		if _, ok := names[item.Name]; !ok {
+			names[item.Name] = struct{}{}
+		} else {
+			err = fmt.Errorf("having duplicated name '%s'", item.Name)
+			break
+		}
+	}
 	return
 }
 
