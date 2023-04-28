@@ -1,0 +1,8 @@
+name: duplicated names
+items:
+- name: projects
+  request:
+    api: https://foo
+- name: projects
+  request:
+    api: https://foo
