@@ -251,78 +251,8 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		}
 	}
 
-	if testcase.Expect.Body != "" {
-		if string(responseBodyData) != strings.TrimSpace(testcase.Expect.Body) {
-			err = fmt.Errorf("case: %s, got different response body, diff: \n%s", testcase.Name,
-				diff.LineDiff(testcase.Expect.Body, string(responseBodyData)))
-			return
-		}
-	}
-
-	var bodyMap map[string]interface{}
-	mapOutput := map[string]interface{}{}
-	if err = json.Unmarshal(responseBodyData, &mapOutput); err != nil {
-		switch b := err.(type) {
-		case *json.UnmarshalTypeError:
-			if b.Value != "array" {
-				return
-			}
-
-			var arrayOutput []interface{}
-			if err = json.Unmarshal(responseBodyData, &arrayOutput); err != nil {
-				return
-			}
-			output = arrayOutput
-			mapOutput["data"] = arrayOutput
-		default:
-			return
-		}
-	} else {
-		bodyMap = mapOutput
-		output = mapOutput
-		mapOutput = map[string]interface{}{
-			"data": bodyMap,
-		}
-	}
-
-	for key, expectVal := range testcase.Expect.BodyFieldsExpect {
-		var val interface{}
-		var ok bool
-		if val, ok, err = unstructured.NestedField(bodyMap, strings.Split(key, "/")...); err != nil {
-			err = fmt.Errorf("failed to get field: %s, %v", key, err)
-			return
-		} else if !ok {
-			err = fmt.Errorf("not found field: %s", key)
-			return
-		} else if !reflect.DeepEqual(expectVal, val) {
-			if reflect.TypeOf(expectVal).Kind() == reflect.Int {
-				if strings.Compare(fmt.Sprintf("%v", expectVal), fmt.Sprintf("%v", val)) == 0 {
-					continue
-				}
-			}
-			err = fmt.Errorf("field[%s] expect value: %v, actual: %v", key, expectVal, val)
-			return
-		}
-	}
-
-	for _, verify := range testcase.Expect.Verify {
-		var program *vm.Program
-		if program, err = expr.Compile(verify, expr.Env(mapOutput),
-			expr.AsBool(), kubernetes.PodValidatorFunc(),
-			kubernetes.KubernetesValidatorFunc()); err != nil {
-			return
-		}
-
-		var result interface{}
-		if result, err = expr.Run(program, mapOutput); err != nil {
-			return
-		}
-
-		if !result.(bool) {
-			err = fmt.Errorf("failed to verify: %s", verify)
-			fmt.Println(err)
-			break
-		}
+	if output, err = verifyResponseBodyData(testcase.Name, testcase.Expect, responseBodyData); err != nil {
+		return
 	}
 
 	err = jsonSchemaValidation(testcase.Expect.Schema, responseBodyData)
@@ -403,6 +333,83 @@ func jsonSchemaValidation(schema string, body []byte) (err error) {
 	var result *gojsonschema.Result
 	if result, err = gojsonschema.Validate(schemaLoader, jsonLoader); err == nil && !result.Valid() {
 		err = fmt.Errorf("JSON schema validation failed: %v", result.Errors())
+	}
+	return
+}
+
+func verifyResponseBodyData(caseName string, expect testing.Response, responseBodyData []byte) (output interface{}, err error) {
+	if expect.Body != "" {
+		if string(responseBodyData) != strings.TrimSpace(expect.Body) {
+			err = fmt.Errorf("case: %s, got different response body, diff: \n%s", caseName,
+				diff.LineDiff(expect.Body, string(responseBodyData)))
+			return
+		}
+	}
+
+	var bodyMap map[string]interface{}
+	mapOutput := map[string]interface{}{}
+	if err = json.Unmarshal(responseBodyData, &mapOutput); err != nil {
+		switch b := err.(type) {
+		case *json.UnmarshalTypeError:
+			if b.Value != "array" {
+				return
+			}
+
+			var arrayOutput []interface{}
+			if err = json.Unmarshal(responseBodyData, &arrayOutput); err != nil {
+				return
+			}
+			output = arrayOutput
+			mapOutput["data"] = arrayOutput
+		default:
+			return
+		}
+	} else {
+		bodyMap = mapOutput
+		output = mapOutput
+		mapOutput = map[string]interface{}{
+			"data": bodyMap,
+		}
+	}
+
+	for key, expectVal := range expect.BodyFieldsExpect {
+		var val interface{}
+		var ok bool
+		if val, ok, err = unstructured.NestedField(bodyMap, strings.Split(key, "/")...); err != nil {
+			err = fmt.Errorf("failed to get field: %s, %v", key, err)
+			return
+		} else if !ok {
+			err = fmt.Errorf("not found field: %s", key)
+			return
+		} else if !reflect.DeepEqual(expectVal, val) {
+			if reflect.TypeOf(expectVal).Kind() == reflect.Int {
+				if strings.Compare(fmt.Sprintf("%v", expectVal), fmt.Sprintf("%v", val)) == 0 {
+					continue
+				}
+			}
+			err = fmt.Errorf("field[%s] expect value: %v, actual: %v", key, expectVal, val)
+			return
+		}
+	}
+
+	for _, verify := range expect.Verify {
+		var program *vm.Program
+		if program, err = expr.Compile(verify, expr.Env(mapOutput),
+			expr.AsBool(), kubernetes.PodValidatorFunc(),
+			kubernetes.KubernetesValidatorFunc()); err != nil {
+			return
+		}
+
+		var result interface{}
+		if result, err = expr.Run(program, mapOutput); err != nil {
+			return
+		}
+
+		if !result.(bool) {
+			err = fmt.Errorf("failed to verify: %s", verify)
+			fmt.Println(err)
+			break
+		}
 	}
 	return
 }
