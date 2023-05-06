@@ -76,6 +76,8 @@ func GetClient() *http.Client {
 // ResourceValidator represents a generic resource validator
 type ResourceValidator interface {
 	Exist() bool
+	Count() int
+	ExpectCount(int) bool
 	ExpectField(value interface{}, fields ...string) bool
 }
 
@@ -84,6 +86,7 @@ type defaultResourceValidator struct {
 	err  error
 }
 
+// Exist returns true if the specific resource exist
 func (v *defaultResourceValidator) Exist() bool {
 	if v.err != nil {
 		fmt.Println(v.err)
@@ -92,6 +95,22 @@ func (v *defaultResourceValidator) Exist() bool {
 	return v.data != nil && len(v.data) > 0
 }
 
+// Count returns the count of the specific resources
+func (v *defaultResourceValidator) Count() int {
+	val, ok, err := unstructured.NestedField(v.data, "items")
+	if ok && err == nil {
+		items := val.([]interface{})
+		return len(items)
+	}
+	return -1
+}
+
+// ExpectCount returns true if there are specific number of the target k8s resources
+func (v *defaultResourceValidator) ExpectCount(expect int) bool {
+	return expect == v.Count()
+}
+
+// ExpectField verify the specific field and value
 func (v *defaultResourceValidator) ExpectField(value interface{}, fields ...string) (result bool) {
 	val, ok, err := unstructured.NestedField(v.data, fields...)
 	if !ok || err != nil {
