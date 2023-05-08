@@ -12,6 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	BearerToken = "Bearer {{.login.data.access_token}}"
+)
+
 func TestRemoteServer(t *testing.T) {
 	server := NewRemoteServer()
 	_, err := server.Run(context.TODO(), &TestTask{
@@ -70,7 +74,7 @@ func TestFindParentTestCases(t *testing.T) {
 		testcase: &atesting.TestCase{
 			Request: atesting.Request{
 				Header: map[string]string{
-					"Authorization": "Bearer {{.login.data.access_token}}",
+					"Authorization": BearerToken,
 				},
 			},
 		},
@@ -114,7 +118,7 @@ func TestFindParentTestCases(t *testing.T) {
 			Request: atesting.Request{
 				API: "/users/{{(index .users 0).name}}{{randomKubernetesName}}",
 				Header: map[string]string{
-					"Authorization": "Bearer {{.login.data.access_token}}",
+					"Authorization": BearerToken,
 				},
 			},
 		},
@@ -131,7 +135,7 @@ func TestFindParentTestCases(t *testing.T) {
 				Request: atesting.Request{
 					API: "/users/{{(index .users 0).name}}",
 					Header: map[string]string{
-						"Authorization": "Bearer {{.login.data.access_token}}",
+						"Authorization": BearerToken,
 					},
 				},
 			}},
