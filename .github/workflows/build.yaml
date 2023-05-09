@@ -17,7 +17,7 @@ jobs:
         run: |
           go test ./... -coverprofile coverage.out
       - name: Report
-        if: github.repository_owner == 'linuxsuren'
+        if: github.actor == 'linuxsuren'
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         run: |
