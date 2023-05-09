@@ -1,6 +1,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3f16717cd6f841118006f12c346e9341)](https://www.codacy.com/gh/LinuxSuRen/api-testing/dashboard?utm_source=github.com\&utm_medium=referral\&utm_content=LinuxSuRen/api-testing\&utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/3f16717cd6f841118006f12c346e9341)](https://www.codacy.com/gh/LinuxSuRen/api-testing/dashboard?utm_source=github.com\&utm_medium=referral\&utm_content=LinuxSuRen/api-testing\&utm_campaign=Badge_Coverage)
 ![GitHub All Releases](https://img.shields.io/github/downloads/linuxsuren/api-testing/total)
+[![LinuxSuRen/open-source-best-practice](https://img.shields.io/static/v1?label=OSBP&message=%E5%BC%80%E6%BA%90%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5&color=blue)](https://github.com/LinuxSuRen/open-source-best-practice)
 
 This is a API testing tool.
 
