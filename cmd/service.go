@@ -71,7 +71,7 @@ var script = `[Unit]
 Description=API Testing
 
 [Service]
-ExecStart=atest server
+ExecStart=/usr/bin/env atest server
 
 [Install]
 WantedBy=multi-user.target
