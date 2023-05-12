@@ -37,6 +37,12 @@
                 },
                 "expect": {
                     "$ref": "#/definitions/Expect"
+                },
+                "before": {
+                    "$ref": "#/definitions/Job"
+                },
+                "after": {
+                    "$ref": "#/definitions/Job"
                 }
             },
             "required": [
@@ -121,6 +127,22 @@
                 "api"
             ],
             "title": "Request"
+        },
+        "Job": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "items"
+            ],
+            "title": "Job"
         }
     }
 }

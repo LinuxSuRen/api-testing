@@ -11,7 +11,8 @@ type TestSuite struct {
 type TestCase struct {
 	Name    string `yaml:"name" json:"name"`
 	Group   string
-	Prepare Prepare  `yaml:"prepare" json:"-"`
+	Before  Job      `yaml:"before" json:"before"`
+	After   Job      `yaml:"after" json:"after"`
 	Request Request  `yaml:"request" json:"request"`
 	Expect  Response `yaml:"expect" json:"expect"`
 	Clean   Clean    `yaml:"clean" json:"-"`
@@ -31,9 +32,9 @@ func (c *TestCase) InScope(items []string) bool {
 	return false
 }
 
-// Prepare does the prepare work
-type Prepare struct {
-	Kubernetes []string `yaml:"kubernetes"`
+// Job contains a list of jobs
+type Job struct {
+	Items []string `yaml:"items"`
 }
 
 // Request represents a HTTP request

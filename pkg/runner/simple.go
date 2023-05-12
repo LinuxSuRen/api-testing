@@ -180,14 +180,13 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		r.testReporter.PutRecord(rr)
 	}(record)
 
-	if err = r.doPrepare(testcase); err != nil {
-		err = fmt.Errorf("failed to prepare, error: %v", err)
-		return
-	}
-
 	defer func() {
 		if testcase.Clean.CleanPrepare {
 			err = r.doCleanPrepare(testcase)
+		}
+
+		if err == nil {
+			err = runJob(testcase.After)
 		}
 	}()
 
@@ -214,6 +213,10 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	// set headers
 	for key, val := range testcase.Request.Header {
 		request.Header.Add(key, val)
+	}
+
+	if err = runJob(testcase.Before); err != nil {
+		return
 	}
 
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
@@ -285,21 +288,10 @@ func (r *simpleTestCaseRunner) WithExecer(execer fakeruntime.Execer) TestCaseRun
 	return r
 }
 
-func (r *simpleTestCaseRunner) doPrepare(testcase *testing.TestCase) (err error) {
-	for i := range testcase.Prepare.Kubernetes {
-		item := testcase.Prepare.Kubernetes[i]
-
-		if err = r.execer.RunCommand("kubectl", "apply", "-f", item); err != nil {
-			return
-		}
-	}
-	return
-}
-
 func (r *simpleTestCaseRunner) doCleanPrepare(testcase *testing.TestCase) (err error) {
-	count := len(testcase.Prepare.Kubernetes)
+	count := len(testcase.Before.Items)
 	for i := count - 1; i >= 0; i-- {
-		item := testcase.Prepare.Kubernetes[i]
+		item := testcase.Before.Items[i]
 
 		if err = r.execer.RunCommand("kubectl", "delete", "-f", item); err != nil {
 			return
@@ -409,6 +401,25 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseBo
 			err = fmt.Errorf("failed to verify: %s", verify)
 			fmt.Println(err)
 			break
+		}
+	}
+	return
+}
+
+func runJob(job testing.Job) (err error) {
+	var program *vm.Program
+	env := struct{}{}
+
+	for _, item := range job.Items {
+		if program, err = expr.Compile(item, expr.Env(env),
+			expr.Function("sleep", ExprFuncSleep)); err != nil {
+			fmt.Printf("failed to compile: %s, %v\n", item, err)
+			return
+		}
+
+		if _, err = expr.Run(program, env); err != nil {
+			fmt.Printf("failed to Run: %s, %v\n", item, err)
+			return
 		}
 	}
 	return

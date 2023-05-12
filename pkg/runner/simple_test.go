@@ -43,8 +43,8 @@ func TestTestCase(t *testing.T) {
 	}{{
 		name: "failed during the prepare stage",
 		testCase: &atest.TestCase{
-			Prepare: atest.Prepare{
-				Kubernetes: []string{"demo.yaml"},
+			Before: atest.Job{
+				Items: []string{"demo.yaml"},
 			},
 		},
 		execer: fakeruntime.FakeExecer{ExpectError: errors.New("fake")},
@@ -69,8 +69,8 @@ func TestTestCase(t *testing.T) {
 					`data.name == "linuxsuren"`,
 				},
 			},
-			Prepare: atest.Prepare{
-				Kubernetes: []string{"demo.yaml"},
+			Before: atest.Job{
+				Items: []string{"sleep(1)"},
 			},
 			Clean: atest.Clean{
 				CleanPrepare: true,
@@ -406,6 +406,32 @@ func TestJSONSchemaValidation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := jsonSchemaValidation(tt.schema, []byte(tt.body))
+			assert.Equal(t, tt.hasErr, err != nil, err)
+		})
+	}
+}
+
+func TestRunJob(t *testing.T) {
+	tests := []struct {
+		name   string
+		job    atest.Job
+		hasErr bool
+	}{{
+		name: "sleep 1s",
+		job: atest.Job{
+			Items: []string{"sleep(1)"},
+		},
+		hasErr: false,
+	}, {
+		name: "no params",
+		job: atest.Job{
+			Items: []string{"sleep()"},
+		},
+		hasErr: true,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := runJob(tt.job)
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})
 	}

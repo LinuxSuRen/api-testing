@@ -28,6 +28,12 @@ func TestParse(t *testing.T) {
 }
 `,
 			},
+			Before: Job{
+				Items: []string{"sleep(1)"},
+			},
+			After: Job{
+				Items: []string{"sleep(1)"},
+			},
 		}, suite.Items[0])
 	}
 
