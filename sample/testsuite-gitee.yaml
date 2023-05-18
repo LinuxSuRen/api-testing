@@ -4,6 +4,9 @@ name: Gitee
 api: https://gitee.com/api/v5
 items:
 - name: stargazers
+  before:
+    items:
+    - sleep(1)
   request:
     api: /repos/linuxsuren/api-testing/stargazers
   expect:

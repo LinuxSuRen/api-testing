@@ -5,12 +5,13 @@
 
 This is a API testing tool.
 
-## Feature
+## Features
 
 *   Response Body fields equation check
 *   Response Body [eval](https://expr.medv.io/)
 *   Verify the Kubernetes resources
 *   Validate the response body with [JSON schema](https://json-schema.org/)
+*   Pre and post handle with the API request
 *   Output reference between TestCase
 *   Run in server mode, and provide the gRPC endpoint
 *   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
@@ -71,6 +72,7 @@ You could use all the common functions which comes from [sprig](http://mastermin
 | Name | Usage |
 |---|---|
 | `randomKubernetesName` | `{{randomKubernetesName}}` to generate Kubernetes resource name randomly, the name will have 8  chars |
+| `sleep` | `{{sleep(1)}}` in the pre and post request handle |
 
 ## Verify against Kubernetes
 

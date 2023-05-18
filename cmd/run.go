@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -216,7 +215,6 @@ func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, c
 		case <-stopSingal:
 			return
 		default:
-			setRelativeDir(suite, &testCase)
 			o.limiter.Accept()
 
 			ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
@@ -237,12 +235,4 @@ func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, c
 
 func getDefaultContext() map[string]interface{} {
 	return map[string]interface{}{}
-}
-
-func setRelativeDir(configFile string, testcase *testing.TestCase) {
-	dir := filepath.Dir(configFile)
-
-	for i := range testcase.Prepare.Kubernetes {
-		testcase.Prepare.Kubernetes[i] = path.Join(dir, testcase.Prepare.Kubernetes[i])
-	}
 }

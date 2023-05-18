@@ -12,6 +12,12 @@ items:
       {
         "type": "array"
       }
+  before:
+    items:
+      - "sleep(1)"
+  after:
+    items:
+      - "sleep(1)"
 - name: project
   request:
     api: https://gitlab.com/api/v4/projects/{{int64 (index .projects 0).id}}
