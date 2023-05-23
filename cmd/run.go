@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -218,6 +219,7 @@ func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, c
 			o.limiter.Accept()
 
 			ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
+			ctxWithTimeout = context.WithValue(ctxWithTimeout, runner.ContextKey("").ParentDir(), path.Dir(suite))
 
 			simpleRunner := runner.NewSimpleTestCaseRunner()
 			simpleRunner.WithTestReporter(o.reporter)

@@ -41,10 +41,6 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/linuxsuren/go-fake-runtime v0.0.0-20230413085645-15e77ab55dbd h1:2Avir30WOgcDqG3sA4hlW4bC4c/tgseAUntPhf5JQ6E=
-github.com/linuxsuren/go-fake-runtime v0.0.0-20230413085645-15e77ab55dbd/go.mod h1:zmh6J78hSnWZo68faMA2eKOdaEp8eFbERHi3ZB9xHCQ=
-github.com/linuxsuren/go-fake-runtime v0.0.0-20230426143116-85f55baf088f h1:QvE5qCxn6uNxIpF4dnX8O172J12+iOFBcmQ52rvhFFU=
-github.com/linuxsuren/go-fake-runtime v0.0.0-20230426143116-85f55baf088f/go.mod h1:zmh6J78hSnWZo68faMA2eKOdaEp8eFbERHi3ZB9xHCQ=
 github.com/linuxsuren/go-fake-runtime v0.0.0-20230426144714-1a7a0d160d3f h1:TfAzkLxq/agwMBbccTx/f/dlmFWIBLWRGCWjI4IOlK8=
 github.com/linuxsuren/go-fake-runtime v0.0.0-20230426144714-1a7a0d160d3f/go.mod h1:zmh6J78hSnWZo68faMA2eKOdaEp8eFbERHi3ZB9xHCQ=
 github.com/linuxsuren/unstructured v0.0.1 h1:ilUA8MUYbR6l9ebo/YPV2bKqlf62bzQursDSE+j00iU=
@@ -137,8 +133,9 @@ gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 h1:YR8cESwS4TdDjEe65xsg0ogR
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.4/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
-gopkg.in/yaml.v2 v2.3.0 h1:clyUAQHOM3G0M3f5vQj7LuJrETvjVot3Z5el9nffUtU=
 gopkg.in/yaml.v2 v2.3.0/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
+gopkg.in/yaml.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

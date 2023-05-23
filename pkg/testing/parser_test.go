@@ -151,7 +151,7 @@ func TestRequestRender(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.request.Render(tt.ctx)
+			err := tt.request.Render(tt.ctx, "")
 			if assert.Equal(t, tt.hasErr, err != nil, err) && tt.verify != nil {
 				tt.verify(t, tt.request)
 			}

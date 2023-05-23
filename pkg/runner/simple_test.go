@@ -219,25 +219,25 @@ func TestTestCase(t *testing.T) {
 			assert.Contains(t, err.Error(), "failed to get field")
 		},
 	},
-		// {
-		// 	name: "verify failed",
-		// 	testCase: &atest.TestCase{
-		// 		Request: atest.Request{
-		// 			API: urlFoo,
-		// 		},
-		// 		Expect: atest.Response{
-		// 			Verify: []string{
-		// 				"len(data.items) > 0",
-		// 			},
-		// 		},
-		// 	},
-		// 	prepare: defaultPrepare,
-		// 	verify: func(t *testing.T, output interface{}, err error) {
-		// 		if assert.NotNil(t, err) {
-		// 			assert.Contains(t, err.Error(), "failed to verify")
-		// 		}
-		// 	},
-		// },
+		{
+			name: "verify failed",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API: urlFoo,
+				},
+				Expect: atest.Response{
+					Verify: []string{
+						"len(data.items) > 0",
+					},
+				},
+			},
+			prepare: defaultPrepare,
+			verify: func(t *testing.T, output interface{}, err error) {
+				if assert.NotNil(t, err) {
+					assert.Contains(t, err.Error(), "failed to verify")
+				}
+			},
+		},
 		{
 			name: "failed to compile",
 			testCase: &atest.TestCase{
@@ -435,6 +435,14 @@ func TestRunJob(t *testing.T) {
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})
 	}
+}
+
+func TestContextKey(t *testing.T) {
+	assert.Equal(t, ContextKey("parentDir"), NewContextKeyBuilder().ParentDir())
+
+	ctx := context.WithValue(context.Background(), NewContextKeyBuilder().ParentDir(), "/tmp")
+	assert.Equal(t, "/tmp", NewContextKeyBuilder().ParentDir().GetContextValueOrEmpty(ctx))
+	assert.Empty(t, ContextKey("fake").GetContextValueOrEmpty(ctx))
 }
 
 const defaultSchemaForTest = `{"properties": {
