@@ -168,6 +168,27 @@ func NewSimpleTestCaseRunner() TestCaseRunner {
 		WithExecer(fakeruntime.DefaultExecer{})
 }
 
+// ContextKey is the alias type of string for context key
+type ContextKey string
+
+// NewContextKeyBuilder returns an emtpy context key
+func NewContextKeyBuilder() ContextKey {
+	return ContextKey("")
+}
+
+// ParentDir returns the key of the parsent directory
+func (c ContextKey) ParentDir() ContextKey {
+	return ContextKey("parentDir")
+}
+
+// GetContextValueOrEmpty returns the value of the context key, if not exist, return empty string
+func (c ContextKey) GetContextValueOrEmpty(ctx context.Context) string {
+	if ctx.Value(c) != nil {
+		return ctx.Value(c).(string)
+	}
+	return ""
+}
+
 // RunTestCase is the main entry point of a test case
 func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error) {
 	r.log.Info("start to run: '%s'\n", testcase.Name)
@@ -196,7 +217,8 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		},
 	}
 
-	if err = testcase.Request.Render(dataContext); err != nil {
+	contextDir := NewContextKeyBuilder().ParentDir().GetContextValueOrEmpty(ctx)
+	if err = testcase.Request.Render(dataContext, contextDir); err != nil {
 		return
 	}
 

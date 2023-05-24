@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -70,7 +71,7 @@ func ParseTestCaseFromData(data []byte) (testCase *TestCase, err error) {
 }
 
 // Render injects the template based context
-func (r *Request) Render(ctx interface{}) (err error) {
+func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 	// template the API
 	var result string
 	if result, err = render.Render("api", r.API, ctx); err == nil {
@@ -83,7 +84,7 @@ func (r *Request) Render(ctx interface{}) (err error) {
 	// read body from file
 	if r.BodyFromFile != "" {
 		var data []byte
-		if data, err = os.ReadFile(r.BodyFromFile); err != nil {
+		if data, err = os.ReadFile(path.Join(dataDir, r.BodyFromFile)); err != nil {
 			return
 		}
 		r.Body = strings.TrimSpace(string(data))
