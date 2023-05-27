@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -30,6 +31,7 @@ type runOption struct {
 	limiter            limit.RateLimiter
 	startTime          time.Time
 	reporter           runner.TestReporter
+	reportFile         string
 	reportWriter       runner.ReportResultWriter
 	report             string
 	reportIgnore       bool
@@ -72,16 +74,26 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
+	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, discard, std")
+	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
 	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
 	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
 	flags.Int32VarP(&opt.qps, "qps", "", 5, "QPS")
 	flags.Int32VarP(&opt.burst, "burst", "", 5, "burst")
-	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, discard, std")
 	return
 }
 
 func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	writer := cmd.OutOrStdout()
+
+	if o.reportFile != "" {
+		var reportFile *os.File
+		if reportFile, err = os.Create(o.reportFile); err != nil {
+			return
+		}
+
+		writer = io.MultiWriter(writer, reportFile)
+	}
 
 	switch o.report {
 	case "markdown", "md":

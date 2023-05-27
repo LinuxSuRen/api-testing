@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
+	"path"
 	"testing"
 	"time"
 
@@ -66,6 +68,13 @@ func TestRunCommand(t *testing.T) {
 	fooPrepare := func() {
 		gock.New(urlFoo).Get("/bar").Reply(http.StatusOK).JSON("{}")
 	}
+	tmpFile, err := os.CreateTemp(os.TempDir(), "api-testing")
+	if !assert.Nil(t, err) {
+		return
+	}
+	defer func() {
+		_ = os.Remove(tmpFile.Name())
+	}()
 
 	tests := []struct {
 		name    string
@@ -101,12 +110,23 @@ func TestRunCommand(t *testing.T) {
 		name:   "invalid schema",
 		args:   []string{"-p", "testdata/invalid-schema.yaml"},
 		hasErr: true,
+	}, {
+		name:    "report file",
+		prepare: fooPrepare,
+		args:    []string{"-p", simpleSuite, "--report", "md", "--report-file", tmpFile.Name()},
+		hasErr:  false,
+	}, {
+		name:    "report file with error",
+		prepare: fooPrepare,
+		args:    []string{"-p", simpleSuite, "--report", "md", "--report-file", path.Join(tmpFile.Name(), "fake")},
+		hasErr:  true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
 			util.MakeSureNotNil(tt.prepare)()
 			root := &cobra.Command{Use: "root"}
+			root.SetOut(&bytes.Buffer{})
 			root.AddCommand(createRunCommand())
 
 			root.SetArgs(append([]string{"run"}, tt.args...))
