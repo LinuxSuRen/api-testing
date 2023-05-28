@@ -1,0 +1,8 @@
+[Unit]
+Description=API Testing
+
+[Service]
+ExecStart=/usr/bin/env atest server
+
+[Install]
+WantedBy=multi-user.target
