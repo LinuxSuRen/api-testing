@@ -31,7 +31,7 @@ items:
         Authorization: "{{.login.data.access_token}}"
       body: |
         {
-          "title": "good-title",
+          "title": "{{randomKubernetesName}}",
           "content": "good-body",
           "tags": [
             {
@@ -44,5 +44,54 @@ items:
         }
     expect:
       bodyFieldsExpect:
-        data/title: good-title
         data/content: good-body
+  - name: answer
+    request:
+      api: /answer
+      method: POST
+      header:
+        Authorization: "{{.login.data.access_token}}"
+        Content-Type: application/json
+      body: |
+        {
+          "question_id": "{{.question.data.id}}",
+          "content": "12121212",
+          "html": "<p>12121212</p>\n"
+        }
+  - name: acceptance
+    before:
+      items:
+        - sleep("1s")
+    request:
+      api: /answer/acceptance
+      method: POST
+      header:
+        Authorization: "{{.login.data.access_token}}"
+        Content-Type: application/json
+      body: |
+        {
+          "question_id": "{{.question.data.id}}",
+          "answer_id": "{{.answer.data.info.id}}"
+        }
+  - name: delAnswer
+    request:
+      api: /answer
+      method: DELETE
+      header:
+        Authorization: "{{.login.data.access_token}}"
+        Content-Type: application/json
+      body: |
+        {
+          "id": "{{.answer.data.info.id}}"
+        }
+  - name: delQuestion
+    request:
+      api: /question
+      method: DELETE
+      header:
+        Content-Type: application/json
+        Authorization: "{{.login.data.access_token}}"
+      body: |
+        {
+          "id": "{{.question.data.id}}"
+        }
