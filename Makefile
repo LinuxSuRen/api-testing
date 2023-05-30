@@ -10,7 +10,7 @@ run-image:
 	docker run ghcr.io/linuxsuren/api-testing:dev
 copy: build
 	sudo cp bin/atest /usr/local/bin/
-copy-restart:
+copy-restart: build
 	atest service stop
 	make copy
 	atest service restart

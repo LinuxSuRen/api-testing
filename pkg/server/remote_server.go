@@ -13,6 +13,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/version"
+	"github.com/linuxsuren/api-testing/sample"
 )
 
 type server struct {
@@ -137,6 +138,12 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 // GetVersion returns the version
 func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
 	reply = &HelloReply{Message: version.GetVersion()}
+	return
+}
+
+// Sample returns a sample of the test task
+func (s *server) Sample(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
+	reply = &HelloReply{Message: sample.TestSuiteGitLab}
 	return
 }
 

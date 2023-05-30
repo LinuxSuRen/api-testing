@@ -39,6 +39,15 @@ func (s *fakeServer) GetVersion(ctx context.Context, in *Empty) (reply *HelloRep
 	return
 }
 
+// Sample returns a sample of the test task
+func (s *fakeServer) Sample(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
+	reply = &HelloReply{
+		Message: "",
+	}
+	err = s.err
+	return
+}
+
 // NewFakeClient creates a fake client
 func NewFakeClient(ctx context.Context, version string, err error) (RunnerClient, func()) {
 	buffer := 101024 * 1024

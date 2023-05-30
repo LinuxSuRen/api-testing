@@ -55,6 +55,10 @@ func TestServer(t *testing.T) {
 	assert.NotNil(t, reply)
 	assert.Nil(t, err)
 
+	reply, err = client.Sample(context.Background(), &server.Empty{})
+	assert.Nil(t, err)
+	assert.Empty(t, reply.GetMessage())
+
 	clientWithErr, _ := server.NewFakeClient(context.Background(), "version", errors.New("fake"))
 	reply, err = clientWithErr.GetVersion(context.Background(), &server.Empty{})
 	assert.NotNil(t, err)
