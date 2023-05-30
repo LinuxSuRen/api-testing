@@ -6,6 +6,7 @@ package server;
 
 service Runner {
     rpc Run (TestTask) returns (HelloReply) {}
+    rpc Sample(Empty) returns (HelloReply) {}
     rpc GetVersion(Empty) returns (HelloReply) {}
 }
 

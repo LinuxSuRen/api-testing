@@ -9,6 +9,7 @@ import (
 
 	"github.com/h2non/gock"
 	atesting "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/sample"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,6 +62,10 @@ func TestRemoteServer(t *testing.T) {
 	ver, err = server.GetVersion(context.TODO(), &Empty{})
 	assert.Empty(t, ver.Message)
 	assert.Nil(t, err)
+
+	ver, err = server.Sample(context.TODO(), &Empty{})
+	assert.Nil(t, err)
+	assert.Equal(t, sample.TestSuiteGitLab, ver.Message)
 }
 
 func TestFindParentTestCases(t *testing.T) {
