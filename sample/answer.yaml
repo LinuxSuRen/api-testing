@@ -1,0 +1,48 @@
+#!api-testing
+# yaml-language-server: $schema=https://gitee.com/linuxsuren/api-testing/raw/master/sample/api-testing-schema.json
+# see also https://github.com/answerdev/answer
+name: Answer
+api: http://localhost:9080/answer/api/v1
+items:
+  - name: login
+    request:
+      api: /user/login/email
+      method: POST
+      header:
+        Content-Type: application/json
+      body: |
+        {
+          "e_mail": "admin@ad.com",
+          "pass": "admin123"
+        }
+  - name: status
+    request:
+      api: /notification/status
+      method: GET
+      header:
+        Content-Type: application/json
+        Authorization: "{{.login.data.access_token}}"
+  - name: question
+    request:
+      api: /question
+      method: POST
+      header:
+        Content-Type: application/json
+        Authorization: "{{.login.data.access_token}}"
+      body: |
+        {
+          "title": "good-title",
+          "content": "good-body",
+          "tags": [
+            {
+              "slug_name": "test",
+              "display_name": "test",
+              "original_text": "",
+              "parsed_text": ""
+            }
+          ]
+        }
+    expect:
+      bodyFieldsExpect:
+        data/title: good-title
+        data/content: good-body

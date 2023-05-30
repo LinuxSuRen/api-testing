@@ -92,6 +92,26 @@ func TestFindParentTestCases(t *testing.T) {
 			Name: "login",
 		}},
 	}, {
+		name: "body",
+		testcase: &atesting.TestCase{
+			Request: atesting.Request{
+				Body: `{{.login.data}}`,
+			},
+		},
+		suite: &atesting.TestSuite{
+			Items: []atesting.TestCase{{
+				Name: "login",
+			}, {
+				Name: "user",
+				Request: atesting.Request{
+					Body: `{{.login.data}}`,
+				},
+			}},
+		},
+		expect: []atesting.TestCase{{
+			Name: "login",
+		}},
+	}, {
 		name:     "empty cases",
 		testcase: &atesting.TestCase{},
 		suite:    &atesting.TestSuite{},
