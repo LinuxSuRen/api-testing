@@ -162,16 +162,8 @@ func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (
 			}
 		}
 
-		for _, sub := range reg.FindStringSubmatch(testcase.Request.API) {
-			// remove {{ and }}
-			if left, leftErr := regexp.Compile(`.*\{\{`); leftErr == nil {
-				api := left.ReplaceAllString(sub, "")
-
-				expectName = targetReg.FindString(api)
-				expectName = strings.TrimPrefix(expectName, ".")
-				expectNames.Push(expectName)
-			}
-		}
+		findExpectNames(testcase.Request.API, expectNames)
+		findExpectNames(testcase.Request.Body, expectNames)
 
 		fmt.Println("expect test case names", expectNames.GetAll())
 		for _, item := range suite.Items {
@@ -181,6 +173,22 @@ func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (
 		}
 	}
 	return
+}
+
+func findExpectNames(target string, expectNames *UniqueSlice[string]) {
+	reg, _ := regexp.Compile(`(.*?\{\{.*\.\w*.*?\}\})`)
+	targetReg, _ := regexp.Compile(`\.\w*`)
+
+	for _, sub := range reg.FindStringSubmatch(target) {
+		// remove {{ and }}
+		if left, leftErr := regexp.Compile(`.*\{\{`); leftErr == nil {
+			body := left.ReplaceAllString(sub, "")
+
+			expectName := targetReg.FindString(body)
+			expectName = strings.TrimPrefix(expectName, ".")
+			expectNames.Push(expectName)
+		}
+	}
 }
 
 // UniqueSlice represents an unique slice

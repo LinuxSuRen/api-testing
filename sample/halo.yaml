@@ -1,0 +1,21 @@
+#!api-testing
+# yaml-language-server: $schema=https://gitee.com/linuxsuren/api-testing/raw/master/sample/api-testing-schema.json
+# see also https://github.com/halo-dev/halo
+name: Halo
+api: https://demo.halo.run
+items:
+- name: publickey
+  request:
+    api: /login/public-key
+    method: GET
+- name: login
+  request:
+    api: /login
+    method: POST
+    body: |
+      {
+        "username": "demo",
+        "password": "P@ssw0rd123"
+      }
+  expect:
+    statusCode: 500
