@@ -14,7 +14,7 @@ This is a API testing tool.
 *   Validate the response body with [JSON schema](https://json-schema.org/)
 *   Pre and post handle with the API request
 *   Output reference between TestCase
-*   Run in server mode, and provide the gRPC endpoint
+*   Run in server mode, and provide the [gRPC endpoint](pkg/server/server.proto)
 *   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
 
 ## Get started
@@ -24,6 +24,8 @@ Install it via [hd](https://github.com/LinuxSuRen/http-downloader) or download f
 ```shell
 hd install atest
 ```
+
+or, you can install it in Kubernetes. See also the [manifests](sample/manifest.yaml).
 
 see the following usage:
 
