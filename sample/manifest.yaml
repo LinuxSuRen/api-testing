@@ -8,16 +8,28 @@ metadata:
   name: api-testing
 spec:
   replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: api-testing
-  strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
         app: api-testing
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: api-testing
+              topologyKey: kubernetes.io/hostname
+            weight: 5
       containers:
       - image: ghcr.io/linuxsuren/api-testing
         name: server
@@ -28,7 +40,6 @@ spec:
           requests:
             cpu: "100m"
             memory: 100m
-status: {}
 ---
 apiVersion: v1
 kind: Service
