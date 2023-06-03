@@ -8,7 +8,7 @@ items:
   request:
     api: /login/public-key
     method: GET
-- name: login
+- name: login-500
   request:
     api: /login
     method: POST
@@ -16,6 +16,17 @@ items:
       {
         "username": "demo",
         "password": "P@ssw0rd123"
+      }
+  expect:
+    statusCode: 500
+- name: login
+  request:
+    api: /login
+    method: POST
+    body: |
+      {
+        "username": "demo",
+        "password": "{{encryptWithBase64PKIXPublicKey .publickey.base64Format "P@ssw0rd123"}}"
       }
   expect:
     statusCode: 500

@@ -76,6 +76,7 @@ You could use all the common functions which comes from [sprig](http://mastermin
 |---|---|
 | `randomKubernetesName` | `{{randomKubernetesName}}` to generate Kubernetes resource name randomly, the name will have 8  chars |
 | `sleep` | `{{sleep(1)}}` in the pre and post request handle |
+| `encryptWithBase64PKIXPublicKey` | Encrypt text with dase64 format of PKIX publicKey |
 
 ## Verify against Kubernetes
 
