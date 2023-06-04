@@ -3,3 +3,4 @@ bin/
 coverage.out
 dist/
 .vscode/launch.json
+sample.yaml
