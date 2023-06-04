@@ -19,7 +19,7 @@ func NewRootCmd(execer fakeruntime.Execer, gRPCServer gRPCServer) (c *cobra.Comm
 	c.AddCommand(createInitCommand(execer),
 		createRunCommand(), createSampleCmd(),
 		createServerCmd(gRPCServer), createJSONSchemaCmd(),
-		createServiceCommand(execer))
+		createServiceCommand(execer), createFunctionCmd())
 	return
 }
 
