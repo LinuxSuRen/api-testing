@@ -13,16 +13,21 @@ import (
 func Render(name, text string, ctx interface{}) (result string, err error) {
 	var tpl *template.Template
 	if tpl, err = template.New(name).
-		Funcs(sprig.FuncMap()).
-		Funcs(template.FuncMap{
-			"randomKubernetesName": func() string {
-				return util.String(8)
-			},
-		}).Parse(text); err == nil {
+		Funcs(FuncMap()).
+		Parse(text); err == nil {
 		buf := new(bytes.Buffer)
 		if err = tpl.Execute(buf, ctx); err == nil {
 			result = strings.TrimSpace(buf.String())
 		}
 	}
 	return
+}
+
+// FuncMap reutrns all the supported functions
+func FuncMap() template.FuncMap {
+	funcs := sprig.FuncMap()
+	funcs["randomKubernetesName"] = func() string {
+		return util.String(8)
+	}
+	return funcs
 }
