@@ -16,6 +16,7 @@ jobs:
       - name: Test
         run: |
           go test ./... -coverprofile coverage.out
+          make test test-collector
       - name: Report
         if: github.actor == 'linuxsuren'
         env:

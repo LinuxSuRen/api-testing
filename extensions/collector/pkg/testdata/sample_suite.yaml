@@ -1,0 +1,24 @@
+#!api-testing
+# yaml-language-server: $schema=https://gitee.com/linuxsuren/api-testing/raw/master/sample/api-testing-schema.json
+name: sample
+items:
+- name: v1
+  request:
+    api: http://foo/api/v1
+    method: GET
+    header:
+      Authorization: Bearer token
+      Content-Type: application/json
+    body: hello
+  expect:
+    statusCode: 200
+- name: v1-1
+  request:
+    api: http://foo/api/v1
+    method: GET
+    header:
+      Authorization: Bearer token
+      Content-Type: application/json
+    body: hello
+  expect:
+    statusCode: 200

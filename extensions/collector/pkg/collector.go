@@ -6,24 +6,27 @@ import (
 	"sync"
 )
 
+// Collects is a HTTP request collector
 type Collects struct {
 	once       sync.Once
 	signal     chan string
 	stopSignal chan struct{}
 	keys       map[string]*http.Request
 	requests   []*http.Request
-	events     []Event
+	events     []EventHandle
 }
 
+// NewCollects creates an instance of Collector
 func NewCollects() *Collects {
 	return &Collects{
 		once:       sync.Once{},
 		signal:     make(chan string, 5),
-		stopSignal: make(chan struct{}),
+		stopSignal: make(chan struct{}, 1),
 		keys:       make(map[string]*http.Request),
 	}
 }
 
+// Add adds a HTTP request
 func (c *Collects) Add(req *http.Request) {
 	key := fmt.Sprintf("%s-%s", req.Method, req.URL.String())
 	if _, ok := c.keys[key]; !ok {
@@ -33,13 +36,16 @@ func (c *Collects) Add(req *http.Request) {
 	}
 }
 
-type Event func(r *http.Request)
+// EventHandle is the collect event handle
+type EventHandle func(r *http.Request)
 
-func (c *Collects) AddEvent(e Event) {
+// AddEvent adds new event handle
+func (c *Collects) AddEvent(e EventHandle) {
 	c.events = append(c.events, e)
 	c.handleEvents()
 }
 
+// Stop stops the collector
 func (c *Collects) Stop() {
 	c.stopSignal <- struct{}{}
 }
