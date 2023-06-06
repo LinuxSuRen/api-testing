@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/elazarl/goproxy"
@@ -37,19 +38,32 @@ func NewRootCmd() (c *cobra.Command) {
 	return
 }
 
+type responseFilter struct {
+	urlFilter *filter.URLPathFilter
+	collects  *pkg.Collects
+}
+
+func (f *responseFilter) filter(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
+	contentType := resp.Header.Get("Content-Type")
+	if !strings.Contains(contentType, "application/json") {
+		return resp
+	}
+
+	req := resp.Request
+	if f.urlFilter.Filter(req.URL) {
+		f.collects.Add(req.Clone(context.TODO()))
+	}
+	return resp
+}
+
 func (o *option) runE(cmd *cobra.Command, args []string) (err error) {
 	urlFilter := &filter.URLPathFilter{PathPrefix: o.filterPath}
 	collects := pkg.NewCollects()
+	responseFilter := &responseFilter{urlFilter: urlFilter, collects: collects}
 
 	proxy := goproxy.NewProxyHttpServer()
 	proxy.Verbose = true
-	proxy.OnRequest().DoFunc(
-		func(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-			if urlFilter.Filter(r.URL) {
-				collects.Add(r.Clone(context.TODO()))
-			}
-			return r, nil
-		})
+	proxy.OnResponse().DoFunc(responseFilter.filter)
 
 	exporter := pkg.NewSampleExporter()
 	collects.AddEvent(exporter.Add)
