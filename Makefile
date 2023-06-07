@@ -17,6 +17,9 @@ copy-restart: build
 test:
 	go test ./... -cover -v -coverprofile=coverage.out
 	go tool cover -func=coverage.out
+test-collector:
+	go test github.com/linuxsuren/api-testing/extensions/collector/./... -cover -v -coverprofile=collector-coverage.out
+	go tool cover -func=collector-coverage.out
 grpc:
 	protoc --go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \

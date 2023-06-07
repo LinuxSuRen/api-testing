@@ -7,6 +7,7 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
+    id: atest
     binary: atest
     goos:
       - linux
@@ -16,8 +17,31 @@ builds:
       - -w
       - -s
       - -X github.com/linuxsuren/api-testing/pkg/version.version={{.Version}}
+  - env:
+      - CGO_ENABLED=0
+    id: collector
+    binary: atest-collector
+    main: ./extensions/collector/main.go
+    goos:
+      - linux
+      - windows
+      - darwin
+    ldflags:
+      - -w
+      - -s
 archives:
   - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
+    builds:
+      - atest
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+  - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
+    id: collector
+    builds:
+      - collector
     format_overrides:
       - goos: windows
         format: zip
