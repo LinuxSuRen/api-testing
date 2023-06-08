@@ -7,6 +7,8 @@ COPY extensions/ extensions/
 COPY sample/ sample/
 COPY go.mod go.mod
 COPY go.sum go.sum
+COPY go.work go.work
+COPY go.work.sum go.work.sum
 COPY main.go main.go
 COPY README.md README.md
 COPY LICENSE LICENSE
@@ -29,7 +31,7 @@ LABEL "maintainer"="Rick <linuxsuren@gmail.com>"
 LABEL "Name"="API testing"
 
 COPY --from=builder /workspace/atest /usr/local/bin/atest
-COPY --from=builder /workspace/atest /usr/local/bin/atest-collector
+COPY --from=builder /workspace/atest-collector /usr/local/bin/atest-collector
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 

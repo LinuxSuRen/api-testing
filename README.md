@@ -61,6 +61,23 @@ below is an example of the usage, and you could see the report as well:
 | GET https://gitlab.com/api/v4/projects/45088772 | 840.761064ms | 1.487285371s | 492.583066ms | 10 | 0 |
 consume: 1m2.153686448s
 
+## Use in Docker
+
+Use `atest` as server mode in Docker:
+```
+docker run -p 7070:7070 ghcr.io/linuxsuren/api-testing
+```
+
+Use `atest-collector` in Docker:
+```shell
+docker run -p 1234:8080 -v /var/tmp:/var/tmp \
+  ghcr.io/linuxsuren/api-testing atest-collector \
+  --filter-path /api \
+  -o /var/tmp/sample.yaml
+# you could find the test cases file from /var/tmp/sample
+# cat /var/tmp/sample
+```
+
 ## Template
 
 The following fields are templated with [sprig](http://masterminds.github.io/sprig/):
