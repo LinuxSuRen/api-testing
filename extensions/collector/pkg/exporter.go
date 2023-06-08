@@ -3,7 +3,6 @@ package pkg
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
 
 	atestpkg "github.com/linuxsuren/api-testing/pkg/testing"
@@ -12,20 +11,23 @@ import (
 
 // SampleExporter is a sample exporter
 type SampleExporter struct {
-	TestSuite atestpkg.TestSuite
+	TestSuite        atestpkg.TestSuite
+	saveResponseBody bool
 }
 
 // NewSampleExporter creates a new exporter
-func NewSampleExporter() *SampleExporter {
+func NewSampleExporter(saveResponseBody bool) *SampleExporter {
 	return &SampleExporter{
 		TestSuite: atestpkg.TestSuite{
 			Name: "sample",
 		},
+		saveResponseBody: saveResponseBody,
 	}
 }
 
 // Add adds a request to the exporter
-func (e *SampleExporter) Add(r *http.Request) {
+func (e *SampleExporter) Add(reqAndResp *RequestAndResponse) {
+	r, resp := reqAndResp.Request, reqAndResp.Response
 
 	fmt.Println("receive", r.URL.Path)
 	req := atestpkg.Request{
@@ -42,9 +44,13 @@ func (e *SampleExporter) Add(r *http.Request) {
 
 	testCase := atestpkg.TestCase{
 		Request: req,
-		Expect: atestpkg.Response{
-			StatusCode: http.StatusOK,
-		},
+	}
+
+	if resp != nil {
+		testCase.Expect.StatusCode = resp.StatusCode
+		if e.saveResponseBody && resp.Body != "" {
+			testCase.Expect.Body = resp.Body
+		}
 	}
 
 	specs := strings.Split(r.URL.Path, "/")

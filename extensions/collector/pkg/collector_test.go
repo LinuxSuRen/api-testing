@@ -21,11 +21,12 @@ func TestCollector(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			collects := pkg.NewCollects()
-			collects.AddEvent(func(r *http.Request) {
+			collects.AddEvent(func(reqAndResp *pkg.RequestAndResponse) {
+				r := reqAndResp.Request
 				assert.Equal(t, tt.Request, r)
 			})
 			for i := 0; i < 10; i++ {
-				collects.Add(tt.Request)
+				collects.Add(tt.Request, nil)
 			}
 			collects.Stop()
 		})

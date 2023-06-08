@@ -12,15 +12,21 @@ import (
 )
 
 func TestSampleExporter(t *testing.T) {
-	exporter := pkg.NewSampleExporter()
+	exporter := pkg.NewSampleExporter(true)
 	assert.Equal(t, "sample", exporter.TestSuite.Name)
 
 	request, err := newRequest()
 	assert.NoError(t, err)
-	exporter.Add(request)
+	exporter.Add(&pkg.RequestAndResponse{Request: request})
 
 	request, err = newRequest()
-	exporter.Add(request)
+	exporter.Add(&pkg.RequestAndResponse{
+		Request: request,
+		Response: &pkg.SimpleResponse{
+			Body:       "hello",
+			StatusCode: http.StatusOK,
+		},
+	})
 
 	var result string
 	result, err = exporter.Export()
