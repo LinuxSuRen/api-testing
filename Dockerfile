@@ -3,6 +3,7 @@ FROM golang:1.18 AS builder
 WORKDIR /workspace
 COPY cmd/ cmd/
 COPY pkg/ pkg/
+COPY extensions/ extensions/
 COPY sample/ sample/
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -12,6 +13,7 @@ COPY LICENSE LICENSE
 
 RUN go mod download
 RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest .
+RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
 
 FROM ubuntu:23.04
 
@@ -27,6 +29,7 @@ LABEL "maintainer"="Rick <linuxsuren@gmail.com>"
 LABEL "Name"="API testing"
 
 COPY --from=builder /workspace/atest /usr/local/bin/atest
+COPY --from=builder /workspace/atest /usr/local/bin/atest-collector
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
