@@ -11,9 +11,19 @@ type Collects struct {
 	once       sync.Once
 	signal     chan string
 	stopSignal chan struct{}
-	keys       map[string]*http.Request
+	keys       map[string]*RequestAndResponse
 	requests   []*http.Request
 	events     []EventHandle
+}
+
+type SimpleResponse struct {
+	StatusCode int
+	Body       string
+}
+
+type RequestAndResponse struct {
+	Request  *http.Request
+	Response *SimpleResponse
 }
 
 // NewCollects creates an instance of Collector
@@ -22,22 +32,25 @@ func NewCollects() *Collects {
 		once:       sync.Once{},
 		signal:     make(chan string, 5),
 		stopSignal: make(chan struct{}, 1),
-		keys:       make(map[string]*http.Request),
+		keys:       make(map[string]*RequestAndResponse),
 	}
 }
 
 // Add adds a HTTP request
-func (c *Collects) Add(req *http.Request) {
+func (c *Collects) Add(req *http.Request, resp *SimpleResponse) {
 	key := fmt.Sprintf("%s-%s", req.Method, req.URL.String())
 	if _, ok := c.keys[key]; !ok {
-		c.keys[key] = req
+		c.keys[key] = &RequestAndResponse{
+			Request:  req,
+			Response: resp,
+		}
 		c.requests = append(c.requests, req)
 		c.signal <- key
 	}
 }
 
 // EventHandle is the collect event handle
-type EventHandle func(r *http.Request)
+type EventHandle func(r *RequestAndResponse)
 
 // AddEvent adds new event handle
 func (c *Collects) AddEvent(e EventHandle) {
@@ -60,7 +73,6 @@ func (c *Collects) handleEvents() {
 				case key := <-c.signal:
 					fmt.Println("receive signal", key)
 					for _, e := range c.events {
-						fmt.Println("handle event", key, e)
 						e(c.keys[key])
 					}
 				case <-c.stopSignal:

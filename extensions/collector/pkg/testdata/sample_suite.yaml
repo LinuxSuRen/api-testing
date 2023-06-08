@@ -10,8 +10,6 @@ items:
       Authorization: Bearer token
       Content-Type: application/json
     body: hello
-  expect:
-    statusCode: 200
 - name: v1-1
   request:
     api: http://foo/api/v1
@@ -22,3 +20,4 @@ items:
     body: hello
   expect:
     statusCode: 200
+    body: hello

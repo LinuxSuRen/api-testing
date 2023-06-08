@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 )
@@ -13,11 +12,15 @@ type URLFilter interface {
 
 // URLPathFilter filters the URL with path
 type URLPathFilter struct {
-	PathPrefix string
+	PathPrefix []string
 }
 
 // Filter implements the URLFilter
 func (f *URLPathFilter) Filter(targetURL *url.URL) bool {
-	fmt.Println(targetURL.Path, f.PathPrefix)
-	return strings.HasPrefix(targetURL.Path, f.PathPrefix)
+	for _, prefix := range f.PathPrefix {
+		if strings.HasPrefix(targetURL.Path, prefix) {
+			return true
+		}
+	}
+	return false
 }
