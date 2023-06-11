@@ -58,12 +58,8 @@ func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice,
 			item.Total += duration
 			item.Count += 1
 
-			if record.EndTime.After(item.Last) {
-				item.Last = record.EndTime
-			}
-			if record.BeginTime.Before(item.First) {
-				item.First = record.BeginTime
-			}
+			item.Last = getLaterTime(record.EndTime, item.Last)
+			item.LastErrorMessage = getOriginalStringWhenEmpty(item.LastErrorMessage, record.GetErrorMessage())
 		} else {
 			resultWithTotal[api] = &ReportResultWithTotal{
 				ReportResult: ReportResult{
@@ -77,6 +73,7 @@ func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice,
 				Last:  record.EndTime,
 				Total: duration,
 			}
+			resultWithTotal[api].LastErrorMessage = record.GetErrorMessage()
 		}
 	}
 
@@ -90,4 +87,18 @@ func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice,
 
 	sort.Sort(result)
 	return
+}
+
+func getLaterTime(a, b time.Time) time.Time {
+	if a.After(b) {
+		return a
+	}
+	return b
+}
+
+func getOriginalStringWhenEmpty(a, b string) string {
+	if b == "" {
+		return a
+	}
+	return b
 }

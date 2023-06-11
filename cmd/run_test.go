@@ -53,7 +53,7 @@ func TestRunSuite(t *testing.T) {
 			defer gock.Clean()
 			util.MakeSureNotNil(tt.prepare)()
 			ctx := getDefaultContext()
-			opt := newDiskCardRunOption()
+			opt := newDiscardRunOption()
 			opt.requestTimeout = 30 * time.Second
 			opt.limiter = limit.NewDefaultRateLimiter(0, 0)
 			stopSingal := make(chan struct{}, 1)

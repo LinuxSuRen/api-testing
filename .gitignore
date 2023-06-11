@@ -5,3 +5,4 @@ collector-coverage.out
 dist/
 .vscode/launch.json
 sample.yaml
+.DS_Store

@@ -8,33 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMarkdownWriter(t *testing.T) {
-	buf := new(bytes.Buffer)
-	writer := runner.NewMarkdownResultWriter(buf)
-
-	err := writer.Output([]runner.ReportResult{{
-		API:     "api",
-		Average: 3,
-		Max:     4,
-		Min:     2,
-		Count:   3,
-		Error:   0,
-	}, {
-		API:     "api",
-		Average: 3,
-		Max:     4,
-		Min:     2,
-		Count:   3,
-		Error:   0,
-	}})
-	assert.Nil(t, err)
-	assert.Equal(t, `| API | Average | Max | Min | Count | Error |
-|---|---|---|---|---|---|
-| api | 3ns | 4ns | 2ns | 3 | 0 |
-| api | 3ns | 4ns | 2ns | 3 | 0 |
-`, buf.String())
-}
-
 func TestNewStdResultWriter(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -58,6 +31,39 @@ func TestNewStdResultWriter(t *testing.T) {
 			QPS:     10,
 			Count:   1,
 			Error:   0,
+		}},
+		expect: `API Average Max Min QPS Count Error
+api 1ns 1ns 1ns 10 1 0
+`,
+	}, {
+		name: "have errors",
+		buf:  new(bytes.Buffer),
+		results: []runner.ReportResult{{
+			API:              "api",
+			Average:          1,
+			Max:              1,
+			Min:              1,
+			QPS:              10,
+			Count:            1,
+			Error:            1,
+			LastErrorMessage: "error",
+		}},
+		expect: `API Average Max Min QPS Count Error
+api 1ns 1ns 1ns 10 1 1
+api error: error
+`,
+	}, {
+		name: "have no errors but with message",
+		buf:  new(bytes.Buffer),
+		results: []runner.ReportResult{{
+			API:              "api",
+			Average:          1,
+			Max:              1,
+			Min:              1,
+			QPS:              10,
+			Count:            1,
+			Error:            0,
+			LastErrorMessage: "message",
 		}},
 		expect: `API Average Max Min QPS Count Error
 api 1ns 1ns 1ns 10 1 0

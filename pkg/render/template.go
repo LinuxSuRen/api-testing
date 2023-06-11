@@ -2,7 +2,9 @@ package render
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
+	"io"
 	"strings"
 
 	"github.com/Masterminds/sprig/v3"
@@ -30,4 +32,13 @@ func FuncMap() template.FuncMap {
 		return util.String(8)
 	}
 	return funcs
+}
+
+// RenderThenPrint renders the template then prints the result
+func RenderThenPrint(name, text string, ctx interface{}, w io.Writer) (err error) {
+	var report string
+	if report, err = Render(name, text, ctx); err == nil {
+		fmt.Fprint(w, report)
+	}
+	return
 }

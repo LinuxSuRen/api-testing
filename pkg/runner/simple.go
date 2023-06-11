@@ -102,6 +102,15 @@ func (r *ReportRecord) ErrorCount() int {
 	return 1
 }
 
+// GetErrorMessage returns the error message
+func (r *ReportRecord) GetErrorMessage() string {
+	if r.ErrorCount() > 0 {
+		return r.Body
+	} else {
+		return ""
+	}
+}
+
 // NewReportRecord creates a record, and set the begin time to be now
 func NewReportRecord() *ReportRecord {
 	return &ReportRecord{
@@ -111,13 +120,14 @@ func NewReportRecord() *ReportRecord {
 
 // ReportResult represents the report result of a set of the same API requests
 type ReportResult struct {
-	API     string
-	Count   int
-	Average time.Duration
-	Max     time.Duration
-	Min     time.Duration
-	QPS     int
-	Error   int
+	API              string
+	Count            int
+	Average          time.Duration
+	Max              time.Duration
+	Min              time.Duration
+	QPS              int
+	Error            int
+	LastErrorMessage string
 }
 
 // ReportResultSlice is the alias type of ReportResult slice
@@ -202,10 +212,6 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	}(record)
 
 	defer func() {
-		if testcase.Clean.CleanPrepare {
-			err = r.doCleanPrepare(testcase)
-		}
-
 		if err == nil {
 			err = runJob(testcase.After)
 		}

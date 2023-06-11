@@ -38,6 +38,7 @@ func TestExportAllReportResults(t *testing.T) {
 			BeginTime: now,
 			EndTime:   now.Add(time.Second * 4),
 			Error:     errors.New("fake"),
+			Body:      "fake",
 		}, {
 			API:       urlFoo,
 			Method:    http.MethodGet,
@@ -62,12 +63,13 @@ func TestExportAllReportResults(t *testing.T) {
 			Count:   1,
 			Error:   0,
 		}, {
-			API:     "GET http://foo",
-			Average: time.Second * 3,
-			Max:     time.Second * 4,
-			Min:     time.Second * 2,
-			Count:   3,
-			Error:   1,
+			API:              "GET http://foo",
+			Average:          time.Second * 3,
+			Max:              time.Second * 4,
+			Min:              time.Second * 2,
+			Count:            3,
+			Error:            1,
+			LastErrorMessage: "fake",
 		}, {
 			API:     "GET http://bar",
 			Average: time.Second,
@@ -76,6 +78,25 @@ func TestExportAllReportResults(t *testing.T) {
 			QPS:     1,
 			Count:   1,
 			Error:   0,
+		}},
+	}, {
+		name: "first record has error",
+		records: []*runner.ReportRecord{{
+			API:       urlFoo,
+			Method:    http.MethodGet,
+			BeginTime: now,
+			EndTime:   now.Add(time.Second * 4),
+			Error:     errors.New("fake"),
+			Body:      "fake",
+		}},
+		expect: runner.ReportResultSlice{{
+			API:              "GET http://foo",
+			Average:          time.Second * 4,
+			Max:              time.Second * 4,
+			Min:              time.Second * 4,
+			Count:            1,
+			Error:            1,
+			LastErrorMessage: "fake",
 		}},
 	}}
 	for _, tt := range tests {

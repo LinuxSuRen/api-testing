@@ -8,6 +8,7 @@ This is a API testing tool.
 
 ## Features
 
+*   Multiple test report formats: Markdown, HTML, Stdout
 *   Response Body fields equation check
 *   Response Body [eval](https://expr.medv.io/)
 *   Verify the Kubernetes resources

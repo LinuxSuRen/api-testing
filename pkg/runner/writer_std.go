@@ -1,11 +1,9 @@
 package runner
 
 import (
-	"bytes"
 	_ "embed"
 	"fmt"
 	"io"
-	"text/template"
 )
 
 type stdResultWriter struct {
@@ -23,36 +21,19 @@ func NewDiscardResultWriter() ReportResultWriter {
 }
 
 // Output writer the report to target writer
-func (w *stdResultWriter) Output(result []ReportResult) error {
+func (w *stdResultWriter) Output(results []ReportResult) error {
+	var errResults []ReportResult
 	fmt.Fprintf(w.writer, "API Average Max Min QPS Count Error\n")
-	for _, r := range result {
+	for _, r := range results {
 		fmt.Fprintf(w.writer, "%s %v %v %v %d %d %d\n", r.API, r.Average, r.Max,
 			r.Min, r.QPS, r.Count, r.Error)
+		if r.Error > 0 && r.LastErrorMessage != "" {
+			errResults = append(errResults, r)
+		}
+	}
+
+	for _, r := range errResults {
+		fmt.Fprintf(w.writer, "%s error: %s\n", r.API, r.LastErrorMessage)
 	}
 	return nil
 }
-
-type markdownResultWriter struct {
-	writer io.Writer
-}
-
-// NewMarkdownResultWriter creates the Markdown writer
-func NewMarkdownResultWriter(writer io.Writer) ReportResultWriter {
-	return &markdownResultWriter{writer: writer}
-}
-
-// Output writer the Markdown based report to target writer
-func (w *markdownResultWriter) Output(result []ReportResult) (err error) {
-	var tpl *template.Template
-	if tpl, err = template.New("report").Parse(markDownReport); err == nil {
-		buf := new(bytes.Buffer)
-
-		if err = tpl.Execute(buf, result); err == nil {
-			fmt.Fprint(w.writer, buf.String())
-		}
-	}
-	return
-}
-
-//go:embed data/report.md
-var markDownReport string
