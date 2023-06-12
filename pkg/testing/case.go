@@ -15,7 +15,6 @@ type TestCase struct {
 	After   Job      `yaml:"after,omitempty" json:"after"`
 	Request Request  `yaml:"request" json:"request"`
 	Expect  Response `yaml:"expect,omitempty" json:"expect"`
-	Clean   Clean    `yaml:"clean,omitempty" json:"-"`
 }
 
 // InScope returns true if the test case is in scope with the given items.
@@ -56,9 +55,4 @@ type Response struct {
 	BodyFieldsExpect map[string]interface{} `yaml:"bodyFieldsExpect,omitempty" json:"bodyFieldsExpect,omitempty"`
 	Verify           []string               `yaml:"verify,omitempty" json:"verify,omitempty"`
 	Schema           string                 `yaml:"schema,omitempty" json:"schema,omitempty"`
-}
-
-// Clean represents the clean work after testing
-type Clean struct {
-	CleanPrepare bool `yaml:"cleanPrepare"`
 }

@@ -1,6 +1,7 @@
 package render
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,6 +54,35 @@ func TestRender(t *testing.T) {
 			if tt.verify != nil {
 				tt.verify(t, result)
 			}
+		})
+	}
+}
+
+func TestRenderThenPrint(t *testing.T) {
+	tests := []struct {
+		name    string
+		tplText string
+		ctx     interface{}
+		buf     *bytes.Buffer
+		expect  string
+	}{{
+		name:    "simple",
+		tplText: `{{max 1 2 3}}`,
+		ctx:     nil,
+		buf:     new(bytes.Buffer),
+		expect:  `3`,
+	}, {
+		name:    "with a map as context",
+		tplText: `{{.name}}`,
+		ctx:     map[string]string{"name": "linuxsuren"},
+		buf:     new(bytes.Buffer),
+		expect:  "linuxsuren",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := RenderThenPrint(tt.name, tt.tplText, tt.ctx, tt.buf)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expect, tt.buf.String())
 		})
 	}
 }

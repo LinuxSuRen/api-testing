@@ -72,9 +72,6 @@ func TestTestCase(t *testing.T) {
 			Before: atest.Job{
 				Items: []string{"sleep(1)"},
 			},
-			Clean: atest.Clean{
-				CleanPrepare: true,
-			},
 		},
 		execer: fakeruntime.FakeExecer{},
 		prepare: func() {
