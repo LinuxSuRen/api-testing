@@ -32,6 +32,7 @@ func TestHTMLResultWriter(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := runner.NewHTMLResultWriter(tt.buf)
+			w.WithAPIConverage(nil)
 			err := w.Output(tt.results)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expect, tt.buf.String())

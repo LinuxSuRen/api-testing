@@ -116,6 +116,14 @@ func TestRunCommand(t *testing.T) {
 		args:    []string{"-p", simpleSuite, "--report", "md", "--report-file", tmpFile.Name()},
 		hasErr:  false,
 	}, {
+		name: "report with swagger URL",
+		prepare: func() {
+			fooPrepare()
+			fooPrepare()
+		},
+		args:   []string{"-p", simpleSuite, "--swagger-url", urlFoo + "/bar"},
+		hasErr: false,
+	}, {
 		name:    "report file with error",
 		prepare: fooPrepare,
 		args:    []string{"-p", simpleSuite, "--report", "md", "--report-file", path.Join(tmpFile.Name(), "fake")},
@@ -124,9 +132,10 @@ func TestRunCommand(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
+			buf := new(bytes.Buffer)
 			util.MakeSureNotNil(tt.prepare)()
 			root := &cobra.Command{Use: "root"}
-			root.SetOut(&bytes.Buffer{})
+			root.SetOut(buf)
 			root.AddCommand(createRunCommand())
 
 			root.SetArgs(append([]string{"run"}, tt.args...))
@@ -179,6 +188,15 @@ func TestPreRunE(t *testing.T) {
 		name: "std report",
 		opt: &runOption{
 			report: "std",
+		},
+		verify: func(t *testing.T, ro *runOption, err error) {
+			assert.Nil(t, err)
+			assert.NotNil(t, ro.reportWriter)
+		},
+	}, {
+		name: "html report",
+		opt: &runOption{
+			report: "html",
 		},
 		verify: func(t *testing.T, ro *runOption, err error) {
 			assert.Nil(t, err)

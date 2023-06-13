@@ -11,6 +11,7 @@ import (
 func TestMarkdownWriter(t *testing.T) {
 	buf := new(bytes.Buffer)
 	writer := runner.NewMarkdownResultWriter(buf)
+	writer.WithAPIConverage(nil)
 
 	err := writer.Output([]runner.ReportResult{{
 		API:     "api",

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"go/ast"
 	"go/doc"
 	"go/parser"
@@ -26,7 +25,7 @@ func createFunctionCmd() (c *cobra.Command) {
 					cmd.Println(reflect.TypeOf(fn))
 					desc := FuncDescription(fn)
 					if desc != "" {
-						fmt.Println(desc)
+						cmd.Println(desc)
 					}
 				} else {
 					cmd.Println("No such function")

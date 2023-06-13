@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/limit"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
@@ -35,6 +36,7 @@ type runOption struct {
 	reportWriter       runner.ReportResultWriter
 	report             string
 	reportIgnore       bool
+	swaggerURL         string
 	level              string
 	caseItems          []string
 }
@@ -77,6 +79,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, discard, std")
 	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
 	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
+	flags.StringVarP(&opt.swaggerURL, "swagger-url", "", "", "The URL of swagger")
 	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
 	flags.Int32VarP(&opt.qps, "qps", "", 5, "QPS")
 	flags.Int32VarP(&opt.burst, "burst", "", 5, "burst")
@@ -106,6 +109,15 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 		o.reportWriter = runner.NewResultWriter(writer)
 	default:
 		err = fmt.Errorf("not supported report type: '%s'", o.report)
+	}
+
+	if err == nil {
+		var swaggerAPI apispec.APIConverage
+		if o.swaggerURL != "" {
+			if swaggerAPI, err = apispec.ParseURLToSwagger(o.swaggerURL); err == nil {
+				o.reportWriter.WithAPIConverage(swaggerAPI)
+			}
+		}
 	}
 
 	o.caseItems = args

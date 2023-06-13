@@ -14,6 +14,7 @@ import (
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
@@ -153,6 +154,7 @@ func (r ReportResultSlice) Swap(i, j int) {
 // ReportResultWriter is the interface of the report writer
 type ReportResultWriter interface {
 	Output([]ReportResult) error
+	WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter
 }
 
 // TestReporter is the interface of the report
