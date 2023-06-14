@@ -16,6 +16,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/semaphore"
 )
@@ -71,7 +72,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	// set flags
 	flags := cmd.Flags()
 	flags.StringVarP(&opt.pattern, "pattern", "p", "test-suite-*.yaml",
-		"The file pattern which try to execute the test cases")
+		"The file pattern which try to execute the test cases. Brace expansion is supported, such as: test-suite-{1,2}.yaml")
 	flags.StringVarP(&opt.level, "level", "l", "info", "Set the output log level")
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
@@ -125,7 +126,6 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 }
 
 func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
-	var files []string
 	o.startTime = time.Now()
 	o.context = cmd.Context()
 	o.limiter = limit.NewDefaultRateLimiter(o.qps, o.burst)
@@ -134,12 +134,20 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 		o.limiter.Stop()
 	}()
 
-	if files, err = filepath.Glob(o.pattern); err == nil {
-		for i := range files {
-			item := files[i]
-			if err = o.runSuiteWithDuration(item); err != nil {
-				break
-			}
+	var suites []string
+	for _, pattern := range util.Expand(o.pattern) {
+		var files []string
+		if files, err = filepath.Glob(pattern); err == nil {
+			suites = append(suites, files...)
+		}
+	}
+
+	cmd.Println("found suites:", len(suites))
+	for i := range suites {
+		item := suites[i]
+		cmd.Println("run suite:", item)
+		if err = o.runSuiteWithDuration(item); err != nil {
+			break
 		}
 	}
 

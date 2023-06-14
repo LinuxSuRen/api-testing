@@ -39,11 +39,13 @@ Usage:
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
+  func        Print all the supported functions
   help        Help about any command
   json        Print the JSON schema of the test suites struct
   run         Run the test suite
   sample      Generate a sample test case YAML file
   server      Run as a server mode
+  service     Install atest as a Linux service
 
 Flags:
   -h, --help      help for atest
