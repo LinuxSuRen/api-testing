@@ -4,10 +4,13 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
+
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 )
 
 type stdResultWriter struct {
-	writer io.Writer
+	writer       io.Writer
+	apiConverage apispec.APIConverage
 }
 
 // NewResultWriter creates a result writer with the specific io.Writer
@@ -35,5 +38,27 @@ func (w *stdResultWriter) Output(results []ReportResult) error {
 	for _, r := range errResults {
 		fmt.Fprintf(w.writer, "%s error: %s\n", r.API, r.LastErrorMessage)
 	}
+
+	apiConveragePrint(results, w.apiConverage, w.writer)
 	return nil
+}
+
+// WithAPIConverage sets the api coverage
+func (w *stdResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
+	w.apiConverage = apiConverage
+	return w
+}
+
+func apiConveragePrint(result []ReportResult, apiConverage apispec.APIConverage, w io.Writer) {
+	if apiConverage == nil {
+		return
+	}
+
+	var covered int
+	for _, item := range result {
+		if apiConverage.HaveAPI(item.API, "GET") {
+			covered++
+		}
+	}
+	fmt.Fprintf(w, "\nAPI Coverage: %d/%d\n", covered, apiConverage.APICount())
 }

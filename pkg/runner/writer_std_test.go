@@ -76,6 +76,7 @@ api 1ns 1ns 1ns 10 1 0
 				return
 			}
 
+			writer.WithAPIConverage(nil)
 			err := writer.Output(tt.results)
 			assert.Nil(t, err)
 			assert.Equal(t, tt.expect, tt.buf.String())
