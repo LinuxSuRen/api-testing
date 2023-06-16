@@ -4,16 +4,18 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewStdResultWriter(t *testing.T) {
 	tests := []struct {
-		name    string
-		buf     *bytes.Buffer
-		results []runner.ReportResult
-		expect  string
+		name         string
+		buf          *bytes.Buffer
+		apiConverage apispec.APIConverage
+		results      []runner.ReportResult
+		expect       string
 	}{{
 		name:    "result is nil",
 		buf:     new(bytes.Buffer),
@@ -23,8 +25,11 @@ func TestNewStdResultWriter(t *testing.T) {
 	}, {
 		name: "have one item",
 		buf:  new(bytes.Buffer),
+		apiConverage: apispec.NewFakeAPISpec([][]string{{
+			"/api", "GET",
+		}}),
 		results: []runner.ReportResult{{
-			API:     "api",
+			API:     "/api",
 			Average: 1,
 			Max:     1,
 			Min:     1,
@@ -33,7 +38,9 @@ func TestNewStdResultWriter(t *testing.T) {
 			Error:   0,
 		}},
 		expect: `API Average Max Min QPS Count Error
-api 1ns 1ns 1ns 10 1 0
+/api 1ns 1ns 1ns 10 1 0
+
+API Coverage: 1/1
 `,
 	}, {
 		name: "have errors",
@@ -76,7 +83,7 @@ api 1ns 1ns 1ns 10 1 0
 				return
 			}
 
-			writer.WithAPIConverage(nil)
+			writer.WithAPIConverage(tt.apiConverage)
 			err := writer.Output(tt.results)
 			assert.Nil(t, err)
 			assert.Equal(t, tt.expect, tt.buf.String())

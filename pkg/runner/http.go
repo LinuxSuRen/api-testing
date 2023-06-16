@@ -14,7 +14,6 @@ import (
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
-	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
@@ -71,54 +70,6 @@ func (w *defaultLevelWriter) Debug(format string, a ...any) {
 	w.Fprintf(w.Writer, 7, format, a...)
 }
 
-// TestCaseRunner represents a test case runner
-type TestCaseRunner interface {
-	RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error)
-	WithOutputWriter(io.Writer) TestCaseRunner
-	WithWriteLevel(level string) TestCaseRunner
-	WithTestReporter(TestReporter) TestCaseRunner
-	WithExecer(fakeruntime.Execer) TestCaseRunner
-}
-
-// ReportRecord represents the raw data of a HTTP request
-type ReportRecord struct {
-	Method    string
-	API       string
-	Body      string
-	BeginTime time.Time
-	EndTime   time.Time
-	Error     error
-}
-
-// Duration returns the duration between begin and end time
-func (r *ReportRecord) Duration() time.Duration {
-	return r.EndTime.Sub(r.BeginTime)
-}
-
-// ErrorCount returns the count number of errors
-func (r *ReportRecord) ErrorCount() int {
-	if r.Error == nil {
-		return 0
-	}
-	return 1
-}
-
-// GetErrorMessage returns the error message
-func (r *ReportRecord) GetErrorMessage() string {
-	if r.ErrorCount() > 0 {
-		return r.Body
-	} else {
-		return ""
-	}
-}
-
-// NewReportRecord creates a record, and set the begin time to be now
-func NewReportRecord() *ReportRecord {
-	return &ReportRecord{
-		BeginTime: time.Now(),
-	}
-}
-
 // ReportResult represents the report result of a set of the same API requests
 type ReportResult struct {
 	API              string
@@ -149,19 +100,6 @@ func (r ReportResultSlice) Swap(i, j int) {
 	tmp := r[i]
 	r[i] = r[j]
 	r[j] = tmp
-}
-
-// ReportResultWriter is the interface of the report writer
-type ReportResultWriter interface {
-	Output([]ReportResult) error
-	WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter
-}
-
-// TestReporter is the interface of the report
-type TestReporter interface {
-	PutRecord(*ReportRecord)
-	GetAllRecords() []*ReportRecord
-	ExportAllReportResults() (ReportResultSlice, error)
 }
 
 type simpleTestCaseRunner struct {
@@ -316,18 +254,6 @@ func (r *simpleTestCaseRunner) WithTestReporter(reporter TestReporter) TestCaseR
 func (r *simpleTestCaseRunner) WithExecer(execer fakeruntime.Execer) TestCaseRunner {
 	r.execer = execer
 	return r
-}
-
-func (r *simpleTestCaseRunner) doCleanPrepare(testcase *testing.TestCase) (err error) {
-	count := len(testcase.Before.Items)
-	for i := count - 1; i >= 0; i-- {
-		item := testcase.Before.Items[i]
-
-		if err = r.execer.RunCommand("kubectl", "delete", "-f", item); err != nil {
-			return
-		}
-	}
-	return
 }
 
 func expectInt(name string, expect, actual int) (err error) {
