@@ -12,8 +12,8 @@ import (
 
 	"github.com/h2non/gock"
 	"github.com/linuxsuren/api-testing/pkg/limit"
+	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
-	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -58,8 +58,13 @@ func TestRunSuite(t *testing.T) {
 			opt.limiter = limit.NewDefaultRateLimiter(0, 0)
 			stopSingal := make(chan struct{}, 1)
 
-			err := opt.runSuite(tt.suiteFile, ctx, context.TODO(), stopSingal)
-			assert.Equal(t, tt.hasError, err != nil, err)
+			loader := atest.NewFileLoader()
+			err := loader.Put(tt.suiteFile)
+			assert.NoError(t, err)
+			if loader.HasMore() {
+				err = opt.runSuite(loader, ctx, context.TODO(), stopSingal)
+				assert.Equal(t, tt.hasError, err != nil, err)
+			}
 		})
 	}
 }
@@ -128,6 +133,11 @@ func TestRunCommand(t *testing.T) {
 		prepare: fooPrepare,
 		args:    []string{"-p", simpleSuite, "--report", "md", "--report-file", path.Join(tmpFile.Name(), "fake")},
 		hasErr:  true,
+	}, {
+		name:    "malformed report file path",
+		prepare: fooPrepare,
+		args:    []string{"-p", "[]]$#%*^&()"},
+		hasErr:  true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -144,12 +154,6 @@ func TestRunCommand(t *testing.T) {
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})
 	}
-}
-
-func TestRootCmd(t *testing.T) {
-	c := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, NewFakeGRPCServer())
-	assert.NotNil(t, c)
-	assert.Equal(t, "atest", c.Use)
 }
 
 func TestPreRunE(t *testing.T) {

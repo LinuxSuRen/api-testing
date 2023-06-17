@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -16,7 +14,6 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
-	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/semaphore"
 )
@@ -40,12 +37,16 @@ type runOption struct {
 	swaggerURL         string
 	level              string
 	caseItems          []string
+
+	// for internal use
+	loader testing.Loader
 }
 
 func newDefaultRunOption() *runOption {
 	return &runOption{
 		reporter:     runner.NewMemoryTestReporter(),
 		reportWriter: runner.NewResultWriter(os.Stdout),
+		loader:       testing.NewFileLoader(),
 	}
 }
 
@@ -134,19 +135,13 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 		o.limiter.Stop()
 	}()
 
-	var suites []string
-	for _, pattern := range util.Expand(o.pattern) {
-		var files []string
-		if files, err = filepath.Glob(pattern); err == nil {
-			suites = append(suites, files...)
-		}
+	if err = o.loader.Put(o.pattern); err != nil {
+		return
 	}
 
-	cmd.Println("found suites:", len(suites))
-	for i := range suites {
-		item := suites[i]
-		cmd.Println("run suite:", item)
-		if err = o.runSuiteWithDuration(item); err != nil {
+	cmd.Println("found suites:", o.loader.GetCount())
+	for o.loader.HasMore() {
+		if err = o.runSuiteWithDuration(o.loader); err != nil {
 			break
 		}
 	}
@@ -166,7 +161,7 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func (o *runOption) runSuiteWithDuration(suite string) (err error) {
+func (o *runOption) runSuiteWithDuration(loader testing.Loader) (err error) {
 	sem := semaphore.NewWeighted(o.thread)
 	stop := false
 	var timeout *time.Ticker
@@ -204,7 +199,7 @@ func (o *runOption) runSuiteWithDuration(suite string) (err error) {
 				}()
 
 				dataContext := getDefaultContext()
-				ch <- o.runSuite(suite, dataContext, o.context, stopSingal)
+				ch <- o.runSuite(loader, dataContext, o.context, stopSingal)
 			}(errChannel, sem)
 			if o.duration <= 0 {
 				stop = true
@@ -221,9 +216,14 @@ func (o *runOption) runSuiteWithDuration(suite string) (err error) {
 	return
 }
 
-func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, ctx context.Context, stopSingal chan struct{}) (err error) {
+func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]interface{}, ctx context.Context, stopSingal chan struct{}) (err error) {
+	var data []byte
+	if data, err = loader.Load(); err != nil {
+		return
+	}
+
 	var testSuite *testing.TestSuite
-	if testSuite, err = testing.Parse(suite); err != nil {
+	if testSuite, err = testing.Parse(data); err != nil {
 		return
 	}
 
@@ -253,7 +253,7 @@ func (o *runOption) runSuite(suite string, dataContext map[string]interface{}, c
 			o.limiter.Accept()
 
 			ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
-			ctxWithTimeout = context.WithValue(ctxWithTimeout, runner.ContextKey("").ParentDir(), path.Dir(suite))
+			ctxWithTimeout = context.WithValue(ctxWithTimeout, runner.ContextKey("").ParentDir(), loader.GetContext())
 
 			simpleRunner := runner.NewSimpleTestCaseRunner()
 			simpleRunner.WithTestReporter(o.reporter)

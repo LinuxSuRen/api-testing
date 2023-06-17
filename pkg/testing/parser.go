@@ -19,11 +19,8 @@ import (
 )
 
 // Parse parses a file and returns the test suite
-func Parse(configFile string) (testSuite *TestSuite, err error) {
-	var data []byte
-	if data, err = os.ReadFile(configFile); err == nil {
-		testSuite, err = ParseFromData(data)
-	}
+func Parse(data []byte) (testSuite *TestSuite, err error) {
+	testSuite, err = ParseFromData(data)
 
 	// schema validation
 	if err == nil {
@@ -116,7 +113,7 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 	}
 
 	// setting default values
-	r.Method = emptyThenDefault(r.Method, http.MethodGet)
+	r.Method = EmptyThenDefault(r.Method, http.MethodGet)
 	return
 }
 
@@ -153,18 +150,20 @@ func (r *Request) GetBody() (reader io.Reader, err error) {
 
 // Render renders the response
 func (r *Response) Render(ctx interface{}) (err error) {
-	r.StatusCode = zeroThenDefault(r.StatusCode, http.StatusOK)
+	r.StatusCode = ZeroThenDefault(r.StatusCode, http.StatusOK)
 	return
 }
 
-func zeroThenDefault(val, defVal int) int {
+// ZeroThenDefault return the default value if the val is zero
+func ZeroThenDefault(val, defVal int) int {
 	if val == 0 {
 		val = defVal
 	}
 	return val
 }
 
-func emptyThenDefault(val, defVal string) string {
+// EmptyThenDefault return the default value if the val is empty
+func EmptyThenDefault(val, defVal string) string {
 	if strings.TrimSpace(val) == "" {
 		val = defVal
 	}
