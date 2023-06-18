@@ -1,150 +1,162 @@
-package testing
+package testing_test
 
 import (
 	"io"
 	"net/http"
+	"os"
 	"testing"
 
 	_ "embed"
 
+	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestParse(t *testing.T) {
-	suite, err := Parse("../../sample/testsuite-gitlab.yaml")
+	data, err := os.ReadFile("../../sample/testsuite-gitlab.yaml")
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	suite, err := atest.Parse(data)
 	if assert.Nil(t, err) && assert.NotNil(t, suite) {
 		assert.Equal(t, "Gitlab", suite.Name)
 		assert.Equal(t, 2, len(suite.Items))
-		assert.Equal(t, TestCase{
+		assert.Equal(t, atest.TestCase{
 			Name: "projects",
-			Request: Request{
+			Request: atest.Request{
 				API: "https://gitlab.com/api/v4/projects",
 			},
-			Expect: Response{
+			Expect: atest.Response{
 				StatusCode: http.StatusOK,
 				Schema: `{
   "type": "array"
 }
 `,
 			},
-			Before: Job{
+			Before: atest.Job{
 				Items: []string{"sleep(1)"},
 			},
-			After: Job{
+			After: atest.Job{
 				Items: []string{"sleep(1)"},
 			},
 		}, suite.Items[0])
 	}
 
-	_, err = Parse("testdata/invalid-testcase.yaml")
+	_, err = atest.Parse([]byte(invalidTestCaseContent))
 	assert.NotNil(t, err)
 }
 
 func TestDuplicatedNames(t *testing.T) {
-	_, err := Parse("testdata/duplicated-names.yaml")
+	data, err := os.ReadFile("testdata/duplicated-names.yaml")
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	_, err = atest.Parse(data)
 	assert.NotNil(t, err)
 
-	_, err = ParseFromData([]byte("fake"))
+	_, err = atest.ParseFromData([]byte("fake"))
 	assert.NotNil(t, err)
 }
 
 func TestRequestRender(t *testing.T) {
 	tests := []struct {
 		name    string
-		request *Request
-		verify  func(t *testing.T, req *Request)
+		request *atest.Request
+		verify  func(t *testing.T, req *atest.Request)
 		ctx     interface{}
 		hasErr  bool
 	}{{
 		name: "slice as context",
-		request: &Request{
+		request: &atest.Request{
 			API:  "http://localhost/{{index . 0}}",
 			Body: "{{index . 1}}",
 		},
 		ctx:    []string{"foo", "bar"},
 		hasErr: false,
-		verify: func(t *testing.T, req *Request) {
+		verify: func(t *testing.T, req *atest.Request) {
 			assert.Equal(t, "http://localhost/foo", req.API)
 			assert.Equal(t, "bar", req.Body)
 		},
 	}, {
 		name:    "default values",
-		request: &Request{},
-		verify: func(t *testing.T, req *Request) {
+		request: &atest.Request{},
+		verify: func(t *testing.T, req *atest.Request) {
 			assert.Equal(t, http.MethodGet, req.Method)
 		},
 		hasErr: false,
 	}, {
 		name:    "context is nil",
-		request: &Request{},
+		request: &atest.Request{},
 		ctx:     nil,
 		hasErr:  false,
 	}, {
 		name: "body from file",
-		request: &Request{
+		request: &atest.Request{
 			BodyFromFile: "testdata/generic_body.json",
 		},
-		ctx: TestCase{
+		ctx: atest.TestCase{
 			Name: "linuxsuren",
 		},
 		hasErr: false,
-		verify: func(t *testing.T, req *Request) {
+		verify: func(t *testing.T, req *atest.Request) {
 			assert.Equal(t, `{"name": "linuxsuren"}`, req.Body)
 		},
 	}, {
 		name: "body file not found",
-		request: &Request{
+		request: &atest.Request{
 			BodyFromFile: "testdata/fake",
 		},
 		hasErr: true,
 	}, {
 		name: "invalid API as template",
-		request: &Request{
+		request: &atest.Request{
 			API: "{{.name}",
 		},
 		hasErr: true,
 	}, {
 		name: "failed with API render",
-		request: &Request{
+		request: &atest.Request{
 			API: "{{.name}}",
 		},
-		ctx:    TestCase{},
+		ctx:    atest.TestCase{},
 		hasErr: true,
 	}, {
 		name: "invalid body as template",
-		request: &Request{
+		request: &atest.Request{
 			Body: "{{.name}",
 		},
 		hasErr: true,
 	}, {
 		name: "failed with body render",
-		request: &Request{
+		request: &atest.Request{
 			Body: "{{.name}}",
 		},
-		ctx:    TestCase{},
+		ctx:    atest.TestCase{},
 		hasErr: true,
 	}, {
 		name: "form render",
-		request: &Request{
+		request: &atest.Request{
 			Form: map[string]string{
 				"key": "{{.Name}}",
 			},
 		},
-		ctx: TestCase{Name: "linuxsuren"},
-		verify: func(t *testing.T, req *Request) {
+		ctx: atest.TestCase{Name: "linuxsuren"},
+		verify: func(t *testing.T, req *atest.Request) {
 			assert.Equal(t, "linuxsuren", req.Form["key"])
 		},
 		hasErr: false,
 	}, {
 		name: "header render",
-		request: &Request{
+		request: &atest.Request{
 			Header: map[string]string{
 				"key": "{{.Name}}",
 			},
 		},
-		ctx: TestCase{Name: "linuxsuren"},
-		verify: func(t *testing.T, req *Request) {
+		ctx: atest.TestCase{Name: "linuxsuren"},
+		verify: func(t *testing.T, req *atest.Request) {
 			assert.Equal(t, "linuxsuren", req.Header["key"])
 		},
 		hasErr: false,
@@ -162,14 +174,14 @@ func TestRequestRender(t *testing.T) {
 func TestResponseRender(t *testing.T) {
 	tests := []struct {
 		name     string
-		response *Response
-		verify   func(t *testing.T, req *Response)
+		response *atest.Response
+		verify   func(t *testing.T, req *atest.Response)
 		ctx      interface{}
 		hasErr   bool
 	}{{
 		name:     "blank response",
-		response: &Response{},
-		verify: func(t *testing.T, req *Response) {
+		response: &atest.Response{},
+		verify: func(t *testing.T, req *atest.Response) {
 			assert.Equal(t, http.StatusOK, req.StatusCode)
 		},
 		hasErr: false,
@@ -208,24 +220,24 @@ func TestEmptyThenDefault(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := emptyThenDefault(tt.val, tt.defVal)
+			result := atest.EmptyThenDefault(tt.val, tt.defVal)
 			assert.Equal(t, tt.expect, result, result)
 		})
 	}
 
-	assert.Equal(t, 1, zeroThenDefault(0, 1))
-	assert.Equal(t, 1, zeroThenDefault(1, 2))
+	assert.Equal(t, 1, atest.ZeroThenDefault(0, 1))
+	assert.Equal(t, 1, atest.ZeroThenDefault(1, 2))
 }
 
 func TestTestCase(t *testing.T) {
-	testCase, err := ParseTestCaseFromData([]byte(testCaseContent))
+	testCase, err := atest.ParseTestCaseFromData([]byte(testCaseContent))
 	assert.Nil(t, err)
-	assert.Equal(t, &TestCase{
+	assert.Equal(t, &atest.TestCase{
 		Name: "projects",
-		Request: Request{
+		Request: atest.Request{
 			API: "https://foo",
 		},
-		Expect: Response{
+		Expect: atest.Response{
 			StatusCode: http.StatusOK,
 		},
 	}, testCase)
@@ -236,21 +248,21 @@ func TestGetBody(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		req         *Request
+		req         *atest.Request
 		expectBody  string
 		containBody string
 		expectErr   bool
 	}{{
 		name:       "normal body",
-		req:        &Request{Body: defaultBody},
+		req:        &atest.Request{Body: defaultBody},
 		expectBody: defaultBody,
 	}, {
 		name:       "body from file",
-		req:        &Request{BodyFromFile: "testdata/testcase.yaml"},
+		req:        &atest.Request{BodyFromFile: "testdata/testcase.yaml"},
 		expectBody: testCaseContent,
 	}, {
 		name: "multipart form data",
-		req: &Request{
+		req: &atest.Request{
 			Header: map[string]string{
 				util.ContentType: util.MultiPartFormData,
 			},
@@ -261,7 +273,7 @@ func TestGetBody(t *testing.T) {
 		containBody: "name=\"key\"\r\n\r\nvalue\r\n",
 	}, {
 		name: "normal form",
-		req: &Request{
+		req: &atest.Request{
 			Header: map[string]string{
 				util.ContentType: util.Form,
 			},
@@ -292,3 +304,6 @@ func TestGetBody(t *testing.T) {
 
 //go:embed testdata/testcase.yaml
 var testCaseContent string
+
+//go:embed testdata/invalid-testcase.yaml
+var invalidTestCaseContent string
