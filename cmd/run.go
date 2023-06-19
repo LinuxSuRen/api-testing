@@ -78,7 +78,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
-	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, discard, std")
+	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std")
 	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
 	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
 	flags.StringVarP(&opt.swaggerURL, "swagger-url", "", "", "The URL of swagger")
@@ -105,6 +105,8 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 		o.reportWriter = runner.NewMarkdownResultWriter(writer)
 	case "html":
 		o.reportWriter = runner.NewHTMLResultWriter(writer)
+	case "json":
+		o.reportWriter = runner.NewJSONResultWriter(writer)
 	case "discard":
 		o.reportWriter = runner.NewDiscardResultWriter()
 	case "", "std":
