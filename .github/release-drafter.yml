@@ -35,8 +35,24 @@ exclude-labels:
   - no-changelog
   - skip-changelog
   - invalid
+autolabeler:
+  - label: 'documentation'
+    title:
+      - '/docs:/i'
+  - label: 'chore'
+    title:
+      - '/chore:/i'
+  - label: 'bug'
+    title:
+      - '/fix:/i'
+  - label: 'enhancement'
+    title:
+      - '/feat:/i'
 change-template: '* $TITLE (#$NUMBER) @$AUTHOR'
 template: |
   ## What’s Changed
 
   $CHANGES
+
+  ## Thanks to
+  $CONTRIBUTORS
