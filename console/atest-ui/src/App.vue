@@ -83,6 +83,47 @@ function change() {
     })
   }
 }
+
+const renderContent = (
+  h,
+  {
+    node,
+    data,
+    store,
+  }: {
+    node: Node
+    data: Tree
+    store: Node['store']
+  }
+) => {
+  if (node.childNodes.length > 0) {
+    return h(
+      'span',
+      {
+        class: 'custom-tree-node',
+      },
+      h('span', null, node.label),
+      h(
+        'span',
+        null,
+        h(
+          'a',
+          {
+          },
+          'Append'
+        )
+      )
+    )
+  } else {
+    return h(
+      'span',
+      {
+        class: 'custom-tree-node',
+      },
+      h('span', null, node.label)
+    )
+  }
+}
 </script>
 
 <template>
@@ -90,7 +131,8 @@ function change() {
     <el-container>
       <el-aside width="200px">
         <el-tree :data="data" :props="defaultProps"
-          :default-expanded-keys="['1']"
+          default-expand-all
+          :render-content="renderContent"
           @node-click="handleNodeClick" />
       </el-aside>
       

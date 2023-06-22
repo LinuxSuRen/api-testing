@@ -3,9 +3,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net"
+	"net/http"
 
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -38,17 +39,27 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	var lis net.Listener
-	lis, err = net.Listen("tcp", fmt.Sprintf(":%d", o.port))
-	if err != nil {
-		return
-	}
+	// var lis net.Listener
+	// lis, err = net.Listen("tcp", fmt.Sprintf(":%d", o.port))
+	// if err != nil {
+	// 	return
+	// }
 
 	s := o.gRPCServer
 	server.RegisterRunnerServer(s, server.NewRemoteServer())
-	log.Printf("server listening at %v", lis.Addr())
-	s.Serve(lis)
-	return
+	// log.Printf("server listening at %v", lis.Addr())
+	// s.Serve(lis)
+
+	mux := runtime.NewServeMux()
+	// opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, server.NewRemoteServer())
+	if err != nil {
+		return err
+	}
+
+	// Start HTTP server (and proxy calls to gRPC server endpoint)
+	return http.ListenAndServe(fmt.Sprintf(":%d", o.port), mux)
+	// return
 }
 
 type gRPCServer interface {
