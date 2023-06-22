@@ -28,9 +28,15 @@ grpc-js:
 	protoc -I=pkg/server server.proto \
     --js_out=import_style=commonjs:bin \
     --grpc-web_out=import_style=commonjs,mode=grpcwebtext:bin
+# https://github.com/grpc/grpc-web
+grpc-ts:
+	protoc -I=pkg/server server.proto \
+    --js_out=import_style=commonjs,binary:console/atest-ui/src \
+    --grpc-web_out=import_style=typescript,mode=grpcwebtext:console/atest-ui/src
 grpc-java:
 	protoc --plugin=protoc-gen-grpc-java=/usr/local/bin/protoc-gen-grpc-java \
     --grpc-java_out=bin --proto_path=pkg/server server.proto
 install-tool:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+	hd i protoc-gen-grpc-web
