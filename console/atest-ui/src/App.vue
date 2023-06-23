@@ -1,87 +1,49 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import TestCase from './views/TestCase.vue'
 import { ref } from 'vue'
-import type { TabsPaneContext } from 'element-plus'
-import * as grpcWeb from 'grpc-web'
-import {RunnerClient} from './ServerServiceClientPb'
-import {TestTask} from './server_pb'
-
-const value = ref('')
-
-const options = [
-  {
-    value: 'GET',
-    label: 'GET',
-  },
-  {
-    value: 'POST',
-    label: 'POST',
-  },
-]
-
-const activeName = ref('first')
-
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event)
-}
+import { ElTree } from 'element-plus'
 
 interface Tree {
+  id: string
   label: string
   children?: Tree[]
 }
 
+const testCaseName = ref('')
 const handleNodeClick = (data: Tree) => {
-  console.log(data)
+  testCaseName.value = data.label
 }
 
 const data: Tree[] = [
   {
+    id: '1',
     label: 'Suite-1',
-    children: [
-      {
-        label: 'userList',
-      },
-      {
-        label: 'userEdit',
-      },
-    ],
   }
 ]
 
-const defaultProps = {
-  children: 'children',
-  label: 'label',
-}
+const treeRef = ref<InstanceType<typeof ElTree>>()
 
-interface User {
-  key: string
-  value: string
-}
+const requestOptions = {
+    method: 'POST'
+};
+fetch('/server.Runner/GetSuite', requestOptions)
+    .then(response => response.json())
+    .then(d => {
+      data[0].label = d.name
 
-let tableData: User[] = [
-  {
-    key: 'name',
-    value: 'Tom',
-  },
-  {
-    key: 'gender',
-    value: 'male',
-  },
-  {
-    key: '',
-    value: '',
-  }
-]
+      data[0].children=[]
+      d.items.forEach(e => {
+        data[0].children.push({
+          label: e.name,
+          id: e.name,
+        })
+      });
 
-function change() {
-  let lastItem = tableData[tableData.length-1]
-  if (lastItem.key !== '') {
-    tableData.push({
-      key:'',
-      value:''
-    })
-  }
+      treeRef.value.updateKeyChildren('1', data[0].children)
+    });
+
+function load(n) {
+  console.log(n)
 }
 
 const renderContent = (
@@ -132,61 +94,16 @@ const renderContent = (
       <el-aside width="200px">
         <el-tree :data="data" :props="defaultProps"
           default-expand-all
-          :render-content="renderContent"
+          ref="treeRef"
+          node-key="id"
           @node-click="handleNodeClick" />
       </el-aside>
-      
 
       <el-main>
-        <el-header>
-            <el-select v-model="value" class="m-2" placeholder="Method" size="large">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-            <el-input v-model="input" placeholder="API Address" />
-
-            <el-button type="primary">Send</el-button>
-        </el-header>
-
-        <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-          <el-tab-pane label="Params" name="first">
-            
-            <el-table :data="tableData" style="width: 100%">
-              <el-table-column label="Key" width="180">
-                <template #default="scope">
-                  <el-input v-model="scope.row.key" placeholder="Key" @change="change"/>  
-                </template>
-              </el-table-column>
-              <el-table-column label="Value">
-                <template #default="scope">
-                  <div style="display: flex; align-items: center">
-                    <el-input v-model="scope.row.value" placeholder="Value" />
-                  </div>
-                </template>
-              </el-table-column>
-            </el-table>
-
-          </el-tab-pane>
-          <el-tab-pane label="Headers" name="second">Config</el-tab-pane>
-          <el-tab-pane label="Body" name="third">
-
-            <el-radio-group v-model="radio">
-              <el-radio :label="3">None</el-radio>
-              <el-radio :label="6">raw</el-radio>
-              <el-radio :label="9">form-data</el-radio>
-            </el-radio-group>
-
-          </el-tab-pane>
-          <el-tab-pane label="Verify" name="fourth">Task</el-tab-pane>
-        </el-tabs>
+        <TestCase :name="testCaseName"/>
       </el-main>
     </el-container>
   </div>
-
 </template>
 
 <style scoped>

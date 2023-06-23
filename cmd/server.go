@@ -6,7 +6,7 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"

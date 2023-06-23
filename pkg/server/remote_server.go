@@ -141,6 +141,67 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 	return
 }
 
+func (s *server) GetSuite(ctx context.Context, in *Empty) (reply *Suite, err error) {
+	var testSuite *testing.TestSuite
+	if testSuite, err = testing.Parse("/Users/rick/Workspace/GitHub/linuxsuren/api-testing/sample/answer.yaml"); err != nil {
+		return
+	}
+
+	reply = &Suite{
+		Name:  testSuite.Name,
+		Api:   testSuite.API,
+		Items: []*TestCase{},
+	}
+	for _, testCase := range testSuite.Items {
+		req := &Request{
+			Api:    testCase.Request.API,
+			Method: testCase.Request.Method,
+			Header: mapToPair(testCase.Request.Header),
+			Query:  mapToPair(testCase.Request.Query),
+			Form:   mapToPair(testCase.Request.Form),
+			Body:   testCase.Request.Body,
+		}
+
+		resp := &Response{
+			StatusCode:       int32(testCase.Expect.StatusCode),
+			Body:             testCase.Expect.Body,
+			Header:           mapToPair(testCase.Expect.Header),
+			BodyFieldsExpect: mapInterToPair(testCase.Expect.BodyFieldsExpect),
+			Verify:           testCase.Expect.Verify,
+			Schema:           testCase.Expect.Schema,
+		}
+
+		reply.Items = append(reply.Items, &TestCase{
+			Name:     testCase.Name,
+			Request:  req,
+			Response: resp,
+		})
+	}
+	return
+}
+
+func mapInterToPair(data map[string]interface{}) (pairs []*Pair) {
+	pairs = make([]*Pair, 0)
+	for k, v := range data {
+		pairs = append(pairs, &Pair{
+			Key:   k,
+			Value: fmt.Sprintf("%v", v),
+		})
+	}
+	return
+}
+
+func mapToPair(data map[string]string) (pairs []*Pair) {
+	pairs = make([]*Pair, 0)
+	for k, v := range data {
+		pairs = append(pairs, &Pair{
+			Key:   k,
+			Value: v,
+		})
+	}
+	return
+}
+
 // Sample returns a sample of the test task
 func (s *server) Sample(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
 	reply = &HelloReply{Message: sample.TestSuiteGitLab}

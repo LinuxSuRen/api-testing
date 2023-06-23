@@ -15,7 +15,7 @@ This is a API testing tool.
 *   Validate the response body with [JSON schema](https://json-schema.org/)
 *   Pre and post handle with the API request
 *   Output reference between TestCase
-*   Run in server mode, and provide the [gRPC endpoint](pkg/server/server.proto)
+*   Run in server mode, and provide the [gRPC](pkg/server/server.proto) and HTTP endpoint
 *   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
 *   [HTTP API record](extensions/collector)
 

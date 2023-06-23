@@ -4,26 +4,11 @@ option go_package = "github.com/linuxsuren/api-testing/pkg/server";
 
 package server;
 
-import "google/api/annotations.proto";
-
 service Runner {
     rpc Run (TestTask) returns (HelloReply) {}
     rpc Sample(Empty) returns (HelloReply) {}
-    rpc GetVersion(Empty) returns (HelloReply) {
-     option (google.api.http) = {
-       get: "/v1/example/echo"
-       body: "*"
-     };
-    }
-    rpc Suite(Empty) returns (Suite) {}
-}
-
-message TestTask {
-    string data = 1;
-    string kind = 2;
-    string caseName = 3;
-    string level = 4;
-    map<string, string> env = 5;
+    rpc GetVersion(Empty) returns (HelloReply) {}
+    rpc GetSuite(Empty) returns (Suite) {}
 }
 
 message TestTask {
@@ -42,11 +27,36 @@ message HelloReply {
 message Suite {
   string name = 1;
   string api = 2;
-  []TestCase items = 3;
+  repeated TestCase items = 3;
 }
 
 message TestCase {
   string name = 1;
+  Request request = 2;
+  Response response = 3;
+}
+
+message Request {
+  string api = 1;
+  string method = 2;
+  repeated Pair header = 3;
+  repeated Pair query = 4;
+  repeated Pair form = 5;
+  string body = 6;
+}
+
+message Response {
+  int32 statusCode = 1;
+  string body = 2;
+  repeated Pair header = 3;
+  repeated Pair bodyFieldsExpect = 4;
+  repeated string verify = 5;
+  string schema = 6;
+}
+
+message Pair {
+  string key = 1;
+  string value = 2;
 }
 
 message Empty {
