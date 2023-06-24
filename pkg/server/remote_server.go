@@ -18,11 +18,12 @@ import (
 
 type server struct {
 	UnimplementedRunnerServer
+	loader testing.Loader
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer() RunnerServer {
-	return &server{}
+func NewRemoteServer(loader testing.Loader) RunnerServer {
+	return &server{loader: loader}
 }
 
 func withDefaultValue(old, defVal any) any {
@@ -143,40 +144,52 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 
 func (s *server) GetSuite(ctx context.Context, in *Empty) (reply *Suite, err error) {
 	var testSuite *testing.TestSuite
-	if testSuite, err = testing.Parse("/Users/rick/Workspace/GitHub/linuxsuren/api-testing/sample/answer.yaml"); err != nil {
-		return
-	}
+	defer func() {
+		s.loader.Reset()
+	}()
 
-	reply = &Suite{
-		Name:  testSuite.Name,
-		Api:   testSuite.API,
-		Items: []*TestCase{},
-	}
-	for _, testCase := range testSuite.Items {
-		req := &Request{
-			Api:    testCase.Request.API,
-			Method: testCase.Request.Method,
-			Header: mapToPair(testCase.Request.Header),
-			Query:  mapToPair(testCase.Request.Query),
-			Form:   mapToPair(testCase.Request.Form),
-			Body:   testCase.Request.Body,
+	for s.loader.HasMore() {
+		var data []byte
+		if data, err = s.loader.Load(); err != nil {
+			continue
 		}
 
-		resp := &Response{
-			StatusCode:       int32(testCase.Expect.StatusCode),
-			Body:             testCase.Expect.Body,
-			Header:           mapToPair(testCase.Expect.Header),
-			BodyFieldsExpect: mapInterToPair(testCase.Expect.BodyFieldsExpect),
-			Verify:           testCase.Expect.Verify,
-			Schema:           testCase.Expect.Schema,
+		if testSuite, err = testing.Parse(data); err != nil {
+			return
 		}
 
-		reply.Items = append(reply.Items, &TestCase{
-			Name:     testCase.Name,
-			Request:  req,
-			Response: resp,
-		})
+		reply = &Suite{
+			Name:  testSuite.Name,
+			Api:   testSuite.API,
+			Items: []*TestCase{},
+		}
+		for _, testCase := range testSuite.Items {
+			req := &Request{
+				Api:    testCase.Request.API,
+				Method: testCase.Request.Method,
+				Header: mapToPair(testCase.Request.Header),
+				Query:  mapToPair(testCase.Request.Query),
+				Form:   mapToPair(testCase.Request.Form),
+				Body:   testCase.Request.Body,
+			}
+
+			resp := &Response{
+				StatusCode:       int32(testCase.Expect.StatusCode),
+				Body:             testCase.Expect.Body,
+				Header:           mapToPair(testCase.Expect.Header),
+				BodyFieldsExpect: mapInterToPair(testCase.Expect.BodyFieldsExpect),
+				Verify:           testCase.Expect.Verify,
+				Schema:           testCase.Expect.Schema,
+			}
+
+			reply.Items = append(reply.Items, &TestCase{
+				Name:     testCase.Name,
+				Request:  req,
+				Response: resp,
+			})
+		}
 	}
+
 	return
 }
 

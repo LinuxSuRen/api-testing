@@ -8,6 +8,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/linuxsuren/api-testing/pkg/server"
+	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
@@ -22,13 +23,15 @@ func createServerCmd(gRPCServer gRPCServer) (c *cobra.Command) {
 	flags := c.Flags()
 	flags.IntVarP(&opt.port, "port", "p", 7070, "The RPC server port")
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
+	flags.StringVarP(&opt.localStorage, "local-storage", "", "", "The local storage path")
 	return
 }
 
 type serverOption struct {
-	gRPCServer gRPCServer
-	port       int
-	printProto bool
+	gRPCServer   gRPCServer
+	port         int
+	printProto   bool
+	localStorage string
 }
 
 func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
@@ -45,14 +48,22 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	// 	return
 	// }
 
-	s := o.gRPCServer
-	server.RegisterRunnerServer(s, server.NewRemoteServer())
+	loader := testing.NewFileLoader()
+	if o.localStorage != "" {
+		if err = loader.Put(o.localStorage); err != nil {
+			return
+		}
+	}
+
+	removeServer := server.NewRemoteServer(loader)
+	// s := o.gRPCServer
+	// server.RegisterRunnerServer(s, removeServer)
 	// log.Printf("server listening at %v", lis.Addr())
 	// s.Serve(lis)
 
 	mux := runtime.NewServeMux()
 	// opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, server.NewRemoteServer())
+	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, removeServer)
 	if err != nil {
 		return err
 	}

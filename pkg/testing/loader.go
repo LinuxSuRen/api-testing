@@ -7,4 +7,5 @@ type Loader interface {
 	Put(string) (err error)
 	GetContext() string
 	GetCount() int
+	Reset()
 }
