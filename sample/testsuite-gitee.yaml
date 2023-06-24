@@ -24,7 +24,3 @@ items:
   expect:
     verify:
     - len(data.name) > 0
-- name: test
-  request:
-    api: http://localhost:7070/server.Runner/GetVersion
-    method: POST

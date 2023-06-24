@@ -8,7 +8,21 @@ service Runner {
     rpc Run (TestTask) returns (HelloReply) {}
     rpc Sample(Empty) returns (HelloReply) {}
     rpc GetVersion(Empty) returns (HelloReply) {}
-    rpc GetSuite(Empty) returns (Suite) {}
+    rpc GetSuites(Empty) returns (Suites) {}
+    rpc GetTestCase(TestCaseIdentity) returns (TestCase) {}
+}
+
+message Suites {
+  map<string, Items> data = 1;
+}
+
+message Items {
+  repeated string data = 1;
+}
+
+message TestCaseIdentity {
+  string suite = 1;
+  string testcase = 2;
 }
 
 message TestTask {

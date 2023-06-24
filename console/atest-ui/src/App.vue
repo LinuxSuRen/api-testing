@@ -10,36 +10,41 @@ interface Tree {
 }
 
 const testCaseName = ref('')
+const testSuite = ref('')
 const handleNodeClick = (data: Tree) => {
   testCaseName.value = data.label
+  testSuite.value = data.parent
 }
 
-const data: Tree[] = [
-  {
-    id: '1',
-    label: 'Suite-1',
-  }
-]
-
+const data = ref([])
 const treeRef = ref<InstanceType<typeof ElTree>>()
 
 const requestOptions = {
     method: 'POST'
 };
-fetch('/server.Runner/GetSuite', requestOptions)
+fetch('/server.Runner/GetSuites', requestOptions)
     .then(response => response.json())
     .then(d => {
-      data[0].label = d.name
+      data.value = []
+      Object.keys(d.data).map(k => {
+        console.log(d.data[k])
+        let suite = {
+          id: k,
+          label: k,
+          children: [],
+        }
 
-      data[0].children=[]
-      d.items.forEach(e => {
-        data[0].children.push({
-          label: e.name,
-          id: e.name,
+        d.data[k].data.forEach((item: any) => {
+          suite.children?.push({
+            id: item,
+            label: item,
+            parent: k,
+          })
         })
-      });
+        data.value.push(suite)
+      })
 
-      treeRef.value.updateKeyChildren('1', data[0].children)
+      // treeRef.value.updateKeyChildren('1', data[0].children)
     });
 
 function load(n) {
@@ -100,7 +105,7 @@ const renderContent = (
       </el-aside>
 
       <el-main>
-        <TestCase :name="testCaseName"/>
+        <TestCase :suite="testSuite" :name="testCaseName"/>
       </el-main>
     </el-container>
   </div>

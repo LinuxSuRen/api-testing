@@ -142,8 +142,35 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 	return
 }
 
-func (s *server) GetSuite(ctx context.Context, in *Empty) (reply *Suite, err error) {
-	var testSuite *testing.TestSuite
+func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err error) {
+	defer func() {
+		s.loader.Reset()
+	}()
+
+	reply = &Suites{
+		Data: make(map[string]*Items),
+	}
+	for s.loader.HasMore() {
+		var data []byte
+		if data, err = s.loader.Load(); err != nil {
+			continue
+		}
+
+		var testSuite *testing.TestSuite
+		if testSuite, err = testing.Parse(data); err != nil {
+			return
+		}
+
+		items := &Items{}
+		for _, item := range testSuite.Items {
+			items.Data = append(items.Data, item.Name)
+		}
+		reply.Data[testSuite.Name] = items
+	}
+	return
+}
+
+func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *TestCase, err error) {
 	defer func() {
 		s.loader.Reset()
 	}()
@@ -154,16 +181,20 @@ func (s *server) GetSuite(ctx context.Context, in *Empty) (reply *Suite, err err
 			continue
 		}
 
+		var testSuite *testing.TestSuite
 		if testSuite, err = testing.Parse(data); err != nil {
 			return
 		}
 
-		reply = &Suite{
-			Name:  testSuite.Name,
-			Api:   testSuite.API,
-			Items: []*TestCase{},
+		if testSuite.Name != in.Suite {
+			continue
 		}
+
 		for _, testCase := range testSuite.Items {
+			if testCase.Name != in.Testcase {
+				continue
+			}
+
 			req := &Request{
 				Api:    testCase.Request.API,
 				Method: testCase.Request.Method,
@@ -182,14 +213,14 @@ func (s *server) GetSuite(ctx context.Context, in *Empty) (reply *Suite, err err
 				Schema:           testCase.Expect.Schema,
 			}
 
-			reply.Items = append(reply.Items, &TestCase{
+			reply = &TestCase{
 				Name:     testCase.Name,
 				Request:  req,
 				Response: resp,
-			})
+			}
+			break
 		}
 	}
-
 	return
 }
 

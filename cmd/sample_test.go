@@ -5,13 +5,15 @@ import (
 	"testing"
 
 	"github.com/linuxsuren/api-testing/cmd"
+	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/sample"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSampleCmd(t *testing.T) {
-	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, cmd.NewFakeGRPCServer())
+	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"},
+		cmd.NewFakeGRPCServer(), server.NewFakeHTTPServer())
 
 	buf := new(bytes.Buffer)
 	c.SetOut(buf)

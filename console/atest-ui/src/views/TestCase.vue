@@ -4,6 +4,7 @@ import type { TabsPaneContext } from 'element-plus'
 
 const props = defineProps({
     name: String,
+    suite: String,
 })
 
 interface Pair {
@@ -15,43 +16,44 @@ const verifyList = ref('')
 const requestBody = ref('')
 const bodyFieldsExpect = ref('')
 const headersData = ref('')
+
 watch(props, (p) => {
     const name = p.name
+    const suite = p.suite
     const requestOptions = {
-        method: 'POST'
+        method: 'POST',
+        body: JSON.stringify({
+            suite: suite,
+            testcase: name,
+        })
     };
-    fetch('/server.Runner/GetSuite', requestOptions)
+    fetch('/server.Runner/GetTestCase', requestOptions)
         .then(response => response.json())
-        .then(d => {
-            d.items.forEach(e => {
-                if (e.name === name) {
-                    if (e.request.method === "") {
-                        e.request.method = "GET"
-                    }
-                    value.value = e.request.method
-                    input.value = d.api + e.request.api
-                    requestBody.value = e.request.body
-                    verifyList.value = e.response.verify
+        .then(e => {
+            if (e.request.method === "") {
+                e.request.method = "GET"
+            }
+            value.value = e.request.method
+            input.value = e.request.api
+            requestBody.value = e.request.body
+            verifyList.value = e.response.verify
 
-                    headersData.value = []
-                    e.request.header.forEach(h => {
-                        headersData.value.push({
-                            key: h.key,
-                            value: h.value
-                        })
-                    })
+            headersData.value = []
+            e.request.header.forEach(h => {
+                headersData.value.push({
+                    key: h.key,
+                    value: h.value
+                })
+            })
 
-                    let items = []
-                    e.response.bodyFieldsExpect.forEach(b => {
-                        items.push({
-                            key: b.key,
-                            value: b.value
-                        })
-                    })
-                    bodyFieldsExpect.value = items
-                    console.log(items)
-                }
-            });
+            let items = []
+            e.response.bodyFieldsExpect.forEach(b => {
+                items.push({
+                    key: b.key,
+                    value: b.value
+                })
+            })
+            bodyFieldsExpect.value = items
         });
 })
 

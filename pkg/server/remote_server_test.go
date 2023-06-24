@@ -18,7 +18,9 @@ const (
 )
 
 func TestRemoteServer(t *testing.T) {
-	server := NewRemoteServer()
+	loader := atesting.NewFileLoader()
+	loader.Put("testdata/simple.yaml")
+	server := NewRemoteServer(loader)
 	_, err := server.Run(context.TODO(), &TestTask{
 		Kind: "fake",
 	})
@@ -66,6 +68,24 @@ func TestRemoteServer(t *testing.T) {
 	ver, err = server.Sample(context.TODO(), &Empty{})
 	assert.Nil(t, err)
 	assert.Equal(t, sample.TestSuiteGitLab, ver.Message)
+
+	var suites *Suites
+	suites, err = server.GetSuites(context.TODO(), &Empty{})
+	assert.Nil(t, err)
+	assert.Equal(t, suites, &Suites{Data: map[string]*Items{
+		"simple": {
+			Data: []string{"get", "query"},
+		},
+	}})
+
+	var testCase *TestCase
+	testCase, err = server.GetTestCase(context.TODO(), &TestCaseIdentity{
+		Suite:    "simple",
+		Testcase: "get",
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, "get", testCase.Name)
+	assert.Equal(t, "http://foo", testCase.Request.Api)
 }
 
 func TestFindParentTestCases(t *testing.T) {

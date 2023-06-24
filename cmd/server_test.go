@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/linuxsuren/api-testing/pkg/server"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,7 +30,7 @@ func TestPrintProto(t *testing.T) {
 		},
 	}, {
 		name: "random port",
-		args: []string{"server", "-p=0"},
+		args: []string{"server", "-p=0", "--http-port=0", "--local-storage=./*"},
 		verify: func(t *testing.T, buf *bytes.Buffer, err error) {
 			assert.Nil(t, err)
 		},
@@ -37,7 +38,8 @@ func TestPrintProto(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, &fakeGRPCServer{})
+			root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"},
+				&fakeGRPCServer{}, server.NewFakeHTTPServer())
 			root.SetOut(buf)
 			root.SetArgs(tt.args)
 			err := root.Execute()

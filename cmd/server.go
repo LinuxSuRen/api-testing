@@ -3,8 +3,8 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"net"
-	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/linuxsuren/api-testing/pkg/server"
@@ -13,8 +13,11 @@ import (
 	"google.golang.org/grpc"
 )
 
-func createServerCmd(gRPCServer gRPCServer) (c *cobra.Command) {
-	opt := &serverOption{gRPCServer: gRPCServer}
+func createServerCmd(gRPCServer gRPCServer, httpServer server.HTTPServer) (c *cobra.Command) {
+	opt := &serverOption{
+		gRPCServer: gRPCServer,
+		httpServer: httpServer,
+	}
 	c = &cobra.Command{
 		Use:   "server",
 		Short: "Run as a server mode",
@@ -22,14 +25,18 @@ func createServerCmd(gRPCServer gRPCServer) (c *cobra.Command) {
 	}
 	flags := c.Flags()
 	flags.IntVarP(&opt.port, "port", "p", 7070, "The RPC server port")
+	flags.IntVarP(&opt.httpPort, "http-port", "", 8080, "The HTTP server port")
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
 	flags.StringVarP(&opt.localStorage, "local-storage", "", "", "The local storage path")
 	return
 }
 
 type serverOption struct {
-	gRPCServer   gRPCServer
+	gRPCServer gRPCServer
+	httpServer server.HTTPServer
+
 	port         int
+	httpPort     int
 	printProto   bool
 	localStorage string
 }
@@ -42,11 +49,18 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	// var lis net.Listener
-	// lis, err = net.Listen("tcp", fmt.Sprintf(":%d", o.port))
-	// if err != nil {
-	// 	return
-	// }
+	var (
+		lis     net.Listener
+		httplis net.Listener
+	)
+	lis, err = net.Listen("tcp", fmt.Sprintf(":%d", o.port))
+	if err != nil {
+		return
+	}
+	httplis, err = net.Listen("tcp", fmt.Sprintf(":%d", o.httpPort))
+	if err != nil {
+		return
+	}
 
 	loader := testing.NewFileLoader()
 	if o.localStorage != "" {
@@ -56,21 +70,20 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	removeServer := server.NewRemoteServer(loader)
-	// s := o.gRPCServer
-	// server.RegisterRunnerServer(s, removeServer)
-	// log.Printf("server listening at %v", lis.Addr())
-	// s.Serve(lis)
+	s := o.gRPCServer
+	go func() {
+		server.RegisterRunnerServer(s, removeServer)
+		log.Printf("gRPC server listening at %v", lis.Addr())
+		s.Serve(lis)
+	}()
 
 	mux := runtime.NewServeMux()
-	// opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, removeServer)
-	if err != nil {
-		return err
+	if err == nil {
+		o.httpServer.WithHandler(mux)
+		err = o.httpServer.Serve(httplis)
 	}
-
-	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	return http.ListenAndServe(fmt.Sprintf(":%d", o.port), mux)
-	// return
+	return
 }
 
 type gRPCServer interface {

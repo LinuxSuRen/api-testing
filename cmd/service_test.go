@@ -5,18 +5,19 @@ import (
 	"os"
 	"testing"
 
+	"github.com/linuxsuren/api-testing/pkg/server"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestService(t *testing.T) {
-	root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, NewFakeGRPCServer())
+	root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, NewFakeGRPCServer(), server.NewFakeHTTPServer())
 	root.SetArgs([]string{"service", "fake"})
 	root.SetOut(new(bytes.Buffer))
 	err := root.Execute()
 	assert.NotNil(t, err)
 
-	notLinux := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "fake"}, NewFakeGRPCServer())
+	notLinux := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "fake"}, NewFakeGRPCServer(), server.NewFakeHTTPServer())
 	notLinux.SetArgs([]string{"service", paramAction, "install"})
 	notLinux.SetOut(new(bytes.Buffer))
 	err = notLinux.Execute()
@@ -87,7 +88,8 @@ func TestService(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			normalRoot := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: tt.targetOS, ExpectOutput: tt.expectOutput}, NewFakeGRPCServer())
+			normalRoot := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: tt.targetOS, ExpectOutput: tt.expectOutput},
+				NewFakeGRPCServer(), server.NewFakeHTTPServer())
 			normalRoot.SetOut(buf)
 			normalRoot.SetArgs([]string{"service", "--action", tt.action, "--script-path", tmpFile.Name()})
 			err = normalRoot.Execute()

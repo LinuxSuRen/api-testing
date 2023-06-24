@@ -25,7 +25,8 @@ type RunnerClient interface {
 	Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*HelloReply, error)
 	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
 	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
-	GetSuite(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suite, error)
+	GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error)
+	GetTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCase, error)
 }
 
 type runnerClient struct {
@@ -63,9 +64,18 @@ func (c *runnerClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.C
 	return out, nil
 }
 
-func (c *runnerClient) GetSuite(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suite, error) {
-	out := new(Suite)
-	err := c.cc.Invoke(ctx, "/server.Runner/GetSuite", in, out, opts...)
+func (c *runnerClient) GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error) {
+	out := new(Suites)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetSuites", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCase, error) {
+	out := new(TestCase)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetTestCase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +89,8 @@ type RunnerServer interface {
 	Run(context.Context, *TestTask) (*HelloReply, error)
 	Sample(context.Context, *Empty) (*HelloReply, error)
 	GetVersion(context.Context, *Empty) (*HelloReply, error)
-	GetSuite(context.Context, *Empty) (*Suite, error)
+	GetSuites(context.Context, *Empty) (*Suites, error)
+	GetTestCase(context.Context, *TestCaseIdentity) (*TestCase, error)
 	mustEmbedUnimplementedRunnerServer()
 }
 
@@ -96,8 +107,11 @@ func (UnimplementedRunnerServer) Sample(context.Context, *Empty) (*HelloReply, e
 func (UnimplementedRunnerServer) GetVersion(context.Context, *Empty) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
 }
-func (UnimplementedRunnerServer) GetSuite(context.Context, *Empty) (*Suite, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSuite not implemented")
+func (UnimplementedRunnerServer) GetSuites(context.Context, *Empty) (*Suites, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSuites not implemented")
+}
+func (UnimplementedRunnerServer) GetTestCase(context.Context, *TestCaseIdentity) (*TestCase, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTestCase not implemented")
 }
 func (UnimplementedRunnerServer) mustEmbedUnimplementedRunnerServer() {}
 
@@ -166,20 +180,38 @@ func _Runner_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Runner_GetSuite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Runner_GetSuites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RunnerServer).GetSuite(ctx, in)
+		return srv.(RunnerServer).GetSuites(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/server.Runner/GetSuite",
+		FullMethod: "/server.Runner/GetSuites",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).GetSuite(ctx, req.(*Empty))
+		return srv.(RunnerServer).GetSuites(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestCaseIdentity)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetTestCase(ctx, req.(*TestCaseIdentity))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -204,8 +236,12 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_GetVersion_Handler,
 		},
 		{
-			MethodName: "GetSuite",
-			Handler:    _Runner_GetSuite_Handler,
+			MethodName: "GetSuites",
+			Handler:    _Runner_GetSuites_Handler,
+		},
+		{
+			MethodName: "GetTestCase",
+			Handler:    _Runner_GetTestCase_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
