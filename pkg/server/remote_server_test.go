@@ -215,6 +215,11 @@ func TestWithDefaultValue(t *testing.T) {
 	assert.Equal(t, withDefaultValue(map[string]string{"key": "val"}, map[string]string{"key": "value"}), map[string]string{"key": "val"})
 }
 
+func TestMapInterToPair(t *testing.T) {
+	assert.Equal(t, []*Pair{{Key: "key", Value: "val"}},
+		mapInterToPair(map[string]interface{}{"key": "val"}))
+}
+
 //go:embed testdata/simple.yaml
 var simpleSuite string
 

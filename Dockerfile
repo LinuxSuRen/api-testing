@@ -22,7 +22,7 @@ FROM node:20-alpine3.17 AS ui
 
 WORKDIR /workspace
 COPY --from=builder /workspace/atest-ui .
-RUN npm install
+RUN npm install --ignore-scripts
 RUN npm run build-only
 
 FROM ubuntu:23.04
