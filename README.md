@@ -66,9 +66,9 @@ consume: 1m2.153686448s
 
 ## Use in Docker
 
-Use `atest` as server mode in Docker:
+Use `atest` as server mode in Docker, then you could visit the UI from `8080` and the gRPC endpoint from `7070`:
 ```
-docker run -p 7070:7070 ghcr.io/linuxsuren/api-testing
+docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing
 ```
 
 Use `atest-collector` in Docker:

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import TestCase from './views/TestCase.vue'
 import { ref } from 'vue'
-import { ElTree } from 'element-plus'
+import { ElTree } from "element-plus"
 
 interface Tree {
   id: string
   label: string
+  parent: string
   children?: Tree[]
 }
 

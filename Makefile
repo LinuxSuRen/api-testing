@@ -7,7 +7,7 @@ goreleaser:
 build-image:
 	docker build -t ghcr.io/linuxsuren/api-testing:dev .
 run-image:
-	docker run ghcr.io/linuxsuren/api-testing:dev
+	docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing:dev
 copy: build
 	sudo cp bin/atest /usr/local/bin/
 copy-restart: build

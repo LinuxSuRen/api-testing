@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
+	"path"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/linuxsuren/api-testing/pkg/server"
@@ -28,6 +30,7 @@ func createServerCmd(gRPCServer gRPCServer, httpServer server.HTTPServer) (c *co
 	flags.IntVarP(&opt.httpPort, "http-port", "", 8080, "The HTTP server port")
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
 	flags.StringVarP(&opt.localStorage, "local-storage", "", "", "The local storage path")
+	flags.StringVarP(&opt.consolePath, "console-path", "", "", "The path of the console")
 	return
 }
 
@@ -39,6 +42,7 @@ type serverOption struct {
 	httpPort     int
 	printProto   bool
 	localStorage string
+	consolePath  string
 }
 
 func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
@@ -80,10 +84,23 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	mux := runtime.NewServeMux()
 	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, removeServer)
 	if err == nil {
+		mux.HandlePath("GET", "/", frontEndHandlerWithLocation(o.consolePath))
+		mux.HandlePath("GET", "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
 		o.httpServer.WithHandler(mux)
 		err = o.httpServer.Serve(httplis)
 	}
 	return
+}
+
+func frontEndHandlerWithLocation(consolePath string) func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	return func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		target := r.URL.Path
+		if target == "/" {
+			target = "/index.html"
+		}
+
+		http.ServeFile(w, r, path.Join(consolePath, target))
+	}
 }
 
 type gRPCServer interface {

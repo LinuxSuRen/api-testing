@@ -4,6 +4,7 @@ WORKDIR /workspace
 COPY cmd/ cmd/
 COPY pkg/ pkg/
 COPY extensions/ extensions/
+COPY console/atest-ui atest-ui/
 COPY sample/ sample/
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -16,6 +17,13 @@ COPY LICENSE LICENSE
 RUN go mod download
 RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest .
 RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
+
+FROM node:20-alpine3.17 AS ui
+
+WORKDIR /workspace
+COPY --from=builder /workspace/atest-ui .
+RUN npm install
+RUN npm run build-only
 
 FROM ubuntu:23.04
 
@@ -35,4 +43,8 @@ COPY --from=builder /workspace/atest-collector /usr/local/bin/atest-collector
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
-CMD ["atest", "server"]
+RUN mkdir -p /var/www
+COPY --from=builder /workspace/sample /var/www/sample
+COPY --from=ui /workspace/dist /var/www/html
+
+CMD ["atest", "server", "--console-path=/var/www/html", "--local-storage=/var/www/sample/testsuite-*.yaml"]
