@@ -62,6 +62,9 @@ func TestDuplicatedNames(t *testing.T) {
 }
 
 func TestRequestRender(t *testing.T) {
+	validMap := map[string]string{
+		"key": "{{.Name}}",
+	}
 	invalidMap := map[string]string{
 		"key": "{{.name}}",
 	}
@@ -143,7 +146,9 @@ func TestRequestRender(t *testing.T) {
 	}, {
 		name: "failed with header render",
 		request: &atest.Request{
-			Header: invalidMap,
+			Header: map[string]string{
+				"key": "{{.name}}",
+			},
 		},
 		ctx:    atest.TestCase{},
 		hasErr: true,
@@ -157,7 +162,7 @@ func TestRequestRender(t *testing.T) {
 	}, {
 		name: "form render",
 		request: &atest.Request{
-			Form: invalidMap,
+			Form: validMap,
 		},
 		ctx: atest.TestCase{Name: "linuxsuren"},
 		verify: func(t *testing.T, req *atest.Request) {
@@ -167,7 +172,7 @@ func TestRequestRender(t *testing.T) {
 	}, {
 		name: "header render",
 		request: &atest.Request{
-			Header: invalidMap,
+			Header: validMap,
 		},
 		ctx: atest.TestCase{Name: "linuxsuren"},
 		verify: func(t *testing.T, req *atest.Request) {
