@@ -14,6 +14,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	"github.com/linuxsuren/api-testing/sample"
+	"gopkg.in/yaml.v3"
 )
 
 type server struct {
@@ -219,6 +220,50 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 				Response: resp,
 			}
 			break
+		}
+	}
+	return
+}
+
+func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
+	defer func() {
+		s.loader.Reset()
+	}()
+
+	var targetTestSuite *testing.TestSuite
+	for s.loader.HasMore() {
+		var data []byte
+		if data, err = s.loader.Load(); err != nil {
+			continue
+		}
+
+		var testSuite *testing.TestSuite
+		if testSuite, err = testing.Parse(data); err != nil {
+			continue
+		}
+
+		if testSuite.Name == in.Suite {
+			targetTestSuite = testSuite
+			break
+		}
+	}
+
+	if targetTestSuite != nil {
+		var data []byte
+		if data, err = yaml.Marshal(targetTestSuite); err == nil {
+			task := &TestTask{
+				Kind:     "testcaseInSuite",
+				Data:     string(data),
+				CaseName: in.Testcase,
+				Level:    "debug",
+			}
+
+			var reply *HelloReply
+			if reply, err = s.Run(ctx, task); err == nil {
+				result = &TestCaseResult{
+					Body: reply.Message,
+				}
+			}
 		}
 	}
 	return

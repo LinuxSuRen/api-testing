@@ -88,6 +88,24 @@ func TestRemoteServer(t *testing.T) {
 	assert.Equal(t, "http://foo", testCase.Request.Api)
 }
 
+func TestRunTestCase(t *testing.T) {
+	loader := atesting.NewFileLoader()
+	loader.Put("testdata/simple.yaml")
+	server := NewRemoteServer(loader)
+
+	defer gock.Clean()
+	gock.New("http://foo").Get("/").MatchHeader("key", "value").
+		Reply(http.StatusOK).
+		BodyString(`{"message": "hello"}`)
+
+	result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
+		Suite:    "simple",
+		Testcase: "get",
+	})
+	assert.NoError(t, err)
+	assert.Contains(t, result.Body, "start to run: 'get'\nstart to send request to http://foo\nresponse body:")
+}
+
 func TestFindParentTestCases(t *testing.T) {
 	tests := []struct {
 		name     string

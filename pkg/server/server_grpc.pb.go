@@ -26,6 +26,7 @@ type RunnerClient interface {
 	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
 	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
 	GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error)
+	RunTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCaseResult, error)
 	GetTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCase, error)
 }
 
@@ -73,6 +74,15 @@ func (c *runnerClient) GetSuites(ctx context.Context, in *Empty, opts ...grpc.Ca
 	return out, nil
 }
 
+func (c *runnerClient) RunTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCaseResult, error) {
+	out := new(TestCaseResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/RunTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) GetTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCase, error) {
 	out := new(TestCase)
 	err := c.cc.Invoke(ctx, "/server.Runner/GetTestCase", in, out, opts...)
@@ -90,6 +100,7 @@ type RunnerServer interface {
 	Sample(context.Context, *Empty) (*HelloReply, error)
 	GetVersion(context.Context, *Empty) (*HelloReply, error)
 	GetSuites(context.Context, *Empty) (*Suites, error)
+	RunTestCase(context.Context, *TestCaseIdentity) (*TestCaseResult, error)
 	GetTestCase(context.Context, *TestCaseIdentity) (*TestCase, error)
 	mustEmbedUnimplementedRunnerServer()
 }
@@ -109,6 +120,9 @@ func (UnimplementedRunnerServer) GetVersion(context.Context, *Empty) (*HelloRepl
 }
 func (UnimplementedRunnerServer) GetSuites(context.Context, *Empty) (*Suites, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSuites not implemented")
+}
+func (UnimplementedRunnerServer) RunTestCase(context.Context, *TestCaseIdentity) (*TestCaseResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RunTestCase not implemented")
 }
 func (UnimplementedRunnerServer) GetTestCase(context.Context, *TestCaseIdentity) (*TestCase, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTestCase not implemented")
@@ -198,6 +212,24 @@ func _Runner_GetSuites_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_RunTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestCaseIdentity)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).RunTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/RunTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).RunTestCase(ctx, req.(*TestCaseIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_GetTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TestCaseIdentity)
 	if err := dec(in); err != nil {
@@ -238,6 +270,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSuites",
 			Handler:    _Runner_GetSuites_Handler,
+		},
+		{
+			MethodName: "RunTestCase",
+			Handler:    _Runner_RunTestCase_Handler,
 		},
 		{
 			MethodName: "GetTestCase",

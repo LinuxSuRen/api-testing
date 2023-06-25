@@ -9,6 +9,7 @@ service Runner {
     rpc Sample(Empty) returns (HelloReply) {}
     rpc GetVersion(Empty) returns (HelloReply) {}
     rpc GetSuites(Empty) returns (Suites) {}
+    rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {}
     rpc GetTestCase(TestCaseIdentity) returns (TestCase) {}
 }
 
@@ -57,6 +58,12 @@ message Request {
   repeated Pair query = 4;
   repeated Pair form = 5;
   string body = 6;
+}
+
+message TestCaseResult {
+  int32 statusCode = 1;
+  string body = 2;
+  repeated Pair header = 3;
 }
 
 message Response {

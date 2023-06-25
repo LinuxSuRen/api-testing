@@ -7,15 +7,35 @@ const props = defineProps({
     suite: String,
 })
 
-interface Pair {
-    key: string
+const testResult = ref('')
+function sendRequest() {
+    const name = props.name
+    const suite = props.suite
+    const requestOptions = {
+        method: 'POST',
+        body: JSON.stringify({
+            suite: suite,
+            testcase: name,
+        })
+    };
+    fetch('/server.Runner/RunTestCase', requestOptions)
+        .then(response => response.json())
+        .then(e => {
+            testResult.value = e.body
+        });
+}
+
+interface Pair{
+    key: string,
     value: string
 }
+
+const emptyPair: Pair[] = []
 
 const verifyList = ref('')
 const requestBody = ref('')
 const bodyFieldsExpect = ref('')
-const headersData = ref('')
+const headersData = ref(emptyPair)
 
 watch(props, (p) => {
     const name = p.name
@@ -46,7 +66,7 @@ watch(props, (p) => {
                 })
             })
 
-            let items = []
+            let items: Pair[] = []
             e.response.bodyFieldsExpect.forEach(b => {
                 items.push({
                     key: b.key,
@@ -84,22 +104,19 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
     console.log(tab, event)
 }
 
-const defaultProps = {
-    children: 'children',
-    label: 'label',
-}
-
 const input = ref('')
 
 function change() {
-    let lastItem = tableData[tableData.length - 1]
+    let lastItem = headersData.value[headersData.value.length - 1]
     if (lastItem.key !== '') {
-        tableData.push({
+        headersData.value.push({
             key: '',
             value: ''
         })
     }
 }
+
+const radio1 = ref('1')
 </script>
 
 <template>
@@ -110,7 +127,7 @@ function change() {
                     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
                 </el-select>
                 <el-input v-model="input" placeholder="API Address"  style="width: 70%; margin-left: 5px; margin-right: 5px;"/>
-                <el-button type="primary">Send</el-button>
+                <el-button type="primary" @click="sendRequest">Send</el-button>
             </el-header>
 
             <el-main>
@@ -134,11 +151,11 @@ function change() {
                     </el-tab-pane>
 
                     <el-tab-pane label="Body" name="third">
-                        <el-radio-group v-model="radio">
-                            <el-radio :label="3">none</el-radio>
-                            <el-radio :label="9">form-data</el-radio>
-                            <el-radio :label="6">raw</el-radio>
-                            <el-radio :label="9">x-www-form-urlencoded</el-radio>
+                        <el-radio-group v-model="radio1">
+                            <el-radio :label="1">none</el-radio>
+                            <el-radio :label="2">form-data</el-radio>
+                            <el-radio :label="3">raw</el-radio>
+                            <el-radio :label="4">x-www-form-urlencoded</el-radio>
                         </el-radio-group>
 
                         <el-input v-model="requestBody" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
@@ -169,6 +186,17 @@ function change() {
                     </el-tab-pane>
                 </el-tabs>
             </el-main>
+
+            <el-footer>
+                <div>Test Result:</div>
+                <el-input
+                    v-model="testResult"
+                    :autosize="{ minRows: 4, maxRows: 6 }"
+                    readonly="true"
+                    type="textarea"
+                    placeholder="Please input"
+                />
+            </el-footer>
         </el-container>
     </div>
 </template>
