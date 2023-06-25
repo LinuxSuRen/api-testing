@@ -137,6 +137,24 @@ func TestRequestRender(t *testing.T) {
 		ctx:    atest.TestCase{},
 		hasErr: true,
 	}, {
+		name: "failed with header render",
+		request: &atest.Request{
+			Header: map[string]string{
+				"key": "{{.name}}",
+			},
+		},
+		ctx:    atest.TestCase{},
+		hasErr: true,
+	}, {
+		name: "failed with form render",
+		request: &atest.Request{
+			Form: map[string]string{
+				"key": "{{.name}}",
+			},
+		},
+		ctx:    atest.TestCase{},
+		hasErr: true,
+	}, {
 		name: "form render",
 		request: &atest.Request{
 			Form: map[string]string{

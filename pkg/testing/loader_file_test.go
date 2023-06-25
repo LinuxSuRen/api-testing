@@ -17,7 +17,7 @@ func TestFileLoader(t *testing.T) {
 		items: []string{},
 		verify: func(t *testing.T, loader atest.Loader) {
 			assert.False(t, loader.HasMore())
-			assert.Empty(t, loader.GetCount())
+			assert.Equal(t, 0, loader.GetCount())
 		},
 	}, {
 		name:   "brace expansion path",
@@ -53,4 +53,6 @@ func defaultVerify(t *testing.T, loader atest.Loader) {
 	assert.Equal(t, "testdata", loader.GetContext())
 
 	assert.False(t, loader.HasMore())
+	loader.Reset()
+	assert.True(t, loader.HasMore())
 }

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -46,4 +47,27 @@ func TestPrintProto(t *testing.T) {
 			tt.verify(t, buf, err)
 		})
 	}
+}
+
+func TestFrontEndHandlerWithLocation(t *testing.T) {
+	handler := frontEndHandlerWithLocation("testdata")
+	req, err := http.NewRequest("GET", "/", nil)
+	assert.NoError(t, err)
+
+	buf := new(bytes.Buffer)
+	handler(&fakeResponseWriter{buf: buf}, req, map[string]string{})
+	assert.Equal(t, "404 page not found\n", buf.String())
+}
+
+type fakeResponseWriter struct {
+	buf *bytes.Buffer
+}
+
+func (w *fakeResponseWriter) Header() http.Header {
+	return make(http.Header)
+}
+func (w *fakeResponseWriter) Write(data []byte) (int, error) {
+	return w.buf.Write(data)
+}
+func (w *fakeResponseWriter) WriteHeader(int) {
 }

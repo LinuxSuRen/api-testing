@@ -48,50 +48,6 @@ fetch('/server.Runner/GetSuites', requestOptions)
       // treeRef.value.updateKeyChildren('1', data[0].children)
     });
 
-function load(n) {
-  console.log(n)
-}
-
-const renderContent = (
-  h,
-  {
-    node,
-    data,
-    store,
-  }: {
-    node: Node
-    data: Tree
-    store: Node['store']
-  }
-) => {
-  if (node.childNodes.length > 0) {
-    return h(
-      'span',
-      {
-        class: 'custom-tree-node',
-      },
-      h('span', null, node.label),
-      h(
-        'span',
-        null,
-        h(
-          'a',
-          {
-          },
-          'Append'
-        )
-      )
-    )
-  } else {
-    return h(
-      'span',
-      {
-        class: 'custom-tree-node',
-      },
-      h('span', null, node.label)
-    )
-  }
-}
 </script>
 
 <template>
