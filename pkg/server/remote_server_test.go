@@ -94,7 +94,7 @@ func TestRunTestCase(t *testing.T) {
 	server := NewRemoteServer(loader)
 
 	defer gock.Clean()
-	gock.New("http://foo").Get("/").MatchHeader("key", "value").
+	gock.New(urlFoo).Get("/").MatchHeader("key", "value").
 		Reply(http.StatusOK).
 		BodyString(`{"message": "hello"}`)
 

@@ -70,4 +70,5 @@ func (w *fakeResponseWriter) Write(data []byte) (int, error) {
 	return w.buf.Write(data)
 }
 func (w *fakeResponseWriter) WriteHeader(int) {
+	// do nothing due to this is a fake response writer
 }
