@@ -50,3 +50,8 @@ func (l *fileLoader) GetContext() string {
 func (l *fileLoader) GetCount() int {
 	return len(l.paths)
 }
+
+// Reset resets the index
+func (l *fileLoader) Reset() {
+	l.index = -1
+}

@@ -8,6 +8,22 @@ service Runner {
     rpc Run (TestTask) returns (HelloReply) {}
     rpc Sample(Empty) returns (HelloReply) {}
     rpc GetVersion(Empty) returns (HelloReply) {}
+    rpc GetSuites(Empty) returns (Suites) {}
+    rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {}
+    rpc GetTestCase(TestCaseIdentity) returns (TestCase) {}
+}
+
+message Suites {
+  map<string, Items> data = 1;
+}
+
+message Items {
+  repeated string data = 1;
+}
+
+message TestCaseIdentity {
+  string suite = 1;
+  string testcase = 2;
 }
 
 message TestTask {
@@ -21,6 +37,47 @@ message TestTask {
 message HelloReply {
   string message = 1;
   string error = 2;
+}
+
+message Suite {
+  string name = 1;
+  string api = 2;
+  repeated TestCase items = 3;
+}
+
+message TestCase {
+  string name = 1;
+  Request request = 2;
+  Response response = 3;
+}
+
+message Request {
+  string api = 1;
+  string method = 2;
+  repeated Pair header = 3;
+  repeated Pair query = 4;
+  repeated Pair form = 5;
+  string body = 6;
+}
+
+message TestCaseResult {
+  int32 statusCode = 1;
+  string body = 2;
+  repeated Pair header = 3;
+}
+
+message Response {
+  int32 statusCode = 1;
+  string body = 2;
+  repeated Pair header = 3;
+  repeated Pair bodyFieldsExpect = 4;
+  repeated string verify = 5;
+  string schema = 6;
+}
+
+message Pair {
+  string key = 1;
+  string value = 2;
 }
 
 message Empty {

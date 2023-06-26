@@ -18,7 +18,9 @@ const (
 )
 
 func TestRemoteServer(t *testing.T) {
-	server := NewRemoteServer()
+	loader := atesting.NewFileLoader()
+	loader.Put("testdata/simple.yaml")
+	server := NewRemoteServer(loader)
 	_, err := server.Run(context.TODO(), &TestTask{
 		Kind: "fake",
 	})
@@ -66,6 +68,42 @@ func TestRemoteServer(t *testing.T) {
 	ver, err = server.Sample(context.TODO(), &Empty{})
 	assert.Nil(t, err)
 	assert.Equal(t, sample.TestSuiteGitLab, ver.Message)
+
+	var suites *Suites
+	suites, err = server.GetSuites(context.TODO(), &Empty{})
+	assert.Nil(t, err)
+	assert.Equal(t, suites, &Suites{Data: map[string]*Items{
+		"simple": {
+			Data: []string{"get", "query"},
+		},
+	}})
+
+	var testCase *TestCase
+	testCase, err = server.GetTestCase(context.TODO(), &TestCaseIdentity{
+		Suite:    "simple",
+		Testcase: "get",
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, "get", testCase.Name)
+	assert.Equal(t, "http://foo", testCase.Request.Api)
+}
+
+func TestRunTestCase(t *testing.T) {
+	loader := atesting.NewFileLoader()
+	loader.Put("testdata/simple.yaml")
+	server := NewRemoteServer(loader)
+
+	defer gock.Clean()
+	gock.New(urlFoo).Get("/").MatchHeader("key", "value").
+		Reply(http.StatusOK).
+		BodyString(`{"message": "hello"}`)
+
+	result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
+		Suite:    "simple",
+		Testcase: "get",
+	})
+	assert.NoError(t, err)
+	assert.Contains(t, result.Body, "start to run: 'get'\nstart to send request to http://foo\nresponse body:")
 }
 
 func TestFindParentTestCases(t *testing.T) {
@@ -193,6 +231,11 @@ func TestWithDefaultValue(t *testing.T) {
 	assert.Equal(t, withDefaultValue("", "b"), "b")
 	assert.Equal(t, withDefaultValue(nil, map[string]string{"key": "val"}), map[string]string{"key": "val"})
 	assert.Equal(t, withDefaultValue(map[string]string{"key": "val"}, map[string]string{"key": "value"}), map[string]string{"key": "val"})
+}
+
+func TestMapInterToPair(t *testing.T) {
+	assert.Equal(t, []*Pair{{Key: "key", Value: "val"}},
+		mapInterToPair(map[string]interface{}{"key": "val"}))
 }
 
 //go:embed testdata/simple.yaml

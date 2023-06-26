@@ -15,7 +15,7 @@ This is a API testing tool.
 *   Validate the response body with [JSON schema](https://json-schema.org/)
 *   Pre and post handle with the API request
 *   Output reference between TestCase
-*   Run in server mode, and provide the [gRPC endpoint](pkg/server/server.proto)
+*   Run in server mode, and provide the [gRPC](pkg/server/server.proto) and HTTP endpoint
 *   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
 *   [HTTP API record](extensions/collector)
 
@@ -66,9 +66,9 @@ consume: 1m2.153686448s
 
 ## Use in Docker
 
-Use `atest` as server mode in Docker:
+Use `atest` as server mode in Docker, then you could visit the UI from `8080` and the gRPC endpoint from `7070`:
 ```
-docker run -p 7070:7070 ghcr.io/linuxsuren/api-testing
+docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing
 ```
 
 Use `atest-collector` in Docker:

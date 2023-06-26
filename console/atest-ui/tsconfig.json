@@ -1,0 +1,20 @@
+{
+  "files": [],
+  "compilerOptions":{
+    "module":"commonjs",
+    "allowJs": true,
+    "target": "es6",
+    "esModuleInterop": true
+  },
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.vitest.json"
+    }
+  ]
+}

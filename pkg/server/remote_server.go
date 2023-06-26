@@ -14,15 +14,17 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	"github.com/linuxsuren/api-testing/sample"
+	"gopkg.in/yaml.v3"
 )
 
 type server struct {
 	UnimplementedRunnerServer
+	loader testing.Loader
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer() RunnerServer {
-	return &server{}
+func NewRemoteServer(loader testing.Loader) RunnerServer {
+	return &server{loader: loader}
 }
 
 func withDefaultValue(old, defVal any) any {
@@ -138,6 +140,154 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 // GetVersion returns the version
 func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
 	reply = &HelloReply{Message: version.GetVersion()}
+	return
+}
+
+func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err error) {
+	defer func() {
+		s.loader.Reset()
+	}()
+
+	reply = &Suites{
+		Data: make(map[string]*Items),
+	}
+	for s.loader.HasMore() {
+		var data []byte
+		if data, err = s.loader.Load(); err != nil {
+			continue
+		}
+
+		var testSuite *testing.TestSuite
+		if testSuite, err = testing.Parse(data); err != nil {
+			return
+		}
+
+		items := &Items{}
+		for _, item := range testSuite.Items {
+			items.Data = append(items.Data, item.Name)
+		}
+		reply.Data[testSuite.Name] = items
+	}
+	return
+}
+
+func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *TestCase, err error) {
+	defer func() {
+		s.loader.Reset()
+	}()
+
+	for s.loader.HasMore() {
+		var data []byte
+		if data, err = s.loader.Load(); err != nil {
+			continue
+		}
+
+		var testSuite *testing.TestSuite
+		if testSuite, err = testing.Parse(data); err != nil {
+			return
+		}
+
+		if testSuite.Name != in.Suite {
+			continue
+		}
+
+		for _, testCase := range testSuite.Items {
+			if testCase.Name != in.Testcase {
+				continue
+			}
+
+			req := &Request{
+				Api:    testCase.Request.API,
+				Method: testCase.Request.Method,
+				Header: mapToPair(testCase.Request.Header),
+				Query:  mapToPair(testCase.Request.Query),
+				Form:   mapToPair(testCase.Request.Form),
+				Body:   testCase.Request.Body,
+			}
+
+			resp := &Response{
+				StatusCode:       int32(testCase.Expect.StatusCode),
+				Body:             testCase.Expect.Body,
+				Header:           mapToPair(testCase.Expect.Header),
+				BodyFieldsExpect: mapInterToPair(testCase.Expect.BodyFieldsExpect),
+				Verify:           testCase.Expect.Verify,
+				Schema:           testCase.Expect.Schema,
+			}
+
+			reply = &TestCase{
+				Name:     testCase.Name,
+				Request:  req,
+				Response: resp,
+			}
+			break
+		}
+	}
+	return
+}
+
+func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
+	defer func() {
+		s.loader.Reset()
+	}()
+
+	var targetTestSuite *testing.TestSuite
+	for s.loader.HasMore() {
+		var data []byte
+		if data, err = s.loader.Load(); err != nil {
+			continue
+		}
+
+		var testSuite *testing.TestSuite
+		if testSuite, err = testing.Parse(data); err != nil {
+			continue
+		}
+
+		if testSuite.Name == in.Suite {
+			targetTestSuite = testSuite
+			break
+		}
+	}
+
+	if targetTestSuite != nil {
+		var data []byte
+		if data, err = yaml.Marshal(targetTestSuite); err == nil {
+			task := &TestTask{
+				Kind:     "testcaseInSuite",
+				Data:     string(data),
+				CaseName: in.Testcase,
+				Level:    "debug",
+			}
+
+			var reply *HelloReply
+			if reply, err = s.Run(ctx, task); err == nil {
+				result = &TestCaseResult{
+					Body: reply.Message,
+				}
+			}
+		}
+	}
+	return
+}
+
+func mapInterToPair(data map[string]interface{}) (pairs []*Pair) {
+	pairs = make([]*Pair, 0)
+	for k, v := range data {
+		pairs = append(pairs, &Pair{
+			Key:   k,
+			Value: fmt.Sprintf("%v", v),
+		})
+	}
+	return
+}
+
+func mapToPair(data map[string]string) (pairs []*Pair) {
+	pairs = make([]*Pair, 0)
+	for k, v := range data {
+		pairs = append(pairs, &Pair{
+			Key:   k,
+			Value: v,
+		})
+	}
 	return
 }
 

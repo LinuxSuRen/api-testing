@@ -4,6 +4,8 @@ items:
   - name: get
     request:
       api: http://foo
+      header:
+        key: value
   - name: query
     request:
       api: /
