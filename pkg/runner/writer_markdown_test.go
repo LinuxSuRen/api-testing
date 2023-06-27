@@ -29,7 +29,9 @@ func TestMarkdownWriter(t *testing.T) {
 		Error:   0,
 	}})
 	assert.Nil(t, err)
-	assert.Equal(t, `| API | Average | Max | Min | Count | Error |
+	assert.Equal(t, `There are 2 test cases:
+
+| API | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |`, buf.String())
