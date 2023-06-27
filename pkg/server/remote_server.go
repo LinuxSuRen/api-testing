@@ -19,11 +19,11 @@ import (
 
 type server struct {
 	UnimplementedRunnerServer
-	loader testing.Loader
+	loader testing.Writer
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer(loader testing.Loader) RunnerServer {
+func NewRemoteServer(loader testing.Writer) RunnerServer {
 	return &server{loader: loader}
 }
 
@@ -287,6 +287,73 @@ func mapToPair(data map[string]string) (pairs []*Pair) {
 			Key:   k,
 			Value: v,
 		})
+	}
+	return
+}
+
+func pairToInterMap(pairs []*Pair) (data map[string]interface{}) {
+	data = make(map[string]interface{})
+	for _, pair := range pairs {
+		data[pair.Key] = pair.Value
+	}
+	return
+}
+
+func pairToMap(pairs []*Pair) (data map[string]string) {
+	data = make(map[string]string)
+	for _, pair := range pairs {
+		data[pair.Key] = pair.Value
+	}
+	return
+}
+
+func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
+	defer func() {
+		s.loader.Reset()
+	}()
+
+	var targetTestSuite *testing.TestSuite
+	for s.loader.HasMore() {
+		var data []byte
+		if data, err = s.loader.Load(); err != nil {
+			continue
+		}
+
+		var testSuite *testing.TestSuite
+		if testSuite, err = testing.Parse(data); err != nil {
+			continue
+		}
+
+		if testSuite.Name == in.SuiteName {
+			targetTestSuite = testSuite
+			break
+		}
+	}
+
+	if targetTestSuite != nil {
+		for i := range targetTestSuite.Items {
+			item := targetTestSuite.Items[i]
+			if item.Name == in.Data.Name {
+				item.Request.API = in.Data.Request.Api
+				item.Request.Method = in.Data.Request.Method
+				item.Request.Header = pairToMap(in.Data.Request.Header)
+				item.Request.Query = pairToMap(in.Data.Request.Query)
+				item.Request.Form = pairToMap(in.Data.Request.Form)
+				item.Request.Body = in.Data.Request.Body
+
+				if in.Data != nil && in.Data.Response != nil {
+					item.Expect.StatusCode = int(in.Data.Response.StatusCode)
+					item.Expect.Body = in.Data.Response.Body
+					item.Expect.Header = pairToMap(in.Data.Response.Header)
+					item.Expect.BodyFieldsExpect = pairToInterMap(in.Data.Response.BodyFieldsExpect)
+					item.Expect.Verify = in.Data.Response.Verify
+					item.Expect.Schema = in.Data.Response.Schema
+				}
+
+				err = s.loader.UpdateTestCase(in.SuiteName, item)
+				break
+			}
+		}
 	}
 	return
 }

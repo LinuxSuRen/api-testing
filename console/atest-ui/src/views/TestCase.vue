@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { TabsPaneContext } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
 
 const props = defineProps({
     name: String,
@@ -32,9 +34,11 @@ interface Pair{
 
 const emptyPair: Pair[] = []
 
+const apiAddress = ref('')
 const verifyList = ref('')
 const requestBody = ref('')
-const bodyFieldsExpect = ref('')
+const responseVerifySchema = ref('')
+const bodyFieldsExpect = ref(emptyPair)
 const headersData = ref(emptyPair)
 
 watch(props, (p) => {
@@ -54,9 +58,10 @@ watch(props, (p) => {
                 e.request.method = "GET"
             }
             value.value = e.request.method
-            input.value = e.request.api
+            apiAddress.value = e.request.api
             requestBody.value = e.request.body
             verifyList.value = e.response.verify
+            responseVerifySchema.value = e.response.schema
 
             headersData.value = []
             e.request.header.forEach(h => {
@@ -76,6 +81,54 @@ watch(props, (p) => {
             bodyFieldsExpect.value = items
         });
 })
+
+interface TestCaseWithSuite{
+    suiteName: string,
+    data: TestCase
+}
+
+interface TestCase {
+    name: string,
+    request: TestCaseRequest,
+}
+
+interface TestCaseRequest {
+    method: string,
+    api: string,
+    body: string,
+}
+
+function saveTestCase() {
+    const p = props
+    let testCaseWithSuite: TestCaseWithSuite = {
+        suiteName: p.suite,
+        data: {
+            name: p.name,
+            request: {
+                method: value.value,
+                api: apiAddress.value,
+                body: requestBody.value,
+            }
+        }
+    }
+    console.log(testCaseWithSuite)
+
+    const requestOptions = {
+        method: 'POST',
+        body: JSON.stringify(testCaseWithSuite)
+    };
+    fetch('/server.Runner/UpdateTestCase', requestOptions)
+        .then(e => {
+            if (e.ok) {
+                ElMessage({
+                    message: 'Saved.',
+                    type: 'success',
+                })
+            } else {
+                ElMessage.error('Oops, ' + e.statusText)
+            }
+        })
+}
 
 const value = ref('')
 
@@ -104,8 +157,6 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
     console.log(tab, event)
 }
 
-const input = ref('')
-
 function change() {
     let lastItem = headersData.value[headersData.value.length - 1]
     if (lastItem.key !== '') {
@@ -123,16 +174,18 @@ const radio1 = ref('1')
     <div class="common-layout">
         <el-container>
             <el-header style="padding-left: 5px;">
+                <div style="margin-bottom: 5px;">
+                    <el-button type="primary" @click="saveTestCase" :icon="Edit">Save</el-button>
+                </div>
                 <el-select v-model="value" class="m-2" placeholder="Method" size="large">
                     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
                 </el-select>
-                <el-input v-model="input" placeholder="API Address"  style="width: 70%; margin-left: 5px; margin-right: 5px;"/>
+                <el-input v-model="apiAddress" placeholder="API Address"  style="width: 70%; margin-left: 5px; margin-right: 5px;"/>
                 <el-button type="primary" @click="sendRequest">Send</el-button>
             </el-header>
 
             <el-main>
                 <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-
                     <el-tab-pane label="Headers" name="second">
                         <el-table :data="headersData" style="width: 100%">
                             <el-table-column label="Key" width="180">
@@ -183,6 +236,10 @@ const radio1 = ref('1')
                         <div v-for="verify in verifyList" :key="verify">
                             <el-input :value="verify" placeholder="API Address" />
                         </div>
+                    </el-tab-pane>
+
+                    <el-tab-pane label="Schema" name="schema">
+                        <el-input :value="responseVerifySchema" />
                     </el-tab-pane>
                 </el-tabs>
             </el-main>

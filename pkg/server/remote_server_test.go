@@ -18,7 +18,7 @@ const (
 )
 
 func TestRemoteServer(t *testing.T) {
-	loader := atesting.NewFileLoader()
+	loader := atesting.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
 	server := NewRemoteServer(loader)
 	_, err := server.Run(context.TODO(), &TestTask{
@@ -89,7 +89,7 @@ func TestRemoteServer(t *testing.T) {
 }
 
 func TestRunTestCase(t *testing.T) {
-	loader := atesting.NewFileLoader()
+	loader := atesting.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
 	server := NewRemoteServer(loader)
 

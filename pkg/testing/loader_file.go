@@ -1,21 +1,29 @@
 package testing
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"gopkg.in/yaml.v3"
 )
 
 type fileLoader struct {
-	paths []string
-	index int
+	paths  []string
+	index  int
+	parent string
 }
 
 // NewFileLoader creates the instance of file loader
 func NewFileLoader() Loader {
 	return &fileLoader{index: -1}
+}
+
+func NewFileWriter(parent string) Writer {
+	return &fileLoader{index: -1, parent: parent}
 }
 
 // HasMore returns if there are more test cases
@@ -54,4 +62,175 @@ func (l *fileLoader) GetCount() int {
 // Reset resets the index
 func (l *fileLoader) Reset() {
 	l.index = -1
+}
+
+func (l *fileLoader) CreateSuite(name, api string) (err error) {
+	var found bool
+	var parentDir string
+	for i := range l.paths {
+		suitePath := l.paths[i]
+
+		parentDir = path.Dir(suitePath)
+		var data []byte
+		if data, err = ioutil.ReadFile(suitePath); err != nil {
+			continue
+		}
+
+		suite := &TestSuite{}
+		if yaml.Unmarshal(data, suite); err != nil {
+			return
+		}
+
+		if suite.Name == name {
+			found = true
+			break
+		}
+	}
+
+	if found {
+		err = fmt.Errorf("suite %s already exists", name)
+	} else {
+		var data []byte
+		if data, err = yaml.Marshal(&TestSuite{
+			Name: name,
+			API:  api,
+		}); err == nil {
+			if l.parent == "" {
+				l.parent = parentDir
+			}
+			newSuiteFile := path.Join(parentDir, fmt.Sprintf("%s.yaml", name))
+			if err = ioutil.WriteFile(newSuiteFile, data, 0644); err == nil {
+				l.Put(newSuiteFile)
+			}
+		}
+	}
+	return
+}
+
+func (l *fileLoader) UpdateSuite(name, api string) (err error) {
+	return
+}
+
+func (l *fileLoader) DeleteSuite(name string) (err error) {
+	found := false
+	for i := range l.paths {
+		suitePath := l.paths[i]
+
+		var data []byte
+		if data, err = ioutil.ReadFile(suitePath); err != nil {
+			continue
+		}
+
+		suite := &TestSuite{}
+		if yaml.Unmarshal(data, suite); err != nil {
+			return
+		}
+
+		if suite.Name == name {
+			err = os.Remove(suitePath)
+			l.paths = append(l.paths[:i], l.paths[i+1:]...)
+			found = true
+			return
+		}
+	}
+	if !found {
+		err = fmt.Errorf("suite %s not found", name)
+	}
+	return
+}
+
+func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err error) {
+	var suite *TestSuite
+	var suiteFilepath string
+	for i := range l.paths {
+		suitePath := l.paths[i]
+
+		var data []byte
+		if data, err = ioutil.ReadFile(suitePath); err != nil {
+			continue
+		}
+
+		suite = &TestSuite{}
+		if yaml.Unmarshal(data, suite); err != nil {
+			return
+		}
+
+		if suite.Name == suiteName {
+			suiteFilepath = suitePath
+			break
+		}
+		suite = nil
+	}
+
+	if suite != nil {
+		found := false
+		for i := range suite.Items {
+			if suite.Items[i].Name == testcase.Name {
+				suite.Items[i] = testcase
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			suite.Items = append(suite.Items, testcase)
+		}
+
+		var data []byte
+		if data, err = yaml.Marshal(suite); err == nil {
+			err = ioutil.WriteFile(suiteFilepath, data, 0644)
+		}
+	}
+	return
+}
+
+func (l *fileLoader) UpdateTestCase(suite string, testcase TestCase) (err error) {
+	err = l.CreateTestCase(suite, testcase)
+	return
+}
+
+func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
+	var suite *TestSuite
+	var suiteFilepath string
+	for i := range l.paths {
+		suitePath := l.paths[i]
+
+		var data []byte
+		if data, err = ioutil.ReadFile(suitePath); err != nil {
+			continue
+		}
+
+		suite = &TestSuite{}
+		if yaml.Unmarshal(data, suite); err != nil {
+			return
+		}
+
+		if suite.Name == suiteName {
+			suiteFilepath = suitePath
+			break
+		}
+		suite = nil
+	}
+
+	if suite != nil {
+		found := false
+		for i := range suite.Items {
+			if suite.Items[i].Name == testcase {
+				suite.Items = append(suite.Items[:i], suite.Items[i+1:]...)
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			err = fmt.Errorf("testcase %s not found", testcase)
+			return
+		}
+
+		var data []byte
+		if data, err = yaml.Marshal(suite); err == nil {
+			err = ioutil.WriteFile(suiteFilepath, data, 0644)
+		}
+	}
+	return
 }
