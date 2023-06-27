@@ -1,3 +1,5 @@
+There are {{len .}} test cases:
+
 | API | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
 {{- range $val := .}}
