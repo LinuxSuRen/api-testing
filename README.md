@@ -27,7 +27,7 @@ Install it via [hd](https://github.com/LinuxSuRen/http-downloader) or download f
 hd install atest
 ```
 
-or, you can install it in Kubernetes. See also the [manifests](sample/manifest.yaml).
+or, you can install it in Kubernetes. See also the [manifests](sample/kubernetes/manifest.yaml).
 
 see the following usage:
 

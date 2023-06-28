@@ -47,4 +47,4 @@ RUN mkdir -p /var/www
 COPY --from=builder /workspace/sample /var/www/sample
 COPY --from=ui /workspace/dist /var/www/html
 
-CMD ["atest", "server", "--console-path=/var/www/html", "--local-storage=/var/www/sample/testsuite-*.yaml"]
+CMD ["atest", "server", "--console-path=/var/www/html", "--local-storage=/var/www/sample/*.yaml"]
