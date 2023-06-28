@@ -1,31 +1,32 @@
+#!api-testing
+# yaml-language-server: $schema=api-testing-schema.json
+# https://docs.gitlab.com/ee/api/api_resources.html
 name: Gitlab
 items:
-    - name: projects
-      before:
-        items:
-            - sleep(1)
-      after:
-        items:
-            - sleep(1)
-      request:
-        api: https://gitlab.com/api/v4/projects
-        method: GET
-      expect:
-        statusCode: 200
-        schema: |
-            {
-              "type": "array"
-            }
-    - name: project
-      request:
-        api: https://gitlab.com/api/v4/projects/47240858
-        method: GET
-      expect:
-        statusCode: 200
-        bodyFieldsExpect:
-            name: NIT-Goa-Resources
-        verify:
-            - data.http_url_to_repo startsWith "https"
-            - data.http_url_to_repo endsWith ".git"
-            - data.default_branch == 'master' or data.default_branch == 'main'
-            - len(data.topics) >= 0
+- name: projects
+  request:
+    api: https://gitlab.com/api/v4/projects
+  expect:
+    statusCode: 200
+    schema: |
+      {
+        "type": "array"
+      }
+  before:
+    items:
+      - "sleep(1)"
+  after:
+    items:
+      - "sleep(1)"
+- name: project
+  request:
+    api: https://gitlab.com/api/v4/projects/{{int64 (index .projects 0).id}}
+  expect:
+    statusCode: 200
+    # bodyFieldsExpect:
+    #   http_url_to_repo: https://gitlab.com/senghuy/sr_chea_senghuy_spring_homework001.git
+    verify:
+    - data.http_url_to_repo startsWith "https"
+    - data.http_url_to_repo endsWith ".git"
+    - data.default_branch == 'master' or data.default_branch == 'main'
+    - len(data.topics) >= 0
