@@ -13,6 +13,7 @@ service Runner {
     rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {}
     rpc GetTestCase(TestCaseIdentity) returns (TestCase) {}
 
+    rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {}
     rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
 }
 
@@ -27,6 +28,11 @@ message Items {
 message TestCaseIdentity {
   string suite = 1;
   string testcase = 2;
+}
+
+message TestSuiteIdentity {
+  string name = 1;
+  string api = 2;
 }
 
 message TestTask {

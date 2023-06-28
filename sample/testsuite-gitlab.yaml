@@ -27,6 +27,3 @@ items:
             - data.http_url_to_repo endsWith ".git"
             - data.default_branch == 'master' or data.default_branch == 'main'
             - len(data.topics) >= 0
-        schema: |-
-            sdsfsd
-            sdsfs

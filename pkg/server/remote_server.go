@@ -199,8 +199,8 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 			req := &Request{
 				Api:    testCase.Request.API,
 				Method: testCase.Request.Method,
-				Header: mapToPair(testCase.Request.Header),
 				Query:  mapToPair(testCase.Request.Query),
+				Header: mapToPair(testCase.Request.Header),
 				Form:   mapToPair(testCase.Request.Form),
 				Body:   testCase.Request.Body,
 			}
@@ -331,6 +331,7 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 	}
 
 	if targetTestSuite != nil {
+		found := false
 		for i := range targetTestSuite.Items {
 			item := targetTestSuite.Items[i]
 			if item.Name == in.Data.Name {
@@ -351,10 +352,27 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 				}
 
 				err = s.loader.UpdateTestCase(in.SuiteName, item)
+				found = true
 				break
 			}
 		}
+
+		if !found {
+			item := testing.TestCase{
+				Name: in.Data.Name,
+				Request: testing.Request{
+					API:    in.Data.Request.Api,
+					Method: in.Data.Request.Method,
+				},
+			}
+			err = s.loader.UpdateTestCase(in.SuiteName, item)
+		}
 	}
+	return
+}
+
+func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
+	err = s.loader.CreateSuite(in.Name, in.Api)
 	return
 }
 

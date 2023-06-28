@@ -1,26 +1,26 @@
-#!api-testing
-# yaml-language-server: $schema=https://gitee.com/linuxsuren/api-testing/raw/master/sample/api-testing-schema.json
 name: Gitee
 api: https://gitee.com/api/v5
 items:
-- name: stargazers
-  before:
-    items:
-    - sleep(1)
-  request:
-    api: /repos/linuxsuren/api-testing/stargazers
-  expect:
-    verify:
-    - len(["data"]) > 0
-- name: branches
-  request:
-    api: /repos/linuxsuren/api-testing/branches
-  expect:
-    verify:
-    - len(filter(data, .name == "master")) == 1
-- name: branche
-  request:
-    api: /repos/linuxsuren/api-testing/branches/{{(index .branches 0).name}}
-  expect:
-    verify:
-    - len(data.name) > 0
+    - name: stargazers
+      before:
+        items:
+            - sleep(1)
+      request:
+        api: /repos/linuxsuren/api-testing/stargazers
+        method: GET
+      expect:
+        verify:
+            - len(["data"]) > 0
+    - name: branches
+      request:
+        api: /repos/linuxsuren/api-testing/branches
+      expect:
+        verify:
+            - len(filter(data, .name == "master")) == 1
+    - name: branche
+      request:
+        api: /repos/linuxsuren/api-testing/branches/{{(index .branches 0).name}}
+        method: GET
+      expect:
+        verify:
+            - len(data.name) > 0
