@@ -18,10 +18,12 @@ items:
             }
     - name: project
       request:
-        api: https://gitlab.com/api/v4/projects/{{int64 (index .projects 0).id}}
+        api: https://gitlab.com/api/v4/projects/47240858
         method: GET
       expect:
         statusCode: 200
+        bodyFieldsExpect:
+            name: NIT-Goa-Resources
         verify:
             - data.http_url_to_repo startsWith "https"
             - data.http_url_to_repo endsWith ".git"

@@ -3,7 +3,7 @@ import { reactive, ref, watch } from 'vue'
 import type { TabsPaneContext } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
-import type { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance } from 'element-plus'
 
 const props = defineProps({
     name: String,
@@ -28,22 +28,45 @@ function sendRequest() {
         .then(e => {
             testResult.value = e.body
             requestLoading.value = false
+
+            if (e.error !== "") {
+                ElMessage({
+                    message: e.error,
+                    type: 'error'
+                })
+            }
         });
 }
 
-interface Pair{
+interface Pair {
     key: string,
     value: string
 }
 
-const emptyPair: Pair[] = []
+const emptyTestCaseWithSuite: TestCaseWithSuite = {
+    suiteName: "",
+    data: {
+        name: "",
+        request: {
+            api: "",
+            method: "",
+            header: [],
+            query: [],
+            form: [],
+            body: "",
+        },
+        response: {
+            statusCode: 0,
+            body: "",
+            header: [],
+            bodyFieldsExpect: [],
+            verify: [],
+            schema: "",
+        },
+    }
+}
 
-const apiAddress = ref('')
-const verifyList = ref('')
-const requestBody = ref('')
-const responseVerifySchema = ref('')
-const bodyFieldsExpect = ref(emptyPair)
-const headersData = ref(emptyPair)
+const testCaseWithSuite = ref(emptyTestCaseWithSuite)
 
 watch(props, (p) => {
     const name = p.name
@@ -61,28 +84,33 @@ watch(props, (p) => {
             if (e.request.method === "") {
                 e.request.method = "GET"
             }
-            value.value = e.request.method
-            apiAddress.value = e.request.api
-            requestBody.value = e.request.body
-            verifyList.value = e.response.verify
-            responseVerifySchema.value = e.response.schema
 
-            headersData.value = []
-            e.request.header.forEach(h => {
-                headersData.value.push({
-                    key: h.key,
-                    value: h.value
-                })
+            e.request.header.push({
+                key: '',
+                value: ''
             })
+            e.request.query.push({
+                key: '',
+                value: ''
+            })
+            e.request.form.push({
+                key: '',
+                value: ''
+            })
+            e.response.header.push({
+                key: '',
+                value: ''
+            })
+            e.response.bodyFieldsExpect.push({
+                key: '',
+                value: ''
+            })
+            e.response.verify.push('')
 
-            let items: Pair[] = []
-            e.response.bodyFieldsExpect.forEach(b => {
-                items.push({
-                    key: b.key,
-                    value: b.value
-                })
-            })
-            bodyFieldsExpect.value = items
+            testCaseWithSuite.value = {
+                suiteName: suite,
+                data: e
+            }
         });
 })
 
@@ -94,33 +122,42 @@ interface TestCaseWithSuite{
 interface TestCase {
     name: string,
     request: TestCaseRequest,
+    response: TestCaseResponse,
 }
 
 interface TestCaseRequest {
-    method: string,
     api: string,
+    method: string,
+    header: Pair[],
+    query: Pair[],
+    form: Pair[],
     body: string,
+}
+
+interface TestCaseResponse {
+    statusCode: number,
+    body: string,
+    header: Pair[],
+    bodyFieldsExpect: Pair[],
+    verify: string[],
+    schema: string,
 }
 
 const saveLoading = ref(false)
 function saveTestCase() {
     saveLoading.value = true
-    const p = props
-    let testCaseWithSuite: TestCaseWithSuite = {
-        suiteName: p.suite,
-        data: {
-            name: p.name,
-            request: {
-                method: value.value,
-                api: apiAddress.value,
-                body: requestBody.value,
-            }
-        }
-    }
+
+    // remove empty pair
+    testCaseWithSuite.value.data.request.header = testCaseWithSuite.value.data.request.header.filter(e => e.key !== '')
+    testCaseWithSuite.value.data.request.query = testCaseWithSuite.value.data.request.query.filter(e => e.key !== '')
+    testCaseWithSuite.value.data.request.form = testCaseWithSuite.value.data.request.form.filter(e => e.key !== '')
+    testCaseWithSuite.value.data.response.header = testCaseWithSuite.value.data.response.header.filter(e => e.key !== '')
+    testCaseWithSuite.value.data.response.bodyFieldsExpect = testCaseWithSuite.value.data.response.bodyFieldsExpect.filter(e => e.key !== '')
+    testCaseWithSuite.value.data.response.verify = testCaseWithSuite.value.data.response.verify.filter(e => e !== '')
 
     const requestOptions = {
         method: 'POST',
-        body: JSON.stringify(testCaseWithSuite)
+        body: JSON.stringify(testCaseWithSuite.value)
     };
     fetch('/server.Runner/UpdateTestCase', requestOptions)
         .then(e => {
@@ -135,8 +172,6 @@ function saveTestCase() {
             saveLoading.value = false
         })
 }
-
-const value = ref('')
 
 const options = [
     {
@@ -163,10 +198,22 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
     console.log(tab, event)
 }
 
-function change() {
-    let lastItem = headersData.value[headersData.value.length - 1]
+function bodyFiledExpectChange() {
+    const data = testCaseWithSuite.value.data.response.bodyFieldsExpect
+    let lastItem = data[data.length - 1]
     if (lastItem.key !== '') {
-        headersData.value.push({
+        data.push({
+            key: '',
+            value: ''
+        })
+    }
+}
+
+function headerChange() {
+    const header = testCaseWithSuite.value.data.request.header
+    let lastItem = header[header.length - 1]
+    if (lastItem.key !== '') {
+        header.push({
             key: '',
             value: ''
         })
@@ -221,7 +268,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 
   fetch('/server.Runner/UpdateTestCase', requestOptions)
       .then(response => response.json())
-      .then(d => {
+      .then(() => {
         suiteCreatingLoading.value = false
       });
       
@@ -238,20 +285,20 @@ const submitForm = (formEl: FormInstance | undefined) => {
                     <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit">New</el-button>
                     <el-text class="mx-1" type="primary">{{props.name}}</el-text>
                 </div>
-                <el-select v-model="value" class="m-2" placeholder="Method" size="large">
+                <el-select v-model="testCaseWithSuite.data.request.method" class="m-2" placeholder="Method" size="middle">
                     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
                 </el-select>
-                <el-input v-model="apiAddress" placeholder="API Address"  style="width: 70%; margin-left: 5px; margin-right: 5px;"/>
+                <el-input v-model="testCaseWithSuite.data.request.api" placeholder="API Address"  style="width: 70%; margin-left: 5px; margin-right: 5px;"/>
                 <el-button type="primary" @click="sendRequest" :loading="requestLoading">Send</el-button>
             </el-header>
 
             <el-main>
                 <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
                     <el-tab-pane label="Headers" name="second">
-                        <el-table :data="headersData" style="width: 100%">
+                        <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
                             <el-table-column label="Key" width="180">
                                 <template #default="scope">
-                                    <el-input v-model="scope.row.key" placeholder="Key" @change="change" />
+                                    <el-input v-model="scope.row.key" placeholder="Key" @change="headerChange" />
                                 </template>
                             </el-table-column>
                             <el-table-column label="Value">
@@ -272,15 +319,15 @@ const submitForm = (formEl: FormInstance | undefined) => {
                             <el-radio :label="4">x-www-form-urlencoded</el-radio>
                         </el-radio-group>
 
-                        <el-input v-model="requestBody" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                        <el-input v-model="testCaseWithSuite.data.request.body" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
                             placeholder="Please input" />
                     </el-tab-pane>
 
                     <el-tab-pane label="BodyFiledExpect" name="fourth">
-                        <el-table :data="bodyFieldsExpect" style="width: 100%">
+                        <el-table :data="testCaseWithSuite.data.response.bodyFieldsExpect" style="width: 100%">
                             <el-table-column label="Key" width="180">
                                 <template #default="scope">
-                                    <el-input v-model="scope.row.key" placeholder="Key" @change="change" />
+                                    <el-input v-model="scope.row.key" placeholder="Key" @change="bodyFiledExpectChange" />
                                 </template>
                             </el-table-column>
                             <el-table-column label="Value">
@@ -294,13 +341,14 @@ const submitForm = (formEl: FormInstance | undefined) => {
                     </el-tab-pane>
 
                     <el-tab-pane label="Verify" name="fifth">
-                        <div v-for="verify in verifyList" :key="verify">
-                            <el-input :value="verify" placeholder="API Address" />
+                        <div v-for="verify in testCaseWithSuite.data.response.verify" :key="verify">
+                            <el-input :value="verify" />
                         </div>
                     </el-tab-pane>
 
                     <el-tab-pane label="Schema" name="schema">
-                        <el-input v-model="responseVerifySchema" />
+                        <el-input v-model="testCaseWithSuite.data.response.schema"
+                            :autosize="{ minRows: 4, maxRows: 8 }" type="textarea" />
                     </el-tab-pane>
                 </el-tabs>
             </el-main>
@@ -310,7 +358,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
                 <el-input
                     v-model="testResult"
                     :autosize="{ minRows: 4, maxRows: 6 }"
-                    readonly="true"
+                    readonly=true
                     type="textarea"
                     placeholder="Please input"
                 />

@@ -133,6 +133,9 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 			break
 		}
 	}
+	if reply.Error != "" {
+		fmt.Fprintln(buf, reply.Error)
+	}
 	reply.Message = buf.String()
 	return
 }
@@ -261,7 +264,8 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 			var reply *HelloReply
 			if reply, err = s.Run(ctx, task); err == nil {
 				result = &TestCaseResult{
-					Body: reply.Message,
+					Body:  reply.Message,
+					Error: reply.Error,
 				}
 			}
 		}

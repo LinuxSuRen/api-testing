@@ -8,6 +8,8 @@ build-image:
 	docker build -t ghcr.io/linuxsuren/api-testing:dev .
 run-image:
 	docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing:dev
+run-server:
+	go run . server  --local-storage 'sample/*.yaml'
 copy: build
 	sudo cp bin/atest /usr/local/bin/
 copy-restart: build

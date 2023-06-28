@@ -87,6 +87,7 @@ message TestCaseResult {
   int32 statusCode = 1;
   string body = 2;
   repeated Pair header = 3;
+  string error = 4;
 }
 
 message Pair {
