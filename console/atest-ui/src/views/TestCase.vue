@@ -34,6 +34,11 @@ function sendRequest() {
                     message: e.error,
                     type: 'error'
                 })
+            } else {
+                ElMessage({
+                    message: 'Pass!',
+                    type: 'success',
+                })
             }
         });
 }
