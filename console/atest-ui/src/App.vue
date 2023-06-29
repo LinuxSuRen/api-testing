@@ -2,8 +2,8 @@
 import TestCase from './views/TestCase.vue'
 import { reactive, ref } from 'vue'
 import { ElTree } from "element-plus"
-import type { FormInstance, FormRules } from 'element-plus'
-import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
+import type { FormInstance } from 'element-plus'
+import { Edit } from '@element-plus/icons-vue'
 
 interface Tree {
   id: string
@@ -76,7 +76,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 
   fetch('/server.Runner/CreateTestSuite', requestOptions)
       .then(response => response.json())
-      .then(d => {
+      .then(() => {
         suiteCreatingLoading.value = false
         loadTestSuites()
       });

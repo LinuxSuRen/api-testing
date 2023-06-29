@@ -2,7 +2,7 @@
 import { reactive, ref, watch } from 'vue'
 import type { TabsPaneContext } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue'
+import { Edit } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
 
 const props = defineProps({
