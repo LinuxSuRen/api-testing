@@ -30,6 +30,7 @@ type RunnerClient interface {
 	GetTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCase, error)
 	CreateTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 	UpdateTestCase(ctx context.Context, in *TestCaseWithSuite, opts ...grpc.CallOption) (*HelloReply, error)
+	DeleteTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 }
 
 type runnerClient struct {
@@ -112,6 +113,15 @@ func (c *runnerClient) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite
 	return out, nil
 }
 
+func (c *runnerClient) DeleteTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/DeleteTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RunnerServer is the server API for Runner service.
 // All implementations must embed UnimplementedRunnerServer
 // for forward compatibility
@@ -124,6 +134,7 @@ type RunnerServer interface {
 	GetTestCase(context.Context, *TestCaseIdentity) (*TestCase, error)
 	CreateTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
 	UpdateTestCase(context.Context, *TestCaseWithSuite) (*HelloReply, error)
+	DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error)
 	mustEmbedUnimplementedRunnerServer()
 }
 
@@ -154,6 +165,9 @@ func (UnimplementedRunnerServer) CreateTestSuite(context.Context, *TestSuiteIden
 }
 func (UnimplementedRunnerServer) UpdateTestCase(context.Context, *TestCaseWithSuite) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateTestCase not implemented")
+}
+func (UnimplementedRunnerServer) DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTestCase not implemented")
 }
 func (UnimplementedRunnerServer) mustEmbedUnimplementedRunnerServer() {}
 
@@ -312,6 +326,24 @@ func _Runner_UpdateTestCase_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_DeleteTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestCaseIdentity)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).DeleteTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/DeleteTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).DeleteTestCase(ctx, req.(*TestCaseIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Runner_ServiceDesc is the grpc.ServiceDesc for Runner service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -350,6 +382,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateTestCase",
 			Handler:    _Runner_UpdateTestCase_Handler,
+		},
+		{
+			MethodName: "DeleteTestCase",
+			Handler:    _Runner_DeleteTestCase_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

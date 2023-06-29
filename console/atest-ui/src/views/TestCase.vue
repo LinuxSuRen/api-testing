@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
-import type { TabsPaneContext } from 'element-plus'
+import type { TabsPaneContext, FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import { Edit } from '@element-plus/icons-vue'
-import type { FormInstance } from 'element-plus'
+import { Edit, Delete } from '@element-plus/icons-vue'
 
 const props = defineProps({
     name: String,
     suite: String,
 })
+const emit = defineEmits(['updated'])
 
 const requestLoading = ref(false)
 const testResult = ref('')
@@ -178,6 +178,34 @@ function saveTestCase() {
         })
 }
 
+function deleteTestCase() {
+    const name = props.name
+    const suite = props.suite
+    const requestOptions = {
+        method: 'POST',
+        body: JSON.stringify({
+            suite: suite,
+            testcase: name,
+        })
+    };
+    fetch('/server.Runner/DeleteTestCase', requestOptions)
+        .then(e => {
+            if (e.ok) {
+                emit('updated', 'hello from child')
+
+                ElMessage({
+                    message: 'Delete.',
+                    type: 'success',
+                })
+
+                // clean all the values
+                testCaseWithSuite.value = emptyTestCaseWithSuite
+            } else {
+                ElMessage.error('Oops, ' + e.statusText)
+            }
+        })
+}
+
 const options = [
     {
         value: 'GET',
@@ -288,6 +316,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
                 <div style="margin-bottom: 5px;">
                     <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading">Save</el-button>
                     <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit">New</el-button>
+                    <el-button type="primary" @click="deleteTestCase" :icon="Delete">Delete</el-button>
                     <el-text class="mx-1" type="primary">{{props.name}}</el-text>
                 </div>
                 <el-select v-model="testCaseWithSuite.data.request.method" class="m-2" placeholder="Method" size="middle">

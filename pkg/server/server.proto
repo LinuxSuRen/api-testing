@@ -15,6 +15,7 @@ service Runner {
 
     rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {}
     rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
+    rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
 }
 
 message Suites {

@@ -380,6 +380,11 @@ func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (re
 	return
 }
 
+func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (reply *HelloReply, err error) {
+	err = s.loader.DeleteTestCase(in.Suite, in.Testcase)
+	return
+}
+
 // Sample returns a sample of the test task
 func (s *server) Sample(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
 	reply = &HelloReply{Message: sample.TestSuiteGitLab}
