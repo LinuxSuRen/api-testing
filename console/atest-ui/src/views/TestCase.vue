@@ -111,6 +111,9 @@ watch(props, (p) => {
                 value: ''
             })
             e.response.verify.push('')
+            if (e.response.statusCode === 0) {
+                e.response.statusCode = 200
+            }
 
             testCaseWithSuite.value = {
                 suiteName: suite,
@@ -355,6 +358,33 @@ const submitForm = (formEl: FormInstance | undefined) => {
 
                         <el-input v-model="testCaseWithSuite.data.request.body" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
                             placeholder="Please input" />
+                    </el-tab-pane>
+
+                    <el-tab-pane label="Expected" name="expected">
+                        <el-row :gutter="20">
+                            <span class="ml-3 w-50 text-gray-600 inline-flex items-center" style="margin-left: 15px; margin-right: 15px">Status Code:</span>
+                            <el-input v-model="testCaseWithSuite.data.response.statusCode" class="w-50 m-2"
+                                placeholder="Please input" style="width: 200px" />
+                        </el-row>
+                        <el-input v-model="testCaseWithSuite.data.response.body" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea"
+                            placeholder="Expected Body" />
+                    </el-tab-pane>
+
+                    <el-tab-pane label="Expected Headers" name="expected-headers">
+                        <el-table :data="testCaseWithSuite.data.response.header" style="width: 100%">
+                            <el-table-column label="Key" width="180">
+                                <template #default="scope">
+                                    <el-input v-model="scope.row.key" placeholder="Key" @change="headerChange" />
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Value">
+                                <template #default="scope">
+                                    <div style="display: flex; align-items: center">
+                                        <el-input v-model="scope.row.value" placeholder="Value" />
+                                    </div>
+                                </template>
+                            </el-table-column>
+                        </el-table>
                     </el-tab-pane>
 
                     <el-tab-pane label="BodyFiledExpect" name="fourth">
