@@ -87,7 +87,7 @@ func TestRemoteServer(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.Equal(t, "get", testCase.Name)
-	assert.Equal(t, "http://foo", testCase.Request.Api)
+	assert.Equal(t, urlFoo, testCase.Request.Api)
 }
 
 func TestRunTestCase(t *testing.T) {
@@ -293,7 +293,7 @@ func TestUpdateTestCase(t *testing.T) {
 				Name: "post",
 				Request: &Request{
 					Method: http.MethodPost,
-					Api:    "http://foo",
+					Api:    urlFoo,
 					Header: []*Pair{{
 						Key:   "key",
 						Value: "value",

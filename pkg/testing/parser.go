@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -64,6 +65,25 @@ func ParseFromData(data []byte) (testSuite *TestSuite, err error) {
 func ParseTestCaseFromData(data []byte) (testCase *TestCase, err error) {
 	testCase = &TestCase{}
 	err = yaml.Unmarshal(data, testCase)
+	return
+}
+
+// ParseTestSuiteFromFile
+func ParseTestSuiteFromFile(suitePath string) (testSuite *TestSuite, err error) {
+	var data []byte
+	if data, err = ioutil.ReadFile(suitePath); err == nil {
+		testSuite = &TestSuite{}
+		yaml.Unmarshal(data, testSuite)
+	}
+	return
+}
+
+// SaveTestSuiteToFile saves the test suite to file
+func SaveTestSuiteToFile(suite *TestSuite, suitePath string) (err error) {
+	var data []byte
+	if data, err = yaml.Marshal(suite); err == nil {
+		err = os.WriteFile(suitePath, data, 0644)
+	}
 	return
 }
 

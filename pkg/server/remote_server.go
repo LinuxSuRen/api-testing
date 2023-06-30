@@ -60,7 +60,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		if suite, err = testing.ParseFromData([]byte(task.Data)); err != nil {
 			return
 		} else if suite == nil || suite.Items == nil {
-			err = fmt.Errorf("no test suite found")
+			err = errNoTestSuiteFound
 			return
 		}
 	case "testcase":
@@ -75,7 +75,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		if suite, err = testing.ParseFromData([]byte(task.Data)); err != nil {
 			return
 		} else if suite == nil || suite.Items == nil {
-			err = fmt.Errorf("no test suite found")
+			err = errNoTestSuiteFound
 			return
 		}
 
@@ -341,7 +341,7 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 	}
 
 	if targetTestSuite == nil {
-		err = errors.New("no test suite found")
+		err = errNoTestSuiteFound
 		return
 	}
 
@@ -491,3 +491,5 @@ func (s *UniqueSlice[T]) Exist(item T) bool {
 func (s *UniqueSlice[T]) GetAll() []T {
 	return s.data
 }
+
+var errNoTestSuiteFound = errors.New("no test suite found")

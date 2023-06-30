@@ -2,13 +2,11 @@ package testing
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 
 	"github.com/linuxsuren/api-testing/pkg/util"
-	"gopkg.in/yaml.v3"
 )
 
 type fileLoader struct {
@@ -71,14 +69,9 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 		suitePath := l.paths[i]
 
 		parentDir = path.Dir(suitePath)
-		var data []byte
-		if data, err = ioutil.ReadFile(suitePath); err != nil {
+		var suite *TestSuite
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
 			continue
-		}
-
-		suite := &TestSuite{}
-		if yaml.Unmarshal(data, suite); err != nil {
-			return
 		}
 
 		if suite.Name == name {
@@ -90,18 +83,17 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 	if found {
 		err = fmt.Errorf("suite %s already exists", name)
 	} else {
-		var data []byte
-		if data, err = yaml.Marshal(&TestSuite{
+		if l.parent == "" {
+			l.parent = parentDir
+		}
+		newSuiteFile := path.Join(parentDir, fmt.Sprintf("%s.yaml", name))
+
+		suite := &TestSuite{
 			Name: name,
 			API:  api,
-		}); err == nil {
-			if l.parent == "" {
-				l.parent = parentDir
-			}
-			newSuiteFile := path.Join(parentDir, fmt.Sprintf("%s.yaml", name))
-			if err = ioutil.WriteFile(newSuiteFile, data, 0644); err == nil {
-				l.Put(newSuiteFile)
-			}
+		}
+		if err = SaveTestSuiteToFile(suite, newSuiteFile); err == nil {
+			l.Put(newSuiteFile)
 		}
 	}
 	return
@@ -115,15 +107,9 @@ func (l *fileLoader) DeleteSuite(name string) (err error) {
 	found := false
 	for i := range l.paths {
 		suitePath := l.paths[i]
-
-		var data []byte
-		if data, err = ioutil.ReadFile(suitePath); err != nil {
+		var suite *TestSuite
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
 			continue
-		}
-
-		suite := &TestSuite{}
-		if yaml.Unmarshal(data, suite); err != nil {
-			return
 		}
 
 		if suite.Name == name {
@@ -144,15 +130,8 @@ func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err er
 	var suiteFilepath string
 	for i := range l.paths {
 		suitePath := l.paths[i]
-
-		var data []byte
-		if data, err = ioutil.ReadFile(suitePath); err != nil {
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
 			continue
-		}
-
-		suite = &TestSuite{}
-		if yaml.Unmarshal(data, suite); err != nil {
-			return
 		}
 
 		if suite.Name == suiteName {
@@ -176,10 +155,7 @@ func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err er
 			suite.Items = append(suite.Items, testcase)
 		}
 
-		var data []byte
-		if data, err = yaml.Marshal(suite); err == nil {
-			err = ioutil.WriteFile(suiteFilepath, data, 0644)
-		}
+		err = SaveTestSuiteToFile(suite, suiteFilepath)
 	}
 	return
 }
@@ -194,15 +170,8 @@ func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 	var suiteFilepath string
 	for i := range l.paths {
 		suitePath := l.paths[i]
-
-		var data []byte
-		if data, err = ioutil.ReadFile(suitePath); err != nil {
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
 			continue
-		}
-
-		suite = &TestSuite{}
-		if yaml.Unmarshal(data, suite); err != nil {
-			return
 		}
 
 		if suite.Name == suiteName {
@@ -227,10 +196,7 @@ func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 			return
 		}
 
-		var data []byte
-		if data, err = yaml.Marshal(suite); err == nil {
-			err = ioutil.WriteFile(suiteFilepath, data, 0644)
-		}
+		err = SaveTestSuiteToFile(suite, suiteFilepath)
 	}
 	return
 }
