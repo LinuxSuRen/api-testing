@@ -4,6 +4,7 @@ package server
 import (
 	"bytes"
 	context "context"
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -316,6 +317,11 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 		s.loader.Reset()
 	}()
 
+	if in.Data == nil {
+		err = errors.New("data is required")
+		return
+	}
+
 	var targetTestSuite *testing.TestSuite
 	for s.loader.HasMore() {
 		var data []byte
@@ -334,44 +340,58 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 		}
 	}
 
-	if targetTestSuite != nil {
-		found := false
-		for i := range targetTestSuite.Items {
-			item := targetTestSuite.Items[i]
-			if item.Name == in.Data.Name {
-				item.Request.API = in.Data.Request.Api
-				item.Request.Method = in.Data.Request.Method
-				item.Request.Header = pairToMap(in.Data.Request.Header)
-				item.Request.Query = pairToMap(in.Data.Request.Query)
-				item.Request.Form = pairToMap(in.Data.Request.Form)
-				item.Request.Body = in.Data.Request.Body
+	if targetTestSuite == nil {
+		err = errors.New("no test suite found")
+		return
+	}
 
-				if in.Data != nil && in.Data.Response != nil {
-					item.Expect.StatusCode = int(in.Data.Response.StatusCode)
-					item.Expect.Body = in.Data.Response.Body
-					item.Expect.Header = pairToMap(in.Data.Response.Header)
-					item.Expect.BodyFieldsExpect = pairToInterMap(in.Data.Response.BodyFieldsExpect)
-					item.Expect.Verify = in.Data.Response.Verify
-					item.Expect.Schema = in.Data.Response.Schema
-				}
+	found := false
+	for i := range targetTestSuite.Items {
+		item := targetTestSuite.Items[i]
+		if item.Name == in.Data.Name {
+			item.Request = grpcRequestToRaw(in.Data.Request)
+			item.Expect = grpcResponseToRaw(in.Data.Response)
 
-				err = s.loader.UpdateTestCase(in.SuiteName, item)
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			item := testing.TestCase{
-				Name: in.Data.Name,
-				Request: testing.Request{
-					API:    in.Data.Request.Api,
-					Method: in.Data.Request.Method,
-				},
-			}
 			err = s.loader.UpdateTestCase(in.SuiteName, item)
+			found = true
+			break
 		}
 	}
+
+	if !found {
+		item := testing.TestCase{
+			Name:    in.Data.Name,
+			Request: grpcRequestToRaw(in.Data.Request),
+			Expect:  grpcResponseToRaw(in.Data.Response),
+		}
+		err = s.loader.UpdateTestCase(in.SuiteName, item)
+	}
+	return
+}
+
+func grpcRequestToRaw(request *Request) (req testing.Request) {
+	if request == nil {
+		return
+	}
+	req.API = request.Api
+	req.Method = request.Method
+	req.Header = pairToMap(request.Header)
+	req.Query = pairToMap(request.Query)
+	req.Form = pairToMap(request.Form)
+	req.Body = request.Body
+	return
+}
+
+func grpcResponseToRaw(response *Response) (req testing.Response) {
+	if response == nil {
+		return
+	}
+	req.StatusCode = int(response.StatusCode)
+	req.Body = response.Body
+	req.Header = pairToMap(response.Header)
+	req.BodyFieldsExpect = pairToInterMap(response.BodyFieldsExpect)
+	req.Verify = response.Verify
+	req.Schema = response.Schema
 	return
 }
 

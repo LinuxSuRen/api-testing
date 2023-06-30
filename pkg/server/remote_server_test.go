@@ -2,7 +2,9 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"os"
 	"testing"
 
 	_ "embed"
@@ -236,6 +238,99 @@ func TestWithDefaultValue(t *testing.T) {
 func TestMapInterToPair(t *testing.T) {
 	assert.Equal(t, []*Pair{{Key: "key", Value: "val"}},
 		mapInterToPair(map[string]interface{}{"key": "val"}))
+}
+
+func TestUpdateTestCase(t *testing.T) {
+	t.Run("no suite found", func(t *testing.T) {
+		writer := atesting.NewFileWriter("")
+		server := NewRemoteServer(writer)
+		server.UpdateTestCase(context.TODO(), &TestCaseWithSuite{
+			Data: &TestCase{},
+		})
+	})
+
+	t.Run("no data", func(t *testing.T) {
+		writer := atesting.NewFileWriter("")
+		server := NewRemoteServer(writer)
+		_, err := server.UpdateTestCase(context.TODO(), &TestCaseWithSuite{})
+		assert.Error(t, err)
+	})
+
+	t.Run("normal", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp(os.TempDir(), "test")
+		assert.NoError(t, err)
+		defer os.Remove(tmpFile.Name())
+
+		fmt.Fprint(tmpFile, simpleSuite)
+
+		writer := atesting.NewFileWriter("")
+		err = writer.Put(tmpFile.Name())
+		assert.NoError(t, err)
+
+		ctx := context.Background()
+		server := NewRemoteServer(writer)
+		_, err = server.UpdateTestCase(ctx, &TestCaseWithSuite{
+			SuiteName: "simple",
+			Data: &TestCase{
+				Name: "get",
+				Request: &Request{
+					Api: "http://foo.json",
+				},
+				Response: &Response{
+					StatusCode: 200,
+					BodyFieldsExpect: []*Pair{{
+						Key:   "key",
+						Value: "value",
+					}},
+				},
+			},
+		})
+		assert.NoError(t, err)
+
+		_, err = server.UpdateTestCase(ctx, &TestCaseWithSuite{
+			SuiteName: "simple",
+			Data: &TestCase{
+				Name: "post",
+				Request: &Request{
+					Method: http.MethodPost,
+					Api:    "http://foo",
+					Header: []*Pair{{
+						Key:   "key",
+						Value: "value",
+					}},
+				},
+			},
+		})
+		assert.NoError(t, err)
+
+		var testCase *TestCase
+		testCase, err = server.GetTestCase(ctx, &TestCaseIdentity{
+			Suite: "simple", Testcase: "get",
+		})
+		assert.NoError(t, err)
+		if assert.NotNil(t, testCase) {
+			assert.Equal(t, "http://foo.json", testCase.Request.Api)
+			assert.Equal(t, int32(200), testCase.Response.StatusCode)
+		}
+
+		_, err = server.CreateTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.NoError(t, err)
+
+		var suites *Suites
+		suites, err = server.GetSuites(ctx, &Empty{})
+		if assert.NoError(t, err) {
+			assert.Equal(t, 2, len(suites.Data))
+		}
+
+		_, err = server.DeleteTestCase(ctx, &TestCaseIdentity{Suite: "simple", Testcase: "get"})
+		assert.NoError(t, err)
+
+		testCase, err = server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple", Testcase: "get"})
+		assert.Nil(t, testCase)
+		assert.NoError(t, err)
+	})
+
+	grpcRequestToRaw(nil) // avoid panic
 }
 
 //go:embed testdata/simple.yaml
