@@ -66,7 +66,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	loader := testing.NewFileLoader()
+	loader := testing.NewFileWriter("")
 	if o.localStorage != "" {
 		if err = loader.Put(o.localStorage); err != nil {
 			return

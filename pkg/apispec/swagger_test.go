@@ -18,7 +18,7 @@ func TestParseURLToSwagger(t *testing.T) {
 		verify     func(t *testing.T, swagger *apispec.Swagger, err error)
 	}{{
 		name:       "normal",
-		swaggerURL: "http://foo",
+		swaggerURL: urlFoo,
 		verify: func(t *testing.T, swagger *apispec.Swagger, err error) {
 			assert.NoError(t, err)
 			assert.Equal(t, "2.0", swagger.Swagger)
@@ -48,25 +48,25 @@ func TestHaveAPI(t *testing.T) {
 		expectExist  bool
 	}{{
 		name:        "normal, exist",
-		swaggerURL:  "http://foo",
+		swaggerURL:  urlFoo,
 		path:        "/api/v1/users",
 		method:      http.MethodGet,
 		expectExist: true,
 	}, {
 		name:        "create user, exist",
-		swaggerURL:  "http://foo",
+		swaggerURL:  urlFoo,
 		path:        "/api/v1/users",
 		method:      http.MethodPost,
 		expectExist: true,
 	}, {
 		name:        "get a user, exist",
-		swaggerURL:  "http://foo",
+		swaggerURL:  urlFoo,
 		path:        "/api/v1/users/linuxsuren",
 		method:      http.MethodGet,
 		expectExist: true,
 	}, {
 		name:        "normal, not exist",
-		swaggerURL:  "http://foo",
+		swaggerURL:  urlFoo,
 		path:        "/api/v1/users",
 		method:      http.MethodDelete,
 		expectExist: false,
@@ -91,7 +91,7 @@ func TestAPICount(t *testing.T) {
 		expectCount int
 	}{{
 		name:        "normal",
-		swaggerURL:  "http://foo",
+		swaggerURL:  urlFoo,
 		expectCount: 5,
 	}}
 	for _, tt := range tests {
@@ -109,3 +109,5 @@ func TestAPICount(t *testing.T) {
 
 //go:embed testdata/swagger.json
 var testdataSwaggerJSON string
+
+const urlFoo = "http://foo"

@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -9,13 +10,18 @@ import (
 )
 
 type fileLoader struct {
-	paths []string
-	index int
+	paths  []string
+	index  int
+	parent string
 }
 
 // NewFileLoader creates the instance of file loader
 func NewFileLoader() Loader {
 	return &fileLoader{index: -1}
+}
+
+func NewFileWriter(parent string) Writer {
+	return &fileLoader{index: -1, parent: parent}
 }
 
 // HasMore returns if there are more test cases
@@ -54,4 +60,143 @@ func (l *fileLoader) GetCount() int {
 // Reset resets the index
 func (l *fileLoader) Reset() {
 	l.index = -1
+}
+
+func (l *fileLoader) CreateSuite(name, api string) (err error) {
+	var found bool
+	var parentDir string
+	for i := range l.paths {
+		suitePath := l.paths[i]
+
+		parentDir = path.Dir(suitePath)
+		var suite *TestSuite
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
+			continue
+		}
+
+		if suite.Name == name {
+			found = true
+			break
+		}
+	}
+
+	if found {
+		err = fmt.Errorf("suite %s already exists", name)
+	} else {
+		if l.parent == "" {
+			l.parent = parentDir
+		}
+		newSuiteFile := path.Join(parentDir, fmt.Sprintf("%s.yaml", name))
+
+		suite := &TestSuite{
+			Name: name,
+			API:  api,
+		}
+		if err = SaveTestSuiteToFile(suite, newSuiteFile); err == nil {
+			l.Put(newSuiteFile)
+		}
+	}
+	return
+}
+
+func (l *fileLoader) UpdateSuite(name, api string) (err error) {
+	return
+}
+
+func (l *fileLoader) DeleteSuite(name string) (err error) {
+	found := false
+	for i := range l.paths {
+		suitePath := l.paths[i]
+		var suite *TestSuite
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
+			continue
+		}
+
+		if suite.Name == name {
+			err = os.Remove(suitePath)
+			l.paths = append(l.paths[:i], l.paths[i+1:]...)
+			found = true
+			return
+		}
+	}
+	if !found {
+		err = fmt.Errorf("suite %s not found", name)
+	}
+	return
+}
+
+func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err error) {
+	var suite *TestSuite
+	var suiteFilepath string
+	for i := range l.paths {
+		suitePath := l.paths[i]
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
+			continue
+		}
+
+		if suite.Name == suiteName {
+			suiteFilepath = suitePath
+			break
+		}
+		suite = nil
+	}
+
+	if suite != nil {
+		found := false
+		for i := range suite.Items {
+			if suite.Items[i].Name == testcase.Name {
+				suite.Items[i] = testcase
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			suite.Items = append(suite.Items, testcase)
+		}
+
+		err = SaveTestSuiteToFile(suite, suiteFilepath)
+	}
+	return
+}
+
+func (l *fileLoader) UpdateTestCase(suite string, testcase TestCase) (err error) {
+	err = l.CreateTestCase(suite, testcase)
+	return
+}
+
+func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
+	var suite *TestSuite
+	var suiteFilepath string
+	for i := range l.paths {
+		suitePath := l.paths[i]
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
+			continue
+		}
+
+		if suite.Name == suiteName {
+			suiteFilepath = suitePath
+			break
+		}
+		suite = nil
+	}
+
+	if suite != nil {
+		found := false
+		for i := range suite.Items {
+			if suite.Items[i].Name == testcase {
+				suite.Items = append(suite.Items[:i], suite.Items[i+1:]...)
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			err = fmt.Errorf("testcase %s not found", testcase)
+			return
+		}
+
+		err = SaveTestSuiteToFile(suite, suiteFilepath)
+	}
+	return
 }

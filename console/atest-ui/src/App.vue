@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import TestCase from './views/TestCase.vue'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { ElTree } from "element-plus"
+import type { FormInstance } from 'element-plus'
+import { Edit } from '@element-plus/icons-vue'
 
 interface Tree {
   id: string
@@ -19,53 +21,123 @@ const handleNodeClick = (data: Tree) => {
 
 const data = ref([])
 const treeRef = ref<InstanceType<typeof ElTree>>()
+const currentNodekey = ref('')
 
-const requestOptions = {
-    method: 'POST'
-};
-fetch('/server.Runner/GetSuites', requestOptions)
-    .then(response => response.json())
-    .then(d => {
-      data.value = []
-      Object.keys(d.data).map(k => {
-        console.log(d.data[k])
-        let suite = {
-          id: k,
-          label: k,
-          children: [],
-        }
+function loadTestSuites() {
+  const requestOptions = {
+      method: 'POST'
+  };
+  fetch('/server.Runner/GetSuites', requestOptions)
+      .then(response => response.json())
+      .then(d => {
+        data.value = []
+        Object.keys(d.data).map(k => {
+          let suite = {
+            id: k,
+            label: k,
+            children: [],
+          }
 
-        d.data[k].data.forEach((item: any) => {
-          suite.children?.push({
-            id: item,
-            label: item,
-            parent: k,
+          d.data[k].data.forEach((item: any) => {
+            suite.children?.push({
+              id: k+item,
+              label: item,
+              parent: k,
+            })
           })
+          data.value.push(suite)
         })
-        data.value.push(suite)
-      })
 
-      // treeRef.value.updateKeyChildren('1', data[0].children)
-    });
+        if (data.value.length > 0) {
+          const firstItem = data.value[0]
+          const child = firstItem.children[0].id
 
+          currentNodekey.value = child
+          treeRef.value!.setCurrentKey(child)
+          treeRef.value!.setCheckedKeys([child], false)
+        }
+      });
+}
+loadTestSuites()
+
+const dialogVisible = ref(false)
+const suiteCreatingLoading = ref(false)
+const suiteFormRef = ref<FormInstance>()
+const testSuiteForm = reactive({
+  name: "",
+  api: "",
+})
+
+function openTestSuiteCreateDialog() {
+  dialogVisible.value = true
+}
+
+const submitForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  suiteCreatingLoading.value = true
+
+  const requestOptions = {
+    method: 'POST',
+    body: JSON.stringify({
+        name: testSuiteForm.name,
+        api: testSuiteForm.api,
+    })
+  };
+
+  fetch('/server.Runner/CreateTestSuite', requestOptions)
+      .then(response => response.json())
+      .then(() => {
+        suiteCreatingLoading.value = false
+        loadTestSuites()
+      });
+      
+  dialogVisible.value = false
+}
 </script>
 
 <template>
   <div class="common-layout">
-    <el-container>
+    <el-container style="height: 100vh">
       <el-aside width="200px">
+        <el-button type="primary" @click="openTestSuiteCreateDialog" :icon="Edit">New</el-button>
+
         <el-tree :data="data" :props="defaultProps"
-          default-expand-all
+          highlight-current
+          check-on-click-node="true"
+          :current-node-key="currentNodekey"
           ref="treeRef"
           node-key="id"
           @node-click="handleNodeClick" />
       </el-aside>
 
       <el-main>
-        <TestCase :suite="testSuite" :name="testCaseName"/>
+        <TestCase :suite="testSuite" :name="testCaseName" @updated="loadTestSuites"/>
       </el-main>
     </el-container>
   </div>
+
+  <el-dialog v-model="dialogVisible" title="Create Test Suite" width="30%" draggable>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-form
+          ref="suiteFormRef"
+          status-icon
+          label-width="120px"
+          class="demo-ruleForm"
+        >
+          <el-form-item label="Name" prop="name">
+            <el-input v-model="testSuiteForm.name" />
+          </el-form-item>
+          <el-form-item label="API" prop="api">
+            <el-input v-model="testSuiteForm.api" placeholder="http://foo" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitForm(suiteFormRef)" :loading="suiteCreatingLoading">Submit</el-button>
+          </el-form-item>
+        </el-form>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <style scoped>

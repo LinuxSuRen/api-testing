@@ -1,6 +1,8 @@
 package testing_test
 
 import (
+	"net/http"
+	"os"
 	"testing"
 
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
@@ -55,4 +57,62 @@ func defaultVerify(t *testing.T, loader atest.Loader) {
 	assert.False(t, loader.HasMore())
 	loader.Reset()
 	assert.True(t, loader.HasMore())
+}
+
+func TestSuite(t *testing.T) {
+	t.Run("create suite", func(t *testing.T) {
+		writer := atest.NewFileWriter(os.TempDir())
+		err := writer.CreateSuite("test", "http://test")
+		assert.NoError(t, err)
+
+		err = writer.CreateSuite("fake", "http://fake")
+		assert.NoError(t, err)
+
+		err = writer.CreateSuite("fake", "")
+		assert.Error(t, err)
+
+		assert.Equal(t, 2, writer.GetCount())
+
+		err = writer.DeleteSuite("test")
+		assert.NoError(t, err)
+		err = writer.DeleteSuite("fake")
+		assert.NoError(t, err)
+
+		assert.Equal(t, 0, writer.GetCount())
+
+		err = writer.DeleteSuite("fake")
+		assert.Error(t, err)
+	})
+
+	t.Run("create case", func(t *testing.T) {
+		writer := atest.NewFileWriter(os.TempDir())
+		err := writer.CreateSuite("test", "http://test")
+		assert.NoError(t, err)
+
+		err = writer.CreateTestCase("test", atest.TestCase{
+			Name: "login",
+			Request: atest.Request{
+				API: "http://test/login",
+			},
+		})
+		assert.NoError(t, err)
+
+		err = writer.UpdateTestCase("test", atest.TestCase{
+			Name: "login",
+			Request: atest.Request{
+				API:    "http://test/login",
+				Method: http.MethodPost,
+			},
+		})
+		assert.NoError(t, err)
+
+		err = writer.DeleteTestCase("test", "login")
+		assert.NoError(t, err)
+
+		err = writer.DeleteTestCase("test", "login")
+		assert.Error(t, err)
+
+		err = writer.DeleteSuite("test")
+		assert.NoError(t, err)
+	})
 }

@@ -9,3 +9,15 @@ type Loader interface {
 	GetCount() int
 	Reset()
 }
+
+type Writer interface {
+	Loader
+
+	CreateTestCase(suite string, testcase TestCase) (err error)
+	UpdateTestCase(suite string, testcase TestCase) (err error)
+	DeleteTestCase(suite, testcase string) (err error)
+
+	CreateSuite(name, api string) (err error)
+	UpdateSuite(name, api string) (err error)
+	DeleteSuite(name string) (err error)
+}

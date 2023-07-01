@@ -4,6 +4,7 @@ package server
 import (
 	"bytes"
 	context "context"
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -19,11 +20,11 @@ import (
 
 type server struct {
 	UnimplementedRunnerServer
-	loader testing.Loader
+	loader testing.Writer
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer(loader testing.Loader) RunnerServer {
+func NewRemoteServer(loader testing.Writer) RunnerServer {
 	return &server{loader: loader}
 }
 
@@ -59,7 +60,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		if suite, err = testing.ParseFromData([]byte(task.Data)); err != nil {
 			return
 		} else if suite == nil || suite.Items == nil {
-			err = fmt.Errorf("no test suite found")
+			err = errNoTestSuiteFound
 			return
 		}
 	case "testcase":
@@ -74,7 +75,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 		if suite, err = testing.ParseFromData([]byte(task.Data)); err != nil {
 			return
 		} else if suite == nil || suite.Items == nil {
-			err = fmt.Errorf("no test suite found")
+			err = errNoTestSuiteFound
 			return
 		}
 
@@ -132,6 +133,9 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 			reply.Error = testErr.Error()
 			break
 		}
+	}
+	if reply.Error != "" {
+		fmt.Fprintln(buf, reply.Error)
 	}
 	reply.Message = buf.String()
 	return
@@ -199,8 +203,8 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 			req := &Request{
 				Api:    testCase.Request.API,
 				Method: testCase.Request.Method,
-				Header: mapToPair(testCase.Request.Header),
 				Query:  mapToPair(testCase.Request.Query),
+				Header: mapToPair(testCase.Request.Header),
 				Form:   mapToPair(testCase.Request.Form),
 				Body:   testCase.Request.Body,
 			}
@@ -261,7 +265,8 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 			var reply *HelloReply
 			if reply, err = s.Run(ctx, task); err == nil {
 				result = &TestCaseResult{
-					Body: reply.Message,
+					Body:  reply.Message,
+					Error: reply.Error,
 				}
 			}
 		}
@@ -288,6 +293,115 @@ func mapToPair(data map[string]string) (pairs []*Pair) {
 			Value: v,
 		})
 	}
+	return
+}
+
+func pairToInterMap(pairs []*Pair) (data map[string]interface{}) {
+	data = make(map[string]interface{})
+	for _, pair := range pairs {
+		data[pair.Key] = pair.Value
+	}
+	return
+}
+
+func pairToMap(pairs []*Pair) (data map[string]string) {
+	data = make(map[string]string)
+	for _, pair := range pairs {
+		data[pair.Key] = pair.Value
+	}
+	return
+}
+
+func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
+	defer func() {
+		s.loader.Reset()
+	}()
+
+	if in.Data == nil {
+		err = errors.New("data is required")
+		return
+	}
+
+	var targetTestSuite *testing.TestSuite
+	for s.loader.HasMore() {
+		var data []byte
+		if data, err = s.loader.Load(); err != nil {
+			continue
+		}
+
+		var testSuite *testing.TestSuite
+		if testSuite, err = testing.Parse(data); err != nil {
+			continue
+		}
+
+		if testSuite.Name == in.SuiteName {
+			targetTestSuite = testSuite
+			break
+		}
+	}
+
+	if targetTestSuite == nil {
+		err = errNoTestSuiteFound
+		return
+	}
+
+	found := false
+	for i := range targetTestSuite.Items {
+		item := targetTestSuite.Items[i]
+		if item.Name == in.Data.Name {
+			item.Request = grpcRequestToRaw(in.Data.Request)
+			item.Expect = grpcResponseToRaw(in.Data.Response)
+
+			err = s.loader.UpdateTestCase(in.SuiteName, item)
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		item := testing.TestCase{
+			Name:    in.Data.Name,
+			Request: grpcRequestToRaw(in.Data.Request),
+			Expect:  grpcResponseToRaw(in.Data.Response),
+		}
+		err = s.loader.UpdateTestCase(in.SuiteName, item)
+	}
+	return
+}
+
+func grpcRequestToRaw(request *Request) (req testing.Request) {
+	if request == nil {
+		return
+	}
+	req.API = request.Api
+	req.Method = request.Method
+	req.Header = pairToMap(request.Header)
+	req.Query = pairToMap(request.Query)
+	req.Form = pairToMap(request.Form)
+	req.Body = request.Body
+	return
+}
+
+func grpcResponseToRaw(response *Response) (req testing.Response) {
+	if response == nil {
+		return
+	}
+	req.StatusCode = int(response.StatusCode)
+	req.Body = response.Body
+	req.Header = pairToMap(response.Header)
+	req.BodyFieldsExpect = pairToInterMap(response.BodyFieldsExpect)
+	req.Verify = response.Verify
+	req.Schema = response.Schema
+	return
+}
+
+func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
+	err = s.loader.CreateSuite(in.Name, in.Api)
+	return
+}
+
+func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (reply *HelloReply, err error) {
+	err = s.loader.DeleteTestCase(in.Suite, in.Testcase)
 	return
 }
 
@@ -377,3 +491,5 @@ func (s *UniqueSlice[T]) Exist(item T) bool {
 func (s *UniqueSlice[T]) GetAll() []T {
 	return s.data
 }
+
+var errNoTestSuiteFound = errors.New("no test suite found")

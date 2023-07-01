@@ -20,14 +20,13 @@
                 }
             },
             "required": [
-                "items",
                 "name"
             ],
             "title": "APITesting"
         },
         "Item": {
             "type": "object",
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
                 "name": {
                     "type": "string"

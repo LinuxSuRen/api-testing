@@ -35,10 +35,10 @@ func TestParse(t *testing.T) {
 }
 `,
 			},
-			Before: atest.Job{
+			Before: &atest.Job{
 				Items: []string{"sleep(1)"},
 			},
-			After: atest.Job{
+			After: &atest.Job{
 				Items: []string{"sleep(1)"},
 			},
 		}, suite.Items[0])
