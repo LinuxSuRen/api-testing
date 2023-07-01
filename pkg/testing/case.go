@@ -2,19 +2,19 @@ package testing
 
 // TestSuite represents a set of test cases
 type TestSuite struct {
-	Name  string     `yaml:"name,omitempty" json:"name"`
+	Name  string     `yaml:"name,omitempty" json:"name,omitempty"`
 	API   string     `yaml:"api,omitempty" json:"api,omitempty"`
-	Items []TestCase `yaml:"items" json:"items"`
+	Items []TestCase `yaml:"items,omitempty" json:"items,omitempty"`
 }
 
 // TestCase represents a test case
 type TestCase struct {
-	Name    string   `yaml:"name,omitempty" json:"name"`
-	Group   string   `yaml:"group,omitempty" json:"group"`
-	Before  Job      `yaml:"before,omitempty" json:"before"`
-	After   Job      `yaml:"after,omitempty" json:"after"`
+	Name    string   `yaml:"name,omitempty" json:"name,omitempty"`
+	Group   string   `yaml:"group,omitempty" json:"group,omitempty"`
+	Before  *Job     `yaml:"before,omitempty" json:"before,omitempty"`
+	After   *Job     `yaml:"after,omitempty" json:"after,omitempty"`
 	Request Request  `yaml:"request" json:"request"`
-	Expect  Response `yaml:"expect,omitempty" json:"expect"`
+	Expect  Response `yaml:"expect,omitempty" json:"expect,omitempty"`
 }
 
 // InScope returns true if the test case is in scope with the given items.
@@ -33,7 +33,7 @@ func (c *TestCase) InScope(items []string) bool {
 
 // Job contains a list of jobs
 type Job struct {
-	Items []string `yaml:"items"`
+	Items []string `yaml:"items,omitempty" json:"items,omitempty"`
 }
 
 // Request represents a HTTP request

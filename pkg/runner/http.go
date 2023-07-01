@@ -362,7 +362,10 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseBo
 	return
 }
 
-func runJob(job testing.Job) (err error) {
+func runJob(job *testing.Job) (err error) {
+	if job == nil {
+		return
+	}
 	var program *vm.Program
 	env := struct{}{}
 

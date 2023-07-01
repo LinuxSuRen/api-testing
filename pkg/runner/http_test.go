@@ -43,7 +43,7 @@ func TestTestCase(t *testing.T) {
 	}{{
 		name: "failed during the prepare stage",
 		testCase: &atest.TestCase{
-			Before: atest.Job{
+			Before: &atest.Job{
 				Items: []string{"demo.yaml"},
 			},
 		},
@@ -69,7 +69,7 @@ func TestTestCase(t *testing.T) {
 					`data.name == "linuxsuren"`,
 				},
 			},
-			Before: atest.Job{
+			Before: &atest.Job{
 				Items: []string{"sleep(1)"},
 			},
 		},
@@ -428,7 +428,7 @@ func TestRunJob(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := runJob(tt.job)
+			err := runJob(&tt.job)
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})
 	}
