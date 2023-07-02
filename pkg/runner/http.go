@@ -103,10 +103,11 @@ func (r ReportResultSlice) Swap(i, j int) {
 }
 
 type simpleTestCaseRunner struct {
-	testReporter TestReporter
-	writer       io.Writer
-	log          LevelWriter
-	execer       fakeruntime.Execer
+	testReporter   TestReporter
+	writer         io.Writer
+	log            LevelWriter
+	execer         fakeruntime.Execer
+	simpleResponse SimpleResponse
 }
 
 // NewSimpleTestCaseRunner creates the instance of the simple test case runner
@@ -201,7 +202,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	}
 
 	var responseBodyData []byte
-	if responseBodyData, err = io.ReadAll(resp.Body); err != nil {
+	if responseBodyData, err = r.withResponseRecord(resp); err != nil {
 		return
 	}
 	record.Body = string(responseBodyData)
@@ -254,6 +255,24 @@ func (r *simpleTestCaseRunner) WithTestReporter(reporter TestReporter) TestCaseR
 func (r *simpleTestCaseRunner) WithExecer(execer fakeruntime.Execer) TestCaseRunner {
 	r.execer = execer
 	return r
+}
+
+func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (responseBodyData []byte, err error) {
+	responseBodyData, err = io.ReadAll(resp.Body)
+	r.simpleResponse = SimpleResponse{
+		StatusCode: resp.StatusCode,
+		Header:     make(map[string]string),
+		Body:       string(responseBodyData),
+	}
+	for key := range resp.Header {
+		r.simpleResponse.Header[key] = resp.Header.Get(key)
+	}
+	return
+}
+
+// GetResponseRecord returns the response record
+func (r *simpleTestCaseRunner) GetResponseRecord() SimpleResponse {
+	return r.simpleResponse
 }
 
 func expectInt(name string, expect, actual int) (err error) {

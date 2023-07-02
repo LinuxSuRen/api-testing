@@ -16,3 +16,15 @@ type TestCaseRunner interface {
 	WithTestReporter(TestReporter) TestCaseRunner
 	WithExecer(fakeruntime.Execer) TestCaseRunner
 }
+
+// HTTPResponseRecord represents a http response record
+type HTTPResponseRecord interface {
+	GetResponseRecord() SimpleResponse
+}
+
+// SimpleResponse represents a simple response
+type SimpleResponse struct {
+	Header     map[string]string
+	Body       string
+	StatusCode int
+}

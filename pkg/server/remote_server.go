@@ -36,7 +36,7 @@ func withDefaultValue(old, defVal any) any {
 }
 
 // Run start to run the test task
-func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, err error) {
+func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, err error) {
 	task.Level = withDefaultValue(task.Level, "info").(string)
 	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
 
@@ -115,7 +115,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 	}
 
 	buf := new(bytes.Buffer)
-	reply = &HelloReply{}
+	reply = &TestResult{}
 
 	for _, testCase := range suite.Items {
 		simpleRunner := runner.NewSimpleTestCaseRunner()
@@ -133,7 +133,19 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 			reply.Error = testErr.Error()
 			break
 		}
+
+		if getter, ok := simpleRunner.(runner.HTTPResponseRecord); ok {
+			resp := getter.GetResponseRecord()
+			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
+				StatusCode: int32(resp.StatusCode),
+				Body:       resp.Body,
+				Header:     mapToPair(resp.Header),
+				Id:         testCase.ID,
+				Output:     buf.String(),
+			})
+		}
 	}
+
 	if reply.Error != "" {
 		fmt.Fprintln(buf, reply.Error)
 	}
@@ -262,12 +274,9 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 				Level:    "debug",
 			}
 
-			var reply *HelloReply
-			if reply, err = s.Run(ctx, task); err == nil {
-				result = &TestCaseResult{
-					Body:  reply.Message,
-					Error: reply.Error,
-				}
+			var reply *TestResult
+			if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
+				result = reply.TestCaseResult[0]
 			}
 		}
 	}

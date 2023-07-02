@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RunnerClient interface {
-	Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*HelloReply, error)
+	Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*TestResult, error)
 	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
 	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
 	GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error)
@@ -41,8 +41,8 @@ func NewRunnerClient(cc grpc.ClientConnInterface) RunnerClient {
 	return &runnerClient{cc}
 }
 
-func (c *runnerClient) Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*HelloReply, error) {
-	out := new(HelloReply)
+func (c *runnerClient) Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*TestResult, error) {
+	out := new(TestResult)
 	err := c.cc.Invoke(ctx, "/server.Runner/Run", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func (c *runnerClient) DeleteTestCase(ctx context.Context, in *TestCaseIdentity,
 // All implementations must embed UnimplementedRunnerServer
 // for forward compatibility
 type RunnerServer interface {
-	Run(context.Context, *TestTask) (*HelloReply, error)
+	Run(context.Context, *TestTask) (*TestResult, error)
 	Sample(context.Context, *Empty) (*HelloReply, error)
 	GetVersion(context.Context, *Empty) (*HelloReply, error)
 	GetSuites(context.Context, *Empty) (*Suites, error)
@@ -142,7 +142,7 @@ type RunnerServer interface {
 type UnimplementedRunnerServer struct {
 }
 
-func (UnimplementedRunnerServer) Run(context.Context, *TestTask) (*HelloReply, error) {
+func (UnimplementedRunnerServer) Run(context.Context, *TestTask) (*TestResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Run not implemented")
 }
 func (UnimplementedRunnerServer) Sample(context.Context, *Empty) (*HelloReply, error) {
