@@ -127,13 +127,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 			testCase.Request.API = fmt.Sprintf("%s%s", suite.API, testCase.Request.API)
 		}
 
-		if output, testErr := simpleRunner.RunTestCase(&testCase, dataContext, ctx); testErr == nil {
-			dataContext[testCase.Name] = output
-		} else {
-			reply.Error = testErr.Error()
-			break
-		}
-
+		output, testErr := simpleRunner.RunTestCase(&testCase, dataContext, ctx)
 		if getter, ok := simpleRunner.(runner.HTTPResponseRecord); ok {
 			resp := getter.GetResponseRecord()
 			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
@@ -143,6 +137,13 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 				Id:         testCase.ID,
 				Output:     buf.String(),
 			})
+		}
+
+		if testErr == nil {
+			dataContext[testCase.Name] = output
+		} else {
+			reply.Error = testErr.Error()
+			break
 		}
 	}
 
@@ -276,8 +277,29 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 
 			var reply *TestResult
 			if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
-				result = reply.TestCaseResult[0]
+				result = &TestCaseResult{
+					Output:     reply.Message,
+					Error:      reply.Error,
+					Body:       reply.TestCaseResult[0].Body,
+					Header:     reply.TestCaseResult[0].Header,
+					StatusCode: reply.TestCaseResult[0].StatusCode,
+				}
+			} else if err != nil {
+				result = &TestCaseResult{
+					Error: err.Error(),
+				}
+			} else {
+				result = &TestCaseResult{
+					Output: reply.Message,
+					Error:  reply.Error,
+				}
+				fmt.Println(reply.TestCaseResult)
 			}
+		}
+	} else {
+		fmt.Println("not found suite", in.Suite)
+		result = &TestCaseResult{
+			Error: "not found suite",
 		}
 	}
 	return

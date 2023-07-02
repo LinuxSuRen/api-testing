@@ -38,6 +38,10 @@ func (l *fileLoader) Load() (data []byte, err error) {
 
 // Put adds the test case path
 func (l *fileLoader) Put(item string) (err error) {
+	if l.parent == "" {
+		l.parent = path.Dir(item)
+	}
+
 	for _, pattern := range util.Expand(item) {
 		var files []string
 		if files, err = filepath.Glob(pattern); err == nil {
@@ -68,9 +72,14 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 	for i := range l.paths {
 		suitePath := l.paths[i]
 
-		parentDir = path.Dir(suitePath)
+		var absPath string
+		if absPath, err = filepath.Abs(suitePath); err != nil {
+			return
+		}
+
+		parentDir = path.Dir(absPath)
 		var suite *TestSuite
-		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
+		if suite, err = ParseTestSuiteFromFile(absPath); err != nil {
 			continue
 		}
 
@@ -86,7 +95,8 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 		if l.parent == "" {
 			l.parent = parentDir
 		}
-		newSuiteFile := path.Join(parentDir, fmt.Sprintf("%s.yaml", name))
+		newSuiteFile := path.Join(l.parent, fmt.Sprintf("%s.yaml", name))
+		fmt.Println("new suite file:", newSuiteFile)
 
 		suite := &TestSuite{
 			Name: name,

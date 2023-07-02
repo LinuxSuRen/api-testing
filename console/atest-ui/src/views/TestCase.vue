@@ -22,7 +22,7 @@ interface TestResult {
 
 const testResultActiveTab = ref('output')
 const requestLoading = ref(false)
-const testResult = ref({} as TestResult)
+const testResult = ref({header: [] as Pair[]} as TestResult)
 function sendRequest() {
     requestLoading.value = true
     const name = props.name
@@ -38,7 +38,6 @@ function sendRequest() {
         .then(response => response.json())
         .then(e => {
             testResult.value = e
-            testResult.value.bodyObject = JSON.parse(e.body)
             requestLoading.value = false
 
             if (e.error !== "") {
@@ -52,6 +51,12 @@ function sendRequest() {
                     type: 'success',
                 })
             }
+            if (e.body !== '') {
+                testResult.value.bodyObject = JSON.parse(e.body)
+            }
+        }).catch(e => {
+            requestLoading.value = false
+            ElMessage.error('Oops, ' + e)
         });
 }
 
@@ -448,7 +453,12 @@ const submitForm = (formEl: FormInstance | undefined) => {
                             sort
                         />
                     </el-tab-pane>
-                    <el-tab-pane label="Header" name="response-header">
+                    <el-tab-pane name="response-header">
+                        <template #label>
+                            <el-badge :value="testResult.header.length" class="item">
+                                Header
+                            </el-badge>
+                        </template>
                         <el-table :data="testResult.header" style="width: 100%">
                             <el-table-column label="Key" width="200">
                                 <template #default="scope">
