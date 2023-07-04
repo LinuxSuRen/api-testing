@@ -57,6 +57,7 @@ function sendRequest() {
         }).catch(e => {
             requestLoading.value = false
             ElMessage.error('Oops, ' + e)
+            testResult.value.bodyObject = JSON.parse(e.body)
         });
 }
 
@@ -323,6 +324,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
       .then(response => response.json())
       .then(() => {
         suiteCreatingLoading.value = false
+        emit('updated', 'hello from child')
       });
       
   dialogVisible.value = false
