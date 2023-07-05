@@ -293,12 +293,15 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 
 			var reply *TestResult
 			if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
+				lastIndex := len(reply.TestCaseResult) - 1
+				lastItem := reply.TestCaseResult[lastIndex]
+
 				result = &TestCaseResult{
 					Output:     reply.Message,
 					Error:      reply.Error,
-					Body:       reply.TestCaseResult[0].Body,
-					Header:     reply.TestCaseResult[0].Header,
-					StatusCode: reply.TestCaseResult[0].StatusCode,
+					Body:       lastItem.Body,
+					Header:     lastItem.Header,
+					StatusCode: lastItem.StatusCode,
 				}
 			} else if err != nil {
 				result = &TestCaseResult{
