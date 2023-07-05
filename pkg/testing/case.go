@@ -9,6 +9,7 @@ type TestSuite struct {
 
 // TestCase represents a test case
 type TestCase struct {
+	ID      string   `yaml:"id,omitempty" json:"id,omitempty"`
 	Name    string   `yaml:"name,omitempty" json:"name,omitempty"`
 	Group   string   `yaml:"group,omitempty" json:"group,omitempty"`
 	Before  *Job     `yaml:"before,omitempty" json:"before,omitempty"`

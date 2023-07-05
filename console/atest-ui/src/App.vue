@@ -19,7 +19,7 @@ const handleNodeClick = (data: Tree) => {
   testSuite.value = data.parent
 }
 
-const data = ref([])
+const data = ref([] as Tree[])
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const currentNodekey = ref('')
 
@@ -30,31 +30,36 @@ function loadTestSuites() {
   fetch('/server.Runner/GetSuites', requestOptions)
       .then(response => response.json())
       .then(d => {
-        data.value = []
+        data.value = [] as Tree[]
+        if (!d.data) {
+          return
+        }
         Object.keys(d.data).map(k => {
           let suite = {
             id: k,
             label: k,
-            children: [],
-          }
+            children: [] as Tree[],
+          } as Tree
 
           d.data[k].data.forEach((item: any) => {
             suite.children?.push({
               id: k+item,
               label: item,
               parent: k,
-            })
+            } as Tree)
           })
           data.value.push(suite)
         })
 
         if (data.value.length > 0) {
           const firstItem = data.value[0]
-          const child = firstItem.children[0].id
-
-          currentNodekey.value = child
-          treeRef.value!.setCurrentKey(child)
-          treeRef.value!.setCheckedKeys([child], false)
+          if (firstItem.children && firstItem.children.length > 0) {
+            const child = firstItem.children[0].id
+  
+            currentNodekey.value = child
+            treeRef.value!.setCurrentKey(child)
+            treeRef.value!.setCheckedKeys([child], false)
+          }
         }
       });
 }
@@ -101,7 +106,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
       <el-aside width="200px">
         <el-button type="primary" @click="openTestSuiteCreateDialog" :icon="Edit">New</el-button>
 
-        <el-tree :data="data" :props="defaultProps"
+        <el-tree :data="data"
           highlight-current
           check-on-click-node="true"
           :current-node-key="currentNodekey"

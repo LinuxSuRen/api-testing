@@ -35,34 +35,18 @@ func withDefaultValue(old, defVal any) any {
 	return old
 }
 
-// Run start to run the test task
-func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, err error) {
-	task.Level = withDefaultValue(task.Level, "info").(string)
-	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
-
-	var suite *testing.TestSuite
-
-	// TODO may not safe in multiple threads
-	oldEnv := map[string]string{}
-	for key, val := range task.Env {
-		oldEnv[key] = os.Getenv(key)
-		os.Setenv(key, val)
+func parseSuiteWithItems(data []byte) (suite *testing.TestSuite, err error) {
+	suite, err = testing.ParseFromData(data)
+	if err == nil && (suite == nil || suite.Items == nil) {
+		err = errNoTestSuiteFound
 	}
+	return
+}
 
-	defer func() {
-		for key, val := range oldEnv {
-			os.Setenv(key, val)
-		}
-	}()
-
+func (s *server) getSuiteFromTestTask(task *TestTask) (suite *testing.TestSuite, err error) {
 	switch task.Kind {
 	case "suite":
-		if suite, err = testing.ParseFromData([]byte(task.Data)); err != nil {
-			return
-		} else if suite == nil || suite.Items == nil {
-			err = errNoTestSuiteFound
-			return
-		}
+		suite, err = parseSuiteWithItems([]byte(task.Data))
 	case "testcase":
 		var testCase *testing.TestCase
 		if testCase, err = testing.ParseTestCaseFromData([]byte(task.Data)); err != nil {
@@ -72,10 +56,8 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 			Items: []testing.TestCase{*testCase},
 		}
 	case "testcaseInSuite":
-		if suite, err = testing.ParseFromData([]byte(task.Data)); err != nil {
-			return
-		} else if suite == nil || suite.Items == nil {
-			err = errNoTestSuiteFound
+		suite, err = parseSuiteWithItems([]byte(task.Data))
+		if err != nil {
 			return
 		}
 
@@ -93,10 +75,38 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 			suite.Items = append(parentCases, *targetTestcase)
 		} else {
 			err = fmt.Errorf("cannot found testcase %s", task.CaseName)
-			return
 		}
 	default:
 		err = fmt.Errorf("not support '%s'", task.Kind)
+	}
+	return
+}
+
+func resetEnv(oldEnv map[string]string) {
+	for key, val := range oldEnv {
+		os.Setenv(key, val)
+	}
+}
+
+// Run start to run the test task
+func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, err error) {
+	task.Level = withDefaultValue(task.Level, "info").(string)
+	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
+
+	var suite *testing.TestSuite
+
+	// TODO may not safe in multiple threads
+	oldEnv := map[string]string{}
+	for key, val := range task.Env {
+		oldEnv[key] = os.Getenv(key)
+		os.Setenv(key, val)
+	}
+
+	defer func() {
+		resetEnv(oldEnv)
+	}()
+
+	if suite, err = s.getSuiteFromTestTask(task); err != nil {
 		return
 	}
 
@@ -115,7 +125,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 	}
 
 	buf := new(bytes.Buffer)
-	reply = &HelloReply{}
+	reply = &TestResult{}
 
 	for _, testCase := range suite.Items {
 		simpleRunner := runner.NewSimpleTestCaseRunner()
@@ -127,13 +137,26 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *HelloReply, er
 			testCase.Request.API = fmt.Sprintf("%s%s", suite.API, testCase.Request.API)
 		}
 
-		if output, testErr := simpleRunner.RunTestCase(&testCase, dataContext, ctx); testErr == nil {
+		output, testErr := simpleRunner.RunTestCase(&testCase, dataContext, ctx)
+		if getter, ok := simpleRunner.(runner.HTTPResponseRecord); ok {
+			resp := getter.GetResponseRecord()
+			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
+				StatusCode: int32(resp.StatusCode),
+				Body:       resp.Body,
+				Header:     mapToPair(resp.Header),
+				Id:         testCase.ID,
+				Output:     buf.String(),
+			})
+		}
+
+		if testErr == nil {
 			dataContext[testCase.Name] = output
 		} else {
 			reply.Error = testErr.Error()
 			break
 		}
 	}
+
 	if reply.Error != "" {
 		fmt.Fprintln(buf, reply.Error)
 	}
@@ -229,12 +252,11 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	return
 }
 
-func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
+func (s *server) findSuite(suiteName string) (targetTestSuite *testing.TestSuite, err error) {
 	defer func() {
 		s.loader.Reset()
 	}()
 
-	var targetTestSuite *testing.TestSuite
 	for s.loader.HasMore() {
 		var data []byte
 		if data, err = s.loader.Load(); err != nil {
@@ -246,13 +268,20 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 			continue
 		}
 
-		if testSuite.Name == in.Suite {
+		if testSuite.Name == suiteName {
 			targetTestSuite = testSuite
+			err = nil
 			break
 		}
 	}
+	return
+}
 
-	if targetTestSuite != nil {
+func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
+	var targetTestSuite *testing.TestSuite
+	targetTestSuite, err = s.findSuite(in.Suite)
+
+	if targetTestSuite != nil && err == nil {
 		var data []byte
 		if data, err = yaml.Marshal(targetTestSuite); err == nil {
 			task := &TestTask{
@@ -262,13 +291,30 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 				Level:    "debug",
 			}
 
-			var reply *HelloReply
-			if reply, err = s.Run(ctx, task); err == nil {
+			var reply *TestResult
+			if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
 				result = &TestCaseResult{
-					Body:  reply.Message,
-					Error: reply.Error,
+					Output:     reply.Message,
+					Error:      reply.Error,
+					Body:       reply.TestCaseResult[0].Body,
+					Header:     reply.TestCaseResult[0].Header,
+					StatusCode: reply.TestCaseResult[0].StatusCode,
+				}
+			} else if err != nil {
+				result = &TestCaseResult{
+					Error: err.Error(),
+				}
+			} else {
+				result = &TestCaseResult{
+					Output: reply.Message,
+					Error:  reply.Error,
 				}
 			}
+		}
+	} else {
+		fmt.Println("not found suite", in.Suite)
+		result = &TestCaseResult{
+			Error: "not found suite",
 		}
 	}
 	return

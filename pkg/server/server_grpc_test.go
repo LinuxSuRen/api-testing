@@ -51,8 +51,9 @@ func TestServer(t *testing.T) {
 	assert.Empty(t, reply.GetError())
 	assert.Nil(t, err)
 
-	reply, err = client.Run(context.Background(), &server.TestTask{})
-	assert.NotNil(t, reply)
+	var testResult *server.TestResult
+	testResult, err = client.Run(context.Background(), &server.TestTask{})
+	assert.NotNil(t, testResult)
 	assert.Nil(t, err)
 
 	reply, err = client.Sample(context.Background(), &server.Empty{})
@@ -64,7 +65,7 @@ func TestServer(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, reply)
 
-	reply, err = clientWithErr.Run(context.Background(), &server.TestTask{})
+	testResult, err = clientWithErr.Run(context.Background(), &server.TestTask{})
 	assert.NotNil(t, err)
-	assert.Nil(t, reply)
+	assert.Nil(t, testResult)
 }

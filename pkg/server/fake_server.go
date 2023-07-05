@@ -26,8 +26,8 @@ func NewServer(version string, err error) RunnerServer {
 }
 
 // Run runs the task
-func (s *fakeServer) Run(ctx context.Context, in *TestTask) (*HelloReply, error) {
-	return &HelloReply{}, s.err
+func (s *fakeServer) Run(ctx context.Context, in *TestTask) (*TestResult, error) {
+	return &TestResult{}, s.err
 }
 
 // GetVersion returns the version

@@ -3,6 +3,7 @@ import { reactive, ref, watch } from 'vue'
 import type { TabsPaneContext, FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { Edit, Delete } from '@element-plus/icons-vue'
+import JsonViewer from 'vue-json-viewer'
 
 const props = defineProps({
     name: String,
@@ -10,8 +11,18 @@ const props = defineProps({
 })
 const emit = defineEmits(['updated'])
 
+interface TestResult {
+    body: string,
+    bodyObject: {},
+    output: string,
+    error: string,
+    statusCode: number,
+    header: Pair[],
+}
+
+const testResultActiveTab = ref('output')
 const requestLoading = ref(false)
-const testResult = ref('')
+const testResult = ref({header: [] as Pair[]} as TestResult)
 function sendRequest() {
     requestLoading.value = true
     const name = props.name
@@ -26,7 +37,7 @@ function sendRequest() {
     fetch('/server.Runner/RunTestCase', requestOptions)
         .then(response => response.json())
         .then(e => {
-            testResult.value = e.body
+            testResult.value = e
             requestLoading.value = false
 
             if (e.error !== "") {
@@ -40,6 +51,13 @@ function sendRequest() {
                     type: 'success',
                 })
             }
+            if (e.body !== '') {
+                testResult.value.bodyObject = JSON.parse(e.body)
+            }
+        }).catch(e => {
+            requestLoading.value = false
+            ElMessage.error('Oops, ' + e)
+            testResult.value.bodyObject = JSON.parse(e.body)
         });
 }
 
@@ -306,6 +324,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
       .then(response => response.json())
       .then(() => {
         suiteCreatingLoading.value = false
+        emit('updated', 'hello from child')
       });
       
   dialogVisible.value = false
@@ -418,14 +437,46 @@ const submitForm = (formEl: FormInstance | undefined) => {
             </el-main>
 
             <el-footer>
-                <div>Test Result:</div>
-                <el-input
-                    v-model="testResult"
-                    :autosize="{ minRows: 4, maxRows: 6 }"
-                    readonly=true
-                    type="textarea"
-                    placeholder="Please input"
-                />
+                <el-tabs v-model="testResultActiveTab" class="demo-tabs" @tab-click="handleClick">
+                    <el-tab-pane label="Output" name="output">
+                        <el-input
+                            v-model="testResult.output"
+                            :autosize="{ minRows: 4, maxRows: 6 }"
+                            readonly=true
+                            type="textarea"
+                            placeholder="Please input"
+                        />
+                    </el-tab-pane>
+                    <el-tab-pane label="Body" name="body">
+                        <JsonViewer :value="testResult.bodyObject"
+                            :expand-depth=5
+                            copyable
+                            boxed
+                            sort
+                        />
+                    </el-tab-pane>
+                    <el-tab-pane name="response-header">
+                        <template #label>
+                            <el-badge :value="testResult.header.length" class="item">
+                                Header
+                            </el-badge>
+                        </template>
+                        <el-table :data="testResult.header" style="width: 100%">
+                            <el-table-column label="Key" width="200">
+                                <template #default="scope">
+                                    <el-input v-model="scope.row.key" placeholder="Key" readonly=true />
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Value">
+                                <template #default="scope">
+                                    <div style="display: flex; align-items: center">
+                                        <el-input v-model="scope.row.value" placeholder="Value" readonly=true />
+                                    </div>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-tab-pane>
+                </el-tabs>
             </el-footer>
         </el-container>
     </div>
