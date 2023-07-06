@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import TestCase from './views/TestCase.vue'
-import { reactive, ref } from 'vue'
+import TestSuite from './views/TestSuite.vue'
+import { reactive, ref, watch } from 'vue'
 import { ElTree } from "element-plus"
 import type { FormInstance } from 'element-plus'
 import { Edit } from '@element-plus/icons-vue'
@@ -15,8 +16,14 @@ interface Tree {
 const testCaseName = ref('')
 const testSuite = ref('')
 const handleNodeClick = (data: Tree) => {
-  testCaseName.value = data.label
-  testSuite.value = data.parent
+  if (data.children) {
+    viewName.value = "testsuite"
+    testSuite.value = data.label
+  } else {
+    testCaseName.value = data.label
+    testSuite.value = data.parent
+    viewName.value = "testcase"
+  }
 }
 
 const data = ref([] as Tree[])
@@ -98,6 +105,17 @@ const submitForm = (formEl: FormInstance | undefined) => {
       
   dialogVisible.value = false
 }
+
+const filterText = ref('')
+watch(filterText, (val) => {
+  treeRef.value!.filter(val)
+})
+const filterTestCases = (value: string, data: Tree) => {
+  if (!value) return true
+  return data.label.includes(value)
+}
+
+const viewName = ref('testcase')
 </script>
 
 <template>
@@ -105,18 +123,22 @@ const submitForm = (formEl: FormInstance | undefined) => {
     <el-container style="height: 100vh">
       <el-aside width="200px">
         <el-button type="primary" @click="openTestSuiteCreateDialog" :icon="Edit">New</el-button>
+        <el-input v-model="filterText" placeholder="Filter keyword" />
 
         <el-tree :data="data"
           highlight-current
-          check-on-click-node="true"
+          :check-on-click-node=true
+          :expand-on-click-node=false
           :current-node-key="currentNodekey"
           ref="treeRef"
           node-key="id"
+          :filter-node-method="filterTestCases"
           @node-click="handleNodeClick" />
       </el-aside>
 
       <el-main>
-        <TestCase :suite="testSuite" :name="testCaseName" @updated="loadTestSuites"/>
+        <TestCase v-if="viewName === 'testcase'" :suite="testSuite" :name="testCaseName" @updated="loadTestSuites"/>
+        <TestSuite v-else-if="viewName === 'testsuite'" :name="testSuite"/>
       </el-main>
     </el-container>
   </div>
