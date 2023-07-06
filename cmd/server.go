@@ -16,6 +16,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
@@ -111,10 +112,10 @@ func frontEndHandlerWithLocation(consolePath string) func(w http.ResponseWriter,
 			content = uiResourceIndex
 		case strings.HasSuffix(target, ".js"):
 			content = uiResourceJS
-			customHeader["Content-Type"] = "text/javascript; charset=utf-8"
+			customHeader[util.ContentType] = "text/javascript; charset=utf-8"
 		case strings.HasSuffix(target, ".css"):
 			content = uiResourceCSS
-			customHeader["Content-Type"] = "text/css"
+			customHeader[util.ContentType] = "text/css"
 		}
 
 		if content != "" {
