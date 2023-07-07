@@ -171,83 +171,144 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 }
 
 func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err error) {
-	defer func() {
-		s.loader.Reset()
-	}()
+	// defer func() {
+	// 	s.loader.Reset()
+	// }()
 
 	reply = &Suites{
 		Data: make(map[string]*Items),
 	}
-	for s.loader.HasMore() {
-		var data []byte
-		if data, err = s.loader.Load(); err != nil {
-			continue
-		}
 
-		var testSuite *testing.TestSuite
-		if testSuite, err = testing.Parse(data); err != nil {
-			return
+	var suites []testing.TestSuite
+	if suites, err = s.loader.ListTestSuite(); err == nil && suites != nil {
+		for _, suite := range suites {
+			items := &Items{}
+			for _, item := range suite.Items {
+				items.Data = append(items.Data, item.Name)
+			}
+			reply.Data[suite.Name] = items
 		}
+	}
 
-		items := &Items{}
-		for _, item := range testSuite.Items {
-			items.Data = append(items.Data, item.Name)
+	// for s.loader.HasMore() {
+	// 	var data []byte
+	// 	if data, err = s.loader.Load(); err != nil {
+	// 		continue
+	// 	}
+
+	// 	var testSuite *testing.TestSuite
+	// 	if testSuite, err = testing.Parse(data); err != nil {
+	// 		return
+	// 	}
+
+	// 	items := &Items{}
+	// 	for _, item := range testSuite.Items {
+	// 		items.Data = append(items.Data, item.Name)
+	// 	}
+	// 	reply.Data[testSuite.Name] = items
+	// }
+	return
+}
+
+func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
+	err = s.loader.CreateSuite(in.Name, in.Api)
+	return
+}
+
+func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (result *TestSuite, err error) {
+	var suite *testing.TestSuite
+	if suite, _, err = s.loader.GetSuite(in.Name); err == nil && suite != nil {
+		result = &TestSuite{
+			Name: suite.Name,
+			Api:  suite.API,
 		}
-		reply.Data[testSuite.Name] = items
+	}
+	return
+}
+
+func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	err = s.loader.UpdateSuite(in.Name, in.Api)
+	return
+}
+
+func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	err = s.loader.DeleteSuite(in.Name)
+	return
+}
+
+func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (result *Suite, err error) {
+	var items []testing.TestCase
+	if items, err = s.loader.ListTestCase(in.Name); err == nil {
+		result = &Suite{}
+		for _, item := range items {
+			result.Items = append(result.Items, convertToGRPCTestCase(item))
+		}
 	}
 	return
 }
 
 func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *TestCase, err error) {
-	defer func() {
-		s.loader.Reset()
-	}()
+	var result testing.TestCase
+	if result, err = s.loader.GetTestCase(in.Suite, in.Testcase); err == nil {
+		reply = convertToGRPCTestCase(result)
+	}
 
-	for s.loader.HasMore() {
-		var data []byte
-		if data, err = s.loader.Load(); err != nil {
-			continue
-		}
+	// defer func() {
+	// 	s.loader.Reset()
+	// }()
 
-		var testSuite *testing.TestSuite
-		if testSuite, err = testing.Parse(data); err != nil {
-			return
-		}
+	// for s.loader.HasMore() {
+	// 	var data []byte
+	// 	if data, err = s.loader.Load(); err != nil {
+	// 		continue
+	// 	}
 
-		if testSuite.Name != in.Suite {
-			continue
-		}
+	// 	var testSuite *testing.TestSuite
+	// 	if testSuite, err = testing.Parse(data); err != nil {
+	// 		return
+	// 	}
 
-		for _, testCase := range testSuite.Items {
-			if testCase.Name != in.Testcase {
-				continue
-			}
+	// 	if testSuite.Name != in.Suite {
+	// 		continue
+	// 	}
 
-			req := &Request{
-				Api:    testCase.Request.API,
-				Method: testCase.Request.Method,
-				Query:  mapToPair(testCase.Request.Query),
-				Header: mapToPair(testCase.Request.Header),
-				Form:   mapToPair(testCase.Request.Form),
-				Body:   testCase.Request.Body,
-			}
+	// 	for _, testCase := range testSuite.Items {
+	// 		if testCase.Name != in.Testcase {
+	// 			continue
+	// 		}
 
-			resp := &Response{
-				StatusCode:       int32(testCase.Expect.StatusCode),
-				Body:             testCase.Expect.Body,
-				Header:           mapToPair(testCase.Expect.Header),
-				BodyFieldsExpect: mapInterToPair(testCase.Expect.BodyFieldsExpect),
-				Verify:           testCase.Expect.Verify,
-				Schema:           testCase.Expect.Schema,
-			}
+	// 		reply = convertToGRPCTestCase(testCase)
+	// 		break
+	// 	}
+	// }
+	return
+}
 
-			reply = &TestCase{
-				Name:     testCase.Name,
-				Request:  req,
-				Response: resp,
-			}
-			break
-		}
+func convertToGRPCTestCase(testCase testing.TestCase) (result *TestCase) {
+	req := &Request{
+		Api:    testCase.Request.API,
+		Method: testCase.Request.Method,
+		Query:  mapToPair(testCase.Request.Query),
+		Header: mapToPair(testCase.Request.Header),
+		Form:   mapToPair(testCase.Request.Form),
+		Body:   testCase.Request.Body,
+	}
+
+	resp := &Response{
+		StatusCode:       int32(testCase.Expect.StatusCode),
+		Body:             testCase.Expect.Body,
+		Header:           mapToPair(testCase.Expect.Header),
+		BodyFieldsExpect: mapInterToPair(testCase.Expect.BodyFieldsExpect),
+		Verify:           testCase.Expect.Verify,
+		Schema:           testCase.Expect.Schema,
+	}
+
+	result = &TestCase{
+		Name:     testCase.Name,
+		Request:  req,
+		Response: resp,
 	}
 	return
 }
@@ -361,60 +422,97 @@ func pairToMap(pairs []*Pair) (data map[string]string) {
 	return
 }
 
+func convertToTestingTestCase(in *TestCase) (result testing.TestCase) {
+	result = testing.TestCase{
+		Name: in.Name,
+	}
+	req := in.Request
+	resp := in.Response
+
+	if req != nil {
+		result.Request.API = req.Api
+		result.Request.Method = req.Method
+		result.Request.Body = req.Body
+		result.Request.Header = pairToMap(req.Header)
+		result.Request.Form = pairToMap(req.Form)
+		result.Request.Query = pairToMap(req.Query)
+	}
+
+	if resp != nil {
+		result.Expect.Body = resp.Body
+		result.Expect.Schema = resp.Schema
+		result.Expect.StatusCode = int(resp.StatusCode)
+		result.Expect.Verify = resp.Verify
+		result.Expect.BodyFieldsExpect = pairToInterMap(resp.BodyFieldsExpect)
+		result.Expect.Header = pairToMap(resp.Header)
+	}
+	return
+}
+
+func (s *server) CreateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	err = s.loader.CreateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
+	return
+}
+
 func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
-	defer func() {
-		s.loader.Reset()
-	}()
+	reply = &HelloReply{}
+	fmt.Println(in.Data.Request.Header)
+	err = s.loader.UpdateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
 
-	if in.Data == nil {
-		err = errors.New("data is required")
-		return
-	}
+	// defer func() {
+	// 	s.loader.Reset()
+	// }()
 
-	var targetTestSuite *testing.TestSuite
-	for s.loader.HasMore() {
-		var data []byte
-		if data, err = s.loader.Load(); err != nil {
-			continue
-		}
+	// if in.Data == nil {
+	// 	err = errors.New("data is required")
+	// 	return
+	// }
 
-		var testSuite *testing.TestSuite
-		if testSuite, err = testing.Parse(data); err != nil {
-			continue
-		}
+	// var targetTestSuite *testing.TestSuite
+	// for s.loader.HasMore() {
+	// 	var data []byte
+	// 	if data, err = s.loader.Load(); err != nil {
+	// 		continue
+	// 	}
 
-		if testSuite.Name == in.SuiteName {
-			targetTestSuite = testSuite
-			break
-		}
-	}
+	// 	var testSuite *testing.TestSuite
+	// 	if testSuite, err = testing.Parse(data); err != nil {
+	// 		continue
+	// 	}
 
-	if targetTestSuite == nil {
-		err = errNoTestSuiteFound
-		return
-	}
+	// 	if testSuite.Name == in.SuiteName {
+	// 		targetTestSuite = testSuite
+	// 		break
+	// 	}
+	// }
 
-	found := false
-	for i := range targetTestSuite.Items {
-		item := targetTestSuite.Items[i]
-		if item.Name == in.Data.Name {
-			item.Request = grpcRequestToRaw(in.Data.Request)
-			item.Expect = grpcResponseToRaw(in.Data.Response)
+	// if targetTestSuite == nil {
+	// 	err = errNoTestSuiteFound
+	// 	return
+	// }
 
-			err = s.loader.UpdateTestCase(in.SuiteName, item)
-			found = true
-			break
-		}
-	}
+	// found := false
+	// for i := range targetTestSuite.Items {
+	// 	item := targetTestSuite.Items[i]
+	// 	if item.Name == in.Data.Name {
+	// 		item.Request = grpcRequestToRaw(in.Data.Request)
+	// 		item.Expect = grpcResponseToRaw(in.Data.Response)
 
-	if !found {
-		item := testing.TestCase{
-			Name:    in.Data.Name,
-			Request: grpcRequestToRaw(in.Data.Request),
-			Expect:  grpcResponseToRaw(in.Data.Response),
-		}
-		err = s.loader.UpdateTestCase(in.SuiteName, item)
-	}
+	// 		err = s.loader.UpdateTestCase(in.SuiteName, item)
+	// 		found = true
+	// 		break
+	// 	}
+	// }
+
+	// if !found {
+	// 	item := testing.TestCase{
+	// 		Name:    in.Data.Name,
+	// 		Request: grpcRequestToRaw(in.Data.Request),
+	// 		Expect:  grpcResponseToRaw(in.Data.Response),
+	// 	}
+	// 	err = s.loader.UpdateTestCase(in.SuiteName, item)
+	// }
 	return
 }
 
@@ -441,34 +539,6 @@ func grpcResponseToRaw(response *Response) (req testing.Response) {
 	req.BodyFieldsExpect = pairToInterMap(response.BodyFieldsExpect)
 	req.Verify = response.Verify
 	req.Schema = response.Schema
-	return
-}
-
-func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
-	err = s.loader.CreateSuite(in.Name, in.Api)
-	return
-}
-
-func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (result *TestSuite, err error) {
-	var suite *testing.TestSuite
-	if suite, _, err = s.loader.GetSuite(in.Name); err == nil && suite != nil {
-		result = &TestSuite{
-			Name: suite.Name,
-			Api:  suite.API,
-		}
-	}
-	return
-}
-
-func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	err = s.loader.UpdateSuite(in.Name, in.Api)
-	return
-}
-
-func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	err = s.loader.DeleteSuite(in.Name)
 	return
 }
 

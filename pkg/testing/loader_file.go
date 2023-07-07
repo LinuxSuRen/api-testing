@@ -66,6 +66,27 @@ func (l *fileLoader) Reset() {
 	l.index = -1
 }
 
+func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
+	defer func() {
+		l.Reset()
+	}()
+
+	for l.HasMore() {
+		var data []byte
+		if data, err = l.Load(); err != nil {
+			continue
+		}
+
+		var testSuite *TestSuite
+		if testSuite, err = Parse(data); err != nil {
+			return
+		}
+		suites = append(suites, *testSuite)
+	}
+	return
+}
+func (l *fileLoader) GetTestSuite(name string) (suite TestSuite, err error) { return }
+
 func (l *fileLoader) CreateSuite(name, api string) (err error) {
 	var absPath string
 	var suite *TestSuite
@@ -148,6 +169,9 @@ func (l *fileLoader) DeleteSuite(name string) (err error) {
 	}
 	return
 }
+
+func (l *fileLoader) ListTestCase(suite string) (testcases []TestCase, err error)   { return }
+func (l *fileLoader) GetTestCase(suite, name string) (testcase TestCase, err error) { return }
 
 func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err error) {
 	var suite *TestSuite

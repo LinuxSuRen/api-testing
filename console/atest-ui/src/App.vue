@@ -19,6 +19,27 @@ const handleNodeClick = (data: Tree) => {
   if (data.children) {
     viewName.value = "testsuite"
     testSuite.value = data.label
+
+    const requestOptions = {
+        method: 'POST',
+        body: JSON.stringify({
+            name: data.label,
+        })
+    };
+    fetch('/server.Runner/ListTestCase', requestOptions)
+        .then(response => response.json())
+        .then(d => {
+          if (d.items && d.items.length > 0) {
+            data.children=[]
+            d.items.forEach((item: any) => {
+              data.children?.push({
+                id: data.label+item.name,
+                label: item.name,
+                parent: data.label,
+              } as Tree)
+            })
+          }
+        })
   } else {
     testCaseName.value = data.label
     testSuite.value = data.parent
