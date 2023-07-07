@@ -2,6 +2,15 @@ build:
 	mkdir -p bin
 	rm -rf bin/atest
 	go build -o bin/atest main.go
+build-embed-ui:
+	cd console/atest-ui && npm i && npm run build-only
+	cp console/atest-ui/dist/index.html cmd/data/index.html
+	cp console/atest-ui/dist/assets/*.js cmd/data/index.js
+	cp console/atest-ui/dist/assets/*.css cmd/data/index.css
+	go build -ldflags "-w -s" -o bin/atest main.go
+	# echo '' > cmd/data/index.html
+	# echo '' > cmd/data/index.js
+	# echo '' > cmd/data/index.css
 goreleaser:
 	goreleaser build --rm-dist --snapshot
 build-image:
@@ -9,7 +18,7 @@ build-image:
 run-image:
 	docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing:dev
 run-server:
-	go run . server  --local-storage 'sample/*.yaml'
+	go run . server  --local-storage 'sample/*.yaml' --console-path console/atest-ui/dist
 copy: build
 	sudo cp bin/atest /usr/local/bin/
 copy-restart: build

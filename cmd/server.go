@@ -2,15 +2,21 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"path"
+	"strings"
+	"time"
+
+	_ "embed"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
@@ -99,7 +105,27 @@ func frontEndHandlerWithLocation(consolePath string) func(w http.ResponseWriter,
 			target = "/index.html"
 		}
 
-		http.ServeFile(w, r, path.Join(consolePath, target))
+		var content string
+		customHeader := map[string]string{}
+		switch {
+		case strings.HasSuffix(target, ".html"):
+			content = uiResourceIndex
+		case strings.HasSuffix(target, ".js"):
+			content = uiResourceJS
+			customHeader[util.ContentType] = "text/javascript; charset=utf-8"
+		case strings.HasSuffix(target, ".css"):
+			content = uiResourceCSS
+			customHeader[util.ContentType] = "text/css"
+		}
+
+		if content != "" {
+			for k, v := range customHeader {
+				w.Header().Set(k, v)
+			}
+			http.ServeContent(w, r, "", time.Now(), bytes.NewReader([]byte(content)))
+		} else {
+			http.ServeFile(w, r, path.Join(consolePath, target))
+		}
 	}
 }
 
@@ -125,3 +151,12 @@ func (s *fakeGRPCServer) Serve(net.Listener) error {
 func (s *fakeGRPCServer) RegisterService(desc *grpc.ServiceDesc, impl interface{}) {
 	// Do nothing due to this is a fake method
 }
+
+//go:embed data/index.js
+var uiResourceJS string
+
+//go:embed data/index.css
+var uiResourceCSS string
+
+//go:embed data/index.html
+var uiResourceIndex string
