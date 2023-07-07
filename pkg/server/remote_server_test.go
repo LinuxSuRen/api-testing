@@ -333,6 +333,53 @@ func TestUpdateTestCase(t *testing.T) {
 	grpcRequestToRaw(nil) // avoid panic
 }
 
+func TestRemoteServerSuite(t *testing.T) {
+	t.Run("Get suite not found", func(t *testing.T) {
+		writer := atesting.NewFileWriter("")
+		ctx := context.Background()
+		server := NewRemoteServer(writer)
+
+		suite, err := server.GetTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.NoError(t, err)
+		assert.Nil(t, suite)
+	})
+
+	t.Run("Get existing suite", func(t *testing.T) {
+		writer := atesting.NewFileWriter(os.TempDir())
+		ctx := context.Background()
+		server := NewRemoteServer(writer)
+
+		// create a new suite
+		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.NoError(t, err)
+
+		suite, err := server.GetTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, suite) {
+			assert.Equal(t, "fake", suite.Name)
+		}
+
+		_, err = server.UpdateTestSuite(ctx, &TestSuite{Name: "fake", Api: "http://foo"})
+		assert.NoError(t, err)
+
+		// check if the value was updated successfully
+		suite, err = server.GetTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, suite) {
+			assert.Equal(t, "http://foo", suite.Api)
+		}
+	})
+
+	t.Run("Delete non-exist suite", func(t *testing.T) {
+		writer := atesting.NewFileWriter(os.TempDir())
+		ctx := context.Background()
+		server := NewRemoteServer(writer)
+
+		_, err := server.DeleteTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.Error(t, err)
+	})
+}
+
 //go:embed testdata/simple.yaml
 var simpleSuite string
 

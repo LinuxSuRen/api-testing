@@ -18,6 +18,7 @@ type Writer interface {
 	DeleteTestCase(suite, testcase string) (err error)
 
 	CreateSuite(name, api string) (err error)
+	GetSuite(name string) (*TestSuite, string, error)
 	UpdateSuite(name, api string) (err error)
 	DeleteSuite(name string) (err error)
 }

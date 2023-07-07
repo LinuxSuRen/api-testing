@@ -91,9 +91,13 @@ const emptyTestCaseWithSuite: TestCaseWithSuite = {
 
 const testCaseWithSuite = ref(emptyTestCaseWithSuite)
 
-watch(props, (p) => {
-    const name = p.name
-    const suite = p.suite
+function load() {
+    const name = props.name
+    const suite = props.suite
+    if (name === "" || suite === "") {
+        return
+    }
+
     const requestOptions = {
         method: 'POST',
         body: JSON.stringify({
@@ -136,8 +140,12 @@ watch(props, (p) => {
             testCaseWithSuite.value = {
                 suiteName: suite,
                 data: e
-            }
+            } as TestCaseWithSuite;
         });
+}
+load()
+watch(props, () => {
+    load()
 })
 
 interface TestCaseWithSuite{

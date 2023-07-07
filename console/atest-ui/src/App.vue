@@ -67,6 +67,9 @@ function loadTestSuites() {
             treeRef.value!.setCurrentKey(child)
             treeRef.value!.setCheckedKeys([child], false)
           }
+          
+          viewName.value = "testsuite"
+          testSuite.value = firstItem.label
         }
       });
 }
@@ -138,7 +141,7 @@ const viewName = ref('testcase')
 
       <el-main>
         <TestCase v-if="viewName === 'testcase'" :suite="testSuite" :name="testCaseName" @updated="loadTestSuites"/>
-        <TestSuite v-else-if="viewName === 'testsuite'" :name="testSuite"/>
+        <TestSuite v-else-if="viewName === 'testsuite'" :name="testSuite" @updated="loadTestSuites"/>
       </el-main>
     </el-container>
   </div>
