@@ -67,33 +67,17 @@ func (l *fileLoader) Reset() {
 }
 
 func (l *fileLoader) CreateSuite(name, api string) (err error) {
-	var found bool
-	var parentDir string
-	for i := range l.paths {
-		suitePath := l.paths[i]
-
-		var absPath string
-		if absPath, err = filepath.Abs(suitePath); err != nil {
-			return
-		}
-
-		parentDir = path.Dir(absPath)
-		var suite *TestSuite
-		if suite, err = ParseTestSuiteFromFile(absPath); err != nil {
-			continue
-		}
-
-		if suite.Name == name {
-			found = true
-			break
-		}
+	var absPath string
+	var suite *TestSuite
+	if suite, absPath, err = l.GetSuite(name); err != nil {
+		return
 	}
 
-	if found {
+	if suite != nil {
 		err = fmt.Errorf("suite %s already exists", name)
 	} else {
 		if l.parent == "" {
-			l.parent = parentDir
+			l.parent = path.Dir(absPath)
 		}
 		newSuiteFile := path.Join(l.parent, fmt.Sprintf("%s.yaml", name))
 		fmt.Println("new suite file:", newSuiteFile)
@@ -109,7 +93,37 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 	return
 }
 
+func (l *fileLoader) GetSuite(name string) (suite *TestSuite, absPath string, err error) {
+	for i := range l.paths {
+		suitePath := l.paths[i]
+		if absPath, err = filepath.Abs(suitePath); err != nil {
+			return
+		}
+
+		if suite, err = ParseTestSuiteFromFile(absPath); err != nil {
+			suite = nil
+			continue
+		}
+
+		if suite.Name == name {
+			return
+		} else {
+			suite = nil
+		}
+	}
+	return
+}
+
+// UpdateSuite updates the suite
 func (l *fileLoader) UpdateSuite(name, api string) (err error) {
+	var suite *TestSuite
+	var absPath string
+	if suite, absPath, err = l.GetSuite(name); err == nil {
+		if suite.API != api {
+			suite.API = api
+			err = SaveTestSuiteToFile(suite, absPath)
+		}
+	}
 	return
 }
 

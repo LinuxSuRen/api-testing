@@ -449,6 +449,29 @@ func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (re
 	return
 }
 
+func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (result *TestSuite, err error) {
+	var suite *testing.TestSuite
+	if suite, _, err = s.loader.GetSuite(in.Name); err == nil && suite != nil {
+		result = &TestSuite{
+			Name: suite.Name,
+			Api:  suite.API,
+		}
+	}
+	return
+}
+
+func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	err = s.loader.UpdateSuite(in.Name, in.Api)
+	return
+}
+
+func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	err = s.loader.DeleteSuite(in.Name)
+	return
+}
+
 func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (reply *HelloReply, err error) {
 	err = s.loader.DeleteTestCase(in.Suite, in.Testcase)
 	return

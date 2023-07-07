@@ -10,10 +10,14 @@ service Runner {
     rpc GetVersion(Empty) returns (HelloReply) {}
 
     rpc GetSuites(Empty) returns (Suites) {}
-    rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {}
-    rpc GetTestCase(TestCaseIdentity) returns (TestCase) {}
 
     rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {}
+    rpc GetTestSuite(TestSuiteIdentity) returns (TestSuite) {}
+    rpc UpdateTestSuite(TestSuite) returns (HelloReply) {}
+    rpc DeleteTestSuite(TestSuiteIdentity) returns (HelloReply) {}
+
+    rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {}
+    rpc GetTestCase(TestCaseIdentity) returns (TestCase) {}
     rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
 }
@@ -29,6 +33,11 @@ message Items {
 message TestCaseIdentity {
   string suite = 1;
   string testcase = 2;
+}
+
+message TestSuite {
+  string name = 1;
+  string api = 2;
 }
 
 message TestSuiteIdentity {

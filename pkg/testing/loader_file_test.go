@@ -65,6 +65,16 @@ func TestSuite(t *testing.T) {
 		err := writer.CreateSuite("test", "http://test")
 		assert.NoError(t, err)
 
+		err = writer.UpdateSuite("test", "http://fake")
+		assert.NoError(t, err)
+
+		var suite *atest.TestSuite
+		var absPath string
+		suite, absPath, err = writer.GetSuite("test")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, absPath)
+		assert.Equal(t, "http://fake", suite.API)
+
 		err = writer.CreateSuite("fake", "http://fake")
 		assert.NoError(t, err)
 
