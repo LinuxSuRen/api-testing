@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -71,7 +70,7 @@ func ParseTestCaseFromData(data []byte) (testCase *TestCase, err error) {
 // ParseTestSuiteFromFile
 func ParseTestSuiteFromFile(suitePath string) (testSuite *TestSuite, err error) {
 	var data []byte
-	if data, err = ioutil.ReadFile(suitePath); err == nil {
+	if data, err = os.ReadFile(suitePath); err == nil {
 		testSuite = &TestSuite{}
 		yaml.Unmarshal(data, testSuite)
 	}

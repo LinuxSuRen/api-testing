@@ -85,7 +85,18 @@ func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
 	}
 	return
 }
-func (l *fileLoader) GetTestSuite(name string) (suite TestSuite, err error) { return }
+func (l *fileLoader) GetTestSuite(name string, full bool) (suite TestSuite, err error) {
+	var items []TestSuite
+	if items, err = l.ListTestSuite(); err == nil {
+		for _, item := range items {
+			if item.Name == name {
+				suite = item
+				break
+			}
+		}
+	}
+	return
+}
 
 func (l *fileLoader) CreateSuite(name, api string) (err error) {
 	var absPath string
@@ -170,8 +181,50 @@ func (l *fileLoader) DeleteSuite(name string) (err error) {
 	return
 }
 
-func (l *fileLoader) ListTestCase(suite string) (testcases []TestCase, err error)   { return }
-func (l *fileLoader) GetTestCase(suite, name string) (testcase TestCase, err error) { return }
+func (l *fileLoader) ListTestCase(suite string) (testcases []TestCase, err error) {
+	defer func() {
+		l.Reset()
+	}()
+
+	for l.HasMore() {
+		var data []byte
+		if data, err = l.Load(); err != nil {
+			continue
+		}
+
+		var testSuite *TestSuite
+		if testSuite, err = Parse(data); err != nil {
+			return
+		}
+
+		if testSuite.Name != suite {
+			continue
+		}
+
+		testcases = testSuite.Items
+		break
+	}
+	return
+}
+
+func (l *fileLoader) GetTestCase(suite, name string) (testcase TestCase, err error) {
+	var items []TestCase
+	if items, err = l.ListTestCase(suite); err == nil {
+		found := false
+		for _, item := range items {
+			if item.Name == name {
+				testcase = item
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			err = fmt.Errorf("testcase %s not found", name)
+		}
+	}
+	return
+}
 
 func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err error) {
 	var suite *TestSuite

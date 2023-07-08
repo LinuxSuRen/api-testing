@@ -15,8 +15,8 @@ COPY README.md README.md
 COPY LICENSE LICENSE
 
 RUN go mod download
-RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest .
-RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
+RUN CGO_ENABLED=0 go build -ldflags "-w -s" -o atest .
+RUN CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
 
 FROM node:20-alpine3.17 AS ui
 

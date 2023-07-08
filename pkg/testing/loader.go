@@ -20,7 +20,7 @@ type Writer interface {
 	DeleteTestCase(suite, testcase string) (err error)
 
 	ListTestSuite() (suites []TestSuite, err error)
-	GetTestSuite(name string) (suite TestSuite, err error)
+	GetTestSuite(name string, full bool) (suite TestSuite, err error)
 	CreateSuite(name, api string) (err error)
 	GetSuite(name string) (*TestSuite, string, error)
 	UpdateSuite(name, api string) (err error)

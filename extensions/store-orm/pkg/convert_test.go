@@ -49,7 +49,7 @@ func TestConvertToRemoteTestCase(t *testing.T) {
 func TestConverToDBTestCase(t *testing.T) {
 	t.Run("without request and response", func(t *testing.T) {
 		result := pkg.ConverToDBTestCase(&remote.TestCase{})
-		assert.Equal(t, pkg.TestCase{}, result)
+		assert.Equal(t, &pkg.TestCase{}, result)
 	})
 
 	t.Run("only have request", func(t *testing.T) {
@@ -63,7 +63,7 @@ func TestConverToDBTestCase(t *testing.T) {
 				Form:   samplePairs,
 			},
 		})
-		assert.Equal(t, pkg.TestCase{
+		assert.Equal(t, &pkg.TestCase{
 			API:    "api",
 			Method: "get",
 			Body:   "body",
@@ -84,13 +84,37 @@ func TestConverToDBTestCase(t *testing.T) {
 				Verify:           []string{"one"},
 			},
 		})
-		assert.Equal(t, pkg.TestCase{
+		assert.Equal(t, &pkg.TestCase{
 			ExpectBody:       "body",
 			ExpectStatusCode: 1,
 			ExpectSchema:     "schema",
 			ExpectVerify:     `["one"]`,
 			ExpectHeader:     sampleJSONMap,
 			ExpectBodyFields: sampleJSONMap,
+		}, result)
+	})
+}
+
+func TestConvertTestSuite(t *testing.T) {
+	t.Run("ConvertToDBTestSuite", func(t *testing.T) {
+		result := pkg.ConvertToDBTestSuite(&remote.TestSuite{
+			Name: "name",
+			Api:  "api",
+		})
+		assert.Equal(t, &pkg.TestSuite{
+			Name: "name",
+			API:  "api",
+		}, result)
+	})
+
+	t.Run("ConvertToGRPCTestSuite", func(t *testing.T) {
+		result := pkg.ConvertToGRPCTestSuite(&pkg.TestSuite{
+			Name: "name",
+			API:  "api",
+		})
+		assert.Equal(t, &remote.TestSuite{
+			Name: "name",
+			Api:  "api",
 		}, result)
 	})
 }

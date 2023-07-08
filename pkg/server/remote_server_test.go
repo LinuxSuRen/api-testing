@@ -327,7 +327,7 @@ func TestUpdateTestCase(t *testing.T) {
 
 		testCase, err = server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple", Testcase: "get"})
 		assert.Nil(t, testCase)
-		assert.NoError(t, err)
+		assert.Error(t, err)
 	})
 
 	grpcRequestToRaw(nil) // avoid panic

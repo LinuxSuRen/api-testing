@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { Edit, Delete } from '@element-plus/icons-vue'
+import { Edit } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
 
 const props = defineProps({

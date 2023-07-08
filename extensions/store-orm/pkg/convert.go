@@ -6,8 +6,8 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 )
 
-func ConverToDBTestCase(testcase *remote.TestCase) (result TestCase) {
-	result = TestCase{
+func ConverToDBTestCase(testcase *remote.TestCase) (result *TestCase) {
+	result = &TestCase{
 		Name:      testcase.Name,
 		SuiteName: testcase.SuiteName,
 	}
@@ -33,31 +33,6 @@ func ConverToDBTestCase(testcase *remote.TestCase) (result TestCase) {
 	return
 }
 
-func sliceToJSON(slice []string) (result string) {
-	var data []byte
-	var err error
-	if data, err = json.Marshal(slice); err == nil {
-		result = string(data)
-	}
-	return
-}
-
-func pairToJSON(pair []*remote.Pair) (result string) {
-	var obj = make(map[string]string)
-	for i := range pair {
-		k := pair[i].Key
-		v := pair[i].Value
-		obj[k] = v
-	}
-
-	var data []byte
-	var err error
-	if data, err = json.Marshal(obj); err == nil {
-		result = string(data)
-	}
-	return
-}
-
 func ConvertToRemoteTestCase(testcase *TestCase) (result *remote.TestCase) {
 	result = &remote.TestCase{
 		Name: testcase.Name,
@@ -79,6 +54,47 @@ func ConvertToRemoteTestCase(testcase *TestCase) (result *remote.TestCase) {
 			BodyFieldsExpect: jsonToPair(testcase.ExpectBodyFields),
 			Header:           jsonToPair(testcase.ExpectHeader),
 		},
+	}
+	return
+}
+
+func ConvertToDBTestSuite(suite *remote.TestSuite) (result *TestSuite) {
+	result = &TestSuite{
+		Name: suite.Name,
+		API:  suite.Api,
+	}
+	return
+}
+
+func ConvertToGRPCTestSuite(suite *TestSuite) (result *remote.TestSuite) {
+	result = &remote.TestSuite{
+		Name: suite.Name,
+		Api:  suite.API,
+	}
+	return
+}
+
+func sliceToJSON(slice []string) (result string) {
+	var data []byte
+	var err error
+	if data, err = json.Marshal(slice); err == nil {
+		result = string(data)
+	}
+	return
+}
+
+func pairToJSON(pair []*remote.Pair) (result string) {
+	var obj = make(map[string]string)
+	for i := range pair {
+		k := pair[i].Key
+		v := pair[i].Value
+		obj[k] = v
+	}
+
+	var data []byte
+	var err error
+	if data, err = json.Marshal(obj); err == nil {
+		result = string(data)
 	}
 	return
 }

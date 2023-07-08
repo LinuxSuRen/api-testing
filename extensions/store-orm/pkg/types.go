@@ -17,3 +17,8 @@ type TestCase struct {
 	ExpectBodyFields string
 	ExpectVerify     string
 }
+
+type TestSuite struct {
+	Name string
+	API  string
+}

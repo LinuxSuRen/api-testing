@@ -254,35 +254,6 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	if result, err = s.loader.GetTestCase(in.Suite, in.Testcase); err == nil {
 		reply = convertToGRPCTestCase(result)
 	}
-
-	// defer func() {
-	// 	s.loader.Reset()
-	// }()
-
-	// for s.loader.HasMore() {
-	// 	var data []byte
-	// 	if data, err = s.loader.Load(); err != nil {
-	// 		continue
-	// 	}
-
-	// 	var testSuite *testing.TestSuite
-	// 	if testSuite, err = testing.Parse(data); err != nil {
-	// 		return
-	// 	}
-
-	// 	if testSuite.Name != in.Suite {
-	// 		continue
-	// 	}
-
-	// 	for _, testCase := range testSuite.Items {
-	// 		if testCase.Name != in.Testcase {
-	// 			continue
-	// 		}
-
-	// 		reply = convertToGRPCTestCase(testCase)
-	// 		break
-	// 	}
-	// }
 	return
 }
 
@@ -339,46 +310,48 @@ func (s *server) findSuite(suiteName string) (targetTestSuite *testing.TestSuite
 }
 
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
-	var targetTestSuite *testing.TestSuite
-	targetTestSuite, err = s.findSuite(in.Suite)
+	var targetTestSuite testing.TestSuite
+	// targetTestSuite, err = s.findSuite(in.Suite)
 
-	if targetTestSuite != nil && err == nil {
-		var data []byte
-		if data, err = yaml.Marshal(targetTestSuite); err == nil {
-			task := &TestTask{
-				Kind:     "testcaseInSuite",
-				Data:     string(data),
-				CaseName: in.Testcase,
-				Level:    "debug",
-			}
-
-			var reply *TestResult
-			if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
-				lastIndex := len(reply.TestCaseResult) - 1
-				lastItem := reply.TestCaseResult[lastIndex]
-
-				result = &TestCaseResult{
-					Output:     reply.Message,
-					Error:      reply.Error,
-					Body:       lastItem.Body,
-					Header:     lastItem.Header,
-					StatusCode: lastItem.StatusCode,
-				}
-			} else if err != nil {
-				result = &TestCaseResult{
-					Error: err.Error(),
-				}
-			} else {
-				result = &TestCaseResult{
-					Output: reply.Message,
-					Error:  reply.Error,
-				}
-			}
-		}
-	} else {
-		fmt.Println("not found suite", in.Suite)
+	targetTestSuite, err = s.loader.GetTestSuite(in.Suite, true)
+	if err != nil {
+		err = nil
 		result = &TestCaseResult{
-			Error: "not found suite",
+			Error: fmt.Sprintf("not found suite: %s", in.Suite),
+		}
+		return
+	}
+
+	var data []byte
+	if data, err = yaml.Marshal(targetTestSuite); err == nil {
+		task := &TestTask{
+			Kind:     "testcaseInSuite",
+			Data:     string(data),
+			CaseName: in.Testcase,
+			Level:    "debug",
+		}
+
+		var reply *TestResult
+		if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
+			lastIndex := len(reply.TestCaseResult) - 1
+			lastItem := reply.TestCaseResult[lastIndex]
+
+			result = &TestCaseResult{
+				Output:     reply.Message,
+				Error:      reply.Error,
+				Body:       lastItem.Body,
+				Header:     lastItem.Header,
+				StatusCode: lastItem.StatusCode,
+			}
+		} else if err != nil {
+			result = &TestCaseResult{
+				Error: err.Error(),
+			}
+		} else {
+			result = &TestCaseResult{
+				Output: reply.Message,
+				Error:  reply.Error,
+			}
 		}
 	}
 	return
@@ -457,7 +430,10 @@ func (s *server) CreateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 
 func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
-	fmt.Println(in.Data.Request.Header)
+	if in.Data == nil {
+		err = errors.New("data is required")
+		return
+	}
 	err = s.loader.UpdateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
 
 	// defer func() {
