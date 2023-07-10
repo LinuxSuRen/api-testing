@@ -16,8 +16,10 @@ service Runner {
     rpc UpdateTestSuite(TestSuite) returns (HelloReply) {}
     rpc DeleteTestSuite(TestSuiteIdentity) returns (HelloReply) {}
 
+    rpc ListTestCase(TestSuiteIdentity) returns (Suite) {}
     rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {}
     rpc GetTestCase(TestCaseIdentity) returns (TestCase) {}
+    rpc CreateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
 }

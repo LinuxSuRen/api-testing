@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
-import type { TabsPaneContext, FormInstance } from 'element-plus'
+import { ref, watch } from 'vue'
+import type { TabsPaneContext } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
@@ -283,60 +283,6 @@ function headerChange() {
 }
 
 const radio1 = ref('1')
-
-const dialogVisible = ref(false)
-const testcaseFormRef = ref<FormInstance>()
-const testCaseForm = reactive({
-    suiteName: "",
-    name: "",
-    api: "",
-})
-function openNewTestCaseDialog() {
-    loadTestSuites()
-    dialogVisible.value = true
-}
-
-const suiteCreatingLoading = ref(false)
-const testSuiteList = ref([])
-function loadTestSuites() {
-  const requestOptions = {
-      method: 'POST'
-  };
-  fetch('/server.Runner/GetSuites', requestOptions)
-      .then(response => response.json())
-      .then(d => {
-        Object.keys(d.data).map(k => {
-          testSuiteList.value.push(k)
-        })
-      });
-}
-const submitForm = (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  suiteCreatingLoading.value = true
-
-  const requestOptions = {
-    method: 'POST',
-    body: JSON.stringify({
-        suiteName: testCaseForm.suiteName,
-        data: {
-            name: testCaseForm.name,
-            request: {
-                api: testCaseForm.api,
-                method: "GET",
-            }
-        },
-    })
-  };
-
-  fetch('/server.Runner/UpdateTestCase', requestOptions)
-      .then(response => response.json())
-      .then(() => {
-        suiteCreatingLoading.value = false
-        emit('updated', 'hello from child')
-      });
-      
-  dialogVisible.value = false
-}
 </script>
 
 <template>
@@ -345,9 +291,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
             <el-header style="padding-left: 5px;">
                 <div style="margin-bottom: 5px;">
                     <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading">Save</el-button>
-                    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit">New</el-button>
                     <el-button type="primary" @click="deleteTestCase" :icon="Delete">Delete</el-button>
-                    <el-text class="mx-1" type="primary">{{props.name}}</el-text>
                 </div>
                 <el-select v-model="testCaseWithSuite.data.request.method" class="m-2" placeholder="Method" size="middle">
                     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
@@ -488,37 +432,4 @@ const submitForm = (formEl: FormInstance | undefined) => {
             </el-footer>
         </el-container>
     </div>
-
-  <el-dialog v-model="dialogVisible" title="Create Test Case" width="30%" draggable>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-form
-          ref="testcaseFormRef"
-          status-icon
-          label-width="120px"
-          class="demo-ruleForm"
-        >
-          <el-form-item label="Suite" prop="suite">
-            <el-select class="m-2" v-model="testCaseForm.suiteName" placeholder="Select" size="large">
-                <el-option
-                v-for="item in testSuiteList"
-                :key="item"
-                :label="item"
-                :value="item"
-                />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Name" prop="name">
-            <el-input v-model="testCaseForm.name" />
-          </el-form-item>
-          <el-form-item label="API" prop="api">
-            <el-input v-model="testCaseForm.api" placeholder="http://foo" />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="submitForm(testcaseFormRef)" :loading="suiteCreatingLoading">Submit</el-button>
-          </el-form-item>
-        </el-form>
-      </span>
-    </template>
-  </el-dialog>
 </template>

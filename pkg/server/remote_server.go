@@ -171,153 +171,140 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 }
 
 func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err error) {
-	defer func() {
-		s.loader.Reset()
-	}()
-
 	reply = &Suites{
 		Data: make(map[string]*Items),
 	}
-	for s.loader.HasMore() {
-		var data []byte
-		if data, err = s.loader.Load(); err != nil {
-			continue
-		}
 
-		var testSuite *testing.TestSuite
-		if testSuite, err = testing.Parse(data); err != nil {
-			return
+	var suites []testing.TestSuite
+	if suites, err = s.loader.ListTestSuite(); err == nil && suites != nil {
+		for _, suite := range suites {
+			items := &Items{}
+			for _, item := range suite.Items {
+				items.Data = append(items.Data, item.Name)
+			}
+			reply.Data[suite.Name] = items
 		}
+	}
 
-		items := &Items{}
-		for _, item := range testSuite.Items {
-			items.Data = append(items.Data, item.Name)
+	return
+}
+
+func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
+	err = s.loader.CreateSuite(in.Name, in.Api)
+	return
+}
+
+func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (result *TestSuite, err error) {
+	var suite *testing.TestSuite
+	if suite, _, err = s.loader.GetSuite(in.Name); err == nil && suite != nil {
+		result = &TestSuite{
+			Name: suite.Name,
+			Api:  suite.API,
 		}
-		reply.Data[testSuite.Name] = items
+	}
+	return
+}
+
+func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	err = s.loader.UpdateSuite(in.Name, in.Api)
+	return
+}
+
+func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	err = s.loader.DeleteSuite(in.Name)
+	return
+}
+
+func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (result *Suite, err error) {
+	var items []testing.TestCase
+	if items, err = s.loader.ListTestCase(in.Name); err == nil {
+		result = &Suite{}
+		for _, item := range items {
+			result.Items = append(result.Items, convertToGRPCTestCase(item))
+		}
 	}
 	return
 }
 
 func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *TestCase, err error) {
-	defer func() {
-		s.loader.Reset()
-	}()
-
-	for s.loader.HasMore() {
-		var data []byte
-		if data, err = s.loader.Load(); err != nil {
-			continue
-		}
-
-		var testSuite *testing.TestSuite
-		if testSuite, err = testing.Parse(data); err != nil {
-			return
-		}
-
-		if testSuite.Name != in.Suite {
-			continue
-		}
-
-		for _, testCase := range testSuite.Items {
-			if testCase.Name != in.Testcase {
-				continue
-			}
-
-			req := &Request{
-				Api:    testCase.Request.API,
-				Method: testCase.Request.Method,
-				Query:  mapToPair(testCase.Request.Query),
-				Header: mapToPair(testCase.Request.Header),
-				Form:   mapToPair(testCase.Request.Form),
-				Body:   testCase.Request.Body,
-			}
-
-			resp := &Response{
-				StatusCode:       int32(testCase.Expect.StatusCode),
-				Body:             testCase.Expect.Body,
-				Header:           mapToPair(testCase.Expect.Header),
-				BodyFieldsExpect: mapInterToPair(testCase.Expect.BodyFieldsExpect),
-				Verify:           testCase.Expect.Verify,
-				Schema:           testCase.Expect.Schema,
-			}
-
-			reply = &TestCase{
-				Name:     testCase.Name,
-				Request:  req,
-				Response: resp,
-			}
-			break
-		}
+	var result testing.TestCase
+	if result, err = s.loader.GetTestCase(in.Suite, in.Testcase); err == nil {
+		reply = convertToGRPCTestCase(result)
 	}
 	return
 }
 
-func (s *server) findSuite(suiteName string) (targetTestSuite *testing.TestSuite, err error) {
-	defer func() {
-		s.loader.Reset()
-	}()
+func convertToGRPCTestCase(testCase testing.TestCase) (result *TestCase) {
+	req := &Request{
+		Api:    testCase.Request.API,
+		Method: testCase.Request.Method,
+		Query:  mapToPair(testCase.Request.Query),
+		Header: mapToPair(testCase.Request.Header),
+		Form:   mapToPair(testCase.Request.Form),
+		Body:   testCase.Request.Body,
+	}
 
-	for s.loader.HasMore() {
-		var data []byte
-		if data, err = s.loader.Load(); err != nil {
-			continue
-		}
+	resp := &Response{
+		StatusCode:       int32(testCase.Expect.StatusCode),
+		Body:             testCase.Expect.Body,
+		Header:           mapToPair(testCase.Expect.Header),
+		BodyFieldsExpect: mapInterToPair(testCase.Expect.BodyFieldsExpect),
+		Verify:           testCase.Expect.Verify,
+		Schema:           testCase.Expect.Schema,
+	}
 
-		var testSuite *testing.TestSuite
-		if testSuite, err = testing.Parse(data); err != nil {
-			continue
-		}
-
-		if testSuite.Name == suiteName {
-			targetTestSuite = testSuite
-			err = nil
-			break
-		}
+	result = &TestCase{
+		Name:     testCase.Name,
+		Request:  req,
+		Response: resp,
 	}
 	return
 }
 
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
-	var targetTestSuite *testing.TestSuite
-	targetTestSuite, err = s.findSuite(in.Suite)
+	var targetTestSuite testing.TestSuite
 
-	if targetTestSuite != nil && err == nil {
-		var data []byte
-		if data, err = yaml.Marshal(targetTestSuite); err == nil {
-			task := &TestTask{
-				Kind:     "testcaseInSuite",
-				Data:     string(data),
-				CaseName: in.Testcase,
-				Level:    "debug",
-			}
-
-			var reply *TestResult
-			if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
-				lastIndex := len(reply.TestCaseResult) - 1
-				lastItem := reply.TestCaseResult[lastIndex]
-
-				result = &TestCaseResult{
-					Output:     reply.Message,
-					Error:      reply.Error,
-					Body:       lastItem.Body,
-					Header:     lastItem.Header,
-					StatusCode: lastItem.StatusCode,
-				}
-			} else if err != nil {
-				result = &TestCaseResult{
-					Error: err.Error(),
-				}
-			} else {
-				result = &TestCaseResult{
-					Output: reply.Message,
-					Error:  reply.Error,
-				}
-			}
-		}
-	} else {
-		fmt.Println("not found suite", in.Suite)
+	targetTestSuite, err = s.loader.GetTestSuite(in.Suite, true)
+	if err != nil {
+		err = nil
 		result = &TestCaseResult{
-			Error: "not found suite",
+			Error: fmt.Sprintf("not found suite: %s", in.Suite),
+		}
+		return
+	}
+
+	var data []byte
+	if data, err = yaml.Marshal(targetTestSuite); err == nil {
+		task := &TestTask{
+			Kind:     "testcaseInSuite",
+			Data:     string(data),
+			CaseName: in.Testcase,
+			Level:    "debug",
+		}
+
+		var reply *TestResult
+		if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
+			lastIndex := len(reply.TestCaseResult) - 1
+			lastItem := reply.TestCaseResult[lastIndex]
+
+			result = &TestCaseResult{
+				Output:     reply.Message,
+				Error:      reply.Error,
+				Body:       lastItem.Body,
+				Header:     lastItem.Header,
+				StatusCode: lastItem.StatusCode,
+			}
+		} else if err != nil {
+			result = &TestCaseResult{
+				Error: err.Error(),
+			}
+		} else {
+			result = &TestCaseResult{
+				Output: reply.Message,
+				Error:  reply.Error,
+			}
 		}
 	}
 	return
@@ -361,114 +348,46 @@ func pairToMap(pairs []*Pair) (data map[string]string) {
 	return
 }
 
-func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
-	defer func() {
-		s.loader.Reset()
-	}()
+func convertToTestingTestCase(in *TestCase) (result testing.TestCase) {
+	result = testing.TestCase{
+		Name: in.Name,
+	}
+	req := in.Request
+	resp := in.Response
 
+	if req != nil {
+		result.Request.API = req.Api
+		result.Request.Method = req.Method
+		result.Request.Body = req.Body
+		result.Request.Header = pairToMap(req.Header)
+		result.Request.Form = pairToMap(req.Form)
+		result.Request.Query = pairToMap(req.Query)
+	}
+
+	if resp != nil {
+		result.Expect.Body = resp.Body
+		result.Expect.Schema = resp.Schema
+		result.Expect.StatusCode = int(resp.StatusCode)
+		result.Expect.Verify = resp.Verify
+		result.Expect.BodyFieldsExpect = pairToInterMap(resp.BodyFieldsExpect)
+		result.Expect.Header = pairToMap(resp.Header)
+	}
+	return
+}
+
+func (s *server) CreateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	err = s.loader.CreateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
+	return
+}
+
+func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
 	if in.Data == nil {
 		err = errors.New("data is required")
 		return
 	}
-
-	var targetTestSuite *testing.TestSuite
-	for s.loader.HasMore() {
-		var data []byte
-		if data, err = s.loader.Load(); err != nil {
-			continue
-		}
-
-		var testSuite *testing.TestSuite
-		if testSuite, err = testing.Parse(data); err != nil {
-			continue
-		}
-
-		if testSuite.Name == in.SuiteName {
-			targetTestSuite = testSuite
-			break
-		}
-	}
-
-	if targetTestSuite == nil {
-		err = errNoTestSuiteFound
-		return
-	}
-
-	found := false
-	for i := range targetTestSuite.Items {
-		item := targetTestSuite.Items[i]
-		if item.Name == in.Data.Name {
-			item.Request = grpcRequestToRaw(in.Data.Request)
-			item.Expect = grpcResponseToRaw(in.Data.Response)
-
-			err = s.loader.UpdateTestCase(in.SuiteName, item)
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		item := testing.TestCase{
-			Name:    in.Data.Name,
-			Request: grpcRequestToRaw(in.Data.Request),
-			Expect:  grpcResponseToRaw(in.Data.Response),
-		}
-		err = s.loader.UpdateTestCase(in.SuiteName, item)
-	}
-	return
-}
-
-func grpcRequestToRaw(request *Request) (req testing.Request) {
-	if request == nil {
-		return
-	}
-	req.API = request.Api
-	req.Method = request.Method
-	req.Header = pairToMap(request.Header)
-	req.Query = pairToMap(request.Query)
-	req.Form = pairToMap(request.Form)
-	req.Body = request.Body
-	return
-}
-
-func grpcResponseToRaw(response *Response) (req testing.Response) {
-	if response == nil {
-		return
-	}
-	req.StatusCode = int(response.StatusCode)
-	req.Body = response.Body
-	req.Header = pairToMap(response.Header)
-	req.BodyFieldsExpect = pairToInterMap(response.BodyFieldsExpect)
-	req.Verify = response.Verify
-	req.Schema = response.Schema
-	return
-}
-
-func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
-	err = s.loader.CreateSuite(in.Name, in.Api)
-	return
-}
-
-func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (result *TestSuite, err error) {
-	var suite *testing.TestSuite
-	if suite, _, err = s.loader.GetSuite(in.Name); err == nil && suite != nil {
-		result = &TestSuite{
-			Name: suite.Name,
-			Api:  suite.API,
-		}
-	}
-	return
-}
-
-func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	err = s.loader.UpdateSuite(in.Name, in.Api)
-	return
-}
-
-func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	err = s.loader.DeleteSuite(in.Name)
+	err = s.loader.UpdateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
 	return
 }
 

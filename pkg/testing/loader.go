@@ -13,10 +13,14 @@ type Loader interface {
 type Writer interface {
 	Loader
 
+	ListTestCase(suite string) (testcases []TestCase, err error)
+	GetTestCase(suite, name string) (testcase TestCase, err error)
 	CreateTestCase(suite string, testcase TestCase) (err error)
 	UpdateTestCase(suite string, testcase TestCase) (err error)
 	DeleteTestCase(suite, testcase string) (err error)
 
+	ListTestSuite() (suites []TestSuite, err error)
+	GetTestSuite(name string, full bool) (suite TestSuite, err error)
 	CreateSuite(name, api string) (err error)
 	GetSuite(name string) (*TestSuite, string, error)
 	UpdateSuite(name, api string) (err error)

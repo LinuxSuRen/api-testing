@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -16,6 +17,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -35,7 +37,9 @@ func createServerCmd(gRPCServer gRPCServer, httpServer server.HTTPServer) (c *co
 	flags.IntVarP(&opt.port, "port", "p", 7070, "The RPC server port")
 	flags.IntVarP(&opt.httpPort, "http-port", "", 8080, "The HTTP server port")
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
+	flags.StringVarP(&opt.storage, "storage", "", "local", "The storage type, local or etcd")
 	flags.StringVarP(&opt.localStorage, "local-storage", "", "", "The local storage path")
+	flags.StringVarP(&opt.grpcStorage, "grpc-storage", "", "", "The grpc storage address")
 	flags.StringVarP(&opt.consolePath, "console-path", "", "", "The path of the console")
 	return
 }
@@ -47,7 +51,9 @@ type serverOption struct {
 	port         int
 	httpPort     int
 	printProto   bool
+	storage      string
 	localStorage string
+	grpcStorage  string
 	consolePath  string
 }
 
@@ -72,11 +78,25 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	loader := testing.NewFileWriter("")
-	if o.localStorage != "" {
-		if err = loader.Put(o.localStorage); err != nil {
+	var loader testing.Writer
+	switch o.storage {
+	case "local":
+		loader = testing.NewFileWriter("")
+		if o.localStorage != "" {
+			err = loader.Put(o.localStorage)
+		}
+	case "grpc":
+		if o.grpcStorage == "" {
+			err = errors.New("grpc storage address is required")
 			return
 		}
+		loader, err = remote.NewGRPCLoader(o.grpcStorage)
+	default:
+		err = errors.New("invalid storage type")
+	}
+
+	if err != nil {
+		return
 	}
 
 	removeServer := server.NewRemoteServer(loader)
