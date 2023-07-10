@@ -12,7 +12,7 @@ jobs:
         with:
           go-version: 1.18.x
       - uses: actions/checkout@v3.0.0
-      - name: Test
+      - name: Unit Test
         run: |
           make test-all
       - name: Report
@@ -21,6 +21,12 @@ jobs:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         run: |
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.out --force-coverage-parser go
+      - name: API Test
+        run: |
+          make build copy
+          sudo atest service install
+          sudo atest service restart
+          atest run -p .github/testing/core.yaml
 
   Build:
     runs-on: ubuntu-20.04
