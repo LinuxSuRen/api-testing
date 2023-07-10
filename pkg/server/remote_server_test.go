@@ -329,8 +329,61 @@ func TestUpdateTestCase(t *testing.T) {
 		assert.Nil(t, testCase)
 		assert.Error(t, err)
 	})
+}
 
-	grpcRequestToRaw(nil) // avoid panic
+func TestListTestCase(t *testing.T) {
+	tmpFile, err := os.CreateTemp(os.TempDir(), "test")
+	assert.NoError(t, err)
+	defer os.Remove(tmpFile.Name())
+
+	fmt.Fprint(tmpFile, simpleSuite)
+	writer := atesting.NewFileWriter(os.TempDir())
+	writer.Put(tmpFile.Name())
+
+	server := NewRemoteServer(writer)
+	ctx := context.Background()
+
+	t.Run("get two testcases", func(t *testing.T) {
+		suite, err := server.ListTestCase(ctx, &TestSuiteIdentity{Name: "simple"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, suite) {
+			assert.Equal(t, 2, len(suite.Items))
+		}
+	})
+
+	t.Run("get one testcase", func(t *testing.T) {
+		result, err := server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple", Testcase: "get"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, result) {
+			assert.Equal(t, atesting.TestCase{
+				Name: "get",
+				Request: atesting.Request{
+					API: urlFoo,
+					Header: map[string]string{
+						"key": "value",
+					},
+					Query: map[string]string{},
+					Form:  map[string]string{},
+				},
+				Expect: atesting.Response{
+					Header:           map[string]string{},
+					BodyFieldsExpect: map[string]interface{}{},
+					Verify:           nil,
+				},
+			}, convertToTestingTestCase(result))
+		}
+	})
+
+	t.Run("create testcase", func(t *testing.T) {
+		reply, err := server.CreateTestCase(ctx, &TestCaseWithSuite{
+			SuiteName: "simple",
+			Data: &TestCase{
+				Name: "put",
+			},
+		})
+		assert.NoError(t, err)
+		assert.NotNil(t, reply)
+	})
 }
 
 func TestRemoteServerSuite(t *testing.T) {

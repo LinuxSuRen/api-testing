@@ -30,10 +30,23 @@ atest server --local-storage 'sample/*.yaml' --console-path console/atest-ui/dis
 ```
 
 ### ORM DataBase Storage
+Start a database with the following command if you don't have a database already. You can install [tiup](https://tiup.io/) via `hd i tiup`.
 
 ```shell
-podman run -p 7071:7071 ghcr.io/linuxsuren/api-testing-store-orm:master --address 127.0.0.1 --user root --database test
+tiup playground --db.host 0.0.0.0
 ```
+
+```shell
+# create a network
+# start the server with gRPC storage
+podman run -p 8080:8080 ghcr.io/linuxsuren/api-testing:master \
+    atest server --storage grpc --grpc-storage 192.168.1.98:7071 --console-path=/var/www/html
+# start the gRPC storage which connect to an ORM database
+podman run -p 7071:7071 ghcr.io/linuxsuren/api-testing:master \
+    atest-store-orm --address 192.168.1.98:4000 --user root --database test
+```
+
+> Please don't forget to replace `192.168.1.98` to your own IP address.
 
 ## Extensions
 Developers could have a storage extension. Implement a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.

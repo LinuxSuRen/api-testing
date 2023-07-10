@@ -86,6 +86,10 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			err = loader.Put(o.localStorage)
 		}
 	case "grpc":
+		if o.grpcStorage == "" {
+			err = errors.New("grpc storage address is required")
+			return
+		}
 		loader, err = remote.NewGRPCLoader(o.grpcStorage)
 	default:
 		err = errors.New("invalid storage type")

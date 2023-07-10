@@ -1,3 +1,5 @@
+IMG_TOOL?=podman
+
 build:
 	mkdir -p bin
 	rm -rf bin/atest
@@ -14,9 +16,9 @@ build-embed-ui:
 goreleaser:
 	goreleaser build --rm-dist --snapshot
 build-image:
-	docker build -t ghcr.io/linuxsuren/api-testing:dev .
+	${IMG_TOOL} build -t ghcr.io/linuxsuren/api-testing:master . --build-arg GOPROXY=https://goproxy.cn,direct
 run-image:
-	docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing:dev
+	docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing:master
 run-server:
 	go run . server  --local-storage 'sample/*.yaml' --console-path console/atest-ui/dist
 copy: build
@@ -25,12 +27,18 @@ copy-restart: build
 	atest service stop
 	make copy
 	atest service restart
+
 test:
 	go test ./... -cover -v -coverprofile=coverage.out
 	go tool cover -func=coverage.out
 test-collector:
 	go test github.com/linuxsuren/api-testing/extensions/collector/./... -cover -v -coverprofile=collector-coverage.out
 	go tool cover -func=collector-coverage.out
+test-store-orm:
+	go test github.com/linuxsuren/api-testing/extensions/store-orm/./... -cover -v -coverprofile=store-orm-coverage.out
+	go tool cover -func=store-orm-coverage.out
+test-all: test test-collector test-store-orm
+
 grpc:
 	protoc --go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \

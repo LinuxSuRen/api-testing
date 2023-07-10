@@ -1,5 +1,6 @@
 FROM golang:1.18 AS builder
 
+ARG GOPROXY
 WORKDIR /workspace
 COPY cmd/ cmd/
 COPY pkg/ pkg/
@@ -14,9 +15,10 @@ COPY main.go main.go
 COPY README.md README.md
 COPY LICENSE LICENSE
 
-RUN go mod download
-RUN CGO_ENABLED=0 go build -ldflags "-w -s" -o atest .
-RUN CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
+RUN GOPROXY=${GOPROXY} go mod download
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest .
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
 
 FROM node:20-alpine3.17 AS ui
 
@@ -40,6 +42,7 @@ LABEL "Name"="API testing"
 
 COPY --from=builder /workspace/atest /usr/local/bin/atest
 COPY --from=builder /workspace/atest-collector /usr/local/bin/atest-collector
+COPY --from=builder /workspace/atest-store-orm /usr/local/bin/atest-store-orm
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 

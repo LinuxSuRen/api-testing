@@ -1,7 +1,7 @@
 bin/
 .idea/
 coverage.out
-collector-coverage.out
+*-coverage.out
 dist/
 .vscode/launch.json
 sample.yaml

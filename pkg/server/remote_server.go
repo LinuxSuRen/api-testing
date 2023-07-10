@@ -171,10 +171,6 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 }
 
 func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err error) {
-	// defer func() {
-	// 	s.loader.Reset()
-	// }()
-
 	reply = &Suites{
 		Data: make(map[string]*Items),
 	}
@@ -190,23 +186,6 @@ func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err e
 		}
 	}
 
-	// for s.loader.HasMore() {
-	// 	var data []byte
-	// 	if data, err = s.loader.Load(); err != nil {
-	// 		continue
-	// 	}
-
-	// 	var testSuite *testing.TestSuite
-	// 	if testSuite, err = testing.Parse(data); err != nil {
-	// 		return
-	// 	}
-
-	// 	items := &Items{}
-	// 	for _, item := range testSuite.Items {
-	// 		items.Data = append(items.Data, item.Name)
-	// 	}
-	// 	reply.Data[testSuite.Name] = items
-	// }
 	return
 }
 
@@ -284,34 +263,8 @@ func convertToGRPCTestCase(testCase testing.TestCase) (result *TestCase) {
 	return
 }
 
-func (s *server) findSuite(suiteName string) (targetTestSuite *testing.TestSuite, err error) {
-	defer func() {
-		s.loader.Reset()
-	}()
-
-	for s.loader.HasMore() {
-		var data []byte
-		if data, err = s.loader.Load(); err != nil {
-			continue
-		}
-
-		var testSuite *testing.TestSuite
-		if testSuite, err = testing.Parse(data); err != nil {
-			continue
-		}
-
-		if testSuite.Name == suiteName {
-			targetTestSuite = testSuite
-			err = nil
-			break
-		}
-	}
-	return
-}
-
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
 	var targetTestSuite testing.TestSuite
-	// targetTestSuite, err = s.findSuite(in.Suite)
 
 	targetTestSuite, err = s.loader.GetTestSuite(in.Suite, true)
 	if err != nil {
@@ -435,86 +388,6 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 		return
 	}
 	err = s.loader.UpdateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
-
-	// defer func() {
-	// 	s.loader.Reset()
-	// }()
-
-	// if in.Data == nil {
-	// 	err = errors.New("data is required")
-	// 	return
-	// }
-
-	// var targetTestSuite *testing.TestSuite
-	// for s.loader.HasMore() {
-	// 	var data []byte
-	// 	if data, err = s.loader.Load(); err != nil {
-	// 		continue
-	// 	}
-
-	// 	var testSuite *testing.TestSuite
-	// 	if testSuite, err = testing.Parse(data); err != nil {
-	// 		continue
-	// 	}
-
-	// 	if testSuite.Name == in.SuiteName {
-	// 		targetTestSuite = testSuite
-	// 		break
-	// 	}
-	// }
-
-	// if targetTestSuite == nil {
-	// 	err = errNoTestSuiteFound
-	// 	return
-	// }
-
-	// found := false
-	// for i := range targetTestSuite.Items {
-	// 	item := targetTestSuite.Items[i]
-	// 	if item.Name == in.Data.Name {
-	// 		item.Request = grpcRequestToRaw(in.Data.Request)
-	// 		item.Expect = grpcResponseToRaw(in.Data.Response)
-
-	// 		err = s.loader.UpdateTestCase(in.SuiteName, item)
-	// 		found = true
-	// 		break
-	// 	}
-	// }
-
-	// if !found {
-	// 	item := testing.TestCase{
-	// 		Name:    in.Data.Name,
-	// 		Request: grpcRequestToRaw(in.Data.Request),
-	// 		Expect:  grpcResponseToRaw(in.Data.Response),
-	// 	}
-	// 	err = s.loader.UpdateTestCase(in.SuiteName, item)
-	// }
-	return
-}
-
-func grpcRequestToRaw(request *Request) (req testing.Request) {
-	if request == nil {
-		return
-	}
-	req.API = request.Api
-	req.Method = request.Method
-	req.Header = pairToMap(request.Header)
-	req.Query = pairToMap(request.Query)
-	req.Form = pairToMap(request.Form)
-	req.Body = request.Body
-	return
-}
-
-func grpcResponseToRaw(response *Response) (req testing.Response) {
-	if response == nil {
-		return
-	}
-	req.StatusCode = int(response.StatusCode)
-	req.Body = response.Body
-	req.Header = pairToMap(response.Header)
-	req.BodyFieldsExpect = pairToInterMap(response.BodyFieldsExpect)
-	req.Verify = response.Verify
-	req.Schema = response.Schema
 	return
 }
 
