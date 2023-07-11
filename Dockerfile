@@ -7,6 +7,7 @@ COPY pkg/ pkg/
 COPY extensions/ extensions/
 COPY console/atest-ui atest-ui/
 COPY sample/ sample/
+COPY docs/ docs/
 COPY go.mod go.mod
 COPY go.sum go.sum
 COPY go.work go.work

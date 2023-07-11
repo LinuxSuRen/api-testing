@@ -12,9 +12,9 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"github.com/linuxsuren/api-testing/docs"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/util"
-	"github.com/linuxsuren/api-testing/sample"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -27,7 +27,7 @@ func Parse(data []byte) (testSuite *TestSuite, err error) {
 		// convert YAML to JSON
 		var jsonData []byte
 		if jsonData, err = yaml.YAMLToJSON(data); err == nil {
-			schemaLoader := gojsonschema.NewStringLoader(sample.Schema)
+			schemaLoader := gojsonschema.NewStringLoader(docs.Schema)
 			documentLoader := gojsonschema.NewBytesLoader(jsonData)
 
 			var result *gojsonschema.Result

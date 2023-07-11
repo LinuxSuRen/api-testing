@@ -56,7 +56,7 @@ func TestExportAllReportResults(t *testing.T) {
 			EndTime:   now.Add(time.Second * 5),
 		}},
 		expect: runner.ReportResultSlice{{
-			API:     "GET http://fake",
+			API:     "GET " + urlFake,
 			Average: time.Second * 5,
 			Max:     time.Second * 5,
 			Min:     time.Second * 5,

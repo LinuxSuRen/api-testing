@@ -115,6 +115,7 @@ func TestConvertTestSuite(t *testing.T) {
 		assert.Equal(t, &remote.TestSuite{
 			Name: "name",
 			Api:  "api",
+			Spec: &remote.APISpec{},
 		}, result)
 	})
 }

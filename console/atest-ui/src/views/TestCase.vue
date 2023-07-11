@@ -5,6 +5,8 @@ import { ElMessage } from 'element-plus'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
 import _ from 'lodash';
+import type { Pair, TestResult, TestCaseWithSuite } from './types'
+import { NewSuggestedAPIsQuery } from './types'
 
 const props = defineProps({
     name: String,
@@ -12,15 +14,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['updated'])
 
-interface TestResult {
-    body: string,
-    bodyObject: {},
-    output: string,
-    error: string,
-    statusCode: number,
-    header: Pair[],
-}
-
+let querySuggestedAPIs = NewSuggestedAPIsQuery(props.suite!)
 const testResultActiveTab = ref('output')
 const requestLoading = ref(false)
 const testResult = ref({header: [] as Pair[]} as TestResult)
@@ -89,11 +83,6 @@ const queryBodyFields = (queryString: string, cb: any) => {
         : pairs
     // call callback function to return suggestions
     cb(results)
-}
-
-interface Pair {
-    key: string,
-    value: string
 }
 
 const emptyTestCaseWithSuite: TestCaseWithSuite = {
@@ -177,35 +166,6 @@ load()
 watch(props, () => {
     load()
 })
-
-interface TestCaseWithSuite{
-    suiteName: string,
-    data: TestCase
-}
-
-interface TestCase {
-    name: string,
-    request: TestCaseRequest,
-    response: TestCaseResponse,
-}
-
-interface TestCaseRequest {
-    api: string,
-    method: string,
-    header: Pair[],
-    query: Pair[],
-    form: Pair[],
-    body: string,
-}
-
-interface TestCaseResponse {
-    statusCode: number,
-    body: string,
-    header: Pair[],
-    bodyFieldsExpect: Pair[],
-    verify: string[],
-    schema: string,
-}
 
 const saveLoading = ref(false)
 function saveTestCase() {
@@ -397,7 +357,18 @@ function flattenObject(obj: any): any {
                 <el-select v-model="testCaseWithSuite.data.request.method" class="m-2" placeholder="Method" size="middle">
                     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
                 </el-select>
-                <el-input v-model="testCaseWithSuite.data.request.api" placeholder="API Address"  style="width: 70%; margin-left: 5px; margin-right: 5px;"/>
+                <el-autocomplete
+                    v-model="testCaseWithSuite.data.request.api"
+                    :fetch-suggestions="querySuggestedAPIs"
+                    placeholder="API Address"
+                    style="width: 70%; margin-left: 5px; margin-right: 5px;"
+                >
+                    <template #default="{ item }">
+                        <div class="value">{{ item.request.method }}</div>
+                        <span class="link">{{ item.request.api }}</span>
+                    </template>
+                </el-autocomplete>
+
                 <el-button type="primary" @click="sendRequest" :loading="requestLoading">Send</el-button>
             </el-header>
 

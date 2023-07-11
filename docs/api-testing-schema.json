@@ -15,6 +15,12 @@
                 "api": {
                     "type": "string"
                 },
+                "spec": {
+                    "type": "object",
+                    "spec": {
+                        "$ref": "#/definitions/Spec"
+                    }
+                },
                 "items": {
                     "type": "array",
                     "items": {
@@ -26,6 +32,22 @@
                 "name"
             ],
             "title": "APITesting"
+        },
+        "Spec": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "kind": {
+                    "type": "string",
+                    "enum": ["openapi", "swagger"]
+                },
+                "url": {
+                    "type": "string",
+                    "qt-uri-protocols": [
+                        "https", "http"
+                    ]
+                }
+            }
         },
         "Item": {
             "type": "object",

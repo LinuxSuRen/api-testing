@@ -25,8 +25,14 @@ message TestSuites {
 message TestSuite {
     string name = 1;
     string api = 2;
-    repeated TestCase items = 3;
-    bool full = 4;
+    APISpec spec = 3;
+    repeated TestCase items = 4;
+    bool full = 5;
+}
+
+message APISpec {
+    string kind = 1;
+    string url = 2;
 }
 
 message TestCases {

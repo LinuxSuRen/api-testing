@@ -24,3 +24,6 @@ items:
   expect:
     verify:
     - len(data.name) > 0
+spec:
+  kind: swagger
+  url: https://gitee.com/api/v5/doc_json

@@ -19,6 +19,8 @@ type TestCase struct {
 }
 
 type TestSuite struct {
-	Name string
-	API  string
+	Name     string
+	API      string
+	SpecKind string
+	SpecURL  string
 }

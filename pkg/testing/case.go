@@ -4,7 +4,13 @@ package testing
 type TestSuite struct {
 	Name  string     `yaml:"name,omitempty" json:"name,omitempty"`
 	API   string     `yaml:"api,omitempty" json:"api,omitempty"`
+	Spec  APISpec    `yaml:"spec,omitempty" json:"spec,omitempty"`
 	Items []TestCase `yaml:"items,omitempty" json:"items,omitempty"`
+}
+
+type APISpec struct {
+	Kind string `yaml:"kind,omitempty" json:"kind,omitempty"`
+	URL  string `yaml:"url,omitempty" json:"url,omitempty"`
 }
 
 // TestCase represents a test case

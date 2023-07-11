@@ -438,6 +438,16 @@ func TestPopularHeaders(t *testing.T) {
 	}
 }
 
+func TestGetSuggestedAPIs(t *testing.T) {
+	ctx := context.Background()
+	server := getRemoteServerInTempDir()
+
+	reply, err := server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: "fake"})
+	if assert.NoError(t, err) {
+		assert.Equal(t, 0, len(reply.Data))
+	}
+}
+
 func getRemoteServerInTempDir() (server RunnerServer) {
 	writer := atesting.NewFileWriter(os.TempDir())
 	server = NewRemoteServer(writer)

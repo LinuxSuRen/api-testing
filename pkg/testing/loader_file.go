@@ -149,14 +149,12 @@ func (l *fileLoader) GetSuite(name string) (suite *TestSuite, absPath string, er
 }
 
 // UpdateSuite updates the suite
-func (l *fileLoader) UpdateSuite(name, api string) (err error) {
-	var suite *TestSuite
+func (l *fileLoader) UpdateSuite(suite TestSuite) (err error) {
 	var absPath string
-	if suite, absPath, err = l.GetSuite(name); err == nil {
-		if suite.API != api {
-			suite.API = api
-			err = SaveTestSuiteToFile(suite, absPath)
-		}
+	var oldSuite *TestSuite
+	if oldSuite, absPath, err = l.GetSuite(suite.Name); err == nil {
+		suite.Items = oldSuite.Items // only update the suite info
+		err = SaveTestSuiteToFile(&suite, absPath)
 	}
 	return
 }

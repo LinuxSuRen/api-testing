@@ -21,6 +21,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func createServerCmd(gRPCServer gRPCServer, httpServer server.HTTPServer) (c *cobra.Command) {
@@ -102,6 +103,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	removeServer := server.NewRemoteServer(loader)
 	s := o.gRPCServer
 	go func() {
+		if gRPCServer, ok := s.(reflection.GRPCServer); ok {
+			reflection.Register(gRPCServer)
+		}
 		server.RegisterRunnerServer(s, removeServer)
 		log.Printf("gRPC server listening at %v", lis.Addr())
 		s.Serve(lis)

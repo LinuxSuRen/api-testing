@@ -37,6 +37,7 @@ type RunnerClient interface {
 	UpdateTestCase(ctx context.Context, in *TestCaseWithSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 	PopularHeaders(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Pairs, error)
+	GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error)
 }
 
 type runnerClient struct {
@@ -182,6 +183,15 @@ func (c *runnerClient) PopularHeaders(ctx context.Context, in *Empty, opts ...gr
 	return out, nil
 }
 
+func (c *runnerClient) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error) {
+	out := new(TestCases)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetSuggestedAPIs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RunnerServer is the server API for Runner service.
 // All implementations must embed UnimplementedRunnerServer
 // for forward compatibility
@@ -201,6 +211,7 @@ type RunnerServer interface {
 	UpdateTestCase(context.Context, *TestCaseWithSuite) (*HelloReply, error)
 	DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error)
 	PopularHeaders(context.Context, *Empty) (*Pairs, error)
+	GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error)
 	mustEmbedUnimplementedRunnerServer()
 }
 
@@ -252,6 +263,9 @@ func (UnimplementedRunnerServer) DeleteTestCase(context.Context, *TestCaseIdenti
 }
 func (UnimplementedRunnerServer) PopularHeaders(context.Context, *Empty) (*Pairs, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PopularHeaders not implemented")
+}
+func (UnimplementedRunnerServer) GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSuggestedAPIs not implemented")
 }
 func (UnimplementedRunnerServer) mustEmbedUnimplementedRunnerServer() {}
 
@@ -536,6 +550,24 @@ func _Runner_PopularHeaders_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_GetSuggestedAPIs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestSuiteIdentity)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetSuggestedAPIs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetSuggestedAPIs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetSuggestedAPIs(ctx, req.(*TestSuiteIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Runner_ServiceDesc is the grpc.ServiceDesc for Runner service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -602,6 +634,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PopularHeaders",
 			Handler:    _Runner_PopularHeaders_Handler,
+		},
+		{
+			MethodName: "GetSuggestedAPIs",
+			Handler:    _Runner_GetSuggestedAPIs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
