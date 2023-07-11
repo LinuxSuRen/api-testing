@@ -38,3 +38,7 @@ items:
     statusCode: 500
     bodyFieldsExpect:
       code: 2
+- name: get-popular-headers
+  request:
+    api: /PopularHeaders
+    method: POST

@@ -242,16 +242,14 @@ func TestMapInterToPair(t *testing.T) {
 
 func TestUpdateTestCase(t *testing.T) {
 	t.Run("no suite found", func(t *testing.T) {
-		writer := atesting.NewFileWriter("")
-		server := NewRemoteServer(writer)
+		server := getRemoteServerInTempDir()
 		server.UpdateTestCase(context.TODO(), &TestCaseWithSuite{
 			Data: &TestCase{},
 		})
 	})
 
 	t.Run("no data", func(t *testing.T) {
-		writer := atesting.NewFileWriter("")
-		server := NewRemoteServer(writer)
+		server := getRemoteServerInTempDir()
 		_, err := server.UpdateTestCase(context.TODO(), &TestCaseWithSuite{})
 		assert.Error(t, err)
 	})
@@ -388,9 +386,8 @@ func TestListTestCase(t *testing.T) {
 
 func TestRemoteServerSuite(t *testing.T) {
 	t.Run("Get suite not found", func(t *testing.T) {
-		writer := atesting.NewFileWriter("")
 		ctx := context.Background()
-		server := NewRemoteServer(writer)
+		server := getRemoteServerInTempDir()
 
 		suite, err := server.GetTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
 		assert.NoError(t, err)
@@ -398,9 +395,8 @@ func TestRemoteServerSuite(t *testing.T) {
 	})
 
 	t.Run("Get existing suite", func(t *testing.T) {
-		writer := atesting.NewFileWriter(os.TempDir())
 		ctx := context.Background()
-		server := NewRemoteServer(writer)
+		server := getRemoteServerInTempDir()
 
 		// create a new suite
 		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
@@ -424,13 +420,28 @@ func TestRemoteServerSuite(t *testing.T) {
 	})
 
 	t.Run("Delete non-exist suite", func(t *testing.T) {
-		writer := atesting.NewFileWriter(os.TempDir())
 		ctx := context.Background()
-		server := NewRemoteServer(writer)
+		server := getRemoteServerInTempDir()
 
 		_, err := server.DeleteTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
 		assert.Error(t, err)
 	})
+}
+
+func TestPopularHeaders(t *testing.T) {
+	ctx := context.Background()
+	server := getRemoteServerInTempDir()
+
+	pairs, err := server.PopularHeaders(ctx, &Empty{})
+	if assert.NoError(t, err) {
+		assert.Equal(t, 4, len(pairs.Data))
+	}
+}
+
+func getRemoteServerInTempDir() (server RunnerServer) {
+	writer := atesting.NewFileWriter(os.TempDir())
+	server = NewRemoteServer(writer)
+	return
 }
 
 //go:embed testdata/simple.yaml

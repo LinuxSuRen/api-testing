@@ -275,7 +275,17 @@ function headerChange() {
     const header = testCaseWithSuite.value.data.request.header
     let lastItem = header[header.length - 1]
     if (lastItem.key !== '') {
-        header.push({
+        testCaseWithSuite.value.data.request.header.push({
+            key: '',
+            value: ''
+        })
+    }
+}
+function expectedHeaderChange() {
+    const header = testCaseWithSuite.value.data.response.header
+    let lastItem = header[header.length - 1]
+    if (lastItem.key !== '') {
+        testCaseWithSuite.value.data.response.header.push({
             key: '',
             value: ''
         })
@@ -283,6 +293,32 @@ function headerChange() {
 }
 
 const radio1 = ref('1')
+const pupularHeaders = ref([] as Pair[])
+const requestOptions = {
+        method: 'POST'
+    };
+    fetch('/server.Runner/PopularHeaders', requestOptions)
+        .then(response => response.json())
+        .then(e => {
+            pupularHeaders.value = e.data
+        })
+const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
+    const results = queryString
+    ? pupularHeaders.value.filter(createFilter(queryString))
+    : pupularHeaders.value
+
+    results.forEach(e => {
+        e.value = e.key
+    })
+    cb(results)
+}
+const createFilter = (queryString: string) => {
+  return (v: Pair) => {
+    return (
+        v.key.toLowerCase().indexOf(queryString.toLowerCase()) !== -1
+    )
+  }
+}
 </script>
 
 <template>
@@ -306,7 +342,12 @@ const radio1 = ref('1')
                         <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
                             <el-table-column label="Key" width="180">
                                 <template #default="scope">
-                                    <el-input v-model="scope.row.key" placeholder="Key" @change="headerChange" />
+                                    <el-autocomplete
+                                        v-model="scope.row.key"
+                                        :fetch-suggestions="queryPupularHeaders"
+                                        placeholder="Key"
+                                        @change="headerChange"
+                                    />
                                 </template>
                             </el-table-column>
                             <el-table-column label="Value">
@@ -345,7 +386,7 @@ const radio1 = ref('1')
                         <el-table :data="testCaseWithSuite.data.response.header" style="width: 100%">
                             <el-table-column label="Key" width="180">
                                 <template #default="scope">
-                                    <el-input v-model="scope.row.key" placeholder="Key" @change="headerChange" />
+                                    <el-input v-model="scope.row.key" placeholder="Key" @change="expectedHeaderChange" />
                                 </template>
                             </el-table-column>
                             <el-table-column label="Value">
