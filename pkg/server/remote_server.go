@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"strings"
 
+	_ "embed"
+
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -401,6 +403,19 @@ func (s *server) Sample(ctx context.Context, in *Empty) (reply *HelloReply, err 
 	reply = &HelloReply{Message: sample.TestSuiteGitLab}
 	return
 }
+
+// PopularHeaders returns a list of popular headers
+func (s *server) PopularHeaders(ctx context.Context, in *Empty) (pairs *Pairs, err error) {
+	pairs = &Pairs{
+		Data: []*Pair{},
+	}
+
+	err = yaml.Unmarshal([]byte(popularHeaders), &pairs.Data)
+	return
+}
+
+//go:embed data/headers.yaml
+var popularHeaders string
 
 func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (testcases []testing.TestCase) {
 	reg, matchErr := regexp.Compile(`(.*?\{\{.*\.\w*.*?\}\})`)

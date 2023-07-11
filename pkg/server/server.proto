@@ -22,6 +22,8 @@ service Runner {
     rpc CreateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
+
+    rpc PopularHeaders(Empty) returns (Pairs) {}
 }
 
 message Suites {
@@ -113,6 +115,10 @@ message TestCaseResult {
 message Pair {
   string key = 1;
   string value = 2;
+}
+
+message Pairs {
+  repeated Pair data = 1;
 }
 
 message Empty {
