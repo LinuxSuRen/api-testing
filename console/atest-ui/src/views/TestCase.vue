@@ -4,6 +4,7 @@ import type { TabsPaneContext } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
+import _ from 'lodash';
 
 const props = defineProps({
     name: String,
@@ -53,12 +54,41 @@ function sendRequest() {
             }
             if (e.body !== '') {
                 testResult.value.bodyObject = JSON.parse(e.body)
+
+                console.log(flattenObject(testResult.value.bodyObject))
+                console.log(Object.getOwnPropertyNames(flattenObject(testResult.value.bodyObject)))
             }
         }).catch(e => {
             requestLoading.value = false
             ElMessage.error('Oops, ' + e)
             testResult.value.bodyObject = JSON.parse(e.body)
         });
+}
+
+const queryBodyFields = (queryString: string, cb: any) => {
+    if (!testResult.value.bodyObject || !flattenObject(testResult.value.bodyObject)) {
+        cb([])
+        return
+    }
+    const keys = Object.getOwnPropertyNames(flattenObject(testResult.value.bodyObject))
+    if (keys.length <= 0) {
+        cb([])
+        return
+    }
+
+    const pairs = [] as Pair[]
+    keys.forEach(e => {
+        pairs.push({
+            key: e,
+            value: e,
+        } as Pair)
+    });
+
+    const results = queryString
+        ? pairs.filter(createFilter(queryString))
+        : pairs
+    // call callback function to return suggestions
+    cb(results)
 }
 
 interface Pair {
@@ -319,6 +349,41 @@ const createFilter = (queryString: string) => {
     )
   }
 }
+
+function flattenObject(obj: any): any {
+  function _flattenPairs(obj: any, prefix: string): [string, any][] {
+    if (!_.isObject(obj)) {
+      return [prefix, obj];
+    }
+
+    return _.toPairs(obj).reduce((final: [string, any][], nPair: [string, any]) => {
+      const flattened = _flattenPairs(nPair[1], `${prefix}.${nPair[0]}`);
+      if (flattened.length === 2 && !_.isObject(flattened[0]) && !_.isObject(flattened[1])) {
+        return final.concat([flattened as [string, any]]);
+      } else {
+        return final.concat(flattened);
+      }
+    }, []);
+  }
+
+  if (!_.isObject(obj)) {
+    return JSON.stringify(obj);
+  }
+
+  const pairs: [string, any][] = _.toPairs(obj).reduce((final: [string, any][], pair: [string, any]) => {
+    const flattened = _flattenPairs(pair[1], pair[0]);
+    if (flattened.length === 2 && !_.isObject(flattened[0]) && !_.isObject(flattened[1])) {
+      return final.concat([flattened as [string, any]]);
+    } else {
+      return final.concat(flattened);
+    }
+  }, []);
+
+  return pairs.reduce((acc: any, pair: [string, any]) => {
+    acc[pair[0]] = pair[1];
+    return acc;
+  }, {});
+}
 </script>
 
 <template>
@@ -403,7 +468,13 @@ const createFilter = (queryString: string) => {
                         <el-table :data="testCaseWithSuite.data.response.bodyFieldsExpect" style="width: 100%">
                             <el-table-column label="Key" width="180">
                                 <template #default="scope">
-                                    <el-input v-model="scope.row.key" placeholder="Key" @change="bodyFiledExpectChange" />
+                                    <el-autocomplete
+                                        v-model="scope.row.key"
+                                        :fetch-suggestions="queryBodyFields"
+                                        clearable
+                                        placeholder="Key"
+                                        @change="bodyFiledExpectChange"
+                                    />
                                 </template>
                             </el-table-column>
                             <el-table-column label="Value">
