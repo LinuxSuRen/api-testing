@@ -2,7 +2,7 @@
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
-import type { FormInstance } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 
 const props = defineProps({
     name: String,
@@ -62,6 +62,12 @@ const testCaseForm = reactive({
     name: "",
     api: "",
 })
+const rules = reactive<FormRules<Suite>>({
+  name: [
+    { required: true, message: 'Please input TestCase name', trigger: 'blur' },
+  ]
+})
+
 function openNewTestCaseDialog() {
     loadTestSuites()
     dialogVisible.value = true
@@ -80,32 +86,36 @@ function loadTestSuites() {
       });
 }
 
-const submitForm = (formEl: FormInstance | undefined) => {
+const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  suiteCreatingLoading.value = true
+  await formEl.validate((valid: boolean, fields) => {
+    if (valid) {
+      suiteCreatingLoading.value = true
 
-  const requestOptions = {
-    method: 'POST',
-    body: JSON.stringify({
-        suiteName: testCaseForm.suiteName,
-        data: {
-            name: testCaseForm.name,
-            request: {
-                api: testCaseForm.api,
-                method: "GET",
-            }
-        },
-    })
-  };
+      const requestOptions = {
+        method: 'POST',
+        body: JSON.stringify({
+            suiteName: testCaseForm.suiteName,
+            data: {
+                name: testCaseForm.name,
+                request: {
+                    api: testCaseForm.api,
+                    method: "GET",
+                }
+            },
+        })
+      };
 
-  fetch('/server.Runner/CreateTestCase', requestOptions)
-      .then(response => response.json())
-      .then(() => {
-        suiteCreatingLoading.value = false
-        emit('updated', 'hello from child')
-      });
-      
-  dialogVisible.value = false
+      fetch('/server.Runner/CreateTestCase', requestOptions)
+          .then(response => response.json())
+          .then(() => {
+            suiteCreatingLoading.value = false
+            emit('updated', 'hello from child')
+          });
+          
+      dialogVisible.value = false
+    }
+  })
 }
 
 function del() {
@@ -147,6 +157,8 @@ const testSuiteList = ref([])
     <template #footer>
       <span class="dialog-footer">
         <el-form
+          :rules="rules"
+          :model="testCaseForm"
           ref="testcaseFormRef"
           status-icon
           label-width="120px"
