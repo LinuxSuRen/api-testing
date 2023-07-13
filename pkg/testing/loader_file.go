@@ -112,14 +112,16 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 			l.parent = path.Dir(absPath)
 		}
 		newSuiteFile := path.Join(l.parent, fmt.Sprintf("%s.yaml", name))
-		fmt.Println("new suite file:", newSuiteFile)
+		if newSuiteFile, err = filepath.Abs(newSuiteFile); err == nil {
+			fmt.Println("new suite file:", newSuiteFile)
 
-		suite := &TestSuite{
-			Name: name,
-			API:  api,
-		}
-		if err = SaveTestSuiteToFile(suite, newSuiteFile); err == nil {
-			l.Put(newSuiteFile)
+			suite := &TestSuite{
+				Name: name,
+				API:  api,
+			}
+			if err = SaveTestSuiteToFile(suite, newSuiteFile); err == nil {
+				l.Put(newSuiteFile)
+			}
 		}
 	}
 	return
