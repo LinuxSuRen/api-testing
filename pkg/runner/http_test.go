@@ -442,6 +442,43 @@ func TestContextKey(t *testing.T) {
 	assert.Empty(t, ContextKey("fake").GetContextValueOrEmpty(ctx))
 }
 
+func TestBodyFiledsVerify(t *testing.T) {
+	tests := []struct {
+		name       string
+		bodyFields map[string]interface{}
+		body       string
+		hasErr     bool
+	}{{
+		name: "normal",
+		bodyFields: map[string]interface{}{
+			"name":   "linuxsuren",
+			"number": 1,
+		},
+		body:   genericBody,
+		hasErr: false,
+	}, {
+		name: "field not found",
+		bodyFields: map[string]interface{}{
+			"project": "",
+		},
+		body:   genericBody,
+		hasErr: true,
+	}, {
+		name: "number is not equal",
+		bodyFields: map[string]interface{}{
+			"number": 2,
+		},
+		body:   genericBody,
+		hasErr: true,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := bodyFieldsVerify(tt.bodyFields, []byte(tt.body))
+			assert.Equal(t, tt.hasErr, err != nil, err)
+		})
+	}
+}
+
 const defaultSchemaForTest = `{"properties": {
 	"name": {"type": "string"},
 	"age": {"type": "integer"}

@@ -339,26 +339,8 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseBo
 		}
 	}
 
-	for key, expectVal := range expect.BodyFieldsExpect {
-		var val interface{}
-
-		result := gjson.Get(string(responseBodyData), key)
-		if result.Exists() {
-			val = result.Value()
-
-			if !reflect.DeepEqual(expectVal, val) {
-				if reflect.TypeOf(expectVal).Kind() == reflect.Int {
-					if strings.Compare(fmt.Sprintf("%v", expectVal), fmt.Sprintf("%v", val)) == 0 {
-						continue
-					}
-				}
-				err = fmt.Errorf("field[%s] expect value: %v, actual: %v", key, expectVal, val)
-				return
-			}
-		} else {
-			err = fmt.Errorf("not found field: %s", key)
-			return
-		}
+	if err = bodyFieldsVerify(expect.BodyFieldsExpect, responseBodyData); err != nil {
+		return
 	}
 
 	for _, verify := range expect.Verify {
@@ -379,6 +361,41 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseBo
 			fmt.Println(err)
 			break
 		}
+	}
+	return
+}
+
+func bodyFieldsVerify(bodyFieldsExpect map[string]interface{}, responseBodyData []byte) (err error) {
+	for key, expectVal := range bodyFieldsExpect {
+		result := gjson.Get(string(responseBodyData), key)
+		if result.Exists() {
+			err = valueCompare(expectVal, result, key)
+		} else {
+			err = fmt.Errorf("not found field: %s", key)
+		}
+
+		if err != nil {
+			break
+		}
+	}
+	return
+}
+
+func valueCompare(expect interface{}, acutalResult gjson.Result, key string) (err error) {
+	var actual interface{}
+	actual = acutalResult.Value()
+
+	if !reflect.DeepEqual(expect, actual) {
+		switch acutalResult.Type {
+		case gjson.Number:
+			expect = fmt.Sprintf("%v", expect)
+			actual = fmt.Sprintf("%v", actual)
+
+			if strings.Compare(expect.(string), actual.(string)) == 0 {
+				return
+			}
+		}
+		err = fmt.Errorf("field[%s] expect value: '%v', actual: '%v'", key, expect, actual)
 	}
 	return
 }
