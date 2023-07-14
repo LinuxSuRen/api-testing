@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import TestCase from './views/TestCase.vue'
 import TestSuite from './views/TestSuite.vue'
+import TemplateFunctions from './views/TemplateFunctions.vue'
 import { reactive, ref, watch } from 'vue'
 import { ElTree } from 'element-plus'
 import type { FormInstance } from 'element-plus'
@@ -200,6 +201,8 @@ const viewName = ref('testcase')
       </span>
     </template>
   </el-dialog>
+
+  <TemplateFunctions/>
 </template>
 
 <style scoped>

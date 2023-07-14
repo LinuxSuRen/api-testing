@@ -2,6 +2,7 @@ package render
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -85,4 +86,71 @@ func TestRenderThenPrint(t *testing.T) {
 			assert.Equal(t, tt.expect, tt.buf.String())
 		})
 	}
+}
+
+func TestFuncGenerator(t *testing.T) {
+	tests := []struct {
+		name     string
+		funcName string
+		fields   string
+		expect   string
+	}{{
+		name:     "randomKubernetesName",
+		funcName: "randomKubernetesName",
+		expect:   `{{randomKubernetesName}}`,
+	}, {
+		name:     "generateJSONString",
+		funcName: "generateJSONString",
+		fields:   "name, age",
+		expect:   `{{generateJSONString "name" "age"}}`,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			funcs := GetAdvancedFuncs()
+			for _, f := range funcs {
+				if f.FuncName == tt.funcName {
+					buf := new(bytes.Buffer)
+					ctx := context.Background()
+					ctx = context.WithValue(ctx, ContextBufferKey, buf)
+					err := f.Generator(ctx, tt.fields)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expect, buf.String())
+				}
+			}
+		})
+	}
+}
+
+func TestGoDogGenerator(t *testing.T) {
+	tests := []struct {
+		name       string
+		goDogExper string
+		fields     string
+		expect     string
+	}{{
+		name:       "randomKubernetesName",
+		goDogExper: `^生成随机字符串，长度 (.*)$`,
+		fields:     `3`,
+		expect:     `{{randAlpha 3}}`,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			funcs := GetAdvancedFuncs()
+			for _, f := range funcs {
+				if f.GoDogExper == tt.goDogExper {
+					buf := new(bytes.Buffer)
+					ctx := context.Background()
+					ctx = context.WithValue(ctx, ContextBufferKey, buf)
+					err := f.Generator(ctx, tt.fields)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expect, buf.String())
+				}
+			}
+		})
+	}
+}
+
+func TestGenerateJSONString(t *testing.T) {
+	result := generateJSONString([]string{"name", "age"})
+	assert.Equal(t, `{"age":"random","name":"random"}`, result)
 }
