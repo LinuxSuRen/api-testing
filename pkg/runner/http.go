@@ -17,7 +17,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
-	unstructured "github.com/linuxsuren/unstructured/pkg"
+	"github.com/tidwall/gjson"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -341,20 +341,22 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseBo
 
 	for key, expectVal := range expect.BodyFieldsExpect {
 		var val interface{}
-		var ok bool
-		if val, ok, err = unstructured.NestedField(bodyMap, strings.Split(key, "/")...); err != nil {
-			err = fmt.Errorf("failed to get field: %s, %v", key, err)
-			return
-		} else if !ok {
-			err = fmt.Errorf("not found field: %s", key)
-			return
-		} else if !reflect.DeepEqual(expectVal, val) {
-			if reflect.TypeOf(expectVal).Kind() == reflect.Int {
-				if strings.Compare(fmt.Sprintf("%v", expectVal), fmt.Sprintf("%v", val)) == 0 {
-					continue
+
+		result := gjson.Get(string(responseBodyData), key)
+		if result.Exists() {
+			val = result.Value()
+
+			if !reflect.DeepEqual(expectVal, val) {
+				if reflect.TypeOf(expectVal).Kind() == reflect.Int {
+					if strings.Compare(fmt.Sprintf("%v", expectVal), fmt.Sprintf("%v", val)) == 0 {
+						continue
+					}
 				}
+				err = fmt.Errorf("field[%s] expect value: %v, actual: %v", key, expectVal, val)
+				return
 			}
-			err = fmt.Errorf("field[%s] expect value: %v, actual: %v", key, expectVal, val)
+		} else {
+			err = fmt.Errorf("not found field: %s", key)
 			return
 		}
 	}

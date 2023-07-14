@@ -206,14 +206,14 @@ func TestTestCase(t *testing.T) {
 			Request: fooRequst,
 			Expect: atest.Response{
 				BodyFieldsExpect: map[string]interface{}{
-					"items[1]": "bar",
+					"0.items": "bar",
 				},
 			},
 		},
 		prepare: defaultPrepare,
 		verify: func(t *testing.T, output interface{}, err error) {
 			assert.NotNil(t, err)
-			assert.Contains(t, err.Error(), "failed to get field")
+			assert.Contains(t, err.Error(), "not found field")
 		},
 	},
 		{
