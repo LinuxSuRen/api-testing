@@ -1,3 +1,4 @@
 #!/bin/sh
 
 make test-all
+cd console/atest-ui && npm run format

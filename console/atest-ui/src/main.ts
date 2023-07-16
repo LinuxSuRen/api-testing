@@ -10,7 +10,7 @@ import 'element-plus/dist/index.css'
 const app = createApp(App)
 
 app.use(ElementPlus, {
-    locale: zhCn,
+  locale: zhCn
 })
 // app.use(router)
 
