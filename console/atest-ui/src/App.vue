@@ -2,7 +2,7 @@
 import TestCase from './views/TestCase.vue'
 import TestSuite from './views/TestSuite.vue'
 import { reactive, ref, watch } from 'vue'
-import { ElTree } from "element-plus"
+import ElTree from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { Edit } from '@element-plus/icons-vue'
 
@@ -17,33 +17,33 @@ const testCaseName = ref('')
 const testSuite = ref('')
 const handleNodeClick = (data: Tree) => {
   if (data.children) {
-    viewName.value = "testsuite"
+    viewName.value = 'testsuite'
     testSuite.value = data.label
 
     const requestOptions = {
-        method: 'POST',
-        body: JSON.stringify({
-            name: data.label,
-        })
-    };
+      method: 'POST',
+      body: JSON.stringify({
+        name: data.label
+      })
+    }
     fetch('/server.Runner/ListTestCase', requestOptions)
-        .then(response => response.json())
-        .then(d => {
-          if (d.items && d.items.length > 0) {
-            data.children=[]
-            d.items.forEach((item: any) => {
-              data.children?.push({
-                id: data.label+item.name,
-                label: item.name,
-                parent: data.label,
-              } as Tree)
-            })
-          }
-        })
+      .then((response) => response.json())
+      .then((d) => {
+        if (d.items && d.items.length > 0) {
+          data.children = []
+          d.items.forEach((item: any) => {
+            data.children?.push({
+              id: data.label + item.name,
+              label: item.name,
+              parent: data.label
+            } as Tree)
+          })
+        }
+      })
   } else {
     testCaseName.value = data.label
     testSuite.value = data.parent
-    viewName.value = "testcase"
+    viewName.value = 'testcase'
   }
 }
 
@@ -53,46 +53,46 @@ const currentNodekey = ref('')
 
 function loadTestSuites() {
   const requestOptions = {
-      method: 'POST'
-  };
+    method: 'POST'
+  }
   fetch('/server.Runner/GetSuites', requestOptions)
-      .then(response => response.json())
-      .then(d => {
-        data.value = [] as Tree[]
-        if (!d.data) {
-          return
-        }
-        Object.keys(d.data).map(k => {
-          let suite = {
-            id: k,
-            label: k,
-            children: [] as Tree[],
-          } as Tree
+    .then((response) => response.json())
+    .then((d) => {
+      data.value = [] as Tree[]
+      if (!d.data) {
+        return
+      }
+      Object.keys(d.data).map((k) => {
+        let suite = {
+          id: k,
+          label: k,
+          children: [] as Tree[]
+        } as Tree
 
-          d.data[k].data.forEach((item: any) => {
-            suite.children?.push({
-              id: k+item,
-              label: item,
-              parent: k,
-            } as Tree)
-          })
-          data.value.push(suite)
+        d.data[k].data.forEach((item: any) => {
+          suite.children?.push({
+            id: k + item,
+            label: item,
+            parent: k
+          } as Tree)
         })
+        data.value.push(suite)
+      })
 
-        if (data.value.length > 0) {
-          const firstItem = data.value[0]
-          if (firstItem.children && firstItem.children.length > 0) {
-            const child = firstItem.children[0].id
-  
-            currentNodekey.value = child
-            treeRef.value!.setCurrentKey(child)
-            treeRef.value!.setCheckedKeys([child], false)
-          }
-          
-          viewName.value = "testsuite"
-          testSuite.value = firstItem.label
+      if (data.value.length > 0) {
+        const firstItem = data.value[0]
+        if (firstItem.children && firstItem.children.length > 0) {
+          const child = firstItem.children[0].id
+
+          currentNodekey.value = child
+          treeRef.value!.setCurrentKey(child)
+          treeRef.value!.setCheckedKeys([child], false)
         }
-      });
+
+        viewName.value = 'testsuite'
+        testSuite.value = firstItem.label
+      }
+    })
 }
 loadTestSuites()
 
@@ -100,8 +100,8 @@ const dialogVisible = ref(false)
 const suiteCreatingLoading = ref(false)
 const suiteFormRef = ref<FormInstance>()
 const testSuiteForm = reactive({
-  name: "",
-  api: "",
+  name: '',
+  api: ''
 })
 
 function openTestSuiteCreateDialog() {
@@ -115,18 +115,18 @@ const submitForm = (formEl: FormInstance | undefined) => {
   const requestOptions = {
     method: 'POST',
     body: JSON.stringify({
-        name: testSuiteForm.name,
-        api: testSuiteForm.api,
+      name: testSuiteForm.name,
+      api: testSuiteForm.api
     })
-  };
+  }
 
   fetch('/server.Runner/CreateTestSuite', requestOptions)
-      .then(response => response.json())
-      .then(() => {
-        suiteCreatingLoading.value = false
-        loadTestSuites()
-      });
-      
+    .then((response) => response.json())
+    .then(() => {
+      suiteCreatingLoading.value = false
+      loadTestSuites()
+    })
+
   dialogVisible.value = false
 }
 
@@ -149,20 +149,31 @@ const viewName = ref('testcase')
         <el-button type="primary" @click="openTestSuiteCreateDialog" :icon="Edit">New</el-button>
         <el-input v-model="filterText" placeholder="Filter keyword" />
 
-        <el-tree :data="data"
+        <el-tree
+          :data="data"
           highlight-current
-          :check-on-click-node=true
-          :expand-on-click-node=false
+          :check-on-click-node="true"
+          :expand-on-click-node="false"
           :current-node-key="currentNodekey"
           ref="treeRef"
           node-key="id"
           :filter-node-method="filterTestCases"
-          @node-click="handleNodeClick" />
+          @node-click="handleNodeClick"
+        />
       </el-aside>
 
       <el-main>
-        <TestCase v-if="viewName === 'testcase'" :suite="testSuite" :name="testCaseName" @updated="loadTestSuites"/>
-        <TestSuite v-else-if="viewName === 'testsuite'" :name="testSuite" @updated="loadTestSuites"/>
+        <TestCase
+          v-if="viewName === 'testcase'"
+          :suite="testSuite"
+          :name="testCaseName"
+          @updated="loadTestSuites"
+        />
+        <TestSuite
+          v-else-if="viewName === 'testsuite'"
+          :name="testSuite"
+          @updated="loadTestSuites"
+        />
       </el-main>
     </el-container>
   </div>
@@ -170,12 +181,7 @@ const viewName = ref('testcase')
   <el-dialog v-model="dialogVisible" title="Create Test Suite" width="30%" draggable>
     <template #footer>
       <span class="dialog-footer">
-        <el-form
-          ref="suiteFormRef"
-          status-icon
-          label-width="120px"
-          class="demo-ruleForm"
-        >
+        <el-form ref="suiteFormRef" status-icon label-width="120px" class="demo-ruleForm">
           <el-form-item label="Name" prop="name">
             <el-input v-model="testSuiteForm.name" />
           </el-form-item>
@@ -183,7 +189,12 @@ const viewName = ref('testcase')
             <el-input v-model="testSuiteForm.api" placeholder="http://foo" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm(suiteFormRef)" :loading="suiteCreatingLoading">Submit</el-button>
+            <el-button
+              type="primary"
+              @click="submitForm(suiteFormRef)"
+              :loading="suiteCreatingLoading"
+              >Submit</el-button
+            >
           </el-form-item>
         </el-form>
       </span>
