@@ -23,6 +23,6 @@ type Writer interface {
 	GetTestSuite(name string, full bool) (suite TestSuite, err error)
 	CreateSuite(name, api string) (err error)
 	GetSuite(name string) (*TestSuite, string, error)
-	UpdateSuite(name, api string) (err error)
+	UpdateSuite(TestSuite) (err error)
 	DeleteSuite(name string) (err error)
 }

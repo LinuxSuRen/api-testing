@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	atesting "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,10 +63,13 @@ func defaultVerify(t *testing.T, loader atest.Loader) {
 func TestSuite(t *testing.T) {
 	t.Run("create suite", func(t *testing.T) {
 		writer := atest.NewFileWriter(os.TempDir())
-		err := writer.CreateSuite("test", "http://test")
+		err := writer.CreateSuite("test", urlTest)
 		assert.NoError(t, err)
 
-		err = writer.UpdateSuite("test", "http://fake")
+		err = writer.UpdateSuite(atest.TestSuite{
+			Name: "test",
+			API:  urlFake,
+		})
 		assert.NoError(t, err)
 
 		var suite *atest.TestSuite
@@ -73,9 +77,9 @@ func TestSuite(t *testing.T) {
 		suite, absPath, err = writer.GetSuite("test")
 		assert.NoError(t, err)
 		assert.NotEmpty(t, absPath)
-		assert.Equal(t, "http://fake", suite.API)
+		assert.Equal(t, urlFake, suite.API)
 
-		err = writer.CreateSuite("fake", "http://fake")
+		err = writer.CreateSuite("fake", urlFake)
 		assert.NoError(t, err)
 
 		err = writer.CreateSuite("fake", "")
@@ -96,25 +100,38 @@ func TestSuite(t *testing.T) {
 
 	t.Run("create case", func(t *testing.T) {
 		writer := atest.NewFileWriter(os.TempDir())
-		err := writer.CreateSuite("test", "http://test")
+		err := writer.CreateSuite("test", urlTest)
 		assert.NoError(t, err)
 
 		err = writer.CreateTestCase("test", atest.TestCase{
 			Name: "login",
 			Request: atest.Request{
-				API: "http://test/login",
+				API: urlTestLogin,
 			},
 		})
 		assert.NoError(t, err)
 
+		var suite atest.TestSuite
+		suite, err = writer.GetTestSuite("test", false)
+		if assert.NoError(t, err) {
+			assert.Equal(t, "test", suite.Name)
+			assert.Equal(t, urlTest, suite.API)
+		}
+
 		err = writer.UpdateTestCase("test", atest.TestCase{
 			Name: "login",
 			Request: atest.Request{
-				API:    "http://test/login",
+				API:    urlTestLogin,
 				Method: http.MethodPost,
 			},
 		})
 		assert.NoError(t, err)
+
+		var testcase atesting.TestCase
+		testcase, err = writer.GetTestCase("test", "login")
+		if assert.NoError(t, err) {
+			assert.Equal(t, urlTestLogin, testcase.Request.API)
+		}
 
 		err = writer.DeleteTestCase("test", "login")
 		assert.NoError(t, err)
@@ -126,3 +143,7 @@ func TestSuite(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+const urlFake = "http://fake"
+const urlTest = "http://test"
+const urlTestLogin = "http://test/login"

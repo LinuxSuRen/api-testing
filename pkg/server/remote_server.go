@@ -12,6 +12,7 @@ import (
 
 	_ "embed"
 
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -202,6 +203,24 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 		result = &TestSuite{
 			Name: suite.Name,
 			Api:  suite.API,
+			Spec: &APISpec{
+				Kind: suite.Spec.Kind,
+				Url:  suite.Spec.URL,
+			},
+		}
+	}
+	return
+}
+
+func convertToTestingTestSuite(in *TestSuite) (suite *testing.TestSuite) {
+	suite = &testing.TestSuite{
+		Name: in.Name,
+		API:  in.Api,
+	}
+	if in.Spec != nil {
+		suite.Spec = testing.APISpec{
+			Kind: in.Spec.Kind,
+			URL:  in.Spec.Url,
 		}
 	}
 	return
@@ -209,7 +228,7 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 
 func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
-	err = s.loader.UpdateSuite(in.Name, in.Api)
+	err = s.loader.UpdateSuite(*convertToTestingTestSuite(in))
 	return
 }
 
@@ -411,6 +430,40 @@ func (s *server) PopularHeaders(ctx context.Context, in *Empty) (pairs *Pairs, e
 	}
 
 	err = yaml.Unmarshal([]byte(popularHeaders), &pairs.Data)
+	return
+}
+
+// GetSuggestedAPIs returns a list of suggested APIs
+func (s *server) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity) (reply *TestCases, err error) {
+	reply = &TestCases{}
+
+	var suite *testing.TestSuite
+	if suite, _, err = s.loader.GetSuite(in.Name); err != nil {
+		return
+	}
+
+	if suite == nil || suite.Spec.URL == "" {
+		return
+	}
+
+	reply.Data = []*TestCase{{
+		Request: &Request{},
+	}}
+
+	var swaggerAPI *apispec.Swagger
+	if swaggerAPI, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil {
+		for api, item := range swaggerAPI.Paths {
+			for method, oper := range item {
+				reply.Data = append(reply.Data, &TestCase{
+					Name: oper.OperationId,
+					Request: &Request{
+						Api:    api,
+						Method: strings.ToUpper(method),
+					},
+				})
+			}
+		}
+	}
 	return
 }
 

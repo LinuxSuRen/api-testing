@@ -2,7 +2,6 @@ package remote
 
 import (
 	context "context"
-	"fmt"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"google.golang.org/grpc"
@@ -76,71 +75,6 @@ func convertToGRPCTestCase(testcase testing.TestCase) (result *TestCase) {
 	return
 }
 
-func convertToNormalTestCase(testcase *TestCase) (result testing.TestCase) {
-	result = testing.TestCase{
-		Name: testcase.Name,
-	}
-	if testcase.Request != nil {
-		result.Request = testing.Request{
-			API:    testcase.Request.Api,
-			Method: testcase.Request.Method,
-			Body:   testcase.Request.Body,
-			Header: pairToMap(testcase.Request.Header),
-			Query:  pairToMap(testcase.Request.Query),
-			Form:   pairToMap(testcase.Request.Form),
-		}
-	}
-	if testcase.Response != nil {
-		result.Expect = testing.Response{
-			Body:             testcase.Response.Body,
-			StatusCode:       int(testcase.Response.StatusCode),
-			Schema:           testcase.Response.Schema,
-			Verify:           testcase.Response.Verify,
-			Header:           pairToMap(testcase.Response.Header),
-			BodyFieldsExpect: pairToInterMap(testcase.Response.BodyFieldsExpect),
-		}
-	}
-	return
-}
-
-func mapToPair(data map[string]string) (pairs []*Pair) {
-	pairs = make([]*Pair, 0)
-	for k, v := range data {
-		pairs = append(pairs, &Pair{
-			Key:   k,
-			Value: v,
-		})
-	}
-	return
-}
-
-func mapInterToPair(data map[string]interface{}) (pairs []*Pair) {
-	pairs = make([]*Pair, 0)
-	for k, v := range data {
-		pairs = append(pairs, &Pair{
-			Key:   k,
-			Value: fmt.Sprintf("%v", v),
-		})
-	}
-	return
-}
-
-func pairToMap(pairs []*Pair) (data map[string]string) {
-	data = make(map[string]string)
-	for _, pair := range pairs {
-		data[pair.Key] = pair.Value
-	}
-	return
-}
-
-func pairToInterMap(pairs []*Pair) (data map[string]interface{}) {
-	data = make(map[string]interface{})
-	for _, pair := range pairs {
-		data[pair.Key] = pair.Value
-	}
-	return
-}
-
 func (g *gRPCLoader) ListTestCase(suite string) (testcases []testing.TestCase, err error) {
 	var testCases *TestCases
 	testCases, err = g.client.ListTestCases(context.Background(), &TestSuite{
@@ -196,10 +130,7 @@ func (g *gRPCLoader) ListTestSuite() (suites []testing.TestSuite, err error) {
 	items, err = g.client.ListTestSuite(context.Background(), &Empty{})
 	if err == nil && items != nil {
 		for _, item := range items.Data {
-			suites = append(suites, testing.TestSuite{
-				Name: item.Name,
-				API:  item.Api,
-			})
+			suites = append(suites, *convertToNormalTestSuite(item))
 		}
 	}
 	return
@@ -238,18 +169,12 @@ func (g *gRPCLoader) GetSuite(name string) (reply *testing.TestSuite, _ string, 
 		return
 	}
 
-	reply = &testing.TestSuite{
-		Name: suite.Name,
-		API:  suite.Api,
-	}
+	reply = convertToNormalTestSuite(suite)
 	return
 }
 
-func (g *gRPCLoader) UpdateSuite(name, api string) (err error) {
-	_, err = g.client.UpdateTestSuite(context.Background(), &TestSuite{
-		Name: name,
-		Api:  api,
-	})
+func (g *gRPCLoader) UpdateSuite(suite testing.TestSuite) (err error) {
+	_, err = g.client.UpdateTestSuite(context.Background(), convertToGRPCTestSuite(&suite))
 	return
 }
 

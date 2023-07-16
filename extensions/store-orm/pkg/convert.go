@@ -63,6 +63,10 @@ func ConvertToDBTestSuite(suite *remote.TestSuite) (result *TestSuite) {
 		Name: suite.Name,
 		API:  suite.Api,
 	}
+	if suite.Spec != nil {
+		result.SpecKind = suite.Spec.Kind
+		result.SpecURL = suite.Spec.Url
+	}
 	return
 }
 
@@ -70,6 +74,10 @@ func ConvertToGRPCTestSuite(suite *TestSuite) (result *remote.TestSuite) {
 	result = &remote.TestSuite{
 		Name: suite.Name,
 		Api:  suite.API,
+		Spec: &remote.APISpec{
+			Kind: suite.SpecKind,
+			Url:  suite.SpecURL,
+		},
 	}
 	return
 }

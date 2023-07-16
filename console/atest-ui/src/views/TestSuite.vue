@@ -3,18 +3,23 @@ import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
+import type { Suite, TestCase } from './types'
+import { NewSuggestedAPIsQuery } from './types'
 
 const props = defineProps({
     name: String,
 })
 const emit = defineEmits(['updated'])
+let querySuggestedAPIs = NewSuggestedAPIsQuery(props.name!)
 
-interface Suite {
-    name: string;
-    api: string;
-}
-
-const suite = ref({} as Suite)
+const suite = ref({
+    name: "",
+    api: "",
+    spec: {
+        kind: "",
+        url: "",
+    }
+} as Suite)
 function load() {
     const requestOptions = {
         method: 'POST',
@@ -25,10 +30,7 @@ function load() {
     fetch('/server.Runner/GetTestSuite', requestOptions)
         .then(response => response.json())
         .then(e => {
-            suite.value = {
-                name: e.name,
-                api: e.api,
-            } as Suite
+            suite.value = e
         }).catch(e => {
             ElMessage.error('Oops, ' + e)
         });
@@ -61,6 +63,7 @@ const testCaseForm = reactive({
     suiteName: "",
     name: "",
     api: "",
+    method: "GET",
 })
 const rules = reactive<FormRules<Suite>>({
   name: [
@@ -69,21 +72,8 @@ const rules = reactive<FormRules<Suite>>({
 })
 
 function openNewTestCaseDialog() {
-    loadTestSuites()
     dialogVisible.value = true
-}
-
-function loadTestSuites() {
-  const requestOptions = {
-      method: 'POST'
-  };
-  fetch('/server.Runner/GetSuites', requestOptions)
-      .then(response => response.json())
-      .then(d => {
-        Object.keys(d.data).map(k => {
-          testSuiteList.value.push(k)
-        })
-      });
+    querySuggestedAPIs = NewSuggestedAPIsQuery(props.name!)
 }
 
 const submitForm = async (formEl: FormInstance | undefined) => {
@@ -95,7 +85,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       const requestOptions = {
         method: 'POST',
         body: JSON.stringify({
-            suiteName: testCaseForm.suiteName,
+            suiteName: props.name,
             data: {
                 name: testCaseForm.name,
                 request: {
@@ -139,13 +129,36 @@ function del() {
 }
 
 const suiteCreatingLoading = ref(false)
-const testSuiteList = ref([])
+
+const apiSpecKinds = [
+    {
+        value: 'swagger',
+        label: 'Swagger',
+    },
+    {
+        value: 'openapi',
+        label: 'OpenAPI',
+    }
+]
+
+const handleAPISelect = (item: TestCase) => {
+    if (testCaseForm.method === "") {
+        testCaseForm.method = item.request.method
+    }
+    if (testCaseForm.name === "") {
+        testCaseForm.name = item.name
+    }
+}
 </script>
 
 <template>
     <div class="common-layout">
         <el-text class="mx-1" type="primary">{{suite.name}}</el-text>
         <el-input class="mx-1" v-model="suite.api" placeholder="API"></el-input>
+        <el-select v-model="suite.spec.kind" class="m-2" placeholder="API Spec Kind" size="middle">
+            <el-option v-for="item in apiSpecKinds" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+        <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
 
         <el-button type="primary" @click="save">Save</el-button>
         <el-button type="primary" @click="del">Delete</el-button>
@@ -164,21 +177,25 @@ const testSuiteList = ref([])
           label-width="120px"
           class="demo-ruleForm"
         >
-          <el-form-item label="Suite" prop="suite">
-            <el-select class="m-2" v-model="testCaseForm.suiteName" placeholder="Select" size="large">
-                <el-option
-                v-for="item in testSuiteList"
-                :key="item"
-                :label="item"
-                :value="item"
-                />
-            </el-select>
-          </el-form-item>
           <el-form-item label="Name" prop="name">
             <el-input v-model="testCaseForm.name" />
           </el-form-item>
+          <el-form-item label="Method" prop="method">
+            <el-input v-model="testCaseForm.method" />
+          </el-form-item>
           <el-form-item label="API" prop="api">
-            <el-input v-model="testCaseForm.api" placeholder="http://foo" />
+            <el-autocomplete
+                v-model="testCaseForm.api"
+                :fetch-suggestions="querySuggestedAPIs"
+                @select="handleAPISelect"
+                placeholder="API Address"
+                style="width: 70%; margin-left: 5px; margin-right: 5px;"
+            >
+                <template #default="{ item }">
+                    <div class="value">{{ item.request.method }}</div>
+                    <span class="link">{{ item.request.api }}</span>
+                </template>
+            </el-autocomplete>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="submitForm(testcaseFormRef)" :loading="suiteCreatingLoading">Submit</el-button>

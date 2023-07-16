@@ -21,9 +21,11 @@ run-image:
 	docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing:master
 run-server:
 	go run . server --local-storage 'sample/*.yaml' --console-path console/atest-ui/dist
-copy: build
+run-console:
+	cd console/atest-ui && npm run dev
+copy:
 	sudo cp bin/atest /usr/local/bin/
-copy-restart: build
+copy-restart: build-embed-ui
 	atest service stop
 	make copy
 	atest service restart
@@ -38,6 +40,9 @@ test-store-orm:
 	go test github.com/linuxsuren/api-testing/extensions/store-orm/./... -cover -v -coverprofile=store-orm-coverage.out
 	go tool cover -func=store-orm-coverage.out
 test-all: test test-collector test-store-orm
+
+install-precheck:
+	cp .github/pre-commit .git/hooks/pre-commit
 
 grpc:
 	protoc --go_out=. --go_opt=paths=source_relative \

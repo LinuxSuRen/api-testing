@@ -24,6 +24,7 @@ service Runner {
     rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
 
     rpc PopularHeaders(Empty) returns (Pairs) {}
+    rpc GetSuggestedAPIs(TestSuiteIdentity) returns (TestCases) {}
 }
 
 message Suites {
@@ -42,6 +43,12 @@ message TestCaseIdentity {
 message TestSuite {
   string name = 1;
   string api = 2;
+  APISpec spec = 3;
+}
+
+message APISpec {
+    string kind = 1;
+    string url = 2;
 }
 
 message TestSuiteIdentity {
@@ -77,6 +84,10 @@ message Suite {
 message TestCaseWithSuite {
   string suiteName = 1;
   TestCase data = 2;
+}
+
+message TestCases {
+  repeated TestCase data = 1;
 }
 
 message TestCase {
