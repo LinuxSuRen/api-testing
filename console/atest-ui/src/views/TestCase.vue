@@ -311,6 +311,18 @@ function bodyTypeChange(e: number) {
   }
 }
 
+function jsonForamt() {
+  if (bodyType.value !== 5) {
+    return
+  }
+
+  try {
+    testCaseWithSuite.value.data.request.body = JSON.stringify(JSON.parse(testCaseWithSuite.value.data.request.body), null, 4)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 function insertOrUpdateIntoMap(pair: Pair, pairs: Pair[]) {
   const index = pairs.findIndex((e) => e.key === pair.key)
   if (index === -1) {
@@ -459,6 +471,7 @@ function flattenObject(obj: any): any {
               :autosize="{ minRows: 4, maxRows: 8 }"
               type="textarea"
               placeholder="Please input"
+              @change="jsonForamt"
             />
             <el-table :data="testCaseWithSuite.data.request.form" style="width: 100%" v-if="bodyType === 4">
               <el-table-column label="Key" width="180">
