@@ -33,6 +33,19 @@ func TestCreateFunctionCommand(t *testing.T) {
 		verify: func(t *testing.T, output string) {
 			assert.Equal(t, "No such function\n", output)
 		},
+	}, {
+		name: "query functions, not found",
+		args: []string{"func", "--feature", `unknown`},
+		verify: func(t *testing.T, output string) {
+			assert.Equal(t, "\n", output)
+		},
+	}, {
+		name: "query functions, not found",
+		args: []string{"func", "--feature", `生成对象，字段包含 name`},
+		verify: func(t *testing.T, output string) {
+			assert.Equal(t, `{{generateJSONString "name"}}
+`, output)
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

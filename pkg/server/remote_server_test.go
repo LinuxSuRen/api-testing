@@ -448,6 +448,27 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	}
 }
 
+func TestFunctionsQuery(t *testing.T) {
+	ctx := context.Background()
+	server := getRemoteServerInTempDir()
+
+	t.Run("match exactly", func(t *testing.T) {
+		reply, err := server.FunctionsQuery(ctx, &SimpleQuery{Name: "randNumeric"})
+		if assert.NoError(t, err) {
+			assert.Equal(t, 1, len(reply.Data))
+			assert.Equal(t, "randNumeric", reply.Data[0].Key)
+			assert.Equal(t, "func(int) string", reply.Data[0].Value)
+		}
+	})
+
+	t.Run("ignore letter case", func(t *testing.T) {
+		reply, err := server.FunctionsQuery(ctx, &SimpleQuery{Name: "randnumer"})
+		if assert.NoError(t, err) {
+			assert.Equal(t, 1, len(reply.Data))
+		}
+	})
+}
+
 func getRemoteServerInTempDir() (server RunnerServer) {
 	writer := atesting.NewFileWriter(os.TempDir())
 	server = NewRemoteServer(writer)

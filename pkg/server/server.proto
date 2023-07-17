@@ -25,6 +25,7 @@ service Runner {
 
     rpc PopularHeaders(Empty) returns (Pairs) {}
     rpc GetSuggestedAPIs(TestSuiteIdentity) returns (TestCases) {}
+    rpc FunctionsQuery(SimpleQuery) returns (Pairs) {}
 }
 
 message Suites {
@@ -130,6 +131,10 @@ message Pair {
 
 message Pairs {
   repeated Pair data = 1;
+}
+
+message SimpleQuery {
+  string name = 1;
 }
 
 message Empty {
