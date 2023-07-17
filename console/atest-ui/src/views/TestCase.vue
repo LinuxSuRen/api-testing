@@ -76,7 +76,7 @@ const queryBodyFields = (queryString: string, cb: any) => {
     } as Pair)
   })
 
-  const results = queryString ? pairs.filter(createFilter(queryString)) : pairs
+  const results = queryString ? pairs.filter(CreateFilter(queryString)) : pairs
   // call callback function to return suggestions
   cb(results)
 }
