@@ -152,6 +152,19 @@ function load() {
         e.response.statusCode = 200
       }
 
+      e.request.header.forEach(item => {
+        if (item.key === "Content-Type") {
+          switch (item.value) {
+            case 'application/x-www-form-urlencoded':
+              bodyType.value = 4
+              break
+            case 'application/json':
+              bodyType.value = 5
+              break
+          }
+        }
+      });
+
       testCaseWithSuite.value = {
         suiteName: suite,
         data: e
@@ -243,7 +256,7 @@ function bodyFiledExpectChange() {
     data.push({
       key: '',
       value: ''
-    })
+    } as Pair)
   }
 }
 
@@ -254,7 +267,7 @@ function headerChange() {
     testCaseWithSuite.value.data.request.header.push({
       key: '',
       value: ''
-    })
+    } as Pair)
   }
 }
 function expectedHeaderChange() {
@@ -264,11 +277,52 @@ function expectedHeaderChange() {
     testCaseWithSuite.value.data.response.header.push({
       key: '',
       value: ''
-    })
+    } as Pair)
+  }
+}
+function formChange() {
+  const form = testCaseWithSuite.value.data.request.form
+  let lastItem = form[form.length - 1]
+  if (lastItem.key !== '') {
+    testCaseWithSuite.value.data.request.form.push({
+      key: '',
+      value: ''
+    } as Pair)
   }
 }
 
-const radio1 = ref('1')
+const bodyType = ref(1)
+function bodyTypeChange(e: number) {
+  let contentType = ""
+  switch (e) {
+    case 4:
+      contentType = 'application/x-www-form-urlencoded'
+      break;
+    case 5:
+      contentType = 'application/json'
+      break;
+  }
+
+  if (contentType !== "") {
+    testCaseWithSuite.value.data.request.header = insertOrUpdateIntoMap({
+        key: 'Content-Type',
+        value: contentType
+      } as Pair, testCaseWithSuite.value.data.request.header)
+  }
+}
+
+function insertOrUpdateIntoMap(pair: Pair, pairs: Pair[]) {
+  const index = pairs.findIndex((e) => e.key === pair.key)
+  if (index === -1) {
+    const oldPairs = pairs
+    pairs = [pair]
+    pairs = pairs.concat(oldPairs)
+  } else {
+    pairs[index] = pair
+  }
+  return pairs
+}
+
 const pupularHeaders = ref([] as Pair[])
 const requestOptions = {
   method: 'POST'
@@ -347,7 +401,7 @@ function flattenObject(obj: any): any {
           <el-option
             v-for="item in options"
             :key="item.value"
-            :label="item.label"
+            :label="item.key"
             :value="item.value"
           />
         </el-select>
@@ -391,19 +445,35 @@ function flattenObject(obj: any): any {
           </el-tab-pane>
 
           <el-tab-pane label="Body" name="third">
-            <el-radio-group v-model="radio1">
+            <el-radio-group v-model="bodyType" @change="bodyTypeChange">
               <el-radio :label="1">none</el-radio>
               <el-radio :label="2">form-data</el-radio>
               <el-radio :label="3">raw</el-radio>
               <el-radio :label="4">x-www-form-urlencoded</el-radio>
+              <el-radio :label="5">JSON</el-radio>
             </el-radio-group>
 
             <el-input
+              v-if="bodyType === 3 || bodyType === 5"
               v-model="testCaseWithSuite.data.request.body"
               :autosize="{ minRows: 4, maxRows: 8 }"
               type="textarea"
               placeholder="Please input"
             />
+            <el-table :data="testCaseWithSuite.data.request.form" style="width: 100%" v-if="bodyType === 4">
+              <el-table-column label="Key" width="180">
+                <template #default="scope">
+                  <el-input v-model="scope.row.key" placeholder="Key" @change="formChange"/>
+                </template>
+              </el-table-column>
+              <el-table-column label="Value">
+                <template #default="scope">
+                  <div style="display: flex; align-items: center">
+                    <el-input v-model="scope.row.value" placeholder="Value" />
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
           </el-tab-pane>
 
           <el-tab-pane label="Expected" name="expected">

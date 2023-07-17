@@ -106,8 +106,8 @@ export function GetHTTPMethods() {
       key: 'GET'
     },
     {
-      key: 'POST',
-      label: 'POST'
+      value: 'POST',
+      key: 'POST'
     },
     {
       value: 'DELETE',

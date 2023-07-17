@@ -2,7 +2,7 @@
 import TestCase from './views/TestCase.vue'
 import TestSuite from './views/TestSuite.vue'
 import { reactive, ref, watch } from 'vue'
-import ElTree from 'element-plus'
+import { ElTree } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { Edit } from '@element-plus/icons-vue'
 
@@ -150,7 +150,7 @@ const viewName = ref('testcase')
         <el-input v-model="filterText" placeholder="Filter keyword" />
 
         <el-tree
-          :data="data"
+          :data=data
           highlight-current
           :check-on-click-node="true"
           :expand-on-click-node="false"
