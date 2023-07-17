@@ -434,7 +434,7 @@ func TestPopularHeaders(t *testing.T) {
 
 	pairs, err := server.PopularHeaders(ctx, &Empty{})
 	if assert.NoError(t, err) {
-		assert.Equal(t, 4, len(pairs.Data))
+		assert.Equal(t, 5, len(pairs.Data))
 	}
 }
 
