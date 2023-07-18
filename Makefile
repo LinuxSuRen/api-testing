@@ -33,13 +33,18 @@ copy-restart: build-embed-ui
 test:
 	go test ./... -cover -v -coverprofile=coverage.out
 	go tool cover -func=coverage.out
+test-ui:
+	cd console/atest-ui && npm run test:unit
+test-e2e:
+	cd console/atest-ui && npm run test:e2e
 test-collector:
 	go test github.com/linuxsuren/api-testing/extensions/collector/./... -cover -v -coverprofile=collector-coverage.out
 	go tool cover -func=collector-coverage.out
 test-store-orm:
 	go test github.com/linuxsuren/api-testing/extensions/store-orm/./... -cover -v -coverprofile=store-orm-coverage.out
 	go tool cover -func=store-orm-coverage.out
-test-all: test test-collector test-store-orm
+test-all-backend: test test-collector test-store-orm
+test-all: test-all-backend test-ui
 
 install-precheck:
 	cp .github/pre-commit .git/hooks/pre-commit
