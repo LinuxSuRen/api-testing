@@ -370,6 +370,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           class="m-2"
           placeholder="Method"
           size="middle"
+          test-id="case-editor-method"
         >
           <el-option
             v-for="item in options"
