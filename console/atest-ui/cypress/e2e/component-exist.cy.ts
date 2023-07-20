@@ -27,14 +27,17 @@ describe('Suite Manage', () => {
 
     cy.get('[test-id="open-new-case-dialog"]').click()
     cy.get('[test-id="case-form-name"]').should('be.visible').type(caseName)
-    cy.get('[test-id="case-form-method"]').clear().type(caseMethod)
+    const methodSelector = cy.get('[test-id="case-form-method"]').clear()
+    methodSelector.type(caseMethod)
+
     cy.get('[test-id="case-form-api"]').should('be.visible').type(caseAPI)
     cy.get('[test-id="case-form-submit"]').click()
   })
 
   it('Find Case', () => {
     cy.visit('/')
-    cy.get('[test-id="search"]').type(caseName).trigger('keydown', {key: 'Enter'})
+    const searchInput = cy.get('[test-id="search"]').type(caseName)
+    searchInput.trigger('keydown', {key: 'Enter'})
 
     // select the target case
     cy.get('span').contains(caseName).should('be.visible').click()
@@ -52,10 +55,10 @@ describe('Suite Manage', () => {
 })
 
 function userID_Alpha() {
-  var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  let text = "";
+  let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-  for (var i = 0; i < 10; i++)
+  for (let i = 0; i < 10; i++)
     text += possible.charAt(Math.floor(Math.random() * possible.length));
 
   return text;
