@@ -9,7 +9,7 @@ build-embed-ui:
 	cp console/atest-ui/dist/index.html cmd/data/index.html
 	cp console/atest-ui/dist/assets/*.js cmd/data/index.js
 	cp console/atest-ui/dist/assets/*.css cmd/data/index.css
-	go build -ldflags "-w -s" -o bin/atest main.go
+	go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(git rev-parse --short HEAD)" -o bin/atest main.go
 	echo -n '' > cmd/data/index.html
 	echo -n '' > cmd/data/index.js
 	echo -n '' > cmd/data/index.css

@@ -20,7 +20,10 @@ jobs:
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         run: |
-          bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.out --force-coverage-parser go
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r collector-coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-orm-coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) final
       - name: API Test
         run: |
           make build copy
