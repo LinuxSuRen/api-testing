@@ -90,7 +90,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
             name: testCaseForm.name,
             request: {
               api: testCaseForm.api,
-              method: 'GET'
+              method: testCaseForm.method
             }
           }
         })
@@ -155,7 +155,7 @@ const handleAPISelect = (item: TestCase) => {
 <template>
   <div class="common-layout">
     <el-text class="mx-1" type="primary">{{ suite.name }}</el-text>
-    <el-input class="mx-1" v-model="suite.api" placeholder="API"></el-input>
+    <el-input class="mx-1" v-model="suite.api" placeholder="API" test-id="suite-editor-api"></el-input>
     <el-select v-model="suite.spec.kind" class="m-2" placeholder="API Spec Kind" size="middle">
       <el-option
         v-for="item in apiSpecKinds"
@@ -167,9 +167,9 @@ const handleAPISelect = (item: TestCase) => {
     <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
 
     <el-button type="primary" @click="save">Save</el-button>
-    <el-button type="primary" @click="del">Delete</el-button>
+    <el-button type="primary" @click="del" test-id="suite-del-but">Delete</el-button>
 
-    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit">New TestCase</el-button>
+    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">New TestCase</el-button>
   </div>
 
   <el-dialog v-model="dialogVisible" title="Create Test Case" width="40%" draggable>
@@ -184,10 +184,10 @@ const handleAPISelect = (item: TestCase) => {
           class="demo-ruleForm"
         >
           <el-form-item label="Name" prop="name">
-            <el-input v-model="testCaseForm.name" />
+            <el-input v-model="testCaseForm.name" test-id="case-form-name"/>
           </el-form-item>
           <el-form-item label="Method" prop="method">
-            <el-input v-model="testCaseForm.method" />
+            <el-input v-model="testCaseForm.method" test-id="case-form-method" />
           </el-form-item>
           <el-form-item label="API" prop="api">
             <el-autocomplete
@@ -196,6 +196,7 @@ const handleAPISelect = (item: TestCase) => {
               @select="handleAPISelect"
               placeholder="API Address"
               style="width: 100%; margin-left: 5px; margin-right: 5px"
+              test-id="case-form-api"
             >
               <template #default="{ item }">
                 <div class="value">{{ item.request.method }}</div>
@@ -208,6 +209,7 @@ const handleAPISelect = (item: TestCase) => {
               type="primary"
               @click="submitForm(testcaseFormRef)"
               :loading="suiteCreatingLoading"
+              test-id="case-form-submit"
               >Submit</el-button
             >
           </el-form-item>

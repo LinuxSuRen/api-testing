@@ -147,8 +147,8 @@ const viewName = ref('testcase')
   <div class="common-layout">
     <el-container style="height: 100vh">
       <el-aside width="200px">
-        <el-button type="primary" @click="openTestSuiteCreateDialog" :icon="Edit">New</el-button>
-        <el-input v-model="filterText" placeholder="Filter keyword" />
+        <el-button type="primary" @click="openTestSuiteCreateDialog" test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
+        <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
 
         <el-tree
           :data=data
@@ -184,16 +184,17 @@ const viewName = ref('testcase')
       <span class="dialog-footer">
         <el-form ref="suiteFormRef" status-icon label-width="120px" class="demo-ruleForm">
           <el-form-item label="Name" prop="name">
-            <el-input v-model="testSuiteForm.name" />
+            <el-input v-model="testSuiteForm.name" test-id="suite-form-name" />
           </el-form-item>
           <el-form-item label="API" prop="api">
-            <el-input v-model="testSuiteForm.api" placeholder="http://foo" />
+            <el-input v-model="testSuiteForm.api" placeholder="http://foo" test-id="suite-form-api" />
           </el-form-item>
           <el-form-item>
             <el-button
               type="primary"
               @click="submitForm(suiteFormRef)"
               :loading="suiteCreatingLoading"
+              test-id="suite-form-submit"
               >Submit</el-button
             >
           </el-form-item>
