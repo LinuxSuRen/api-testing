@@ -116,6 +116,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	if err == nil {
 		mux.HandlePath("GET", "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath("GET", "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
+		mux.HandlePath("GET", "/healthz", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+			w.Write([]byte("ok"))
+		})
 		o.httpServer.WithHandler(mux)
 		err = o.httpServer.Serve(httplis)
 	}
