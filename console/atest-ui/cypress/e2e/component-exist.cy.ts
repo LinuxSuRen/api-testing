@@ -27,7 +27,8 @@ describe('Suite Manage', () => {
 
     cy.get('[test-id="open-new-case-dialog"]').click()
     cy.get('[test-id="case-form-name"]').should('be.visible').type(caseName)
-    const methodSelector = cy.get('[test-id="case-form-method"]').clear()
+    const methodSelector = cy.get('[test-id="case-form-method"]')
+    methodSelector.clear()
     methodSelector.type(caseMethod)
 
     cy.get('[test-id="case-form-api"]').should('be.visible').type(caseAPI)
@@ -36,7 +37,8 @@ describe('Suite Manage', () => {
 
   it('Find Case', () => {
     cy.visit('/')
-    const searchInput = cy.get('[test-id="search"]').type(caseName)
+    const searchInput = cy.get('[test-id="search"]')
+    searchInput.type(caseName)
     searchInput.trigger('keydown', {key: 'Enter'})
 
     // select the target case
@@ -56,7 +58,7 @@ describe('Suite Manage', () => {
 
 function userID_Alpha() {
   let text = "";
-  let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
   for (let i = 0; i < 10; i++)
     text += possible.charAt(Math.floor(Math.random() * possible.length));
