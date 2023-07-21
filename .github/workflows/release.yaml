@@ -40,6 +40,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
 
+  Test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18.x
+      - uses: actions/checkout@v3.0.0
+      - name: Unit Test
+        run: |
+          make test-all-backend
+      - name: Report
+        if: github.actor == 'linuxsuren'
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: |
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r collector-coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-orm-coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+
   image:
     runs-on: ubuntu-20.04
     steps:
