@@ -11,7 +11,7 @@ spec:
   strategy:
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: api-testing
@@ -33,12 +33,25 @@ spec:
       containers:
       - image: ghcr.io/linuxsuren/api-testing
         name: server
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 1
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 1
+          periodSeconds: 5
         resources:
           limits:
-            cpu: "1"
-            memory: 1Gi
+            cpu: 500m
+            memory: 512Mi
           requests:
-            cpu: "100m"
+            cpu: 100m
             memory: 100m
 ---
 apiVersion: v1
@@ -47,10 +60,14 @@ metadata:
   name: api-testing
 spec:
   ports:
-  - name: server
+  - name: grpc
     port: 7070
     protocol: TCP
     targetPort: 7070
+  - name: web
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
   selector:
     app: api-testing
   sessionAffinity: None

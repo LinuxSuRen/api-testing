@@ -16,7 +16,7 @@ There are multiple storage backend supported: See the status from the list:
 Local storage is the built-in solution. You can run it with the following command:
 
 ```shell
-podman run -p 8080:8080 ghcr.io/linuxsuren/api-testing:master
+podman run --pull always -p 8080:8080 ghcr.io/linuxsuren/api-testing:master
 
 # The default local storage directory is: /var/www/sample
 # You can find the test case YAML files in it.
@@ -27,6 +27,11 @@ or, you can run the CLI in terminal like this:
 
 ```shell
 atest server --local-storage 'sample/*.yaml' --console-path console/atest-ui/dist
+```
+
+using the host network mode if you want to connect to your local environment:
+```shell
+podman run --pull always --network host ghcr.io/linuxsuren/api-testing:master
 ```
 
 ### ORM DataBase Storage
