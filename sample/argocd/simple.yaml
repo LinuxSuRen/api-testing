@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api-testing
+  namespace: argocd
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: sample/kubernetes
+    repoURL: https://github.com/LinuxSuRen/api-testing
+    targetRevision: master
+    # see also https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/
+    kustomize:
+      images:
+      - ghcr.io/linuxsuren/api-testing=ghcr.io/linuxsuren/api-testing:master
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    - RespectIgnoreDifferences=true
+    automated:
+      prune: true
+      selfHeal: true

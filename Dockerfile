@@ -1,5 +1,6 @@
 FROM golang:1.18 AS builder
 
+ARG VERSION
 ARG GOPROXY
 WORKDIR /workspace
 COPY cmd/ cmd/
@@ -17,9 +18,9 @@ COPY README.md README.md
 COPY LICENSE LICENSE
 
 RUN GOPROXY=${GOPROXY} go mod download
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest .
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}" -o atest .
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}" -o atest-collector extensions/collector/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}" -o atest-store-orm extensions/store-orm/main.go
 
 FROM node:20-alpine3.17 AS ui
 

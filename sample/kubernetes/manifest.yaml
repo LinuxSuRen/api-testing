@@ -33,6 +33,7 @@ spec:
       containers:
       - image: ghcr.io/linuxsuren/api-testing
         name: server
+        imagePullPolicy: Always
         resources:
           limits:
             cpu: "1"
@@ -47,10 +48,14 @@ metadata:
   name: api-testing
 spec:
   ports:
-  - name: server
+  - name: grpc
     port: 7070
     protocol: TCP
     targetPort: 7070
+  - name: web
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
   selector:
     app: api-testing
   sessionAffinity: None

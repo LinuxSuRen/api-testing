@@ -16,7 +16,9 @@ build-embed-ui:
 goreleaser:
 	goreleaser build --rm-dist --snapshot
 build-image:
-	${IMG_TOOL} build -t ghcr.io/linuxsuren/api-testing:master . --build-arg GOPROXY=https://goproxy.cn,direct
+	${IMG_TOOL} build -t ghcr.io/linuxsuren/api-testing:master . \
+		--build-arg GOPROXY=https://goproxy.cn,direct \
+		--build-arg VERSION=$(git describe --abbrev=0 --tags)-$(git rev-parse --short HEAD)
 run-image:
 	docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing:master
 run-server:
