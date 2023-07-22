@@ -1,5 +1,5 @@
 #!api-testing
-# yaml-language-server: $schema=https://gitee.com/linuxsuren/api-testing/raw/master/sample/api-testing-schema.json
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
 # see also https://github.com/answerdev/answer
 # start via docker run -d -p 9080:80 -v answer-data:/data --name answer answerdev/answer:1.1.0
 name: Answer
