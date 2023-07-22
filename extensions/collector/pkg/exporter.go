@@ -69,7 +69,7 @@ func (e *SampleExporter) Add(reqAndResp *RequestAndResponse) {
 }
 
 var prefix = `#!api-testing
-# yaml-language-server: $schema=https://gitee.com/linuxsuren/api-testing/raw/master/sample/api-testing-schema.json
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
 `
 
 // Export exports the test suite
