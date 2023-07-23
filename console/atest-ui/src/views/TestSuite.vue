@@ -3,7 +3,7 @@ import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import type { Suite, TestCase } from './types'
+import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery } from './types'
 
 const props = defineProps({
@@ -15,6 +15,7 @@ let querySuggestedAPIs = NewSuggestedAPIsQuery(props.name!)
 const suite = ref({
   name: '',
   api: '',
+  param: [] as Pair[],
   spec: {
     kind: '',
     url: ''
@@ -31,6 +32,12 @@ function load() {
     .then((response) => response.json())
     .then((e) => {
       suite.value = e
+      if (suite.value.param.length === 0) {
+        suite.value.param.push({
+          key: '',
+          value: ''
+        } as Pair)
+      }
     })
     .catch((e) => {
       ElMessage.error('Oops, ' + e)
@@ -150,6 +157,17 @@ const handleAPISelect = (item: TestCase) => {
     testCaseForm.name = item.name
   }
 }
+
+function paramChange() {
+  const form = suite.value.param
+  let lastItem = form[form.length - 1]
+  if (lastItem.key !== '') {
+    suite.value.param.push({
+      key: '',
+      value: ''
+    } as Pair)
+  }
+}
 </script>
 
 <template>
@@ -165,6 +183,21 @@ const handleAPISelect = (item: TestCase) => {
       />
     </el-select>
     <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
+
+    <el-table :data="suite.param" style="width: 100%">
+      <el-table-column label="Key" width="180">
+        <template #default="scope">
+          <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="Value">
+        <template #default="scope">
+          <div style="display: flex; align-items: center">
+            <el-input v-model="scope.row.value" placeholder="Value" />
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
 
     <el-button type="primary" @click="save">Save</el-button>
     <el-button type="primary" @click="del" test-id="suite-del-but">Delete</el-button>

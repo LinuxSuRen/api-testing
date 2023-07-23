@@ -8,8 +8,9 @@ import (
 
 func convertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
 	result = &testing.TestSuite{
-		Name: suite.Name,
-		API:  suite.Api,
+		Name:  suite.Name,
+		API:   suite.Api,
+		Param: pairToMap(suite.Param),
 	}
 
 	if suite.Spec != nil {
@@ -23,8 +24,9 @@ func convertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
 
 func convertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 	result = &TestSuite{
-		Name: suite.Name,
-		Api:  suite.API,
+		Name:  suite.Name,
+		Api:   suite.API,
+		Param: mapToPair(suite.Param),
 		Spec: &APISpec{
 			Kind: suite.Spec.Kind,
 			Url:  suite.Spec.URL,
@@ -56,6 +58,29 @@ func convertToNormalTestCase(testcase *TestCase) (result testing.TestCase) {
 			Header:           pairToMap(testcase.Response.Header),
 			BodyFieldsExpect: pairToInterMap(testcase.Response.BodyFieldsExpect),
 		}
+	}
+	return
+}
+
+func convertToGRPCTestCase(testcase testing.TestCase) (result *TestCase) {
+	result = &TestCase{
+		Name: testcase.Name,
+		Request: &Request{
+			Api:    testcase.Request.API,
+			Method: testcase.Request.Method,
+			Body:   testcase.Request.Body,
+			Header: mapToPair(testcase.Request.Header),
+			Query:  mapToPair(testcase.Request.Query),
+			Form:   mapToPair(testcase.Request.Form),
+		},
+		Response: &Response{
+			Body:             testcase.Expect.Body,
+			StatusCode:       int32(testcase.Expect.StatusCode),
+			Schema:           testcase.Expect.Schema,
+			Verify:           testcase.Expect.Verify,
+			Header:           mapToPair(testcase.Expect.Header),
+			BodyFieldsExpect: mapInterToPair(testcase.Expect.BodyFieldsExpect),
+		},
 	}
 	return
 }

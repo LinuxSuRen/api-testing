@@ -347,6 +347,10 @@ func TestTestCase(t *testing.T) {
 			}
 			output, err := runner.RunTestCase(tt.testCase, tt.ctx, context.TODO())
 			tt.verify(t, output, err)
+
+			getter, ok := runner.(HTTPResponseRecord)
+			assert.True(t, ok)
+			assert.NotNil(t, getter.GetResponseRecord())
 		})
 	}
 }

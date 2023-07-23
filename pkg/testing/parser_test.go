@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	_ "embed"
@@ -19,14 +20,17 @@ func TestParse(t *testing.T) {
 		return
 	}
 
+	// make sure the sample file contains the header
+	assert.True(t, strings.HasPrefix(string(data), atest.GetHeader()))
+
 	suite, err := atest.Parse(data)
 	if assert.Nil(t, err) && assert.NotNil(t, suite) {
 		assert.Equal(t, "Gitlab", suite.Name)
-		assert.Equal(t, 2, len(suite.Items))
+		assert.Equal(t, 3, len(suite.Items))
 		assert.Equal(t, atest.TestCase{
 			Name: "projects",
 			Request: atest.Request{
-				API: "https://gitlab.com/api/v4/projects",
+				API: "/projects",
 			},
 			Expect: atest.Response{
 				StatusCode: http.StatusOK,
@@ -42,6 +46,12 @@ func TestParse(t *testing.T) {
 				Items: []string{"sleep(1)"},
 			},
 		}, suite.Items[0])
+
+		// render suite
+		data := map[string]interface{}{}
+		err = suite.Render(data)
+		assert.NoError(t, err)
+		assert.Equal(t, "https://gitlab.com/api/v4", suite.API)
 	}
 
 	_, err = atest.Parse([]byte(invalidTestCaseContent))

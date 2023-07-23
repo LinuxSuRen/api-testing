@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/linuxsuren/api-testing/pkg/testing"
 	atestpkg "github.com/linuxsuren/api-testing/pkg/testing"
 	"gopkg.in/yaml.v2"
 )
@@ -68,9 +69,7 @@ func (e *SampleExporter) Add(reqAndResp *RequestAndResponse) {
 	e.TestSuite.Items = append(e.TestSuite.Items, testCase)
 }
 
-var prefix = `#!api-testing
-# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
-`
+var prefix = testing.GetHeader()
 
 // Export exports the test suite
 func (e *SampleExporter) Export() (string, error) {

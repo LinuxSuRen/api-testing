@@ -11,7 +11,6 @@ import (
 
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/limit"
-	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/spf13/cobra"
@@ -229,11 +228,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 		return
 	}
 
-	var result string
-	if result, err = render.Render("base api", testSuite.API, dataContext); err == nil {
-		testSuite.API = result
-		testSuite.API = strings.TrimSuffix(testSuite.API, "/")
-	} else {
+	if err = testSuite.Render(dataContext); err != nil {
 		return
 	}
 

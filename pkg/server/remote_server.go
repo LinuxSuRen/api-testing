@@ -118,11 +118,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 	fmt.Printf("task kind: %s, %d to run\n", task.Kind, len(suite.Items))
 	dataContext := map[string]interface{}{}
 
-	var result string
-	if result, err = render.Render("base api", suite.API, dataContext); err == nil {
-		suite.API = result
-		suite.API = strings.TrimSuffix(suite.API, "/")
-	} else {
+	if err = suite.Render(dataContext); err != nil {
 		reply.Error = err.Error()
 		err = nil
 		return
@@ -202,8 +198,9 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 	var suite *testing.TestSuite
 	if suite, _, err = s.loader.GetSuite(in.Name); err == nil && suite != nil {
 		result = &TestSuite{
-			Name: suite.Name,
-			Api:  suite.API,
+			Name:  suite.Name,
+			Api:   suite.API,
+			Param: mapToPair(suite.Param),
 			Spec: &APISpec{
 				Kind: suite.Spec.Kind,
 				Url:  suite.Spec.URL,
@@ -215,8 +212,9 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 
 func convertToTestingTestSuite(in *TestSuite) (suite *testing.TestSuite) {
 	suite = &testing.TestSuite{
-		Name: in.Name,
-		API:  in.Api,
+		Name:  in.Name,
+		API:   in.Api,
+		Param: pairToMap(in.Param),
 	}
 	if in.Spec != nil {
 		suite.Spec = testing.APISpec{
