@@ -25,9 +25,10 @@ message TestSuites {
 message TestSuite {
     string name = 1;
     string api = 2;
-    APISpec spec = 3;
-    repeated TestCase items = 4;
-    bool full = 5;
+    repeated Pair param = 3;
+    APISpec spec = 4;
+    repeated TestCase items = 5;
+    bool full = 6;
 }
 
 message APISpec {

@@ -44,7 +44,8 @@ message TestCaseIdentity {
 message TestSuite {
   string name = 1;
   string api = 2;
-  APISpec spec = 3;
+  repeated Pair param = 3;
+  APISpec spec = 4;
 }
 
 message APISpec {

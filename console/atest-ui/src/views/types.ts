@@ -4,6 +4,7 @@ import _ from 'lodash'
 export interface Suite {
   name: string
   api: string
+  param: Pair[]
   spec: {
     kind: string
     url: string

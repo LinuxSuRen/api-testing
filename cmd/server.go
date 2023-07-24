@@ -114,11 +114,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	mux := runtime.NewServeMux()
 	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, removeServer)
 	if err == nil {
-		mux.HandlePath("GET", "/", frontEndHandlerWithLocation(o.consolePath))
-		mux.HandlePath("GET", "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
-		mux.HandlePath("GET", "/healthz", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-			w.Write([]byte("ok"))
-		})
+		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
+		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
+		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
 		o.httpServer.WithHandler(mux)
 		err = o.httpServer.Serve(httplis)
 	}
@@ -130,6 +128,9 @@ func frontEndHandlerWithLocation(consolePath string) func(w http.ResponseWriter,
 		target := r.URL.Path
 		if target == "/" {
 			target = "/index.html"
+		} else if target == "/healthz" {
+			w.Write([]byte("ok"))
+			return
 		}
 
 		var content string

@@ -2,10 +2,11 @@ package testing
 
 // TestSuite represents a set of test cases
 type TestSuite struct {
-	Name  string     `yaml:"name,omitempty" json:"name,omitempty"`
-	API   string     `yaml:"api,omitempty" json:"api,omitempty"`
-	Spec  APISpec    `yaml:"spec,omitempty" json:"spec,omitempty"`
-	Items []TestCase `yaml:"items,omitempty" json:"items,omitempty"`
+	Name  string            `yaml:"name,omitempty" json:"name,omitempty"`
+	API   string            `yaml:"api,omitempty" json:"api,omitempty"`
+	Spec  APISpec           `yaml:"spec,omitempty" json:"spec,omitempty"`
+	Param map[string]string `yaml:"param,omitempty" json:"param,omitempty"`
+	Items []TestCase        `yaml:"items,omitempty" json:"items,omitempty"`
 }
 
 type APISpec struct {
