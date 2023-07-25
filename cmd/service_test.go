@@ -143,6 +143,12 @@ func TestService(t *testing.T) {
 		targetOS:     fakeruntime.OSLinux,
 		mode:         string(ServiceModeDocker),
 		expectOutput: "",
+	}, {
+		name:         "start in podman",
+		action:       "start",
+		targetOS:     fakeruntime.OSLinux,
+		mode:         ServiceModePodman.String(),
+		expectOutput: "",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
