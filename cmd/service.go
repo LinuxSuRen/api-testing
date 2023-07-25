@@ -4,6 +4,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	_ "embed"
 
@@ -61,6 +62,10 @@ func (s serviceMode) All() []serviceMode {
 		ServiceModePodman, ServiceModeDocker}
 }
 
+func (s serviceMode) String() string {
+	return string(s)
+}
+
 func (o *serviceOption) preRunE(c *cobra.Command, args []string) (err error) {
 	if o.action == "" && len(args) > 0 {
 		o.action = args[0]
@@ -99,6 +104,7 @@ func (o *serviceOption) runE(c *cobra.Command, args []string) (err error) {
 		err = fmt.Errorf("not support action: '%s'", o.action)
 	}
 
+	output = strings.TrimSpace(output)
 	if output != "" {
 		c.Println(output)
 	}
@@ -124,12 +130,12 @@ func (a Action) All() []Action {
 
 // Service is the interface of service
 type Service interface {
-	Start() (string, error)   // start the service
-	Stop() (string, error)    // stop the service gracefully
-	Restart() (string, error) // restart the service gracefully
-	Status() (string, error)  // status of the service
-	Install() (string, error) // install the service
-	Uninstall() (string, error)
+	Start() (string, error)     // start the service
+	Stop() (string, error)      // stop the service gracefully
+	Restart() (string, error)   // restart the service gracefully
+	Status() (string, error)    // status of the service
+	Install() (string, error)   // install the service
+	Uninstall() (string, error) // uninstall the service
 }
 
 func emptyThenDefault(value, defaultValue string) string {
@@ -176,16 +182,20 @@ func (o *serviceOption) getContainerService() (service Service, err error) {
 	var client string
 	switch serviceMode(o.mode) {
 	case ServiceModeDocker:
-		client = "docker"
+		client = ServiceModeDocker.String()
 	case ServiceModePodman, ServiceModeContainer:
-		client = "podman"
+		client = ServiceModePodman.String()
 	default:
 		err = fmt.Errorf("not support mode: '%s'", o.mode)
 		return
 	}
 
-	if client, err = o.LookPath(client); err == nil {
-		service = newContainerService(o.Execer, client, o.image, o.version)
+	var clientPath string
+	if clientPath, err = o.LookPath(client); err == nil {
+		if clientPath == "" {
+			clientPath = client
+		}
+		service = newContainerService(o.Execer, clientPath, o.image, o.version)
 	}
 	return
 }
@@ -247,35 +257,38 @@ type linuxService struct {
 	commonService
 }
 
+const systemCtl = "systemctl"
+const serviceName = "atest"
+
 func (s *linuxService) Start() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("systemctl", "", "start", "atest")
+	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "start", serviceName)
 	return
 }
 
 func (s *linuxService) Stop() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("systemctl", "", "stop", "atest")
+	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "stop", serviceName)
 	return
 }
 
 func (s *linuxService) Restart() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("systemctl", "", "restart", "atest")
+	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "restart", serviceName)
 	return
 }
 
 func (s *linuxService) Status() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("systemctl", "", "status", "atest")
+	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "status", serviceName)
 	return
 }
 
 func (s *linuxService) Install() (output string, err error) {
 	if err = os.WriteFile(s.scriptPath, []byte(s.script), os.ModeAppend); err == nil {
-		output, err = s.Execer.RunCommandAndReturn("systemctl", "", "enable", "atest")
+		output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "enable", serviceName)
 	}
 	return
 }
 
 func (s *linuxService) Uninstall() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("systemctl", "", "disable", "atest")
+	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "disable", serviceName)
 	return
 }
 
@@ -296,20 +309,31 @@ func newContainerService(execer fakeruntime.Execer, client, image, tag string) (
 	if image == "" {
 		image = defaultImage
 	}
-	service = &containerService{
+
+	containerServer := &containerService{
 		Execer: execer,
 		client: client,
-		name:   "atest",
+		name:   serviceName,
 		image:  image,
 		tag:    tag,
+	}
+
+	if strings.HasSuffix(client, ServiceModePodman.String()) {
+		service = &podmanService{
+			containerService: *containerServer,
+		}
+	} else {
+		service = containerServer
 	}
 	return
 }
 
 func (s *containerService) Start() (output string, err error) {
-	err = s.Execer.SystemCall(s.client, []string{s.client, "run", "--name=" + s.name,
-		"--restart=always", "-d", "--pull=always", "--network=host",
-		s.image + ":" + s.tag}, os.Environ())
+	if s.exist() {
+		output, err = s.Execer.RunCommandAndReturn(s.client, "", "start", s.name)
+	} else {
+		err = s.Execer.SystemCall(s.client, append([]string{s.client}, s.getStartArgs()...), os.Environ())
+	}
 	return
 }
 
@@ -323,7 +347,8 @@ func (s *containerService) Restart() (output string, err error) {
 	return
 }
 
-func (s *containerService) Status() (output string, err error) {
+func (s *containerService) Status() (_ string, err error) {
+	err = s.Execer.SystemCall(s.client, []string{s.client, "stats", s.name}, os.Environ())
 	return
 }
 
@@ -334,5 +359,35 @@ func (s *containerService) Install() (output string, err error) {
 
 func (s *containerService) Uninstall() (output string, err error) {
 	output, err = s.Stop()
+	return
+}
+
+func (s *containerService) exist() bool {
+	output, err := s.Execer.RunCommandAndReturn(s.client, "", "ps", "--all", "--filter", fmt.Sprintf("name=%s", s.name))
+	return err == nil && strings.Contains(output, s.name)
+}
+
+func (s *containerService) getStartArgs() []string {
+	return []string{"run", "--name=" + s.name,
+		"--restart=always", "-d", "--pull=always", "--network=host",
+		s.image + ":" + s.tag}
+}
+
+type podmanService struct {
+	containerService
+}
+
+func (s *podmanService) Start() (output string, err error) {
+	if s.exist() {
+		output, err = s.Execer.RunCommandAndReturn(s.client, "", "start", s.name)
+	} else {
+		output, err = s.Execer.RunCommandAndReturn(s.client, "", s.getStartArgs()...)
+
+		if err == nil {
+			var result string
+			result, err = s.Execer.RunCommandAndReturn(s.client, "", "generate", "systemd", "--new", "--files", "--name", s.name)
+			output = fmt.Sprintf("%s\n%s", output, result)
+		}
+	}
 	return
 }
