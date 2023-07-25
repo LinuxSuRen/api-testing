@@ -22,8 +22,12 @@ func createServiceCommand(execer fakeruntime.Execer) (c *cobra.Command) {
 		Aliases: []string{"s"},
 		Example: `atest service install
 atest service start`,
-		Short:   "Install atest as service",
-		Long:    `It could be a native or container service`,
+		Short: "Install atest as service",
+		Long: `It could be a native or container service
+
+You could choose the alternative images:
+Sync Images: linuxsuren/api-testing
+Mirror Images: docker.m.daocloud.io/linuxsuren/api-testing`,
 		PreRunE: opt.preRunE,
 		RunE:    opt.runE,
 	}

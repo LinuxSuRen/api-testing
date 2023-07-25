@@ -1,10 +1,42 @@
 Welcome to use `atest` to improve your code quality.
 
 ## Get started
-TODO
+You can use `atest` as a CLI or other ways:
+
+* Web UI
+* [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=linuxsuren.api-testing)
+
+See also the screenshots below:
+
+![image](https://github.com/LinuxSuRen/api-testing/assets/1450685/e3404c53-34bc-4bf0-8f6a-c1873e2263a2)
+
+![image](https://github.com/LinuxSuRen/api-testing/assets/1450685/e959f560-1fb5-4592-9f45-ec883c385785)
+
+## Installation
+You can install in various methods:
+
+* CLI via `hd i atest`
+* Web server
+* [Kubernetes](https://github.com/LinuxSuRen/api-testing/tree/master/sample/kubernetes)
+* [Argo CD](https://github.com/LinuxSuRen/api-testing/blob/master/sample/argocd/simple.yaml)
+
+If you're developing APIs locally, the best way is installing it as a container service.
+Then you can access it via your browser.
+
+Currently, it supports the following kinds of services:
+
+* Operate System services
+  * Linux, and Darwin
+* Podman, and Docker
+
+Please see the following example usage:
+
+```shell
+atest service start -m podman --version master
+```
 
 ## Storage
-There are multiple storage backend supported: See the status from the list:
+There are multiple storage backends supported. See the status from the list:
 
 | Name | Status |
 |---|---|
@@ -61,6 +93,7 @@ You could find the official images from both [Docker Hub](https://hub.docker.com
 
 * `ghcr.io/linuxsuren/api-testing:latest`
 * `linuxsuren/api-testing:latest`
+* `docker.m.daocloud.io/linuxsuren/api-testing` (mirror)
 
 The tag `latest` represents the latest release version. The tag `master` represents the image of the latest master branch. We highly recommend you using a fixed version instead of those in a production environment.
 
