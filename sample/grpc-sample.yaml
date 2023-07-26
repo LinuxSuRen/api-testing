@@ -1,0 +1,32 @@
+#!api-testing
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
+# see also https://github.com/LinuxSuRen/api-testing
+name: grpc-sample
+api: 127.0.0.1:7070
+spec:
+  grpc:
+  import: ./
+  protofile: ./server.proto
+items:
+  - name: GetVersion
+    request:
+      api: Runner.GetVersion
+  - name: FunctionsQuery
+    request:
+      api: Runner.SimpleQuery
+      payload: |
+        {
+          "name": "hello"
+        }
+  - name: FunctionsQueryStream
+    request:
+      api: Runner.SimpleQueryStream
+      payload: |
+        [
+          {
+            "name": "hello"
+          },
+          {
+            "name": "title"
+          }
+        ]

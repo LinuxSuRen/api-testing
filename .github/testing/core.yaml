@@ -4,41 +4,41 @@
 name: atest
 api: http://localhost:8080/server.Runner
 items:
-- name: suites
-  request:
-    api: /GetSuites
-    method: POST
-- name: suite
-  request:
-    api: /GetTestSuite
-    method: POST
-    body: |
-      {"name": "texst"}
-  expect:
-    bodyFieldsExpect:
-      name: ""
-      api: ""
-- name: get-testcase-not-found
-  request:
-    api: /GetTestCase
-    method: POST
-    body: |
-      {"name": "texst"}
-  expect:
-    statusCode: 500
-    bodyFieldsExpect:
-      code: 2
-- name: list-testcases
-  request:
-    api: /GetTestCase
-    method: POST
-    body: |
-      {"name": "texst"}
-  expect:
-    statusCode: 500
-    bodyFieldsExpect:
-      code: 2
-- name: get-popular-headers
-  request:
-    api: /PopularHeaders
-    method: POST
+  - name: suites
+    request:
+      api: /GetSuites
+      method: POST
+  - name: suite
+    request:
+      api: /GetTestSuite
+      method: POST
+      body: |
+        {"name": "texst"}
+    expect:
+      bodyFieldsExpect:
+        name: ""
+        api: ""
+  - name: get-testcase-not-found
+    request:
+      api: /GetTestCase
+      method: POST
+      body: |
+        {"name": "texst"}
+    expect:
+      statusCode: 500
+      bodyFieldsExpect:
+        code: 2
+  - name: list-testcases
+    request:
+      api: /GetTestCase
+      method: POST
+      body: |
+        {"name": "texst"}
+    expect:
+      statusCode: 500
+      bodyFieldsExpect:
+        code: 2
+  - name: get-popular-headers
+    request:
+      api: /PopularHeaders
+      method: POST
