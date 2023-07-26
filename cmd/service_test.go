@@ -144,8 +144,14 @@ func TestService(t *testing.T) {
 		mode:         string(ServiceModeDocker),
 		expectOutput: "",
 	}, {
-		name:         "start in podman",
-		action:       "start",
+		name:         "install in podman",
+		action:       "install",
+		targetOS:     fakeruntime.OSLinux,
+		mode:         ServiceModePodman.String(),
+		expectOutput: "",
+	}, {
+		name:         "uninstall in podman",
+		action:       "uninstall",
 		targetOS:     fakeruntime.OSLinux,
 		mode:         ServiceModePodman.String(),
 		expectOutput: "",
