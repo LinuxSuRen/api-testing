@@ -21,6 +21,12 @@
                         "$ref": "#/definitions/Spec"
                     }
                 },
+                "param": {
+                    "description": "Parameters of the test suite",
+                    "type": "object",
+                    "title": "Param",
+                    "additionalProperties": true
+                },
                 "items": {
                     "type": "array",
                     "items": {

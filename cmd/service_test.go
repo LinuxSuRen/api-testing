@@ -143,6 +143,18 @@ func TestService(t *testing.T) {
 		targetOS:     fakeruntime.OSLinux,
 		mode:         string(ServiceModeDocker),
 		expectOutput: "",
+	}, {
+		name:         "install in podman",
+		action:       "install",
+		targetOS:     fakeruntime.OSLinux,
+		mode:         ServiceModePodman.String(),
+		expectOutput: "",
+	}, {
+		name:         "uninstall in podman",
+		action:       "uninstall",
+		targetOS:     fakeruntime.OSLinux,
+		mode:         ServiceModePodman.String(),
+		expectOutput: "",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

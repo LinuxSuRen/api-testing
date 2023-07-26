@@ -12,6 +12,7 @@ type gRPCLoader struct {
 	client  LoaderClient
 }
 
+// NewGRPCLoader creates a new gRPC loader
 func NewGRPCLoader(address string) (writer testing.Writer, err error) {
 	var conn *grpc.ClientConn
 	if conn, err = grpc.Dial(address, grpc.WithInsecure()); err == nil {
@@ -50,29 +51,6 @@ func (g *gRPCLoader) GetCount() int {
 
 func (g *gRPCLoader) Reset() {
 	// nothing to do
-}
-
-func convertToGRPCTestCase(testcase testing.TestCase) (result *TestCase) {
-	result = &TestCase{
-		Name: testcase.Name,
-		Request: &Request{
-			Api:    testcase.Request.API,
-			Method: testcase.Request.Method,
-			Body:   testcase.Request.Body,
-			Header: mapToPair(testcase.Request.Header),
-			Query:  mapToPair(testcase.Request.Query),
-			Form:   mapToPair(testcase.Request.Form),
-		},
-		Response: &Response{
-			Body:             testcase.Expect.Body,
-			StatusCode:       int32(testcase.Expect.StatusCode),
-			Schema:           testcase.Expect.Schema,
-			Verify:           testcase.Expect.Verify,
-			Header:           mapToPair(testcase.Expect.Header),
-			BodyFieldsExpect: mapInterToPair(testcase.Expect.BodyFieldsExpect),
-		},
-	}
-	return
 }
 
 func (g *gRPCLoader) ListTestCase(suite string) (testcases []testing.TestCase, err error) {

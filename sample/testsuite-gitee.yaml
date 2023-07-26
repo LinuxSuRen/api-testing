@@ -2,28 +2,30 @@
 # yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
 name: Gitee
 api: https://gitee.com/api/v5
+param:
+  repo: api-testing
 items:
-  - name: stargazers
-    before:
-      items:
-        - sleep(1)
-    request:
-      api: /repos/linuxsuren/api-testing/stargazers
-    expect:
-      verify:
-        - len(["data"]) > 0
-  - name: branches
-    request:
-      api: /repos/linuxsuren/api-testing/branches
-    expect:
-      verify:
-        - len(filter(data, .name == "master")) == 1
-  - name: branche
-    request:
-      api: /repos/linuxsuren/api-testing/branches/{{(index .branches 0).name}}
-    expect:
-      verify:
-        - len(data.name) > 0
+- name: stargazers
+  before:
+    items:
+    - sleep(1)
+  request:
+    api: /repos/linuxsuren/{{.param.repo}}/stargazers
+  expect:
+    verify:
+    - len(["data"]) > 0
+- name: branches
+  request:
+    api: /repos/linuxsuren/{{.param.repo}}/branches
+  expect:
+    verify:
+    - len(filter(data, .name == "master")) == 1
+- name: branch
+  request:
+    api: /repos/linuxsuren/{{.param.repo}}/branches/{{(index .branches 0).name}}
+  expect:
+    verify:
+    - len(data.name) > 0
 spec:
   kind: swagger
   url: https://gitee.com/api/v5/doc_json

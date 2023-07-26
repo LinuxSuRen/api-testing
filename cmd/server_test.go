@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -56,7 +55,7 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 	const expect404 = "404 page not found\n"
 
 	t.Run("404", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/", nil)
+		req, err := http.NewRequest(http.MethodGet, "/", nil)
 		assert.NoError(t, err)
 
 		resp := newFakeResponseWriter()
@@ -65,7 +64,7 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 	})
 
 	t.Run("get js", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/assets/index.js", nil)
+		req, err := http.NewRequest(http.MethodGet, "/assets/index.js", nil)
 		assert.NoError(t, err)
 		defer func() {
 			uiResourceJS = ""
@@ -77,17 +76,25 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 		handler(resp, req, map[string]string{})
 		assert.Equal(t, uiResourceJS, resp.GetBody().String())
 
-		fmt.Println(resp.Header())
 		assert.Equal(t, "text/javascript; charset=utf-8", resp.Header().Get(util.ContentType))
 	})
 
 	t.Run("get css", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/assets/index.css", nil)
+		req, err := http.NewRequest(http.MethodGet, "/assets/index.css", nil)
 		assert.NoError(t, err)
 
 		resp := newFakeResponseWriter()
 		handler(resp, req, map[string]string{})
 		assert.Equal(t, expect404, resp.GetBody().String())
+	})
+
+	t.Run("healthz", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, "/healthz", nil)
+		assert.NoError(t, err)
+
+		resp := newFakeResponseWriter()
+		handler(resp, req, map[string]string{})
+		assert.Equal(t, "ok", resp.GetBody().String())
 	})
 }
 

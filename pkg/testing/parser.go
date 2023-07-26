@@ -77,11 +77,34 @@ func ParseTestSuiteFromFile(suitePath string) (testSuite *TestSuite, err error) 
 	return
 }
 
+// GetHeader returns the header of the YAML config file
+func GetHeader() string {
+	return `#!api-testing
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
+`
+}
+
 // SaveTestSuiteToFile saves the test suite to file
 func SaveTestSuiteToFile(suite *TestSuite, suitePath string) (err error) {
 	var data []byte
 	if data, err = yaml.Marshal(suite); err == nil {
+		// add header
+		data = append([]byte(GetHeader()), data...)
 		err = os.WriteFile(suitePath, data, 0644)
+	}
+	return
+}
+
+// Render injects the template based context
+func (s *TestSuite) Render(dataContext map[string]interface{}) (err error) {
+	// render the API
+	var result string
+	if result, err = render.Render("base api", s.API, dataContext); err == nil {
+		s.API = result
+		s.API = strings.TrimSuffix(s.API, "/")
+		// render the parameters
+		s.Param, err = renderMap(dataContext, s.Param, "parameter")
+		dataContext["param"] = s.Param
 	}
 	return
 }
@@ -107,12 +130,8 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 	}
 
 	// template the header
-	for key, val := range r.Header {
-		if result, err = render.Render("header", val, ctx); err == nil {
-			r.Header[key] = result
-		} else {
-			return
-		}
+	if r.Header, err = renderMap(ctx, r.Header, "header"); err != nil {
+		return
 	}
 
 	// template the body
@@ -123,12 +142,8 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 	}
 
 	// template the form
-	for key, val := range r.Form {
-		if result, err = render.Render("form", val, ctx); err == nil {
-			r.Form[key] = result
-		} else {
-			return
-		}
+	if r.Form, err = renderMap(ctx, r.Form, "form"); err != nil {
+		return
 	}
 
 	// setting default values
@@ -170,6 +185,19 @@ func (r *Request) GetBody() (reader io.Reader, err error) {
 // Render renders the response
 func (r *Response) Render(ctx interface{}) (err error) {
 	r.StatusCode = ZeroThenDefault(r.StatusCode, http.StatusOK)
+	return
+}
+
+func renderMap(ctx interface{}, data map[string]string, title string) (result map[string]string, err error) {
+	var tmpVal string
+	for key, val := range data {
+		if tmpVal, err = render.Render(title, val, ctx); err == nil {
+			data[key] = tmpVal
+		} else {
+			break
+		}
+	}
+	result = data
 	return
 }
 
