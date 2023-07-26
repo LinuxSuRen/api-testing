@@ -7,6 +7,7 @@ COPY cmd/ cmd/
 COPY pkg/ pkg/
 COPY extensions/ extensions/
 COPY console/atest-ui atest-ui/
+COPY .github/testing/*.yaml sample/
 COPY sample/ sample/
 COPY docs/ docs/
 COPY go.mod go.mod
@@ -48,8 +49,8 @@ COPY --from=builder /workspace/atest-store-orm /usr/local/bin/atest-store-orm
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
-RUN mkdir -p /var/www
+RUN mkdir -p /var/www/data
 COPY --from=builder /workspace/sample /var/www/sample
 COPY --from=ui /workspace/dist /var/www/html
 
-CMD ["atest", "server", "--console-path=/var/www/html", "--local-storage=/var/www/sample/*.yaml"]
+CMD ["atest", "server", "--console-path=/var/www/html", "--local-storage=/var/www/sample/*.yaml", "--local-storage=/var/www/data/*.yaml"]

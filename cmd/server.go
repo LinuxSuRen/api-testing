@@ -39,7 +39,7 @@ func createServerCmd(gRPCServer gRPCServer, httpServer server.HTTPServer) (c *co
 	flags.IntVarP(&opt.httpPort, "http-port", "", 8080, "The HTTP server port")
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
 	flags.StringVarP(&opt.storage, "storage", "", "local", "The storage type, local or etcd")
-	flags.StringVarP(&opt.localStorage, "local-storage", "", "*.yaml", "The local storage path")
+	flags.StringArrayVarP(&opt.localStorage, "local-storage", "", []string{"*.yaml"}, "The local storage path")
 	flags.StringVarP(&opt.grpcStorage, "grpc-storage", "", "", "The grpc storage address")
 	flags.StringVarP(&opt.consolePath, "console-path", "", "", "The path of the console")
 	return
@@ -53,7 +53,7 @@ type serverOption struct {
 	httpPort     int
 	printProto   bool
 	storage      string
-	localStorage string
+	localStorage []string
 	grpcStorage  string
 	consolePath  string
 }
@@ -83,8 +83,10 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	switch o.storage {
 	case "local":
 		loader = testing.NewFileWriter("")
-		if o.localStorage != "" {
-			err = loader.Put(o.localStorage)
+		for _, storage := range o.localStorage {
+			if err = loader.Put(storage); err != nil {
+				break
+			}
 		}
 	case "grpc":
 		if o.grpcStorage == "" {
