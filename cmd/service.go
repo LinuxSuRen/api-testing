@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -54,6 +55,8 @@ type serviceOption struct {
 	fakeruntime.Execer
 	mode         string
 	localStorage string
+
+	stdOut io.Writer
 }
 
 type serviceMode string
@@ -75,6 +78,7 @@ func (s serviceMode) String() string {
 }
 
 func (o *serviceOption) preRunE(c *cobra.Command, args []string) (err error) {
+	o.stdOut = c.OutOrStdout()
 	if o.action == "" && len(args) > 0 {
 		o.action = args[0]
 	}
@@ -89,6 +93,8 @@ func (o *serviceOption) preRunE(c *cobra.Command, args []string) (err error) {
 	if o.service == nil {
 		err = fmt.Errorf("not supported service")
 		return
+	} else if err == nil {
+		err = o.Execer.MkdirAll(o.localStorage, os.ModePerm)
 	}
 	return
 }
@@ -204,7 +210,7 @@ func (o *serviceOption) getContainerService() (service Service, err error) {
 			clientPath = client
 		}
 		service = newContainerService(o.Execer, clientPath,
-			o.image, o.version, o.localStorage)
+			o.image, o.version, o.localStorage, o.stdOut)
 	}
 	return
 }
@@ -312,11 +318,13 @@ type containerService struct {
 	image        string
 	tag          string
 	localStorage string
+	stdOut       io.Writer
+	errOut       io.Writer
 }
 
 const defaultImage = "ghcr.io/linuxsuren/api-testing"
 
-func newContainerService(execer fakeruntime.Execer, client, image, tag, localStorage string) (service Service) {
+func newContainerService(execer fakeruntime.Execer, client, image, tag, localStorage string, writer io.Writer) (service Service) {
 	if tag == "" {
 		tag = "latest"
 	}
@@ -331,6 +339,8 @@ func newContainerService(execer fakeruntime.Execer, client, image, tag, localSto
 		image:        image,
 		tag:          tag,
 		localStorage: localStorage,
+		stdOut:       writer,
+		errOut:       writer,
 	}
 
 	if strings.HasSuffix(client, ServiceModePodman.String()) {
@@ -347,7 +357,6 @@ func (s *containerService) Start() (output string, err error) {
 	if s.exist() {
 		output, err = s.Execer.RunCommandAndReturn(s.client, "", "start", s.name)
 	} else {
-		fmt.Println(s.getStartArgs(), "===")
 		err = s.Execer.SystemCall(s.client, append([]string{s.client}, s.getStartArgs()...), os.Environ())
 	}
 	return
@@ -392,7 +401,7 @@ func (s *containerService) getStartArgs() []string {
 		"-d",
 		"--pull=always",
 		"--network=host",
-		"-v", s.localStorage + ":/var/www/sample",
+		"-v", s.localStorage + ":/var/www/data",
 		s.image + ":" + s.tag}
 }
 
@@ -407,14 +416,11 @@ func (s *podmanService) Install() (output string, err error) {
 
 func (s *podmanService) Start() (output string, err error) {
 	if s.exist() {
-		output, err = s.Execer.RunCommandAndReturn(s.client, "", "start", s.name)
+		err = s.Execer.RunCommandWithIO(s.client, "", s.stdOut, s.errOut, "start", s.name)
 	} else {
-		output, err = s.Execer.RunCommandAndReturn(s.client, "", s.getStartArgs()...)
+		err = s.Execer.RunCommandWithIO(s.client, "", s.stdOut, s.errOut, s.getStartArgs()...)
 		if err == nil {
-			var result string
-			if result, err = s.installService(); err == nil {
-				output = fmt.Sprintf("%s\n%s", output, result)
-			}
+			output, err = s.installService()
 		}
 	}
 	return
