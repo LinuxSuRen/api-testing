@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/linuxsuren/api-testing/extensions/store-orm/pkg"
+	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,9 +26,9 @@ func TestConvertToRemoteTestCase(t *testing.T) {
 		ExpectBodyFields: sampleJSONMap,
 		ExpectVerify:     `["one"]`,
 	})
-	assert.Equal(t, &remote.TestCase{
+	assert.Equal(t, &server.TestCase{
 		Name: "name",
-		Request: &remote.Request{
+		Request: &server.Request{
 			Api:    "api",
 			Method: "get",
 			Body:   "body",
@@ -35,7 +36,7 @@ func TestConvertToRemoteTestCase(t *testing.T) {
 			Header: samplePairs,
 			Form:   samplePairs,
 		},
-		Response: &remote.Response{
+		Response: &server.Response{
 			StatusCode:       1,
 			BodyFieldsExpect: samplePairs,
 			Verify:           []string{"one"},
@@ -48,13 +49,13 @@ func TestConvertToRemoteTestCase(t *testing.T) {
 
 func TestConverToDBTestCase(t *testing.T) {
 	t.Run("without request and response", func(t *testing.T) {
-		result := pkg.ConverToDBTestCase(&remote.TestCase{})
+		result := pkg.ConverToDBTestCase(&server.TestCase{})
 		assert.Equal(t, &pkg.TestCase{}, result)
 	})
 
 	t.Run("only have request", func(t *testing.T) {
-		result := pkg.ConverToDBTestCase(&remote.TestCase{
-			Request: &remote.Request{
+		result := pkg.ConverToDBTestCase(&server.TestCase{
+			Request: &server.Request{
 				Api:    "api",
 				Method: "get",
 				Body:   "body",
@@ -74,8 +75,8 @@ func TestConverToDBTestCase(t *testing.T) {
 	})
 
 	t.Run("only have response", func(t *testing.T) {
-		result := pkg.ConverToDBTestCase(&remote.TestCase{
-			Response: &remote.Response{
+		result := pkg.ConverToDBTestCase(&server.TestCase{
+			Response: &server.Response{
 				StatusCode:       1,
 				Body:             "body",
 				Schema:           "schema",
@@ -98,12 +99,18 @@ func TestConverToDBTestCase(t *testing.T) {
 func TestConvertTestSuite(t *testing.T) {
 	t.Run("ConvertToDBTestSuite", func(t *testing.T) {
 		result := pkg.ConvertToDBTestSuite(&remote.TestSuite{
-			Name: "name",
-			Api:  "api",
+			Name:  "name",
+			Api:   "api",
+			Param: samplePairs,
+			Spec: &server.APISpec{
+				Kind: "kind",
+			},
 		})
 		assert.Equal(t, &pkg.TestSuite{
-			Name: "name",
-			API:  "api",
+			Name:     "name",
+			API:      "api",
+			SpecKind: "kind",
+			Param:    `{"key":"value"}`,
 		}, result)
 	})
 
@@ -115,14 +122,18 @@ func TestConvertTestSuite(t *testing.T) {
 		assert.Equal(t, &remote.TestSuite{
 			Name: "name",
 			Api:  "api",
-			Spec: &remote.APISpec{},
+			Spec: &server.APISpec{},
 		}, result)
+	})
+
+	t.Run("sliceToJSON", func(t *testing.T) {
+		assert.Equal(t, "[]", pkg.SliceToJSON(nil))
 	})
 }
 
 const sampleJSONMap = `{"key":"value"}`
 
-var samplePairs []*remote.Pair = []*remote.Pair{{
+var samplePairs []*server.Pair = []*server.Pair{{
 	Key:   "key",
 	Value: "value",
 }}

@@ -3,6 +3,7 @@ package remote
 import (
 	"fmt"
 
+	server "github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
 
@@ -27,7 +28,7 @@ func convertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 		Name:  suite.Name,
 		Api:   suite.API,
 		Param: mapToPair(suite.Param),
-		Spec: &APISpec{
+		Spec: &server.APISpec{
 			Kind: suite.Spec.Kind,
 			Url:  suite.Spec.URL,
 		},
@@ -35,7 +36,7 @@ func convertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 	return
 }
 
-func convertToNormalTestCase(testcase *TestCase) (result testing.TestCase) {
+func convertToNormalTestCase(testcase *server.TestCase) (result testing.TestCase) {
 	result = testing.TestCase{
 		Name: testcase.Name,
 	}
@@ -62,10 +63,10 @@ func convertToNormalTestCase(testcase *TestCase) (result testing.TestCase) {
 	return
 }
 
-func convertToGRPCTestCase(testcase testing.TestCase) (result *TestCase) {
-	result = &TestCase{
+func convertToGRPCTestCase(testcase testing.TestCase) (result *server.TestCase) {
+	result = &server.TestCase{
 		Name: testcase.Name,
-		Request: &Request{
+		Request: &server.Request{
 			Api:    testcase.Request.API,
 			Method: testcase.Request.Method,
 			Body:   testcase.Request.Body,
@@ -73,7 +74,7 @@ func convertToGRPCTestCase(testcase testing.TestCase) (result *TestCase) {
 			Query:  mapToPair(testcase.Request.Query),
 			Form:   mapToPair(testcase.Request.Form),
 		},
-		Response: &Response{
+		Response: &server.Response{
 			Body:             testcase.Expect.Body,
 			StatusCode:       int32(testcase.Expect.StatusCode),
 			Schema:           testcase.Expect.Schema,
@@ -85,10 +86,10 @@ func convertToGRPCTestCase(testcase testing.TestCase) (result *TestCase) {
 	return
 }
 
-func mapToPair(data map[string]string) (pairs []*Pair) {
-	pairs = make([]*Pair, 0)
+func mapToPair(data map[string]string) (pairs []*server.Pair) {
+	pairs = make([]*server.Pair, 0)
 	for k, v := range data {
-		pairs = append(pairs, &Pair{
+		pairs = append(pairs, &server.Pair{
 			Key:   k,
 			Value: v,
 		})
@@ -96,10 +97,10 @@ func mapToPair(data map[string]string) (pairs []*Pair) {
 	return
 }
 
-func mapInterToPair(data map[string]interface{}) (pairs []*Pair) {
-	pairs = make([]*Pair, 0)
+func mapInterToPair(data map[string]interface{}) (pairs []*server.Pair) {
+	pairs = make([]*server.Pair, 0)
 	for k, v := range data {
-		pairs = append(pairs, &Pair{
+		pairs = append(pairs, &server.Pair{
 			Key:   k,
 			Value: fmt.Sprintf("%v", v),
 		})
@@ -107,7 +108,7 @@ func mapInterToPair(data map[string]interface{}) (pairs []*Pair) {
 	return
 }
 
-func pairToMap(pairs []*Pair) (data map[string]string) {
+func pairToMap(pairs []*server.Pair) (data map[string]string) {
 	data = make(map[string]string)
 	for _, pair := range pairs {
 		data[pair.Key] = pair.Value
@@ -115,7 +116,7 @@ func pairToMap(pairs []*Pair) (data map[string]string) {
 	return
 }
 
-func pairToInterMap(pairs []*Pair) (data map[string]interface{}) {
+func pairToInterMap(pairs []*server.Pair) (data map[string]interface{}) {
 	data = make(map[string]interface{})
 	for _, pair := range pairs {
 		data[pair.Key] = pair.Value

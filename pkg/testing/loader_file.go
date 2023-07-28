@@ -73,13 +73,16 @@ func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
 
 	for l.HasMore() {
 		var data []byte
-		if data, err = l.Load(); err != nil {
+		var loadErr error
+		if data, loadErr = l.Load(); err != nil {
+			fmt.Println("failed to load data", loadErr)
 			continue
 		}
 
 		var testSuite *TestSuite
-		if testSuite, err = Parse(data); err != nil {
-			return
+		if testSuite, loadErr = Parse(data); loadErr != nil {
+			fmt.Println("failed to parse data", loadErr)
+			continue
 		}
 		suites = append(suites, *testSuite)
 	}

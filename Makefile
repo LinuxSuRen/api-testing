@@ -52,13 +52,11 @@ install-precheck:
 	cp .github/pre-commit .git/hooks/pre-commit
 
 grpc:
-	protoc --go_out=. --go_opt=paths=source_relative \
+	protoc --proto_path=. \
+	--go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    pkg/server/server.proto
-
-	protoc --go_out=. --go_opt=paths=source_relative \
-    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    pkg/testing/remote/loader.proto
+    pkg/server/server.proto \
+	pkg/testing/remote/loader.proto
 grpc-gw:
 	protoc -I . --grpc-gateway_out . \
     --grpc-gateway_opt logtostderr=true \

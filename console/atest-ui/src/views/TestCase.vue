@@ -9,7 +9,8 @@ import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } fr
 
 const props = defineProps({
   name: String,
-  suite: String
+  suite: String,
+  store: String
 })
 const emit = defineEmits(['updated'])
 
@@ -23,6 +24,9 @@ function sendRequest() {
   const suite = props.suite
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
     body: JSON.stringify({
       suite: suite,
       testcase: name
@@ -114,6 +118,9 @@ function load() {
 
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
     body: JSON.stringify({
       suite: suite,
       testcase: name
@@ -198,6 +205,9 @@ function saveTestCase() {
 
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
     body: JSON.stringify(testCaseWithSuite.value)
   }
   fetch('/server.Runner/UpdateTestCase', requestOptions).then((e) => {
@@ -218,6 +228,9 @@ function deleteTestCase() {
   const suite = props.suite
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
     body: JSON.stringify({
       suite: suite,
       testcase: name
@@ -336,7 +349,10 @@ function insertOrUpdateIntoMap(pair: Pair, pairs: Pair[]) {
 
 const pupularHeaders = ref([] as Pair[])
 const requestOptions = {
-  method: 'POST'
+  method: 'POST',
+  headers: {
+    'X-Store-Name': props.store
+  },
 }
 fetch('/server.Runner/PopularHeaders', requestOptions)
   .then((response) => response.json())

@@ -10,17 +10,19 @@ import (
 )
 
 func TestCreateRunCommand(t *testing.T) {
+	execer := fakeruntime.FakeExecer{}
+
 	cmd := createRunCommand()
 	assert.Equal(t, "run", cmd.Use)
 
-	init := createInitCommand(fakeruntime.FakeExecer{})
+	init := createInitCommand(execer)
 	assert.Equal(t, "init", init.Use)
 
-	s := createServerCmd(&fakeGRPCServer{}, server.NewFakeHTTPServer())
+	s := createServerCmd(execer, &fakeGRPCServer{}, server.NewFakeHTTPServer())
 	assert.NotNil(t, s)
 	assert.Equal(t, "server", s.Use)
 
-	root := NewRootCmd(fakeruntime.FakeExecer{}, NewFakeGRPCServer(), server.NewFakeHTTPServer())
+	root := NewRootCmd(execer, NewFakeGRPCServer(), server.NewFakeHTTPServer())
 	root.SetArgs([]string{"init", "-k=demo.yaml", "--wait-namespace", "demo", "--wait-resource", "demo"})
 	err := root.Execute()
 	assert.Nil(t, err)
