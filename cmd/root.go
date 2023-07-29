@@ -20,7 +20,7 @@ func NewRootCmd(execer fakeruntime.Execer, gRPCServer gRPCServer,
 	c.Version = version.GetVersion()
 	c.AddCommand(createInitCommand(execer),
 		createRunCommand(), createSampleCmd(),
-		createServerCmd(gRPCServer, httpServer), createJSONSchemaCmd(),
+		createServerCmd(execer, gRPCServer, httpServer), createJSONSchemaCmd(),
 		createServiceCommand(execer), createFunctionCmd())
 	return
 }

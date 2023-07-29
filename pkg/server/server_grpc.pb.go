@@ -22,23 +22,32 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RunnerClient interface {
+	// belong to a specific store
 	Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*TestResult, error)
-	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
-	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
 	GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error)
 	CreateTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 	GetTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestSuite, error)
 	UpdateTestSuite(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
+	// test cases related
 	ListTestCase(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*Suite, error)
+	GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error)
 	RunTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCaseResult, error)
 	GetTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCase, error)
 	CreateTestCase(ctx context.Context, in *TestCaseWithSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	UpdateTestCase(ctx context.Context, in *TestCaseWithSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*HelloReply, error)
+	// common services
 	PopularHeaders(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Pairs, error)
-	GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error)
 	FunctionsQuery(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Pairs, error)
+	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
+	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
+	// stores related interfaces
+	GetStoreKinds(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*StoreKinds, error)
+	GetStores(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Stores, error)
+	CreateStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error)
+	DeleteStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error)
+	VerifyStore(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*CommonResult, error)
 }
 
 type runnerClient struct {
@@ -52,24 +61,6 @@ func NewRunnerClient(cc grpc.ClientConnInterface) RunnerClient {
 func (c *runnerClient) Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*TestResult, error) {
 	out := new(TestResult)
 	err := c.cc.Invoke(ctx, "/server.Runner/Run", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runnerClient) Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error) {
-	out := new(HelloReply)
-	err := c.cc.Invoke(ctx, "/server.Runner/Sample", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runnerClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error) {
-	out := new(HelloReply)
-	err := c.cc.Invoke(ctx, "/server.Runner/GetVersion", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -130,6 +121,15 @@ func (c *runnerClient) ListTestCase(ctx context.Context, in *TestSuiteIdentity, 
 	return out, nil
 }
 
+func (c *runnerClient) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error) {
+	out := new(TestCases)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetSuggestedAPIs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) RunTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*TestCaseResult, error) {
 	out := new(TestCaseResult)
 	err := c.cc.Invoke(ctx, "/server.Runner/RunTestCase", in, out, opts...)
@@ -184,18 +184,72 @@ func (c *runnerClient) PopularHeaders(ctx context.Context, in *Empty, opts ...gr
 	return out, nil
 }
 
-func (c *runnerClient) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error) {
-	out := new(TestCases)
-	err := c.cc.Invoke(ctx, "/server.Runner/GetSuggestedAPIs", in, out, opts...)
+func (c *runnerClient) FunctionsQuery(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Pairs, error) {
+	out := new(Pairs)
+	err := c.cc.Invoke(ctx, "/server.Runner/FunctionsQuery", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *runnerClient) FunctionsQuery(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Pairs, error) {
-	out := new(Pairs)
-	err := c.cc.Invoke(ctx, "/server.Runner/FunctionsQuery", in, out, opts...)
+func (c *runnerClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetVersion", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/Sample", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetStoreKinds(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*StoreKinds, error) {
+	out := new(StoreKinds)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetStoreKinds", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetStores(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Stores, error) {
+	out := new(Stores)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetStores", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) CreateStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error) {
+	out := new(Store)
+	err := c.cc.Invoke(ctx, "/server.Runner/CreateStore", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) DeleteStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error) {
+	out := new(Store)
+	err := c.cc.Invoke(ctx, "/server.Runner/DeleteStore", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) VerifyStore(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/VerifyStore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -206,23 +260,32 @@ func (c *runnerClient) FunctionsQuery(ctx context.Context, in *SimpleQuery, opts
 // All implementations must embed UnimplementedRunnerServer
 // for forward compatibility
 type RunnerServer interface {
+	// belong to a specific store
 	Run(context.Context, *TestTask) (*TestResult, error)
-	Sample(context.Context, *Empty) (*HelloReply, error)
-	GetVersion(context.Context, *Empty) (*HelloReply, error)
 	GetSuites(context.Context, *Empty) (*Suites, error)
 	CreateTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
 	GetTestSuite(context.Context, *TestSuiteIdentity) (*TestSuite, error)
 	UpdateTestSuite(context.Context, *TestSuite) (*HelloReply, error)
 	DeleteTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
+	// test cases related
 	ListTestCase(context.Context, *TestSuiteIdentity) (*Suite, error)
+	GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error)
 	RunTestCase(context.Context, *TestCaseIdentity) (*TestCaseResult, error)
 	GetTestCase(context.Context, *TestCaseIdentity) (*TestCase, error)
 	CreateTestCase(context.Context, *TestCaseWithSuite) (*HelloReply, error)
 	UpdateTestCase(context.Context, *TestCaseWithSuite) (*HelloReply, error)
 	DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error)
+	// common services
 	PopularHeaders(context.Context, *Empty) (*Pairs, error)
-	GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error)
 	FunctionsQuery(context.Context, *SimpleQuery) (*Pairs, error)
+	GetVersion(context.Context, *Empty) (*HelloReply, error)
+	Sample(context.Context, *Empty) (*HelloReply, error)
+	// stores related interfaces
+	GetStoreKinds(context.Context, *Empty) (*StoreKinds, error)
+	GetStores(context.Context, *Empty) (*Stores, error)
+	CreateStore(context.Context, *Store) (*Store, error)
+	DeleteStore(context.Context, *Store) (*Store, error)
+	VerifyStore(context.Context, *SimpleQuery) (*CommonResult, error)
 	mustEmbedUnimplementedRunnerServer()
 }
 
@@ -232,12 +295,6 @@ type UnimplementedRunnerServer struct {
 
 func (UnimplementedRunnerServer) Run(context.Context, *TestTask) (*TestResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Run not implemented")
-}
-func (UnimplementedRunnerServer) Sample(context.Context, *Empty) (*HelloReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Sample not implemented")
-}
-func (UnimplementedRunnerServer) GetVersion(context.Context, *Empty) (*HelloReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
 }
 func (UnimplementedRunnerServer) GetSuites(context.Context, *Empty) (*Suites, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSuites not implemented")
@@ -257,6 +314,9 @@ func (UnimplementedRunnerServer) DeleteTestSuite(context.Context, *TestSuiteIden
 func (UnimplementedRunnerServer) ListTestCase(context.Context, *TestSuiteIdentity) (*Suite, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTestCase not implemented")
 }
+func (UnimplementedRunnerServer) GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSuggestedAPIs not implemented")
+}
 func (UnimplementedRunnerServer) RunTestCase(context.Context, *TestCaseIdentity) (*TestCaseResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RunTestCase not implemented")
 }
@@ -275,11 +335,29 @@ func (UnimplementedRunnerServer) DeleteTestCase(context.Context, *TestCaseIdenti
 func (UnimplementedRunnerServer) PopularHeaders(context.Context, *Empty) (*Pairs, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PopularHeaders not implemented")
 }
-func (UnimplementedRunnerServer) GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSuggestedAPIs not implemented")
-}
 func (UnimplementedRunnerServer) FunctionsQuery(context.Context, *SimpleQuery) (*Pairs, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FunctionsQuery not implemented")
+}
+func (UnimplementedRunnerServer) GetVersion(context.Context, *Empty) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
+}
+func (UnimplementedRunnerServer) Sample(context.Context, *Empty) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Sample not implemented")
+}
+func (UnimplementedRunnerServer) GetStoreKinds(context.Context, *Empty) (*StoreKinds, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStoreKinds not implemented")
+}
+func (UnimplementedRunnerServer) GetStores(context.Context, *Empty) (*Stores, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStores not implemented")
+}
+func (UnimplementedRunnerServer) CreateStore(context.Context, *Store) (*Store, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateStore not implemented")
+}
+func (UnimplementedRunnerServer) DeleteStore(context.Context, *Store) (*Store, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteStore not implemented")
+}
+func (UnimplementedRunnerServer) VerifyStore(context.Context, *SimpleQuery) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyStore not implemented")
 }
 func (UnimplementedRunnerServer) mustEmbedUnimplementedRunnerServer() {}
 
@@ -308,42 +386,6 @@ func _Runner_Run_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).Run(ctx, req.(*TestTask))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runner_Sample_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).Sample(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/server.Runner/Sample",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).Sample(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runner_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).GetVersion(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/server.Runner/GetVersion",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).GetVersion(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -456,6 +498,24 @@ func _Runner_ListTestCase_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_GetSuggestedAPIs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestSuiteIdentity)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetSuggestedAPIs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetSuggestedAPIs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetSuggestedAPIs(ctx, req.(*TestSuiteIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_RunTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TestCaseIdentity)
 	if err := dec(in); err != nil {
@@ -564,24 +624,6 @@ func _Runner_PopularHeaders_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Runner_GetSuggestedAPIs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TestSuiteIdentity)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).GetSuggestedAPIs(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/server.Runner/GetSuggestedAPIs",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).GetSuggestedAPIs(ctx, req.(*TestSuiteIdentity))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Runner_FunctionsQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SimpleQuery)
 	if err := dec(in); err != nil {
@@ -600,6 +642,132 @@ func _Runner_FunctionsQuery_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetVersion",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetVersion(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_Sample_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).Sample(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/Sample",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).Sample(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetStoreKinds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetStoreKinds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetStoreKinds",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetStoreKinds(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetStores_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetStores(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetStores",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetStores(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_CreateStore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Store)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).CreateStore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/CreateStore",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).CreateStore(ctx, req.(*Store))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_DeleteStore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Store)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).DeleteStore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/DeleteStore",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).DeleteStore(ctx, req.(*Store))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_VerifyStore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleQuery)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).VerifyStore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/VerifyStore",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).VerifyStore(ctx, req.(*SimpleQuery))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Runner_ServiceDesc is the grpc.ServiceDesc for Runner service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -610,14 +778,6 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Run",
 			Handler:    _Runner_Run_Handler,
-		},
-		{
-			MethodName: "Sample",
-			Handler:    _Runner_Sample_Handler,
-		},
-		{
-			MethodName: "GetVersion",
-			Handler:    _Runner_GetVersion_Handler,
 		},
 		{
 			MethodName: "GetSuites",
@@ -644,6 +804,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_ListTestCase_Handler,
 		},
 		{
+			MethodName: "GetSuggestedAPIs",
+			Handler:    _Runner_GetSuggestedAPIs_Handler,
+		},
+		{
 			MethodName: "RunTestCase",
 			Handler:    _Runner_RunTestCase_Handler,
 		},
@@ -668,12 +832,36 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_PopularHeaders_Handler,
 		},
 		{
-			MethodName: "GetSuggestedAPIs",
-			Handler:    _Runner_GetSuggestedAPIs_Handler,
-		},
-		{
 			MethodName: "FunctionsQuery",
 			Handler:    _Runner_FunctionsQuery_Handler,
+		},
+		{
+			MethodName: "GetVersion",
+			Handler:    _Runner_GetVersion_Handler,
+		},
+		{
+			MethodName: "Sample",
+			Handler:    _Runner_Sample_Handler,
+		},
+		{
+			MethodName: "GetStoreKinds",
+			Handler:    _Runner_GetStoreKinds_Handler,
+		},
+		{
+			MethodName: "GetStores",
+			Handler:    _Runner_GetStores_Handler,
+		},
+		{
+			MethodName: "CreateStore",
+			Handler:    _Runner_CreateStore_Handler,
+		},
+		{
+			MethodName: "DeleteStore",
+			Handler:    _Runner_DeleteStore_Handler,
+		},
+		{
+			MethodName: "VerifyStore",
+			Handler:    _Runner_VerifyStore_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

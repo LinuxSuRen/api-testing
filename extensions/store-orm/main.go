@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"os"
 
 	"github.com/linuxsuren/api-testing/extensions/store-orm/pkg"
+	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -23,9 +25,6 @@ func main() {
 		RunE:  opt.runE,
 	}
 	flags := cmd.Flags()
-	flags.StringVarP(&opt.user, "user", "u", "root", "The user name of database")
-	flags.StringVarP(&opt.address, "address", "", "127.0.0.1:4000", "The address of database")
-	flags.StringVarP(&opt.database, "database", "", "test", "The database name")
 	flags.IntVarP(&opt.port, "port", "p", 7071, "The port of gRPC server")
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
@@ -34,7 +33,7 @@ func main() {
 
 func (o *option) runE(cmd *cobra.Command, args []string) (err error) {
 	var removeServer remote.LoaderServer
-	if removeServer, err = NewRemoteServer(o.user, o.address, o.database); err != nil {
+	if removeServer, err = NewRemoteServer(); err != nil {
 		return
 	}
 
@@ -51,30 +50,27 @@ func (o *option) runE(cmd *cobra.Command, args []string) (err error) {
 }
 
 type option struct {
-	user, address, database string
-	port                    int
+	port int
 }
 
-type server struct {
+type dbserver struct {
 	remote.UnimplementedLoaderServer
-	db *gorm.DB
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer(user, address, database string) (s remote.LoaderServer, err error) {
-	var db *gorm.DB
-	if db, err = createDB(user, address, database); err == nil {
-		s = &server{db: db}
-	}
+func NewRemoteServer() (s remote.LoaderServer, err error) {
+	s = &dbserver{}
 	return
 }
 
 func createDB(user, address, database string) (db *gorm.DB, err error) {
 	dsn := fmt.Sprintf("%s:@tcp(%s)/%s?charset=utf8mb4", user, address, database)
+	fmt.Println("try to connect to", dsn)
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
+		err = fmt.Errorf("failed to connect to %s, %v", dsn, err)
 		return
 	}
 
@@ -83,10 +79,40 @@ func createDB(user, address, database string) (db *gorm.DB, err error) {
 	return
 }
 
-func (s *server) ListTestSuite(context.Context, *remote.Empty) (suites *remote.TestSuites, err error) {
-	items := make([]*pkg.TestSuite, 0)
-	s.db.Find(&items)
+var dbCache map[string]*gorm.DB = make(map[string]*gorm.DB)
 
+func (s *dbserver) getClient(ctx context.Context) (db *gorm.DB, err error) {
+	store := remote.GetStoreFromContext(ctx)
+	if store == nil {
+		err = errors.New("no connect to database")
+	} else {
+		var ok bool
+		if db, ok = dbCache[store.Name]; ok && db != nil {
+			return
+		}
+
+		database := "atest"
+		for key, val := range store.Properties {
+			if key == "database" {
+				database = val
+			}
+		}
+
+		db, err = createDB(store.Username, store.URL, database)
+		dbCache[store.Name] = db
+	}
+	return
+}
+
+func (s *dbserver) ListTestSuite(ctx context.Context, _ *server.Empty) (suites *remote.TestSuites, err error) {
+	items := make([]*pkg.TestSuite, 0)
+
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+
+	db.Find(&items)
 	suites = &remote.TestSuites{}
 	for i := range items {
 		suites.Data = append(suites.Data, pkg.ConvertToGRPCTestSuite(items[i]))
@@ -94,21 +120,31 @@ func (s *server) ListTestSuite(context.Context, *remote.Empty) (suites *remote.T
 	return
 }
 
-func (s *server) CreateTestSuite(ctx context.Context, testSuite *remote.TestSuite) (reply *remote.Empty, err error) {
-	reply = &remote.Empty{}
-	s.db.Create(pkg.ConvertToDBTestSuite(testSuite))
+func (s *dbserver) CreateTestSuite(ctx context.Context, testSuite *remote.TestSuite) (reply *server.Empty, err error) {
+	reply = &server.Empty{}
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+
+	db.Create(pkg.ConvertToDBTestSuite(testSuite))
 	return
 }
 
 const nameQuery = `name = ?`
 
-func (s *server) GetTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *remote.TestSuite, err error) {
+func (s *dbserver) GetTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *remote.TestSuite, err error) {
 	query := &pkg.TestSuite{}
-	s.db.Find(&query, nameQuery, suite.Name)
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+
+	db.Find(&query, nameQuery, suite.Name)
 
 	reply = pkg.ConvertToGRPCTestSuite(query)
 	if suite.Full {
-		var testcases *remote.TestCases
+		var testcases *server.TestCases
 		if testcases, err = s.ListTestCases(ctx, &remote.TestSuite{
 			Name: suite.Name,
 		}); err == nil && testcases != nil {
@@ -118,9 +154,15 @@ func (s *server) GetTestSuite(ctx context.Context, suite *remote.TestSuite) (rep
 	return
 }
 
-func (s *server) UpdateTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *remote.TestSuite, err error) {
+func (s *dbserver) UpdateTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *remote.TestSuite, err error) {
+	reply = &remote.TestSuite{}
 	input := pkg.ConvertToDBTestSuite(suite)
-	testSuiteIdentity(s.db, input).Updates(input)
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+
+	testSuiteIdentity(db, input).Updates(input)
 	return
 }
 
@@ -128,41 +170,63 @@ func testSuiteIdentity(db *gorm.DB, suite *pkg.TestSuite) *gorm.DB {
 	return db.Model(suite).Where(nameQuery, suite.Name)
 }
 
-func (s *server) DeleteTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *remote.Empty, err error) {
-	reply = &remote.Empty{}
-	s.db.Delete(suite, nameQuery, suite.Name)
+func (s *dbserver) DeleteTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *server.Empty, err error) {
+	reply = &server.Empty{}
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+
+	db.Delete(suite, nameQuery, suite.Name)
 	return
 }
 
-func (s *server) ListTestCases(ctx context.Context, suite *remote.TestSuite) (result *remote.TestCases, err error) {
+func (s *dbserver) ListTestCases(ctx context.Context, suite *remote.TestSuite) (result *server.TestCases, err error) {
 	items := make([]*pkg.TestCase, 0)
-	s.db.Find(&items, "suite_name = ?", suite.Name)
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+	db.Find(&items, "suite_name = ?", suite.Name)
 
-	result = &remote.TestCases{}
+	result = &server.TestCases{}
 	for i := range items {
 		result.Data = append(result.Data, pkg.ConvertToRemoteTestCase(items[i]))
 	}
 	return
 }
 
-func (s *server) CreateTestCase(ctx context.Context, testcase *remote.TestCase) (reply *remote.Empty, err error) {
+func (s *dbserver) CreateTestCase(ctx context.Context, testcase *server.TestCase) (reply *server.Empty, err error) {
 	payload := pkg.ConverToDBTestCase(testcase)
-	s.db.Create(&payload)
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+	reply = &server.Empty{}
+	db.Create(&payload)
 	return
 }
 
-func (s *server) GetTestCase(ctx context.Context, testcase *remote.TestCase) (result *remote.TestCase, err error) {
+func (s *dbserver) GetTestCase(ctx context.Context, testcase *server.TestCase) (result *server.TestCase, err error) {
 	item := &pkg.TestCase{}
-	s.db.Find(&item, "suite_name = ? AND name = ?", testcase.SuiteName, testcase.Name)
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+	db.Find(&item, "suite_name = ? AND name = ?", testcase.SuiteName, testcase.Name)
 
 	result = pkg.ConvertToRemoteTestCase(item)
 	return
 }
 
-func (s *server) UpdateTestCase(ctx context.Context, testcase *remote.TestCase) (reply *remote.TestCase, err error) {
-	reply = &remote.TestCase{}
+func (s *dbserver) UpdateTestCase(ctx context.Context, testcase *server.TestCase) (reply *server.TestCase, err error) {
+	reply = &server.TestCase{}
 	input := pkg.ConverToDBTestCase(testcase)
-	testCaseIdentiy(s.db, input).Updates(input)
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+	testCaseIdentiy(db, input).Updates(input)
 
 	data := make(map[string]interface{})
 	if input.ExpectBody == "" {
@@ -173,15 +237,19 @@ func (s *server) UpdateTestCase(ctx context.Context, testcase *remote.TestCase) 
 	}
 
 	if len(data) > 0 {
-		testCaseIdentiy(s.db, input).Updates(data)
+		testCaseIdentiy(db, input).Updates(data)
 	}
 	return
 }
 
-func (s *server) DeleteTestCase(ctx context.Context, testcase *remote.TestCase) (reply *remote.Empty, err error) {
-	reply = &remote.Empty{}
+func (s *dbserver) DeleteTestCase(ctx context.Context, testcase *server.TestCase) (reply *server.Empty, err error) {
+	reply = &server.Empty{}
 	input := pkg.ConverToDBTestCase(testcase)
-	testCaseIdentiy(s.db, input).Delete(input)
+	var db *gorm.DB
+	if db, err = s.getClient(ctx); err != nil {
+		return
+	}
+	testCaseIdentiy(db, input).Delete(input)
 	return
 }
 
