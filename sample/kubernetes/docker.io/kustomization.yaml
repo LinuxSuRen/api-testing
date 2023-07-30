@@ -1,0 +1,9 @@
+bases:
+- ../default
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: ghcr.io/linuxsuren/api-testing:master
+  newName: linuxsuren/api-testing
+  newTag: master

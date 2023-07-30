@@ -193,10 +193,12 @@ const viewName = ref('testcase')
 </script>
 
 <template>
-  <div class="common-layout">
+  <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
     <el-container style="height: 100%">
       <el-aside width="200px">
-        <el-button type="primary" @click="openTestSuiteCreateDialog" test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
+        <el-button type="primary" @click="openTestSuiteCreateDialog"
+          data-intro="Click here to create a new test suite"
+          test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
         <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
 
         <el-tree
@@ -209,6 +211,7 @@ const viewName = ref('testcase')
           node-key="id"
           :filter-node-method="filterTestCases"
           @node-click="handleNodeClick"
+          data-intro="This is the test suite tree. You can click the test suite to edit it."
         />
       </el-aside>
 
@@ -219,12 +222,14 @@ const viewName = ref('testcase')
           :suite="testSuite"
           :name="testCaseName"
           @updated="loadStores"
+          data-intro="This is the test case editor. You can edit the test case here."
         />
         <TestSuite
           v-else-if="viewName === 'testsuite'"
           :name="testSuite"
           :store="store"
           @updated="loadStores"
+          data-intro="This is the test suite editor. You can edit the test suite here."
         />
       </el-main>
     </el-container>

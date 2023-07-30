@@ -35,6 +35,16 @@ Please see the following example usage:
 atest service start -m podman --version master
 ```
 
+## Run in k3s
+
+```shell
+sudo k3s server --write-kubeconfig-mode 666
+
+k3s kubectl apply -k sample/kubernetes/default
+
+kustomize build sample/kubernetes/docker.io/ | k3s kubectl apply -f -
+```
+
 ## Storage
 There are multiple storage backends supported. See the status from the list:
 
