@@ -10,6 +10,7 @@ describe('Suite Manage', () => {
   
   it('Create Suite', () => {
     cy.visit('/')
+    cy.get('.introjs-skipbutton').click()
     cy.contains('span', 'Tool Box')
 
     cy.get('[test-id="open-new-suite-dialog"]').click()
@@ -29,6 +30,7 @@ describe('Suite Manage', () => {
   const caseAPI = "/api/v2"
   it('New Case', () => {
     cy.visit('/')
+    cy.get('.introjs-skipbutton').click()
     cy.get('span').contains(suiteName).should('be.visible').click()
 
     cy.get('[test-id="open-new-case-dialog"]').click()
@@ -43,6 +45,7 @@ describe('Suite Manage', () => {
 
   it('Find Case', () => {
     cy.visit('/')
+    cy.get('.introjs-skipbutton').click()
     const searchInput = cy.get('[test-id="search"]')
     searchInput.type(caseName)
     searchInput.trigger('keydown', {key: 'Enter'})
@@ -56,6 +59,7 @@ describe('Suite Manage', () => {
 
   it('Delete Suite', () => {
     cy.visit('/')
+    cy.get('.introjs-skipbutton').click()
     cy.get('span').contains(suiteName).should('be.visible').click()
     cy.get('[test-id="suite-editor-api"]').should('have.value', sampleAPIAddress)
     cy.get('[test-id="suite-del-but"]').click()
