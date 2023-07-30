@@ -145,7 +145,7 @@ const viewName = ref('testcase')
 
 <template>
   <div class="common-layout">
-    <el-container style="height: 100vh">
+    <el-container style="height: 100%">
       <el-aside width="200px">
         <el-button type="primary" @click="openTestSuiteCreateDialog" test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
         <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
@@ -211,7 +211,9 @@ header {
   line-height: 1.5;
   max-height: 100vh;
 }
-
+.common-layout {
+  height: 100%;
+}
 .logo {
   display: block;
   margin: 0 auto 2rem;
