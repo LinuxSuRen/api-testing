@@ -3,10 +3,11 @@ package pkg
 import (
 	"encoding/json"
 
+	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 )
 
-func ConverToDBTestCase(testcase *remote.TestCase) (result *TestCase) {
+func ConverToDBTestCase(testcase *server.TestCase) (result *TestCase) {
 	result = &TestCase{
 		Name:      testcase.Name,
 		SuiteName: testcase.SuiteName,
@@ -28,16 +29,16 @@ func ConverToDBTestCase(testcase *remote.TestCase) (result *TestCase) {
 		result.ExpectStatusCode = int(resp.StatusCode)
 		result.ExpectHeader = pairToJSON(resp.Header)
 		result.ExpectBodyFields = pairToJSON(resp.BodyFieldsExpect)
-		result.ExpectVerify = sliceToJSON(resp.Verify)
+		result.ExpectVerify = SliceToJSON(resp.Verify)
 	}
 	return
 }
 
-func ConvertToRemoteTestCase(testcase *TestCase) (result *remote.TestCase) {
-	result = &remote.TestCase{
+func ConvertToRemoteTestCase(testcase *TestCase) (result *server.TestCase) {
+	result = &server.TestCase{
 		Name: testcase.Name,
 
-		Request: &remote.Request{
+		Request: &server.Request{
 			Api:    testcase.API,
 			Method: testcase.Method,
 			Body:   testcase.Body,
@@ -46,7 +47,7 @@ func ConvertToRemoteTestCase(testcase *TestCase) (result *remote.TestCase) {
 			Form:   jsonToPair(testcase.Form),
 		},
 
-		Response: &remote.Response{
+		Response: &server.Response{
 			StatusCode:       int32(testcase.ExpectStatusCode),
 			Body:             testcase.ExpectBody,
 			Schema:           testcase.ExpectSchema,
@@ -67,6 +68,9 @@ func ConvertToDBTestSuite(suite *remote.TestSuite) (result *TestSuite) {
 		result.SpecKind = suite.Spec.Kind
 		result.SpecURL = suite.Spec.Url
 	}
+	if suite.Param != nil {
+		result.Param = pairToJSON(suite.Param)
+	}
 	return
 }
 
@@ -74,24 +78,30 @@ func ConvertToGRPCTestSuite(suite *TestSuite) (result *remote.TestSuite) {
 	result = &remote.TestSuite{
 		Name: suite.Name,
 		Api:  suite.API,
-		Spec: &remote.APISpec{
+		Spec: &server.APISpec{
 			Kind: suite.SpecKind,
 			Url:  suite.SpecURL,
 		},
+		Param: jsonToPair(suite.Param),
 	}
 	return
 }
 
-func sliceToJSON(slice []string) (result string) {
+func SliceToJSON(slice []string) (result string) {
 	var data []byte
 	var err error
-	if data, err = json.Marshal(slice); err == nil {
-		result = string(data)
+	if slice != nil {
+		if data, err = json.Marshal(slice); err == nil {
+			result = string(data)
+		}
+	}
+	if result == "" {
+		result = "[]"
 	}
 	return
 }
 
-func pairToJSON(pair []*remote.Pair) (result string) {
+func pairToJSON(pair []*server.Pair) (result string) {
 	var obj = make(map[string]string)
 	for i := range pair {
 		k := pair[i].Key
@@ -107,12 +117,12 @@ func pairToJSON(pair []*remote.Pair) (result string) {
 	return
 }
 
-func jsonToPair(jsonStr string) (pairs []*remote.Pair) {
+func jsonToPair(jsonStr string) (pairs []*server.Pair) {
 	pairMap := make(map[string]string, 0)
 	err := json.Unmarshal([]byte(jsonStr), &pairMap)
 	if err == nil {
 		for k, v := range pairMap {
-			pairs = append(pairs, &remote.Pair{
+			pairs = append(pairs, &server.Pair{
 				Key: k, Value: v,
 			})
 		}

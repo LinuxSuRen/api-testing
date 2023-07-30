@@ -3,6 +3,7 @@ package remote
 import (
 	"testing"
 
+	server "github.com/linuxsuren/api-testing/pkg/server"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +24,7 @@ func TestConvert(t *testing.T) {
 			},
 		}, convertToNormalTestSuite(&TestSuite{
 			Param: defaultPairs,
-			Spec: &APISpec{
+			Spec: &server.APISpec{
 				Url:  "/v1",
 				Kind: "http",
 			},
@@ -51,12 +52,12 @@ func TestConvert(t *testing.T) {
 				BodyFieldsExpect: defaultInterMap,
 				Header:           map[string]string{},
 			},
-		}, convertToNormalTestCase(&TestCase{
-			Request: &Request{
+		}, convertToNormalTestCase(&server.TestCase{
+			Request: &server.Request{
 				Api:    "/v1",
 				Header: defaultPairs,
 			},
-			Response: &Response{
+			Response: &server.Response{
 				BodyFieldsExpect: defaultPairs,
 			},
 		}))
@@ -79,4 +80,4 @@ func TestConvert(t *testing.T) {
 
 var defaultInterMap = map[string]interface{}{"foo": "bar"}
 var defaultMap map[string]string = map[string]string{"foo": "bar"}
-var defaultPairs []*Pair = []*Pair{{Key: "foo", Value: "bar"}}
+var defaultPairs []*server.Pair = []*server.Pair{{Key: "foo", Value: "bar"}}

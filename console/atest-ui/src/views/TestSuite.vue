@@ -7,7 +7,8 @@ import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery } from './types'
 
 const props = defineProps({
-  name: String
+  name: String,
+  store: String,
 })
 const emit = defineEmits(['updated'])
 let querySuggestedAPIs = NewSuggestedAPIsQuery(props.name!)
@@ -24,6 +25,9 @@ const suite = ref({
 function load() {
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
     body: JSON.stringify({
       name: props.name
     })
@@ -51,6 +55,9 @@ watch(props, () => {
 function save() {
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
     body: JSON.stringify(suite.value)
   }
   fetch('/server.Runner/UpdateTestSuite', requestOptions)
@@ -91,6 +98,9 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
       const requestOptions = {
         method: 'POST',
+        headers: {
+          'X-Store-Name': props.store
+        },
         body: JSON.stringify({
           suiteName: props.name,
           data: {
@@ -118,6 +128,9 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 function del() {
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
     body: JSON.stringify({
       name: props.name
     })
@@ -214,7 +227,6 @@ function paramChange() {
           ref="testcaseFormRef"
           status-icon
           label-width="60px"
-          class="demo-ruleForm"
         >
           <el-form-item label="Name" prop="name">
             <el-input v-model="testCaseForm.name" test-id="case-form-name"/>

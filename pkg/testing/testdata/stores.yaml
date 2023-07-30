@@ -1,0 +1,8 @@
+- name: db
+  kind:
+    name: database
+    url: localhost:7071
+  url: localhost:4000
+  username: root
+  properties:
+    database: test
