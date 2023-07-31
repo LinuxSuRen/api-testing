@@ -479,7 +479,7 @@ func TestFunctionsQueryStream(t *testing.T) {
 	server := getRemoteServerInTempDir()
 
 	fakess := &fakeServerStream{
-		p:      atomic.Uint64{},
+		p:      new(uint32),
 		lock:   sync.Mutex{},
 		Ctx:    ctx,
 		Inputs: []any{&SimpleQuery{Name: "randNumeric"}, &SimpleQuery{Name: "randnumer"}},
@@ -524,7 +524,7 @@ var simpleTestCase string
 const urlFoo = "http://foo"
 
 type fakeServerStream struct {
-	p      atomic.Uint64
+	p      *uint32
 	lock   sync.Mutex
 	Ctx    context.Context
 	Inputs []any
@@ -552,8 +552,9 @@ func (s *fakeServerStream) SendMsg(m interface{}) error {
 }
 
 func (s *fakeServerStream) RecvMsg(m interface{}) error {
-	defer s.p.Add(1)
-	if s.p.Load() == uint64(len(s.Inputs)) {
+	defer atomic.AddUint32(s.p, 1)
+	index := atomic.LoadUint32(s.p)
+	if index == uint32(len(s.Inputs)) {
 		return io.EOF
 	}
 
@@ -564,17 +565,17 @@ func (s *fakeServerStream) RecvMsg(m interface{}) error {
 		return fmt.Errorf("cannot receive to %v", m)
 	}
 
-	iv := reflect.ValueOf(s.Inputs[s.p.Load()])
+	iv := reflect.ValueOf(s.Inputs[index])
 	if iv.Kind() == reflect.Pointer && !iv.IsNil() {
 		iv = iv.Elem()
 	} else {
-		return fmt.Errorf("invalid fake input at index %v", s.p.Load())
+		return fmt.Errorf("invalid fake input at index %v", index)
 	}
 
 	if mv.CanSet() && mv.Type() == iv.Type() {
 		mv.Set(iv)
 	} else {
-		return fmt.Errorf("cannot set fake input to %v at index %v", m, s.p.Load())
+		return fmt.Errorf("cannot set fake input to %v at index %v", m, index)
 	}
 
 	return nil
