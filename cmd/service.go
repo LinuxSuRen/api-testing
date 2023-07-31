@@ -3,11 +3,13 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
 	_ "embed"
 
+	"github.com/linuxsuren/api-testing/cmd/service"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/spf13/cobra"
@@ -54,6 +56,8 @@ type serviceOption struct {
 	fakeruntime.Execer
 	mode         string
 	localStorage string
+
+	stdOut io.Writer
 }
 
 type serviceMode string
@@ -75,6 +79,7 @@ func (s serviceMode) String() string {
 }
 
 func (o *serviceOption) preRunE(c *cobra.Command, args []string) (err error) {
+	o.stdOut = c.OutOrStdout()
 	if o.action == "" && len(args) > 0 {
 		o.action = args[0]
 	}
@@ -89,6 +94,8 @@ func (o *serviceOption) preRunE(c *cobra.Command, args []string) (err error) {
 	if o.service == nil {
 		err = fmt.Errorf("not supported service")
 		return
+	} else if err == nil {
+		err = o.Execer.MkdirAll(o.localStorage, os.ModePerm)
 	}
 	return
 }
@@ -204,7 +211,7 @@ func (o *serviceOption) getContainerService() (service Service, err error) {
 			clientPath = client
 		}
 		service = newContainerService(o.Execer, clientPath,
-			o.image, o.version, o.localStorage)
+			o.image, o.version, o.localStorage, o.stdOut)
 	}
 	return
 }
@@ -266,26 +273,23 @@ type linuxService struct {
 	commonService
 }
 
-const systemCtl = "systemctl"
-const serviceName = "atest"
-
 func (s *linuxService) Start() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "start", serviceName)
+	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "start", service.ServiceName)
 	return
 }
 
 func (s *linuxService) Stop() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "stop", serviceName)
+	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "stop", service.ServiceName)
 	return
 }
 
 func (s *linuxService) Restart() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "restart", serviceName)
+	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "restart", service.ServiceName)
 	return
 }
 
 func (s *linuxService) Status() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "status", serviceName)
+	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "status", service.ServiceName)
 	if err != nil && err.Error() == "exit status 3" {
 		// this is normal case
 		err = nil
@@ -295,13 +299,13 @@ func (s *linuxService) Status() (output string, err error) {
 
 func (s *linuxService) Install() (output string, err error) {
 	if err = os.WriteFile(s.scriptPath, []byte(s.script), os.ModeAppend); err == nil {
-		output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "enable", serviceName)
+		output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "enable", service.ServiceName)
 	}
 	return
 }
 
 func (s *linuxService) Uninstall() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(systemCtl, "", "disable", serviceName)
+	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "disable", service.ServiceName)
 	return
 }
 
@@ -312,11 +316,13 @@ type containerService struct {
 	image        string
 	tag          string
 	localStorage string
+	stdOut       io.Writer
+	errOut       io.Writer
 }
 
 const defaultImage = "ghcr.io/linuxsuren/api-testing"
 
-func newContainerService(execer fakeruntime.Execer, client, image, tag, localStorage string) (service Service) {
+func newContainerService(execer fakeruntime.Execer, client, image, tag, localStorage string, writer io.Writer) (svc Service) {
 	if tag == "" {
 		tag = "latest"
 	}
@@ -327,18 +333,20 @@ func newContainerService(execer fakeruntime.Execer, client, image, tag, localSto
 	containerServer := &containerService{
 		Execer:       execer,
 		client:       client,
-		name:         serviceName,
+		name:         service.ServiceName,
 		image:        image,
 		tag:          tag,
 		localStorage: localStorage,
+		stdOut:       writer,
+		errOut:       writer,
 	}
 
 	if strings.HasSuffix(client, ServiceModePodman.String()) {
-		service = &podmanService{
+		svc = &podmanService{
 			containerService: containerServer,
 		}
 	} else {
-		service = containerServer
+		svc = containerServer
 	}
 	return
 }
@@ -347,7 +355,6 @@ func (s *containerService) Start() (output string, err error) {
 	if s.exist() {
 		output, err = s.Execer.RunCommandAndReturn(s.client, "", "start", s.name)
 	} else {
-		fmt.Println(s.getStartArgs(), "===")
 		err = s.Execer.SystemCall(s.client, append([]string{s.client}, s.getStartArgs()...), os.Environ())
 	}
 	return
@@ -392,7 +399,7 @@ func (s *containerService) getStartArgs() []string {
 		"-d",
 		"--pull=always",
 		"--network=host",
-		"-v", s.localStorage + ":/var/www/sample",
+		"-v", s.localStorage + ":/var/www/data",
 		s.image + ":" + s.tag}
 }
 
@@ -407,16 +414,18 @@ func (s *podmanService) Install() (output string, err error) {
 
 func (s *podmanService) Start() (output string, err error) {
 	if s.exist() {
-		output, err = s.Execer.RunCommandAndReturn(s.client, "", "start", s.name)
+		err = s.Execer.RunCommandWithIO(s.client, "", s.stdOut, s.errOut, "start", s.name)
 	} else {
-		output, err = s.Execer.RunCommandAndReturn(s.client, "", s.getStartArgs()...)
+		err = s.Execer.RunCommandWithIO(s.client, "", s.stdOut, s.errOut, s.getStartArgs()...)
 		if err == nil {
-			var result string
-			if result, err = s.installService(); err == nil {
-				output = fmt.Sprintf("%s\n%s", output, result)
-			}
+			output, err = s.installService()
 		}
 	}
+	return
+}
+
+func (s *podmanService) Stop() (output string, err error) {
+	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "stop", service.PodmanServiceName)
 	return
 }
 
@@ -424,10 +433,10 @@ func (s *podmanService) installService() (output string, err error) {
 	output, err = s.Execer.RunCommandAndReturn(s.client, "", "generate", "systemd", "--new", "--files", "--name", s.name)
 	if err == nil {
 		var result string
-		result, err = s.Execer.RunCommandAndReturn("mv", "", "container-atest.service", "/etc/systemd/system")
+		result, err = s.Execer.RunCommandAndReturn("mv", "", service.PodmanServiceName, "/etc/systemd/system")
 		if err == nil {
 			output = fmt.Sprintf("%s\n%s", output, result)
-			if result, err = s.Execer.RunCommandAndReturn("systemctl", "", "enable", "container-atest.service"); err == nil {
+			if result, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "enable", service.PodmanServiceName); err == nil {
 				output = fmt.Sprintf("%s\n%s", output, result)
 			}
 		}
@@ -447,6 +456,6 @@ func (s *podmanService) Uninstall() (output string, err error) {
 }
 
 func (s *podmanService) uninstallService() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("systemctl", "", "disable", "container-atest.service")
+	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "disable", service.PodmanServiceName)
 	return
 }

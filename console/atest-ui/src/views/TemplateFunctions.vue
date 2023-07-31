@@ -23,9 +23,9 @@ function queryFuncs() {
 
 <template>
     <el-affix position="bottom" :offset="20">
-        <el-button type="primary" @click="dialogVisible = !dialogVisible">Tool Box</el-button>
+        <el-button type="primary" @click="dialogVisible = !dialogVisible"
+            data-intro="You can search your desired template functions.">Tool Box</el-button>
     </el-affix>
-
 
     <el-dialog v-model="dialogVisible" title="Template Functions Query" width="40%" draggable destroy-on-close>
         <template #footer>

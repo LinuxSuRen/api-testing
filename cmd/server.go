@@ -3,11 +3,11 @@ package cmd
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -19,43 +19,51 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-func createServerCmd(gRPCServer gRPCServer, httpServer server.HTTPServer) (c *cobra.Command) {
+func createServerCmd(execer fakeruntime.Execer, gRPCServer gRPCServer, httpServer server.HTTPServer) (c *cobra.Command) {
 	opt := &serverOption{
 		gRPCServer: gRPCServer,
 		httpServer: httpServer,
+		execer:     execer,
 	}
 	c = &cobra.Command{
-		Use:   "server",
-		Short: "Run as a server mode",
-		RunE:  opt.runE,
+		Use:     "server",
+		Short:   "Run as a server mode",
+		PreRunE: opt.preRunE,
+		RunE:    opt.runE,
 	}
 	flags := c.Flags()
 	flags.IntVarP(&opt.port, "port", "p", 7070, "The RPC server port")
 	flags.IntVarP(&opt.httpPort, "http-port", "", 8080, "The HTTP server port")
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
-	flags.StringVarP(&opt.storage, "storage", "", "local", "The storage type, local or etcd")
 	flags.StringArrayVarP(&opt.localStorage, "local-storage", "", []string{"*.yaml"}, "The local storage path")
-	flags.StringVarP(&opt.grpcStorage, "grpc-storage", "", "", "The grpc storage address")
 	flags.StringVarP(&opt.consolePath, "console-path", "", "", "The path of the console")
+	flags.StringVarP(&opt.configDir, "config-dir", "", "$HOME/.config/atest", "The config directory")
 	return
 }
 
 type serverOption struct {
 	gRPCServer gRPCServer
 	httpServer server.HTTPServer
+	execer     fakeruntime.Execer
 
 	port         int
 	httpPort     int
 	printProto   bool
-	storage      string
 	localStorage []string
-	grpcStorage  string
 	consolePath  string
+	configDir    string
+}
+
+func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
+	o.configDir = os.ExpandEnv(o.configDir)
+	err = o.execer.MkdirAll(o.configDir, 0755)
+	return
 }
 
 func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
@@ -79,30 +87,15 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	var loader testing.Writer
-	switch o.storage {
-	case "local":
-		loader = testing.NewFileWriter("")
-		for _, storage := range o.localStorage {
-			if err = loader.Put(storage); err != nil {
-				break
-			}
+	loader := testing.NewFileWriter("")
+	for _, storage := range o.localStorage {
+		if loadErr := loader.Put(storage); loadErr != nil {
+			cmd.PrintErrf("failed to load %s, error: %v\n", storage, loadErr)
+			continue
 		}
-	case "grpc":
-		if o.grpcStorage == "" {
-			err = errors.New("grpc storage address is required")
-			return
-		}
-		loader, err = remote.NewGRPCLoader(o.grpcStorage)
-	default:
-		err = errors.New("invalid storage type")
 	}
 
-	if err != nil {
-		return
-	}
-
-	removeServer := server.NewRemoteServer(loader)
+	removeServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), o.configDir)
 	s := o.gRPCServer
 	go func() {
 		if gRPCServer, ok := s.(reflection.GRPCServer); ok {
@@ -113,13 +106,14 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		s.Serve(lis)
 	}()
 
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc)) //  runtime.WithIncomingHeaderMatcher(func(key string) (s string, b bool) {
 	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, removeServer)
 	if err == nil {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
 		o.httpServer.WithHandler(mux)
+		log.Printf("HTTP server listening at %v", httplis.Addr())
 		err = o.httpServer.Serve(httplis)
 	}
 	return

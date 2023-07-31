@@ -31,7 +31,7 @@ spec:
               topologyKey: kubernetes.io/hostname
             weight: 5
       containers:
-      - image: ghcr.io/linuxsuren/api-testing
+      - image: ghcr.io/linuxsuren/api-testing:master
         name: server
         imagePullPolicy: Always
         livenessProbe:
@@ -52,7 +52,25 @@ spec:
             memory: 512Mi
           requests:
             cpu: 100m
-            memory: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: config
+          mountPath: /root/.config/atest/
+      - image: ghcr.io/linuxsuren/api-testing:master
+        name: extension-orm
+        command: [atest-store-orm]
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+      volumes:
+      - name: config
+        configMap:
+          name: api-testing
 ---
 apiVersion: v1
 kind: Service
@@ -60,10 +78,6 @@ metadata:
   name: api-testing
 spec:
   ports:
-  - name: grpc
-    port: 7070
-    protocol: TCP
-    targetPort: 7070
   - name: web
     port: 8080
     protocol: TCP
@@ -72,3 +86,35 @@ spec:
     app: api-testing
   sessionAffinity: None
   type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-testing
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-testing
+            port:
+              number: 8080
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: api-testing
+data:
+  stores.yaml: |
+    - name: db
+      kind:
+        name: database
+        url: localhost:7071
+      url: localhost:4000
+      username: root
+      properties:
+        database: test

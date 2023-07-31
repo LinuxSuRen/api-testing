@@ -6,6 +6,7 @@ import (
 	context "context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	reflect "reflect"
 	"regexp"
@@ -19,17 +20,24 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	"github.com/linuxsuren/api-testing/sample"
+	"google.golang.org/grpc/metadata"
 	"gopkg.in/yaml.v3"
 )
 
 type server struct {
 	UnimplementedRunnerServer
-	loader testing.Writer
+	loader             testing.Writer
+	storeWriterFactory testing.StoreWriterFactory
+	configDir          string
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer(loader testing.Writer) RunnerServer {
-	return &server{loader: loader}
+func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, configDir string) RunnerServer {
+	return &server{
+		loader:             loader,
+		storeWriterFactory: storeWriterFactory,
+		configDir:          configDir,
+	}
 }
 
 func withDefaultValue(old, defVal any) any {
@@ -90,6 +98,33 @@ func resetEnv(oldEnv map[string]string) {
 	for key, val := range oldEnv {
 		os.Setenv(key, val)
 	}
+}
+
+func (s *server) getLoader(ctx context.Context) (loader testing.Writer) {
+	var ok bool
+	loader = s.loader
+
+	var mdd metadata.MD
+	if mdd, ok = metadata.FromIncomingContext(ctx); ok {
+		storeNameMeta := mdd.Get(HeaderKeyStoreName)
+		if len(storeNameMeta) > 0 {
+			storeName := storeNameMeta[0]
+			if storeName == "local" {
+				return
+			}
+
+			store, err := testing.NewStoreFactory(s.configDir).GetStore(storeName)
+			if err == nil && store != nil {
+				loader, err = s.storeWriterFactory.NewInstance(*store)
+				if err != nil {
+					fmt.Println("failed to new grpc loader from store", store.Name, err)
+				}
+			} else {
+				fmt.Println("failed to get store", storeName, err)
+			}
+		}
+	}
+	return
 }
 
 // Run start to run the test task
@@ -171,12 +206,13 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 }
 
 func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err error) {
+	loader := s.getLoader(ctx)
 	reply = &Suites{
 		Data: make(map[string]*Items),
 	}
 
 	var suites []testing.TestSuite
-	if suites, err = s.loader.ListTestSuite(); err == nil && suites != nil {
+	if suites, err = loader.ListTestSuite(); err == nil && suites != nil {
 		for _, suite := range suites {
 			items := &Items{}
 			for _, item := range suite.Items {
@@ -190,13 +226,15 @@ func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err e
 }
 
 func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
-	err = s.loader.CreateSuite(in.Name, in.Api)
+	loader := s.getLoader(ctx)
+	err = loader.CreateSuite(in.Name, in.Api)
 	return
 }
 
 func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (result *TestSuite, err error) {
+	loader := s.getLoader(ctx)
 	var suite *testing.TestSuite
-	if suite, _, err = s.loader.GetSuite(in.Name); err == nil && suite != nil {
+	if suite, _, err = loader.GetSuite(in.Name); err == nil && suite != nil {
 		result = &TestSuite{
 			Name:  suite.Name,
 			Api:   suite.API,
@@ -227,19 +265,22 @@ func convertToTestingTestSuite(in *TestSuite) (suite *testing.TestSuite) {
 
 func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
-	err = s.loader.UpdateSuite(*convertToTestingTestSuite(in))
+	loader := s.getLoader(ctx)
+	err = loader.UpdateSuite(*convertToTestingTestSuite(in))
 	return
 }
 
 func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
-	err = s.loader.DeleteSuite(in.Name)
+	loader := s.getLoader(ctx)
+	err = loader.DeleteSuite(in.Name)
 	return
 }
 
 func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (result *Suite, err error) {
 	var items []testing.TestCase
-	if items, err = s.loader.ListTestCase(in.Name); err == nil {
+	loader := s.getLoader(ctx)
+	if items, err = loader.ListTestCase(in.Name); err == nil {
 		result = &Suite{}
 		for _, item := range items {
 			result.Items = append(result.Items, convertToGRPCTestCase(item))
@@ -250,7 +291,8 @@ func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (resul
 
 func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *TestCase, err error) {
 	var result testing.TestCase
-	if result, err = s.loader.GetTestCase(in.Suite, in.Testcase); err == nil {
+	loader := s.getLoader(ctx)
+	if result, err = loader.GetTestCase(in.Suite, in.Testcase); err == nil {
 		reply = convertToGRPCTestCase(result)
 	}
 	return
@@ -286,7 +328,8 @@ func convertToGRPCTestCase(testCase testing.TestCase) (result *TestCase) {
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
 	var targetTestSuite testing.TestSuite
 
-	targetTestSuite, err = s.loader.GetTestSuite(in.Suite, true)
+	loader := s.getLoader(ctx)
+	targetTestSuite, err = loader.GetTestSuite(in.Suite, true)
 	if err != nil {
 		err = nil
 		result = &TestCaseResult{
@@ -397,7 +440,8 @@ func convertToTestingTestCase(in *TestCase) (result testing.TestCase) {
 
 func (s *server) CreateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
-	err = s.loader.CreateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
+	loader := s.getLoader(ctx)
+	err = loader.CreateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
 	return
 }
 
@@ -407,12 +451,14 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 		err = errors.New("data is required")
 		return
 	}
-	err = s.loader.UpdateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
+	loader := s.getLoader(ctx)
+	err = loader.UpdateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
 	return
 }
 
 func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (reply *HelloReply, err error) {
-	err = s.loader.DeleteTestCase(in.Suite, in.Testcase)
+	loader := s.getLoader(ctx)
+	err = loader.DeleteTestCase(in.Suite, in.Testcase)
 	return
 }
 
@@ -437,7 +483,8 @@ func (s *server) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity) (r
 	reply = &TestCases{}
 
 	var suite *testing.TestSuite
-	if suite, _, err = s.loader.GetSuite(in.Name); err != nil {
+	loader := s.loader
+	if suite, _, err = loader.GetSuite(in.Name); err != nil {
 		return
 	}
 
@@ -480,6 +527,62 @@ func (s *server) FunctionsQuery(ctx context.Context, in *SimpleQuery) (reply *Pa
 			})
 		}
 	}
+	return
+}
+// FunctionsQueryStream works like FunctionsQuery but is implemented in bidirectional streaming
+func (s *server) FunctionsQueryStream(srv Runner_FunctionsQueryStreamServer) error {
+	ctx := srv.Context()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			in, err := srv.Recv()
+			if err != nil {
+				if err == io.EOF {
+					return nil
+				}
+				return err
+			}
+			reply := &Pairs{}
+			in.Name = strings.ToLower(in.Name)
+
+			for name, fn := range render.FuncMap() {
+				lowerCaseName := strings.ToLower(name)
+				if in.Name == "" || strings.Contains(lowerCaseName, in.Name) {
+					reply.Data = append(reply.Data, &Pair{
+						Key:   name,
+						Value: fmt.Sprintf("%v", reflect.TypeOf(fn)),
+					})
+				}
+			}
+			if err := srv.Send(reply); err != nil {
+				return nil
+			}
+		}
+	}
+}
+
+func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err error) {
+	storeFactory := testing.NewStoreFactory(s.configDir)
+	var stores []testing.Store
+	if stores, err = storeFactory.GetStores(); err == nil {
+		reply = &Stores{
+			Data: make([]*Store, 0),
+		}
+		for _, item := range stores {
+			reply.Data = append(reply.Data, ToGRPCStore(item))
+		}
+	}
+	return
+}
+func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err error) {
+	return
+}
+func (s *server) DeleteStore(ctx context.Context, in *Store) (reply *Store, err error) {
+	return
+}
+func (s *server) VerifyStore(ctx context.Context, in *SimpleQuery) (reply *CommonResult, err error) {
 	return
 }
 

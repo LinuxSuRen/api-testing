@@ -5,27 +5,37 @@ option go_package = "github.com/linuxsuren/api-testing/pkg/server";
 package server;
 
 service Runner {
+    // belong to a specific store
     rpc Run (TestTask) returns (TestResult) {}
-    rpc Sample(Empty) returns (HelloReply) {}
-    rpc GetVersion(Empty) returns (HelloReply) {}
 
     rpc GetSuites(Empty) returns (Suites) {}
-
     rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {}
     rpc GetTestSuite(TestSuiteIdentity) returns (TestSuite) {}
     rpc UpdateTestSuite(TestSuite) returns (HelloReply) {}
     rpc DeleteTestSuite(TestSuiteIdentity) returns (HelloReply) {}
 
+    // test cases related
     rpc ListTestCase(TestSuiteIdentity) returns (Suite) {}
+    rpc GetSuggestedAPIs(TestSuiteIdentity) returns (TestCases) {}
     rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {}
     rpc GetTestCase(TestCaseIdentity) returns (TestCase) {}
     rpc CreateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
 
+    // common services
     rpc PopularHeaders(Empty) returns (Pairs) {}
-    rpc GetSuggestedAPIs(TestSuiteIdentity) returns (TestCases) {}
     rpc FunctionsQuery(SimpleQuery) returns (Pairs) {}
+    rpc FunctionsQueryStream(stream SimpleQuery) returns (stream Pairs) {}
+    rpc GetVersion(Empty) returns (HelloReply) {}
+    rpc Sample(Empty) returns (HelloReply) {}
+
+    // stores related interfaces
+    rpc GetStoreKinds(Empty) returns (StoreKinds) {}
+    rpc GetStores(Empty) returns (Stores) {}
+    rpc CreateStore(Store) returns (Store) {}
+    rpc DeleteStore(Store) returns (Store) {}
+    rpc VerifyStore(SimpleQuery) returns (CommonResult) {}
 }
 
 message Suites {
@@ -49,8 +59,8 @@ message TestSuite {
 }
 
 message APISpec {
-    string kind = 1;
-    string url = 2;
+  string kind = 1;
+  string url = 2;
 }
 
 message TestSuiteIdentity {
@@ -59,11 +69,11 @@ message TestSuiteIdentity {
 }
 
 message TestTask {
-    string data = 1;
-    string kind = 2;
-    string caseName = 3;
-    string level = 4;
-    map<string, string> env = 5;
+  string data = 1;
+  string kind = 2;
+  string caseName = 3;
+  string level = 4;
+  map<string, string> env = 5;
 }
 
 message TestResult {
@@ -94,8 +104,9 @@ message TestCases {
 
 message TestCase {
   string name = 1;
-  Request request = 2;
-  Response response = 3;
+  string suiteName = 2;
+  Request request = 3;
+  Response response = 4;
 }
 
 message Request {
@@ -136,6 +147,34 @@ message Pairs {
 
 message SimpleQuery {
   string name = 1;
+}
+
+message Stores {
+  repeated Store data = 1;
+}
+
+message Store {
+  string name = 1;
+  string description = 2;
+  string url = 3;
+  string username = 4;
+  string password = 5;
+  repeated Pair properties = 6;
+  StoreKind kind = 7;
+}
+
+message StoreKinds {
+  repeated StoreKind data = 1;
+}
+
+message StoreKind {
+  string name = 1;
+  string url = 2;
+}
+
+message CommonResult {
+  bool success = 1;
+  string message = 2;
 }
 
 message Empty {

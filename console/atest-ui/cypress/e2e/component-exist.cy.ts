@@ -4,14 +4,21 @@
 console.log(Cypress.browser)
 describe('Suite Manage', () => {
   const suiteName = userID_Alpha()
+  const store = "local"
   const sampleAPIAddress = "http://foo"
   console.log(sampleAPIAddress)
   
   it('Create Suite', () => {
     cy.visit('/')
+    cy.get('.introjs-skipbutton').click()
     cy.contains('span', 'Tool Box')
 
     cy.get('[test-id="open-new-suite-dialog"]').click()
+
+    const storeSelect = cy.get('[test-id=suite-form-store] input')
+    storeSelect.click()
+    storeSelect.type(store)
+    storeSelect.trigger('keydown', {key: 'Enter'})
 
     cy.get('[test-id=suite-form-name]').should('be.visible').type(suiteName)
     cy.get('[test-id=suite-form-api]').should('be.visible').type(sampleAPIAddress)
@@ -23,6 +30,7 @@ describe('Suite Manage', () => {
   const caseAPI = "/api/v2"
   it('New Case', () => {
     cy.visit('/')
+    cy.get('.introjs-skipbutton').click()
     cy.get('span').contains(suiteName).should('be.visible').click()
 
     cy.get('[test-id="open-new-case-dialog"]').click()
@@ -37,6 +45,7 @@ describe('Suite Manage', () => {
 
   it('Find Case', () => {
     cy.visit('/')
+    cy.get('.introjs-skipbutton').click()
     const searchInput = cy.get('[test-id="search"]')
     searchInput.type(caseName)
     searchInput.trigger('keydown', {key: 'Enter'})
@@ -50,6 +59,7 @@ describe('Suite Manage', () => {
 
   it('Delete Suite', () => {
     cy.visit('/')
+    cy.get('.introjs-skipbutton').click()
     cy.get('span').contains(suiteName).should('be.visible').click()
     cy.get('[test-id="suite-editor-api"]').should('have.value', sampleAPIAddress)
     cy.get('[test-id="suite-del-but"]').click()

@@ -23,4 +23,5 @@ type TestSuite struct {
 	API      string
 	SpecKind string
 	SpecURL  string
+	Param    string
 }

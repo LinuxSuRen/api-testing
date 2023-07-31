@@ -4,25 +4,32 @@ import TestSuite from './views/TestSuite.vue'
 import TemplateFunctions from './views/TemplateFunctions.vue'
 import { reactive, ref, watch } from 'vue'
 import { ElTree } from 'element-plus'
-import type { FormInstance } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 import { Edit } from '@element-plus/icons-vue'
+import type { Suite } from './types'
 
 interface Tree {
   id: string
   label: string
   parent: string
+  store: string
   children?: Tree[]
 }
 
 const testCaseName = ref('')
 const testSuite = ref('')
+const store = ref('')
 const handleNodeClick = (data: Tree) => {
   if (data.children) {
     viewName.value = 'testsuite'
     testSuite.value = data.label
+    store.value = data.store
 
     const requestOptions = {
       method: 'POST',
+      headers: {
+        'X-Store-Name': data.store
+      },
       body: JSON.stringify({
         name: data.label
       })
@@ -36,6 +43,7 @@ const handleNodeClick = (data: Tree) => {
             data.children?.push({
               id: data.label + item.name,
               label: item.name,
+              store: data.store,
               parent: data.label
             } as Tree)
           })
@@ -44,6 +52,7 @@ const handleNodeClick = (data: Tree) => {
   } else {
     testCaseName.value = data.label
     testSuite.value = data.parent
+    store.value = data.store
     viewName.value = 'testcase'
   }
 }
@@ -52,14 +61,16 @@ const data = ref([] as Tree[])
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const currentNodekey = ref('')
 
-function loadTestSuites() {
+function loadTestSuites(store: string) {
   const requestOptions = {
-    method: 'POST'
+    method: 'POST',
+    headers: {
+      'X-Store-Name': store
+    },
   }
   fetch('/server.Runner/GetSuites', requestOptions)
     .then((response) => response.json())
     .then((d) => {
-      data.value = [] as Tree[]
       if (!d.data) {
         return
       }
@@ -67,6 +78,7 @@ function loadTestSuites() {
         let suite = {
           id: k,
           label: k,
+          store: store,
           children: [] as Tree[]
         } as Tree
 
@@ -74,6 +86,7 @@ function loadTestSuites() {
           suite.children?.push({
             id: k + item,
             label: item,
+            store: store,
             parent: k
           } as Tree)
         })
@@ -95,40 +108,76 @@ function loadTestSuites() {
       }
     })
 }
-loadTestSuites()
+
+interface Store {
+  name: string,
+  description: string,
+}
+
+const stores = ref([] as Store[])
+function loadStores() {
+  const requestOptions = {
+    method: 'POST',
+  }
+  fetch('/server.Runner/GetStores', requestOptions)
+    .then((response) => response.json())
+    .then((d) => {
+      stores.value = d.data
+      data.value = [] as Tree[]
+
+      d.data.forEach((item: any) => {
+        loadTestSuites(item.name)
+      })
+    })
+}
+loadStores()
 
 const dialogVisible = ref(false)
 const suiteCreatingLoading = ref(false)
 const suiteFormRef = ref<FormInstance>()
 const testSuiteForm = reactive({
   name: '',
-  api: ''
+  api: '',
+  store: ''
 })
 
 function openTestSuiteCreateDialog() {
   dialogVisible.value = true
 }
 
-const submitForm = (formEl: FormInstance | undefined) => {
+const rules = reactive<FormRules<Suite>>({
+  name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
+  store: [{ required: true, message: 'Location is required', trigger: 'blur' }]
+})
+const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  suiteCreatingLoading.value = true
+  console.log(formEl)
+  await formEl.validate((valid: boolean, fields) => {
+    console.log(valid, fields)
+    if (valid) {
+      suiteCreatingLoading.value = true
 
-  const requestOptions = {
-    method: 'POST',
-    body: JSON.stringify({
-      name: testSuiteForm.name,
-      api: testSuiteForm.api
-    })
-  }
+      const requestOptions = {
+        method: 'POST',
+        headers: {
+          'X-Store-Name': testSuiteForm.store
+        },
+        body: JSON.stringify({
+          name: testSuiteForm.name,
+          api: testSuiteForm.api
+        })
+      }
 
-  fetch('/server.Runner/CreateTestSuite', requestOptions)
-    .then((response) => response.json())
-    .then(() => {
-      suiteCreatingLoading.value = false
-      loadTestSuites()
-    })
-
-  dialogVisible.value = false
+      fetch('/server.Runner/CreateTestSuite', requestOptions)
+        .then((response) => response.json())
+        .then(() => {
+          suiteCreatingLoading.value = false
+          loadStores()
+          dialogVisible.value = false
+          formEl.resetFields()
+        })
+    }
+  })
 }
 
 const filterText = ref('')
@@ -144,10 +193,12 @@ const viewName = ref('testcase')
 </script>
 
 <template>
-  <div class="common-layout">
-    <el-container style="height: 100vh">
+  <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
+    <el-container style="height: 100%">
       <el-aside width="200px">
-        <el-button type="primary" @click="openTestSuiteCreateDialog" test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
+        <el-button type="primary" @click="openTestSuiteCreateDialog"
+          data-intro="Click here to create a new test suite"
+          test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
         <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
 
         <el-tree
@@ -160,20 +211,25 @@ const viewName = ref('testcase')
           node-key="id"
           :filter-node-method="filterTestCases"
           @node-click="handleNodeClick"
+          data-intro="This is the test suite tree. You can click the test suite to edit it."
         />
       </el-aside>
 
       <el-main>
         <TestCase
           v-if="viewName === 'testcase'"
+          :store="store"
           :suite="testSuite"
           :name="testCaseName"
-          @updated="loadTestSuites"
+          @updated="loadStores"
+          data-intro="This is the test case editor. You can edit the test case here."
         />
         <TestSuite
           v-else-if="viewName === 'testsuite'"
           :name="testSuite"
-          @updated="loadTestSuites"
+          :store="store"
+          @updated="loadStores"
+          data-intro="This is the test suite editor. You can edit the test suite here."
         />
       </el-main>
     </el-container>
@@ -182,7 +238,25 @@ const viewName = ref('testcase')
   <el-dialog v-model="dialogVisible" title="Create Test Suite" width="30%" draggable>
     <template #footer>
       <span class="dialog-footer">
-        <el-form ref="suiteFormRef" status-icon label-width="120px" class="demo-ruleForm">
+        <el-form
+          :rules="rules"
+          :model="testSuiteForm"
+          ref="suiteFormRef"
+          status-icon label-width="120px">
+          <el-form-item label="Location" prop="store">
+            <el-select v-model="testSuiteForm.store" class="m-2"
+              test-id="suite-form-store"
+              filterable=true
+              default-first-option=true
+              placeholder="Storage Location" size="middle">
+              <el-option
+                v-for="item in stores"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
+              />
+            </el-select>
+          </el-form-item>
           <el-form-item label="Name" prop="name">
             <el-input v-model="testSuiteForm.name" test-id="suite-form-name" />
           </el-form-item>
@@ -211,7 +285,9 @@ header {
   line-height: 1.5;
   max-height: 100vh;
 }
-
+.common-layout {
+  height: 100%;
+}
 .logo {
   display: block;
   margin: 0 auto 2rem;

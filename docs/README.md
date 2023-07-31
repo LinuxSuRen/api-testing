@@ -35,6 +35,16 @@ Please see the following example usage:
 atest service start -m podman --version master
 ```
 
+## Run in k3s
+
+```shell
+sudo k3s server --write-kubeconfig-mode 666
+
+k3s kubectl apply -k sample/kubernetes/default
+
+kustomize build sample/kubernetes/docker.io/ | k3s kubectl apply -f -
+```
+
 ## Storage
 There are multiple storage backends supported. See the status from the list:
 
@@ -74,16 +84,29 @@ tiup playground --db.host 0.0.0.0
 ```
 
 ```shell
-# create a network
-# start the server with gRPC storage
-podman run -p 8080:8080 ghcr.io/linuxsuren/api-testing:master \
-    atest server --storage grpc --grpc-storage 192.168.1.98:7071 --console-path=/var/www/html
-# start the gRPC storage which connect to an ORM database
-podman run -p 7071:7071 ghcr.io/linuxsuren/api-testing:master \
-    atest-store-orm --address 192.168.1.98:4000 --user root --database test
-```
+# create a config file
+mkdir bin
+echo "- name: db
+  kind:
+    name: database
+    url: localhost:7071
+  url: localhost:4000
+  username: root
+  properties:
+    database: test" > bin/stores.yaml
 
-> Please don't forget to replace `192.168.1.98` to your own IP address.
+# start the server with gRPC storage
+podman run -p 8080:8080 -v bin:var/data/atest \
+    --network host \
+    ghcr.io/linuxsuren/api-testing:master \
+    atest server --console-path=/var/www/html \
+    --config-dir=/var/data/atest
+
+# start the gRPC storage which ready to connect to an ORM database
+podman run -p 7071:7071 \
+    --network host \
+    ghcr.io/linuxsuren/api-testing:master atest-store-orm
+```
 
 ## Extensions
 Developers could have a storage extension. Implement a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.

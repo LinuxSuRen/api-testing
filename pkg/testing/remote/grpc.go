@@ -3,22 +3,30 @@ package remote
 import (
 	context "context"
 
+	server "github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"google.golang.org/grpc"
 )
 
 type gRPCLoader struct {
-	address string
-	client  LoaderClient
+	store  *testing.Store
+	client LoaderClient
+	ctx    context.Context
 }
 
-// NewGRPCLoader creates a new gRPC loader
-func NewGRPCLoader(address string) (writer testing.Writer, err error) {
+func NewGRPCloaderFromStore() testing.StoreWriterFactory {
+	return &gRPCLoader{}
+}
+
+func (g *gRPCLoader) NewInstance(store testing.Store) (writer testing.Writer, err error) {
+	address := store.Kind.URL
+
 	var conn *grpc.ClientConn
 	if conn, err = grpc.Dial(address, grpc.WithInsecure()); err == nil {
 		writer = &gRPCLoader{
-			address: address,
-			client:  NewLoaderClient(conn),
+			store:  &store,
+			ctx:    WithStoreContext(context.Background(), &store),
+			client: NewLoaderClient(conn),
 		}
 	}
 	return
@@ -54,8 +62,8 @@ func (g *gRPCLoader) Reset() {
 }
 
 func (g *gRPCLoader) ListTestCase(suite string) (testcases []testing.TestCase, err error) {
-	var testCases *TestCases
-	testCases, err = g.client.ListTestCases(context.Background(), &TestSuite{
+	var testCases *server.TestCases
+	testCases, err = g.client.ListTestCases(g.ctx, &TestSuite{
 		Name: suite,
 	})
 
@@ -70,8 +78,8 @@ func (g *gRPCLoader) ListTestCase(suite string) (testcases []testing.TestCase, e
 	return
 }
 func (g *gRPCLoader) GetTestCase(suite, name string) (testcase testing.TestCase, err error) {
-	var result *TestCase
-	result, err = g.client.GetTestCase(context.Background(), &TestCase{
+	var result *server.TestCase
+	result, err = g.client.GetTestCase(g.ctx, &server.TestCase{
 		Name:      name,
 		SuiteName: suite,
 	})
@@ -84,19 +92,19 @@ func (g *gRPCLoader) GetTestCase(suite, name string) (testcase testing.TestCase,
 func (g *gRPCLoader) CreateTestCase(suite string, testcase testing.TestCase) (err error) {
 	payload := convertToGRPCTestCase(testcase)
 	payload.SuiteName = suite
-	_, err = g.client.CreateTestCase(context.Background(), payload)
+	_, err = g.client.CreateTestCase(g.ctx, payload)
 	return
 }
 
 func (g *gRPCLoader) UpdateTestCase(suite string, testcase testing.TestCase) (err error) {
 	payload := convertToGRPCTestCase(testcase)
 	payload.SuiteName = suite
-	_, err = g.client.UpdateTestCase(context.Background(), payload)
+	_, err = g.client.UpdateTestCase(g.ctx, payload)
 	return
 }
 
 func (g *gRPCLoader) DeleteTestCase(suite, testcase string) (err error) {
-	_, err = g.client.DeleteTestCase(context.Background(), &TestCase{
+	_, err = g.client.DeleteTestCase(g.ctx, &server.TestCase{
 		Name:      testcase,
 		SuiteName: suite,
 	})
@@ -105,7 +113,7 @@ func (g *gRPCLoader) DeleteTestCase(suite, testcase string) (err error) {
 
 func (g *gRPCLoader) ListTestSuite() (suites []testing.TestSuite, err error) {
 	var items *TestSuites
-	items, err = g.client.ListTestSuite(context.Background(), &Empty{})
+	items, err = g.client.ListTestSuite(g.ctx, &server.Empty{})
 	if err == nil && items != nil {
 		for _, item := range items.Data {
 			suites = append(suites, *convertToNormalTestSuite(item))
@@ -116,7 +124,7 @@ func (g *gRPCLoader) ListTestSuite() (suites []testing.TestSuite, err error) {
 
 func (g *gRPCLoader) GetTestSuite(name string, full bool) (suite testing.TestSuite, err error) {
 	var result *TestSuite
-	if result, err = g.client.GetTestSuite(context.Background(),
+	if result, err = g.client.GetTestSuite(g.ctx,
 		&TestSuite{Name: name, Full: full}); err == nil {
 		suite = testing.TestSuite{
 			Name: result.Name,
@@ -133,7 +141,7 @@ func (g *gRPCLoader) GetTestSuite(name string, full bool) (suite testing.TestSui
 }
 
 func (g *gRPCLoader) CreateSuite(name, api string) (err error) {
-	_, err = g.client.CreateTestSuite(context.Background(), &TestSuite{
+	_, err = g.client.CreateTestSuite(g.ctx, &TestSuite{
 		Name: name,
 		Api:  api,
 	})
@@ -142,7 +150,7 @@ func (g *gRPCLoader) CreateSuite(name, api string) (err error) {
 
 func (g *gRPCLoader) GetSuite(name string) (reply *testing.TestSuite, _ string, err error) {
 	var suite *TestSuite
-	if suite, err = g.client.GetTestSuite(context.Background(),
+	if suite, err = g.client.GetTestSuite(g.ctx,
 		&TestSuite{Name: name}); err != nil {
 		return
 	}
@@ -152,12 +160,12 @@ func (g *gRPCLoader) GetSuite(name string) (reply *testing.TestSuite, _ string, 
 }
 
 func (g *gRPCLoader) UpdateSuite(suite testing.TestSuite) (err error) {
-	_, err = g.client.UpdateTestSuite(context.Background(), convertToGRPCTestSuite(&suite))
+	_, err = g.client.UpdateTestSuite(g.ctx, convertToGRPCTestSuite(&suite))
 	return
 }
 
 func (g *gRPCLoader) DeleteSuite(name string) (err error) {
-	_, err = g.client.DeleteTestSuite(context.Background(), &TestSuite{
+	_, err = g.client.DeleteTestSuite(g.ctx, &TestSuite{
 		Name: name,
 	})
 	return
