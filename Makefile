@@ -45,7 +45,10 @@ test-collector:
 test-store-orm:
 	go test github.com/linuxsuren/api-testing/extensions/store-orm/./... -cover -v -coverprofile=store-orm-coverage.out
 	go tool cover -func=store-orm-coverage.out
-test-all-backend: test test-collector test-store-orm
+test-store-s3:
+	go test github.com/linuxsuren/api-testing/extensions/store-s3/./... -cover -v -coverprofile=store-s3-coverage.out
+	go tool cover -func=store-s3-coverage.out
+test-all-backend: test test-collector test-store-orm test-store-s3
 test-all: test-all-backend test-ui
 
 install-precheck:
