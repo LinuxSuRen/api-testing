@@ -3,8 +3,12 @@ package server
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"reflect"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	_ "embed"
@@ -13,6 +17,7 @@ import (
 	atesting "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/sample"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/metadata"
 )
 
 const (
@@ -469,6 +474,41 @@ func TestFunctionsQuery(t *testing.T) {
 	})
 }
 
+func TestFunctionsQueryStream(t *testing.T) {
+	ctx := context.Background()
+	server := getRemoteServerInTempDir()
+
+	fakess := &fakeServerStream{
+		p:      new(uint32),
+		lock:   sync.Mutex{},
+		Ctx:    ctx,
+		Inputs: []any{&SimpleQuery{Name: "randNumeric"}, &SimpleQuery{Name: "randnumer"}},
+		Outpus: []any{},
+	}
+	err := server.FunctionsQueryStream(&runnerFunctionsQueryStreamServer{fakess})
+	t.Run("match outputs length", func(t *testing.T) {
+		if assert.NoError(t, err) {
+			assert.Equal(t, 2, len(fakess.Outpus))
+		}
+	})
+	t.Run("match exactly", func(t *testing.T) {
+		if assert.NoError(t, err) {
+			reply := fakess.Outpus[0]
+			assert.IsType(t, &Pairs{}, reply)
+			assert.Equal(t, 1, len(reply.(*Pairs).Data))
+			assert.Equal(t, "randNumeric", reply.(*Pairs).Data[0].Key)
+			assert.Equal(t, "func(int) string", reply.(*Pairs).Data[0].Value)
+		}
+	})
+	t.Run("ignore letter case", func(t *testing.T) {
+		if assert.NoError(t, err) {
+			reply := fakess.Outpus[1]
+			assert.IsType(t, &Pairs{}, reply)
+			assert.Equal(t, 1, len(reply.(*Pairs).Data))
+		}
+	})
+}
+
 func getRemoteServerInTempDir() (server RunnerServer) {
 	writer := atesting.NewFileWriter(os.TempDir())
 	server = NewRemoteServer(writer, nil, "")
@@ -482,3 +522,61 @@ var simpleSuite string
 var simpleTestCase string
 
 const urlFoo = "http://foo"
+
+type fakeServerStream struct {
+	p      *uint32
+	lock   sync.Mutex
+	Ctx    context.Context
+	Inputs []any
+	Outpus []any
+}
+
+func (s *fakeServerStream) SetInputs(in []any) {
+	s.Inputs = in
+	s.Outpus = make([]any, len(in))
+}
+
+func (s *fakeServerStream) SetHeader(metadata.MD) error { return nil }
+
+func (s *fakeServerStream) SendHeader(metadata.MD) error { return nil }
+
+func (s *fakeServerStream) SetTrailer(metadata.MD) {}
+
+func (s *fakeServerStream) Context() context.Context { return s.Ctx }
+
+func (s *fakeServerStream) SendMsg(m interface{}) error {
+	s.lock.Lock()
+	s.Outpus = append(s.Outpus, m)
+	s.lock.Unlock()
+	return nil
+}
+
+func (s *fakeServerStream) RecvMsg(m interface{}) error {
+	defer atomic.AddUint32(s.p, 1)
+	index := atomic.LoadUint32(s.p)
+	if index == uint32(len(s.Inputs)) {
+		return io.EOF
+	}
+
+	mv := reflect.ValueOf(m)
+	if mv.Kind() == reflect.Pointer && !mv.IsNil() {
+		mv = mv.Elem()
+	} else {
+		return fmt.Errorf("cannot receive to %v", m)
+	}
+
+	iv := reflect.ValueOf(s.Inputs[index])
+	if iv.Kind() == reflect.Pointer && !iv.IsNil() {
+		iv = iv.Elem()
+	} else {
+		return fmt.Errorf("invalid fake input at index %v", index)
+	}
+
+	if mv.CanSet() && mv.Type() == iv.Type() {
+		mv.Set(iv)
+	} else {
+		return fmt.Errorf("cannot set fake input to %v at index %v", m, index)
+	}
+
+	return nil
+}
