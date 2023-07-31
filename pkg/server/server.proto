@@ -26,6 +26,7 @@ service Runner {
     // common services
     rpc PopularHeaders(Empty) returns (Pairs) {}
     rpc FunctionsQuery(SimpleQuery) returns (Pairs) {}
+    rpc FunctionsQueryStream(stream SimpleQuery) returns (stream Pairs) {}
     rpc GetVersion(Empty) returns (HelloReply) {}
     rpc Sample(Empty) returns (HelloReply) {}
 

@@ -6,6 +6,7 @@ import (
 	context "context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	reflect "reflect"
 	"regexp"
@@ -527,6 +528,39 @@ func (s *server) FunctionsQuery(ctx context.Context, in *SimpleQuery) (reply *Pa
 		}
 	}
 	return
+}
+// FunctionsQueryStream works like FunctionsQuery but is implemented in bidirectional streaming
+func (s *server) FunctionsQueryStream(srv Runner_FunctionsQueryStreamServer) error {
+	ctx := srv.Context()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			in, err := srv.Recv()
+			if err != nil {
+				if err == io.EOF {
+					return nil
+				}
+				return err
+			}
+			reply := &Pairs{}
+			in.Name = strings.ToLower(in.Name)
+
+			for name, fn := range render.FuncMap() {
+				lowerCaseName := strings.ToLower(name)
+				if in.Name == "" || strings.Contains(lowerCaseName, in.Name) {
+					reply.Data = append(reply.Data, &Pair{
+						Key:   name,
+						Value: fmt.Sprintf("%v", reflect.TypeOf(fn)),
+					})
+				}
+			}
+			if err := srv.Send(reply); err != nil {
+				return nil
+			}
+		}
+	}
 }
 
 func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err error) {
