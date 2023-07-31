@@ -7,7 +7,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
 
-func convertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
+func ConvertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
 	result = &testing.TestSuite{
 		Name:  suite.Name,
 		API:   suite.Api,
@@ -20,10 +20,14 @@ func convertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
 			URL:  suite.Spec.Url,
 		}
 	}
+
+	for _, testcase := range suite.Items {
+		result.Items = append(result.Items, convertToNormalTestCase(testcase))
+	}
 	return
 }
 
-func convertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
+func ConvertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 	result = &TestSuite{
 		Name:  suite.Name,
 		Api:   suite.API,
@@ -32,6 +36,10 @@ func convertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 			Kind: suite.Spec.Kind,
 			Url:  suite.Spec.URL,
 		},
+	}
+
+	for _, testcase := range suite.Items {
+		result.Items = append(result.Items, convertToGRPCTestCase(testcase))
 	}
 	return
 }

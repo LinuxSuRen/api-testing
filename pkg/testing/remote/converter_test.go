@@ -12,7 +12,7 @@ func TestConvert(t *testing.T) {
 	t.Run("convertToNormalTestSuite, empty object", func(t *testing.T) {
 		assert.Equal(t, &atest.TestSuite{
 			Param: map[string]string{},
-		}, convertToNormalTestSuite(&TestSuite{}))
+		}, ConvertToNormalTestSuite(&TestSuite{}))
 	})
 
 	t.Run("convertToNormalTestSuite, normal object", func(t *testing.T) {
@@ -22,7 +22,7 @@ func TestConvert(t *testing.T) {
 				Kind: "http",
 				URL:  "/v1",
 			},
-		}, convertToNormalTestSuite(&TestSuite{
+		}, ConvertToNormalTestSuite(&TestSuite{
 			Param: defaultPairs,
 			Spec: &server.APISpec{
 				Url:  "/v1",
@@ -32,7 +32,7 @@ func TestConvert(t *testing.T) {
 	})
 
 	t.Run("convertToGRPCTestSuite, normal object", func(t *testing.T) {
-		result := convertToGRPCTestSuite(&atest.TestSuite{
+		result := ConvertToGRPCTestSuite(&atest.TestSuite{
 			API:   "v1",
 			Param: defaultMap,
 		})

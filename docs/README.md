@@ -108,6 +108,32 @@ podman run -p 7071:7071 \
     ghcr.io/linuxsuren/api-testing:master atest-store-orm
 ```
 
+### ORM S3 Storage
+You can use a S3 compatible storage as the storage backend.
+
+```shell
+# The default port is 7072
+podman run --network host \
+    ghcr.io/linuxsuren/api-testing:master atest-store-s3
+```
+
+See also the expected configuration below:
+
+```yaml
+- name: s3
+  url: http://172.11.0.13:30999   # address of the s3 server
+  kind:
+    name: s3
+    url: localhost:7072           # address of the s3 storage extension
+  properties:
+    accessKeyID: 6e03rIMChrsZ6YZl
+    secretAccessKey: F0xH6o2qRYTyAUyRuXO81B4gj7zUrSaj
+    disableSSL:  true
+    forcepathstyle: true
+    bucket: vm1
+    region: cn
+```
+
 ## Extensions
 Developers could have a storage extension. Implement a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.
 

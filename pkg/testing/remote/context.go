@@ -42,6 +42,10 @@ func GetStoreFromContext(ctx context.Context) (store *testing.Store) {
 	return
 }
 
+func WithIncomingStoreContext(ctx context.Context, store *testing.Store) context.Context {
+	return metadata.NewIncomingContext(ctx, metadata.New(store.ToMap()))
+}
+
 func MDToStore(md metadata.MD) *testing.Store {
 	data := make(map[string]string)
 	for key, val := range md {
