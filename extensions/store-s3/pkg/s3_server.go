@@ -17,11 +17,12 @@ import (
 )
 
 type s3Client struct {
+	S3Creator S3Creator
 	remote.UnimplementedLoaderServer
 }
 
-func NewRemoteServer() (remote.LoaderServer, error) {
-	return &s3Client{}, nil
+func NewRemoteServer(S3Creator S3Creator) remote.LoaderServer {
+	return &s3Client{S3Creator: S3Creator}
 }
 
 func (s *s3Client) ListTestSuite(ctx context.Context, _ *server.Empty) (suites *remote.TestSuites, err error) {
@@ -34,22 +35,28 @@ func (s *s3Client) ListTestSuite(ctx context.Context, _ *server.Empty) (suites *
 	var list *s3.ListObjectsOutput
 	if list, err = client.ListObjectsWithContext(ctx, &s3.ListObjectsInput{
 		Bucket: aws.String(client.bucket),
-	}); err == nil {
-		var suite *testing.TestSuite
-		for _, obj := range list.Contents {
-			if !strings.HasSuffix(*obj.Key, ".yaml") {
-				continue
-			}
+	}); err == nil && list != nil {
+		suites, err = listObjectsOutputToTestSuite(ctx, list, client)
+	}
+	return
+}
+func listObjectsOutputToTestSuite(ctx context.Context, list *s3.ListObjectsOutput, client *s3WithBucket) (
+	suites *remote.TestSuites, err error) {
+	var suite *testing.TestSuite
+	suites = &remote.TestSuites{}
+	for _, obj := range list.Contents {
+		if !strings.HasSuffix(*obj.Key, ".yaml") {
+			continue
+		}
 
-			var objOutput *s3.GetObjectOutput
-			if objOutput, err = client.GetObjectWithContext(ctx, &s3.GetObjectInput{
-				Bucket: aws.String(client.bucket),
-				Key:    obj.Key,
-			}); err == nil {
-				data := objOutput.Body
-				if suite, err = testing.ParseFromStream(data); err == nil {
-					suites.Data = append(suites.Data, remote.ConvertToGRPCTestSuite(suite))
-				}
+		var objOutput *s3.GetObjectOutput
+		if objOutput, err = client.GetObjectWithContext(ctx, &s3.GetObjectInput{
+			Bucket: aws.String(client.bucket),
+			Key:    obj.Key,
+		}); err == nil {
+			data := objOutput.Body
+			if suite, err = testing.ParseFromStream(data); err == nil {
+				suites.Data = append(suites.Data, remote.ConvertToGRPCTestSuite(suite))
 			}
 		}
 	}
@@ -60,39 +67,34 @@ func (s *s3Client) CreateTestSuite(ctx context.Context, testSuite *remote.TestSu
 	reply = &server.Empty{}
 
 	var data []byte
-	if data, err = yaml.Marshal(suite); err != nil {
-		return
+	if data, err = yaml.Marshal(suite); err == nil {
+		var client *s3WithBucket
+		if client, err = s.getClient(ctx); err == nil {
+			_, err = client.PutObjectWithContext(ctx, &s3.PutObjectInput{
+				Bucket: aws.String(client.bucket),
+				Key:    generateKey(suite.Name),
+				Body:   bytes.NewReader(data),
+			})
+		}
 	}
 
-	var client *s3WithBucket
-	if client, err = s.getClient(ctx); err != nil {
-		return
-	}
-
-	_, err = client.PutObjectWithContext(ctx, &s3.PutObjectInput{
-		Bucket: aws.String(client.bucket),
-		Key:    aws.String(suite.Name + ".yaml"),
-		Body:   bytes.NewReader(data),
-	})
 	return
 }
 func (s *s3Client) GetTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *remote.TestSuite, err error) {
 	reply = &remote.TestSuite{}
 	var client *s3WithBucket
-	if client, err = s.getClient(ctx); err != nil || client == nil {
-		return
-	}
+	if client, err = s.getClient(ctx); err == nil && client != nil {
+		var objOutput *s3.GetObjectOutput
+		if objOutput, err = client.GetObjectWithContext(ctx, &s3.GetObjectInput{
+			Bucket: aws.String(client.bucket),
+			Key:    generateKey(suite.Name),
+		}); err == nil && objOutput != nil {
+			data := objOutput.Body
 
-	var objOutput *s3.GetObjectOutput
-	if objOutput, err = client.GetObjectWithContext(ctx, &s3.GetObjectInput{
-		Bucket: aws.String(client.bucket),
-		Key:    aws.String(suite.Name + ".yaml"),
-	}); err == nil {
-		data := objOutput.Body
-
-		var suite *testing.TestSuite
-		if suite, err = testing.ParseFromStream(data); err == nil {
-			reply = remote.ConvertToGRPCTestSuite(suite)
+			var suite *testing.TestSuite
+			if suite, err = testing.ParseFromStream(data); err == nil {
+				reply = remote.ConvertToGRPCTestSuite(suite)
+			}
 		}
 	}
 	return
@@ -100,34 +102,28 @@ func (s *s3Client) GetTestSuite(ctx context.Context, suite *remote.TestSuite) (r
 func (s *s3Client) UpdateTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *remote.TestSuite, err error) {
 	reply = &remote.TestSuite{}
 	var oldSuite *remote.TestSuite
-	if oldSuite, err = s.GetTestSuite(ctx, suite); err != nil {
-		return
+	if oldSuite, err = s.GetTestSuite(ctx, suite); err == nil {
+		suite.Items = oldSuite.Items
+		_, err = s.CreateTestSuite(ctx, suite)
 	}
-
-	suite.Items = oldSuite.Items
-	_, err = s.CreateTestSuite(ctx, suite)
 	return
 }
 func (s *s3Client) DeleteTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *server.Empty, err error) {
 	reply = &server.Empty{}
 	var client *s3WithBucket
-	if client, err = s.getClient(ctx); err != nil || client == nil {
-		return
+	if client, err = s.getClient(ctx); err == nil && client != nil {
+		_, err = client.DeleteObjectWithContext(ctx, &s3.DeleteObjectInput{
+			Bucket: aws.String(client.bucket),
+			Key:    generateKey(suite.Name),
+		})
 	}
-
-	_, err = client.DeleteObjectWithContext(ctx, &s3.DeleteObjectInput{
-		Bucket: aws.String(client.bucket),
-		Key:    aws.String(suite.Name + ".yaml"),
-	})
 	return
 }
 func (s *s3Client) ListTestCases(ctx context.Context, suite *remote.TestSuite) (result *server.TestCases, err error) {
-	if suite, err = s.GetTestSuite(ctx, suite); err != nil {
-		return
-	}
-
-	result = &server.TestCases{
-		Data: suite.Items,
+	if suite, err = s.GetTestSuite(ctx, suite); err == nil {
+		result = &server.TestCases{
+			Data: suite.Items,
+		}
 	}
 	return
 }
@@ -137,27 +133,18 @@ func (s *s3Client) CreateTestCase(ctx context.Context, testcase *server.TestCase
 	var suite *remote.TestSuite
 	if suite, err = s.GetTestSuite(ctx, &remote.TestSuite{
 		Name: testcase.SuiteName,
-	}); err != nil {
-		return
+	}); err == nil {
+		suite.Items = append(suite.Items, testcase)
+		_, err = s.CreateTestSuite(ctx, suite)
 	}
-
-	suite.Items = append(suite.Items, testcase)
-	_, err = s.CreateTestSuite(ctx, suite)
 	return
 }
 func (s *s3Client) GetTestCase(ctx context.Context, testcase *server.TestCase) (result *server.TestCase, err error) {
 	var suite *remote.TestSuite
 	if suite, err = s.GetTestSuite(ctx, &remote.TestSuite{
 		Name: testcase.SuiteName,
-	}); err != nil {
-		return
-	}
-
-	for _, item := range suite.Items {
-		if item.Name == testcase.Name {
-			result = item
-			break
-		}
+	}); err == nil {
+		result = getTestCaseByName(suite, testcase.Name)
 	}
 	return
 }
@@ -166,36 +153,20 @@ func (s *s3Client) UpdateTestCase(ctx context.Context, testcase *server.TestCase
 	var suite *remote.TestSuite
 	if suite, err = s.GetTestSuite(ctx, &remote.TestSuite{
 		Name: testcase.SuiteName,
-	}); err != nil {
-		return
+	}); err == nil {
+		suite = updateTestCase(suite, testcase)
+		_, err = s.CreateTestSuite(ctx, suite)
 	}
-
-	for i, item := range suite.Items {
-		if item.Name == testcase.Name {
-			suite.Items[i] = testcase
-			break
-		}
-	}
-
-	_, err = s.CreateTestSuite(ctx, suite)
 	return
 }
 func (s *s3Client) DeleteTestCase(ctx context.Context, testcase *server.TestCase) (reply *server.Empty, err error) {
 	var suite *remote.TestSuite
 	if suite, err = s.GetTestSuite(ctx, &remote.TestSuite{
 		Name: testcase.SuiteName,
-	}); err != nil {
-		return
+	}); err == nil {
+		suite = removeTestCaseByName(suite, testcase.Name)
+		_, err = s.UpdateTestSuite(ctx, suite)
 	}
-
-	for i, item := range suite.Items {
-		if item.Name == testcase.Name {
-			suite.Items = append(suite.Items[:i], suite.Items[i+1:]...)
-			break
-		}
-	}
-
-	_, err = s.UpdateTestSuite(ctx, suite)
 	return
 }
 func (s *s3Client) getClient(ctx context.Context) (db *s3WithBucket, err error) {
@@ -221,13 +192,11 @@ func (s *s3Client) getClient(ctx context.Context) (db *s3WithBucket, err error) 
 
 		var sess *session.Session
 		sess, err = session.NewSession(&config)
-		if err != nil {
-			return
+		if err == nil {
+			svc := s.S3Creator.New(sess) // s3.New(sess)
+			db = &s3WithBucket{S3API: svc, bucket: options.Bucket}
+			clientCache[store.Name] = db
 		}
-
-		svc := s3.New(sess)
-		db = &s3WithBucket{S3: svc, bucket: options.Bucket}
-		clientCache[store.Name] = db
 	}
 	return
 }
@@ -240,6 +209,40 @@ func mapToS3Options(data map[string]string) (opt s3Options) {
 	opt.DisableSSL = data["disablessl"] == "true"
 	opt.ForcePathStyle = data["forcepathstyle"] == "true"
 	opt.Bucket = data["bucket"]
+	return
+}
+
+func generateKey(name string) *string {
+	return aws.String(name + ".yaml")
+}
+
+func removeTestCaseByName(suite *remote.TestSuite, name string) *remote.TestSuite {
+	for i, item := range suite.Items {
+		if item.Name == name {
+			suite.Items = append(suite.Items[:i], suite.Items[i+1:]...)
+			break
+		}
+	}
+	return suite
+}
+
+func updateTestCase(suite *remote.TestSuite, testcase *server.TestCase) *remote.TestSuite {
+	for i, item := range suite.Items {
+		if item.Name == testcase.Name {
+			suite.Items[i] = testcase
+			break
+		}
+	}
+	return suite
+}
+
+func getTestCaseByName(suite *remote.TestSuite, name string) (result *server.TestCase) {
+	for _, item := range suite.Items {
+		if item.Name == name {
+			result = item
+			break
+		}
+	}
 	return
 }
 
@@ -258,7 +261,7 @@ type s3Options struct {
 }
 
 type s3WithBucket struct {
-	*s3.S3
+	S3API
 	bucket string
 }
 
