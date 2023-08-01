@@ -47,6 +47,7 @@ LABEL "Name"="API testing"
 COPY --from=builder /workspace/atest /usr/local/bin/atest
 COPY --from=builder /workspace/atest-collector /usr/local/bin/atest-collector
 COPY --from=builder /workspace/atest-store-orm /usr/local/bin/atest-store-orm
+COPY --from=builder /workspace/atest-store-s3 /usr/local/bin/atest-store-s3
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
