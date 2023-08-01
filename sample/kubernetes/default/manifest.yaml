@@ -67,6 +67,17 @@ spec:
           requests:
             cpu: 100m
             memory: 100Mi
+      - image: ghcr.io/linuxsuren/api-testing:master
+        name: extension-s3
+        command: [atest-store-s3]
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
       volumes:
       - name: config
         configMap:
