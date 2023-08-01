@@ -15,6 +15,7 @@ import (
 	_ "embed"
 
 	"github.com/linuxsuren/api-testing/pkg/apispec"
+	"github.com/linuxsuren/api-testing/pkg/generator"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -462,6 +463,43 @@ func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (repl
 	return
 }
 
+// code generator
+func (s *server) ListCodeGenerator(ctx context.Context, in *Empty) (reply *SimpleList, err error) {
+	reply = &SimpleList{}
+
+	generators := generator.GetCodeGenerators()
+	for name := range generators {
+		reply.Data = append(reply.Data, &Pair{
+			Key: name,
+		})
+	}
+	return
+}
+
+func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
+	reply = &CommonResult{}
+
+	instance := generator.GetCodeGenerator(in.Generator)
+	if instance == nil {
+		reply.Success = false
+		reply.Message = fmt.Sprintf("generator '%s' not found", in.Generator)
+	} else {
+		var result testing.TestCase
+		loader := s.getLoader(ctx)
+		if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
+			output, genErr := instance.Generate(&result)
+			if genErr != nil {
+				reply.Success = false
+				reply.Message = genErr.Error()
+			} else {
+				reply.Success = true
+				reply.Message = output
+			}
+		}
+	}
+	return
+}
+
 // Sample returns a sample of the test task
 func (s *server) Sample(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
 	reply = &HelloReply{Message: sample.TestSuiteGitLab}
@@ -529,6 +567,7 @@ func (s *server) FunctionsQuery(ctx context.Context, in *SimpleQuery) (reply *Pa
 	}
 	return
 }
+
 // FunctionsQueryStream works like FunctionsQuery but is implemented in bidirectional streaming
 func (s *server) FunctionsQueryStream(srv Runner_FunctionsQueryStreamServer) error {
 	ctx := srv.Context()

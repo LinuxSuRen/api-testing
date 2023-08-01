@@ -474,6 +474,59 @@ func TestFunctionsQuery(t *testing.T) {
 	})
 }
 
+func TestCodeGenerator(t *testing.T) {
+	ctx := context.Background()
+	server := getRemoteServerInTempDir()
+
+	t.Run("ListCodeGenerator", func(t *testing.T) {
+		generators, err := server.ListCodeGenerator(ctx, &Empty{})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(generators.Data))
+	})
+
+	t.Run("GenerateCode, no generator found", func(t *testing.T) {
+		result, err := server.GenerateCode(ctx, &CodeGenerateRequest{
+			Generator: "fake",
+		})
+		assert.NoError(t, err)
+		assert.False(t, result.Success)
+	})
+
+	t.Run("GenerateCode, no TestCase found", func(t *testing.T) {
+		result, err := server.GenerateCode(ctx, &CodeGenerateRequest{
+			Generator: "golang",
+			TestSuite: "fake",
+			TestCase:  "fake",
+		})
+		assert.Error(t, err)
+		assert.NotNil(t, result)
+	})
+
+	t.Run("GenerateCode, normal", func(t *testing.T) {
+		// create a new suite
+		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.NoError(t, err)
+
+		_, err = server.CreateTestCase(ctx, &TestCaseWithSuite{
+			SuiteName: "fake",
+			Data: &TestCase{
+				Name: "fake",
+			},
+		})
+		assert.NoError(t, err)
+
+		result, err := server.GenerateCode(ctx, &CodeGenerateRequest{
+			Generator: "golang",
+			TestSuite: "fake",
+			TestCase:  "fake",
+		})
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		assert.True(t, result.Success)
+		assert.NotEmpty(t, result.Message)
+	})
+}
+
 func TestFunctionsQueryStream(t *testing.T) {
 	ctx := context.Background()
 	server := getRemoteServerInTempDir()
