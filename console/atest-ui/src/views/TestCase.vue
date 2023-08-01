@@ -60,6 +60,31 @@ function sendRequest() {
     })
 }
 
+function generateCode() {
+  const name = props.name
+  const suite = props.suite
+  const requestOptions = {
+    method: 'POST',
+    body: JSON.stringify({
+      TestSuite: suite,
+      TestCase: name,
+      Generator: "golang"
+    })
+  }
+  fetch('/server.Runner/GenerateCode', requestOptions)
+    .then((response) => response.json())
+    .then((e) => {
+      ElMessage({
+        message: 'Code generated!',
+        type: 'success'
+      })
+      testResult.value.output = e.message
+    })
+    .catch((e) => {
+      ElMessage.error('Oops, ' + e)
+    })
+}
+
 const queryBodyFields = (queryString: string, cb: any) => {
   if (!testResult.value.bodyObject || !FlattenObject(testResult.value.bodyObject)) {
     cb([])
@@ -408,6 +433,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
         </el-autocomplete>
 
         <el-button type="primary" @click="sendRequest" :loading="requestLoading">Send</el-button>
+        <el-button type="primary" @click="generateCode">Generator Code</el-button>
       </el-header>
 
       <el-main>

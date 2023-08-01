@@ -23,6 +23,10 @@ service Runner {
     rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
 
+    // code generator
+    rpc ListCodeGenerator(Empty) returns (SimpleList) {}
+    rpc GenerateCode(CodeGenerateRequest)  returns (CommonResult) {}
+
     // common services
     rpc PopularHeaders(Empty) returns (Pairs) {}
     rpc FunctionsQuery(SimpleQuery) returns (Pairs) {}
@@ -175,6 +179,20 @@ message StoreKind {
 message CommonResult {
   bool success = 1;
   string message = 2;
+}
+
+message SimpleList {
+  repeated Pair data = 1;
+}
+
+message SimpleName {
+  string name = 1;
+}
+
+message CodeGenerateRequest {
+  string TestSuite = 1;
+  string TestCase = 2;
+  string Generator = 3;
 }
 
 message Empty {

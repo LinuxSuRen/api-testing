@@ -1,0 +1,27 @@
+package main
+
+import (
+	"io"
+	"net/http"
+)
+
+func main() {
+	body := bytes.NewBufferString("")
+
+	req, err := http.NewRequest("GET," "https://www.baidu.com", body)
+	if err != nil {
+		panic(err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		panic("status code is not 200")
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	println(string(data))
+}
