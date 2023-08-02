@@ -1,0 +1,34 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "sample",
+        "title": "sample",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/users": {
+            "get": {
+                "summary": "summary",
+                "operationId": "getUsers"
+            },
+            "post": {
+                "summary": "summary",
+                "operationId": "createUser"
+            }
+        },
+        "/api/v1/users/{user}": {
+            "get": {
+                "summary": "summary",
+                "operationId": "getUser"
+            },
+            "delete": {
+                "summary": "summary",
+                "operationId": "deleteUser"
+            },
+            "put": {
+                "summary": "summary",
+                "operationId": "updateUser"
+            }
+        }
+    }
+}
