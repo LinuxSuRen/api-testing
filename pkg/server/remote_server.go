@@ -521,21 +521,18 @@ func (s *server) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity) (r
 	reply = &TestCases{}
 
 	var suite *testing.TestSuite
-	loader := s.loader
-	if suite, _, err = loader.GetSuite(in.Name); err != nil {
+	loader := s.getLoader(ctx)
+	if suite, _, err = loader.GetSuite(in.Name); err != nil || suite == nil {
 		return
 	}
 
-	if suite == nil || suite.Spec.URL == "" {
+	if suite.Spec.URL == "" {
 		return
 	}
 
-	reply.Data = []*TestCase{{
-		Request: &Request{},
-	}}
-
+	fmt.Println(in.Name, suite)
 	var swaggerAPI *apispec.Swagger
-	if swaggerAPI, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil {
+	if swaggerAPI, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil && swaggerAPI != nil {
 		for api, item := range swaggerAPI.Paths {
 			for method, oper := range item {
 				reply.Data = append(reply.Data, &TestCase{
@@ -616,12 +613,15 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 	return
 }
 func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err error) {
+	// TODO need to implement
 	return
 }
 func (s *server) DeleteStore(ctx context.Context, in *Store) (reply *Store, err error) {
+	// TODO need to implement
 	return
 }
 func (s *server) VerifyStore(ctx context.Context, in *SimpleQuery) (reply *CommonResult, err error) {
+	// TODO need to implement
 	return
 }
 
