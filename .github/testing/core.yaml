@@ -13,7 +13,7 @@ items:
     api: /GetTestSuite
     method: POST
     body: |
-      {"name": "texst"}
+      {"name": "test"}
   expect:
     bodyFieldsExpect:
       name: ""
@@ -23,7 +23,7 @@ items:
     api: /GetTestCase
     method: POST
     body: |
-      {"name": "texst"}
+      {"name": "test"}
   expect:
     statusCode: 500
     bodyFieldsExpect:
@@ -33,7 +33,7 @@ items:
     api: /GetTestCase
     method: POST
     body: |
-      {"name": "texst"}
+      {"name": "test"}
   expect:
     statusCode: 500
     bodyFieldsExpect:
@@ -41,4 +41,29 @@ items:
 - name: get-popular-headers
   request:
     api: /PopularHeaders
+    method: POST
+- name: list-code-generators
+  request:
+    api: /ListCodeGenerator
+    method: POST
+  expect:
+    verify:
+      - len(data) == 1
+- name: list-stores
+  request:
+    api: /GetStores
+    method: POST
+  expect:
+    verify:
+      - len(data) >= 1
+- name: query-funcs
+  request:
+    api: /FunctionsQuery
+    method: POST
+  expect:
+    verify:
+      - len(data) == 1
+- name: version
+  request:
+    api: /GetVersion
     method: POST

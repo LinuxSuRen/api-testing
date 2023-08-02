@@ -58,6 +58,10 @@ func (s *Store) ToMap() (result map[string]string) {
 	return
 }
 
+func (s *Store) IsLocal() bool {
+	return s.Name == "local"
+}
+
 func MapToStore(data map[string]string) (store Store) {
 	store = Store{
 		Name:        data["name"],

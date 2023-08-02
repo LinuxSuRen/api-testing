@@ -1,3 +1,4 @@
+/**
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -19,3 +20,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+
+package util_test
+
+import (
+	"errors"
+	"testing"
+
+	"github.com/linuxsuren/api-testing/pkg/util"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestOkOrErrorMessage(t *testing.T) {
+	assert.Equal(t, "OK", util.OKOrErrorMessage(nil))
+	assert.Equal(t, "test", util.OKOrErrorMessage(errors.New("test")))
+}

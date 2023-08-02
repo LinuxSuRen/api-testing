@@ -23,6 +23,8 @@ const suite = ref({
   }
 } as Suite)
 function load() {
+  if (!props.name || props.store === "") return
+
   const requestOptions = {
     method: 'POST',
     headers: {

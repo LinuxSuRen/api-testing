@@ -18,6 +18,8 @@ service Loader {
     rpc GetTestCase(server.TestCase) returns (server.TestCase) {}
     rpc UpdateTestCase(server.TestCase) returns (server.TestCase) {}
     rpc DeleteTestCase(server.TestCase) returns (server.Empty) {}
+
+    rpc Verify(server.Empty) returns (server.CommonResult) {}
 }
 
 message TestSuites {

@@ -1,3 +1,4 @@
+/**
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -19,3 +20,36 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+package cmd
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestRootCommand(t *testing.T) {
+	t.Run("invalid port", func(t *testing.T) {
+		c := NewRootCommand()
+		assert.Equal(t, "store-orm", c.Use)
+
+		c.SetArgs([]string{"--port", "abc"})
+		err := c.Execute()
+		assert.Error(t, err)
+	})
+
+	t.Run("a random port", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		c := NewRootCommand()
+		c.SetContext(ctx)
+
+		c.SetArgs([]string{"--port", "0"})
+		err := c.Execute()
+		assert.NoError(t, err)
+	})
+}

@@ -30,6 +30,7 @@ jobs:
           make build copy
           sudo atest service install
           sudo atest service restart
+          sudo atest service status
           atest run -p .github/testing/core.yaml
 
   Build:
