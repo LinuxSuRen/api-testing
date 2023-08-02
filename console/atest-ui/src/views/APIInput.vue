@@ -9,7 +9,7 @@ const props = defineProps({
   operationId: String
 })
 // const emit = defineEmits(['update:address', 'update:method', 'update:operationId'])
-const querySuggestedAPIs = NewSuggestedAPIsQuery(props.suite!)
+const querySuggestedAPIs = NewSuggestedAPIsQuery('', props.suite!)
 
 const handleSelect = (item: TestCase) => {
   // emit('update:address', item.request.api)

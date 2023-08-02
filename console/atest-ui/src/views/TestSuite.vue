@@ -11,7 +11,7 @@ const props = defineProps({
   store: String,
 })
 const emit = defineEmits(['updated'])
-let querySuggestedAPIs = NewSuggestedAPIsQuery(props.name!)
+let querySuggestedAPIs = NewSuggestedAPIsQuery(props.store!, props.name!)
 
 const suite = ref({
   name: '',
@@ -87,7 +87,7 @@ const rules = reactive<FormRules<Suite>>({
 
 function openNewTestCaseDialog() {
   dialogVisible.value = true
-  querySuggestedAPIs = NewSuggestedAPIsQuery(props.name!)
+  querySuggestedAPIs = NewSuggestedAPIsQuery(props.store!, props.name!)
 }
 
 const submitForm = async (formEl: FormInstance | undefined) => {

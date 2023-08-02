@@ -14,7 +14,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['updated'])
 
-let querySuggestedAPIs = NewSuggestedAPIsQuery(props.suite!)
+let querySuggestedAPIs = NewSuggestedAPIsQuery(props.store!, props.suite!)
 const testResultActiveTab = ref('output')
 const requestLoading = ref(false)
 const testResult = ref({ header: [] as Pair[] } as TestResult)
@@ -65,6 +65,9 @@ function generateCode() {
   const suite = props.suite
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
     body: JSON.stringify({
       TestSuite: suite,
       TestCase: name,
@@ -424,7 +427,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           v-model="testCaseWithSuite.data.request.api"
           :fetch-suggestions="querySuggestedAPIs"
           placeholder="API Address"
-          style="width: 70%; margin-left: 5px; margin-right: 5px"
+          style="width: 50%; margin-left: 5px; margin-right: 5px"
         >
           <template #default="{ item }">
             <div class="value">{{ item.request.method }}</div>
