@@ -663,8 +663,8 @@ func TestStoreManager(t *testing.T) {
 		defer clean()
 
 		reply, err := server.VerifyStore(ctx, &SimpleQuery{})
-		assert.NoError(t, err)
-		assert.Nil(t, reply)
+		assert.Error(t, err)
+		assert.NotNil(t, reply)
 	})
 }
 
@@ -673,7 +673,19 @@ func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 	call = func() { os.RemoveAll(dir) }
 
 	writer := atesting.NewFileWriter(dir)
-	server = NewRemoteServer(writer, nil, "")
+	server = NewRemoteServer(writer, newLocalloaderFromStore(), "")
+	return
+}
+
+type fakeLocalLoaderFactory struct {
+}
+
+func newLocalloaderFromStore() atesting.StoreWriterFactory {
+	return &fakeLocalLoaderFactory{}
+}
+
+func (l *fakeLocalLoaderFactory) NewInstance(store atesting.Store) (writer atesting.Writer, err error) {
+	writer = atesting.NewFileWriter("")
 	return
 }
 

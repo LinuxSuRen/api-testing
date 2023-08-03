@@ -2,6 +2,7 @@ package remote
 
 import (
 	context "context"
+	"errors"
 
 	server "github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -168,5 +169,15 @@ func (g *gRPCLoader) DeleteSuite(name string) (err error) {
 	_, err = g.client.DeleteTestSuite(g.ctx, &TestSuite{
 		Name: name,
 	})
+	return
+}
+
+func (g *gRPCLoader) Verify() (err error) {
+	var result *server.CommonResult
+	if result, err = g.client.Verify(g.ctx, &server.Empty{}); err == nil {
+		if !result.Success {
+			err = errors.New(result.Message)
+		}
+	}
 	return
 }

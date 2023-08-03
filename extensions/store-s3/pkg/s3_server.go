@@ -13,6 +13,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,8 +22,8 @@ type s3Client struct {
 	remote.UnimplementedLoaderServer
 }
 
-func NewRemoteServer(S3Creator S3Creator) remote.LoaderServer {
-	return &s3Client{S3Creator: S3Creator}
+func NewRemoteServer(s3Creator S3Creator) remote.LoaderServer {
+	return &s3Client{S3Creator: s3Creator}
 }
 
 func (s *s3Client) ListTestSuite(ctx context.Context, _ *server.Empty) (suites *remote.TestSuites, err error) {
@@ -169,6 +170,14 @@ func (s *s3Client) DeleteTestCase(ctx context.Context, testcase *server.TestCase
 	}
 	return
 }
+func (s *s3Client) Verify(ctx context.Context, in *server.Empty) (reply *server.CommonResult, err error) {
+	_, clientErr := s.ListTestSuite(ctx, in)
+	reply = &server.CommonResult{
+		Success: err == nil,
+		Message: util.OKOrErrorMessage(clientErr),
+	}
+	return
+}
 func (s *s3Client) getClient(ctx context.Context) (db *s3WithBucket, err error) {
 	store := remote.GetStoreFromContext(ctx)
 	if store == nil {
@@ -180,24 +189,29 @@ func (s *s3Client) getClient(ctx context.Context) (db *s3WithBucket, err error) 
 		}
 
 		options := mapToS3Options(store.Properties)
-		cred := credentials.NewStaticCredentials(options.AccessKeyID, options.SecretAccessKey, options.SessionToken)
-
-		config := aws.Config{
-			Region:           aws.String(options.Region),
-			Endpoint:         aws.String(store.URL),
-			DisableSSL:       aws.Bool(options.DisableSSL),
-			S3ForcePathStyle: aws.Bool(options.ForcePathStyle),
-			Credentials:      cred,
-		}
 
 		var sess *session.Session
-		sess, err = session.NewSession(&config)
+		sess, err = createClientFromSs3Options(options, store.URL)
 		if err == nil {
 			svc := s.S3Creator.New(sess) // s3.New(sess)
 			db = &s3WithBucket{S3API: svc, bucket: options.Bucket}
 			clientCache[store.Name] = db
 		}
 	}
+	return
+}
+func createClientFromSs3Options(options s3Options, storeURL string) (sess *session.Session, err error) {
+	cred := credentials.NewStaticCredentials(options.AccessKeyID, options.SecretAccessKey, options.SessionToken)
+
+	config := aws.Config{
+		Region:           aws.String(options.Region),
+		Endpoint:         aws.String(storeURL),
+		DisableSSL:       aws.Bool(options.DisableSSL),
+		S3ForcePathStyle: aws.Bool(options.ForcePathStyle),
+		Credentials:      cred,
+	}
+
+	sess, err = session.NewSession(&config)
 	return
 }
 

@@ -12,7 +12,7 @@ import (
 
 func NewRootCmd(s3Creator pkg.S3Creator) (cmd *cobra.Command) {
 	opt := &option{
-		S3Creator: s3Creator,
+		s3Creator: s3Creator,
 	}
 	cmd = &cobra.Command{
 		Use:   "store-s3",
@@ -25,7 +25,7 @@ func NewRootCmd(s3Creator pkg.S3Creator) (cmd *cobra.Command) {
 }
 
 func (o *option) runE(cmd *cobra.Command, args []string) (err error) {
-	removeServer := pkg.NewRemoteServer(o.S3Creator)
+	removeServer := pkg.NewRemoteServer(o.s3Creator)
 
 	var lis net.Listener
 	lis, err = net.Listen("tcp", fmt.Sprintf(":%d", o.port))
@@ -50,5 +50,5 @@ type option struct {
 	port int
 
 	// inner fields
-	S3Creator pkg.S3Creator
+	s3Creator pkg.S3Creator
 }

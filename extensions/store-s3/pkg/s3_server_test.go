@@ -31,6 +31,11 @@ func TestNewRemoteServer(t *testing.T) {
 	t.Run("ListTestSuite", func(t *testing.T) {
 		_, err := newRemoteServer(t).ListTestSuite(defaultCtx, nil)
 		assert.NoError(t, err)
+
+		var result *server.CommonResult
+		result, err = newRemoteServer(t).Verify(defaultCtx, &server.Empty{})
+		assert.NoError(t, err)
+		assert.True(t, result.Success)
 	})
 
 	t.Run("CreateTestSuite", func(t *testing.T) {

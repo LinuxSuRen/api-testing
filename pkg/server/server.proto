@@ -165,6 +165,7 @@ message Store {
   string password = 5;
   repeated Pair properties = 6;
   StoreKind kind = 7;
+  bool ready = 8;
 }
 
 message StoreKinds {
