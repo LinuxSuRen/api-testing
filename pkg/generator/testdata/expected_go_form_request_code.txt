@@ -6,7 +6,9 @@ import (
 )
 
 func main() {
-	body := bytes.NewBufferString("")
+	data := url.Values{}
+	data.Set("key", "value")
+	body := strings.NewReader(data.Encode())
 
 	req, err := http.NewRequest("GET," "https://www.baidu.com", body)
 	if err != nil {
