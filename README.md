@@ -19,6 +19,7 @@ This is a API testing tool.
 *   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
 *   Multiple storage backends supported(Local, ORM Database, S3, etc)
 *   [HTTP API record](extensions/collector)
+*   Install in mutiple use cases(CLI, Container, Native-Service, Operator, etc)
 
 ## Get started
 

@@ -6,6 +6,7 @@ WORKDIR /workspace
 COPY cmd/ cmd/
 COPY pkg/ pkg/
 COPY extensions/ extensions/
+COPY operator/ operator/
 COPY console/atest-ui atest-ui/
 COPY .github/testing/*.yaml sample/
 COPY sample/ sample/

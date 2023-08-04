@@ -1,0 +1,49 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: ATest is the Schema for the atests API
+      displayName: ATest
+      kind: ATest
+      name: atests.core.linuxsuren.github.com
+      version: v1alpha1
+  description: API Testing
+  displayName: API Testing
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - API
+  - Testing
+  links:
+  - name: Operator
+    url: https://operator.domain
+  maintainers:
+  - email: linuxsuren@gmail.com
+    name: linuxsuren
+  maturity: alpha
+  provider:
+    name: linuxsuren
+    url: https://github.com/LinuxSuRen/api-testing
+  version: 0.0.0

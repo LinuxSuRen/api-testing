@@ -24,6 +24,7 @@ jobs:
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r collector-coverage.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-orm-coverage.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-s3-coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r operator/cover.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) final
       - name: API Test
         run: |
@@ -32,6 +33,7 @@ jobs:
           sudo atest service restart
           sudo atest service status
           atest run -p .github/testing/core.yaml
+          sudo atest service status
 
   Build:
     runs-on: ubuntu-20.04
@@ -47,8 +49,8 @@ jobs:
           github_token: ${{ secrets.GH_PUBLISH_SECRETS }}
           version: v1.14.0
           args: release --skip-publish --rm-dist --snapshot
-      - name: Image
-        run: make build-image
+      - name: Operator
+        run: cd operator && make build
 
   BuildImage:
     runs-on: ubuntu-20.04
@@ -58,8 +60,10 @@ jobs:
         with:
           go-version: 1.18.x
       - uses: actions/checkout@v3.0.0
-      - name: Image
+      - name: Core Image
         run: make build-image
+      - name: Operator Image
+        run: cd operator && make docker-build
 
   BuildEmbedUI:
     runs-on: ubuntu-20.04
