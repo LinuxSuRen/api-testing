@@ -55,6 +55,9 @@ func TestGenerators(t *testing.T) {
 	testcase := &atest.TestCase{
 		Request: atest.Request{
 			API: "https://www.baidu.com",
+			Header: map[string]string{
+				"User-Agent": "atest",
+			},
 		},
 	}
 	t.Run("golang", func(t *testing.T) {
@@ -62,7 +65,20 @@ func TestGenerators(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, expectedGoCode, result)
 	})
+
+	formRequest := &atest.TestCase{Request: testcase.Request}
+	formRequest.Request.Form = map[string]string{
+		"key": "value",
+	}
+	t.Run("golang form HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("golang").Generate(formRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedFormRequestGoCode, result, result)
+	})
 }
 
 //go:embed testdata/expected_go_code.txt
 var expectedGoCode string
+
+//go:embed testdata/expected_go_form_request_code.txt
+var expectedFormRequestGoCode string

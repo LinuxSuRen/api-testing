@@ -6,12 +6,12 @@ import (
 )
 
 func main() {
-	{{- if lt (len .Request.Form) 0 }}
+	{{- if gt (len .Request.Form) 0 }}
 	data := url.Values{}
 	{{- range $key, $val := .Request.Form}}
-	data.Set("$key", "$val")
-	{{end}}
-	reader := strings.NewReader(data.Encode())
+	data.Set("{{$key}}", "{{$val}}")
+	{{- end}}
+	body := strings.NewReader(data.Encode())
 	{{- else}}
 	body := bytes.NewBufferString("{{.Request.Body}}")
 	{{- end }}
@@ -22,8 +22,8 @@ func main() {
 	}
 
 	{{- range $key, $val := .Request.Header}}
-	req.Header.Set("$key", "$val")
- 	{{end}}
+	req.Header.Set("{{$key}}", "{{$val}}")
+ 	{{- end}}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
