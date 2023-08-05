@@ -45,13 +45,38 @@
             "properties": {
                 "kind": {
                     "type": "string",
-                    "enum": ["openapi", "swagger"]
+                    "enum": [
+                        "openapi",
+                        "swagger"
+                    ]
                 },
                 "url": {
                     "type": "string",
                     "qt-uri-protocols": [
-                        "https", "http"
+                        "https",
+                        "http"
                     ]
+                },
+                "grpc": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "import": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "protofile": {
+                            "type": "string"
+                        },
+                        "protoset": {
+                            "type": "string"
+                        },
+                        "server_reflection": {
+                            "type": "boolean"
+                        }
+                    }
                 }
             }
         },
@@ -91,6 +116,9 @@
                 "body": {
                     "type": "string"
                 },
+                "payload": {
+                    "type": "string"
+                },
                 "header": {
                     "description": "HTTP response header",
                     "type": "object",
@@ -123,10 +151,16 @@
                     "qt-uri-protocols": [
                         "https"
                     ]
-                }, 
+                },
                 "method": {
                     "type": "string",
-                    "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+                    "enum": [
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE"
+                    ]
                 },
                 "query": {
                     "description": "HTTP request query",
@@ -150,6 +184,9 @@
                     "type": "string"
                 },
                 "bodyFromFile": {
+                    "type": "string"
+                },
+                "payload": {
                     "type": "string"
                 }
             },

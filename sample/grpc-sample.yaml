@@ -5,22 +5,34 @@ name: grpc-sample
 api: 127.0.0.1:7070
 spec:
   grpc:
-  import: ./
-  protofile: ./server.proto
+    import:
+      - ./pkg/server
+    protofile: server.proto
+    server_reflection: false
 items:
   - name: GetVersion
     request:
       api: Runner.GetVersion
   - name: FunctionsQuery
     request:
-      api: Runner.SimpleQuery
+      api: Runner.FunctionsQuery
       payload: |
         {
           "name": "hello"
         }
+    expect:
+      payload: |
+        {
+          "data": [
+            {
+              "key": "hello",
+              "value": "func() string"
+            }
+          ]
+        }
   - name: FunctionsQueryStream
     request:
-      api: Runner.SimpleQueryStream
+      api: Runner.FunctionsQueryStream
       payload: |
         [
           {
@@ -30,3 +42,6 @@ items:
             "name": "title"
           }
         ]
+    expect:
+      verify:
+        - 'len(data) == 2'
