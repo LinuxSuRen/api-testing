@@ -56,9 +56,9 @@ export interface TestCaseResponse {
 
 // Suggested APIs query
 const localCache = ref({} as TestCaseWithValue[])
-export function NewSuggestedAPIsQuery(suite: string) {
+export function NewSuggestedAPIsQuery(store: string, suite: string) {
   return function (queryString: string, cb: (arg: any) => void) {
-    loadCache(suite, function () {
+    loadCache(store, suite, function () {
       const results = queryString
         ? localCache.value.filter(CreateFilter(queryString))
         : localCache.value
@@ -72,7 +72,7 @@ export function CreateFilter(queryString: string) {
     return v.value.toLowerCase().indexOf(queryString.toLowerCase()) !== -1
   }
 }
-function loadCache(suite: string, callback: Function) {
+function loadCache(store: string, suite: string, callback: Function) {
   if (localCache.value.length > 0) {
     callback()
     return
@@ -84,6 +84,9 @@ function loadCache(suite: string, callback: Function) {
 
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Store-Name': store
+    },
     body: JSON.stringify({
       name: suite
     })

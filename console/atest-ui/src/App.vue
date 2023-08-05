@@ -126,7 +126,9 @@ function loadStores() {
       data.value = [] as Tree[]
 
       d.data.forEach((item: any) => {
-        loadTestSuites(item.name)
+        if (item.ready) {
+          loadTestSuites(item.name)
+        }
       })
     })
 }

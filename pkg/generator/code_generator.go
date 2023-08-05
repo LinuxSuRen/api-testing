@@ -1,3 +1,4 @@
+/**
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -19,3 +20,32 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+
+package generator
+
+import "github.com/linuxsuren/api-testing/pkg/testing"
+
+// CodeGenerator is the interface of code generator
+type CodeGenerator interface {
+	Generate(testcase *testing.TestCase) (result string, err error)
+}
+
+var codeGenerators = map[string]CodeGenerator{}
+
+func GetCodeGenerator(name string) CodeGenerator {
+	return codeGenerators[name]
+}
+
+func RegisterCodeGenerator(name string, generator CodeGenerator) {
+	codeGenerators[name] = generator
+}
+
+func GetCodeGenerators() (result map[string]CodeGenerator) {
+	// returns an immutable map
+	result = make(map[string]CodeGenerator, len(codeGenerators))
+	for k, v := range codeGenerators {
+		result[k] = v
+	}
+	return
+}

@@ -25,4 +25,6 @@ type Writer interface {
 	GetSuite(name string) (*TestSuite, string, error)
 	UpdateSuite(TestSuite) (err error)
 	DeleteSuite(name string) (err error)
+
+	Verify() (err error)
 }

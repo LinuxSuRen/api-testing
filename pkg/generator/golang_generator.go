@@ -1,3 +1,4 @@
+/**
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -19,3 +20,44 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+
+package generator
+
+import (
+	"bytes"
+	"html/template"
+	"net/http"
+
+	_ "embed"
+
+	"github.com/linuxsuren/api-testing/pkg/testing"
+)
+
+type golangGenerator struct {
+}
+
+func NewGolangGenerator() CodeGenerator {
+	return &golangGenerator{}
+}
+
+func (g *golangGenerator) Generate(testcase *testing.TestCase) (result string, err error) {
+	if testcase.Request.Method == "" {
+		testcase.Request.Method = http.MethodGet
+	}
+	var tpl *template.Template
+	if tpl, err = template.New("golang template").Parse(golangTemplate); err == nil {
+		buf := new(bytes.Buffer)
+		if err = tpl.Execute(buf, testcase); err == nil {
+			result = buf.String()
+		}
+	}
+	return
+}
+
+func init() {
+	RegisterCodeGenerator("golang", NewGolangGenerator())
+}
+
+//go:embed data/main.go.tpl
+var golangTemplate string

@@ -247,14 +247,16 @@ func TestMapInterToPair(t *testing.T) {
 
 func TestUpdateTestCase(t *testing.T) {
 	t.Run("no suite found", func(t *testing.T) {
-		server := getRemoteServerInTempDir()
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
 		server.UpdateTestCase(context.TODO(), &TestCaseWithSuite{
 			Data: &TestCase{},
 		})
 	})
 
 	t.Run("no data", func(t *testing.T) {
-		server := getRemoteServerInTempDir()
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
 		_, err := server.UpdateTestCase(context.TODO(), &TestCaseWithSuite{})
 		assert.Error(t, err)
 	})
@@ -392,7 +394,8 @@ func TestListTestCase(t *testing.T) {
 func TestRemoteServerSuite(t *testing.T) {
 	t.Run("Get suite not found", func(t *testing.T) {
 		ctx := context.Background()
-		server := getRemoteServerInTempDir()
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
 
 		suite, err := server.GetTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
 		assert.NoError(t, err)
@@ -401,7 +404,8 @@ func TestRemoteServerSuite(t *testing.T) {
 
 	t.Run("Get existing suite", func(t *testing.T) {
 		ctx := context.Background()
-		server := getRemoteServerInTempDir()
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
 
 		// create a new suite
 		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
@@ -426,7 +430,8 @@ func TestRemoteServerSuite(t *testing.T) {
 
 	t.Run("Delete non-exist suite", func(t *testing.T) {
 		ctx := context.Background()
-		server := getRemoteServerInTempDir()
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
 
 		_, err := server.DeleteTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
 		assert.Error(t, err)
@@ -435,7 +440,8 @@ func TestRemoteServerSuite(t *testing.T) {
 
 func TestPopularHeaders(t *testing.T) {
 	ctx := context.Background()
-	server := getRemoteServerInTempDir()
+	server, clean := getRemoteServerInTempDir()
+	defer clean()
 
 	pairs, err := server.PopularHeaders(ctx, &Empty{})
 	if assert.NoError(t, err) {
@@ -445,17 +451,74 @@ func TestPopularHeaders(t *testing.T) {
 
 func TestGetSuggestedAPIs(t *testing.T) {
 	ctx := context.Background()
-	server := getRemoteServerInTempDir()
+	server, clean := getRemoteServerInTempDir()
+	defer clean()
 
-	reply, err := server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: "fake"})
-	if assert.NoError(t, err) {
-		assert.Equal(t, 0, len(reply.Data))
-	}
+	t.Run("not found TestSuite", func(t *testing.T) {
+		reply, err := server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: "fake"})
+		if assert.NoError(t, err) {
+			assert.Equal(t, 0, len(reply.Data))
+		}
+	})
+
+	t.Run("no swagger URL", func(t *testing.T) {
+		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.NoError(t, err)
+
+		reply, err := server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: "fake"})
+		if assert.NoError(t, err) {
+			assert.Equal(t, 0, len(reply.Data))
+		}
+	})
+
+	t.Run("with swagger URL, not accessed", func(t *testing.T) {
+		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{
+			Name: "fake",
+		})
+
+		_, err = server.UpdateTestSuite(ctx, &TestSuite{
+			Name: "fake",
+			Spec: &APISpec{
+				Url: urlFoo + "/v2",
+			},
+		})
+		assert.NoError(t, err)
+
+		gock.New(urlFoo).Get("/v2").Reply(500)
+
+		_, err = server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.NoError(t, err)
+	})
+
+	t.Run("normal", func(t *testing.T) {
+		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{
+			Name: "fake-1",
+		})
+		assert.NoError(t, err)
+
+		_, err = server.UpdateTestSuite(ctx, &TestSuite{
+			Name: "fake-1",
+			Spec: &APISpec{
+				Url: urlFoo + "/v1",
+			},
+		})
+		assert.NoError(t, err)
+
+		gock.New(urlFoo).Get("/v1").Reply(200).File("testdata/swagger.json")
+
+		var testcases *TestCases
+		testcases, err = server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: "fake-1"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, testcases) {
+			assert.Equal(t, 5, len(testcases.Data))
+		}
+	})
 }
 
 func TestFunctionsQuery(t *testing.T) {
 	ctx := context.Background()
-	server := getRemoteServerInTempDir()
+	server, clean := getRemoteServerInTempDir()
+	defer clean()
 
 	t.Run("match exactly", func(t *testing.T) {
 		reply, err := server.FunctionsQuery(ctx, &SimpleQuery{Name: "randNumeric"})
@@ -474,9 +537,64 @@ func TestFunctionsQuery(t *testing.T) {
 	})
 }
 
+func TestCodeGenerator(t *testing.T) {
+	ctx := context.Background()
+	server, clean := getRemoteServerInTempDir()
+	defer clean()
+
+	t.Run("ListCodeGenerator", func(t *testing.T) {
+		generators, err := server.ListCodeGenerator(ctx, &Empty{})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(generators.Data))
+	})
+
+	t.Run("GenerateCode, no generator found", func(t *testing.T) {
+		result, err := server.GenerateCode(ctx, &CodeGenerateRequest{
+			Generator: "fake",
+		})
+		assert.NoError(t, err)
+		assert.False(t, result.Success)
+	})
+
+	t.Run("GenerateCode, no TestCase found", func(t *testing.T) {
+		result, err := server.GenerateCode(ctx, &CodeGenerateRequest{
+			Generator: "golang",
+			TestSuite: "fake",
+			TestCase:  "fake",
+		})
+		assert.Error(t, err)
+		assert.NotNil(t, result)
+	})
+
+	t.Run("GenerateCode, normal", func(t *testing.T) {
+		// create a new suite
+		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{Name: "fake"})
+		assert.NoError(t, err)
+
+		_, err = server.CreateTestCase(ctx, &TestCaseWithSuite{
+			SuiteName: "fake",
+			Data: &TestCase{
+				Name: "fake",
+			},
+		})
+		assert.NoError(t, err)
+
+		result, err := server.GenerateCode(ctx, &CodeGenerateRequest{
+			Generator: "golang",
+			TestSuite: "fake",
+			TestCase:  "fake",
+		})
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		assert.True(t, result.Success)
+		assert.NotEmpty(t, result.Message)
+	})
+}
+
 func TestFunctionsQueryStream(t *testing.T) {
 	ctx := context.Background()
-	server := getRemoteServerInTempDir()
+	server, clean := getRemoteServerInTempDir()
+	defer clean()
 
 	fakess := &fakeServerStream{
 		p:      new(uint32),
@@ -509,9 +627,65 @@ func TestFunctionsQueryStream(t *testing.T) {
 	})
 }
 
-func getRemoteServerInTempDir() (server RunnerServer) {
-	writer := atesting.NewFileWriter(os.TempDir())
-	server = NewRemoteServer(writer, nil, "")
+func TestStoreManager(t *testing.T) {
+	ctx := context.Background()
+
+	// always have a local store
+	t.Run("GetStores, no external stores", func(t *testing.T) {
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
+
+		reply, err := server.GetStores(ctx, &Empty{})
+		assert.NoError(t, err)
+		if assert.Equal(t, 1, len(reply.Data)) {
+			assert.Equal(t, "local", reply.Data[0].Name)
+		}
+	})
+
+	t.Run("CreateStore", func(t *testing.T) {
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
+		reply, err := server.CreateStore(ctx, &Store{})
+		assert.NoError(t, err)
+		assert.Nil(t, reply)
+	})
+
+	t.Run("DeleteStore", func(t *testing.T) {
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
+		reply, err := server.DeleteStore(ctx, &Store{})
+		assert.NoError(t, err)
+		assert.Nil(t, reply)
+	})
+
+	t.Run("VerifyStore", func(t *testing.T) {
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
+
+		reply, err := server.VerifyStore(ctx, &SimpleQuery{})
+		assert.Error(t, err)
+		assert.NotNil(t, reply)
+	})
+}
+
+func getRemoteServerInTempDir() (server RunnerServer, call func()) {
+	dir, _ := os.MkdirTemp(os.TempDir(), "remote-server-test")
+	call = func() { os.RemoveAll(dir) }
+
+	writer := atesting.NewFileWriter(dir)
+	server = NewRemoteServer(writer, newLocalloaderFromStore(), "")
+	return
+}
+
+type fakeLocalLoaderFactory struct {
+}
+
+func newLocalloaderFromStore() atesting.StoreWriterFactory {
+	return &fakeLocalLoaderFactory{}
+}
+
+func (l *fakeLocalLoaderFactory) NewInstance(store atesting.Store) (writer atesting.Writer, err error) {
+	writer = atesting.NewFileWriter("")
 	return
 }
 

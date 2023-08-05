@@ -2,6 +2,7 @@ package remote
 
 import (
 	context "context"
+	"errors"
 
 	server "github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -116,7 +117,7 @@ func (g *gRPCLoader) ListTestSuite() (suites []testing.TestSuite, err error) {
 	items, err = g.client.ListTestSuite(g.ctx, &server.Empty{})
 	if err == nil && items != nil {
 		for _, item := range items.Data {
-			suites = append(suites, *convertToNormalTestSuite(item))
+			suites = append(suites, *ConvertToNormalTestSuite(item))
 		}
 	}
 	return
@@ -155,12 +156,12 @@ func (g *gRPCLoader) GetSuite(name string) (reply *testing.TestSuite, _ string, 
 		return
 	}
 
-	reply = convertToNormalTestSuite(suite)
+	reply = ConvertToNormalTestSuite(suite)
 	return
 }
 
 func (g *gRPCLoader) UpdateSuite(suite testing.TestSuite) (err error) {
-	_, err = g.client.UpdateTestSuite(g.ctx, convertToGRPCTestSuite(&suite))
+	_, err = g.client.UpdateTestSuite(g.ctx, ConvertToGRPCTestSuite(&suite))
 	return
 }
 
@@ -168,5 +169,15 @@ func (g *gRPCLoader) DeleteSuite(name string) (err error) {
 	_, err = g.client.DeleteTestSuite(g.ctx, &TestSuite{
 		Name: name,
 	})
+	return
+}
+
+func (g *gRPCLoader) Verify() (err error) {
+	var result *server.CommonResult
+	if result, err = g.client.Verify(g.ctx, &server.Empty{}); err == nil {
+		if !result.Success {
+			err = errors.New(result.Message)
+		}
+	}
 	return
 }

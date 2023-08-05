@@ -4,3 +4,4 @@ use ./
 use ./extensions/collector
 use ./extensions/store-etcd
 use ./extensions/store-orm
+use ./extensions/store-s3

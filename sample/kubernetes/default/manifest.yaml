@@ -67,6 +67,17 @@ spec:
           requests:
             cpu: 100m
             memory: 100Mi
+      - image: ghcr.io/linuxsuren/api-testing:master
+        name: extension-s3
+        command: [atest-store-s3]
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
       volumes:
       - name: config
         configMap:
@@ -118,3 +129,15 @@ data:
       username: root
       properties:
         database: test
+    - name: s3
+      url: http://172.11.0.13:30999   # address of the s3 server
+      kind:
+        name: s3
+        url: localhost:7072           # address of the s3 storage extension
+      properties:
+        accessKeyID: 6e03rIMChrsZ6YZl
+        secretAccessKey: F0xH6o2qRYTyAUyRuXO81B4gj7zUrSaj
+        disableSSL:  true
+        forcepathstyle: true
+        bucket: vm1
+        region: cn

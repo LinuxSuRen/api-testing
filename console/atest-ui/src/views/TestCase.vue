@@ -14,7 +14,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['updated'])
 
-let querySuggestedAPIs = NewSuggestedAPIsQuery(props.suite!)
+let querySuggestedAPIs = NewSuggestedAPIsQuery(props.store!, props.suite!)
 const testResultActiveTab = ref('output')
 const requestLoading = ref(false)
 const testResult = ref({ header: [] as Pair[] } as TestResult)
@@ -57,6 +57,34 @@ function sendRequest() {
       requestLoading.value = false
       ElMessage.error('Oops, ' + e)
       testResult.value.bodyObject = JSON.parse(e.body)
+    })
+}
+
+function generateCode() {
+  const name = props.name
+  const suite = props.suite
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
+    body: JSON.stringify({
+      TestSuite: suite,
+      TestCase: name,
+      Generator: "golang"
+    })
+  }
+  fetch('/server.Runner/GenerateCode', requestOptions)
+    .then((response) => response.json())
+    .then((e) => {
+      ElMessage({
+        message: 'Code generated!',
+        type: 'success'
+      })
+      testResult.value.output = e.message
+    })
+    .catch((e) => {
+      ElMessage.error('Oops, ' + e)
     })
 }
 
@@ -399,7 +427,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           v-model="testCaseWithSuite.data.request.api"
           :fetch-suggestions="querySuggestedAPIs"
           placeholder="API Address"
-          style="width: 70%; margin-left: 5px; margin-right: 5px"
+          style="width: 50%; margin-left: 5px; margin-right: 5px"
         >
           <template #default="{ item }">
             <div class="value">{{ item.request.method }}</div>
@@ -408,6 +436,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
         </el-autocomplete>
 
         <el-button type="primary" @click="sendRequest" :loading="requestLoading">Send</el-button>
+        <el-button type="primary" @click="generateCode">Generator Code</el-button>
       </el-header>
 
       <el-main>

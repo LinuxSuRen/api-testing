@@ -70,6 +70,7 @@ func TestStoreFactory(t *testing.T) {
 				"database": "test",
 			},
 		}, store)
+		assert.False(t, store.IsLocal())
 	})
 
 	t.Run("GetAllStores", func(t *testing.T) {
@@ -96,6 +97,11 @@ func TestStoreFactory(t *testing.T) {
 		assert.Equal(t, []Store{{
 			Name: "local",
 		}}, stores)
+	})
+
+	t.Run("local store", func(t *testing.T) {
+		store := Store{Name: "local"}
+		assert.True(t, store.IsLocal())
 	})
 }
 

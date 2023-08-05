@@ -17,6 +17,7 @@ This is a API testing tool.
 *   Output reference between TestCase
 *   Run in server mode, and provide the [gRPC](pkg/server/server.proto) and HTTP endpoint
 *   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
+*   Multiple storage backends supported(Local, ORM Database, S3, etc)
 *   [HTTP API record](extensions/collector)
 
 ## Get started
