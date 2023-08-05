@@ -344,7 +344,7 @@ func compareElement(field string, expect, actul gjson.Result) error {
 		return compareArr(field, expect.Array(), actul.Array())
 	}
 
-	if !reflect.ValueOf(expect.Value()).Equal(reflect.ValueOf(actul.Value())) {
+	if !reflect.DeepEqual(expect.Value(), actul.Value()) {
 		return fmt.Errorf("field %s: expect %v but got %v", field, expect.Value(), actul.Value())
 	}
 
