@@ -55,6 +55,7 @@ There are multiple storage backends supported. See the status from the list:
 | Local Storage | Ready |
 | S3 | Ready |
 | ORM DataBase | Developing |
+| Git Repository | Developing |
 | Etcd DataBase | Developing |
 
 ### Local Storage
@@ -135,6 +136,29 @@ See also the expected configuration below:
     forcepathstyle: true
     bucket: vm1
     region: cn
+```
+
+### Git Storage
+You can use a git repository as the storage backend.
+
+```shell
+# The default port is 7074
+podman run --network host \
+    ghcr.io/linuxsuren/api-testing:master atest-store-git
+```
+
+See also the expected configuration below:
+
+```yaml
+- name: git
+  url: http://172.11.0.13:30999   # address of the git repository
+  username: linuxsuren
+  password: linuxsuren
+  kind:
+    name: git
+    url: localhost:7074           # address of the git storage extension
+  properties:
+    targetPath: .
 ```
 
 ## Secret Server

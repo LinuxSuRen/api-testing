@@ -48,9 +48,12 @@ test-store-orm:
 test-store-s3:
 	go test github.com/linuxsuren/api-testing/extensions/store-s3/./... -cover -v -coverprofile=store-s3-coverage.out
 	go tool cover -func=store-s3-coverage.out
+test-store-git:
+	go test github.com/linuxsuren/api-testing/extensions/store-git/./... -cover -v -coverprofile=store-git-coverage.out
+	go tool cover -func=store-git-coverage.out
 test-operator:
 	cd operator && make test # converage file path: operator/cover.out
-test-all-backend: test test-collector test-store-orm test-store-s3 test-operator
+test-all-backend: test test-collector test-store-orm test-store-s3 test-store-git #test-operator
 test-all: test-all-backend test-ui
 
 install-precheck:

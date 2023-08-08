@@ -97,7 +97,7 @@ func (g *gRPCLoader) ListTestCase(suite string) (testcases []testing.TestCase, e
 			if item.Name == "" {
 				continue
 			}
-			testcases = append(testcases, convertToNormalTestCase(item))
+			testcases = append(testcases, ConvertToNormalTestCase(item))
 		}
 	}
 	return
@@ -109,20 +109,20 @@ func (g *gRPCLoader) GetTestCase(suite, name string) (testcase testing.TestCase,
 		SuiteName: suite,
 	})
 	if err == nil && result != nil {
-		testcase = convertToNormalTestCase(result)
+		testcase = ConvertToNormalTestCase(result)
 	}
 	return
 }
 
 func (g *gRPCLoader) CreateTestCase(suite string, testcase testing.TestCase) (err error) {
-	payload := convertToGRPCTestCase(testcase)
+	payload := ConvertToGRPCTestCase(testcase)
 	payload.SuiteName = suite
 	_, err = g.client.CreateTestCase(g.ctx, payload)
 	return
 }
 
 func (g *gRPCLoader) UpdateTestCase(suite string, testcase testing.TestCase) (err error) {
-	payload := convertToGRPCTestCase(testcase)
+	payload := ConvertToGRPCTestCase(testcase)
 	payload.SuiteName = suite
 	_, err = g.client.UpdateTestCase(g.ctx, payload)
 	return
@@ -158,7 +158,7 @@ func (g *gRPCLoader) GetTestSuite(name string, full bool) (suite testing.TestSui
 
 		if result.Items != nil {
 			for i := range result.Items {
-				suite.Items = append(suite.Items, convertToNormalTestCase(result.Items[i]))
+				suite.Items = append(suite.Items, ConvertToNormalTestCase(result.Items[i]))
 			}
 		}
 	}
