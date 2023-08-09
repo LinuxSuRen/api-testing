@@ -26,6 +26,7 @@ package server
 
 import "github.com/linuxsuren/api-testing/pkg/testing"
 
+// ToGRPCStore convert the normal store to GRPC store
 func ToGRPCStore(store testing.Store) (result *Store) {
 	result = &Store{
 		Name: store.Name,
@@ -38,6 +39,25 @@ func ToGRPCStore(store testing.Store) (result *Store) {
 		Username:    store.Username,
 		Password:    store.Password,
 		Properties:  mapToPair(store.Properties),
+	}
+	return
+}
+
+// ToNormalStore convert the GRPC store to normal store
+func ToNormalStore(store *Store) (result testing.Store) {
+	result = testing.Store{
+		Name:        store.Name,
+		Description: store.Description,
+		URL:         store.Url,
+		Username:    store.Username,
+		Password:    store.Password,
+		Properties:  pairToMap(store.Properties),
+	}
+	if store.Kind != nil {
+		result.Kind = testing.StoreKind{
+			Name: store.Kind.Name,
+			URL:  store.Kind.Url,
+		}
 	}
 	return
 }

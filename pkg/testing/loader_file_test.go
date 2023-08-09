@@ -38,6 +38,8 @@ func TestFileLoader(t *testing.T) {
 				loader.Put(item)
 			}
 			tt.verify(t, loader)
+
+			assert.NoError(t, loader.Verify())
 		})
 	}
 }

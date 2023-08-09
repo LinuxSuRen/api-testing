@@ -25,6 +25,7 @@ SOFTWARE.
 package testing
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -70,14 +71,13 @@ func TestStoreFactory(t *testing.T) {
 				"database": "test",
 			},
 		}, store)
-		assert.False(t, store.IsLocal())
 	})
 
 	t.Run("GetAllStores", func(t *testing.T) {
 		stores, err := factory.GetStores()
 		assert.Nil(t, err)
-		assert.Equal(t, 2, len(stores))
-		assert.Equal(t, "local", stores[1].Name)
+		assert.Equal(t, 1, len(stores))
+		assert.Equal(t, "db", stores[0].Name)
 	})
 
 	t.Run("DeleteStore", func(t *testing.T) {
@@ -86,22 +86,43 @@ func TestStoreFactory(t *testing.T) {
 	})
 
 	t.Run("UpdateStore", func(t *testing.T) {
-		err := factory.UpdateStore(Store{})
-		assert.NoError(t, err)
+		err := factory.UpdateStore(Store{Name: "fake"})
+		assert.Error(t, err)
 	})
 
 	t.Run("no stores.yaml found", func(t *testing.T) {
 		factory := NewStoreFactory("testdata-fake")
 		stores, err := factory.GetStores()
 		assert.NoError(t, err)
-		assert.Equal(t, []Store{{
-			Name: "local",
-		}}, stores)
+		assert.Nil(t, stores)
 	})
 
-	t.Run("local store", func(t *testing.T) {
-		store := Store{Name: "local"}
-		assert.True(t, store.IsLocal())
+	t.Run("CreateStore", func(t *testing.T) {
+		dir, err := os.MkdirTemp(os.TempDir(), "store")
+		assert.NoError(t, err)
+		defer os.RemoveAll(dir)
+
+		factory := NewStoreFactory(dir)
+		err = factory.CreateStore(Store{Name: "fake"})
+		assert.NoError(t, err)
+
+		// create an existing store
+		err = factory.CreateStore(Store{Name: "fake"})
+		assert.Error(t, err)
+
+		// update an existing store
+		err = factory.UpdateStore(Store{Name: "fake"})
+		assert.NoError(t, err)
+
+		// delete an existing store
+		err = factory.DeleteStore("fake")
+		assert.NoError(t, err)
+
+		// get all stores
+		var stores []Store
+		stores, err = factory.GetStores()
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(stores))
 	})
 }
 

@@ -645,9 +645,16 @@ func TestStoreManager(t *testing.T) {
 	t.Run("CreateStore", func(t *testing.T) {
 		server, clean := getRemoteServerInTempDir()
 		defer clean()
-		reply, err := server.CreateStore(ctx, &Store{})
+		reply, err := server.CreateStore(ctx, &Store{
+			Name: "fake",
+		})
 		assert.NoError(t, err)
-		assert.Nil(t, reply)
+		assert.NotNil(t, reply)
+
+		var stores *Stores
+		stores, err = server.GetStores(ctx, &Empty{})
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(stores.Data))
 	})
 
 	t.Run("DeleteStore", func(t *testing.T) {
@@ -655,7 +662,7 @@ func TestStoreManager(t *testing.T) {
 		defer clean()
 		reply, err := server.DeleteStore(ctx, &Store{})
 		assert.NoError(t, err)
-		assert.Nil(t, reply)
+		assert.NotNil(t, reply)
 	})
 
 	t.Run("VerifyStore", func(t *testing.T) {
@@ -666,6 +673,14 @@ func TestStoreManager(t *testing.T) {
 		assert.Error(t, err)
 		assert.NotNil(t, reply)
 	})
+
+	t.Run("UpdateStore", func(t *testing.T) {
+		server, clean := getRemoteServerInTempDir()
+		defer clean()
+
+		_, err := server.UpdateStore(ctx, &Store{})
+		assert.Error(t, err)
+	})
 }
 
 func getRemoteServerInTempDir() (server RunnerServer, call func()) {
@@ -673,7 +688,7 @@ func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 	call = func() { os.RemoveAll(dir) }
 
 	writer := atesting.NewFileWriter(dir)
-	server = NewRemoteServer(writer, newLocalloaderFromStore(), "")
+	server = NewRemoteServer(writer, newLocalloaderFromStore(), dir)
 	return
 }
 

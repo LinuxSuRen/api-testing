@@ -50,6 +50,7 @@ type RunnerClient interface {
 	GetStoreKinds(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*StoreKinds, error)
 	GetStores(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Stores, error)
 	CreateStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error)
+	UpdateStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error)
 	DeleteStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error)
 	VerifyStore(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*CommonResult, error)
 }
@@ -291,6 +292,15 @@ func (c *runnerClient) CreateStore(ctx context.Context, in *Store, opts ...grpc.
 	return out, nil
 }
 
+func (c *runnerClient) UpdateStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error) {
+	out := new(Store)
+	err := c.cc.Invoke(ctx, "/server.Runner/UpdateStore", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) DeleteStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error) {
 	out := new(Store)
 	err := c.cc.Invoke(ctx, "/server.Runner/DeleteStore", in, out, opts...)
@@ -341,6 +351,7 @@ type RunnerServer interface {
 	GetStoreKinds(context.Context, *Empty) (*StoreKinds, error)
 	GetStores(context.Context, *Empty) (*Stores, error)
 	CreateStore(context.Context, *Store) (*Store, error)
+	UpdateStore(context.Context, *Store) (*Store, error)
 	DeleteStore(context.Context, *Store) (*Store, error)
 	VerifyStore(context.Context, *SimpleQuery) (*CommonResult, error)
 	mustEmbedUnimplementedRunnerServer()
@@ -418,6 +429,9 @@ func (UnimplementedRunnerServer) GetStores(context.Context, *Empty) (*Stores, er
 }
 func (UnimplementedRunnerServer) CreateStore(context.Context, *Store) (*Store, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateStore not implemented")
+}
+func (UnimplementedRunnerServer) UpdateStore(context.Context, *Store) (*Store, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateStore not implemented")
 }
 func (UnimplementedRunnerServer) DeleteStore(context.Context, *Store) (*Store, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteStore not implemented")
@@ -860,6 +874,24 @@ func _Runner_CreateStore_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_UpdateStore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Store)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).UpdateStore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/UpdateStore",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).UpdateStore(ctx, req.(*Store))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_DeleteStore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Store)
 	if err := dec(in); err != nil {
@@ -990,6 +1022,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateStore",
 			Handler:    _Runner_CreateStore_Handler,
+		},
+		{
+			MethodName: "UpdateStore",
+			Handler:    _Runner_UpdateStore_Handler,
 		},
 		{
 			MethodName: "DeleteStore",
