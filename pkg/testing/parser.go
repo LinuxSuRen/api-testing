@@ -41,6 +41,7 @@ func Parse(data []byte) (testSuite *TestSuite, err error) {
 	return
 }
 
+// ParseFromStream parses the stream and returns the test suite
 func ParseFromStream(stream io.Reader) (testSuite *TestSuite, err error) {
 	var data []byte
 	if data, err = io.ReadAll(stream); err == nil {

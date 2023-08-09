@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import TestCase from './views/TestCase.vue'
 import TestSuite from './views/TestSuite.vue'
+import StoreManager from './views/StoreManager.vue'
 import TemplateFunctions from './views/TemplateFunctions.vue'
 import { reactive, ref, watch } from 'vue'
 import { ElTree } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { Edit } from '@element-plus/icons-vue'
+import { Edit, Share } from '@element-plus/icons-vue'
 import type { Suite } from './types'
 
 interface Tree {
@@ -61,11 +62,11 @@ const data = ref([] as Tree[])
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const currentNodekey = ref('')
 
-function loadTestSuites(store: string) {
+function loadTestSuites(storeName: string) {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store
+      'X-Store-Name': storeName
     },
   }
   fetch('/server.Runner/GetSuites', requestOptions)
@@ -78,7 +79,7 @@ function loadTestSuites(store: string) {
         let suite = {
           id: k,
           label: k,
-          store: store,
+          store: storeName,
           children: [] as Tree[]
         } as Tree
 
@@ -86,7 +87,7 @@ function loadTestSuites(store: string) {
           suite.children?.push({
             id: k + item,
             label: item,
-            store: store,
+            store: storeName,
             parent: k
           } as Tree)
         })
@@ -105,6 +106,7 @@ function loadTestSuites(store: string) {
 
         viewName.value = 'testsuite'
         testSuite.value = firstItem.label
+        store.value = firstItem.store
       }
     })
 }
@@ -196,43 +198,54 @@ const viewName = ref('testcase')
 
 <template>
   <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
-    <el-container style="height: 100%">
-      <el-aside width="200px">
-        <el-button type="primary" @click="openTestSuiteCreateDialog"
-          data-intro="Click here to create a new test suite"
-          test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
-        <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
-
-        <el-tree
-          :data=data
-          highlight-current
-          :check-on-click-node="true"
-          :expand-on-click-node="false"
-          :current-node-key="currentNodekey"
-          ref="treeRef"
-          node-key="id"
-          :filter-node-method="filterTestCases"
-          @node-click="handleNodeClick"
-          data-intro="This is the test suite tree. You can click the test suite to edit it."
-        />
-      </el-aside>
+    <el-container>
+      <el-header style="height: 30px;justify-content: flex-end;">
+        <el-button type="primary" :icon="Share" @click="viewName = ''" />
+      </el-header>
 
       <el-main>
-        <TestCase
-          v-if="viewName === 'testcase'"
-          :store="store"
-          :suite="testSuite"
-          :name="testCaseName"
-          @updated="loadStores"
-          data-intro="This is the test case editor. You can edit the test case here."
-        />
-        <TestSuite
-          v-else-if="viewName === 'testsuite'"
-          :name="testSuite"
-          :store="store"
-          @updated="loadStores"
-          data-intro="This is the test suite editor. You can edit the test suite here."
-        />
+        <el-container style="height: 100%">
+          <el-aside width="200px">
+            <el-button type="primary" @click="openTestSuiteCreateDialog"
+              data-intro="Click here to create a new test suite"
+              test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
+            <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
+
+            <el-tree
+              :data=data
+              highlight-current
+              :check-on-click-node="true"
+              :expand-on-click-node="false"
+              :current-node-key="currentNodekey"
+              ref="treeRef"
+              node-key="id"
+              :filter-node-method="filterTestCases"
+              @node-click="handleNodeClick"
+              data-intro="This is the test suite tree. You can click the test suite to edit it."
+            />
+          </el-aside>
+
+          <el-main>
+            <TestCase
+              v-if="viewName === 'testcase'"
+              :store="store"
+              :suite="testSuite"
+              :name="testCaseName"
+              @updated="loadStores"
+              data-intro="This is the test case editor. You can edit the test case here."
+            />
+            <TestSuite
+              v-else-if="viewName === 'testsuite' && testSuite !== ''"
+              :name="testSuite"
+              :store="store"
+              @updated="loadStores"
+              data-intro="This is the test suite editor. You can edit the test suite here."
+            />
+            <StoreManager
+            v-else-if="viewName === '' || testSuite === '' || store === ''"
+            />
+          </el-main>
+        </el-container>
       </el-main>
     </el-container>
   </div>

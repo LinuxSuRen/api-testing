@@ -602,24 +602,35 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 		for _, item := range stores {
 			grpcStore := ToGRPCStore(item)
 
-			if !item.IsLocal() {
-				storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
-				grpcStore.Ready = sErr == nil && storeStatus.Success
-			} else {
-				grpcStore.Ready = true
-			}
+			storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
+			grpcStore.Ready = sErr == nil && storeStatus.Success
 
 			reply.Data = append(reply.Data, grpcStore)
 		}
+		reply.Data = append(reply.Data, &Store{
+			Name:  "local",
+			Kind:  &StoreKind{},
+			Ready: true,
+		})
 	}
 	return
 }
 func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err error) {
-	// TODO need to implement
+	reply = &Store{}
+	storeFactory := testing.NewStoreFactory(s.configDir)
+	err = storeFactory.CreateStore(ToNormalStore(in))
+	return
+}
+func (s *server) UpdateStore(ctx context.Context, in *Store) (reply *Store, err error) {
+	reply = &Store{}
+	storeFactory := testing.NewStoreFactory(s.configDir)
+	err = storeFactory.UpdateStore(ToNormalStore(in))
 	return
 }
 func (s *server) DeleteStore(ctx context.Context, in *Store) (reply *Store, err error) {
-	// TODO need to implement
+	reply = &Store{}
+	storeFactory := testing.NewStoreFactory(s.configDir)
+	err = storeFactory.DeleteStore(in.Name)
 	return
 }
 func (s *server) VerifyStore(ctx context.Context, in *SimpleQuery) (reply *CommonResult, err error) {

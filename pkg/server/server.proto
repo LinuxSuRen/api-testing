@@ -38,6 +38,7 @@ service Runner {
     rpc GetStoreKinds(Empty) returns (StoreKinds) {}
     rpc GetStores(Empty) returns (Stores) {}
     rpc CreateStore(Store) returns (Store) {}
+    rpc UpdateStore(Store) returns (Store) {}
     rpc DeleteStore(Store) returns (Store) {}
     rpc VerifyStore(SimpleQuery) returns (CommonResult) {}
 }

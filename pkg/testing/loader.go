@@ -8,6 +8,8 @@ type Loader interface {
 	GetContext() string
 	GetCount() int
 	Reset()
+
+	Verify() (err error)
 }
 
 type Writer interface {
@@ -25,6 +27,4 @@ type Writer interface {
 	GetSuite(name string) (*TestSuite, string, error)
 	UpdateSuite(TestSuite) (err error)
 	DeleteSuite(name string) (err error)
-
-	Verify() (err error)
 }

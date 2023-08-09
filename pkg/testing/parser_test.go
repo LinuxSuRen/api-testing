@@ -1,6 +1,7 @@
 package testing_test
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"os"
@@ -53,6 +54,10 @@ func TestParse(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "https://gitlab.com/api/v4", suite.API)
 	}
+
+	var anotherSuite *atest.TestSuite
+	anotherSuite, err = atest.ParseFromStream(bytes.NewBuffer(data))
+	assert.Equal(t, suite, anotherSuite)
 
 	_, err = atest.Parse([]byte(invalidTestCaseContent))
 	assert.NotNil(t, err)

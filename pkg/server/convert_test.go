@@ -60,3 +60,33 @@ func TestToGRPCStore(t *testing.T) {
 		},
 	}))
 }
+
+func TestToNormalStore(t *testing.T) {
+	assert.Equal(t, atest.Store{
+		Name:        "test",
+		Description: "desc",
+		Kind: atest.StoreKind{
+			Name: "test",
+			URL:  urlFoo,
+		},
+		URL:      urlFoo,
+		Username: "user",
+		Password: "pass",
+		Properties: map[string]string{
+			"foo": "bar",
+		},
+	}, ToNormalStore(&Store{
+		Name:        "test",
+		Description: "desc",
+		Kind: &StoreKind{
+			Name: "test",
+			Url:  urlFoo,
+		},
+		Url:      urlFoo,
+		Username: "user",
+		Password: "pass",
+		Properties: []*Pair{{
+			Key: "foo", Value: "bar",
+		}},
+	}))
+}

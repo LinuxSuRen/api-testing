@@ -25,6 +25,7 @@ SOFTWARE.
 package testing
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -56,10 +57,6 @@ func (s *Store) ToMap() (result map[string]string) {
 		result["pro."+key] = val
 	}
 	return
-}
-
-func (s *Store) IsLocal() bool {
-	return s.Name == "local"
 }
 
 func MapToStore(data map[string]string) (store Store) {
@@ -94,6 +91,7 @@ type StoreGetterAndSetter interface {
 	GetStore(name string) (store *Store, err error)
 	DeleteStore(name string) (err error)
 	UpdateStore(store Store) (err error)
+	CreateStore(store Store) (err error)
 
 	GetStoreKinds() (kinds []StoreKind, err error)
 }
@@ -106,12 +104,14 @@ type storeFactory struct {
 	configDir string
 }
 
+// NewStoreFactory creates a new store factory
 func NewStoreFactory(configDir string) StoreGetterAndSetter {
 	return &storeFactory{
 		configDir: configDir,
 	}
 }
 
+// GetStores returns all stores
 func (s *storeFactory) GetStores() (stores []Store, err error) {
 	var data []byte
 	if data, err = os.ReadFile(path.Join(s.configDir, "stores.yaml")); err == nil {
@@ -119,7 +119,6 @@ func (s *storeFactory) GetStores() (stores []Store, err error) {
 	} else {
 		err = nil
 	}
-	stores = append(stores, Store{Name: "local"})
 	return
 }
 
@@ -137,10 +136,70 @@ func (s *storeFactory) GetStore(name string) (store *Store, err error) {
 }
 
 func (s *storeFactory) DeleteStore(name string) (err error) {
+	var stores []Store
+	if stores, err = s.GetStores(); err == nil {
+		for i := range stores {
+			item := stores[i]
+			if item.Name == name {
+				stores = append(stores[:i], stores[i+1:]...)
+				break
+			}
+		}
+		var data []byte
+		if data, err = yaml.Marshal(stores); err == nil {
+			err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
+		}
+	}
 	return
 }
 
 func (s *storeFactory) UpdateStore(store Store) (err error) {
+	var stores []Store
+	if stores, err = s.GetStores(); err == nil {
+		exist := false
+		for i := range stores {
+			item := stores[i]
+			if item.Name == store.Name {
+				stores[i] = store
+				exist = true
+				break
+			}
+		}
+
+		if exist {
+			var data []byte
+			if data, err = yaml.Marshal(stores); err == nil {
+				err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
+			}
+		} else {
+			err = fmt.Errorf("store %s is not exists", store.Name)
+		}
+	}
+	return
+}
+
+func (s *storeFactory) CreateStore(store Store) (err error) {
+	var stores []Store
+	if stores, err = s.GetStores(); err == nil {
+		exist := false
+		for i := range stores {
+			item := stores[i]
+			if item.Name == store.Name {
+				exist = true
+				break
+			}
+		}
+
+		if !exist {
+			stores = append(stores, store)
+			var data []byte
+			if data, err = yaml.Marshal(stores); err == nil {
+				err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
+			}
+		} else {
+			err = fmt.Errorf("store %s already exists", store.Name)
+		}
+	}
 	return
 }
 
