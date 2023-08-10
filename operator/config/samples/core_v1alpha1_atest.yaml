@@ -1,0 +1,13 @@
+apiVersion: core.linuxsuren.github.com/v1alpha1
+kind: ATest
+metadata:
+  labels:
+    app.kubernetes.io/name: atest
+    app.kubernetes.io/instance: atest-sample
+    app.kubernetes.io/part-of: operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: operator
+  name: atest-sample
+spec:
+  image: ghcr.io/linuxsuren/api-testing
+  version: master

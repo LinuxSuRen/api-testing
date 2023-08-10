@@ -1,0 +1,64 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: atests.core.linuxsuren.github.com
+spec:
+  group: core.linuxsuren.github.com
+  names:
+    kind: ATest
+    listKind: ATestList
+    plural: atests
+    singular: atest
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ATest is the Schema for the atests API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ATestSpec defines the desired state of ATest
+            properties:
+              image:
+                type: string
+              persistent:
+                description: Persistent defines the persistent volume claim
+                properties:
+                  enabled:
+                    type: boolean
+                  storageClass:
+                    type: string
+                type: object
+              replicas:
+                format: int32
+                type: integer
+              serviceType:
+                description: Service Type string describes ingress methods for a service
+                type: string
+              version:
+                type: string
+            type: object
+          status:
+            description: ATestStatus defines the observed state of ATest
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
