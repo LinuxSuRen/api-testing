@@ -110,6 +110,8 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 		o.reportWriter = runner.NewDiscardResultWriter()
 	case "", "std":
 		o.reportWriter = runner.NewResultWriter(writer)
+	case "pdf":
+		o.reportWriter = runner.NewPDFResultWriter(writer)
 	default:
 		err = fmt.Errorf("not supported report type: '%s'", o.report)
 	}
