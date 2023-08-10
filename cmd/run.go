@@ -107,6 +107,14 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 		o.reportWriter = runner.NewHTMLResultWriter(writer)
 	case "json":
 		o.reportWriter = runner.NewJSONResultWriter(writer)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+	case "pdf":
+		o.reportWriter = runner.NewPDFResultWriter(writer)
+>>>>>>> f760783 (delte font file)
+>>>>>>> f39aeef (conflict resolve)
 	case "discard":
 		o.reportWriter = runner.NewDiscardResultWriter()
 	case "", "std":
