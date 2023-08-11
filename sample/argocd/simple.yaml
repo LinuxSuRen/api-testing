@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: sample/kubernetes
+    path: sample/kubernetes/default
     repoURL: https://github.com/LinuxSuRen/api-testing
     targetRevision: master
     # see also https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/

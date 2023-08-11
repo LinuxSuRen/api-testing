@@ -32,7 +32,8 @@ func TestPrintProto(t *testing.T) {
 		},
 	}, {
 		name: "random port",
-		args: []string{"server", "-p=0", "--http-port=0", "--local-storage=./*"},
+		args: []string{"server", "-p=0", "--http-port=0",
+			"--local-storage=./*", "--secret-server=localhost:7073"},
 		verify: func(t *testing.T, buf *bytes.Buffer, err error) {
 			assert.Nil(t, err)
 		},
