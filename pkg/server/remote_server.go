@@ -31,14 +31,56 @@ type server struct {
 	loader             testing.Writer
 	storeWriterFactory testing.StoreWriterFactory
 	configDir          string
+
+	secretServer SecretServiceServer
+}
+
+type SecretServiceServer interface {
+	GetSecrets(context.Context, *Empty) (*Secrets, error)
+	CreateSecret(context.Context, *Secret) (*CommonResult, error)
+	DeleteSecret(context.Context, *Secret) (*CommonResult, error)
+	UpdateSecret(context.Context, *Secret) (*CommonResult, error)
+}
+
+type SecertServiceGetable interface {
+	GetSecret(context.Context, *Secret) (*Secret, error)
+}
+
+type fakeSecretServer struct{}
+
+var errNoSecretService = errors.New("no secret service found")
+
+func (f *fakeSecretServer) GetSecrets(ctx context.Context, in *Empty) (reply *Secrets, err error) {
+	err = errNoSecretService
+	return
+}
+
+func (f *fakeSecretServer) CreateSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
+	err = errNoSecretService
+	return
+}
+
+func (f *fakeSecretServer) DeleteSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
+	err = errNoSecretService
+	return
+}
+
+func (f *fakeSecretServer) UpdateSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
+	err = errNoSecretService
+	return
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, configDir string) RunnerServer {
+func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, secretServer SecretServiceServer, configDir string) RunnerServer {
+	if secretServer == nil {
+		secretServer = &fakeSecretServer{}
+	}
+
 	return &server{
 		loader:             loader,
 		storeWriterFactory: storeWriterFactory,
 		configDir:          configDir,
+		secretServer:       secretServer,
 	}
 }
 
@@ -643,6 +685,20 @@ func (s *server) VerifyStore(ctx context.Context, in *SimpleQuery) (reply *Commo
 		reply.Message = util.OKOrErrorMessage(verifyErr)
 	}
 	return
+}
+
+// secret related interfaces
+func (s *server) GetSecrets(ctx context.Context, in *Empty) (reply *Secrets, err error) {
+	return s.secretServer.GetSecrets(ctx, in)
+}
+func (s *server) CreateSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
+	return s.secretServer.CreateSecret(ctx, in)
+}
+func (s *server) DeleteSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
+	return s.secretServer.DeleteSecret(ctx, in)
+}
+func (s *server) UpdateSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
+	return s.secretServer.UpdateSecret(ctx, in)
 }
 
 func (s *server) getLoaderByStoreName(storeName string) (loader testing.Writer, err error) {

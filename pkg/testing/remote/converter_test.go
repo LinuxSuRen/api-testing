@@ -22,12 +22,18 @@ func TestConvert(t *testing.T) {
 				Kind: "http",
 				URL:  "/v1",
 			},
+			Items: []atest.TestCase{{
+				Name: "fake",
+			}},
 		}, ConvertToNormalTestSuite(&TestSuite{
 			Param: defaultPairs,
 			Spec: &server.APISpec{
 				Url:  "/v1",
 				Kind: "http",
 			},
+			Items: []*server.TestCase{{
+				Name: "fake",
+			}},
 		}))
 	})
 
@@ -35,6 +41,9 @@ func TestConvert(t *testing.T) {
 		result := ConvertToGRPCTestSuite(&atest.TestSuite{
 			API:   "v1",
 			Param: defaultMap,
+			Items: []atest.TestCase{{
+				Name: "fake",
+			}},
 		})
 		assert.Equal(t, "v1", result.Api)
 		assert.Equal(t, defaultPairs, result.Param)

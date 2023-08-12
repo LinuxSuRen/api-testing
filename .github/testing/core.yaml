@@ -67,3 +67,9 @@ items:
   request:
     api: /GetVersion
     method: POST
+- name: secrets
+  request:
+    api: /GetSecrets
+    method: POST
+  expect:
+    statusCode: 500

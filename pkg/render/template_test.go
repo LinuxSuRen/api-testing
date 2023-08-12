@@ -154,3 +154,18 @@ func TestGenerateJSONString(t *testing.T) {
 	result := generateJSONString([]string{"name", "age"})
 	assert.Equal(t, `{"age":"random","name":"random"}`, result)
 }
+
+func TestSecret(t *testing.T) {
+	SetSecretGetter(nil)
+	result, err := Render("", `{{secretValue "pass"}}`, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "no secret server", result)
+
+	expected := "password"
+	SetSecretGetter(&nonSecretGetter{
+		value: expected,
+	})
+	result, err = Render("", `{{secretValue "pass"}}`, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, result)
+}

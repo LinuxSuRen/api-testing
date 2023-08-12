@@ -68,6 +68,11 @@ grpc-gw:
     --grpc-gateway_opt paths=source_relative \
     --grpc-gateway_opt generate_unbound_methods=true \
     pkg/server/server.proto
+grpc-java:
+	protoc --plugin=protoc-gen-grpc-java \
+    --grpc-java_out=bin --proto_path=. \
+	pkg/server/server.proto \
+	pkg/testing/remote/loader.proto
 grpc-js:
 	protoc -I=pkg/server server.proto \
     --js_out=import_style=commonjs:bin \

@@ -41,6 +41,12 @@ service Runner {
     rpc UpdateStore(Store) returns (Store) {}
     rpc DeleteStore(Store) returns (Store) {}
     rpc VerifyStore(SimpleQuery) returns (CommonResult) {}
+
+    // secret related interfaces
+    rpc GetSecrets(Empty) returns (Secrets) {}
+    rpc CreateSecret(Secret) returns (CommonResult) {}
+    rpc DeleteSecret(Secret) returns (CommonResult) {}
+    rpc UpdateSecret(Secret) returns (CommonResult) {}
 }
 
 message Suites {
@@ -195,6 +201,16 @@ message CodeGenerateRequest {
   string TestSuite = 1;
   string TestCase = 2;
   string Generator = 3;
+}
+
+message Secrets {
+  repeated Secret data = 1;
+}
+
+message Secret {
+  string Name = 1;
+  string Value = 2;
+  string Description = 3;
 }
 
 message Empty {

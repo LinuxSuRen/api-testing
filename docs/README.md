@@ -27,13 +27,15 @@ Currently, it supports the following kinds of services:
 
 * Operate System services
   * Linux, and Darwin
-* Podman, and Docker
+* [Podman](https://github.com/containers/podman), and Docker
 
 Please see the following example usage:
 
 ```shell
-atest service start -m podman --version master
+sudo atest service install -m podman --version master
 ```
+
+the default web server port is `8080`. So you can visit it via: http://localhost:8080
 
 ## Run in k3s
 
@@ -51,6 +53,7 @@ There are multiple storage backends supported. See the status from the list:
 | Name | Status |
 |---|---|
 | Local Storage | Ready |
+| S3 | Ready |
 | ORM DataBase | Developing |
 | Etcd DataBase | Developing |
 
@@ -108,7 +111,7 @@ podman run -p 7071:7071 \
     ghcr.io/linuxsuren/api-testing:master atest-store-orm
 ```
 
-### ORM S3 Storage
+### S3 Storage
 You can use a S3 compatible storage as the storage backend.
 
 ```shell
@@ -134,8 +137,17 @@ See also the expected configuration below:
     region: cn
 ```
 
+## Secret Server
+You can put the sensitive information into a secret server. For example, [Vault](https://www.github.com/hashicorp/vault).
+
+Connect to [a vault extension](https://github.com/LinuxSuRen/api-testing-secret-extension) via flag: `--secret-server`. Such as:
+
+```shell
+atest server --secret-server localhost:7073
+```
+
 ## Extensions
-Developers could have a storage extension. Implement a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.
+Developers could have storage, secret extensions. Implement a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.
 
 ## Official Images
 You could find the official images from both [Docker Hub](https://hub.docker.com/r/linuxsuren/api-testing) and [GitHub Images](https://github.com/users/LinuxSuRen/packages/container/package/api-testing). See the image path:

@@ -10,8 +10,21 @@ import (
 	"strings"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/linuxsuren/api-testing/pkg/secret"
 	"github.com/linuxsuren/api-testing/pkg/util"
 )
+
+var secretGetter secret.SecretGetter
+
+// SetSecretGetter set the secret getter
+func SetSecretGetter(getter secret.SecretGetter) {
+	if getter == nil {
+		getter = &nonSecretGetter{
+			err: fmt.Errorf("no secret server"),
+		}
+	}
+	secretGetter = getter
+}
 
 // Render render then return the result
 func Render(name, text string, ctx interface{}) (result string, err error) {
@@ -69,6 +82,15 @@ var advancedFuncs = []AdvancedFunc{{
 		writeWithContext(ctx, `{{randAlpha `+fields+`}}`)
 		return
 	},
+}, {
+	FuncName: "secretValue",
+	Func: func(name string) string {
+		val, err := secretGetter.GetSecret(name)
+		if err == nil {
+			return val.Value
+		}
+		return err.Error()
+	},
 }}
 
 // GetAdvancedFuncs returns all the advanced functions
@@ -112,7 +134,6 @@ func writeWithContext(ctx context.Context, text string) {
 	if ok && writer != nil {
 		_, _ = writer.Write([]byte(text))
 	}
-	return
 }
 
 // AdvancedFunc represents an advanced function

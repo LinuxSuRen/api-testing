@@ -25,31 +25,33 @@ const (
 )
 
 func TestRemoteServer(t *testing.T) {
+	ctx := context.Background()
+
 	loader := atesting.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
-	server := NewRemoteServer(loader, nil, "")
-	_, err := server.Run(context.TODO(), &TestTask{
+	server := NewRemoteServer(loader, nil, nil, "")
+	_, err := server.Run(ctx, &TestTask{
 		Kind: "fake",
 	})
 	assert.NotNil(t, err)
 
 	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
 	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
-	_, err = server.Run(context.TODO(), &TestTask{
+	_, err = server.Run(ctx, &TestTask{
 		Kind: "suite",
 		Data: simpleSuite,
 	})
 	assert.Nil(t, err)
 
 	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
-	_, err = server.Run(context.TODO(), &TestTask{
+	_, err = server.Run(ctx, &TestTask{
 		Kind: "testcase",
 		Data: simpleTestCase,
 	})
 	assert.Nil(t, err)
 
 	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
-	_, err = server.Run(context.TODO(), &TestTask{
+	_, err = server.Run(ctx, &TestTask{
 		Kind:     "testcaseInSuite",
 		Data:     simpleSuite,
 		CaseName: "get",
@@ -57,7 +59,7 @@ func TestRemoteServer(t *testing.T) {
 	assert.Nil(t, err)
 
 	gock.New(urlFoo).Get("/").Reply(http.StatusOK).JSON(&server)
-	_, err = server.Run(context.TODO(), &TestTask{
+	_, err = server.Run(ctx, &TestTask{
 		Kind:     "testcaseInSuite",
 		Data:     simpleSuite,
 		CaseName: "fake",
@@ -68,16 +70,16 @@ func TestRemoteServer(t *testing.T) {
 	assert.NotNil(t, err)
 
 	var ver *HelloReply
-	ver, err = server.GetVersion(context.TODO(), &Empty{})
+	ver, err = server.GetVersion(ctx, &Empty{})
 	assert.Empty(t, ver.Message)
 	assert.Nil(t, err)
 
-	ver, err = server.Sample(context.TODO(), &Empty{})
+	ver, err = server.Sample(ctx, &Empty{})
 	assert.Nil(t, err)
 	assert.Equal(t, sample.TestSuiteGitLab, ver.Message)
 
 	var suites *Suites
-	suites, err = server.GetSuites(context.TODO(), &Empty{})
+	suites, err = server.GetSuites(ctx, &Empty{})
 	assert.Nil(t, err)
 	assert.Equal(t, suites, &Suites{Data: map[string]*Items{
 		"simple": {
@@ -86,19 +88,32 @@ func TestRemoteServer(t *testing.T) {
 	}})
 
 	var testCase *TestCase
-	testCase, err = server.GetTestCase(context.TODO(), &TestCaseIdentity{
+	testCase, err = server.GetTestCase(ctx, &TestCaseIdentity{
 		Suite:    "simple",
 		Testcase: "get",
 	})
 	assert.Nil(t, err)
 	assert.Equal(t, "get", testCase.Name)
 	assert.Equal(t, urlFoo, testCase.Request.Api)
+
+	// secret functions
+	_, err = server.GetSecrets(ctx, &Empty{})
+	assert.Error(t, err)
+
+	_, err = server.CreateSecret(ctx, &Secret{})
+	assert.Error(t, err)
+
+	_, err = server.DeleteSecret(ctx, &Secret{})
+	assert.Error(t, err)
+
+	_, err = server.UpdateSecret(ctx, &Secret{})
+	assert.Error(t, err)
 }
 
 func TestRunTestCase(t *testing.T) {
 	loader := atesting.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
-	server := NewRemoteServer(loader, nil, "")
+	server := NewRemoteServer(loader, nil, nil, "")
 
 	defer gock.Clean()
 	gock.New(urlFoo).Get("/").MatchHeader("key", "value").
@@ -273,7 +288,7 @@ func TestUpdateTestCase(t *testing.T) {
 		assert.NoError(t, err)
 
 		ctx := context.Background()
-		server := NewRemoteServer(writer, nil, "")
+		server := NewRemoteServer(writer, nil, nil, "")
 		_, err = server.UpdateTestCase(ctx, &TestCaseWithSuite{
 			SuiteName: "simple",
 			Data: &TestCase{
@@ -345,7 +360,7 @@ func TestListTestCase(t *testing.T) {
 	writer := atesting.NewFileWriter(os.TempDir())
 	writer.Put(tmpFile.Name())
 
-	server := NewRemoteServer(writer, nil, "")
+	server := NewRemoteServer(writer, nil, nil, "")
 	ctx := context.Background()
 
 	t.Run("get two testcases", func(t *testing.T) {
@@ -683,12 +698,29 @@ func TestStoreManager(t *testing.T) {
 	})
 }
 
+func TestFakeSecretServer(t *testing.T) {
+	fakeSecret := &fakeSecretServer{}
+	ctx := context.Background()
+
+	_, err := fakeSecret.GetSecrets(ctx, &Empty{})
+	assert.Error(t, err)
+
+	_, err = fakeSecret.CreateSecret(ctx, &Secret{})
+	assert.Error(t, err)
+
+	_, err = fakeSecret.DeleteSecret(ctx, &Secret{})
+	assert.Error(t, err)
+
+	_, err = fakeSecret.UpdateSecret(ctx, &Secret{})
+	assert.Error(t, err)
+}
+
 func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 	dir, _ := os.MkdirTemp(os.TempDir(), "remote-server-test")
 	call = func() { os.RemoveAll(dir) }
 
 	writer := atesting.NewFileWriter(dir)
-	server = NewRemoteServer(writer, newLocalloaderFromStore(), dir)
+	server = NewRemoteServer(writer, newLocalloaderFromStore(), nil, dir)
 	return
 }
 

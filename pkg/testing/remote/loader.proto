@@ -34,3 +34,11 @@ message TestSuite {
     repeated server.TestCase items = 5;
     bool full = 6;
 }
+
+service SecretService {
+    rpc GetSecret(server.Secret) returns (server.Secret) {}
+    rpc GetSecrets(server.Empty) returns (server.Secrets) {}
+    rpc CreateSecret(server.Secret) returns (server.CommonResult) {}
+    rpc DeleteSecret(server.Secret) returns (server.CommonResult) {}
+    rpc UpdateSecret(server.Secret) returns (server.CommonResult) {}
+}
