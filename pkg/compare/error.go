@@ -15,7 +15,7 @@ type noEqualErrs struct {
 	errs []error
 }
 
-type queue struct {
+type task struct {
 	path []string
 	errs []error
 }
@@ -26,7 +26,7 @@ func (e *noEqualErr) Error() string {
 	}
 
 	msg := []string{}
-	q := []*queue{{
+	q := []*task{{
 		path: e.Path,
 		errs: e.NeqErrs.errs,
 	}}
@@ -35,26 +35,29 @@ func (e *noEqualErr) Error() string {
 	for {
 		if iter == end {
 			iter = 0
+
 			q[0] = nil
 			q = q[1:]
 			if len(q) == 0 {
 				break
 			}
+
 			end = len(q[0].errs)
 			continue
 		}
+
 		v := q[0].errs[iter]
 		switch v.(type) {
 		case *noEqualErr:
 			if v.(*noEqualErr).NeqErrs != nil {
-				q = append(q, &queue{append(q[0].path, v.(*noEqualErr).Path...), v.(*noEqualErr).NeqErrs.errs})
+				q = append(q, &task{append(q[0].path, v.(*noEqualErr).Path...), v.(*noEqualErr).NeqErrs.errs})
 			} else {
 				msg = append(msg,
 					fmt.Sprintf("compare: field %s: %s",
 						strings.Join(append(q[0].path, v.(*noEqualErr).Path...), "."), v.(*noEqualErr).Message))
 			}
 		case *noEqualErrs:
-			q = append(q, &queue{path: q[0].path, errs: v.(*noEqualErrs).errs})
+			q = append(q, &task{path: q[0].path, errs: v.(*noEqualErrs).errs})
 		}
 		iter++
 	}
@@ -67,6 +70,7 @@ func newNoEqualErr(field string, err error) error {
 		Path:    []string{field},
 		Message: "",
 	}
+	
 	if err != nil {
 		if v, ok := err.(*noEqualErr); ok {
 			noEqerr.Path = append(noEqerr.Path, v.Path...)

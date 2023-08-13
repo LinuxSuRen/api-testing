@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -148,6 +147,7 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 			},
 		),
 	}
+
 	linker, err := compiler.Compile(ctx, r.proto.ProtoFile)
 	if err != nil {
 		return nil, err
@@ -199,6 +199,7 @@ func invokeRPCStream(ctx context.Context, conn grpc.ClientConnInterface, method 
 		ServerStreams: method.IsStreamingServer(),
 		ClientStreams: method.IsStreamingClient(),
 	}
+
 	s, err := conn.NewStream(ctx, sd, getMethodName(method))
 	if err != nil {
 		return nil, err
@@ -220,7 +221,6 @@ sendLoop:
 			}
 			i++
 		}
-
 	}
 
 	if err = s.CloseSend(); err != nil {
@@ -264,30 +264,36 @@ func payloadFieldsVerify(caseName string, expect testing.Response, jsonPayload [
 	if expect.Body == "" {
 		return nil
 	}
+
 	if !gjson.Valid(expect.Body) {
 		fmt.Printf("expect.Body: %v\n", expect.Body)
 		return fmt.Errorf("case %s: expect body is not a valid JSON", caseName)
 	}
 
-	result := gjson.Parse(expect.Body)
+	exp := gjson.Parse(expect.Body)
 	gjsonPayload := make([]gjson.Result, len(jsonPayload))
 	for i := range jsonPayload {
 		gjsonPayload[i] = gjson.Parse(jsonPayload[i])
 	}
 
-	if result.IsArray() {
-		return compare.Array(caseName, result.Array(), gjsonPayload)
+	if exp.IsArray() {
+		return compare.Array(caseName, exp.Array(), gjsonPayload)
 	}
-	if result.IsObject() {
-		var errlist error
+
+	if exp.IsObject() {
+		var msg string
 		for i := range jsonPayload {
 			err := compare.Object(fmt.Sprintf("%v[%v]", caseName, i),
-				result.Map(), gjsonPayload[i].Map())
+				exp.Map(), gjsonPayload[i].Map())
 			if err != nil {
-				errlist = errors.Join(err)
+				msg += err.Error()
 			}
 		}
-		return errlist
+		
+		if msg != "" {
+			return fmt.Errorf(msg)
+		}
+		return nil
 	}
 	return fmt.Errorf("case %s: unknown expect content", caseName)
 }
