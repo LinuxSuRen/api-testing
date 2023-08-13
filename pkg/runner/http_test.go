@@ -341,7 +341,8 @@ func TestTestCase(t *testing.T) {
 			if tt.verify == nil {
 				tt.verify = hasError
 			}
-			runner := NewSimpleTestCaseRunner().WithOutputWriter(os.Stdout)
+			runner := NewSimpleTestCaseRunner()
+			runner.WithOutputWriter(os.Stdout)
 			if tt.execer != nil {
 				runner.WithExecer(tt.execer)
 			}
