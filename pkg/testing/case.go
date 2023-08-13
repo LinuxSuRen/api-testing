@@ -60,15 +60,12 @@ type Request struct {
 	Form            map[string]string `yaml:"form,omitempty" json:"form,omitempty"`
 	Body            string            `yaml:"body,omitempty" json:"body,omitempty"`
 	BodyFromFile    string            `yaml:"bodyFromFile,omitempty" json:"bodyFromFile,omitempty"`
-	Payload         string            `yaml:"payload,omitempty" json:"payload,omitempty"`
-	PayloadFromFile string            `yaml:"payloadFromFile,omitempty" json:"payloadFromFile,omitempty"`
 }
 
 // Response is the expected response
 type Response struct {
 	StatusCode       int                    `yaml:"statusCode,omitempty" json:"statusCode,omitempty"`
 	Body             string                 `yaml:"body,omitempty" json:"body,omitempty"`
-	Payload          string                 `yaml:"payload,omitempty" json:"payload,omitempty"`
 	Header           map[string]string      `yaml:"header,omitempty" json:"header,omitempty"`
 	BodyFieldsExpect map[string]interface{} `yaml:"bodyFieldsExpect,omitempty" json:"bodyFieldsExpect,omitempty"`
 	Verify           []string               `yaml:"verify,omitempty" json:"verify,omitempty"`

@@ -137,15 +137,6 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 		r.Body = strings.TrimSpace(string(data))
 	}
 
-	// read payload from file
-	if r.PayloadFromFile != "" {
-		var data []byte
-		if data, err = os.ReadFile(path.Join(dataDir, r.PayloadFromFile)); err != nil {
-			return
-		}
-		r.Payload = strings.TrimSpace(string(data))
-	}
-
 	// template the header
 	if r.Header, err = renderMap(ctx, r.Header, "header"); err != nil {
 		return
@@ -154,13 +145,6 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 	// template the body
 	if result, err = render.Render("body", r.Body, ctx); err == nil {
 		r.Body = result
-	} else {
-		return
-	}
-
-	// template the payload
-	if result, err = render.Render("payload", r.Payload, ctx); err == nil {
-		r.Payload = result
 	} else {
 		return
 	}

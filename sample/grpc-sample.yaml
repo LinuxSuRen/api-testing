@@ -16,12 +16,12 @@ items:
   - name: FunctionsQuery
     request:
       api: Runner.FunctionsQuery
-      payload: |
+      body: |
         {
           "name": "hello"
         }
     expect:
-      payload: |
+      body: |
         {
           "data": [
             {
@@ -33,7 +33,7 @@ items:
   - name: FunctionsQueryStream
     request:
       api: Runner.FunctionsQueryStream
-      payload: |
+      body: |
         [
           {
             "name": "hello"
@@ -44,4 +44,4 @@ items:
         ]
     expect:
       verify:
-        - 'len(data) == 2'
+        - "len(data) == 2"

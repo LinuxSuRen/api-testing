@@ -116,9 +116,6 @@
                 "body": {
                     "type": "string"
                 },
-                "payload": {
-                    "type": "string"
-                },
                 "header": {
                     "description": "HTTP response header",
                     "type": "object",
@@ -184,9 +181,6 @@
                     "type": "string"
                 },
                 "bodyFromFile": {
-                    "type": "string"
-                },
-                "payload": {
                     "type": "string"
                 }
             },
