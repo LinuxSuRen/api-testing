@@ -14,9 +14,7 @@ import (
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
-	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
 	"github.com/linuxsuren/api-testing/pkg/testing"
-	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/tidwall/gjson"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -103,20 +101,17 @@ func (r ReportResultSlice) Swap(i, j int) {
 }
 
 type simpleTestCaseRunner struct {
-	testReporter   TestReporter
-	writer         io.Writer
-	log            LevelWriter
-	execer         fakeruntime.Execer
+	UnimplementedRunner
 	simpleResponse SimpleResponse
 }
 
 // NewSimpleTestCaseRunner creates the instance of the simple test case runner
 func NewSimpleTestCaseRunner() TestCaseRunner {
-	runner := &simpleTestCaseRunner{}
-	return runner.WithOutputWriter(io.Discard).
-		WithWriteLevel("info").
-		WithTestReporter(NewDiscardTestReporter()).
-		WithExecer(fakeruntime.DefaultExecer{})
+	runner := &simpleTestCaseRunner{
+		UnimplementedRunner: NewDefaultUnimplementedRunner(),
+		simpleResponse:      SimpleResponse{},
+	}
+	return runner
 }
 
 // ContextKey is the alias type of string for context key
@@ -231,32 +226,6 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	return
 }
 
-// WithOutputWriter sets the io.Writer
-func (r *simpleTestCaseRunner) WithOutputWriter(writer io.Writer) TestCaseRunner {
-	r.writer = writer
-	return r
-}
-
-// WithWriteLevel sets the level writer
-func (r *simpleTestCaseRunner) WithWriteLevel(level string) TestCaseRunner {
-	if level != "" {
-		r.log = NewDefaultLevelWriter(level, r.writer)
-	}
-	return r
-}
-
-// WithTestReporter sets the TestReporter
-func (r *simpleTestCaseRunner) WithTestReporter(reporter TestReporter) TestCaseRunner {
-	r.testReporter = reporter
-	return r
-}
-
-// WithExecer sets the execer
-func (r *simpleTestCaseRunner) WithExecer(execer fakeruntime.Execer) TestCaseRunner {
-	r.execer = execer
-	return r
-}
-
 func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (responseBodyData []byte, err error) {
 	responseBodyData, err = io.ReadAll(resp.Body)
 	r.simpleResponse = SimpleResponse{
@@ -343,25 +312,7 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseBo
 		return
 	}
 
-	for _, verify := range expect.Verify {
-		var program *vm.Program
-		if program, err = expr.Compile(verify, expr.Env(mapOutput),
-			expr.AsBool(), kubernetes.PodValidatorFunc(),
-			kubernetes.KubernetesValidatorFunc()); err != nil {
-			return
-		}
-
-		var result interface{}
-		if result, err = expr.Run(program, mapOutput); err != nil {
-			return
-		}
-
-		if !result.(bool) {
-			err = fmt.Errorf("failed to verify: %s", verify)
-			fmt.Println(err)
-			break
-		}
-	}
+	err = Verify(expect, mapOutput)
 	return
 }
 

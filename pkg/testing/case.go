@@ -10,8 +10,15 @@ type TestSuite struct {
 }
 
 type APISpec struct {
-	Kind string `yaml:"kind,omitempty" json:"kind,omitempty"`
-	URL  string `yaml:"url,omitempty" json:"url,omitempty"`
+	Kind string    `yaml:"kind,omitempty" json:"kind,omitempty"`
+	URL  string    `yaml:"url,omitempty" json:"url,omitempty"`
+	GRPC *GRPCDesc `yaml:"grpc,omitempty" json:"grpc,omitempty"`
+}
+type GRPCDesc struct {
+	ImportPath       []string `yaml:"import,omitempty" json:"import,omitempty"`
+	ServerReflection bool     `yaml:"serverReflection,omitempty" json:"serverReflection,omitempty"`
+	ProtoFile        string   `yaml:"protofile,omitempty" json:"protofile,omitempty"`
+	ProtoSet         string   `yaml:"protoset,omitempty" json:"protoset,omitempty"`
 }
 
 // TestCase represents a test case

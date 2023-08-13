@@ -254,9 +254,9 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 			ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
 			ctxWithTimeout = context.WithValue(ctxWithTimeout, runner.ContextKey("").ParentDir(), loader.GetContext())
 
-			simpleRunner := runner.NewSimpleTestCaseRunner()
-			simpleRunner.WithTestReporter(o.reporter)
-			if output, err = simpleRunner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
+			runner := runner.GetTestSuiteRunner(testSuite)
+			runner.WithTestReporter(o.reporter)
+			if output, err = runner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
 				err = fmt.Errorf("failed to run '%s', %v", testCase.Name, err)
 				return
 			} else {

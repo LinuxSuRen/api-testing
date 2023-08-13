@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
 	github.com/antonmedv/expr v1.12.1
+	github.com/bufbuild/protocompile v0.6.0
 	github.com/cucumber/godog v0.12.6
 	github.com/ghodss/yaml v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
@@ -14,12 +15,12 @@ require (
 	github.com/linuxsuren/go-fake-runtime v0.0.1
 	github.com/linuxsuren/unstructured v0.0.1
 	github.com/spf13/cobra v1.6.1
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.14.4
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/sync v0.1.0
+	golang.org/x/sync v0.3.0
 	google.golang.org/grpc v1.55.0
-	google.golang.org/protobuf v1.30.0
+	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

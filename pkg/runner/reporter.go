@@ -9,7 +9,7 @@ type TestReporter interface {
 	ExportAllReportResults() (ReportResultSlice, error)
 }
 
-// ReportRecord represents the raw data of a HTTP request
+// ReportRecord represents the raw data of a request
 type ReportRecord struct {
 	Method    string
 	API       string

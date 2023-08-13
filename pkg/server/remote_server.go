@@ -199,17 +199,17 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 	reply = &TestResult{}
 
 	for _, testCase := range suite.Items {
-		simpleRunner := runner.NewSimpleTestCaseRunner()
-		simpleRunner.WithOutputWriter(buf)
-		simpleRunner.WithWriteLevel(task.Level)
+		suiteRunner := runner.GetTestSuiteRunner(suite)
+		suiteRunner.WithOutputWriter(buf)
+		suiteRunner.WithWriteLevel(task.Level)
 
 		// reuse the API prefix
 		if strings.HasPrefix(testCase.Request.API, "/") {
 			testCase.Request.API = fmt.Sprintf("%s%s", suite.API, testCase.Request.API)
 		}
 
-		output, testErr := simpleRunner.RunTestCase(&testCase, dataContext, ctx)
-		if getter, ok := simpleRunner.(runner.HTTPResponseRecord); ok {
+		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
+		if getter, ok := suiteRunner.(runner.HTTPResponseRecord); ok {
 			resp := getter.GetResponseRecord()
 			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
 				StatusCode: int32(resp.StatusCode),
@@ -628,7 +628,7 @@ func (s *server) FunctionsQueryStream(srv Runner_FunctionsQueryStreamServer) err
 				}
 			}
 			if err := srv.Send(reply); err != nil {
-				return nil
+				return err
 			}
 		}
 	}
