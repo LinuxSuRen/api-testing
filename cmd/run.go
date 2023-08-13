@@ -252,7 +252,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 			ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
 			ctxWithTimeout = context.WithValue(ctxWithTimeout, runner.ContextKey("").ParentDir(), loader.GetContext())
 
-			runner := getTestSuiteRunner(testSuite)
+			runner := runner.GetTestSuiteRunner(testSuite)
 			runner.WithTestReporter(o.reporter)
 			if output, err = runner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
 				err = fmt.Errorf("failed to run '%s', %v", testCase.Name, err)
@@ -268,11 +268,4 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 
 func getDefaultContext() map[string]interface{} {
 	return map[string]interface{}{}
-}
-
-func getTestSuiteRunner(suite *testing.TestSuite) runner.TestCaseRunner {
-	if suite.Spec.GRPC != nil {
-		return runner.NewGRPCTestCaseRunner(suite.API, *suite.Spec.GRPC)
-	}
-	return runner.NewSimpleTestCaseRunner()
 }
