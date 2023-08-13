@@ -2,22 +2,22 @@
 # yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
 name: sample
 items:
-  - name: v1
-    request:
-      api: http://foo/api/v1
-      method: GET
-      header:
-        Authorization: Bearer token
-        Content-Type: application/json
-      body: hello
-  - name: v1-1
-    request:
-      api: http://foo/api/v1
-      method: GET
-      header:
-        Authorization: Bearer token
-        Content-Type: application/json
-      body: hello
-    expect:
-      statusCode: 200
-      body: hello
+- name: v1
+  request:
+    api: http://foo/api/v1
+    method: GET
+    header:
+      Authorization: Bearer token
+      Content-Type: application/json
+    body: hello
+- name: v1-1
+  request:
+    api: http://foo/api/v1
+    method: GET
+    header:
+      Authorization: Bearer token
+      Content-Type: application/json
+    body: hello
+  expect:
+    statusCode: 200
+    body: hello
