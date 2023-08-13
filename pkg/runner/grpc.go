@@ -5,17 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"reflect"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
 	"github.com/bufbuild/protocompile"
-	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
+	"github.com/linuxsuren/api-testing/pkg/compare"
 	"github.com/linuxsuren/api-testing/pkg/testing"
-	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/tidwall/gjson"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -25,21 +20,17 @@ import (
 )
 
 type gRPCTestCaseRunner struct {
-	simpleTestCaseRunner
+	UnimplementedRunner
 	host  string
 	proto testing.GRPCDesc
 }
 
 func NewGRPCTestCaseRunner(host string, proto testing.GRPCDesc) TestCaseRunner {
 	runner := &gRPCTestCaseRunner{
-		simpleTestCaseRunner: simpleTestCaseRunner{},
-		host:                 host,
-		proto:                proto,
+		UnimplementedRunner: NewDefaultUnimplementedRunner(),
+		host:                host,
+		proto:               proto,
 	}
-	runner.WithOutputWriter(io.Discard).
-		WithWriteLevel("info").
-		WithTestReporter(NewDiscardTestReporter()).
-		WithExecer(fakeruntime.DefaultExecer{})
 	return runner
 }
 
@@ -65,43 +56,14 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 		return
 	}
 
-	compiler := protocompile.Compiler{
-		Resolver: protocompile.WithStandardImports(
-			&protocompile.SourceResolver{
-				ImportPaths: r.proto.ImportPath,
-			},
-		),
-	}
-	linker, err := compiler.Compile(ctx, r.proto.ProtoFile)
+	md, err := getMethodDescriptor(ctx, r, testcase)
 	if err != nil {
 		return nil, err
-	}
-
-	fd, err := linker.AsResolver().FindFileByPath(r.proto.ProtoFile)
-	if err != nil {
-		return nil, err
-	}
-
-	api := splitServiceAndMethod(testcase.Request.API)
-	if len(api) != 2 {
-		return nil, fmt.Errorf("%s is not a valid gRPC api name", testcase.Request.API)
-	}
-
-	sd := fd.Services().ByName(protoreflect.Name(api[0]))
-	if sd == nil {
-		return nil, fmt.Errorf("grpc service %s is not found in proto %s", api[0], fd.Name())
-	}
-
-	md := sd.Methods().ByName(protoreflect.Name(api[1]))
-	if md == nil {
-		return nil, fmt.Errorf("method %s is not found in service %s", api[1], api[0])
 	}
 
 	if err = runJob(testcase.Before); err != nil {
 		return
 	}
-
-	payload := testcase.Request.Payload
 
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
 	conn, err := grpc.Dial(r.host, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -110,12 +72,30 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	}
 	defer conn.Close()
 
+	payload := testcase.Request.Body
+	respsStr, err := invokeRequest(ctx, md, payload, conn)
+	if err != nil {
+		return nil, err
+	}
+
+	record.Body = strings.Join(respsStr, ",")
+	r.log.Debug("response body: %s\n", record.Body)
+
+	output, err = verifyResponsePayload(testcase.Name, testcase.Expect, respsStr)
+	if err != nil {
+		return nil, err
+	}
+
+	return output, nil
+}
+
+func invokeRequest(ctx context.Context, md protoreflect.MethodDescriptor, payload string, conn *grpc.ClientConn) (respones []string, err error) {
 	resps := make([]*dynamicpb.Message, 0)
 
 	if md.IsStreamingClient() || md.IsStreamingServer() {
 		result := gjson.Parse(payload)
 		if !result.IsArray() {
-			return nil, fmt.Errorf("payload is not a json array")
+			return nil, fmt.Errorf("payload is not a JSON array")
 		}
 
 		reqs := make([]*dynamicpb.Message, len(result.Array()))
@@ -157,15 +137,42 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 		}
 		respsStr = append(respsStr, string(respbR))
 	}
-	record.Body = strings.Join(respsStr, ",")
-	r.log.Debug("response body: %s\n", record.Body)
+	return respsStr, nil
+}
 
-	output, err = verifyResponsePayload(testcase.Name, testcase.Expect, respsStr)
+func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *testing.TestCase) (protoreflect.MethodDescriptor, error) {
+	compiler := protocompile.Compiler{
+		Resolver: protocompile.WithStandardImports(
+			&protocompile.SourceResolver{
+				ImportPaths: r.proto.ImportPath,
+			},
+		),
+	}
+	linker, err := compiler.Compile(ctx, r.proto.ProtoFile)
 	if err != nil {
 		return nil, err
 	}
 
-	return output, nil
+	fd, err := linker.AsResolver().FindFileByPath(r.proto.ProtoFile)
+	if err != nil {
+		return nil, err
+	}
+
+	api := splitServiceAndMethod(testcase.Request.API)
+	if len(api) != 2 {
+		return nil, fmt.Errorf("%s is not a valid gRPC api name", testcase.Request.API)
+	}
+
+	sd := fd.Services().ByName(protoreflect.Name(api[0]))
+	if sd == nil {
+		return nil, fmt.Errorf("grpc service %s is not found in proto %s", api[0], fd.Name())
+	}
+
+	md := sd.Methods().ByName(protoreflect.Name(api[1]))
+	if md == nil {
+		return nil, fmt.Errorf("method %s is not found in service %s", api[1], api[0])
+	}
+	return md, nil
 }
 
 func splitServiceAndMethod(api string) []string {
@@ -246,49 +253,35 @@ func verifyResponsePayload(caseName string, expect testing.Response, jsonPayload
 		return
 	}
 
-	for _, verify := range expect.Verify {
-		var program *vm.Program
-		if program, err = expr.Compile(verify, expr.Env(mapOutput),
-			expr.AsBool(), kubernetes.PodValidatorFunc(),
-			kubernetes.KubernetesValidatorFunc()); err != nil {
-			return
-		}
-
-		var result interface{}
-		if result, err = expr.Run(program, mapOutput); err != nil {
-			return
-		}
-
-		if !result.(bool) {
-			err = fmt.Errorf("failed to verify: %s", verify)
-			fmt.Println(err)
-			break
-		}
+	err = Verify(expect, mapOutput)
+	if err != nil {
+		return nil, err
 	}
 	return
 }
 
 func payloadFieldsVerify(caseName string, expect testing.Response, jsonPayload []string) error {
-	if expect.Payload == "" {
+	if expect.Body == "" {
 		return nil
 	}
-	if !gjson.Valid(expect.Payload) {
-		return fmt.Errorf("case %s: expect payload is not a valid json", caseName)
+	if !gjson.Valid(expect.Body) {
+		fmt.Printf("expect.Body: %v\n", expect.Body)
+		return fmt.Errorf("case %s: expect body is not a valid JSON", caseName)
 	}
 
-	result := gjson.Parse(expect.Payload)
+	result := gjson.Parse(expect.Body)
 	gjsonPayload := make([]gjson.Result, len(jsonPayload))
 	for i := range jsonPayload {
 		gjsonPayload[i] = gjson.Parse(jsonPayload[i])
 	}
 
 	if result.IsArray() {
-		return compareArr(caseName, result.Array(), gjsonPayload)
+		return compare.Array(caseName, result.Array(), gjsonPayload)
 	}
 	if result.IsObject() {
 		var errlist error
 		for i := range jsonPayload {
-			err := compareObj(fmt.Sprintf("%v[%v]", caseName, i),
+			err := compare.Object(fmt.Sprintf("%v[%v]", caseName, i),
 				result.Map(), gjsonPayload[i].Map())
 			if err != nil {
 				errlist = errors.Join(err)
@@ -297,56 +290,4 @@ func payloadFieldsVerify(caseName string, expect testing.Response, jsonPayload [
 		return errlist
 	}
 	return fmt.Errorf("case %s: unknown expect content", caseName)
-}
-
-func compareObj(field string, expect, actul map[string]gjson.Result) error {
-	var errlist error
-	for k, ev := range expect {
-		av, ok := actul[k]
-		if !ok {
-			errors.Join(errlist, fmt.Errorf("field %s: field %s is not exist", field, k))
-			continue
-		}
-
-		err := compareElement(k, ev, av)
-		if err != nil {
-			errlist = errors.Join(errlist, fmt.Errorf("field %s: fail at %s", field, err.Error()))
-		}
-	}
-
-	return errlist
-}
-
-func compareArr(field string, expect, actul []gjson.Result) error {
-	var errlist error
-	if l1, l2 := len(expect), len(actul); l1 != l2 {
-		return fmt.Errorf("field %s: expect %v fields but got %v", field, l1, l2)
-	}
-
-	for i := range expect {
-		err := compareElement(strconv.Itoa(i), expect[i], actul[i])
-		if err != nil {
-			errlist = errors.Join(errlist, fmt.Errorf("field %s: fail at %s", field, err.Error()))
-		}
-	}
-	return errlist
-}
-
-func compareElement(field string, expect, actul gjson.Result) error {
-	if expect.Type != actul.Type {
-		return fmt.Errorf("field %s: expect type %s but got %v", field, expect.Type.String(), actul.Type.String())
-	}
-
-	if expect.IsObject() {
-		return compareObj(field, expect.Map(), actul.Map())
-	}
-	if expect.IsArray() {
-		return compareArr(field, expect.Array(), actul.Array())
-	}
-
-	if !reflect.DeepEqual(expect.Value(), actul.Value()) {
-		return fmt.Errorf("field %s: expect %v but got %v", field, expect.Value(), actul.Value())
-	}
-
-	return nil
 }
