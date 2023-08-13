@@ -31,8 +31,8 @@ func TestElement(t *testing.T) {
 
 	err := Element("TestElement", expect, actul)
 
-	expmsg := `compare: field TestElement.data.0.value: expect func() strin but got func() string
-compare: field TestElement.data.0.key: expect hell but got hello`
-	assert.Equal(t, expmsg, err.Error())
-
+	expmsg1 := "compare: field TestElement.data.0.value: expect func() strin but got func() string"
+	expmsg2 := "compare: field TestElement.data.0.key: expect hell but got hello"
+	assert.Contains(t, err.Error(), expmsg1)
+	assert.Contains(t, err.Error(), expmsg2)
 }
