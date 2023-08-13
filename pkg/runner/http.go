@@ -313,9 +313,6 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseBo
 	}
 
 	err = Verify(expect, mapOutput)
-	if err != nil {
-		return nil, err
-	}
 	return
 }
 

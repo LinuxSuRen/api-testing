@@ -30,5 +30,5 @@ func Verify(expect testing.Response, data map[string]any) (err error) {
 			break
 		}
 	}
-	return nil
+	return
 }
