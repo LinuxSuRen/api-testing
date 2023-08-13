@@ -73,7 +73,7 @@
                         "protoset": {
                             "type": "string"
                         },
-                        "server_reflection": {
+                        "serverReflection": {
                             "type": "boolean"
                         }
                     }

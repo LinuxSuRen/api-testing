@@ -8,7 +8,7 @@ spec:
     import:
       - ./pkg/server
     protofile: server.proto
-    server_reflection: false
+    serverReflection: false
 items:
   - name: GetVersion
     request:

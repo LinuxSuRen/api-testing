@@ -16,7 +16,7 @@ type APISpec struct {
 }
 type GRPCDesc struct {
 	ImportPath       []string `yaml:"import,omitempty" json:"import,omitempty"`
-	ServerReflection bool     `yaml:"server_reflection,omitempty" json:"server_reflection,omitempty"`
+	ServerReflection bool     `yaml:"serverReflection,omitempty" json:"serverReflection,omitempty"`
 	ProtoFile        string   `yaml:"protofile,omitempty" json:"protofile,omitempty"`
 	ProtoSet         string   `yaml:"protoset,omitempty" json:"protoset,omitempty"`
 }
@@ -53,13 +53,13 @@ type Job struct {
 
 // Request represents a HTTP request
 type Request struct {
-	API             string            `yaml:"api" json:"api"`
-	Method          string            `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=GET,enum=POST,enum=PUT,enum=DELETE"`
-	Query           map[string]string `yaml:"query,omitempty" json:"query,omitempty"`
-	Header          map[string]string `yaml:"header,omitempty" json:"header,omitempty"`
-	Form            map[string]string `yaml:"form,omitempty" json:"form,omitempty"`
-	Body            string            `yaml:"body,omitempty" json:"body,omitempty"`
-	BodyFromFile    string            `yaml:"bodyFromFile,omitempty" json:"bodyFromFile,omitempty"`
+	API          string            `yaml:"api" json:"api"`
+	Method       string            `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=GET,enum=POST,enum=PUT,enum=DELETE"`
+	Query        map[string]string `yaml:"query,omitempty" json:"query,omitempty"`
+	Header       map[string]string `yaml:"header,omitempty" json:"header,omitempty"`
+	Form         map[string]string `yaml:"form,omitempty" json:"form,omitempty"`
+	Body         string            `yaml:"body,omitempty" json:"body,omitempty"`
+	BodyFromFile string            `yaml:"bodyFromFile,omitempty" json:"bodyFromFile,omitempty"`
 }
 
 // Response is the expected response
