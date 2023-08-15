@@ -5,17 +5,18 @@ import { Edit, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
 
-const stores = ref([] as Store[])
-const dialogVisible = ref(false)
-const creatingLoading = ref(false)
-const storeFormRef = ref<FormInstance>()
-const store = ref({
+const emptyStore = {
     kind: {},
     properties: [{
         key: '',
         value: ''
     }]
-} as Store)
+} as Store
+const stores = ref([] as Store[])
+const dialogVisible = ref(false)
+const creatingLoading = ref(false)
+const storeFormRef = ref<FormInstance>()
+const store = ref(emptyStore)
 const createAction = ref(true)
 const storeForm = reactive(store)
 
@@ -78,6 +79,7 @@ function editStore(name: string) {
 }
 
 function addStore() {
+    store.value = emptyStore
     dialogVisible.value = true
     createAction.value = true
 }
@@ -134,6 +136,7 @@ function updateKeys() {
     <div>Store Manager</div>
     <div>
         <el-button type="primary" @click="addStore" :icon="Edit">New</el-button>
+        <el-button type="primary" @click="loadStores">Refresh</el-button>
     </div>
     <el-table :data="stores" style="width: 100%">
       <el-table-column label="Name" width="180">
