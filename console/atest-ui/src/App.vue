@@ -198,7 +198,7 @@ const viewName = ref('testcase')
 
 <template>
   <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
-    <el-container>
+    <el-container style="height: 100%">
       <el-header style="height: 30px;justify-content: flex-end;">
         <el-button type="primary" :icon="Share" @click="viewName = ''" />
       </el-header>
