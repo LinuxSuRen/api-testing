@@ -28,6 +28,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"time"
@@ -43,11 +44,13 @@ import (
 )
 
 type gitClient struct {
+	writer io.Writer
 	remote.UnimplementedLoaderServer
 }
 
+// NewRemoteServer returns a new remote server
 func NewRemoteServer() remote.LoaderServer {
-	return &gitClient{}
+	return &gitClient{writer: os.Stdout}
 }
 func (s *gitClient) loadCache(ctx context.Context) (opt *gitOptions, err error) {
 	if opt, err = s.getClient(ctx); err != nil {
@@ -105,37 +108,32 @@ func (s *gitClient) pushCache(ctx context.Context) (err error) {
 		var wd *git.Worktree
 
 		if wd, err = repo.Worktree(); err == nil {
-			_, err = wd.Add(".")
+			if _, err = wd.Add("."); err != nil {
+				return
+			}
 
 			if _, err = wd.Commit(`auto commit by api-testing
 
 See also https://github.com/LinuxSuRen/api-testing
 `, &git.CommitOptions{
 				Author: &object.Signature{
-					Name:  "LinuxSuRen",
-					Email: "LinuxSuRen@users.noreply.github.com",
+					Name:  opt.name,
+					Email: opt.email,
 					When:  time.Now(),
 				},
-			}); err != nil {
-				return
+			}); err == nil {
+				err = repo.Push(opt.pushOptions)
 			}
-
-			err = repo.Push(opt.pushOptions)
 		}
 	}
 	return
 }
 func (s *gitClient) ListTestSuite(ctx context.Context, _ *server.Empty) (reply *remote.TestSuites, err error) {
 	reply = &remote.TestSuites{}
-
-	var opt *gitOptions
-	if opt, err = s.loadCache(ctx); err != nil {
+	var loader testing.Writer
+	if loader, err = s.newLoader(ctx); err != nil {
 		return
 	}
-
-	parentDir := path.Join(opt.cache, opt.targetPath)
-	loader := testing.NewFileWriter(parentDir)
-	loader.Put(parentDir + "/*.yaml")
 
 	var suites []testing.TestSuite
 	if suites, err = loader.ListTestSuite(); err == nil {
@@ -147,17 +145,10 @@ func (s *gitClient) ListTestSuite(ctx context.Context, _ *server.Empty) (reply *
 }
 func (s *gitClient) CreateTestSuite(ctx context.Context, testSuite *remote.TestSuite) (reply *server.Empty, err error) {
 	reply = &server.Empty{}
-
-	var opt *gitOptions
-	if opt, err = s.loadCache(ctx); err != nil {
+	var loader testing.Writer
+	if loader, err = s.newLoader(ctx); err != nil {
 		return
 	}
-
-	parentDir := path.Join(opt.cache, opt.targetPath)
-	if err = os.MkdirAll(parentDir, 0755); err != nil {
-		return
-	}
-	loader := testing.NewFileWriter(parentDir)
 
 	if err = loader.CreateSuite(testSuite.Name, testSuite.Api); err == nil {
 		s.pushCache(ctx)
@@ -166,15 +157,10 @@ func (s *gitClient) CreateTestSuite(ctx context.Context, testSuite *remote.TestS
 }
 func (s *gitClient) GetTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *remote.TestSuite, err error) {
 	reply = &remote.TestSuite{}
-
-	var opt *gitOptions
-	if opt, err = s.loadCache(ctx); err != nil {
+	var loader testing.Writer
+	if loader, err = s.newLoader(ctx); err != nil {
 		return
 	}
-
-	parentDir := path.Join(opt.cache, opt.targetPath)
-	loader := testing.NewFileWriter(parentDir)
-	loader.Put(parentDir + "/*.yaml")
 
 	var normalSuite testing.TestSuite
 	if normalSuite, err = loader.GetTestSuite(suite.Name, true); err == nil {
@@ -184,15 +170,10 @@ func (s *gitClient) GetTestSuite(ctx context.Context, suite *remote.TestSuite) (
 }
 func (s *gitClient) UpdateTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *remote.TestSuite, err error) {
 	reply = &remote.TestSuite{}
-
-	var opt *gitOptions
-	if opt, err = s.loadCache(ctx); err != nil {
+	var loader testing.Writer
+	if loader, err = s.newLoader(ctx); err != nil {
 		return
 	}
-
-	parentDir := path.Join(opt.cache, opt.targetPath)
-	loader := testing.NewFileWriter(parentDir)
-	loader.Put(parentDir + "/*.yaml")
 
 	if err = loader.UpdateSuite(*remote.ConvertToNormalTestSuite(suite)); err == nil {
 		err = s.pushCache(ctx)
@@ -201,15 +182,10 @@ func (s *gitClient) UpdateTestSuite(ctx context.Context, suite *remote.TestSuite
 }
 func (s *gitClient) DeleteTestSuite(ctx context.Context, suite *remote.TestSuite) (reply *server.Empty, err error) {
 	reply = &server.Empty{}
-
-	var opt *gitOptions
-	if opt, err = s.loadCache(ctx); err != nil {
+	var loader testing.Writer
+	if loader, err = s.newLoader(ctx); err != nil {
 		return
 	}
-
-	parentDir := path.Join(opt.cache, opt.targetPath)
-	loader := testing.NewFileWriter(parentDir)
-	loader.Put(parentDir + "/*.yaml")
 
 	if err = loader.DeleteSuite(suite.Name); err == nil {
 		err = s.pushCache(ctx)
@@ -226,15 +202,10 @@ func (s *gitClient) ListTestCases(ctx context.Context, suite *remote.TestSuite) 
 }
 func (s *gitClient) CreateTestCase(ctx context.Context, testcase *server.TestCase) (reply *server.Empty, err error) {
 	reply = &server.Empty{}
-
-	var opt *gitOptions
-	if opt, err = s.loadCache(ctx); err != nil {
+	var loader testing.Writer
+	if loader, err = s.newLoader(ctx); err != nil {
 		return
 	}
-
-	parentDir := path.Join(opt.cache, opt.targetPath)
-	loader := testing.NewFileWriter(parentDir)
-	loader.Put(parentDir + "/*.yaml")
 
 	if err = loader.CreateTestCase(testcase.SuiteName, remote.ConvertToNormalTestCase(testcase)); err == nil {
 		err = s.pushCache(ctx)
@@ -257,15 +228,10 @@ func (s *gitClient) GetTestCase(ctx context.Context, testcase *server.TestCase) 
 }
 func (s *gitClient) UpdateTestCase(ctx context.Context, testcase *server.TestCase) (reply *server.TestCase, err error) {
 	reply = &server.TestCase{}
-
-	var opt *gitOptions
-	if opt, err = s.loadCache(ctx); err != nil {
+	var loader testing.Writer
+	if loader, err = s.newLoader(ctx); err != nil {
 		return
 	}
-
-	parentDir := path.Join(opt.cache, opt.targetPath)
-	loader := testing.NewFileWriter(parentDir)
-	loader.Put(parentDir + "/*.yaml")
 
 	if err = loader.UpdateTestCase(testcase.SuiteName, remote.ConvertToNormalTestCase(testcase)); err == nil {
 		err = s.pushCache(ctx)
@@ -274,15 +240,10 @@ func (s *gitClient) UpdateTestCase(ctx context.Context, testcase *server.TestCas
 }
 func (s *gitClient) DeleteTestCase(ctx context.Context, testcase *server.TestCase) (reply *server.Empty, err error) {
 	reply = &server.Empty{}
-
-	var opt *gitOptions
-	if opt, err = s.loadCache(ctx); err != nil {
+	var loader testing.Writer
+	if loader, err = s.newLoader(ctx); err != nil {
 		return
 	}
-
-	parentDir := path.Join(opt.cache, opt.targetPath)
-	loader := testing.NewFileWriter(parentDir)
-	loader.Put(parentDir + "/*.yaml")
 
 	if err = loader.DeleteTestCase(testcase.SuiteName, testcase.Name); err == nil {
 		err = s.pushCache(ctx)
@@ -292,7 +253,7 @@ func (s *gitClient) DeleteTestCase(ctx context.Context, testcase *server.TestCas
 func (s *gitClient) Verify(ctx context.Context, in *server.Empty) (reply *server.CommonResult, err error) {
 	_, clientErr := s.ListTestSuite(ctx, in)
 	reply = &server.CommonResult{
-		Success: err == nil,
+		Success: clientErr == nil,
 		Message: util.OKOrErrorMessage(clientErr),
 	}
 	return
@@ -302,44 +263,69 @@ func (s *gitClient) getClient(ctx context.Context) (opt *gitOptions, err error) 
 	if store == nil {
 		err = errors.New("no connect to git server")
 	} else {
-		var ok bool
-		if opt, ok = clientCache[store.Name]; ok && opt != nil {
-			return
-		}
-
 		auth := &http.BasicAuth{
 			Username: store.Username,
 			Password: store.Password,
 		}
 
+		insecure := store.Properties["insecure"] == "true"
+
 		opt = &gitOptions{
-			cache:      "/tmp/" + store.Name,
+			cache:      path.Join(os.TempDir(), store.Name),
 			targetPath: store.Properties["targetpath"],
+			name:       store.Properties["name"],
+			email:      store.Properties["email"],
 			cloneOptions: &git.CloneOptions{
-				URL:      store.URL,
-				Progress: os.Stdout,
-				Auth:     auth,
+				URL:             store.URL,
+				Progress:        s.writer,
+				InsecureSkipTLS: insecure,
+				Auth:            auth,
 			},
 			pushOptions: &git.PushOptions{
-				Progress: os.Stdout,
-				Auth:     auth,
+				Progress:        s.writer,
+				InsecureSkipTLS: insecure,
+				Auth:            auth,
 			},
 			fetchOptions: &git.FetchOptions{
-				Progress: os.Stdout,
-				Auth:     auth,
+				Progress:        s.writer,
+				InsecureSkipTLS: insecure,
+				Auth:            auth,
 			},
 		}
-		clientCache[store.Name] = opt
+
+		if opt.name == "" {
+			opt.name = "LinuxSuRen"
+		}
+		if opt.email == "" {
+			opt.email = "LinuxSuRen@users.noreply.github.com"
+		}
 	}
 	return
 }
 
-var clientCache = map[string]*gitOptions{}
+func (s *gitClient) newLoader(ctx context.Context) (loader testing.Writer, err error) {
+	var opt *gitOptions
+	if opt, err = s.loadCache(ctx); err == nil {
+		loader, err = opt.newLoader()
+	}
+	return
+}
 
 type gitOptions struct {
 	cache        string
 	targetPath   string
+	name         string
+	email        string
 	cloneOptions *git.CloneOptions
 	pushOptions  *git.PushOptions
 	fetchOptions *git.FetchOptions
+}
+
+func (g *gitOptions) newLoader() (loader testing.Writer, err error) {
+	parentDir := path.Join(g.cache, g.targetPath)
+	if err = os.MkdirAll(parentDir, 0755); err == nil {
+		loader = testing.NewFileWriter(parentDir)
+		loader.Put(parentDir + "/*.yaml")
+	}
+	return
 }
