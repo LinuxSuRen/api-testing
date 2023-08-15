@@ -300,6 +300,16 @@ function bodyFiledExpectChange() {
   }
 }
 
+function queryChange() {
+  const query = testCaseWithSuite.value.data.request.query
+  let lastItem = query[query.length - 1]
+  if (lastItem.key !== '') {
+    testCaseWithSuite.value.data.request.query.push({
+      key: '',
+      value: ''
+    } as Pair)
+  }
+}
 function headerChange() {
   const header = testCaseWithSuite.value.data.request.header
   let lastItem = header[header.length - 1]
@@ -441,6 +451,27 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
 
       <el-main>
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+          <el-tab-pane label="Query" name="query">
+            <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
+              <el-table-column label="Key" width="180">
+                <template #default="scope">
+                  <el-autocomplete
+                    v-model="scope.row.key"
+                    placeholder="Key"
+                    @change="queryChange"
+                  />
+                </template>
+              </el-table-column>
+              <el-table-column label="Value">
+                <template #default="scope">
+                  <div style="display: flex; align-items: center">
+                    <el-input v-model="scope.row.value" placeholder="Value" />
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+
           <el-tab-pane label="Headers" name="second">
             <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
               <el-table-column label="Key" width="180">

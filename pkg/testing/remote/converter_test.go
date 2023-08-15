@@ -61,7 +61,7 @@ func TestConvert(t *testing.T) {
 				BodyFieldsExpect: defaultInterMap,
 				Header:           map[string]string{},
 			},
-		}, convertToNormalTestCase(&server.TestCase{
+		}, ConvertToNormalTestCase(&server.TestCase{
 			Request: &server.Request{
 				Api:    "/v1",
 				Header: defaultPairs,
@@ -73,7 +73,7 @@ func TestConvert(t *testing.T) {
 	})
 
 	t.Run("convertToGRPCTestCase", func(t *testing.T) {
-		result := convertToGRPCTestCase(atest.TestCase{
+		result := ConvertToGRPCTestCase(atest.TestCase{
 			Expect: atest.Response{
 				BodyFieldsExpect: defaultInterMap,
 				Header:           defaultMap,

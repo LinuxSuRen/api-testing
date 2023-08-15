@@ -47,7 +47,9 @@ func (l *fileLoader) Put(item string) (err error) {
 		if files, err = filepath.Glob(pattern); err == nil {
 			l.paths = append(l.paths, files...)
 		}
+		fmt.Println(pattern, "pattern", files)
 	}
+	fmt.Println(l.paths, item, l.parent, err)
 	return
 }
 

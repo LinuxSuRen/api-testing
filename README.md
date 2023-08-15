@@ -8,7 +8,7 @@ This is a API testing tool.
 
 ## Features
 
-*   Multiple test report formats: Markdown, HTML, Stdout
+*   Multiple test report formats: Markdown, HTML, PDF, Stdout
 *   Response Body fields equation check
 *   Response Body [eval](https://expr.medv.io/)
 *   Verify the Kubernetes resources
@@ -17,7 +17,7 @@ This is a API testing tool.
 *   Output reference between TestCase
 *   Run in server mode, and provide the [gRPC](pkg/server/server.proto) and HTTP endpoint
 *   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
-*   Multiple storage backends supported(Local, ORM Database, S3, etc)
+*   Multiple storage backends supported(Local, ORM Database, S3, Git, etc)
 *   [HTTP API record](extensions/collector)
 *   Install in mutiple use cases(CLI, Container, Native-Service, Operator, etc)
 
