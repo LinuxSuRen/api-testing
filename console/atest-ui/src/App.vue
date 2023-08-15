@@ -200,7 +200,7 @@ const viewName = ref('testcase')
   <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
     <el-container style="height: 100%">
       <el-header style="height: 30px;justify-content: flex-end;">
-        <el-button type="primary" :icon="Share" @click="viewName = ''" />
+        <el-button type="primary" :icon="Share" @click="viewName = ''" data-intro="Manage the store backends." />
       </el-header>
 
       <el-main>
