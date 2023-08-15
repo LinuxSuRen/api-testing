@@ -58,4 +58,8 @@ RUN mkdir -p /var/www/data
 COPY --from=builder /workspace/sample /var/www/sample
 COPY --from=ui /workspace/dist /var/www/html
 
+RUN apt update -y && \
+    # required for atest-store-git
+    apt install -y --no-install-recommends ssh-client ca-certificates
+
 CMD ["atest", "server", "--console-path=/var/www/html", "--local-storage=/var/www/sample/*.yaml", "--local-storage=/var/www/data/*.yaml"]

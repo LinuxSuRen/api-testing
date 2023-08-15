@@ -400,6 +400,7 @@ func (s *containerService) getStartArgs() []string {
 		"--pull=always",
 		"--network=host",
 		"-v", s.localStorage + ":/var/www/data",
+		"-v", "/root/.config/atest:/root/.config/atest",
 		s.image + ":" + s.tag}
 }
 
