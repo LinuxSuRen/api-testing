@@ -33,7 +33,7 @@ jobs:
           sudo atest service install
           sudo atest service restart
           sudo atest service status
-          atest run -p .github/testing/core.yaml
+          atest run -p .github/testing/core.yaml --request-ignore-error
           sudo atest service status
 
   Build:

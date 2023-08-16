@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: api-testing
+  name: api-testing
+spec:
+  containers:
+  - image: ghcr.io/linuxsuren/api-testing:master
+    name: web
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /root/.config/atest/
+      name: config
+    tty: true
+    workingDir: /
+  - image: ghcr.io/linuxsuren/api-testing:master
+    name: extension-orm
+    command: [atest-store-orm]
+    tty: true
+    workingDir: /
+  - image: ghcr.io/linuxsuren/api-testing:master
+    name: extension-s3
+    command: [atest-store-s3]
+    tty: true
+    workingDir: /
+  - image: ghcr.io/linuxsuren/api-testing:master
+    name: extension-git
+    command: [atest-store-git]
+    tty: true
+    workingDir: /
+  volumes:
+  - name: config
+    hostPath:
+      path: /root/.config/atest/
+      type: DirectoryOrCreate

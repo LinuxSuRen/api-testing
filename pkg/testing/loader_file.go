@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 
 	"github.com/linuxsuren/api-testing/pkg/util"
 )
@@ -13,15 +14,17 @@ type fileLoader struct {
 	paths  []string
 	index  int
 	parent string
+
+	lock *sync.RWMutex
 }
 
 // NewFileLoader creates the instance of file loader
 func NewFileLoader() Loader {
-	return &fileLoader{index: -1}
+	return &fileLoader{index: -1, lock: &sync.RWMutex{}}
 }
 
 func NewFileWriter(parent string) Writer {
-	return &fileLoader{index: -1, parent: parent}
+	return &fileLoader{index: -1, parent: parent, lock: &sync.RWMutex{}}
 }
 
 // HasMore returns if there are more test cases
@@ -38,6 +41,9 @@ func (l *fileLoader) Load() (data []byte, err error) {
 
 // Put adds the test case path
 func (l *fileLoader) Put(item string) (err error) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
 	if l.parent == "" {
 		l.parent = path.Dir(item)
 	}
@@ -47,9 +53,8 @@ func (l *fileLoader) Put(item string) (err error) {
 		if files, err = filepath.Glob(pattern); err == nil {
 			l.paths = append(l.paths, files...)
 		}
-		fmt.Println(pattern, "pattern", files)
+		fmt.Println(pattern, "pattern", len(files))
 	}
-	fmt.Println(l.paths, item, l.parent, err)
 	return
 }
 
@@ -133,6 +138,9 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 }
 
 func (l *fileLoader) GetSuite(name string) (suite *TestSuite, absPath string, err error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	for i := range l.paths {
 		suitePath := l.paths[i]
 		if absPath, err = filepath.Abs(suitePath); err != nil {
@@ -165,6 +173,9 @@ func (l *fileLoader) UpdateSuite(suite TestSuite) (err error) {
 }
 
 func (l *fileLoader) DeleteSuite(name string) (err error) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
 	found := false
 	for i := range l.paths {
 		suitePath := l.paths[i]

@@ -13,3 +13,9 @@ make install-precheck
 ```shell
 git ls-files | xargs cloc
 ```
+
+## TODO
+
+```
+go tool pprof -http=:9999 http://localhost:8080/debug/pprof/heap
+```
