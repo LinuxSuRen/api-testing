@@ -8,27 +8,65 @@ items:
   request:
     api: /GetSuites
     method: POST
+- name: createSuite
+  request:
+    api: /CreateTestSuite
+    method: POST
+    body: |
+      {"name": "{{randAlpha 6}}"}
 - name: suite
   request:
     api: /GetTestSuite
     method: POST
     body: |
-      {"name": "test"}
+      {"name": "{{randAlpha 6}}"}
   expect:
     bodyFieldsExpect:
       name: ""
       api: ""
-- name: get-testcase-not-found
+- name: UpdateTestSuite
   request:
-    api: /GetTestCase
+    api: /UpdateTestSuite
     method: POST
     body: |
-      {"name": "test"}
+      {
+        "name": "{{index (keys .suites.data) 0}}",
+        "api": "{{randAlpha 6}}"}
+      }
+- name: DeleteTestSuiteNotFound
+  request:
+    api: /DeleteTestSuite
+    method: POST
+    body: |
+      {"name": "{{randAlpha 6}}"}
   expect:
     statusCode: 500
+
+- name: ListTestCase
+  request:
+    api: /ListTestCase
+    method: POST
+    body: |
+      {"name": "{{index (keys .suites.data) (randInt 0 (len (keys .suites.data)))}}"}
+- name: list-testcases-not-found
+  request:
+    api: /ListTestCase
+    method: POST
+    body: |
+      {"name": "{{randAlpha 6}}"}
+  expect:
     bodyFieldsExpect:
-      code: 2
-- name: list-testcases
+      name: ""
+- name: GetSuggestedAPIs-no-testsuite-found
+  request:
+    api: /GetSuggestedAPIs
+    method: POST
+    body: |
+      {"name": "{{randAlpha 6}}"}
+  expect:
+    verify:
+      - len(data.data) == 0
+- name: get-testcase-not-found
   request:
     api: /GetTestCase
     method: POST
@@ -67,9 +105,16 @@ items:
   request:
     api: /GetVersion
     method: POST
-- name: secrets
+- name: GetSecrets
   request:
     api: /GetSecrets
     method: POST
   expect:
     statusCode: 500
+
+- name: DeleteTestSuite
+  request:
+    api: /DeleteTestSuite
+    method: POST
+    body: |
+      {"name": "{{index (keys .suites.data) 0}}"}

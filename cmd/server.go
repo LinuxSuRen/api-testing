@@ -13,6 +13,7 @@ import (
 	"time"
 
 	_ "embed"
+	pprof "net/http/pprof"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	template "github.com/linuxsuren/api-testing/pkg/render"
@@ -124,6 +125,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
+		debugHandler(mux)
 		o.httpServer.WithHandler(mux)
 		log.Printf("HTTP server listening at %v", httplis.Addr())
 		err = o.httpServer.Serve(httplis)
@@ -163,6 +165,25 @@ func frontEndHandlerWithLocation(consolePath string) func(w http.ResponseWriter,
 			http.ServeFile(w, r, path.Join(consolePath, target))
 		}
 	}
+}
+
+func debugHandler(mux *runtime.ServeMux) {
+	mux.HandlePath(http.MethodGet, "/debug/pprof/{sub}", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		switch sub := pathParams["sub"]; sub {
+		case "cmdline":
+			pprof.Cmdline(w, r)
+		case "profile":
+			pprof.Profile(w, r)
+		case "symbol":
+			pprof.Symbol(w, r)
+		case "trace":
+			pprof.Trace(w, r)
+		case "allocs", "block", "goroutine", "heap", "mutex", "threadcreate":
+			pprof.Index(w, r)
+		case "":
+			pprof.Index(w, r)
+		}
+	})
 }
 
 type gRPCServer interface {

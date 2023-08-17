@@ -13,3 +13,14 @@ make install-precheck
 ```shell
 git ls-files | xargs cloc
 ```
+
+## pprof
+
+```
+go tool pprof -http=:9999 http://localhost:8080/debug/pprof/heap
+```
+
+Other usage of this:
+* `/debug/pprof/heap?gc=1`
+* `/debug/pprof/heap?seconds=10`
+* `/debug/pprof/goroutine/?debug=0`

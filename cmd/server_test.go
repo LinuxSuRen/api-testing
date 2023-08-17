@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
+	"net"
 	"net/http"
 	"strings"
 	"testing"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
@@ -96,6 +99,43 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 		resp := newFakeResponseWriter()
 		handler(resp, req, map[string]string{})
 		assert.Equal(t, "ok", resp.GetBody().String())
+	})
+
+	t.Run("pprof", func(t *testing.T) {
+		apis := []string{"", "cmdline", "symbol",
+			"trace", "profile",
+			"allocs", "block", "goroutine", "heap", "mutex", "threadcreate"}
+
+		mu := runtime.NewServeMux()
+		debugHandler(mu)
+
+		ready := make(chan struct{})
+		var err error
+		var listen net.Listener
+		var port string
+		go func() {
+			listen, err = net.Listen("tcp", ":0")
+			assert.NoError(t, err)
+
+			addr := listen.Addr().String()
+			items := strings.Split(addr, ":")
+			port = items[len(items)-1]
+
+			ready <- struct{}{}
+			server := http.Server{Addr: addr, Handler: mu}
+			server.Serve(listen)
+		}()
+
+		<-ready
+		defer listen.Close()
+
+		for _, name := range apis {
+			// gock.Off()
+
+			resp, err := http.Get(fmt.Sprintf("http://localhost:%s/debug/pprof/%s?seconds=1", port, name))
+			assert.NoError(t, err)
+			assert.Equal(t, http.StatusOK, resp.StatusCode)
+		}
 	})
 }
 
