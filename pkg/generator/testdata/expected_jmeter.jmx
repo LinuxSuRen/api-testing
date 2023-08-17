@@ -1,0 +1,26 @@
+  <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.0">
+      <hashTree>
+          <TestPlan testname="API Testing" guiclass="TestPlanGui" testclass="TestPlan" enabled="true">
+              <stringProp name="TestPlan.comments">comment</stringProp>
+          </TestPlan>
+          <hashTree>
+              <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" enabled="true" testname="Thread Group">
+                  <stringProp name="ThreadGroup.num_threads">1</stringProp>
+                  <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" enabled="false">
+                      <stringProp name="LoopController.loops">1</stringProp>
+                      <boolProp name="LoopController.continue_forever">false</boolProp>
+                  </elementProp>
+              </ThreadGroup>
+              <hashTree>
+                  <HTTPSamplerProxy testname="hello-jmeter" guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" enabled="true">
+                      <stringProp name="HTTPSampler.domain">localhost:8080</stringProp>
+                      <stringProp name="HTTPSampler.port">8080</stringProp>
+                      <stringProp name="HTTPSampler.path">/GetSuites</stringProp>
+                      <stringProp name="HTTPSampler.method">POST</stringProp>
+                  </HTTPSamplerProxy>
+                  <hashTree></hashTree>
+                  <ResultCollector enabled="true" guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report"></ResultCollector>
+              </hashTree>
+          </hashTree>
+      </hashTree>
+  </jmeterTestPlan>

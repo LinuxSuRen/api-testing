@@ -9,8 +9,8 @@ This is a API testing tool.
 ## Features
 
 *   Multiple test report formats: Markdown, HTML, PDF, Stdout
-*   Response Body fields equation check
-*   Response Body [eval](https://expr.medv.io/)
+*   Support converting to [JMeter](https://jmeter.apache.org/) files
+*   Response Body fields equation check or [eval](https://expr.medv.io/)
 *   Verify the Kubernetes resources
 *   Validate the response body with [JSON schema](https://json-schema.org/)
 *   Pre and post handle with the API request

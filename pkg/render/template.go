@@ -3,6 +3,9 @@ package render
 import (
 	"bytes"
 	"context"
+	"crypto/md5"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -90,6 +93,27 @@ var advancedFuncs = []AdvancedFunc{{
 			return val.Value
 		}
 		return err.Error()
+	},
+}, {
+	FuncName: "md5",
+	Func: func(text string) string {
+		hash := md5.Sum([]byte(text))
+		return hex.EncodeToString(hash[:])
+	},
+}, {
+	FuncName: "base64",
+	Func: func(text string) string {
+		return base64.StdEncoding.EncodeToString([]byte(text))
+	},
+}, {
+	FuncName: "base64Decode",
+	Func: func(text string) string {
+		result, err := base64.StdEncoding.DecodeString(text)
+		if err == nil {
+			return string(result)
+		} else {
+			return err.Error()
+		}
 	},
 }}
 

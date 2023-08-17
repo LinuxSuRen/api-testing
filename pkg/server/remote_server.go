@@ -523,13 +523,39 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 		loader := s.getLoader(ctx)
 		if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
 			output, genErr := instance.Generate(&result)
-			if genErr != nil {
-				reply.Success = false
-				reply.Message = genErr.Error()
-			} else {
-				reply.Success = true
-				reply.Message = output
-			}
+			reply.Success = genErr == nil
+			reply.Message = util.OrErrorMessage(genErr, output)
+		}
+	}
+	return
+}
+
+// converter
+func (s *server) ListConverter(ctx context.Context, in *Empty) (reply *SimpleList, err error) {
+	reply = &SimpleList{}
+	converters := generator.GetTestSuiteConverters()
+	for name := range converters {
+		reply.Data = append(reply.Data, &Pair{
+			Key: name,
+		})
+	}
+	return
+}
+
+func (s *server) ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
+	reply = &CommonResult{}
+
+	instance := generator.GetTestSuiteConverter(in.Generator)
+	if instance == nil {
+		reply.Success = false
+		reply.Message = fmt.Sprintf("converter '%s' not found", in.Generator)
+	} else {
+		var result testing.TestSuite
+		loader := s.getLoader(ctx)
+		if result, err = loader.GetTestSuite(in.TestSuite, true); err == nil {
+			output, genErr := instance.Convert(&result)
+			reply.Success = genErr == nil
+			reply.Message = util.OrErrorMessage(genErr, output)
 		}
 	}
 	return

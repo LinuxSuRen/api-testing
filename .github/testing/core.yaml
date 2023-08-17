@@ -2,7 +2,8 @@
 # yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
 # https://docs.gitlab.com/ee/api/api_resources.html
 name: atest
-api: http://localhost:8080/server.Runner
+api: |
+  {{default "http://localhost:8080/server.Runner" (env "SERVER")}}
 items:
 - name: suites
   request:
@@ -80,6 +81,7 @@ items:
   request:
     api: /PopularHeaders
     method: POST
+
 - name: list-code-generators
   request:
     api: /ListCodeGenerator
@@ -87,6 +89,42 @@ items:
   expect:
     verify:
       - len(data) == 1
+- name: GenerateCode
+  request:
+    api: /GenerateCode
+    method: POST
+    body: |
+      {
+        "TestSuite": "{{index (keys .suites.data) 0}}",
+        "TestCase": "{{randAlpha 6}}",
+        "Generator": "golang"
+      }
+  expect:
+    statusCode: 500 # no testcase found
+    verify:
+      - indexOf(data.message, "not found") != -1
+
+- name: listConverters
+  request:
+    api: /ListConverter
+    method: POST
+  expect:
+    verify:
+      - len(data) == 1
+- name: ConvertTestSuite
+  request:
+    api: /ConvertTestSuite
+    method: POST
+    body: |
+      {
+        "TestSuite": "{{index (keys .suites.data) 0}}",
+        "Generator": "jmeter"
+      }
+  expect:
+    verify:
+      - data.message != ""
+      - indexOf(data.message, "jmeterTestPlan") != -1
+
 - name: list-stores
   request:
     api: /GetStores

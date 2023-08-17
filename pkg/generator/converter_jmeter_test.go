@@ -22,17 +22,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package util
+package generator
 
-// OKOrErrorMessage returns OK or error message
-func OKOrErrorMessage(err error) string {
-	return OrErrorMessage(err, "OK")
-}
+import (
+	"testing"
 
-// OrErrorMessage returns error message or message
-func OrErrorMessage(err error, message string) string {
-	if err != nil {
-		return err.Error()
+	_ "embed"
+
+	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestJmeterConvert(t *testing.T) {
+	t.Run("common", func(t *testing.T) {
+		jmeterConvert := GetTestSuiteConverter("jmeter")
+		assert.NotNil(t, jmeterConvert)
+
+		converters := GetTestSuiteConverters()
+		assert.Equal(t, 1, len(converters))
+	})
+
+	testSuite := &atest.TestSuite{
+		Name: "API Testing",
+		Items: []atest.TestCase{{
+			Name: "hello-jmeter",
+			Request: atest.Request{
+				Method: "POST",
+				API:    "http://localhost:8080/GetSuites",
+			},
+		}},
 	}
-	return message
+
+	converter := &jmeterConverter{}
+	output, err := converter.Convert(testSuite)
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedJmeter, output, output)
 }
+
+//go:embed testdata/expected_jmeter.jmx
+var expectedJmeter string
