@@ -40,6 +40,9 @@ type RunnerClient interface {
 	// code generator
 	ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
+	// converter
+	ListConverter(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
+	ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
 	// common services
 	PopularHeaders(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Pairs, error)
 	FunctionsQuery(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Pairs, error)
@@ -197,6 +200,24 @@ func (c *runnerClient) ListCodeGenerator(ctx context.Context, in *Empty, opts ..
 func (c *runnerClient) GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error) {
 	out := new(CommonResult)
 	err := c.cc.Invoke(ctx, "/server.Runner/GenerateCode", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) ListConverter(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error) {
+	out := new(SimpleList)
+	err := c.cc.Invoke(ctx, "/server.Runner/ListConverter", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/ConvertTestSuite", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -382,6 +403,9 @@ type RunnerServer interface {
 	// code generator
 	ListCodeGenerator(context.Context, *Empty) (*SimpleList, error)
 	GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error)
+	// converter
+	ListConverter(context.Context, *Empty) (*SimpleList, error)
+	ConvertTestSuite(context.Context, *CodeGenerateRequest) (*CommonResult, error)
 	// common services
 	PopularHeaders(context.Context, *Empty) (*Pairs, error)
 	FunctionsQuery(context.Context, *SimpleQuery) (*Pairs, error)
@@ -451,6 +475,12 @@ func (UnimplementedRunnerServer) ListCodeGenerator(context.Context, *Empty) (*Si
 }
 func (UnimplementedRunnerServer) GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateCode not implemented")
+}
+func (UnimplementedRunnerServer) ListConverter(context.Context, *Empty) (*SimpleList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListConverter not implemented")
+}
+func (UnimplementedRunnerServer) ConvertTestSuite(context.Context, *CodeGenerateRequest) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConvertTestSuite not implemented")
 }
 func (UnimplementedRunnerServer) PopularHeaders(context.Context, *Empty) (*Pairs, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PopularHeaders not implemented")
@@ -776,6 +806,42 @@ func _Runner_GenerateCode_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).GenerateCode(ctx, req.(*CodeGenerateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_ListConverter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).ListConverter(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/ListConverter",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).ListConverter(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_ConvertTestSuite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CodeGenerateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).ConvertTestSuite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/ConvertTestSuite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).ConvertTestSuite(ctx, req.(*CodeGenerateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1124,6 +1190,14 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateCode",
 			Handler:    _Runner_GenerateCode_Handler,
+		},
+		{
+			MethodName: "ListConverter",
+			Handler:    _Runner_ListConverter_Handler,
+		},
+		{
+			MethodName: "ConvertTestSuite",
+			Handler:    _Runner_ConvertTestSuite_Handler,
 		},
 		{
 			MethodName: "PopularHeaders",

@@ -604,6 +604,28 @@ func TestCodeGenerator(t *testing.T) {
 		assert.True(t, result.Success)
 		assert.NotEmpty(t, result.Message)
 	})
+
+	t.Run("ListConverter", func(t *testing.T) {
+		list, err := server.ListConverter(ctx, &Empty{})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(list.Data))
+	})
+
+	t.Run("ConvertTestSuite no converter given", func(t *testing.T) {
+		reply, err := server.ConvertTestSuite(ctx, &CodeGenerateRequest{})
+		assert.NoError(t, err)
+		if assert.NotNil(t, reply) {
+			assert.False(t, reply.Success)
+		}
+	})
+
+	t.Run("ConvertTestSuite no suite found", func(t *testing.T) {
+		reply, err := server.ConvertTestSuite(ctx, &CodeGenerateRequest{Generator: "jmeter"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, reply) {
+			assert.True(t, reply.Success)
+		}
+	})
 }
 
 func TestFunctionsQueryStream(t *testing.T) {

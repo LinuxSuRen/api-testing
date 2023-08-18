@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -239,10 +238,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 			continue
 		}
 
-		// reuse the API prefix
-		if strings.HasPrefix(testCase.Request.API, "/") {
-			testCase.Request.API = fmt.Sprintf("%s%s", testSuite.API, testCase.Request.API)
-		}
+		testCase.Request.RenderAPI(testSuite.API)
 
 		var output interface{}
 		select {

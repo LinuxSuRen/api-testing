@@ -22,17 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package util
+package util_test
 
-// OKOrErrorMessage returns OK or error message
-func OKOrErrorMessage(err error) string {
-	return OrErrorMessage(err, "OK")
-}
+import (
+	"testing"
 
-// OrErrorMessage returns error message or message
-func OrErrorMessage(err error, message string) string {
-	if err != nil {
-		return err.Error()
-	}
-	return message
+	"github.com/linuxsuren/api-testing/pkg/util"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestKeys(t *testing.T) {
+	t.Run("normal", func(t *testing.T) {
+		assert.Equal(t, []string{"foo", "bar"},
+			util.Keys(map[string]interface{}{"foo": "xx", "bar": "xx"}))
+	})
 }

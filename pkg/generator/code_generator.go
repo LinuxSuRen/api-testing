@@ -49,3 +49,27 @@ func GetCodeGenerators() (result map[string]CodeGenerator) {
 	}
 	return
 }
+
+// TestSuiteConverter is the interface of test suite converter
+type TestSuiteConverter interface {
+	Convert(*testing.TestSuite) (result string, err error)
+}
+
+var converters = map[string]TestSuiteConverter{}
+
+func GetTestSuiteConverter(name string) TestSuiteConverter {
+	return converters[name]
+}
+
+func RegisterTestSuiteConverter(name string, converter TestSuiteConverter) {
+	converters[name] = converter
+}
+
+func GetTestSuiteConverters() (result map[string]TestSuiteConverter) {
+	// returns an immutable map
+	result = make(map[string]TestSuiteConverter, len(converters))
+	for k, v := range converters {
+		result[k] = v
+	}
+	return
+}

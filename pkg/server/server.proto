@@ -27,6 +27,10 @@ service Runner {
     rpc ListCodeGenerator(Empty) returns (SimpleList) {}
     rpc GenerateCode(CodeGenerateRequest)  returns (CommonResult) {}
 
+    // converter
+    rpc ListConverter(Empty) returns (SimpleList) {}
+    rpc ConvertTestSuite(CodeGenerateRequest) returns (CommonResult) {}
+
     // common services
     rpc PopularHeaders(Empty) returns (Pairs) {}
     rpc FunctionsQuery(SimpleQuery) returns (Pairs) {}

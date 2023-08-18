@@ -160,6 +160,14 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 	return
 }
 
+// RenderAPI will combine with the base API
+func (r *Request) RenderAPI(base string) {
+	// reuse the API prefix
+	if strings.HasPrefix(r.API, "/") {
+		r.API = fmt.Sprintf("%s%s", base, r.API)
+	}
+}
+
 // GetBody returns the request body
 func (r *Request) GetBody() (reader io.Reader, err error) {
 	if len(r.Form) > 0 {

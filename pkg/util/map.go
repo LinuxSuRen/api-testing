@@ -24,15 +24,13 @@ SOFTWARE.
 
 package util
 
-// OKOrErrorMessage returns OK or error message
-func OKOrErrorMessage(err error) string {
-	return OrErrorMessage(err, "OK")
-}
-
-// OrErrorMessage returns error message or message
-func OrErrorMessage(err error, message string) string {
-	if err != nil {
-		return err.Error()
+// Keys returns a list of keys
+func Keys[T interface{}](data map[string]T) (keys []string) {
+	keys = make([]string, len(data))
+	index := 0
+	for k := range data {
+		keys[index] = k
+		index++
 	}
-	return message
+	return
 }
