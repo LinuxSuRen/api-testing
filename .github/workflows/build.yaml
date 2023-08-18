@@ -44,12 +44,18 @@ jobs:
           sudo atest service status
           atest run -p .github/testing/core.yaml --request-ignore-error --report md --report-file .github/workflows/report.md
           sudo atest service status
+
+          atest convert -p .github/testing/core.yaml --converter jmeter -t sample.jmx
       - name: Report API Test
         uses: harupy/comment-on-pr@c0522c44600040927a120b9309b531e3cb6f8d48
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           filename: report.md
+      - name: Run JMeter Tests
+        uses: rbhadti94/apache-jmeter-action@v0.5.0
+        with:
+          testFilePath: sample.jmx
 
   Build:
     runs-on: ubuntu-20.04

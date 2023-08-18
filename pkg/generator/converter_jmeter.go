@@ -39,18 +39,25 @@ func init() {
 }
 
 func (c *jmeterConverter) Convert(testSuite *testing.TestSuite) (result string, err error) {
-	jmeterTestPlan := c.buildJmeterTestPlan(testSuite)
-
-	var data []byte
-	if data, err = xml.MarshalIndent(jmeterTestPlan, "  ", "    "); err == nil {
-		result = string(data)
+	var jmeterTestPlan *JmeterTestPlan
+	if jmeterTestPlan, err = c.buildJmeterTestPlan(testSuite); err == nil {
+		var data []byte
+		if data, err = xml.MarshalIndent(jmeterTestPlan, "  ", "    "); err == nil {
+			result = string(data)
+		}
 	}
 	return
 }
 
-func (c *jmeterConverter) buildJmeterTestPlan(testSuite *testing.TestSuite) (result *JmeterTestPlan) {
+func (c *jmeterConverter) buildJmeterTestPlan(testSuite *testing.TestSuite) (result *JmeterTestPlan, err error) {
+	if err = testSuite.Render(make(map[string]interface{})); err != nil {
+		return
+	}
+
 	requestItems := []interface{}{}
 	for _, item := range testSuite.Items {
+		item.Request.RenderAPI(testSuite.API)
+
 		api, err := url.Parse(item.Request.API)
 		if err != nil {
 			continue

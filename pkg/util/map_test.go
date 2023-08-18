@@ -22,44 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package generator
+package util_test
 
 import (
 	"testing"
 
-	_ "embed"
-
-	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJmeterConvert(t *testing.T) {
-	t.Run("common", func(t *testing.T) {
-		jmeterConvert := GetTestSuiteConverter("jmeter")
-		assert.NotNil(t, jmeterConvert)
-
-		converters := GetTestSuiteConverters()
-		assert.Equal(t, 1, len(converters))
+func TestKeys(t *testing.T) {
+	t.Run("normal", func(t *testing.T) {
+		assert.Equal(t, []string{"foo", "bar"},
+			util.Keys(map[string]interface{}{"foo": "xx", "bar": "xx"}))
 	})
-
-	testSuite := &atest.TestSuite{
-		Name: "API Testing",
-		API:  "http://localhost:8080",
-		Items: []atest.TestCase{{
-			Name: "hello-jmeter",
-			Request: atest.Request{
-				Method: "POST",
-				API:    "/GetSuites",
-			},
-		}},
-	}
-
-	converter := &jmeterConverter{}
-	output, err := converter.Convert(testSuite)
-	assert.NoError(t, err)
-
-	assert.Equal(t, expectedJmeter, output, output)
 }
-
-//go:embed testdata/expected_jmeter.jmx
-var expectedJmeter string

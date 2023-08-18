@@ -21,7 +21,7 @@ func NewRootCmd(execer fakeruntime.Execer, gRPCServer gRPCServer,
 	c.AddCommand(createInitCommand(execer),
 		createRunCommand(), createSampleCmd(),
 		createServerCmd(execer, gRPCServer, httpServer), createJSONSchemaCmd(),
-		createServiceCommand(execer), createFunctionCmd())
+		createServiceCommand(execer), createFunctionCmd(), createConvertCommand())
 	return
 }
 

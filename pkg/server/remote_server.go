@@ -204,9 +204,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		suiteRunner.WithWriteLevel(task.Level)
 
 		// reuse the API prefix
-		if strings.HasPrefix(testCase.Request.API, "/") {
-			testCase.Request.API = fmt.Sprintf("%s%s", suite.API, testCase.Request.API)
-		}
+		testCase.Request.RenderAPI(suite.API)
 
 		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
 		if getter, ok := suiteRunner.(runner.HTTPResponseRecord); ok {
