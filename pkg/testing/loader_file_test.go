@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	atesting "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/stretchr/testify/assert"
@@ -42,6 +43,62 @@ func TestFileLoader(t *testing.T) {
 			assert.NoError(t, loader.Verify())
 		})
 	}
+}
+
+func TestURLLoader(t *testing.T) {
+	const json = `{"key": "value", "message": "sample"}`
+
+	t.Run("normal HTTP GET request", func(t *testing.T) {
+		loader := atest.NewFileLoader()
+		defer gock.Off()
+
+		err := loader.Put(urlFake)
+		assert.NoError(t, err)
+
+		gock.New(urlFake).Get("/").Reply(http.StatusOK).BodyString(json)
+
+		assert.True(t, loader.HasMore())
+		var data []byte
+		data, err = loader.Load()
+		assert.NoError(t, err)
+		assert.Equal(t, json, string(data))
+	})
+
+	t.Run("HTTP POST request, lack of suite name", func(t *testing.T) {
+		loader := atest.NewFileLoader()
+		defer gock.Off()
+		const api = "/server.Runner/ConvertTestSuite"
+		const reqURL = urlFake + api
+
+		err := loader.Put(reqURL)
+		assert.NoError(t, err)
+
+		gock.New(urlFake).Get(api).Reply(http.StatusOK).BodyString(json)
+
+		assert.True(t, loader.HasMore())
+		_, err = loader.Load()
+		assert.Error(t, err)
+	})
+
+	t.Run("HTTP POST request", func(t *testing.T) {
+		loader := atest.NewFileLoader()
+		defer gock.Off()
+		const api = "/server.Runner/ConvertTestSuite"
+		const reqURL = urlFake + api + "?suite=sample"
+
+		err := loader.Put(reqURL)
+		assert.NoError(t, err)
+
+		gock.New(urlFake).Post(api).BodyString(`{"TestSuite":"sample", "Generator":"raw"}`).
+			Reply(http.StatusOK).BodyString(json)
+
+		assert.True(t, loader.HasMore())
+
+		var data []byte
+		data, err = loader.Load()
+		assert.NoError(t, err)
+		assert.Equal(t, "sample", string(data))
+	})
 }
 
 func defaultVerify(t *testing.T, loader atest.Loader) {

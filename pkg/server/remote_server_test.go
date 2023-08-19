@@ -608,7 +608,7 @@ func TestCodeGenerator(t *testing.T) {
 	t.Run("ListConverter", func(t *testing.T) {
 		list, err := server.ListConverter(ctx, &Empty{})
 		assert.NoError(t, err)
-		assert.Equal(t, 1, len(list.Data))
+		assert.Equal(t, 2, len(list.Data))
 	})
 
 	t.Run("ConvertTestSuite no converter given", func(t *testing.T) {

@@ -1,10 +1,16 @@
 package testing
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -35,7 +41,54 @@ func (l *fileLoader) HasMore() bool {
 
 // Load returns the test case content
 func (l *fileLoader) Load() (data []byte, err error) {
-	data, err = os.ReadFile(l.paths[l.index])
+	targetFile := l.paths[l.index]
+	if strings.HasPrefix(targetFile, "http://") || strings.HasPrefix(targetFile, "https://") {
+		var ok bool
+		data, ok, err = gRPCCompitableRequest(targetFile)
+		if !ok && err == nil {
+			var resp *http.Response
+			if resp, err = http.Get(targetFile); err == nil {
+				data, err = io.ReadAll(resp.Body)
+			}
+		}
+	} else {
+		data, err = os.ReadFile(targetFile)
+	}
+	return
+}
+
+func gRPCCompitableRequest(targetURLStr string) (data []byte, ok bool, err error) {
+	if !strings.Contains(targetURLStr, "server.Runner/ConvertTestSuite") {
+		return
+	}
+
+	var targetURL *url.URL
+	if targetURL, err = url.Parse(targetURLStr); err != nil {
+		return
+	}
+
+	suite := targetURL.Query().Get("suite")
+	if suite == "" {
+		err = fmt.Errorf("suite is required")
+		return
+	}
+
+	payload := new(bytes.Buffer)
+	payload.WriteString(fmt.Sprintf(`{"TestSuite":"%s", "Generator":"raw"}`, suite))
+
+	var resp *http.Response
+	if resp, err = http.Post(targetURLStr, "", payload); err == nil {
+		if data, err = io.ReadAll(resp.Body); err != nil {
+			return
+		}
+
+		var gRPCData map[string]interface{}
+		if err = json.Unmarshal(data, &gRPCData); err == nil {
+			var obj interface{}
+			obj, ok = gRPCData["message"]
+			data = []byte(fmt.Sprintf("%v", obj))
+		}
+	}
 	return
 }
 
@@ -46,6 +99,11 @@ func (l *fileLoader) Put(item string) (err error) {
 
 	if l.parent == "" {
 		l.parent = path.Dir(item)
+	}
+
+	if strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
+		l.paths = append(l.paths, item)
+		return
 	}
 
 	for _, pattern := range util.Expand(item) {
