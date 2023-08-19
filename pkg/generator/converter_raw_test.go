@@ -29,39 +29,17 @@ import (
 
 	_ "embed"
 
-	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJmeterConvert(t *testing.T) {
-	t.Run("common", func(t *testing.T) {
-		jmeterConvert := GetTestSuiteConverter("jmeter")
-		assert.NotNil(t, jmeterConvert)
+func TestRawConvert(t *testing.T) {
+	rawConvert := GetTestSuiteConverter("raw")
+	assert.NotNil(t, rawConvert)
 
-		converters := GetTestSuiteConverters()
-		assert.Equal(t, 2, len(converters))
-	})
-
-	converter := &jmeterConverter{}
-	output, err := converter.Convert(createTestSuiteForTest())
+	output, err := rawConvert.Convert(createTestSuiteForTest())
 	assert.NoError(t, err)
-
-	assert.Equal(t, expectedJmeter, output, output)
+	assert.Equal(t, expectedTestSuite, output)
 }
 
-func createTestSuiteForTest() *atest.TestSuite {
-	return &atest.TestSuite{
-		Name: "API Testing",
-		API:  "http://localhost:8080",
-		Items: []atest.TestCase{{
-			Name: "hello-jmeter",
-			Request: atest.Request{
-				Method: "POST",
-				API:    "/GetSuites",
-			},
-		}},
-	}
-}
-
-//go:embed testdata/expected_jmeter.jmx
-var expectedJmeter string
+//go:embed testdata/expected_testsuite.yaml
+var expectedTestSuite string

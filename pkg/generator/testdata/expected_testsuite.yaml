@@ -1,0 +1,7 @@
+name: API Testing
+api: http://localhost:8080
+items:
+    - name: hello-jmeter
+      request:
+        api: /GetSuites
+        method: POST

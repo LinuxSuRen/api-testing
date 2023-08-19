@@ -47,6 +47,26 @@ k3s kubectl apply -k sample/kubernetes/default
 kustomize build sample/kubernetes/docker.io/ | k3s kubectl apply -f -
 ```
 
+## Run your test cases
+The test suite file could be in local, or in the HTTP server. See the following different ways:
+
+* `atest run -p your-local-file.yaml`
+* `atest run -p https://gitee.com/linuxsuren/api-testing/raw/master/sample/testsuite-gitee.yaml`
+* `atest run -p http://localhost:8080/server.Runner/ConvertTestSuite?suite=sample`
+
+For the last one, it represents the API Testing server.
+
+## Convert to JMeter
+[JMeter](https://jmeter.apache.org/) is a load test tool. You can run the following commands from the root directory of this repository:
+
+```shell
+atest convert --converter jmeter -p sample/testsuite-gitee.yaml --target bin/gitee.jmx
+
+jmeter -n -t bin/gitee.jmx
+```
+
+Please feel free to bring more test tool converters.
+
 ## Storage
 There are multiple storage backends supported. See the status from the list:
 
