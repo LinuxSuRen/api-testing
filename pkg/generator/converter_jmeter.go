@@ -26,6 +26,7 @@ package generator
 
 import (
 	"encoding/xml"
+	"fmt"
 	"net/url"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -50,27 +51,31 @@ func (c *jmeterConverter) Convert(testSuite *testing.TestSuite) (result string, 
 }
 
 func (c *jmeterConverter) buildJmeterTestPlan(testSuite *testing.TestSuite) (result *JmeterTestPlan, err error) {
-	if err = testSuite.Render(make(map[string]interface{})); err != nil {
+	emptyCtx := make(map[string]interface{})
+	if err = testSuite.Render(emptyCtx); err != nil {
 		return
 	}
 
 	requestItems := []interface{}{}
 	for _, item := range testSuite.Items {
 		item.Request.RenderAPI(testSuite.API)
+		if reqRenderErr := item.Request.Render(emptyCtx, ""); reqRenderErr != nil {
+			fmt.Println("Error rendering request: ", reqRenderErr)
+		}
 
 		api, err := url.Parse(item.Request.API)
 		if err != nil {
 			continue
 		}
 
-		requestItems = append(requestItems, &HTTPSamplerProxy{
+		requestItem := &HTTPSamplerProxy{
 			GUIClass:  "HttpTestSampleGui",
 			TestClass: "HTTPSamplerProxy",
 			Enabled:   true,
 			Name:      item.Name,
 			StringProp: []StringProp{{
 				Name:  "HTTPSampler.domain",
-				Value: api.Host,
+				Value: api.Hostname(),
 			}, {
 				Name:  "HTTPSampler.port",
 				Value: api.Port(),
@@ -81,7 +86,36 @@ func (c *jmeterConverter) buildJmeterTestPlan(testSuite *testing.TestSuite) (res
 				Name:  "HTTPSampler.method",
 				Value: item.Request.Method,
 			}},
-		})
+		}
+		if item.Request.Body != "" {
+			requestItem.BoolProp = append(requestItem.BoolProp, BoolProp{
+				Name:  "HTTPSampler.postBodyRaw",
+				Value: "true",
+			})
+			requestItem.ElementProp = append(requestItem.ElementProp, ElementProp{
+				Name: "HTTPsampler.Arguments",
+				Type: "Arguments",
+				CollectionProp: []CollectionProp{{
+					Name: "Arguments.arguments",
+					ElementProp: []ElementProp{{
+						Name: "",
+						Type: "HTTPArgument",
+						BoolProp: []BoolProp{{
+							Name:  "HTTPArgument.always_encode",
+							Value: "false",
+						}},
+						StringProp: []StringProp{{
+							Name:  "Argument.value",
+							Value: item.Request.Body,
+						}, {
+							Name:  "Argument.metadata",
+							Value: "=",
+						}},
+					}},
+				}},
+			})
+		}
+		requestItems = append(requestItems, requestItem)
 		requestItems = append(requestItems, HashTree{})
 	}
 	requestItems = append(requestItems, &ResultCollector{
@@ -177,12 +211,14 @@ type ThreadGroup struct {
 }
 
 type HTTPSamplerProxy struct {
-	XMLName    xml.Name     `xml:"HTTPSamplerProxy"`
-	StringProp []StringProp `xml:"stringProp"`
-	Name       string       `xml:"testname,attr"`
-	GUIClass   string       `xml:"guiclass,attr"`
-	TestClass  string       `xml:"testclass,attr"`
-	Enabled    bool         `xml:"enabled,attr"`
+	XMLName     xml.Name      `xml:"HTTPSamplerProxy"`
+	Name        string        `xml:"testname,attr"`
+	GUIClass    string        `xml:"guiclass,attr"`
+	TestClass   string        `xml:"testclass,attr"`
+	Enabled     bool          `xml:"enabled,attr"`
+	StringProp  []StringProp  `xml:"stringProp"`
+	BoolProp    []BoolProp    `xml:"boolProp"`
+	ElementProp []ElementProp `xml:"elementProp"`
 }
 
 type ResultCollector struct {
@@ -194,13 +230,19 @@ type ResultCollector struct {
 }
 
 type ElementProp struct {
-	Name       string       `xml:"name,attr"`
-	Type       string       `xml:"elementType,attr"`
-	GUIClass   string       `xml:"guiclass,attr"`
-	TestClass  string       `xml:"testclass,attr"`
-	Enabled    bool         `xml:"enabled,attr"`
-	StringProp []StringProp `xml:"stringProp"`
-	BoolProp   []BoolProp   `xml:"boolProp"`
+	Name           string           `xml:"name,attr"`
+	Type           string           `xml:"elementType,attr"`
+	GUIClass       string           `xml:"guiclass,attr"`
+	TestClass      string           `xml:"testclass,attr"`
+	Enabled        bool             `xml:"enabled,attr"`
+	StringProp     []StringProp     `xml:"stringProp"`
+	BoolProp       []BoolProp       `xml:"boolProp"`
+	CollectionProp []CollectionProp `xml:"collectionProp"`
+}
+
+type CollectionProp struct {
+	Name        string        `xml:"name,attr"`
+	ElementProp []ElementProp `xml:"elementProp"`
 }
 
 type StringProp struct {

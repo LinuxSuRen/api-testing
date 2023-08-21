@@ -35,6 +35,13 @@ Please see the following example usage:
 sudo atest service install -m podman --version master
 ```
 
+or run in Docker:
+```shell
+docker run -v /var/www/sample:/var/www/sample \
+  --network host \
+  linuxsuren/api-testing:master
+```
+
 the default web server port is `8080`. So you can visit it via: http://localhost:8080
 
 ## Run in k3s
@@ -203,6 +210,7 @@ You could find the official images from both [Docker Hub](https://hub.docker.com
 The tag `latest` represents the latest release version. The tag `master` represents the image of the latest master branch. We highly recommend you using a fixed version instead of those in a production environment.
 
 ## Release Notes
+* [v0.0.13](release-note-v0.0.13.md)
 * [v0.0.12](release-note-v0.0.12.md)
 
 ## Articles

@@ -33,7 +33,7 @@ import (
 
 func TestKeys(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
-		assert.Equal(t, []string{"foo", "bar"},
+		assert.ElementsMatch(t, []string{"foo", "bar"},
 			util.Keys(map[string]interface{}{"foo": "xx", "bar": "xx"}))
 	})
 }

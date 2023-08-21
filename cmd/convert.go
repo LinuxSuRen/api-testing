@@ -64,9 +64,7 @@ type convertOption struct {
 }
 
 func (o *convertOption) preRunE(c *cobra.Command, args []string) (err error) {
-	if o.target == "" {
-		o.target = "sample.jmx"
-	}
+	o.target = util.EmptyThenDefault(o.target, "sample.jmx")
 	return
 }
 
