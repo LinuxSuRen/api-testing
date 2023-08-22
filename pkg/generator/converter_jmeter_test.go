@@ -52,12 +52,13 @@ func TestJmeterConvert(t *testing.T) {
 func createTestSuiteForTest() *atest.TestSuite {
 	return &atest.TestSuite{
 		Name: "API Testing",
-		API:  "http://localhost:8080",
+		API:  `{{default "http://localhost:8080/server.Runner" (env "SERVER")}}`,
 		Items: []atest.TestCase{{
 			Name: "hello-jmeter",
 			Request: atest.Request{
 				Method: "POST",
 				API:    "/GetSuites",
+				Body:   `sample`,
 			},
 		}},
 	}

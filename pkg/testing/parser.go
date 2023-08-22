@@ -156,7 +156,7 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 	}
 
 	// setting default values
-	r.Method = EmptyThenDefault(r.Method, http.MethodGet)
+	r.Method = util.EmptyThenDefault(r.Method, http.MethodGet)
 	return
 }
 
@@ -201,7 +201,7 @@ func (r *Request) GetBody() (reader io.Reader, err error) {
 
 // Render renders the response
 func (r *Response) Render(ctx interface{}) (err error) {
-	r.StatusCode = ZeroThenDefault(r.StatusCode, http.StatusOK)
+	r.StatusCode = util.ZeroThenDefault(r.StatusCode, http.StatusOK)
 	return
 }
 
@@ -216,20 +216,4 @@ func renderMap(ctx interface{}, data map[string]string, title string) (result ma
 	}
 	result = data
 	return
-}
-
-// ZeroThenDefault return the default value if the val is zero
-func ZeroThenDefault(val, defVal int) int {
-	if val == 0 {
-		val = defVal
-	}
-	return val
-}
-
-// EmptyThenDefault return the default value if the val is empty
-func EmptyThenDefault(val, defVal string) string {
-	if strings.TrimSpace(val) == "" {
-		val = defVal
-	}
-	return val
 }

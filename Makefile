@@ -1,4 +1,5 @@
 IMG_TOOL?=podman
+BINARY?=atest
 
 build:
 	mkdir -p bin
@@ -9,10 +10,12 @@ build-embed-ui:
 	cp console/atest-ui/dist/index.html cmd/data/index.html
 	cp console/atest-ui/dist/assets/*.js cmd/data/index.js
 	cp console/atest-ui/dist/assets/*.css cmd/data/index.css
-	go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git rev-parse --short HEAD)" -o bin/atest main.go
+	GOOS=${OS} go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git rev-parse --short HEAD)" -o bin/${BINARY} main.go
 	echo -n '' > cmd/data/index.html
 	echo -n '' > cmd/data/index.js
 	echo -n '' > cmd/data/index.css
+build-win-embed-ui:
+	BINARY=atest.exe OS=windows make build-embed-ui
 goreleaser:
 	goreleaser build --rm-dist --snapshot
 build-image:

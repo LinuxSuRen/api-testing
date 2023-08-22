@@ -13,10 +13,20 @@
               </ThreadGroup>
               <hashTree>
                   <HTTPSamplerProxy testname="hello-jmeter" guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" enabled="true">
-                      <stringProp name="HTTPSampler.domain">localhost:8080</stringProp>
+                      <stringProp name="HTTPSampler.domain">localhost</stringProp>
                       <stringProp name="HTTPSampler.port">8080</stringProp>
-                      <stringProp name="HTTPSampler.path">/GetSuites</stringProp>
+                      <stringProp name="HTTPSampler.path">/server.Runner/GetSuites</stringProp>
                       <stringProp name="HTTPSampler.method">POST</stringProp>
+                      <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+                      <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="" testclass="" enabled="false">
+                          <collectionProp name="Arguments.arguments">
+                              <elementProp name="" elementType="HTTPArgument" guiclass="" testclass="" enabled="false">
+                                  <stringProp name="Argument.value">sample</stringProp>
+                                  <stringProp name="Argument.metadata">=</stringProp>
+                                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                              </elementProp>
+                          </collectionProp>
+                      </elementProp>
                   </HTTPSamplerProxy>
                   <hashTree></hashTree>
                   <ResultCollector enabled="true" guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report"></ResultCollector>

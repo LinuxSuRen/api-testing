@@ -36,12 +36,17 @@ func NewFileWriter(parent string) Writer {
 // HasMore returns if there are more test cases
 func (l *fileLoader) HasMore() bool {
 	l.index++
-	return l.index < len(l.paths)
+	return l.index < len(l.paths) && l.index >= 0
 }
 
 // Load returns the test case content
 func (l *fileLoader) Load() (data []byte, err error) {
 	targetFile := l.paths[l.index]
+	data, err = loadData(targetFile)
+	return
+}
+
+func loadData(targetFile string) (data []byte, err error) {
 	if strings.HasPrefix(targetFile, "http://") || strings.HasPrefix(targetFile, "https://") {
 		var ok bool
 		data, ok, err = gRPCCompitableRequest(targetFile)
@@ -132,14 +137,13 @@ func (l *fileLoader) Reset() {
 }
 
 func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
-	defer func() {
-		l.Reset()
-	}()
+	l.lock.RLocker().Lock()
+	defer l.lock.RUnlock()
 
-	for l.HasMore() {
+	for _, target := range l.paths {
 		var data []byte
 		var loadErr error
-		if data, loadErr = l.Load(); err != nil {
+		if data, loadErr = loadData(target); err != nil {
 			fmt.Println("failed to load data", loadErr)
 			continue
 		}
