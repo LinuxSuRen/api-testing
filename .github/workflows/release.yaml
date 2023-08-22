@@ -30,8 +30,6 @@ jobs:
           node-version: 18.x
           cache: 'npm'
           cache-dependency-path: console/atest-ui/package-lock.json
-      - name: Build
-        run: make build-embed-ui
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2.9.1
         with:
