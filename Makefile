@@ -5,19 +5,23 @@ build:
 	mkdir -p bin
 	rm -rf bin/atest
 	go build -o bin/atest main.go
-build-embed-ui:
+embed-ui:
 	cd console/atest-ui && npm i && npm run build-only
 	cp console/atest-ui/dist/index.html cmd/data/index.html
 	cp console/atest-ui/dist/assets/*.js cmd/data/index.js
 	cp console/atest-ui/dist/assets/*.css cmd/data/index.css
-	GOOS=${OS} go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git rev-parse --short HEAD)" -o bin/${BINARY} main.go
+clean-embed-ui:
 	echo -n '' > cmd/data/index.html
 	echo -n '' > cmd/data/index.js
 	echo -n '' > cmd/data/index.css
+build-embed-ui: embed-ui
+	GOOS=${OS} go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git rev-parse --short HEAD)" -o bin/${BINARY} main.go
+	make clean-embed-ui
 build-win-embed-ui:
 	BINARY=atest.exe OS=windows make build-embed-ui
 goreleaser:
 	goreleaser build --rm-dist --snapshot
+	make clean-embed-ui
 build-image:
 	${IMG_TOOL} build -t ghcr.io/linuxsuren/api-testing:master . \
 		--build-arg GOPROXY=https://goproxy.cn,direct \
