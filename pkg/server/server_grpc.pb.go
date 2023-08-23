@@ -26,6 +26,7 @@ type RunnerClient interface {
 	Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*TestResult, error)
 	GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error)
 	CreateTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
+	ImportTestSuite(ctx context.Context, in *TestSuiteSource, opts ...grpc.CallOption) (*CommonResult, error)
 	GetTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestSuite, error)
 	UpdateTestSuite(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
@@ -92,6 +93,15 @@ func (c *runnerClient) GetSuites(ctx context.Context, in *Empty, opts ...grpc.Ca
 func (c *runnerClient) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error) {
 	out := new(HelloReply)
 	err := c.cc.Invoke(ctx, "/server.Runner/CreateTestSuite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) ImportTestSuite(ctx context.Context, in *TestSuiteSource, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/ImportTestSuite", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -389,6 +399,7 @@ type RunnerServer interface {
 	Run(context.Context, *TestTask) (*TestResult, error)
 	GetSuites(context.Context, *Empty) (*Suites, error)
 	CreateTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
+	ImportTestSuite(context.Context, *TestSuiteSource) (*CommonResult, error)
 	GetTestSuite(context.Context, *TestSuiteIdentity) (*TestSuite, error)
 	UpdateTestSuite(context.Context, *TestSuite) (*HelloReply, error)
 	DeleteTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
@@ -439,6 +450,9 @@ func (UnimplementedRunnerServer) GetSuites(context.Context, *Empty) (*Suites, er
 }
 func (UnimplementedRunnerServer) CreateTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTestSuite not implemented")
+}
+func (UnimplementedRunnerServer) ImportTestSuite(context.Context, *TestSuiteSource) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ImportTestSuite not implemented")
 }
 func (UnimplementedRunnerServer) GetTestSuite(context.Context, *TestSuiteIdentity) (*TestSuite, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTestSuite not implemented")
@@ -590,6 +604,24 @@ func _Runner_CreateTestSuite_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).CreateTestSuite(ctx, req.(*TestSuiteIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_ImportTestSuite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestSuiteSource)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).ImportTestSuite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/ImportTestSuite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).ImportTestSuite(ctx, req.(*TestSuiteSource))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1142,6 +1174,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateTestSuite",
 			Handler:    _Runner_CreateTestSuite_Handler,
+		},
+		{
+			MethodName: "ImportTestSuite",
+			Handler:    _Runner_ImportTestSuite_Handler,
 		},
 		{
 			MethodName: "GetTestSuite",

@@ -25,6 +25,7 @@ SOFTWARE.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -50,6 +51,7 @@ func createConvertCommand() (c *cobra.Command) {
 		"The file pattern which try to execute the test cases. Brace expansion is supported, such as: test-suite-{1,2}.yaml")
 	flags.StringVarP(&opt.converter, "converter", "", "",
 		fmt.Sprintf("The converter format, supported: %s", util.Keys(converters)))
+	flags.StringVarP(&opt.source, "source", "", "", "The source format, supported: postman")
 	flags.StringVarP(&opt.target, "target", "t", "", "The target file path")
 
 	_ = c.MarkFlagRequired("pattern")
@@ -60,11 +62,21 @@ func createConvertCommand() (c *cobra.Command) {
 type convertOption struct {
 	pattern   string
 	converter string
+	source    string
 	target    string
 }
 
 func (o *convertOption) preRunE(c *cobra.Command, args []string) (err error) {
-	o.target = util.EmptyThenDefault(o.target, "sample.jmx")
+	switch o.source {
+	case "postman":
+		o.target = util.EmptyThenDefault(o.target, "sample.yaml")
+		o.converter = "raw"
+	case "":
+		o.target = util.EmptyThenDefault(o.target, "sample.jmx")
+	default:
+		err = errors.New("only postman supported")
+	}
+
 	return
 }
 
@@ -74,23 +86,41 @@ func (o *convertOption) runE(c *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	var output string
-	var suites []testing.TestSuite
-	if suites, err = loader.ListTestSuite(); err == nil {
-		if len(suites) == 0 {
-			err = fmt.Errorf("no suites found")
-		} else {
-			converter := generator.GetTestSuiteConverter(o.converter)
-			if converter == nil {
-				err = fmt.Errorf("no converter found")
-			} else {
-				output, err = converter.Convert(&suites[0])
-			}
-		}
+	var suite *testing.TestSuite
+	if o.source == "" {
+		suite, err = getSuiteFromFile(o.pattern)
+	} else {
+		suite, err = generator.NewPostmanImporter().ConvertFromFile(o.pattern)
 	}
 
-	if output != "" {
-		err = os.WriteFile(o.target, []byte(output), 0644)
+	if err != nil {
+		return
+	}
+
+	converter := generator.GetTestSuiteConverter(o.converter)
+	if converter == nil {
+		err = fmt.Errorf("no converter found")
+	} else {
+		var output string
+		output, err = converter.Convert(suite)
+		if output != "" {
+			err = os.WriteFile(o.target, []byte(output), 0644)
+		}
+	}
+	return
+}
+
+func getSuiteFromFile(pattern string) (suite *testing.TestSuite, err error) {
+	loader := testing.NewFileWriter("")
+	if err = loader.Put(pattern); err == nil {
+		var suites []testing.TestSuite
+		if suites, err = loader.ListTestSuite(); err == nil {
+			if len(suites) > 0 {
+				suite = &suites[0]
+			} else {
+				err = errors.New("no suites found")
+			}
+		}
 	}
 	return
 }

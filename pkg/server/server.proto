@@ -10,6 +10,7 @@ service Runner {
 
     rpc GetSuites(Empty) returns (Suites) {}
     rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {}
+    rpc ImportTestSuite(TestSuiteSource) returns (CommonResult) {}
     rpc GetTestSuite(TestSuiteIdentity) returns (TestSuite) {}
     rpc UpdateTestSuite(TestSuite) returns (HelloReply) {}
     rpc DeleteTestSuite(TestSuiteIdentity) returns (HelloReply) {}
@@ -64,6 +65,12 @@ message Items {
 message TestCaseIdentity {
   string suite = 1;
   string testcase = 2;
+}
+
+message TestSuiteSource {
+  string kind = 1;
+  string url = 2;
+  string data = 3;
 }
 
 message TestSuite {
