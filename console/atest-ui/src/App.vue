@@ -192,6 +192,13 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
+const importSuiteFormRules = reactive<FormRules<Suite>>({
+  url: [
+    { required: true, message: 'URL is required', trigger: 'blur' },
+    { type: 'url', message: 'Should be a valid URL value', trigger: 'blur' }
+  ],
+  store: [{ required: true, message: 'Location is required', trigger: 'blur' }]
+})
 const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid: boolean, fields) => {
@@ -334,7 +341,7 @@ const viewName = ref('testcase')
     <template #footer>
       <span class="dialog-footer">
         <el-form
-          :rules="rules"
+          :rules="importSuiteFormRules"
           :model="importSuiteForm"
           ref="importSuiteFormRef"
           status-icon label-width="120px">

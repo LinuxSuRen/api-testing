@@ -26,7 +26,6 @@ package generator
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -149,7 +148,6 @@ func (p *postmanImporter) ConvertFromURL(dataURL string) (suite *testing.TestSui
 		if data, err = io.ReadAll(resp.Body); err == nil {
 			suite, err = p.Convert(data)
 		}
-		fmt.Println(suite)
 	}
 	return
 }
