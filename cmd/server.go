@@ -125,6 +125,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
+		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		debugHandler(mux)
 		o.httpServer.WithHandler(mux)
 		log.Printf("HTTP server listening at %v", httplis.Addr())
@@ -184,6 +185,25 @@ func debugHandler(mux *runtime.ServeMux) {
 			pprof.Index(w, r)
 		}
 	})
+}
+
+func (o *serverOption) getAtestBinary(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	w.Header().Set("Content-Disposition", "attachment; filename=atest")
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Transfer-Encoding", "binary")
+	w.Header().Set("Expires", "0")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Cache-Control", "no-cache")
+
+	var data []byte
+	if atestPath, err := o.execer.LookPath("atest"); err == nil {
+		if data, err = os.ReadFile(atestPath); err != nil {
+			data = []byte(fmt.Sprintf("failed to read atest: %v", err))
+		}
+	} else {
+		data = []byte("not found atest")
+	}
+	w.Write(data)
 }
 
 type gRPCServer interface {
