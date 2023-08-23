@@ -74,6 +74,28 @@ jmeter -n -t bin/gitee.jmx
 
 Please feel free to bring more test tool converters.
 
+## Run in Jenkins
+You can run the API testings in Jenkins, see also the following example:
+
+```Jenkinsfile
+pipeline {
+    agent any
+    
+    stages() {
+        stage('test') {
+            steps {
+                sh '''
+                curl http://localhost:9090/get -o atest
+                chmod u+x atest
+                
+                ./atest run -p http://localhost:9090/server.Runner/ConvertTestSuite?suite=api-testing
+                '''
+            }
+        }
+    }
+}
+```
+
 ## Storage
 There are multiple storage backends supported. See the status from the list:
 
