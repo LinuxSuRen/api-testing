@@ -49,6 +49,7 @@ type PostmanInfo struct {
 type PostmanItem struct {
 	Name    string         `json:"name"`
 	Request PostmanRequest `json:"request"`
+	Item    []PostmanItem  `json:"item"`
 }
 
 type PostmanRequest struct {
@@ -120,14 +121,28 @@ func (p *postmanImporter) Convert(data []byte) (suite *testing.TestSuite, err er
 	suite.Items = make([]testing.TestCase, len(postman.Item))
 
 	for i, item := range postman.Item {
-		suite.Items[i] = testing.TestCase{
-			Name: item.Name,
-			Request: testing.Request{
-				Method: item.Request.Method,
-				API:    item.Request.URL.Raw,
-				Body:   item.Request.Body.Raw,
-				Header: item.Request.Header.ToMap(),
-			},
+		if len(item.Item) == 0 {
+			suite.Items[i] = testing.TestCase{
+				Name: item.Name,
+				Request: testing.Request{
+					Method: item.Request.Method,
+					API:    item.Request.URL.Raw,
+					Body:   item.Request.Body.Raw,
+					Header: item.Request.Header.ToMap(),
+				},
+			}
+		} else {
+			for _, sub := range item.Item {
+				suite.Items[i] = testing.TestCase{
+					Name: item.Name + " " + sub.Name,
+					Request: testing.Request{
+						Method: sub.Request.Method,
+						API:    sub.Request.URL.Raw,
+						Body:   sub.Request.Body.Raw,
+						Header: sub.Request.Header.ToMap(),
+					},
+				}
+			}
 		}
 	}
 	return
