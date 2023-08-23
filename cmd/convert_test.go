@@ -25,6 +25,7 @@ SOFTWARE.
 package cmd_test
 
 import (
+	_ "embed"
 	"io"
 	"os"
 	"path"
@@ -84,5 +85,20 @@ func TestConvert(t *testing.T) {
 
 		err := c.Execute()
 		assert.Error(t, err)
+	})
+
+	t.Run("not supported source format", func(t *testing.T) {
+		c.SetArgs([]string{"convert", "--source=fake"})
+		err := c.Execute()
+		assert.Error(t, err)
+	})
+
+	t.Run("convert from postmant", func(t *testing.T) {
+		tmpFile := path.Join(os.TempDir(), time.Now().String())
+		defer os.RemoveAll(tmpFile)
+
+		c.SetArgs([]string{"convert", "--source=postman", "--target=", tmpFile, "-p=testdata/postman.json"})
+		err := c.Execute()
+		assert.NoError(t, err)
 	})
 }

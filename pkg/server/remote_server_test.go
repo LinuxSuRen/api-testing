@@ -1,3 +1,27 @@
+/**
+MIT License
+
+Copyright (c) 2023 API Testing Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 package server
 
 import (
@@ -626,6 +650,42 @@ func TestCodeGenerator(t *testing.T) {
 			assert.True(t, reply.Success)
 		}
 	})
+
+	t.Run("ImportTestSuite, url or data is required", func(t *testing.T) {
+		result, err := server.ImportTestSuite(ctx, &TestSuiteSource{})
+		assert.Error(t, err)
+		assert.False(t, result.Success)
+		assert.Equal(t, "url or data is required", result.Message)
+	})
+
+	t.Run("ImportTestSuite, invalid kind", func(t *testing.T) {
+		result, err := server.ImportTestSuite(ctx, &TestSuiteSource{Kind: "fake"})
+		assert.NoError(t, err)
+		assert.False(t, result.Success)
+		assert.Equal(t, "not support kind: fake", result.Message)
+	})
+
+	t.Run("ImportTestSuite, import from string", func(t *testing.T) {
+		result, err := server.ImportTestSuite(ctx, &TestSuiteSource{
+			Kind: "postman",
+			Data: simplePostman,
+		})
+		assert.NoError(t, err)
+		assert.True(t, result.Success)
+	})
+
+	t.Run("ImportTestSuite, import from URL", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(urlFoo).Get("/").Reply(http.StatusOK).BodyString(simplePostman)
+
+		// already exist
+		result, err := server.ImportTestSuite(ctx, &TestSuiteSource{
+			Kind: "postman",
+			Url:  urlFoo,
+		})
+		assert.Error(t, err)
+		assert.False(t, result.Success)
+	})
 }
 
 func TestFunctionsQueryStream(t *testing.T) {
@@ -763,6 +823,9 @@ var simpleSuite string
 
 //go:embed testdata/simple_testcase.yaml
 var simpleTestCase string
+
+//go:embed testdata/postman.json
+var simplePostman string
 
 const urlFoo = "http://foo"
 

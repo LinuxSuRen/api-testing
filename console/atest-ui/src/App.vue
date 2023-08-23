@@ -137,6 +137,7 @@ function loadStores() {
 loadStores()
 
 const dialogVisible = ref(false)
+const importDialogVisible = ref(false)
 const suiteCreatingLoading = ref(false)
 const suiteFormRef = ref<FormInstance>()
 const testSuiteForm = reactive({
@@ -144,9 +145,18 @@ const testSuiteForm = reactive({
   api: '',
   store: ''
 })
+const importSuiteFormRef = ref<FormInstance>()
+const importSuiteForm = reactive({
+  url: '',
+  store: ''
+})
 
 function openTestSuiteCreateDialog() {
   dialogVisible.value = true
+}
+
+function openTestSuiteImportDialog() {
+  importDialogVisible.value = true
 }
 
 const rules = reactive<FormRules<Suite>>({
@@ -155,9 +165,7 @@ const rules = reactive<FormRules<Suite>>({
 })
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  console.log(formEl)
   await formEl.validate((valid: boolean, fields) => {
-    console.log(valid, fields)
     if (valid) {
       suiteCreatingLoading.value = true
 
@@ -178,6 +186,33 @@ const submitForm = async (formEl: FormInstance | undefined) => {
           suiteCreatingLoading.value = false
           loadStores()
           dialogVisible.value = false
+          formEl.resetFields()
+        })
+    }
+  })
+}
+
+const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate((valid: boolean, fields) => {
+    if (valid) {
+      suiteCreatingLoading.value = true
+
+      const requestOptions = {
+        method: 'POST',
+        headers: {
+          'X-Store-Name': importSuiteForm.store
+        },
+        body: JSON.stringify({
+          url: importSuiteForm.url
+        })
+      }
+
+      fetch('/server.Runner/ImportTestSuite', requestOptions)
+        .then((response) => response.json())
+        .then(() => {
+          loadStores()
+          importDialogVisible.value = false
           formEl.resetFields()
         })
     }
@@ -209,6 +244,9 @@ const viewName = ref('testcase')
             <el-button type="primary" @click="openTestSuiteCreateDialog"
               data-intro="Click here to create a new test suite"
               test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
+            <el-button type="primary" @click="openTestSuiteImportDialog"
+              data-intro="Click here to import from Postman"
+              test-id="open-import-suite-dialog">Import</el-button>
             <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
 
             <el-tree
@@ -285,6 +323,44 @@ const viewName = ref('testcase')
               :loading="suiteCreatingLoading"
               test-id="suite-form-submit"
               >Submit</el-button
+            >
+          </el-form-item>
+        </el-form>
+      </span>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="importDialogVisible" title="Import Test Suite" width="30%" draggable>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-form
+          :rules="rules"
+          :model="importSuiteForm"
+          ref="importSuiteFormRef"
+          status-icon label-width="120px">
+          <el-form-item label="Location" prop="store">
+            <el-select v-model="importSuiteForm.store" class="m-2"
+              test-id="suite-import-form-store"
+              filterable=true
+              default-first-option=true
+              placeholder="Storage Location" size="middle">
+              <el-option
+                v-for="item in stores"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="URL" prop="url">
+            <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api" />
+          </el-form-item>
+          <el-form-item>
+            <el-button
+              type="primary"
+              @click="importSuiteFormSubmit(importSuiteFormRef)"
+              test-id="suite-import-submit"
+              >Import</el-button
             >
           </el-form-item>
         </el-form>
