@@ -26,7 +26,10 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"os"
+	"path"
 	"testing"
 	"time"
 
@@ -56,6 +59,18 @@ func TestNewRootCmd(t *testing.T) {
 		cmd := newRootCmdForTest()
 		cmd.SetContext(ctx)
 		cmd.SetArgs([]string{"--port", "0"})
+		err := cmd.Execute()
+		assert.NoError(t, err)
+	})
+
+	t.Run("stop the command with socket", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.TODO(), time.Second)
+		defer cancel()
+
+		tempSocket := path.Join(os.TempDir(), fmt.Sprintf("atest-store-git-%d.sock", time.Now().UnixMicro()))
+		cmd := newRootCmdForTest()
+		cmd.SetContext(ctx)
+		cmd.SetArgs([]string{"--socket", tempSocket})
 		err := cmd.Execute()
 		assert.NoError(t, err)
 	})

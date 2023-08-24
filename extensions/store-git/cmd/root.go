@@ -27,6 +27,8 @@ package cmd
 import (
 	"fmt"
 	"net"
+	"os"
+	"os/signal"
 
 	"github.com/linuxsuren/api-testing/extensions/store-git/pkg"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
@@ -44,28 +46,49 @@ func NewRootCommand() (c *cobra.Command) {
 	}
 	flags := c.Flags()
 	flags.IntVarP(&opt.port, "port", "p", 7074, "The port to listen on")
+	flags.StringVarP(&opt.socket, "socket", "", "", "The socket to listen on, for instance: /var/run/atest-ext-store-git.sock")
 	return
 }
 
 type options struct {
-	port int
+	port   int
+	socket string
+}
+
+func (o *options) getListenAddress() (protocol, address string) {
+	if o.socket != "" {
+		protocol = "unix"
+		address = o.socket
+	} else {
+		protocol = "tcp"
+		address = fmt.Sprintf(":%d", o.port)
+	}
+	return
 }
 
 func (o *options) runE(c *cobra.Command, args []string) (err error) {
 	removeServer := pkg.NewRemoteServer()
+	protocol, address := o.getListenAddress()
 
 	var lis net.Listener
-	lis, err = net.Listen("tcp", fmt.Sprintf(":%d", o.port))
+	lis, err = net.Listen(protocol, address)
 	if err != nil {
 		return
 	}
 
 	gRPCServer := grpc.NewServer()
 	remote.RegisterLoaderServer(gRPCServer, removeServer)
-	c.Println("Git storage extension is running at port", o.port)
+	c.Printf("Git storage extension is running at %s\n", address)
 
+	endChan := make(chan os.Signal, 1)
+	signal.Notify(endChan, os.Interrupt, os.Kill)
 	go func() {
-		<-c.Context().Done()
+		select {
+		case <-endChan:
+		case <-c.Context().Done():
+		}
+		fmt.Println("Stopping the server...")
+		_ = os.Remove(o.socket)
 		gRPCServer.Stop()
 	}()
 
