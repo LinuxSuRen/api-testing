@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import WelcomePage from './views/WelcomePage.vue'
 import TestCase from './views/TestCase.vue'
 import TestSuite from './views/TestSuite.vue'
 import StoreManager from './views/StoreManager.vue'
@@ -132,6 +133,10 @@ function loadStores() {
           loadTestSuites(item.name)
         }
       })
+
+      if (data.value.length === 0) {
+        viewName.value = ""
+      }
     })
 }
 loadStores()
@@ -235,14 +240,14 @@ const filterTestCases = (value: string, data: Tree) => {
   return data.label.includes(value)
 }
 
-const viewName = ref('testcase')
+const viewName = ref('')
 </script>
 
 <template>
   <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
     <el-container style="height: 100%">
       <el-header style="height: 30px;justify-content: flex-end;">
-        <el-button type="primary" :icon="Share" @click="viewName = ''" data-intro="Manage the store backends." />
+        <el-button type="primary" :icon="Share" @click="viewName = 'store'" data-intro="Manage the store backends." />
       </el-header>
 
       <el-main>
@@ -271,8 +276,11 @@ const viewName = ref('testcase')
           </el-aside>
 
           <el-main>
+            <WelcomePage
+              v-if="viewName === ''"
+            />
             <TestCase
-              v-if="viewName === 'testcase'"
+              v-else-if="viewName === 'testcase'"
               :store="store"
               :suite="testSuite"
               :name="testCaseName"
@@ -280,14 +288,14 @@ const viewName = ref('testcase')
               data-intro="This is the test case editor. You can edit the test case here."
             />
             <TestSuite
-              v-else-if="viewName === 'testsuite' && testSuite !== ''"
+              v-else-if="viewName === 'testsuite'"
               :name="testSuite"
               :store="store"
               @updated="loadStores"
               data-intro="This is the test suite editor. You can edit the test suite here."
             />
             <StoreManager
-            v-else-if="viewName === '' || testSuite === '' || store === ''"
+            v-else-if="viewName === 'store'"
             />
           </el-main>
         </el-container>
@@ -338,6 +346,7 @@ const viewName = ref('testcase')
   </el-dialog>
 
   <el-dialog v-model="importDialogVisible" title="Import Test Suite" width="30%" draggable>
+    <span>Supported source URL: Postman collection share link</span>
     <template #footer>
       <span class="dialog-footer">
         <el-form
@@ -360,7 +369,7 @@ const viewName = ref('testcase')
             </el-select>
           </el-form-item>
           <el-form-item label="URL" prop="url">
-            <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api" />
+            <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api" placeholder="https://api.postman.com/collections/xxx" />
           </el-form-item>
           <el-form-item>
             <el-button
