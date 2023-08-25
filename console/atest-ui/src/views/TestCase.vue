@@ -18,7 +18,11 @@ let querySuggestedAPIs = NewSuggestedAPIsQuery(props.store!, props.suite!)
 const testResultActiveTab = ref('output')
 const requestLoading = ref(false)
 const testResult = ref({ header: [] as Pair[] } as TestResult)
-function sendRequest() {
+const sendRequest = async () => {
+  if (needUpdate.value) {
+    await saveTestCase(false)
+  }
+
   requestLoading.value = true
   const name = props.name
   const suite = props.suite
@@ -210,8 +214,15 @@ watch(props, () => {
   load()
 })
 
+const needUpdate = ref(false)
+watch(testCaseWithSuite, (after, before) => {
+  if (before.data.name !== '' && after.data.name === before.data.name) {
+    needUpdate.value = true
+  }
+}, { deep: true })
+
 const saveLoading = ref(false)
-function saveTestCase() {
+function saveTestCase(tip: boolean = true) {
   saveLoading.value = true
 
   // remove empty pair
@@ -239,13 +250,17 @@ function saveTestCase() {
     body: JSON.stringify(testCaseWithSuite.value)
   }
   fetch('/server.Runner/UpdateTestCase', requestOptions).then((e) => {
-    if (e.ok) {
-      ElMessage({
-        message: 'Saved.',
-        type: 'success'
-      })
-    } else {
-      ElMessage.error('Oops, ' + e.statusText)
+    if (tip) {
+      if (e.ok) {
+        ElMessage({
+          message: 'Saved.',
+          type: 'success'
+        })
+  
+        needUpdate.value = false
+      } else {
+        ElMessage.error('Oops, ' + e.statusText)
+      }
     }
     saveLoading.value = false
   })
