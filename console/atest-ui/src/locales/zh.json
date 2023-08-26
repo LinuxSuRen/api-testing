@@ -1,0 +1,19 @@
+{
+    "button": {
+        "import": "导入",
+        "export": "导出",
+        "new": "新建",
+        "submit": "提交",
+        "save": "保存",
+        "delete": "删除",
+        "send": "发送",
+        "toolbox": "工具箱",
+        "newtestcase": "新建测试用例"
+    },
+    "tip": {
+        "filter": "过滤"
+    },
+    "field": {
+        "name": "名称"
+    }
+}

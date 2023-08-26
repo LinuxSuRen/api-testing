@@ -1,0 +1,19 @@
+{
+    "button": {
+        "import": "Import",
+        "export": "Export",
+        "new": "New",
+        "submit": "Submit",
+        "save": "Save",
+        "delete": "Delete",
+        "send": "Send",
+        "toolbox": "Tool Box",
+        "newtestcase": "New TestCase"
+    },
+    "tip": {
+        "filter": "Filter Keyword"
+    },
+    "field": {
+        "name": "Name"
+    }
+}

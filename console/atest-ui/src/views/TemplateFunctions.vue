@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { Pair } from './types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const dialogVisible = ref(false)
 const query = ref('')
@@ -24,7 +27,7 @@ function queryFuncs() {
 <template>
     <el-affix position="bottom" :offset="20">
         <el-button type="primary" @click="dialogVisible = !dialogVisible"
-            data-intro="You can search your desired template functions.">Tool Box</el-button>
+            data-intro="You can search your desired template functions.">{{ t('button.toolbox') }}</el-button>
     </el-affix>
 
     <el-dialog v-model="dialogVisible" title="Template Functions Query" width="40%" draggable destroy-on-close>
