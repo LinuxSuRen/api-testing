@@ -11,9 +11,9 @@ embed-ui:
 	cp console/atest-ui/dist/assets/*.js cmd/data/index.js
 	cp console/atest-ui/dist/assets/*.css cmd/data/index.css
 clean-embed-ui:
-	echo -n '' > cmd/data/index.html
-	echo -n '' > cmd/data/index.js
-	echo -n '' > cmd/data/index.css
+	git checkout cmd/data/index.html
+	git checkout cmd/data/index.js
+	git checkout cmd/data/index.css
 build-embed-ui: embed-ui
 	GOOS=${OS} go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git rev-parse --short HEAD)" -o bin/${BINARY} main.go
 	make clean-embed-ui

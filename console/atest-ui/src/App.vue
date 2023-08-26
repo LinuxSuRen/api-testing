@@ -9,6 +9,9 @@ import { ElTree } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Edit, Share } from '@element-plus/icons-vue'
 import type { Suite } from './types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 interface Tree {
   id: string
@@ -255,10 +258,10 @@ const viewName = ref('')
           <el-aside width="200px">
             <el-button type="primary" @click="openTestSuiteCreateDialog"
               data-intro="Click here to create a new test suite"
-              test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
+              test-id="open-new-suite-dialog" :icon="Edit">{{ t('button.new') }}</el-button>
             <el-button type="primary" @click="openTestSuiteImportDialog"
               data-intro="Click here to import from Postman"
-              test-id="open-import-suite-dialog">Import</el-button>
+              test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
             <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
 
             <el-tree
@@ -337,7 +340,7 @@ const viewName = ref('')
               @click="submitForm(suiteFormRef)"
               :loading="suiteCreatingLoading"
               test-id="suite-form-submit"
-              >Submit</el-button
+              >{{ t('button.submit') }}</el-button
             >
           </el-form-item>
         </el-form>
@@ -376,7 +379,7 @@ const viewName = ref('')
               type="primary"
               @click="importSuiteFormSubmit(importSuiteFormRef)"
               test-id="suite-import-submit"
-              >Import</el-button
+              >{{ t('button.import') }}</el-button
             >
           </el-form-item>
         </el-form>

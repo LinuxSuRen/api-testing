@@ -6,6 +6,9 @@ import { Edit, Delete } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
 import type { Pair, TestResult, TestCaseWithSuite } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   name: String,
@@ -297,12 +300,7 @@ function deleteTestCase() {
 }
 
 const options = GetHTTPMethods()
-
 const activeName = ref('second')
-
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event)
-}
 
 function bodyFiledExpectChange() {
   const data = testCaseWithSuite.value.data.response.bodyFieldsExpect
@@ -430,9 +428,9 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
       <el-header style="padding-left: 5px">
         <div style="margin-bottom: 5px">
           <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
-            >Save</el-button
+            >{{ t('button.save') }}</el-button
           >
-          <el-button type="primary" @click="deleteTestCase" :icon="Delete">Delete</el-button>
+          <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
         </div>
         <el-select
           v-model="testCaseWithSuite.data.request.method"
@@ -460,12 +458,12 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           </template>
         </el-autocomplete>
 
-        <el-button type="primary" @click="sendRequest" :loading="requestLoading">Send</el-button>
+        <el-button type="primary" @click="sendRequest" :loading="requestLoading">{{ t('button.send') }}</el-button>
         <el-button type="primary" @click="generateCode">Generator Code</el-button>
       </el-header>
 
       <el-main>
-        <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+        <el-tabs v-model="activeName" class="demo-tabs">
           <el-tab-pane label="Query" name="query">
             <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
               <el-table-column label="Key" width="180">
@@ -625,7 +623,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
       </el-main>
 
       <el-footer>
-        <el-tabs v-model="testResultActiveTab" class="demo-tabs" @tab-click="handleClick">
+        <el-tabs v-model="testResultActiveTab" class="demo-tabs">
           <el-tab-pane label="Output" name="output">
             <el-input
               v-model="testResult.output"

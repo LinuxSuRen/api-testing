@@ -5,6 +5,9 @@ import { Edit } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery } from './types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   name: String,
@@ -251,12 +254,10 @@ function paramChange() {
       </el-table-column>
     </el-table>
 
-    <el-button type="primary" @click="save">Save</el-button>
-    <el-button type="primary" @click="del" test-id="suite-del-but">Delete</el-button>
-
-    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">New TestCase</el-button>
-
-    <el-button type="primary" @click="convert" test-id="convert">Convert</el-button>
+    <el-button type="primary" @click="save">{{ t('button.save') }}</el-button>
+    <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
+    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
+    <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
   </div>
 
   <el-dialog v-model="dialogVisible" title="Create Test Case" width="40%" draggable>
@@ -296,7 +297,7 @@ function paramChange() {
               @click="submitForm(testcaseFormRef)"
               :loading="suiteCreatingLoading"
               test-id="case-form-submit"
-              >Submit</el-button
+              >{{ t('button.submit') }}</el-button
             >
           </el-form-item>
         </el-form>
