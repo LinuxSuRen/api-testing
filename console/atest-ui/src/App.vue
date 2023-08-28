@@ -306,7 +306,7 @@ const viewName = ref('')
     </el-container>
   </div>
 
-  <el-dialog v-model="dialogVisible" title="Create Test Suite" width="30%" draggable>
+  <el-dialog v-model="dialogVisible" :title="t('title.createTestSuite')" width="30%" draggable>
     <template #footer>
       <span class="dialog-footer">
         <el-form
@@ -314,7 +314,7 @@ const viewName = ref('')
           :model="testSuiteForm"
           ref="suiteFormRef"
           status-icon label-width="120px">
-          <el-form-item label="Location" prop="store">
+          <el-form-item :label="t('field.storageLocation')" prop="store">
             <el-select v-model="testSuiteForm.store" class="m-2"
               test-id="suite-form-store"
               filterable=true
@@ -328,7 +328,7 @@ const viewName = ref('')
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="Name" prop="name">
+          <el-form-item :label="t('field.name')" prop="name">
             <el-input v-model="testSuiteForm.name" test-id="suite-form-name" />
           </el-form-item>
           <el-form-item label="API" prop="api">

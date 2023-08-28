@@ -260,7 +260,7 @@ function paramChange() {
     <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
   </div>
 
-  <el-dialog v-model="dialogVisible" title="Create Test Case" width="40%" draggable>
+  <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
     <template #footer>
       <span class="dialog-footer">
         <el-form
@@ -270,7 +270,7 @@ function paramChange() {
           status-icon
           label-width="60px"
         >
-          <el-form-item label="Name" prop="name">
+          <el-form-item :label="t('field.name')" prop="name">
             <el-input v-model="testCaseForm.name" test-id="case-form-name"/>
           </el-form-item>
           <el-form-item label="Method" prop="method">

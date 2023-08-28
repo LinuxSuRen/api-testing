@@ -4,16 +4,30 @@
         "export": "Export",
         "new": "New",
         "submit": "Submit",
+        "edit": "Edit",
         "save": "Save",
         "delete": "Delete",
         "send": "Send",
         "toolbox": "Tool Box",
+        "refresh": "Refresh",
         "newtestcase": "New TestCase"
+    },
+    "title": {
+        "createTestSuite": "Create Test Suite",
+        "createTestCase": "Create Test Case",
+        "createStore": "Create Store"
     },
     "tip": {
         "filter": "Filter Keyword"
     },
     "field": {
-        "name": "Name"
+        "name": "Name",
+        "username": "Username",
+        "password": "Password",
+        "properties": "Properties",
+        "plugin": "Plugin",
+        "status": "Status",
+        "operations": "Operations",
+        "storageLocation": "Storage Location"
     }
 }
