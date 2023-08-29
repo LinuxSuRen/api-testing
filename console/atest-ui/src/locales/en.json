@@ -15,7 +15,9 @@
     "title": {
         "createTestSuite": "Create Test Suite",
         "createTestCase": "Create Test Case",
-        "createStore": "Create Store"
+        "createStore": "Create Store",
+        "createSecret": "Create Secret",
+        "secretManager": "Secret Manager"
     },
     "tip": {
         "filter": "Filter Keyword"

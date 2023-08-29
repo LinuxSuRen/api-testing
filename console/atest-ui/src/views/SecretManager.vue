@@ -3,6 +3,9 @@ import { ElMessage } from 'element-plus'
 import { reactive, ref } from 'vue'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const secrets = ref([] as Secret[])
 const dialogVisible = ref(false)
@@ -102,27 +105,27 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 </script>
 
 <template>
-    <div>Secret Manager</div>
+    <div>{{t('title.secretManager')}}</div>
     <div>
-        <el-button type="primary" @click="addSecret" :icon="Edit">New</el-button>
+        <el-button type="primary" @click="addSecret" :icon="Edit">{{t('button.new')}}</el-button>
     </div>
     <el-table :data="secrets" style="width: 100%">
-      <el-table-column label="Name" width="180">
+      <el-table-column :label="t('field.name')" width="180">
         <template #default="scope">
           <el-text class="mx-1">{{ scope.row.Name }}</el-text>
         </template>
       </el-table-column>
-      <el-table-column label="Operations" width="220">
+      <el-table-column :label="t('field.operations')" width="220">
         <template #default="scope">
           <div style="display: flex; align-items: center">
-            <el-button type="primary" @click="deleteSecret(scope.row.Name)" :icon="Delete">Delete</el-button>
-            <el-button type="primary" @click="editSecret(scope.row.Name)" :icon="Edit">Edit</el-button>
+            <el-button type="primary" @click="deleteSecret(scope.row.Name)" :icon="Delete">{{t('button.delete')}}</el-button>
+            <el-button type="primary" @click="editSecret(scope.row.Name)" :icon="Edit">{{t('button.edit')}}</el-button>
           </div>
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="dialogVisible" title="Create Secret" width="30%" draggable>
+    <el-dialog v-model="dialogVisible" :title="t('title.createSecret')" width="30%" draggable>
       <template #footer>
       <span class="dialog-footer">
         <el-form
@@ -130,10 +133,10 @@ const submitForm = async (formEl: FormInstance | undefined) => {
           :model="secretForm"
           ref="secretFormRef"
           status-icon label-width="120px">
-          <el-form-item label="Name" prop="Name">
+          <el-form-item :label="t('field.name')" prop="Name">
             <el-input v-model="secretForm.Name" test-id="secret-form-name" />
           </el-form-item>
-          <el-form-item label="Password" prop="Value">
+          <el-form-item :label="t('field.password')" prop="Value">
             <el-input v-model="secretForm.Value" type="password" test-id="secret-form-password" />
           </el-form-item>
           <el-form-item>
@@ -142,7 +145,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
               @click="submitForm(secretFormRef)"
               :loading="creatingLoading"
               test-id="store-form-submit"
-              >Submit</el-button
+              >{{t('button.submit')}}</el-button
             >
           </el-form-item>
         </el-form>
