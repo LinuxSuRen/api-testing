@@ -6,6 +6,8 @@ import { Edit, Delete } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
 import type { Pair, TestResult, TestCaseWithSuite } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
+import { GetTestCaseResponseCache, SetTestCaseResponseCache } from './cache'
+import type { TestCaseResponse } from './cache'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -59,6 +61,11 @@ const sendRequest = async () => {
       if (e.body !== '') {
         testResult.value.bodyObject = JSON.parse(e.body)
       }
+
+      SetTestCaseResponseCache(suite + '-' + name, {
+        body: testResult.value.bodyObject,
+        output: e.output
+      } as TestCaseResponse)
     })
     .catch((e) => {
       requestLoading.value = false
@@ -149,6 +156,17 @@ function load() {
   const suite = props.suite
   if (name === '' || suite === '') {
     return
+  }
+
+  // load cache
+  console.log('load cache')
+  const cache = GetTestCaseResponseCache(suite + '-' + name)
+  if (cache.body) {
+    testResult.value.bodyObject = cache.body
+    testResult.value.output = cache.output
+  } else {
+    testResult.value.bodyObject = {}
+    testResult.value.output = ''
   }
 
   const requestOptions = {
