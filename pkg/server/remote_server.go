@@ -38,6 +38,8 @@ import (
 
 	_ "embed"
 
+	"log"
+
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/generator"
 	"github.com/linuxsuren/api-testing/pkg/render"
@@ -151,7 +153,7 @@ func (s *server) getSuiteFromTestTask(task *TestTask) (suite *testing.TestSuite,
 
 		if targetTestcase != nil {
 			parentCases := findParentTestCases(targetTestcase, suite)
-			fmt.Printf("find %d parent cases\n", len(parentCases))
+			log.Printf("find %d parent cases\n", len(parentCases))
 			suite.Items = append(parentCases, *targetTestcase)
 		} else {
 			err = fmt.Errorf("cannot found testcase %s", task.CaseName)
@@ -209,8 +211,8 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		return
 	}
 
-	fmt.Printf("prepare to run: %s, with level: %s\n", suite.Name, task.Level)
-	fmt.Printf("task kind: %s, %d to run\n", task.Kind, len(suite.Items))
+	log.Printf("prepare to run: %s, with level: %s\n", suite.Name, task.Level)
+	log.Printf("task kind: %s, %d to run\n", task.Kind, len(suite.Items))
 	dataContext := map[string]interface{}{}
 
 	if err = suite.Render(dataContext); err != nil {
@@ -680,7 +682,7 @@ func (s *server) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity) (r
 		return
 	}
 
-	fmt.Println("Finding APIs from", in.Name, "with loader", reflect.TypeOf(loader))
+	log.Println("Finding APIs from", in.Name, "with loader", reflect.TypeOf(loader))
 	var swaggerAPI *apispec.Swagger
 	if swaggerAPI, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil && swaggerAPI != nil {
 		for api, item := range swaggerAPI.Paths {
@@ -868,7 +870,7 @@ func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (
 		findExpectNames(testcase.Request.API, expectNames)
 		findExpectNames(testcase.Request.Body, expectNames)
 
-		fmt.Println("expect test case names", expectNames.GetAll())
+		log.Println("expect test case names", expectNames.GetAll())
 		for _, item := range suite.Items {
 			if expectNames.Exist(item.Name) {
 				testcases = append(testcases, item)

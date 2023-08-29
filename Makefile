@@ -4,7 +4,7 @@ BINARY?=atest
 build:
 	mkdir -p bin
 	rm -rf bin/atest
-	go build -o bin/atest main.go
+	go build -toolexec="skywalking-go" -a -o bin/atest main.go
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
 embed-ui:

@@ -20,6 +20,7 @@ This is a API testing tool.
 *   Multiple storage backends supported(Local, ORM Database, S3, Git, etc)
 *   [HTTP API record](extensions/collector)
 *   Install in mutiple use cases(CLI, Container, Native-Service, Operator, etc)
+*   Monitoring integration with Prometheus, Skywalking
 
 ## Get started
 
