@@ -50,7 +50,7 @@ func TestRunSuite(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defer gock.Clean()
+			defer gock.Off()
 			util.MakeSureNotNil(tt.prepare)()
 			ctx := getDefaultContext()
 			opt := newDiscardRunOption()
@@ -141,7 +141,8 @@ func TestRunCommand(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defer gock.Clean()
+			defer gock.Off()
+
 			buf := new(bytes.Buffer)
 			util.MakeSureNotNil(tt.prepare)()
 			root := &cobra.Command{Use: "root"}

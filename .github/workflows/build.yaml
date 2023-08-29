@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v3.0.0
       - name: Unit Test
         run: |
-          make test-all-backend
+          make test-all-backend test-operator
       - name: Report
         if: github.actor == 'linuxsuren'
         env:
@@ -24,16 +24,38 @@ jobs:
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r collector-coverage.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-orm-coverage.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-s3-coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-git-coverage.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r operator/cover.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+
+  APITest:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18.x
+      - uses: actions/checkout@v3.0.0
       - name: API Test
         run: |
           make build copy
           sudo atest service install
           sudo atest service restart
           sudo atest service status
-          atest run -p .github/testing/core.yaml
+          atest run -p .github/testing/core.yaml --request-ignore-error --report md --report-file .github/workflows/report.md
           sudo atest service status
+
+          atest convert -p .github/testing/core.yaml --converter jmeter -t sample.jmx
+      - name: Report API Test
+        uses: harupy/comment-on-pr@c0522c44600040927a120b9309b531e3cb6f8d48
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          filename: report.md
+      - name: Run JMeter Tests
+        uses: rbhadti94/apache-jmeter-action@v0.5.0
+        with:
+          testFilePath: sample.jmx
 
   Build:
     runs-on: ubuntu-20.04

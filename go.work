@@ -5,4 +5,5 @@ use ./extensions/collector
 use ./extensions/store-etcd
 use ./extensions/store-orm
 use ./extensions/store-s3
+use ./extensions/store-git
 use ./operator

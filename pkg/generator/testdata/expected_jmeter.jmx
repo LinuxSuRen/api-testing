@@ -1,0 +1,36 @@
+  <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.0">
+      <hashTree>
+          <TestPlan testname="API Testing" guiclass="TestPlanGui" testclass="TestPlan" enabled="true">
+              <stringProp name="TestPlan.comments">comment</stringProp>
+          </TestPlan>
+          <hashTree>
+              <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" enabled="true" testname="Thread Group">
+                  <stringProp name="ThreadGroup.num_threads">1</stringProp>
+                  <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" enabled="false">
+                      <stringProp name="LoopController.loops">1</stringProp>
+                      <boolProp name="LoopController.continue_forever">false</boolProp>
+                  </elementProp>
+              </ThreadGroup>
+              <hashTree>
+                  <HTTPSamplerProxy testname="hello-jmeter" guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" enabled="true">
+                      <stringProp name="HTTPSampler.domain">localhost</stringProp>
+                      <stringProp name="HTTPSampler.port">8080</stringProp>
+                      <stringProp name="HTTPSampler.path">/server.Runner/GetSuites</stringProp>
+                      <stringProp name="HTTPSampler.method">POST</stringProp>
+                      <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+                      <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="" testclass="" enabled="false">
+                          <collectionProp name="Arguments.arguments">
+                              <elementProp name="" elementType="HTTPArgument" guiclass="" testclass="" enabled="false">
+                                  <stringProp name="Argument.value">sample</stringProp>
+                                  <stringProp name="Argument.metadata">=</stringProp>
+                                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                              </elementProp>
+                          </collectionProp>
+                      </elementProp>
+                  </HTTPSamplerProxy>
+                  <hashTree></hashTree>
+                  <ResultCollector enabled="true" guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report"></ResultCollector>
+              </hashTree>
+          </hashTree>
+      </hashTree>
+  </jmeterTestPlan>

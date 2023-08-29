@@ -22,7 +22,7 @@ func ConvertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
 	}
 
 	for _, testcase := range suite.Items {
-		result.Items = append(result.Items, convertToNormalTestCase(testcase))
+		result.Items = append(result.Items, ConvertToNormalTestCase(testcase))
 	}
 	return
 }
@@ -39,12 +39,12 @@ func ConvertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 	}
 
 	for _, testcase := range suite.Items {
-		result.Items = append(result.Items, convertToGRPCTestCase(testcase))
+		result.Items = append(result.Items, ConvertToGRPCTestCase(testcase))
 	}
 	return
 }
 
-func convertToNormalTestCase(testcase *server.TestCase) (result testing.TestCase) {
+func ConvertToNormalTestCase(testcase *server.TestCase) (result testing.TestCase) {
 	result = testing.TestCase{
 		Name: testcase.Name,
 	}
@@ -71,7 +71,7 @@ func convertToNormalTestCase(testcase *server.TestCase) (result testing.TestCase
 	return
 }
 
-func convertToGRPCTestCase(testcase testing.TestCase) (result *server.TestCase) {
+func ConvertToGRPCTestCase(testcase testing.TestCase) (result *server.TestCase) {
 	result = &server.TestCase{
 		Name: testcase.Name,
 		Request: &server.Request{

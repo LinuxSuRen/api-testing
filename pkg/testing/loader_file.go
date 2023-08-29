@@ -1,10 +1,17 @@
 package testing
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
+	"sync"
 
 	"github.com/linuxsuren/api-testing/pkg/util"
 )
@@ -13,33 +20,95 @@ type fileLoader struct {
 	paths  []string
 	index  int
 	parent string
+
+	lock *sync.RWMutex
 }
 
 // NewFileLoader creates the instance of file loader
 func NewFileLoader() Loader {
-	return &fileLoader{index: -1}
+	return &fileLoader{index: -1, lock: &sync.RWMutex{}}
 }
 
 func NewFileWriter(parent string) Writer {
-	return &fileLoader{index: -1, parent: parent}
+	return &fileLoader{index: -1, parent: parent, lock: &sync.RWMutex{}}
 }
 
 // HasMore returns if there are more test cases
 func (l *fileLoader) HasMore() bool {
 	l.index++
-	return l.index < len(l.paths)
+	return l.index < len(l.paths) && l.index >= 0
 }
 
 // Load returns the test case content
 func (l *fileLoader) Load() (data []byte, err error) {
-	data, err = os.ReadFile(l.paths[l.index])
+	targetFile := l.paths[l.index]
+	data, err = loadData(targetFile)
+	return
+}
+
+func loadData(targetFile string) (data []byte, err error) {
+	if strings.HasPrefix(targetFile, "http://") || strings.HasPrefix(targetFile, "https://") {
+		var ok bool
+		data, ok, err = gRPCCompitableRequest(targetFile)
+		if !ok && err == nil {
+			var resp *http.Response
+			if resp, err = http.Get(targetFile); err == nil {
+				data, err = io.ReadAll(resp.Body)
+			}
+		}
+	} else {
+		data, err = os.ReadFile(targetFile)
+	}
+	return
+}
+
+func gRPCCompitableRequest(targetURLStr string) (data []byte, ok bool, err error) {
+	if !strings.Contains(targetURLStr, "server.Runner/ConvertTestSuite") {
+		return
+	}
+
+	var targetURL *url.URL
+	if targetURL, err = url.Parse(targetURLStr); err != nil {
+		return
+	}
+
+	suite := targetURL.Query().Get("suite")
+	if suite == "" {
+		err = fmt.Errorf("suite is required")
+		return
+	}
+
+	payload := new(bytes.Buffer)
+	payload.WriteString(fmt.Sprintf(`{"TestSuite":"%s", "Generator":"raw"}`, suite))
+
+	var resp *http.Response
+	if resp, err = http.Post(targetURLStr, "", payload); err == nil {
+		if data, err = io.ReadAll(resp.Body); err != nil {
+			return
+		}
+
+		var gRPCData map[string]interface{}
+		if err = json.Unmarshal(data, &gRPCData); err == nil {
+			var obj interface{}
+			obj, ok = gRPCData["message"]
+			data = []byte(fmt.Sprintf("%v", obj))
+		}
+	}
 	return
 }
 
 // Put adds the test case path
 func (l *fileLoader) Put(item string) (err error) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
 	if l.parent == "" {
 		l.parent = path.Dir(item)
+	}
+
+	if strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
+		l.paths = append(l.paths, item)
+		return
 	}
 
 	for _, pattern := range util.Expand(item) {
@@ -47,6 +116,7 @@ func (l *fileLoader) Put(item string) (err error) {
 		if files, err = filepath.Glob(pattern); err == nil {
 			l.paths = append(l.paths, files...)
 		}
+		fmt.Println(pattern, "pattern", len(files))
 	}
 	return
 }
@@ -67,14 +137,13 @@ func (l *fileLoader) Reset() {
 }
 
 func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
-	defer func() {
-		l.Reset()
-	}()
+	l.lock.RLocker().Lock()
+	defer l.lock.RUnlock()
 
-	for l.HasMore() {
+	for _, target := range l.paths {
 		var data []byte
 		var loadErr error
-		if data, loadErr = l.Load(); err != nil {
+		if data, loadErr = loadData(target); err != nil {
 			fmt.Println("failed to load data", loadErr)
 			continue
 		}
@@ -131,6 +200,9 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 }
 
 func (l *fileLoader) GetSuite(name string) (suite *TestSuite, absPath string, err error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
 	for i := range l.paths {
 		suitePath := l.paths[i]
 		if absPath, err = filepath.Abs(suitePath); err != nil {
@@ -163,6 +235,9 @@ func (l *fileLoader) UpdateSuite(suite TestSuite) (err error) {
 }
 
 func (l *fileLoader) DeleteSuite(name string) (err error) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
 	found := false
 	for i := range l.paths {
 		suitePath := l.paths[i]

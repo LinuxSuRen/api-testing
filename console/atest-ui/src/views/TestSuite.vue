@@ -5,6 +5,9 @@ import { Edit } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery } from './types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   name: String,
@@ -151,6 +154,43 @@ function del() {
     })
 }
 
+function convert() {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
+    body: JSON.stringify({
+      Generator: 'jmeter',
+      TestSuite: props.name
+    })
+  }
+  fetch('/server.Runner/ConvertTestSuite', requestOptions)
+    .then((response) => response.json())
+    .then((e) => {
+      const blob = new Blob([e.message], { type: `text/xml;charset=utf-8;` });
+      const link = document.createElement('a');
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `jmeter.jmx`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      ElMessage({
+        message: 'Converted.',
+        type: 'success'
+      })
+      emit('updated')
+    })
+    .catch((e) => {
+      ElMessage.error('Oops, ' + e)
+    })
+}
+
 const suiteCreatingLoading = ref(false)
 
 const apiSpecKinds = [
@@ -214,13 +254,13 @@ function paramChange() {
       </el-table-column>
     </el-table>
 
-    <el-button type="primary" @click="save">Save</el-button>
-    <el-button type="primary" @click="del" test-id="suite-del-but">Delete</el-button>
-
-    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">New TestCase</el-button>
+    <el-button type="primary" @click="save">{{ t('button.save') }}</el-button>
+    <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
+    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
+    <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
   </div>
 
-  <el-dialog v-model="dialogVisible" title="Create Test Case" width="40%" draggable>
+  <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
     <template #footer>
       <span class="dialog-footer">
         <el-form
@@ -230,7 +270,7 @@ function paramChange() {
           status-icon
           label-width="60px"
         >
-          <el-form-item label="Name" prop="name">
+          <el-form-item :label="t('field.name')" prop="name">
             <el-input v-model="testCaseForm.name" test-id="case-form-name"/>
           </el-form-item>
           <el-form-item label="Method" prop="method">
@@ -257,7 +297,7 @@ function paramChange() {
               @click="submitForm(testcaseFormRef)"
               :loading="suiteCreatingLoading"
               test-id="case-form-submit"
-              >Submit</el-button
+              >{{ t('button.submit') }}</el-button
             >
           </el-form-item>
         </el-form>

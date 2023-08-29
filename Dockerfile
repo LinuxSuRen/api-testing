@@ -24,6 +24,7 @@ RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s -X github.com/linu
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
 
 FROM node:20-alpine3.17 AS ui
 
@@ -49,11 +50,16 @@ COPY --from=builder /workspace/atest /usr/local/bin/atest
 COPY --from=builder /workspace/atest-collector /usr/local/bin/atest-collector
 COPY --from=builder /workspace/atest-store-orm /usr/local/bin/atest-store-orm
 COPY --from=builder /workspace/atest-store-s3 /usr/local/bin/atest-store-s3
+COPY --from=builder /workspace/atest-store-git /usr/local/bin/atest-store-git
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
 RUN mkdir -p /var/www/data
 COPY --from=builder /workspace/sample /var/www/sample
 COPY --from=ui /workspace/dist /var/www/html
+
+RUN apt update -y && \
+    # required for atest-store-git
+    apt install -y --no-install-recommends ssh-client ca-certificates
 
 CMD ["atest", "server", "--console-path=/var/www/html", "--local-storage=/var/www/sample/*.yaml", "--local-storage=/var/www/data/*.yaml"]

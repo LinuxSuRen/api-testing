@@ -1,3 +1,27 @@
+/**
+MIT License
+
+Copyright (c) 2023 API Testing Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 // Package server provides a GRPC based server
 package server
 
@@ -204,9 +228,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		suiteRunner.WithWriteLevel(task.Level)
 
 		// reuse the API prefix
-		if strings.HasPrefix(testCase.Request.API, "/") {
-			testCase.Request.API = fmt.Sprintf("%s%s", suite.API, testCase.Request.API)
-		}
+		testCase.Request.RenderAPI(suite.API)
 
 		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
 		if getter, ok := suiteRunner.(runner.HTTPResponseRecord); ok {
@@ -264,6 +286,45 @@ func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err e
 func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
 	loader := s.getLoader(ctx)
 	err = loader.CreateSuite(in.Name, in.Api)
+	return
+}
+
+func (s *server) ImportTestSuite(ctx context.Context, in *TestSuiteSource) (result *CommonResult, err error) {
+	result = &CommonResult{}
+	if in.Kind != "postman" && in.Kind != "" {
+		result.Success = false
+		result.Message = fmt.Sprintf("not support kind: %s", in.Kind)
+		return
+	}
+
+	var suite *testing.TestSuite
+	importer := generator.NewPostmanImporter()
+	if in.Url != "" {
+		suite, err = importer.ConvertFromURL(in.Url)
+	} else if in.Data != "" {
+		suite, err = importer.Convert([]byte(in.Data))
+	} else {
+		err = errors.New("url or data is required")
+	}
+
+	if err != nil {
+		result.Success = false
+		result.Message = err.Error()
+		return
+	}
+
+	loader := s.getLoader(ctx)
+
+	if err = loader.CreateSuite(suite.Name, suite.API); err != nil {
+		return
+	}
+
+	for _, item := range suite.Items {
+		if err = loader.CreateTestCase(suite.Name, item); err != nil {
+			break
+		}
+	}
+	result.Success = true
 	return
 }
 
@@ -523,13 +584,39 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 		loader := s.getLoader(ctx)
 		if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
 			output, genErr := instance.Generate(&result)
-			if genErr != nil {
-				reply.Success = false
-				reply.Message = genErr.Error()
-			} else {
-				reply.Success = true
-				reply.Message = output
-			}
+			reply.Success = genErr == nil
+			reply.Message = util.OrErrorMessage(genErr, output)
+		}
+	}
+	return
+}
+
+// converter
+func (s *server) ListConverter(ctx context.Context, in *Empty) (reply *SimpleList, err error) {
+	reply = &SimpleList{}
+	converters := generator.GetTestSuiteConverters()
+	for name := range converters {
+		reply.Data = append(reply.Data, &Pair{
+			Key: name,
+		})
+	}
+	return
+}
+
+func (s *server) ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
+	reply = &CommonResult{}
+
+	instance := generator.GetTestSuiteConverter(in.Generator)
+	if instance == nil {
+		reply.Success = false
+		reply.Message = fmt.Sprintf("converter '%s' not found", in.Generator)
+	} else {
+		var result testing.TestSuite
+		loader := s.getLoader(ctx)
+		if result, err = loader.GetTestSuite(in.TestSuite, true); err == nil {
+			output, genErr := instance.Convert(&result)
+			reply.Success = genErr == nil
+			reply.Message = util.OrErrorMessage(genErr, output)
 		}
 	}
 	return
@@ -646,6 +733,7 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 
 			storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
 			grpcStore.Ready = sErr == nil && storeStatus.Success
+			grpcStore.Password = "******" // return a placeholder instead of the actual value for the security reason
 
 			reply.Data = append(reply.Data, grpcStore)
 		}

@@ -30,8 +30,6 @@ jobs:
           node-version: 18.x
           cache: 'npm'
           cache-dependency-path: console/atest-ui/package-lock.json
-      - name: Build
-        run: make build-embed-ui
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2.9.1
         with:
@@ -50,7 +48,7 @@ jobs:
       - uses: actions/checkout@v3.0.0
       - name: Unit Test
         run: |
-          make test-all-backend
+          make test-all-backend test-operator
       - name: Report
         if: github.actor == 'linuxsuren'
         env:
@@ -60,6 +58,7 @@ jobs:
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r collector-coverage.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-orm-coverage.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-s3-coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r store-git-coverage.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r operator/cover.out
           bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 

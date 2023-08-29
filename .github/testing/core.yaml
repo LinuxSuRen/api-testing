@@ -2,33 +2,72 @@
 # yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
 # https://docs.gitlab.com/ee/api/api_resources.html
 name: atest
-api: http://localhost:8080/server.Runner
+api: |
+  {{default "http://localhost:8080/server.Runner" (env "SERVER")}}
 items:
 - name: suites
   request:
     api: /GetSuites
     method: POST
+- name: createSuite
+  request:
+    api: /CreateTestSuite
+    method: POST
+    body: |
+      {"name": "{{randAlpha 6}}"}
 - name: suite
   request:
     api: /GetTestSuite
     method: POST
     body: |
-      {"name": "test"}
+      {"name": "{{randAlpha 6}}"}
   expect:
     bodyFieldsExpect:
       name: ""
       api: ""
-- name: get-testcase-not-found
+- name: UpdateTestSuite
   request:
-    api: /GetTestCase
+    api: /UpdateTestSuite
     method: POST
     body: |
-      {"name": "test"}
+      {
+        "name": "{{index (keys .suites.data) 0}}",
+        "api": "{{randAlpha 6}}"}
+      }
+- name: DeleteTestSuiteNotFound
+  request:
+    api: /DeleteTestSuite
+    method: POST
+    body: |
+      {"name": "{{randAlpha 6}}"}
   expect:
     statusCode: 500
+
+- name: ListTestCase
+  request:
+    api: /ListTestCase
+    method: POST
+    body: |
+      {"name": "{{index (keys .suites.data) (randInt 0 (len (keys .suites.data)))}}"}
+- name: list-testcases-not-found
+  request:
+    api: /ListTestCase
+    method: POST
+    body: |
+      {"name": "{{randAlpha 6}}"}
+  expect:
     bodyFieldsExpect:
-      code: 2
-- name: list-testcases
+      name: ""
+- name: GetSuggestedAPIs-no-testsuite-found
+  request:
+    api: /GetSuggestedAPIs
+    method: POST
+    body: |
+      {"name": "{{randAlpha 6}}"}
+  expect:
+    verify:
+      - len(data.data) == 0
+- name: get-testcase-not-found
   request:
     api: /GetTestCase
     method: POST
@@ -42,6 +81,7 @@ items:
   request:
     api: /PopularHeaders
     method: POST
+
 - name: list-code-generators
   request:
     api: /ListCodeGenerator
@@ -49,6 +89,42 @@ items:
   expect:
     verify:
       - len(data) == 1
+- name: GenerateCode
+  request:
+    api: /GenerateCode
+    method: POST
+    body: |
+      {
+        "TestSuite": "{{index (keys .suites.data) 0}}",
+        "TestCase": "{{randAlpha 6}}",
+        "Generator": "golang"
+      }
+  expect:
+    statusCode: 500 # no testcase found
+    verify:
+      - indexOf(data.message, "not found") != -1
+
+- name: listConverters
+  request:
+    api: /ListConverter
+    method: POST
+  expect:
+    verify:
+      - len(data) == 1
+- name: ConvertTestSuite
+  request:
+    api: /ConvertTestSuite
+    method: POST
+    body: |
+      {
+        "TestSuite": "{{index (keys .suites.data) 0}}",
+        "Generator": "jmeter"
+      }
+  expect:
+    verify:
+      - data.message != ""
+      - indexOf(data.message, "jmeterTestPlan") != -1
+
 - name: list-stores
   request:
     api: /GetStores
@@ -67,9 +143,16 @@ items:
   request:
     api: /GetVersion
     method: POST
-- name: secrets
+- name: GetSecrets
   request:
     api: /GetSecrets
     method: POST
   expect:
     statusCode: 500
+
+- name: DeleteTestSuite
+  request:
+    api: /DeleteTestSuite
+    method: POST
+    body: |
+      {"name": "{{index (keys .suites.data) 0}}"}

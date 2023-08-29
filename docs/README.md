@@ -35,6 +35,13 @@ Please see the following example usage:
 sudo atest service install -m podman --version master
 ```
 
+or run in Docker:
+```shell
+docker run -v /var/www/sample:/var/www/sample \
+  --network host \
+  linuxsuren/api-testing:master
+```
+
 the default web server port is `8080`. So you can visit it via: http://localhost:8080
 
 ## Run in k3s
@@ -47,6 +54,48 @@ k3s kubectl apply -k sample/kubernetes/default
 kustomize build sample/kubernetes/docker.io/ | k3s kubectl apply -f -
 ```
 
+## Run your test cases
+The test suite file could be in local, or in the HTTP server. See the following different ways:
+
+* `atest run -p your-local-file.yaml`
+* `atest run -p https://gitee.com/linuxsuren/api-testing/raw/master/sample/testsuite-gitee.yaml`
+* `atest run -p http://localhost:8080/server.Runner/ConvertTestSuite?suite=sample`
+
+For the last one, it represents the API Testing server.
+
+## Convert to JMeter
+[JMeter](https://jmeter.apache.org/) is a load test tool. You can run the following commands from the root directory of this repository:
+
+```shell
+atest convert --converter jmeter -p sample/testsuite-gitee.yaml --target bin/gitee.jmx
+
+jmeter -n -t bin/gitee.jmx
+```
+
+Please feel free to bring more test tool converters.
+
+## Run in Jenkins
+You can run the API testings in Jenkins, see also the following example:
+
+```Jenkinsfile
+pipeline {
+    agent any
+    
+    stages() {
+        stage('test') {
+            steps {
+                sh '''
+                curl http://localhost:9090/get -o atest
+                chmod u+x atest
+                
+                ./atest run -p http://localhost:9090/server.Runner/ConvertTestSuite?suite=api-testing
+                '''
+            }
+        }
+    }
+}
+```
+
 ## Storage
 There are multiple storage backends supported. See the status from the list:
 
@@ -55,6 +104,7 @@ There are multiple storage backends supported. See the status from the list:
 | Local Storage | Ready |
 | S3 | Ready |
 | ORM DataBase | Developing |
+| Git Repository | Developing |
 | Etcd DataBase | Developing |
 
 ### Local Storage
@@ -137,6 +187,29 @@ See also the expected configuration below:
     region: cn
 ```
 
+### Git Storage
+You can use a git repository as the storage backend.
+
+```shell
+# The default port is 7074
+podman run --network host \
+    ghcr.io/linuxsuren/api-testing:master atest-store-git
+```
+
+See also the expected configuration below:
+
+```yaml
+- name: git
+  url: http://172.11.0.13:30999   # address of the git repository
+  username: linuxsuren
+  password: linuxsuren
+  kind:
+    name: git
+    url: localhost:7074           # address of the git storage extension
+  properties:
+    targetPath: .
+```
+
 ## Secret Server
 You can put the sensitive information into a secret server. For example, [Vault](https://www.github.com/hashicorp/vault).
 
@@ -159,6 +232,7 @@ You could find the official images from both [Docker Hub](https://hub.docker.com
 The tag `latest` represents the latest release version. The tag `master` represents the image of the latest master branch. We highly recommend you using a fixed version instead of those in a production environment.
 
 ## Release Notes
+* [v0.0.13](release-note-v0.0.13.md)
 * [v0.0.12](release-note-v0.0.12.md)
 
 ## Articles

@@ -8,16 +8,16 @@ This is a API testing tool.
 
 ## Features
 
-*   Multiple test report formats: Markdown, HTML, Stdout
-*   Response Body fields equation check
-*   Response Body [eval](https://expr.medv.io/)
+*   Multiple test report formats: Markdown, HTML, PDF, Stdout
+*   Support converting to [JMeter](https://jmeter.apache.org/) files
+*   Response Body fields equation check or [eval](https://expr.medv.io/)
 *   Verify the Kubernetes resources
 *   Validate the response body with [JSON schema](https://json-schema.org/)
 *   Pre and post handle with the API request
 *   Output reference between TestCase
 *   Run in server mode, and provide the [gRPC](pkg/server/server.proto) and HTTP endpoint
 *   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
-*   Multiple storage backends supported(Local, ORM Database, S3, etc)
+*   Multiple storage backends supported(Local, ORM Database, S3, Git, etc)
 *   [HTTP API record](extensions/collector)
 *   Install in mutiple use cases(CLI, Container, Native-Service, Operator, etc)
 

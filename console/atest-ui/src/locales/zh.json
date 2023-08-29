@@ -1,0 +1,33 @@
+{
+    "button": {
+        "import": "导入",
+        "export": "导出",
+        "new": "新建",
+        "submit": "提交",
+        "edit": "编辑",
+        "save": "保存",
+        "delete": "删除",
+        "send": "发送",
+        "toolbox": "工具箱",
+        "refresh": "刷新",
+        "newtestcase": "新建测试用例"
+    },
+    "title": {
+        "createTestSuite": "创建测试用例集",
+        "createTestCase": "创建测试用例",
+        "createStore": "创建存储"
+    },
+    "tip": {
+        "filter": "过滤"
+    },
+    "field": {
+        "name": "名称",
+        "username": "用户名",
+        "password": "密码",
+        "properties": "属性",
+        "plugin": "插件",
+        "status": "状态",
+        "operations": "操作",
+        "storageLocation": "保存位置"
+    }
+}

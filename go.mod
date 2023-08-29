@@ -5,15 +5,17 @@ go 1.18
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/antonmedv/expr v1.12.1
+	github.com/antonmedv/expr v1.14.0
 	github.com/bufbuild/protocompile v0.6.0
 	github.com/cucumber/godog v0.12.6
+	github.com/flopp/go-findfont v0.1.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/h2non/gock v1.2.0
 	github.com/invopop/jsonschema v0.7.0
 	github.com/linuxsuren/go-fake-runtime v0.0.1
 	github.com/linuxsuren/unstructured v0.0.1
+	github.com/signintech/gopdf v0.18.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.14.4
@@ -30,7 +32,6 @@ require (
 	github.com/cucumber/gherkin-go/v19 v19.0.3 // indirect
 	github.com/cucumber/messages-go/v16 v16.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/flopp/go-findfont v0.1.0 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -51,7 +52,6 @@ require (
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
-	github.com/signintech/gopdf v0.18.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tidwall/match v1.1.1 // indirect

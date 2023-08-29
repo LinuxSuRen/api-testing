@@ -6,6 +6,9 @@ import { Edit, Delete } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
 import type { Pair, TestResult, TestCaseWithSuite } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   name: String,
@@ -18,7 +21,11 @@ let querySuggestedAPIs = NewSuggestedAPIsQuery(props.store!, props.suite!)
 const testResultActiveTab = ref('output')
 const requestLoading = ref(false)
 const testResult = ref({ header: [] as Pair[] } as TestResult)
-function sendRequest() {
+const sendRequest = async () => {
+  if (needUpdate.value) {
+    await saveTestCase(false)
+  }
+
   requestLoading.value = true
   const name = props.name
   const suite = props.suite
@@ -210,8 +217,15 @@ watch(props, () => {
   load()
 })
 
+const needUpdate = ref(false)
+watch(testCaseWithSuite, (after, before) => {
+  if (before.data.name !== '' && after.data.name === before.data.name) {
+    needUpdate.value = true
+  }
+}, { deep: true })
+
 const saveLoading = ref(false)
-function saveTestCase() {
+function saveTestCase(tip: boolean = true) {
   saveLoading.value = true
 
   // remove empty pair
@@ -239,13 +253,17 @@ function saveTestCase() {
     body: JSON.stringify(testCaseWithSuite.value)
   }
   fetch('/server.Runner/UpdateTestCase', requestOptions).then((e) => {
-    if (e.ok) {
-      ElMessage({
-        message: 'Saved.',
-        type: 'success'
-      })
-    } else {
-      ElMessage.error('Oops, ' + e.statusText)
+    if (tip) {
+      if (e.ok) {
+        ElMessage({
+          message: 'Saved.',
+          type: 'success'
+        })
+  
+        needUpdate.value = false
+      } else {
+        ElMessage.error('Oops, ' + e.statusText)
+      }
     }
     saveLoading.value = false
   })
@@ -282,12 +300,7 @@ function deleteTestCase() {
 }
 
 const options = GetHTTPMethods()
-
 const activeName = ref('second')
-
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event)
-}
 
 function bodyFiledExpectChange() {
   const data = testCaseWithSuite.value.data.response.bodyFieldsExpect
@@ -300,6 +313,16 @@ function bodyFiledExpectChange() {
   }
 }
 
+function queryChange() {
+  const query = testCaseWithSuite.value.data.request.query
+  let lastItem = query[query.length - 1]
+  if (lastItem.key !== '') {
+    testCaseWithSuite.value.data.request.query.push({
+      key: '',
+      value: ''
+    } as Pair)
+  }
+}
 function headerChange() {
   const header = testCaseWithSuite.value.data.request.header
   let lastItem = header[header.length - 1]
@@ -405,9 +428,9 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
       <el-header style="padding-left: 5px">
         <div style="margin-bottom: 5px">
           <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
-            >Save</el-button
+            >{{ t('button.save') }}</el-button
           >
-          <el-button type="primary" @click="deleteTestCase" :icon="Delete">Delete</el-button>
+          <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
         </div>
         <el-select
           v-model="testCaseWithSuite.data.request.method"
@@ -435,12 +458,33 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           </template>
         </el-autocomplete>
 
-        <el-button type="primary" @click="sendRequest" :loading="requestLoading">Send</el-button>
+        <el-button type="primary" @click="sendRequest" :loading="requestLoading">{{ t('button.send') }}</el-button>
         <el-button type="primary" @click="generateCode">Generator Code</el-button>
       </el-header>
 
       <el-main>
-        <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+        <el-tabs v-model="activeName" class="demo-tabs">
+          <el-tab-pane label="Query" name="query">
+            <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
+              <el-table-column label="Key" width="180">
+                <template #default="scope">
+                  <el-autocomplete
+                    v-model="scope.row.key"
+                    placeholder="Key"
+                    @change="queryChange"
+                  />
+                </template>
+              </el-table-column>
+              <el-table-column label="Value">
+                <template #default="scope">
+                  <div style="display: flex; align-items: center">
+                    <el-input v-model="scope.row.value" placeholder="Value" />
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+
           <el-tab-pane label="Headers" name="second">
             <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
               <el-table-column label="Key" width="180">
@@ -579,7 +623,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
       </el-main>
 
       <el-footer>
-        <el-tabs v-model="testResultActiveTab" class="demo-tabs" @tab-click="handleClick">
+        <el-tabs v-model="testResultActiveTab" class="demo-tabs">
           <el-tab-pane label="Output" name="output">
             <el-input
               v-model="testResult.output"

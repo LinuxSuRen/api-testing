@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import WelcomePage from './views/WelcomePage.vue'
 import TestCase from './views/TestCase.vue'
 import TestSuite from './views/TestSuite.vue'
 import StoreManager from './views/StoreManager.vue'
@@ -9,6 +10,9 @@ import { ElTree } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Edit, Share } from '@element-plus/icons-vue'
 import type { Suite } from './types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 interface Tree {
   id: string
@@ -133,11 +137,16 @@ function loadStores() {
           loadTestSuites(item.name)
         }
       })
+
+      if (data.value.length === 0) {
+        viewName.value = ""
+      }
     })
 }
 loadStores()
 
 const dialogVisible = ref(false)
+const importDialogVisible = ref(false)
 const suiteCreatingLoading = ref(false)
 const suiteFormRef = ref<FormInstance>()
 const testSuiteForm = reactive({
@@ -145,9 +154,18 @@ const testSuiteForm = reactive({
   api: '',
   store: ''
 })
+const importSuiteFormRef = ref<FormInstance>()
+const importSuiteForm = reactive({
+  url: '',
+  store: ''
+})
 
 function openTestSuiteCreateDialog() {
   dialogVisible.value = true
+}
+
+function openTestSuiteImportDialog() {
+  importDialogVisible.value = true
 }
 
 const rules = reactive<FormRules<Suite>>({
@@ -156,9 +174,7 @@ const rules = reactive<FormRules<Suite>>({
 })
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  console.log(formEl)
   await formEl.validate((valid: boolean, fields) => {
-    console.log(valid, fields)
     if (valid) {
       suiteCreatingLoading.value = true
 
@@ -185,6 +201,40 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
+const importSuiteFormRules = reactive<FormRules<Suite>>({
+  url: [
+    { required: true, message: 'URL is required', trigger: 'blur' },
+    { type: 'url', message: 'Should be a valid URL value', trigger: 'blur' }
+  ],
+  store: [{ required: true, message: 'Location is required', trigger: 'blur' }]
+})
+const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate((valid: boolean, fields) => {
+    if (valid) {
+      suiteCreatingLoading.value = true
+
+      const requestOptions = {
+        method: 'POST',
+        headers: {
+          'X-Store-Name': importSuiteForm.store
+        },
+        body: JSON.stringify({
+          url: importSuiteForm.url
+        })
+      }
+
+      fetch('/server.Runner/ImportTestSuite', requestOptions)
+        .then((response) => response.json())
+        .then(() => {
+          loadStores()
+          importDialogVisible.value = false
+          formEl.resetFields()
+        })
+    }
+  })
+}
+
 const filterText = ref('')
 watch(filterText, (val) => {
   treeRef.value!.filter(val)
@@ -194,15 +244,15 @@ const filterTestCases = (value: string, data: Tree) => {
   return data.label.includes(value)
 }
 
-const viewName = ref('testcase')
+const viewName = ref('')
 </script>
 
 <template>
   <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
-    <el-container>
+    <el-container style="height: 100%">
       <el-header style="height: 30px;justify-content: flex-end;">
-        <el-button type="primary" :icon="Share" @click="viewName = 'store'" />
-        <el-button type="primary" :icon="Edit" @click="viewName = 'secret'" />
+        <el-button type="primary" :icon="Edit" @click="viewName = 'secret'" data-intro="Manage the secrets."/>
+        <el-button type="primary" :icon="Share" @click="viewName = 'store'" data-intro="Manage the store backends." />
       </el-header>
 
       <el-main>
@@ -210,7 +260,10 @@ const viewName = ref('testcase')
           <el-aside width="200px">
             <el-button type="primary" @click="openTestSuiteCreateDialog"
               data-intro="Click here to create a new test suite"
-              test-id="open-new-suite-dialog" :icon="Edit">New</el-button>
+              test-id="open-new-suite-dialog" :icon="Edit">{{ t('button.new') }}</el-button>
+            <el-button type="primary" @click="openTestSuiteImportDialog"
+              data-intro="Click here to import from Postman"
+              test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
             <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
 
             <el-tree
@@ -228,8 +281,11 @@ const viewName = ref('testcase')
           </el-aside>
 
           <el-main>
+            <WelcomePage
+              v-if="viewName === ''"
+            />
             <TestCase
-              v-if="viewName === 'testcase'"
+              v-else-if="viewName === 'testcase'"
               :store="store"
               :suite="testSuite"
               :name="testCaseName"
@@ -237,7 +293,7 @@ const viewName = ref('testcase')
               data-intro="This is the test case editor. You can edit the test case here."
             />
             <TestSuite
-              v-else-if="viewName === 'testsuite' && testSuite !== ''"
+              v-else-if="viewName === 'testsuite'"
               :name="testSuite"
               :store="store"
               @updated="loadStores"
@@ -255,7 +311,7 @@ const viewName = ref('testcase')
     </el-container>
   </div>
 
-  <el-dialog v-model="dialogVisible" title="Create Test Suite" width="30%" draggable>
+  <el-dialog v-model="dialogVisible" :title="t('title.createTestSuite')" width="30%" draggable>
     <template #footer>
       <span class="dialog-footer">
         <el-form
@@ -263,7 +319,7 @@ const viewName = ref('testcase')
           :model="testSuiteForm"
           ref="suiteFormRef"
           status-icon label-width="120px">
-          <el-form-item label="Location" prop="store">
+          <el-form-item :label="t('field.storageLocation')" prop="store">
             <el-select v-model="testSuiteForm.store" class="m-2"
               test-id="suite-form-store"
               filterable=true
@@ -277,7 +333,7 @@ const viewName = ref('testcase')
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="Name" prop="name">
+          <el-form-item :label="t('field.name')" prop="name">
             <el-input v-model="testSuiteForm.name" test-id="suite-form-name" />
           </el-form-item>
           <el-form-item label="API" prop="api">
@@ -289,7 +345,46 @@ const viewName = ref('testcase')
               @click="submitForm(suiteFormRef)"
               :loading="suiteCreatingLoading"
               test-id="suite-form-submit"
-              >Submit</el-button
+              >{{ t('button.submit') }}</el-button
+            >
+          </el-form-item>
+        </el-form>
+      </span>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="importDialogVisible" title="Import Test Suite" width="30%" draggable>
+    <span>Supported source URL: Postman collection share link</span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-form
+          :rules="importSuiteFormRules"
+          :model="importSuiteForm"
+          ref="importSuiteFormRef"
+          status-icon label-width="120px">
+          <el-form-item label="Location" prop="store">
+            <el-select v-model="importSuiteForm.store" class="m-2"
+              test-id="suite-import-form-store"
+              filterable=true
+              default-first-option=true
+              placeholder="Storage Location" size="middle">
+              <el-option
+                v-for="item in stores"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="URL" prop="url">
+            <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api" placeholder="https://api.postman.com/collections/xxx" />
+          </el-form-item>
+          <el-form-item>
+            <el-button
+              type="primary"
+              @click="importSuiteFormSubmit(importSuiteFormRef)"
+              test-id="suite-import-submit"
+              >{{ t('button.import') }}</el-button
             >
           </el-form-item>
         </el-form>

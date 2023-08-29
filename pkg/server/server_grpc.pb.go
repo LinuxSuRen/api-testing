@@ -26,6 +26,7 @@ type RunnerClient interface {
 	Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*TestResult, error)
 	GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error)
 	CreateTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
+	ImportTestSuite(ctx context.Context, in *TestSuiteSource, opts ...grpc.CallOption) (*CommonResult, error)
 	GetTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestSuite, error)
 	UpdateTestSuite(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
@@ -40,6 +41,9 @@ type RunnerClient interface {
 	// code generator
 	ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
+	// converter
+	ListConverter(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
+	ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
 	// common services
 	PopularHeaders(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Pairs, error)
 	FunctionsQuery(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Pairs, error)
@@ -89,6 +93,15 @@ func (c *runnerClient) GetSuites(ctx context.Context, in *Empty, opts ...grpc.Ca
 func (c *runnerClient) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error) {
 	out := new(HelloReply)
 	err := c.cc.Invoke(ctx, "/server.Runner/CreateTestSuite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) ImportTestSuite(ctx context.Context, in *TestSuiteSource, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/ImportTestSuite", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -197,6 +210,24 @@ func (c *runnerClient) ListCodeGenerator(ctx context.Context, in *Empty, opts ..
 func (c *runnerClient) GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error) {
 	out := new(CommonResult)
 	err := c.cc.Invoke(ctx, "/server.Runner/GenerateCode", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) ListConverter(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error) {
+	out := new(SimpleList)
+	err := c.cc.Invoke(ctx, "/server.Runner/ListConverter", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/ConvertTestSuite", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -368,6 +399,7 @@ type RunnerServer interface {
 	Run(context.Context, *TestTask) (*TestResult, error)
 	GetSuites(context.Context, *Empty) (*Suites, error)
 	CreateTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
+	ImportTestSuite(context.Context, *TestSuiteSource) (*CommonResult, error)
 	GetTestSuite(context.Context, *TestSuiteIdentity) (*TestSuite, error)
 	UpdateTestSuite(context.Context, *TestSuite) (*HelloReply, error)
 	DeleteTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
@@ -382,6 +414,9 @@ type RunnerServer interface {
 	// code generator
 	ListCodeGenerator(context.Context, *Empty) (*SimpleList, error)
 	GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error)
+	// converter
+	ListConverter(context.Context, *Empty) (*SimpleList, error)
+	ConvertTestSuite(context.Context, *CodeGenerateRequest) (*CommonResult, error)
 	// common services
 	PopularHeaders(context.Context, *Empty) (*Pairs, error)
 	FunctionsQuery(context.Context, *SimpleQuery) (*Pairs, error)
@@ -415,6 +450,9 @@ func (UnimplementedRunnerServer) GetSuites(context.Context, *Empty) (*Suites, er
 }
 func (UnimplementedRunnerServer) CreateTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTestSuite not implemented")
+}
+func (UnimplementedRunnerServer) ImportTestSuite(context.Context, *TestSuiteSource) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ImportTestSuite not implemented")
 }
 func (UnimplementedRunnerServer) GetTestSuite(context.Context, *TestSuiteIdentity) (*TestSuite, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTestSuite not implemented")
@@ -451,6 +489,12 @@ func (UnimplementedRunnerServer) ListCodeGenerator(context.Context, *Empty) (*Si
 }
 func (UnimplementedRunnerServer) GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateCode not implemented")
+}
+func (UnimplementedRunnerServer) ListConverter(context.Context, *Empty) (*SimpleList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListConverter not implemented")
+}
+func (UnimplementedRunnerServer) ConvertTestSuite(context.Context, *CodeGenerateRequest) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConvertTestSuite not implemented")
 }
 func (UnimplementedRunnerServer) PopularHeaders(context.Context, *Empty) (*Pairs, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PopularHeaders not implemented")
@@ -560,6 +604,24 @@ func _Runner_CreateTestSuite_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).CreateTestSuite(ctx, req.(*TestSuiteIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_ImportTestSuite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestSuiteSource)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).ImportTestSuite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/ImportTestSuite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).ImportTestSuite(ctx, req.(*TestSuiteSource))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -776,6 +838,42 @@ func _Runner_GenerateCode_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).GenerateCode(ctx, req.(*CodeGenerateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_ListConverter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).ListConverter(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/ListConverter",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).ListConverter(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_ConvertTestSuite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CodeGenerateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).ConvertTestSuite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/ConvertTestSuite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).ConvertTestSuite(ctx, req.(*CodeGenerateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1078,6 +1176,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_CreateTestSuite_Handler,
 		},
 		{
+			MethodName: "ImportTestSuite",
+			Handler:    _Runner_ImportTestSuite_Handler,
+		},
+		{
 			MethodName: "GetTestSuite",
 			Handler:    _Runner_GetTestSuite_Handler,
 		},
@@ -1124,6 +1226,14 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateCode",
 			Handler:    _Runner_GenerateCode_Handler,
+		},
+		{
+			MethodName: "ListConverter",
+			Handler:    _Runner_ListConverter_Handler,
+		},
+		{
+			MethodName: "ConvertTestSuite",
+			Handler:    _Runner_ConvertTestSuite_Handler,
 		},
 		{
 			MethodName: "PopularHeaders",

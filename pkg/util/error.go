@@ -26,8 +26,13 @@ package util
 
 // OKOrErrorMessage returns OK or error message
 func OKOrErrorMessage(err error) string {
+	return OrErrorMessage(err, "OK")
+}
+
+// OrErrorMessage returns error message or message
+func OrErrorMessage(err error, message string) string {
 	if err != nil {
 		return err.Error()
 	}
-	return "OK"
+	return message
 }
