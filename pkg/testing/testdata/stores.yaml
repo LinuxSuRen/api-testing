@@ -1,10 +1,13 @@
-- name: db
-  kind:
-    name: database
-    url: localhost:7071
-  description: ""
-  url: localhost:4000
-  username: root
-  password: ""
-  properties:
-    database: test
+stores:
+    - name: db
+      kind:
+        name: database
+        url: localhost:7071
+        enabled: false
+      description: ""
+      url: localhost:4000
+      username: root
+      password: ""
+      properties:
+        database: test
+plugins: []

@@ -39,6 +39,10 @@ copy-restart: build-embed-ui
 	make copy
 	atest service restart
 
+# plugins
+plugin-git:
+	GOOS=${OS} go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
+
 test:
 	go test ./... -cover -v -coverprofile=coverage.out
 	go tool cover -func=coverage.out

@@ -721,6 +721,22 @@ func (s *server) FunctionsQueryStream(srv Runner_FunctionsQueryStreamServer) err
 	}
 }
 
+func (s *server) GetStoreKinds(context.Context, *Empty) (kinds *StoreKinds, err error) {
+	storeFactory := testing.NewStoreFactory(s.configDir)
+	var stores []testing.StoreKind
+	if stores, err = storeFactory.GetStoreKinds(); err == nil {
+		kinds = &StoreKinds{}
+		for _, store := range stores {
+			kinds.Data = append(kinds.Data, &StoreKind{
+				Name:    store.Name,
+				Enabled: store.Enabled,
+				Url:     store.URL,
+			})
+		}
+	}
+	return
+}
+
 func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err error) {
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	var stores []testing.Store

@@ -108,19 +108,28 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		template.SetSecretGetter(remote.NewGRPCSecretGetter(secretServer))
 	}
 
-	removeServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, o.configDir)
+	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, o.configDir)
+	kinds, storeKindsErr := remoteServer.GetStoreKinds(nil, nil)
+	if storeKindsErr != nil {
+		cmd.PrintErrf("failed to get store kinds, error: %p\n", storeKindsErr)
+	} else {
+		if err = startPlugins(o.execer, kinds); err != nil {
+			return
+		}
+	}
+
 	s := o.gRPCServer
 	go func() {
 		if gRPCServer, ok := s.(reflection.GRPCServer); ok {
 			reflection.Register(gRPCServer)
 		}
-		server.RegisterRunnerServer(s, removeServer)
+		server.RegisterRunnerServer(s, remoteServer)
 		log.Printf("gRPC server listening at %v", lis.Addr())
 		s.Serve(lis)
 	}()
 
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc)) //  runtime.WithIncomingHeaderMatcher(func(key string) (s string, b bool) {
-	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, removeServer)
+	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, remoteServer)
 	if err == nil {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
@@ -130,6 +139,26 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		o.httpServer.WithHandler(mux)
 		log.Printf("HTTP server listening at %v", httplis.Addr())
 		err = o.httpServer.Serve(httplis)
+	}
+	return
+}
+
+func startPlugins(execer fakeruntime.Execer, kinds *server.StoreKinds) (err error) {
+	const socketPrefix = "unix://"
+
+	for _, kind := range kinds.Data {
+		if kind.Enabled && strings.HasPrefix(kind.Url, socketPrefix) {
+			binaryPath, lookErr := execer.LookPath(kind.Name)
+			if lookErr != nil {
+				log.Printf("failed to find %s, error: %v", kind.Name, lookErr)
+			} else {
+				go func(socketURL, plugin string) {
+					if err = execer.RunCommand(plugin, "--socket", strings.TrimPrefix(socketURL, socketPrefix)); err != nil {
+						log.Printf("failed to start %s, error: %v", socketURL, err)
+					}
+				}(kind.Url, binaryPath)
+			}
+		}
 	}
 	return
 }
