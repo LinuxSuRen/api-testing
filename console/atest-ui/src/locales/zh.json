@@ -15,7 +15,9 @@
     "title": {
         "createTestSuite": "创建测试用例集",
         "createTestCase": "创建测试用例",
-        "createStore": "创建存储"
+        "createStore": "创建存储",
+        "createSecret": "创建凭据",
+        "secretManager": "凭据管理"
     },
     "tip": {
         "filter": "过滤"

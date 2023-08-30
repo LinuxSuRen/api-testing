@@ -3,6 +3,7 @@ import WelcomePage from './views/WelcomePage.vue'
 import TestCase from './views/TestCase.vue'
 import TestSuite from './views/TestSuite.vue'
 import StoreManager from './views/StoreManager.vue'
+import SecretManager from './views/SecretManager.vue'
 import TemplateFunctions from './views/TemplateFunctions.vue'
 import { reactive, ref, watch } from 'vue'
 import { ElTree } from 'element-plus'
@@ -250,6 +251,7 @@ const viewName = ref('')
   <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
     <el-container style="height: 100%">
       <el-header style="height: 30px;justify-content: flex-end;">
+        <el-button type="primary" :icon="Edit" @click="viewName = 'secret'" data-intro="Manage the secrets."/>
         <el-button type="primary" :icon="Share" @click="viewName = 'store'" data-intro="Manage the store backends." />
       </el-header>
 
@@ -299,6 +301,9 @@ const viewName = ref('')
             />
             <StoreManager
             v-else-if="viewName === 'store'"
+            />
+            <SecretManager
+            v-else-if="viewName === 'secret'"
             />
           </el-main>
         </el-container>
