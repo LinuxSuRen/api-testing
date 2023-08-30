@@ -45,7 +45,7 @@ func createServerCmd(execer fakeruntime.Execer, gRPCServer gRPCServer, httpServe
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
 	flags.StringArrayVarP(&opt.localStorage, "local-storage", "", []string{"*.yaml"}, "The local storage path")
 	flags.StringVarP(&opt.consolePath, "console-path", "", "", "The path of the console")
-	flags.StringVarP(&opt.configDir, "config-dir", "", "$HOME/.config/atest", "The config directory")
+	flags.StringVarP(&opt.configDir, "config-dir", "", os.ExpandEnv("$HOME/.config/atest"), "The config directory")
 	flags.StringVarP(&opt.secretServer, "secret-server", "", "", "The secret server URL")
 	return
 }

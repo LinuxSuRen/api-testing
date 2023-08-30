@@ -41,6 +41,7 @@ Mirror Images: docker.m.daocloud.io/linuxsuren/api-testing`,
 	flags.StringVarP(&opt.mode, "mode", "m", string(ServiceModeOS),
 		fmt.Sprintf("Availeble values: %v", ServiceModeOS.All()))
 	flags.StringVarP(&opt.image, "image", "", defaultImage, "The image of the service which as a container")
+	flags.StringVarP(&opt.pull, "pull", "", "always", `Pull image before creating ("always"|"missing"|"never")`)
 	flags.StringVarP(&opt.version, "version", "", version.GetVersion(), "The version of the service image")
 	flags.StringVarP(&opt.localStorage, "local-storage", "", "/var/data/atest",
 		"The local storage path which will be mounted into the container")
@@ -56,6 +57,7 @@ type serviceOption struct {
 	fakeruntime.Execer
 	mode         string
 	localStorage string
+	pull         string
 
 	stdOut io.Writer
 }
@@ -211,7 +213,7 @@ func (o *serviceOption) getContainerService() (service Service, err error) {
 			clientPath = client
 		}
 		service = newContainerService(o.Execer, clientPath,
-			o.image, o.version, o.localStorage, o.stdOut)
+			o.image, o.version, o.pull, o.localStorage, o.stdOut)
 	}
 	return
 }
@@ -315,6 +317,7 @@ type containerService struct {
 	client       string
 	image        string
 	tag          string
+	pull         string
 	localStorage string
 	stdOut       io.Writer
 	errOut       io.Writer
@@ -322,7 +325,7 @@ type containerService struct {
 
 const defaultImage = "ghcr.io/linuxsuren/api-testing"
 
-func newContainerService(execer fakeruntime.Execer, client, image, tag, localStorage string, writer io.Writer) (svc Service) {
+func newContainerService(execer fakeruntime.Execer, client, image, tag, pull, localStorage string, writer io.Writer) (svc Service) {
 	if tag == "" {
 		tag = "latest"
 	}
@@ -336,6 +339,7 @@ func newContainerService(execer fakeruntime.Execer, client, image, tag, localSto
 		name:         service.ServiceName,
 		image:        image,
 		tag:          tag,
+		pull:         pull,
 		localStorage: localStorage,
 		stdOut:       writer,
 		errOut:       writer,
@@ -397,7 +401,7 @@ func (s *containerService) getStartArgs() []string {
 	return []string{"run", "--name=" + s.name,
 		"--restart=always",
 		"-d",
-		"--pull=always",
+		fmt.Sprintf("--pull=%s", s.pull),
 		"--network=host",
 		"-v", s.localStorage + ":/var/www/data",
 		"-v", "/root/.config/atest:/root/.config/atest",
