@@ -33,6 +33,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type StoreConfig struct {
+	Stores  []Store     `yaml:"stores"`
+	Plugins []StoreKind `yaml:"plugins"`
+}
+
 type Store struct {
 	Name        string
 	Kind        StoreKind
@@ -82,8 +87,9 @@ func MapToStore(data map[string]string) (store Store) {
 
 // StoreKind represents a gRPC-based store
 type StoreKind struct {
-	Name string
-	URL  string
+	Name    string
+	URL     string
+	Enabled bool
 }
 
 type StoreGetterAndSetter interface {
@@ -113,11 +119,9 @@ func NewStoreFactory(configDir string) StoreGetterAndSetter {
 
 // GetStores returns all stores
 func (s *storeFactory) GetStores() (stores []Store, err error) {
-	var data []byte
-	if data, err = os.ReadFile(path.Join(s.configDir, "stores.yaml")); err == nil {
-		err = yaml.Unmarshal(data, &stores)
-	} else {
-		err = nil
+	var storeConfig *StoreConfig
+	if storeConfig, err = s.getStoreConfig(); err == nil {
+		stores = storeConfig.Stores
 	}
 	return
 }
@@ -136,17 +140,17 @@ func (s *storeFactory) GetStore(name string) (store *Store, err error) {
 }
 
 func (s *storeFactory) DeleteStore(name string) (err error) {
-	var stores []Store
-	if stores, err = s.GetStores(); err == nil {
-		for i := range stores {
-			item := stores[i]
+	var storeConfig *StoreConfig
+	if storeConfig, err = s.getStoreConfig(); err == nil {
+		for i := range storeConfig.Stores {
+			item := storeConfig.Stores[i]
 			if item.Name == name {
-				stores = append(stores[:i], stores[i+1:]...)
+				storeConfig.Stores = append(storeConfig.Stores[:i], storeConfig.Stores[i+1:]...)
 				break
 			}
 		}
 		var data []byte
-		if data, err = yaml.Marshal(stores); err == nil {
+		if data, err = yaml.Marshal(storeConfig); err == nil {
 			err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
 		}
 	}
@@ -154,13 +158,13 @@ func (s *storeFactory) DeleteStore(name string) (err error) {
 }
 
 func (s *storeFactory) UpdateStore(store Store) (err error) {
-	var stores []Store
-	if stores, err = s.GetStores(); err == nil {
+	var storeConfig *StoreConfig
+	if storeConfig, err = s.getStoreConfig(); err == nil {
 		exist := false
-		for i := range stores {
-			item := stores[i]
+		for i := range storeConfig.Stores {
+			item := storeConfig.Stores[i]
 			if item.Name == store.Name {
-				stores[i] = store
+				storeConfig.Stores[i] = store
 				exist = true
 				break
 			}
@@ -168,7 +172,7 @@ func (s *storeFactory) UpdateStore(store Store) (err error) {
 
 		if exist {
 			var data []byte
-			if data, err = yaml.Marshal(stores); err == nil {
+			if data, err = yaml.Marshal(storeConfig); err == nil {
 				err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
 			}
 		} else {
@@ -179,11 +183,11 @@ func (s *storeFactory) UpdateStore(store Store) (err error) {
 }
 
 func (s *storeFactory) CreateStore(store Store) (err error) {
-	var stores []Store
-	if stores, err = s.GetStores(); err == nil {
+	var storeConfig *StoreConfig
+	if storeConfig, err = s.getStoreConfig(); err == nil {
 		exist := false
-		for i := range stores {
-			item := stores[i]
+		for i := range storeConfig.Stores {
+			item := storeConfig.Stores[i]
 			if item.Name == store.Name {
 				exist = true
 				break
@@ -191,9 +195,9 @@ func (s *storeFactory) CreateStore(store Store) (err error) {
 		}
 
 		if !exist {
-			stores = append(stores, store)
+			storeConfig.Stores = append(storeConfig.Stores, store)
 			var data []byte
-			if data, err = yaml.Marshal(stores); err == nil {
+			if data, err = yaml.Marshal(storeConfig); err == nil {
 				err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
 			}
 		} else {
@@ -204,5 +208,20 @@ func (s *storeFactory) CreateStore(store Store) (err error) {
 }
 
 func (s *storeFactory) GetStoreKinds() (kinds []StoreKind, err error) {
+	var storeConfig *StoreConfig
+	if storeConfig, err = s.getStoreConfig(); err == nil {
+		kinds = storeConfig.Plugins
+	}
+	return
+}
+
+func (s *storeFactory) getStoreConfig() (storeConfig *StoreConfig, err error) {
+	storeConfig = &StoreConfig{}
+	var data []byte
+	if data, err = os.ReadFile(path.Join(s.configDir, "stores.yaml")); err == nil {
+		err = yaml.Unmarshal(data, storeConfig)
+	} else {
+		err = nil
+	}
 	return
 }
