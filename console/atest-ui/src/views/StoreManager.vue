@@ -185,6 +185,10 @@ function updateKeys() {
       </el-table-column>
     </el-table>
 
+    <div style="margin-top: 20px; margin-bottom: 20px; position: absolute; bottom: 0px;">
+      Follow <el-link href="https://linuxsuren.github.io/api-testing/#storage" target="_blank">the instructions</el-link> to configure the storage plugins.
+    </div>
+
     <el-dialog v-model="dialogVisible" :title="t('title.createStore')" width="30%" draggable>
       <template #footer>
       <span class="dialog-footer">

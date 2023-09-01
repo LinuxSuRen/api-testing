@@ -10,6 +10,7 @@ import { ElTree } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Edit, Share } from '@element-plus/icons-vue'
 import type { Suite } from './types'
+import { GetLastTestCaseLocation, SetLastTestCaseLocation } from './views/cache'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -18,6 +19,7 @@ interface Tree {
   id: string
   label: string
   parent: string
+  parentID: string
   store: string
   children?: Tree[]
 }
@@ -50,12 +52,14 @@ const handleNodeClick = (data: Tree) => {
               id: data.label + item.name,
               label: item.name,
               store: data.store,
-              parent: data.label
+              parent: data.label,
+              parentID: data.id
             } as Tree)
           })
         }
       })
   } else {
+    SetLastTestCaseLocation(data.parentID, data.id)
     testCaseName.value = data.label
     testSuite.value = data.parent
     store.value = data.store
@@ -74,46 +78,34 @@ function loadTestSuites(storeName: string) {
       'X-Store-Name': storeName
     },
   }
-  fetch('/server.Runner/GetSuites', requestOptions)
-    .then((response) => response.json())
-    .then((d) => {
-      if (!d.data) {
-        return
-      }
-      Object.keys(d.data).map((k) => {
-        let suite = {
-          id: k,
-          label: k,
-          store: storeName,
-          children: [] as Tree[]
-        } as Tree
-
-        d.data[k].data.forEach((item: any) => {
-          suite.children?.push({
-            id: k + item,
-            label: item,
-            store: storeName,
-            parent: k
-          } as Tree)
-        })
-        data.value.push(suite)
-      })
-
-      if (data.value.length > 0) {
-        const firstItem = data.value[0]
-        if (firstItem.children && firstItem.children.length > 0) {
-          const child = firstItem.children[0].id
-
-          currentNodekey.value = child
-          treeRef.value!.setCurrentKey(child)
-          treeRef.value!.setCheckedKeys([child], false)
+  return async () => {
+    await fetch('/server.Runner/GetSuites', requestOptions)
+      .then((response) => response.json())
+      .then((d) => {
+        if (!d.data) {
+          return
         }
+        Object.keys(d.data).map((k) => {
+          let suite = {
+            id: k,
+            label: k,
+            store: storeName,
+            children: [] as Tree[]
+          } as Tree
 
-        viewName.value = 'testsuite'
-        testSuite.value = firstItem.label
-        store.value = firstItem.store
-      }
-    })
+          d.data[k].data.forEach((item: any) => {
+            suite.children?.push({
+              id: k + item,
+              label: item,
+              store: storeName,
+              parent: k,
+              parentID: suite.id
+            } as Tree)
+          })
+          data.value.push(suite)
+        })
+      })
+  }
 }
 
 interface Store {
@@ -128,17 +120,52 @@ function loadStores() {
   }
   fetch('/server.Runner/GetStores', requestOptions)
     .then((response) => response.json())
-    .then((d) => {
+    .then(async (d) => {
       stores.value = d.data
       data.value = [] as Tree[]
 
-      d.data.forEach((item: any) => {
+      for (const item of d.data) {
         if (item.ready) {
-          loadTestSuites(item.name)
+          await loadTestSuites(item.name)()
         }
-      })
+      }
 
-      if (data.value.length === 0) {
+      if (data.value.length > 0) {
+        const key = GetLastTestCaseLocation()
+
+        let targetSuite = {} as Tree
+        let targetChild = {} as Tree
+        if (key.suite !== '' && key.testcase !== '') {
+          for (var i = 0; i < data.value.length; i++) {
+            const item = data.value[i]
+            if (item.id === key.suite && item.children) {
+              for (var j = 0; j < item.children.length; j++) {
+                const child = item.children[j]
+                if (child.id === key.testcase) {
+                  targetSuite = item
+                  targetChild = child
+                  break
+                }
+              }
+              break
+            }
+          }
+        }
+        
+        if (!targetChild.id || targetChild.id === '') {
+          targetSuite = data.value[0]
+          if (targetSuite.children && targetSuite.children.length > 0) {
+            targetChild = targetSuite.children[0]
+          }
+        }
+
+        viewName.value = 'testsuite'
+        currentNodekey.value = targetChild.id
+        treeRef.value!.setCurrentKey(targetChild.id)
+        treeRef.value!.setCheckedKeys([targetChild.id], false)
+        testSuite.value = targetSuite.label
+        store.value = targetSuite.store
+      } else {
         viewName.value = ""
       }
     })
@@ -278,6 +305,8 @@ const viewName = ref('')
               @node-click="handleNodeClick"
               data-intro="This is the test suite tree. You can click the test suite to edit it."
             />
+
+            <TemplateFunctions/>
           </el-aside>
 
           <el-main>
@@ -391,8 +420,6 @@ const viewName = ref('')
       </span>
     </template>
   </el-dialog>
-
-  <TemplateFunctions/>
 </template>
 
 <style scoped>

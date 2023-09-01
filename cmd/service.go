@@ -45,6 +45,7 @@ Mirror Images: docker.m.daocloud.io/linuxsuren/api-testing`,
 	flags.StringVarP(&opt.version, "version", "", version.GetVersion(), "The version of the service image")
 	flags.StringVarP(&opt.localStorage, "local-storage", "", "/var/data/atest",
 		"The local storage path which will be mounted into the container")
+	flags.StringVarP(&opt.secretServer, "secret-server", "", "", "The secret server URL")
 	return
 }
 
@@ -58,6 +59,7 @@ type serviceOption struct {
 	mode         string
 	localStorage string
 	pull         string
+	secretServer string
 
 	stdOut io.Writer
 }
@@ -213,7 +215,7 @@ func (o *serviceOption) getContainerService() (service Service, err error) {
 			clientPath = client
 		}
 		service = newContainerService(o.Execer, clientPath,
-			o.image, o.version, o.pull, o.localStorage, o.stdOut)
+			o.image, o.version, o.pull, o.localStorage, o.secretServer, o.stdOut)
 	}
 	return
 }
@@ -319,13 +321,14 @@ type containerService struct {
 	tag          string
 	pull         string
 	localStorage string
+	secretServer string
 	stdOut       io.Writer
 	errOut       io.Writer
 }
 
 const defaultImage = "ghcr.io/linuxsuren/api-testing"
 
-func newContainerService(execer fakeruntime.Execer, client, image, tag, pull, localStorage string, writer io.Writer) (svc Service) {
+func newContainerService(execer fakeruntime.Execer, client, image, tag, pull, localStorage string, secretServer string, writer io.Writer) (svc Service) {
 	if tag == "" {
 		tag = "latest"
 	}
@@ -341,6 +344,7 @@ func newContainerService(execer fakeruntime.Execer, client, image, tag, pull, lo
 		tag:          tag,
 		pull:         pull,
 		localStorage: localStorage,
+		secretServer: secretServer,
 		stdOut:       writer,
 		errOut:       writer,
 	}
@@ -398,14 +402,20 @@ func (s *containerService) exist() bool {
 }
 
 func (s *containerService) getStartArgs() []string {
-	return []string{"run", "--name=" + s.name,
+	args := []string{"run", "--name=" + s.name,
 		"--restart=always",
 		"-d",
 		fmt.Sprintf("--pull=%s", s.pull),
 		"--network=host",
 		"-v", s.localStorage + ":/var/www/data",
 		"-v", "/root/.config/atest:/root/.config/atest",
-		s.image + ":" + s.tag}
+		s.image + ":" + s.tag,
+		"atest", "server"}
+	if s.secretServer != "" {
+		args = append(args, "--secret-server="+s.secretServer)
+	}
+	args = append(args, "--console-path=/var/www/html")
+	return args
 }
 
 type podmanService struct {
