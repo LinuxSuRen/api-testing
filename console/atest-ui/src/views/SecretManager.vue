@@ -25,7 +25,13 @@ function loadStores() {
     method: 'POST',
   }
   fetch('/server.Runner/GetSecrets', requestOptions)
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(response.statusText)
+      } else {
+        response.json()
+      }
+    })
     .then((e) => {
       secrets.value = e.data
     })
@@ -124,6 +130,10 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         </template>
       </el-table-column>
     </el-table>
+
+    <div style="margin-top: 20px; margin-bottom: 20px; position: absolute; bottom: 0px;">
+      Follow <el-link href="https://linuxsuren.github.io/api-testing/#secret-server" target="_blank">the instructions</el-link> to configure the secret server.
+    </div>
 
     <el-dialog v-model="dialogVisible" :title="t('title.createSecret')" width="30%" draggable>
       <template #footer>
