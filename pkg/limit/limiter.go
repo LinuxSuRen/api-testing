@@ -6,8 +6,7 @@ import (
 )
 
 type RateLimiter interface {
-	TryAccept() bool
-	Accept()
+	Accept() bool
 	Stop()
 	Burst() int32
 }
@@ -28,43 +27,40 @@ func NewDefaultRateLimiter(qps, burst int32) RateLimiter {
 		burst = 5
 	}
 	limiter := &defaultRateLimiter{
-		qps:    qps,
-		burst:  burst,
-		singal: make(chan struct{}, 1),
+		qps:       qps,
+		burst:     burst,
+		singal:    make(chan struct{}, 1),
+		lastToken: time.Now(),
 	}
 	go limiter.updateBurst()
 	return limiter
 }
 
-func (r *defaultRateLimiter) TryAccept() bool {
-	_, ok := r.resver()
-	return ok
-}
-
 func (r *defaultRateLimiter) resver() (delay time.Duration, ok bool) {
 	delay = time.Now().Sub(r.lastToken) / time.Millisecond
+	delayRequire := time.Second / time.Duration(r.qps)
 	r.lastToken = time.Now()
-	if delay > 0 {
+	if delay >= delayRequire {
 		ok = true
 	} else if r.Burst() > 0 {
 		r.Setburst(r.Burst() - 1)
 		ok = true
 	} else {
-		delay = time.Second / time.Duration(r.qps)
+		delay = delayRequire - delay
 	}
 	return
 }
 
-func (r *defaultRateLimiter) Accept() {
+func (r *defaultRateLimiter) Accept() bool {
 	delay, ok := r.resver()
 	if ok {
-		return
+		return ok
 	}
 
 	if delay > 0 {
 		time.Sleep(delay)
 	}
-	return
+	return ok
 }
 
 func (r *defaultRateLimiter) Setburst(burst int32) {

@@ -7,8 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestXxx(t *testing.T) {
-	limiter := NewDefaultRateLimiter(1, 1)
+func TestLimiter(t *testing.T) {
+	t.Log("run rate limit test")
+	limiter := NewDefaultRateLimiter(0, 0)
 	num := 0
 
 	loop := true
@@ -22,6 +23,7 @@ func TestXxx(t *testing.T) {
 	select {
 	case <-time.After(time.Second):
 		loop = false
+		limiter.Stop()
 	}
-	assert.True(t, num <= 10)
+	assert.True(t, num <= 10, num)
 }
