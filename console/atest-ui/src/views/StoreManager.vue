@@ -8,20 +8,28 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-const emptyStore = {
-    kind: {},
+const emptyStore = function() {
+  return {
+    name: '',
+    url: '',
+    username: '',
+    password: '',
+    kind: {
+        name: '',
+        url: ''
+    },
     properties: [{
         key: '',
         value: ''
     }]
-} as Store
+  } as Store
+}
 const stores = ref([] as Store[])
 const dialogVisible = ref(false)
 const creatingLoading = ref(false)
 const storeFormRef = ref<FormInstance>()
-const store = ref(emptyStore)
 const createAction = ref(true)
-const storeForm = reactive(store)
+const storeForm = reactive(emptyStore())
 
 interface Store {
   name: string
@@ -30,6 +38,7 @@ interface Store {
   password: string
   ready: boolean
   kind: {
+    name: string
     url: string
   }
   properties: Pair[]
@@ -75,14 +84,23 @@ function editStore(name: string) {
     dialogVisible.value = true
     stores.value.forEach((e: Store) => {
         if (e.name === name) {
-            store.value = e
+            setStoreForm(e)
         }
     })
     createAction.value = false
 }
 
+function setStoreForm(store: Store) {
+    storeForm.name = store.name
+    storeForm.url = store.url
+    storeForm.username = store.username
+    storeForm.password = store.password
+    storeForm.kind = store.kind
+    storeForm.properties = store.properties
+}
+
 function addStore() {
-    store.value = emptyStore
+    setStoreForm(emptyStore())
     dialogVisible.value = true
     createAction.value = true
 }
@@ -96,14 +114,9 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     if (valid) {
       creatingLoading.value = true
 
-       // remove empty pair
-      store.value.properties = store.value.properties.filter(
-       (e) => e.key !== ''
-      )
-
       const requestOptions = {
         method: 'POST',
-        body: JSON.stringify(store.value)
+        body: JSON.stringify(storeForm)
       }
       
       let api = '/server.Runner/CreateStore'
@@ -112,22 +125,31 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       }
 
       fetch(api, requestOptions)
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(response.statusText)
+          } else {
+            response.json()
+          }
+        })
         .then(() => {
-          creatingLoading.value = false
           loadStores()
           dialogVisible.value = false
           formEl.resetFields()
         })
+        .catch((e) => {
+          ElMessage.error('Oops, ' + e)
+        })
+        creatingLoading.value = false
     }
   })
 }
 
 function updateKeys() {
-  const props = store.value.properties
+  const props = storeForm.properties
   let lastItem = props[props.length - 1]
   if (lastItem.key !== '') {
-    store.value.properties.push({
+    storeForm.properties.push({
       key: '',
       value: ''
     })
@@ -208,6 +230,9 @@ function updateKeys() {
           </el-form-item>
           <el-form-item :label="t('field.password')" prop="password">
             <el-input v-model="storeForm.password" type="password" test-id="store-form-password" />
+          </el-form-item>
+          <el-form-item :label="t('field.plugin')" prop="pluginName">
+            <el-input v-model="storeForm.kind.name" test-id="store-form-plugin-name" />
           </el-form-item>
           <el-form-item :label="t('field.plugin')" prop="plugin">
             <el-input v-model="storeForm.kind.url" test-id="store-form-plugin" />

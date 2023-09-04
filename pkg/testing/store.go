@@ -149,10 +149,7 @@ func (s *storeFactory) DeleteStore(name string) (err error) {
 				break
 			}
 		}
-		var data []byte
-		if data, err = yaml.Marshal(storeConfig); err == nil {
-			err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
-		}
+		err = s.save(storeConfig)
 	}
 	return
 }
@@ -171,10 +168,7 @@ func (s *storeFactory) UpdateStore(store Store) (err error) {
 		}
 
 		if exist {
-			var data []byte
-			if data, err = yaml.Marshal(storeConfig); err == nil {
-				err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
-			}
+			err = s.save(storeConfig)
 		} else {
 			err = fmt.Errorf("store %s is not exists", store.Name)
 		}
@@ -196,12 +190,19 @@ func (s *storeFactory) CreateStore(store Store) (err error) {
 
 		if !exist {
 			storeConfig.Stores = append(storeConfig.Stores, store)
-			var data []byte
-			if data, err = yaml.Marshal(storeConfig); err == nil {
-				err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
-			}
+			err = s.save(storeConfig)
 		} else {
 			err = fmt.Errorf("store %s already exists", store.Name)
+		}
+	}
+	return
+}
+
+func (s *storeFactory) save(storeConfig *StoreConfig) (err error) {
+	if err = os.MkdirAll(s.configDir, 0755);err==nil{
+		var data []byte
+		if data, err = yaml.Marshal(storeConfig); err == nil {
+			err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)
 		}
 	}
 	return
