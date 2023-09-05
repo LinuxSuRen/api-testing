@@ -129,7 +129,7 @@ func invokeRequest(ctx context.Context, md protoreflect.MethodDescriptor, payloa
 		if err != nil {
 			return nil, err
 		}
-
+		return buildResponses(resps)
 	}
 	request, err := getReqMessagePb(md, payload)
 	if err != nil {

@@ -43,6 +43,7 @@ jobs:
           sudo atest service restart
           sudo atest service status
           atest run -p .github/testing/core.yaml --request-ignore-error --report md --report-file .github/workflows/report.md
+          atest run -p sample/grpc-sample.yaml
           sudo atest service status
 
           atest convert -p .github/testing/core.yaml --converter jmeter -t sample.jmx
