@@ -1,0 +1,11 @@
+name: License check
+
+on:
+  - pull_request
+
+jobs:
+  Test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check License Header
+        uses: apache/skywalking-eyes/header@0.4.0
