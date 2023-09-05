@@ -15,6 +15,9 @@ jobs:
       - name: Unit Test
         run: |
           make test-all-backend test-operator
+      - name: Long Test
+        run: |
+          make testlong
       - name: Report
         if: github.actor == 'linuxsuren'
         env:

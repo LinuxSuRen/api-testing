@@ -46,6 +46,8 @@ plugin-git:
 test:
 	go test ./... -cover -v -coverprofile=coverage.out
 	go tool cover -func=coverage.out
+testlong:
+	go test pkg/limit/limiter_long_test.go -v
 test-ui:
 	cd console/atest-ui && npm run test:unit
 test-e2e:

@@ -17,8 +17,8 @@ You can install in various methods:
 
 * CLI via `hd i atest`
 * Web server
-* [Kubernetes](https://github.com/LinuxSuRen/api-testing/tree/master/sample/kubernetes)
-* [Argo CD](https://github.com/LinuxSuRen/api-testing/blob/master/sample/argocd/simple.yaml)
+* [Kubernetes](https://github.com/LinuxSuRen/api-testing/tree/master/docs/manifests/kubernetes)
+* [Argo CD](https://github.com/LinuxSuRen/api-testing/blob/master/docs/manifests/argocd/simple.yaml)
 
 If you're developing APIs locally, the best way is installing it as a container service.
 Then you can access it via your browser.
