@@ -31,24 +31,49 @@ import (
 
 // Verify if the data satisfies the expression.
 func Verify(expect testing.Response, data map[string]any) (err error) {
-	for _, verify := range expect.Verify {
-		var program *vm.Program
-		if program, err = expr.Compile(verify, expr.Env(data),
-			expr.AsBool(), kubernetes.PodValidatorFunc(),
-			kubernetes.KubernetesValidatorFunc()); err != nil {
-			return err
-		}
-
-		var result interface{}
-		if result, err = expr.Run(program, data); err != nil {
-			return err
-		}
-
-		if !result.(bool) {
-			err = fmt.Errorf("failed to verify: %s", verify)
-			fmt.Println(err)
-			break
+	for _, verifyExpr := range expect.Verify {
+		var ok bool
+		if ok, err = verify(verifyExpr, data); !ok {
+			err = fmt.Errorf("failed to verify: %q, %v", verifyExpr, err)
+			return
 		}
 	}
+
+	for _, verifyCon := range expect.ConditionalVerify {
+		pass := true
+		for _, con := range verifyCon.Condition {
+			if ok, _ := verify(con, data); !ok {
+				pass = false
+				break
+			}
+		}
+
+		if pass {
+			for _, verifyExpr := range verifyCon.Verify {
+				var ok bool
+				if ok, err = verify(verifyExpr, data); !ok {
+					err = fmt.Errorf("failed to verify: %q, %v", verifyExpr, err)
+					return
+				}
+			}
+		}
+	}
+	return
+}
+
+func verify(verify string, data map[string]any) (ok bool, err error) {
+	var program *vm.Program
+	if program, err = expr.Compile(verify, expr.Env(data),
+		expr.AsBool(), kubernetes.PodValidatorFunc(),
+		kubernetes.KubernetesValidatorFunc()); err != nil {
+		return
+	}
+
+	var result interface{}
+	if result, err = expr.Run(program, data); err != nil {
+		return
+	}
+
+	ok = result.(bool)
 	return
 }

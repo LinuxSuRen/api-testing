@@ -529,8 +529,23 @@ func convertToTestingTestCase(in *TestCase) (result testing.TestCase) {
 		result.Expect.Schema = resp.Schema
 		result.Expect.StatusCode = int(resp.StatusCode)
 		result.Expect.Verify = resp.Verify
+		result.Expect.ConditionalVerify = convertConditionalVerify(resp.ConditionalVerify)
 		result.Expect.BodyFieldsExpect = pairToInterMap(resp.BodyFieldsExpect)
 		result.Expect.Header = pairToMap(resp.Header)
+	}
+	return
+}
+
+func convertConditionalVerify(verify []*ConditionalVerify) (result []testing.ConditionalVerify) {
+	if verify != nil {
+		result = make([]testing.ConditionalVerify, 0)
+
+		for _, item := range verify {
+			result = append(result, testing.ConditionalVerify{
+				Condition: item.Condition,
+				Verify:    item.Verify,
+			})
+		}
 	}
 	return
 }

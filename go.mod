@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/antonmedv/expr v1.14.0
+	github.com/antonmedv/expr v1.15.0
 	github.com/bufbuild/protocompile v0.6.0
 	github.com/cucumber/godog v0.12.6
 	github.com/flopp/go-findfont v0.1.0

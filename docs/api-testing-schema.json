@@ -133,11 +133,35 @@
                         "type": "string"
                     }
                 },
+                "conditionalVerify": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ConditionalVerify"
+                    }
+                },
                 "schema": {
                     "type": "string"
                 }
             },
             "title": "Expect"
+        },
+        "ConditionalVerify": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "condition": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "verify":{
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         },
         "Request": {
             "type": "object",

@@ -1,4 +1,4 @@
-/**
+/*
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -22,42 +22,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package server
+package runner_test
 
-import "github.com/linuxsuren/api-testing/pkg/testing"
+import (
+	"testing"
 
-// ToGRPCStore convert the normal store to GRPC store
-func ToGRPCStore(store testing.Store) (result *Store) {
-	result = &Store{
-		Name: store.Name,
-		Kind: &StoreKind{
-			Name: store.Kind.Name,
-			Url:  store.Kind.URL,
-		},
-		Description: store.Description,
-		Url:         store.URL,
-		Username:    store.Username,
-		Password:    store.Password,
-		Properties:  mapToPair(store.Properties),
-	}
-	return
-}
+	"github.com/linuxsuren/api-testing/pkg/runner"
+	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/stretchr/testify/assert"
+)
 
-// ToNormalStore convert the GRPC store to normal store
-func ToNormalStore(store *Store) (result testing.Store) {
-	result = testing.Store{
-		Name:        store.Name,
-		Description: store.Description,
-		URL:         store.Url,
-		Username:    store.Username,
-		Password:    store.Password,
-		Properties:  pairToMap(store.Properties),
-	}
-	if store.Kind != nil {
-		result.Kind = testing.StoreKind{
-			Name: store.Kind.Name,
-			URL:  store.Kind.Url,
-		}
-	}
-	return
+func TestVerify(t *testing.T) {
+	t.Run("conditionalVerify", func(t *testing.T) {
+		err := runner.Verify(atest.Response{
+			ConditionalVerify: []atest.ConditionalVerify{{
+				Condition: []string{
+					"1 == 1",
+					"2 == 2",
+				},
+				Verify: []string{"1 == 2"},
+			}},
+		}, nil)
+		assert.Error(t, err)
+
+		err = runner.Verify(atest.Response{
+			ConditionalVerify: []atest.ConditionalVerify{{
+				Condition: []string{"1 != 1"},
+				Verify:    []string{"1 == 2"},
+			}},
+		}, nil)
+		assert.NoError(t, err)
+	})
 }
