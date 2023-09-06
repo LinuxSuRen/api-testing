@@ -8,14 +8,14 @@ spec:
     import:
       - ./pkg/server
     protofile: server.proto
-    serverReflection: false
+    serverReflection: true
 items:
   - name: GetVersion
     request:
-      api: Runner.GetVersion
+      api: /server.Runner/GetVersion
   - name: FunctionsQuery
     request:
-      api: Runner.FunctionsQuery
+      api: /server.Runner/FunctionsQuery
       body: |
         {
           "name": "hello"
@@ -32,7 +32,7 @@ items:
         }
   - name: FunctionsQueryStream
     request:
-      api: Runner.FunctionsQueryStream
+      api: /server.Runner/FunctionsQueryStream
       body: |
         [
           {
