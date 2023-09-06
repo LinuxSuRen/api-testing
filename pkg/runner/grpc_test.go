@@ -20,4 +20,39 @@ SOFTWARE.
 
 package runner
 
-// TODO
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/reflect/protoreflect"
+)
+
+func TestAPINameMatch(t *testing.T) {
+	qn, err := splitFullQualifiedName("127.0.0.1:7070/server.Runner/GetVersion")
+	assert.NoError(t, err)
+	assert.Equal(t,
+		protoreflect.FullName("server.Runner.GetVersion"),
+		qn,
+		"match full qualified name",
+	)
+
+	qn, err = splitFullQualifiedName("127.0.0.1:7070/server.v1.service/method")
+	assert.NoError(t, err)
+	assert.Equal(t,
+		protoreflect.FullName("server.v1.service.method"),
+		qn,
+		"match full qualified name long",
+	)
+
+	qn, err = splitFullQualifiedName("127.0.0.1:7070//server.Runner/GetVersion")
+	assert.NotNil(t,
+		err,
+		"unexpect leading character",
+	)
+
+	qn, err = splitFullQualifiedName("127.0.0.1:7070/server.Runner/GetVersion/")
+	assert.NotNil(t,
+		err,
+		"unexpect trailing character",
+	)
+}

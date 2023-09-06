@@ -83,6 +83,14 @@ message TestSuite {
 message APISpec {
   string kind = 1;
   string url = 2;
+  GRPC grpc=3;
+}
+
+message GRPC{
+  repeated string import =1;
+  bool serverReflection =2;
+  string protofile =3;
+  string protoset =4;
 }
 
 message TestSuiteIdentity {
