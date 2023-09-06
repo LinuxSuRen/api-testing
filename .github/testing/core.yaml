@@ -5,16 +5,16 @@ name: atest
 api: |
   {{default "http://localhost:8080/server.Runner" (env "SERVER")}}
 items:
-- name: suites
-  request:
-    api: /GetSuites
-    method: POST
 - name: createSuite
   request:
     api: /CreateTestSuite
     method: POST
     body: |
       {"name": "{{randAlpha 6}}"}
+- name: suites
+  request:
+    api: /GetSuites
+    method: POST
 - name: suite
   request:
     api: /GetTestSuite
