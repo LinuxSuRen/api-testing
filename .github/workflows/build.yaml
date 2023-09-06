@@ -51,11 +51,11 @@ jobs:
 
           atest convert -p .github/testing/core.yaml --converter jmeter -t sample.jmx
       - name: Report API Test
-        uses: harupy/comment-on-pr@c0522c44600040927a120b9309b531e3cb6f8d48
+        uses: thollander/actions-comment-pull-request@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          filename: report.md
+          filePath: repord.md
       - name: Run JMeter Tests
         uses: rbhadti94/apache-jmeter-action@v0.5.0
         with:
@@ -72,7 +72,7 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4.1.1
         with:
-          github_token: ${{ secrets.GH_PUBLISH_SECRETS }}
+          github-token: ${{ secrets.GH_PUBLISH_SECRETS }}
           version: v1.14.0
           args: release --skip-publish --rm-dist --snapshot
       - name: Operator
