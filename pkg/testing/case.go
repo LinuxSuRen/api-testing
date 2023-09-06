@@ -64,10 +64,16 @@ type Request struct {
 
 // Response is the expected response
 type Response struct {
-	StatusCode       int                    `yaml:"statusCode,omitempty" json:"statusCode,omitempty"`
-	Body             string                 `yaml:"body,omitempty" json:"body,omitempty"`
-	Header           map[string]string      `yaml:"header,omitempty" json:"header,omitempty"`
-	BodyFieldsExpect map[string]interface{} `yaml:"bodyFieldsExpect,omitempty" json:"bodyFieldsExpect,omitempty"`
-	Verify           []string               `yaml:"verify,omitempty" json:"verify,omitempty"`
-	Schema           string                 `yaml:"schema,omitempty" json:"schema,omitempty"`
+	StatusCode        int                    `yaml:"statusCode,omitempty" json:"statusCode,omitempty"`
+	Body              string                 `yaml:"body,omitempty" json:"body,omitempty"`
+	Header            map[string]string      `yaml:"header,omitempty" json:"header,omitempty"`
+	BodyFieldsExpect  map[string]interface{} `yaml:"bodyFieldsExpect,omitempty" json:"bodyFieldsExpect,omitempty"`
+	Verify            []string               `yaml:"verify,omitempty" json:"verify,omitempty"`
+	ConditionalVerify []ConditionalVerify    `yaml:"conditionalVerify,omitempty" json:"conditionalVerify,omitempty"`
+	Schema            string                 `yaml:"schema,omitempty" json:"schema,omitempty"`
+}
+
+type ConditionalVerify struct {
+	Condition []string `yaml:"condition,omitempty" json:"condition,omitempty"`
+	Verify    []string `yaml:"verify,omitempty" json:"verify,omitempty"`
 }

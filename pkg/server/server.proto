@@ -146,7 +146,13 @@ message Response {
   repeated Pair header = 3;
   repeated Pair bodyFieldsExpect = 4;
   repeated string verify = 5;
-  string schema = 6;
+  repeated ConditionalVerify ConditionalVerify = 6;
+  string schema = 7;
+}
+
+message ConditionalVerify {
+  repeated string condition = 1;
+  repeated string verify = 2;
 }
 
 message TestCaseResult {

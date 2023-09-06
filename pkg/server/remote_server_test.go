@@ -38,6 +38,7 @@ import (
 	_ "embed"
 
 	"github.com/h2non/gock"
+	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	atesting "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/sample"
 	"github.com/stretchr/testify/assert"
@@ -427,6 +428,16 @@ func TestListTestCase(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		assert.NotNil(t, reply)
+	})
+
+	t.Run("convertConditionalVerify", func(t *testing.T) {
+		assert.Equal(t, []atest.ConditionalVerify{{
+			Condition: []string{"1 == 1"},
+			Verify:    []string{"1 == 1"},
+		}}, convertConditionalVerify([]*ConditionalVerify{{
+			Condition: []string{"1 == 1"},
+			Verify:    []string{"1 == 1"},
+		}}))
 	})
 }
 
