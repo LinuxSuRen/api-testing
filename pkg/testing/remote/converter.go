@@ -37,6 +37,14 @@ func ConvertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 			Url:  suite.Spec.URL,
 		},
 	}
+	if suite.Spec.GRPC != nil {
+		result.Spec.Grpc = &server.GRPC{
+			Import:           suite.Spec.GRPC.ImportPath,
+			ServerReflection: suite.Spec.GRPC.ServerReflection,
+			Protofile:        suite.Spec.GRPC.ProtoFile,
+			Protoset:         suite.Spec.GRPC.ProtoSet,
+		}
+	}
 
 	for _, testcase := range suite.Items {
 		result.Items = append(result.Items, ConvertToGRPCTestCase(testcase))

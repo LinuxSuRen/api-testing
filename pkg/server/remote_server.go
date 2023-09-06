@@ -341,6 +341,14 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 				Url:  suite.Spec.URL,
 			},
 		}
+		if suite.Spec.GRPC != nil {
+			result.Spec.Grpc = &GRPC{
+				Import:           suite.Spec.GRPC.ImportPath,
+				ServerReflection: suite.Spec.GRPC.ServerReflection,
+				Protofile:        suite.Spec.GRPC.ProtoFile,
+				Protoset:         suite.Spec.GRPC.ProtoSet,
+			}
+		}
 	}
 	return
 }

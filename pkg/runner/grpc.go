@@ -202,13 +202,13 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 	}
 
 	if dp.IsPlaceholder() {
-		return nil, fmt.Errorf("%s is not found", fullname)
+		return nil, fmt.Errorf("%q is not found", fullname)
 	}
 
 	if md, ok := dp.(protoreflect.MethodDescriptor); ok {
 		return md, nil
 	}
-	return nil, fmt.Errorf("%s is not a gRPC method", fullname)
+	return nil, fmt.Errorf("%q is not a gRPC method", fullname)
 }
 
 func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflect.FullName) (protoreflect.Descriptor, error) {
@@ -283,18 +283,18 @@ func getByReflect(ctx context.Context, r *gRPCTestCaseRunner, fullName protorefl
 		}
 	}
 
-	return nil, fmt.Errorf("%s is not found", fullName)
+	return nil, fmt.Errorf("%q is not found", fullName)
 }
 
 func getMdFromFd(fd protoreflect.FileDescriptor, fullname protoreflect.FullName) (md protoreflect.MethodDescriptor, err error) {
 	sd := fd.Services().ByName(fullname.Parent().Name())
 	if sd == nil {
-		return nil, fmt.Errorf("grpc service %s is not found in proto %s", fullname.Parent().Name(), fd.Name())
+		return nil, fmt.Errorf("grpc service %q is not found in proto %q", fullname.Parent().Name(), fd.Name())
 	}
 
 	md = sd.Methods().ByName(fullname.Name())
 	if md == nil {
-		return nil, fmt.Errorf("method %s is not found in service %s", fullname.Name(), fullname.Parent().Name())
+		return nil, fmt.Errorf("method %q is not found in service %q", fullname.Name(), fullname.Parent().Name())
 	}
 	return md, nil
 }
@@ -302,11 +302,11 @@ func getMdFromFd(fd protoreflect.FileDescriptor, fullname protoreflect.FullName)
 func splitFullQualifiedName(api string) (protoreflect.FullName, error) {
 	qn := regexFullQualifiedName.FindStringSubmatch(api)
 	if len(qn) == 0 {
-		return "", fmt.Errorf("%s is not a valid gRPC api name", api)
+		return "", fmt.Errorf("%q is not a valid gRPC api name", api)
 	}
 	fn := protoreflect.FullName(strings.Join(qn[2:], "."))
 	if !fn.IsValid() {
-		return "", fmt.Errorf("%s is not a valid gRPC api name", api)
+		return "", fmt.Errorf("%q is not a valid gRPC api name", api)
 	}
 	return fn, nil
 }
@@ -407,7 +407,7 @@ func payloadFieldsVerify(caseName string, expect testing.Response, jsonPayload [
 
 	if !gjson.Valid(expect.Body) {
 		fmt.Printf("expect.Body: %v\n", expect.Body)
-		return fmt.Errorf("case %s: expect body is not a valid JSON", caseName)
+		return fmt.Errorf("case %q: expect body is not a valid JSON", caseName)
 	}
 
 	exp := gjson.Parse(expect.Body)
@@ -435,5 +435,5 @@ func payloadFieldsVerify(caseName string, expect testing.Response, jsonPayload [
 		}
 		return nil
 	}
-	return fmt.Errorf("case %s: unknown expect content", caseName)
+	return fmt.Errorf("case %q: unknown expect content", caseName)
 }
