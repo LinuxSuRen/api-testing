@@ -24,6 +24,8 @@ SOFTWARE.
 
 package util
 
+import "net/http"
+
 // OKOrErrorMessage returns OK or error message
 func OKOrErrorMessage(err error) string {
 	return OrErrorMessage(err, "OK")
@@ -35,4 +37,12 @@ func OrErrorMessage(err error, message string) string {
 		return err.Error()
 	}
 	return message
+}
+
+// IgnoreErrServerClosed ignores ErrServerClosed
+func IgnoreErrServerClosed(err error) error {
+	if err == http.ErrServerClosed {
+		return nil
+	}
+	return err
 }

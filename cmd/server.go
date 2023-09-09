@@ -3,13 +3,16 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"path"
 	"strings"
+	"syscall"
 	"time"
 
 	_ "embed"
@@ -71,6 +74,9 @@ func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 }
 
 func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
+	ctx, cancel := context.WithCancel(cmd.Context())
+	defer cancel()
+
 	if o.printProto {
 		for _, val := range server.GetProtos() {
 			cmd.Println(val)
@@ -109,7 +115,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, o.configDir)
-	kinds, storeKindsErr := remoteServer.GetStoreKinds(nil, nil)
+	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
 	if storeKindsErr != nil {
 		cmd.PrintErrf("failed to get store kinds, error: %p\n", storeKindsErr)
 	} else {
@@ -117,6 +123,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			return
 		}
 	}
+
+	clean := make(chan os.Signal, 1)
+	signal.Notify(clean, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	s := o.gRPCServer
 	go func() {
@@ -128,8 +137,19 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		s.Serve(lis)
 	}()
 
+	go func() {
+		<-clean
+		_ = lis.Close()
+		_ = o.httpServer.Shutdown(ctx)
+		for _, file := range filesNeedToBeRemoved {
+			if err = os.RemoveAll(file); err != nil {
+				log.Printf("failed to remove %s, error: %v", file, err)
+			}
+		}
+	}()
+
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc)) //  runtime.WithIncomingHeaderMatcher(func(key string) (s string, b bool) {
-	err = server.RegisterRunnerHandlerServer(cmd.Context(), mux, remoteServer)
+	err = server.RegisterRunnerHandlerServer(ctx, mux, remoteServer)
 	if err == nil {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
@@ -139,6 +159,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		o.httpServer.WithHandler(mux)
 		log.Printf("HTTP server listening at %v", httplis.Addr())
 		err = o.httpServer.Serve(httplis)
+		err = util.IgnoreErrServerClosed(err)
 	}
 	return
 }
@@ -153,7 +174,9 @@ func startPlugins(execer fakeruntime.Execer, kinds *server.StoreKinds) (err erro
 				log.Printf("failed to find %s, error: %v", kind.Name, lookErr)
 			} else {
 				go func(socketURL, plugin string) {
-					if err = execer.RunCommand(plugin, "--socket", strings.TrimPrefix(socketURL, socketPrefix)); err != nil {
+					socketFile := strings.TrimPrefix(socketURL, socketPrefix)
+					filesNeedToBeRemoved = append(filesNeedToBeRemoved, socketFile)
+					if err = execer.RunCommand(plugin, "--socket", socketFile); err != nil {
 						log.Printf("failed to start %s, error: %v", socketURL, err)
 					}
 				}(kind.Url, binaryPath)
@@ -215,6 +238,8 @@ func debugHandler(mux *runtime.ServeMux) {
 		}
 	})
 }
+
+var filesNeedToBeRemoved = []string{}
 
 func (o *serverOption) getAtestBinary(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 	w.Header().Set("Content-Disposition", "attachment; filename=atest")
