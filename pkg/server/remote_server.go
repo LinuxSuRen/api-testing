@@ -284,8 +284,13 @@ func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err e
 }
 
 func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
 	loader := s.getLoader(ctx)
-	err = loader.CreateSuite(in.Name, in.Api)
+	if loader == nil {
+		reply.Error = "no loader found"
+	} else {
+		err = loader.CreateSuite(in.Name, in.Api)
+	}
 	return
 }
 

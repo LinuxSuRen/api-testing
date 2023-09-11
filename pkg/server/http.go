@@ -1,6 +1,7 @@
 package server
 
 import (
+	context "context"
 	"net"
 	"net/http"
 )
@@ -9,9 +10,11 @@ import (
 type HTTPServer interface {
 	Serve(lis net.Listener) error
 	WithHandler(handler http.Handler)
+	Shutdown(ctx context.Context) error
 }
 
 type defaultHTTPServer struct {
+	server  *http.Server
 	handler http.Handler
 }
 
@@ -21,13 +24,17 @@ func NewDefaultHTTPServer() HTTPServer {
 }
 
 func (s *defaultHTTPServer) Serve(lis net.Listener) (err error) {
-	server := &http.Server{Handler: s.handler}
-	err = server.Serve(lis)
+	s.server = &http.Server{Handler: s.handler}
+	err = s.server.Serve(lis)
 	return
 }
 
 func (s *defaultHTTPServer) WithHandler(h http.Handler) {
 	s.handler = h
+}
+
+func (s *defaultHTTPServer) Shutdown(ctx context.Context) error {
+	return s.server.Shutdown(ctx)
 }
 
 type fakeHandler struct{}
@@ -44,4 +51,9 @@ func (s *fakeHandler) Serve(lis net.Listener) (err error) {
 
 func (s *fakeHandler) WithHandler(h http.Handler) {
 	// do nothing due to this is a fake method
+}
+
+func (s *fakeHandler) Shutdown(ctx context.Context) error {
+	// do nothing due to this is a fake method
+	return nil
 }

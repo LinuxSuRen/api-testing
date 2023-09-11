@@ -129,7 +129,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
           if (!response.ok) {
             throw new Error(response.statusText)
           } else {
-            response.json()
+            return response.json()
           }
         })
         .then(() => {
@@ -143,6 +143,40 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         creatingLoading.value = false
     }
   })
+}
+
+function storeVerify(formEl: FormInstance | undefined) {
+  if (!formEl) return
+
+  const requestOptions = {
+    method: 'POST',
+    body: JSON.stringify({
+      name: storeForm.name
+    })
+  }
+  
+  let api = '/server.Runner/VerifyStore'
+  fetch(api, requestOptions)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(response.statusText)
+      } else {
+        return response.json()
+      }
+    })
+    .then((e) => {
+      if (e.success) {
+        ElMessage({
+          message: 'Verified!',
+          type: 'success'
+        })
+      } else {
+        ElMessage.error(e.message)
+      }
+    })
+    .catch((e) => {
+      ElMessage.error('Oops, ' + e)
+    })
 }
 
 function updateKeys() {
@@ -231,10 +265,10 @@ function updateKeys() {
           <el-form-item :label="t('field.password')" prop="password">
             <el-input v-model="storeForm.password" type="password" test-id="store-form-password" />
           </el-form-item>
-          <el-form-item :label="t('field.plugin')" prop="pluginName">
+          <el-form-item :label="t('field.pluginName')" prop="pluginName">
             <el-input v-model="storeForm.kind.name" test-id="store-form-plugin-name" />
           </el-form-item>
-          <el-form-item :label="t('field.plugin')" prop="plugin">
+          <el-form-item :label="t('field.pluginURL')" prop="plugin">
             <el-input v-model="storeForm.kind.url" test-id="store-form-plugin" />
           </el-form-item>
           <el-form-item :label="t('field.properties')" prop="properties">
@@ -254,6 +288,12 @@ function updateKeys() {
             </el-table>
           </el-form-item>
           <el-form-item>
+            <el-button
+              type="primary"
+              @click="storeVerify(storeFormRef)"
+              test-id="store-form-verify"
+              >{{t('button.verify')}}</el-button
+            >
             <el-button
               type="primary"
               @click="submitForm(storeFormRef)"

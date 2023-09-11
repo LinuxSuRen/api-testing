@@ -10,7 +10,8 @@
         "send": "Send",
         "toolbox": "Tool Box",
         "refresh": "Refresh",
-        "newtestcase": "New TestCase"
+        "newtestcase": "New TestCase",
+        "verify": "Verify"
     },
     "title": {
         "createTestSuite": "Create Test Suite",
@@ -28,6 +29,8 @@
         "password": "Password",
         "properties": "Properties",
         "plugin": "Plugin",
+        "pluginName": "Plugin Name",
+        "pluginURL": "Plugin URL",
         "status": "Status",
         "operations": "Operations",
         "storageLocation": "Storage Location"

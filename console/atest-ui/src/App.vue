@@ -6,11 +6,12 @@ import StoreManager from './views/StoreManager.vue'
 import SecretManager from './views/SecretManager.vue'
 import TemplateFunctions from './views/TemplateFunctions.vue'
 import { reactive, ref, watch } from 'vue'
-import { ElTree } from 'element-plus'
+import { ElTree, ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Edit, Share } from '@element-plus/icons-vue'
 import type { Suite } from './types'
 import { GetLastTestCaseLocation, SetLastTestCaseLocation } from './views/cache'
+import { DefaultResponseProcess } from './views/net'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -217,12 +218,20 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       }
 
       fetch('/server.Runner/CreateTestSuite', requestOptions)
-        .then((response) => response.json())
-        .then(() => {
+        .then(DefaultResponseProcess())
+        .then((e) => {
           suiteCreatingLoading.value = false
-          loadStores()
-          dialogVisible.value = false
-          formEl.resetFields()
+          if (e.error !== "") {
+            ElMessage.error('Oops, ' + e.error)
+          } else {
+            loadStores()
+            dialogVisible.value = false
+            formEl.resetFields()
+          }
+        })
+        .catch((e) => {
+          suiteCreatingLoading.value = false
+          ElMessage.error('Oops, ' + e)
         })
     }
   })

@@ -5,6 +5,8 @@ build:
 	mkdir -p bin
 	rm -rf bin/atest
 	go build -o bin/atest main.go
+build-ext-git:
+	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
 embed-ui:
 	cd console/atest-ui && npm i && npm run build-only
 	cp console/atest-ui/dist/index.html cmd/data/index.html

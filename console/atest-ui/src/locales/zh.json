@@ -10,7 +10,8 @@
         "send": "发送",
         "toolbox": "工具箱",
         "refresh": "刷新",
-        "newtestcase": "新建测试用例"
+        "newtestcase": "新建测试用例",
+        "verify": "检查"
     },
     "title": {
         "createTestSuite": "创建测试用例集",
@@ -28,6 +29,8 @@
         "password": "密码",
         "properties": "属性",
         "plugin": "插件",
+        "pluginName": "插件名称",
+        "pluginURL": "插件地址",
         "status": "状态",
         "operations": "操作",
         "storageLocation": "保存位置"

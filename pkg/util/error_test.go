@@ -26,6 +26,7 @@ package util_test
 
 import (
 	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -35,4 +36,10 @@ import (
 func TestOkOrErrorMessage(t *testing.T) {
 	assert.Equal(t, "OK", util.OKOrErrorMessage(nil))
 	assert.Equal(t, "test", util.OKOrErrorMessage(errors.New("test")))
+}
+
+func TestIgnoreErrServerClosed(t *testing.T) {
+	assert.Nil(t, util.IgnoreErrServerClosed(nil))
+	assert.Nil(t, util.IgnoreErrServerClosed(http.ErrServerClosed))
+	assert.Error(t, util.IgnoreErrServerClosed(errors.New("test")))
 }
