@@ -14,6 +14,7 @@ import (
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
+	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/tidwall/gjson"
 	"github.com/xeipuuv/gojsonschema"
@@ -149,7 +150,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 	defer func() {
 		if err == nil {
-			err = runJob(testcase.After)
+			err = runJob(testcase.After, dataContext)
 		}
 	}()
 
@@ -179,7 +180,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		request.Header.Add(key, val)
 	}
 
-	if err = runJob(testcase.Before); err != nil {
+	if err = runJob(testcase.Before, dataContext); err != nil {
 		return
 	}
 
@@ -351,7 +352,7 @@ func valueCompare(expect interface{}, acutalResult gjson.Result, key string) (er
 	return
 }
 
-func runJob(job *testing.Job) (err error) {
+func runJob(job *testing.Job, ctx interface{}) (err error) {
 	if job == nil {
 		return
 	}
@@ -359,8 +360,13 @@ func runJob(job *testing.Job) (err error) {
 	env := struct{}{}
 
 	for _, item := range job.Items {
-		if program, err = expr.Compile(item, expr.Env(env),
-			expr.Function("sleep", ExprFuncSleep)); err != nil {
+		var exprText string
+		if exprText, err = render.Render("job", item, ctx); err != nil {
+			err = fmt.Errorf("failed to render: %q, error is: %v", item, err)
+			break
+		}
+
+		if program, err = expr.Compile(exprText, getCustomExprFuncs(env)...); err != nil {
 			fmt.Printf("failed to compile: %s, %v\n", item, err)
 			return
 		}
@@ -369,6 +375,14 @@ func runJob(job *testing.Job) (err error) {
 			fmt.Printf("failed to Run: %s, %v\n", item, err)
 			return
 		}
+	}
+	return
+}
+
+func getCustomExprFuncs(env any) (opts []expr.Option) {
+	opts = append(opts, expr.Env(env))
+	for _, item := range extensionFuncs {
+		opts = append(opts, expr.Function(item.Name, item.Func))
 	}
 	return
 }

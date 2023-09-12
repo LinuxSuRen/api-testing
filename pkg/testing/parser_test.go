@@ -27,7 +27,7 @@ func TestParse(t *testing.T) {
 	suite, err := atest.Parse(data)
 	if assert.Nil(t, err) && assert.NotNil(t, suite) {
 		assert.Equal(t, "Gitlab", suite.Name)
-		assert.Equal(t, 3, len(suite.Items))
+		assert.Equal(t, 2, len(suite.Items))
 		assert.Equal(t, atest.TestCase{
 			Name: "projects",
 			Request: atest.Request{

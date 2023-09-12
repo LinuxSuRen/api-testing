@@ -55,7 +55,7 @@ func TestCreateFunctionCommand(t *testing.T) {
 		name: "with not exit function",
 		args: []string{"func", "fake"},
 		verify: func(t *testing.T, output string) {
-			assert.Equal(t, "No such function\n", output)
+			assert.Equal(t, "No such function\n\nAll expr functions:\n", output)
 		},
 	}, {
 		name: "query functions, not found",

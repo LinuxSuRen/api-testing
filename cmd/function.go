@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/antonmedv/expr/builtin"
 	"github.com/cucumber/godog"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/spf13/cobra"
@@ -37,15 +38,7 @@ type funcPrinterOption struct {
 func (o *funcPrinterOption) runE(cmd *cobra.Command, args []string) (err error) {
 	if len(args) > 0 {
 		name := args[0]
-		if fn, ok := render.FuncMap()[name]; ok {
-			cmd.Println(reflect.TypeOf(fn))
-			desc := FuncDescription(fn)
-			if desc != "" {
-				cmd.Println(desc)
-			}
-		} else {
-			cmd.Println("No such function")
-		}
+		filterAndPrint(cmd, name)
 	} else if o.feature != "" {
 		ctx := context.WithValue(cmd.Context(), render.ContextBufferKey, cmd.OutOrStdout())
 
@@ -71,11 +64,36 @@ func (o *funcPrinterOption) runE(cmd *cobra.Command, args []string) (err error) 
 			cmd.Println()
 		}
 	} else {
-		for name, fn := range render.FuncMap() {
-			cmd.Println(name, reflect.TypeOf(fn))
-		}
+		filterAndPrint(cmd, "")
 	}
 	return
+}
+
+func filterAndPrint(writer printer, name string) {
+	if name == "" {
+		writer.Println("All template functions:")
+		for name, fn := range render.FuncMap() {
+			writer.Println(name, reflect.TypeOf(fn))
+		}
+	} else {
+		if fn, ok := render.FuncMap()[name]; ok {
+			writer.Println(reflect.TypeOf(fn))
+			desc := FuncDescription(fn)
+			if desc != "" {
+				writer.Println(desc)
+			}
+		} else {
+			writer.Println("No such function")
+		}
+	}
+
+	writer.Println("")
+	writer.Println("All expr functions:")
+	for _, item := range builtin.Builtins {
+		if strings.Contains(item.Name, name) {
+			writer.Println(item.Name, reflect.TypeOf(item.Func))
+		}
+	}
 }
 
 func initializeScenario(ctx *godog.ScenarioContext) {

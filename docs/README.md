@@ -63,6 +63,43 @@ The test suite file could be in local, or in the HTTP server. See the following 
 
 For the last one, it represents the API Testing server.
 
+## Functions
+
+There are two kinds of functions for two situations: template rendering and test results verification.
+
+* Template rendering functions base on [the Go template](https://pkg.go.dev/text/template)
+* The verification functions base on [expr library](https://expr.medv.io/)
+
+You can query the supported functions by using the following command or on the UI page:
+
+```shell
+atest func
+```
+
+## Hooks
+
+In some cases you may want to run the test cases after a HTTP server is ready. Then you can use the hooks feature.
+Such as:
+
+```yaml
+name: Gitlab
+api: https://gitlab.com/api/v4
+param:
+  user: linuxsuren
+items:
+- name: projects
+  request:
+    api: /projects
+  before:
+    items:
+      - "sleep(1)"
+  after:
+    items:
+      - "sleep(1)"
+```
+
+You can use all the functions that are available in the expr library.
+
 ## Convert to JMeter
 [JMeter](https://jmeter.apache.org/) is a load test tool. You can run the following commands from the root directory of this repository:
 
