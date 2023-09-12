@@ -433,7 +433,7 @@ func TestRunJob(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := runJob(&tt.job)
+			err := runJob(&tt.job, nil)
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})
 	}
