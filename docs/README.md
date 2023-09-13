@@ -133,6 +133,10 @@ pipeline {
 }
 ```
 
+## Report
+
+You can see the test results from [Grafana](prometheus.md).
+
 ## Storage
 There are multiple storage backends supported. See the status from the list:
 

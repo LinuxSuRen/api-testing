@@ -11,6 +11,8 @@ type TestReporter interface {
 
 // ReportRecord represents the raw data of a request
 type ReportRecord struct {
+	Group     string
+	Name      string
 	Method    string
 	API       string
 	Body      string
