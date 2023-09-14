@@ -25,6 +25,9 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -155,6 +158,19 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
+
+		// Create non-global registry.
+		reg := prometheus.NewRegistry()
+
+		// Add go runtime metrics and process collectors.
+		reg.MustRegister(
+			collectors.NewGoCollector(),
+			collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+		)
+		mux.HandlePath(http.MethodGet, "/metrics", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+			promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}).ServeHTTP(w, r)
+		})
+
 		debugHandler(mux)
 		o.httpServer.WithHandler(mux)
 		log.Printf("HTTP server listening at %v", httplis.Addr())

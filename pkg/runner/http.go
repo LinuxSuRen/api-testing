@@ -141,6 +141,8 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	r.log.Info("start to run: '%s'\n", testcase.Name)
 	record := NewReportRecord()
 	defer func(rr *ReportRecord) {
+		rr.Group = testcase.Group
+		rr.Name = testcase.Name
 		rr.EndTime = time.Now()
 		rr.Error = err
 		rr.API = testcase.Request.API

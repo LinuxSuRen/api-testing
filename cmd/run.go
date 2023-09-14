@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -76,7 +77,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
-	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std")
+	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus")
 	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
 	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
 	flags.StringVarP(&opt.swaggerURL, "swagger-url", "", "", "The URL of swagger")
@@ -89,7 +90,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	writer := cmd.OutOrStdout()
 
-	if o.reportFile != "" {
+	if o.reportFile != "" && !strings.HasPrefix(o.reportFile, "http://") && !strings.HasPrefix(o.reportFile, "https://") {
 		var reportFile *os.File
 		if reportFile, err = os.Create(o.reportFile); err != nil {
 			return
@@ -111,6 +112,12 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 		o.reportWriter = runner.NewResultWriter(writer)
 	case "pdf":
 		o.reportWriter = runner.NewPDFResultWriter(writer)
+	case "prometheus":
+		if o.reportFile == "" {
+			err = fmt.Errorf("report file is required for prometheus report")
+			return
+		}
+		o.reporter = runner.NewPrometheusWriter(o.reportFile, false)
 	default:
 		err = fmt.Errorf("not supported report type: '%s'", o.report)
 	}
@@ -238,6 +245,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 			continue
 		}
 
+		testCase.Group = testSuite.Name
 		testCase.Request.RenderAPI(testSuite.API)
 
 		var output interface{}
