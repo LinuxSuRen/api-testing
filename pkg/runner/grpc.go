@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -52,6 +53,7 @@ type gRPCTestCaseRunner struct {
 }
 
 var regexFullQualifiedName = regexp.MustCompile(`^([\w\.:]+)\/([\w\.]+)\/(\w+)$`)
+var regexURLPrefix = regexp.MustCompile(`^https?://`)
 
 func NewGRPCTestCaseRunner(host string, proto testing.GRPCDesc) TestCaseRunner {
 	runner := &gRPCTestCaseRunner{
@@ -240,9 +242,24 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 }
 
 func getByProtoSet(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflect.FullName) (protoreflect.Descriptor, error) {
-	decs, err := os.ReadFile(r.proto.ProtoSet)
-	if err != nil {
-		return nil, err
+	var decs []byte
+	var err error
+	if regexURLPrefix.FindString(r.proto.ProtoSet) != "" {
+		resp, err := http.Get(r.proto.ProtoSet)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		decs, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		decs, err = os.ReadFile(r.proto.ProtoSet)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	fds := &descriptorpb.FileDescriptorSet{}
