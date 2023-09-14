@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -191,7 +192,7 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 	if r.proto.ServerReflection {
 		dp, err = getByReflect(ctx, r, fullname, conn)
 	} else {
-		if r.proto.ProtoFile == "" {
+		if r.proto.ProtoFile == "" && r.proto.ProtoSet == "" {
 			return nil, fmt.Errorf("missing descriptor source")
 		}
 		dp, err = getByProto(ctx, r, fullname)
@@ -212,6 +213,10 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 }
 
 func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflect.FullName) (protoreflect.Descriptor, error) {
+	if r.proto.ProtoSet != "" {
+		return getByProtoSet(ctx, r, fullName)
+	}
+
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(
 			&protocompile.SourceResolver{
@@ -226,6 +231,32 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 	}
 
 	dp, err := linker.AsResolver().FindDescriptorByName(fullName)
+	if err != nil {
+		return nil, err
+	}
+
+	// r.fdCache.Store(fullName.Parent(), dp.ParentFile())
+	return dp, nil
+}
+
+func getByProtoSet(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflect.FullName) (protoreflect.Descriptor, error) {
+	decs, err := os.ReadFile(r.proto.ProtoSet)
+	if err != nil {
+		return nil, err
+	}
+
+	fds := &descriptorpb.FileDescriptorSet{}
+	err = proto.Unmarshal(decs, fds)
+	if err != nil {
+		return nil, err
+	}
+
+	prfs, err := protodesc.NewFiles(fds)
+	if err != nil {
+		return nil, err
+	}
+
+	dp, err := prfs.FindDescriptorByName(fullName)
 	if err != nil {
 		return nil, err
 	}
