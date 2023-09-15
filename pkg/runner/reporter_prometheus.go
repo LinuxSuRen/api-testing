@@ -33,8 +33,10 @@ import (
 )
 
 type prometheusReporter struct {
-	remote string
-	sync   bool
+	remote       string
+	sync         bool
+	errorCount   prometheus.Counter
+	successCount prometheus.Counter
 }
 
 // NewPrometheusWriter creates a new PrometheusWriter
@@ -45,6 +47,8 @@ func NewPrometheusWriter(remote string, sync bool) TestReporter {
 	}
 }
 
+const namespace = "api_testing"
+
 // PutRecord puts the test result into the Prometheum Pushgateway
 func (w *prometheusReporter) PutRecord(record *ReportRecord) {
 	var wait sync.WaitGroup
@@ -53,19 +57,40 @@ func (w *prometheusReporter) PutRecord(record *ReportRecord) {
 	go func() {
 		defer wait.Done()
 
-		name := fmt.Sprintf("response_time_%s_%s", record.Group, record.Name)
-
 		var responseTime prometheus.Gauge
 		responseTime = prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace: "api_testing",
-			Name:      name,
-			Help:      "The response time in milliseconds of the API.",
+			Namespace:   namespace,
+			Name:        "response_time",
+			ConstLabels: getConstLabels(record),
+			Help:        "The response time in milliseconds of the API.",
 		})
 		responseTime.Set(float64(record.EndTime.Sub(record.BeginTime).Milliseconds()))
 
-		if err := push.New(w.remote, "api-testing").
-			Collector(responseTime).
-			Push(); err != nil {
+		pusher := push.New(w.remote, "api-testing").Collector(responseTime)
+
+		if record.Error != nil {
+			if w.errorCount == nil {
+				w.errorCount = prometheus.NewCounter(prometheus.CounterOpts{
+					Namespace:   namespace,
+					Name:        "error_count",
+					ConstLabels: getConstLabels(record),
+				})
+			}
+			w.errorCount.Inc()
+			pusher.Collector(w.errorCount)
+		} else {
+			if w.successCount == nil {
+				w.successCount = prometheus.NewCounter(prometheus.CounterOpts{
+					Namespace:   namespace,
+					Name:        "success_count",
+					ConstLabels: getConstLabels(record),
+				})
+			}
+			w.successCount.Inc()
+			pusher.Collector(w.successCount)
+		}
+
+		if err := pusher.Push(); err != nil {
 			fmt.Println("Could not push completion time to Pushgateway:", err)
 		}
 	}()
@@ -73,6 +98,15 @@ func (w *prometheusReporter) PutRecord(record *ReportRecord) {
 		wait.Wait()
 	}
 	return
+}
+
+func getConstLabels(record *ReportRecord) prometheus.Labels {
+	return prometheus.Labels{
+		"group":  record.Group,
+		"name":   record.Name,
+		"api":    record.API,
+		"method": record.Method,
+	}
 }
 
 func (w *prometheusReporter) GetAllRecords() []*ReportRecord {
