@@ -43,6 +43,7 @@ func ConvertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 			ServerReflection: suite.Spec.GRPC.ServerReflection,
 			Protofile:        suite.Spec.GRPC.ProtoFile,
 			Protoset:         suite.Spec.GRPC.ProtoSet,
+			Insecure:         suite.Spec.GRPC.Insecure,
 		}
 	}
 

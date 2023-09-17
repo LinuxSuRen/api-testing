@@ -19,6 +19,7 @@ type GRPCDesc struct {
 	ServerReflection bool     `yaml:"serverReflection,omitempty" json:"serverReflection,omitempty"`
 	ProtoFile        string   `yaml:"protofile,omitempty" json:"protofile,omitempty"`
 	ProtoSet         string   `yaml:"protoset,omitempty" json:"protoset,omitempty"`
+	Insecure         bool     `yaml:"insecure,omitempty" json:"insecure,omitempty"`
 }
 
 // TestCase represents a test case

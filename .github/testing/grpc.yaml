@@ -8,6 +8,7 @@ spec:
     import:
       - ./pkg/server
     protofile: server.proto
+    insecure: true
 items:
   - name: GetVersion
     request:

@@ -87,10 +87,11 @@ message APISpec {
 }
 
 message GRPC{
-  repeated string import =1;
-  bool serverReflection =2;
-  string protofile =3;
-  string protoset =4;
+  repeated string import = 1;
+  bool serverReflection = 2;
+  string protofile = 3;
+  string protoset = 4;
+  bool insecure = 5;
 }
 
 message TestSuiteIdentity {

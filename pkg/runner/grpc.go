@@ -91,7 +91,14 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	}
 
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
-	conn, err := grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	var conn *grpc.ClientConn
+	if r.proto.Insecure {
+		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	} else {
+		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host))
+	}
+	
 	if err != nil {
 		return nil, err
 	}

@@ -352,6 +352,7 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 				ServerReflection: suite.Spec.GRPC.ServerReflection,
 				Protofile:        suite.Spec.GRPC.ProtoFile,
 				Protoset:         suite.Spec.GRPC.ProtoSet,
+				Insecure:         suite.Spec.GRPC.Insecure,
 			}
 		}
 	}
