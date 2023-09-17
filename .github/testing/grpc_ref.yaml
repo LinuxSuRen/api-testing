@@ -6,7 +6,6 @@ api: 127.0.0.1:7070
 spec:
   grpc:
     serverReflection: true
-    insecure: true
 items:
   - name: GetVersion
     request:

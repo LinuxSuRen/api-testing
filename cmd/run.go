@@ -260,6 +260,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 
 			runner := runner.GetTestSuiteRunner(testSuite)
 			runner.WithTestReporter(o.reporter)
+			runner.WithSecure(testSuite.Spec.Secure)
 			if output, err = runner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
 				err = fmt.Errorf("failed to run '%s', %v", testCase.Name, err)
 				return

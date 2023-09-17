@@ -6,7 +6,6 @@ api: 127.0.0.1:7070
 spec:
   grpc:
     protoset: .github/testing/server.pb
-    insecure: true
 items:
   - name: GetVersion
     request:

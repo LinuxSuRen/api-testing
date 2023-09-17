@@ -226,6 +226,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		suiteRunner := runner.GetTestSuiteRunner(suite)
 		suiteRunner.WithOutputWriter(buf)
 		suiteRunner.WithWriteLevel(task.Level)
+		suiteRunner.WithSecure(suite.Spec.Secure)
 
 		// reuse the API prefix
 		testCase.Request.RenderAPI(suite.API)
@@ -344,6 +345,12 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 			Spec: &APISpec{
 				Kind: suite.Spec.Kind,
 				Url:  suite.Spec.URL,
+				Secure: &Secure{
+					Insecure:   suite.Spec.Secure.Insecure,
+					Cert:       suite.Spec.Secure.CertFile,
+					Ca:         suite.Spec.Secure.CAFile,
+					ServerName: suite.Spec.Secure.ServerName,
+				},
 			},
 		}
 		if suite.Spec.GRPC != nil {
@@ -352,7 +359,6 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 				ServerReflection: suite.Spec.GRPC.ServerReflection,
 				Protofile:        suite.Spec.GRPC.ProtoFile,
 				Protoset:         suite.Spec.GRPC.ProtoSet,
-				Insecure:         suite.Spec.GRPC.Insecure,
 			}
 		}
 	}

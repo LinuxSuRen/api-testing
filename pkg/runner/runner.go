@@ -12,6 +12,7 @@ import (
 // TestCaseRunner represents a test case runner
 type TestCaseRunner interface {
 	RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error)
+	WithSecure(secure *testing.Secure)
 	WithOutputWriter(io.Writer)
 	WithWriteLevel(level string)
 	WithTestReporter(TestReporter)
@@ -50,6 +51,7 @@ type UnimplementedRunner struct {
 	writer       io.Writer
 	log          LevelWriter
 	execer       fakeruntime.Execer
+	Secure       *testing.Secure
 }
 
 func (r *UnimplementedRunner) RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error) {
@@ -76,4 +78,9 @@ func (r *UnimplementedRunner) WithTestReporter(reporter TestReporter) {
 // WithExecer sets the execer
 func (r *UnimplementedRunner) WithExecer(execer fakeruntime.Execer) {
 	r.execer = execer
+}
+
+// WithSecure sets the secure option.
+func (r *UnimplementedRunner) WithSecure(secure *testing.Secure) {
+	r.Secure = secure
 }

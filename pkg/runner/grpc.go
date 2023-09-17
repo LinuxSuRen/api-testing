@@ -35,6 +35,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/tidwall/gjson"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -93,12 +94,16 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
 
 	var conn *grpc.ClientConn
-	if r.proto.Insecure {
+	if r.Secure == nil || r.Secure.Insecure {
 		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
-		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host))
+		cerd, err := credentials.NewClientTLSFromFile(r.Secure.CertFile, r.Secure.ServerName)
+		if err != nil {
+			return nil, err
+		}
+		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(cerd))
 	}
-	
+
 	if err != nil {
 		return nil, err
 	}
