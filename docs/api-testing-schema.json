@@ -75,6 +75,18 @@
                         },
                         "serverReflection": {
                             "type": "boolean"
+                        }
+                    }
+                },
+                "secure": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "ca": {
+                            "type": "string"
+                        },
+                        "cert": {
+                            "type": "string"
                         },
                         "insecure": {
                             "type": "boolean"
@@ -158,7 +170,7 @@
                         "type": "string"
                     }
                 },
-                "verify":{
+                "verify": {
                     "type": "array",
                     "items": {
                         "type": "string"
