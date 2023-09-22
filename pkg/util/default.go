@@ -67,4 +67,5 @@ const (
 	ContentType       = "Content-Type"
 	MultiPartFormData = "multipart/form-data"
 	Form              = "application/x-www-form-urlencoded"
+	JSON              = "application/json"
 )
