@@ -16,6 +16,7 @@ import (
 	"github.com/antonmedv/expr/vm"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/tidwall/gjson"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -221,7 +222,8 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		}
 	}
 
-	if output, err = verifyResponseBodyData(testcase.Name, testcase.Expect, responseBodyData); err != nil {
+	respType := resp.Header.Get(util.ContentType)
+	if output, err = verifyResponseBodyData(testcase.Name, testcase.Expect, respType, responseBodyData); err != nil {
 		return
 	}
 
@@ -276,13 +278,17 @@ func jsonSchemaValidation(schema string, body []byte) (err error) {
 	return
 }
 
-func verifyResponseBodyData(caseName string, expect testing.Response, responseBodyData []byte) (output interface{}, err error) {
+func verifyResponseBodyData(caseName string, expect testing.Response, responseType string, responseBodyData []byte) (output interface{}, err error) {
 	if expect.Body != "" {
 		if string(responseBodyData) != strings.TrimSpace(expect.Body) {
 			err = fmt.Errorf("case: %s, got different response body, diff: \n%s", caseName,
 				diff.LineDiff(expect.Body, string(responseBodyData)))
 			return
 		}
+	}
+
+	if responseType != util.JSON {
+		return
 	}
 
 	var bodyMap map[string]interface{}
@@ -311,7 +317,7 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseBo
 		}
 	}
 
-	if err = bodyFieldsVerify(expect.BodyFieldsExpect, responseBodyData); err != nil {
+	if err = bodyFieldsVerifyAsJSON(expect.BodyFieldsExpect, responseBodyData); err != nil {
 		return
 	}
 
@@ -319,7 +325,7 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseBo
 	return
 }
 
-func bodyFieldsVerify(bodyFieldsExpect map[string]interface{}, responseBodyData []byte) (err error) {
+func bodyFieldsVerifyAsJSON(bodyFieldsExpect map[string]interface{}, responseBodyData []byte) (err error) {
 	for key, expectVal := range bodyFieldsExpect {
 		result := gjson.Get(string(responseBodyData), key)
 		if result.Exists() {
