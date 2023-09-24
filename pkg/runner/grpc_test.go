@@ -37,6 +37,7 @@ import (
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -60,10 +61,33 @@ func TestGRPCTestCase(t *testing.T) {
 
 	l := runServer(t, s)
 
-	doGRPCTest(t, l, &atest.GRPCDesc{
+	doGRPCTest(t, l, nil, &atest.GRPCDesc{
 		ImportPath: []string{"grpc_test"},
 		ProtoFile:  "test.proto",
 	})
+	s.Stop()
+}
+func TestGRPCTestCaseWithSecure(t *testing.T) {
+	creds, err := credentials.NewServerTLSFromFile("grpc_test/testassets/server.pem", "grpc_test/testassets/server.key")
+	assert.Nil(t, err)
+
+	s := grpc.NewServer(grpc.Creds(creds))
+	testServer := &testsrv.TestServer{}
+	testsrv.RegisterMainServer(s, testServer)
+
+	l := runServer(t, s)
+
+	doGRPCTest(t, l,
+		&atest.Secure{
+			Insecure:   false,
+			CertFile:   "grpc_test/testassets/server.pem",
+			ServerName: "atest",
+		},
+		&atest.GRPCDesc{
+			ImportPath: []string{"grpc_test"},
+			ProtoFile:  "test.proto",
+		})
+
 	s.Stop()
 }
 
@@ -74,9 +98,53 @@ func TestGRPCProtoSetTestCase(t *testing.T) {
 
 	l := runServer(t, s)
 
-	doGRPCTest(t, l, &atest.GRPCDesc{
+	addition := []testUnit{
+		{
+			name: "test get protoset from url but url is error",
+			desc: &atest.GRPCDesc{
+				ProtoSet: "http://localhost/pb",
+			},
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:  "/grpctest.Main/Unary",
+					Body: "{}",
+				},
+			},
+			verify: func(t *testing.T, output any, err error) {
+				assert.NotNil(t, err)
+			},
+		},
+		{
+			name: "test get protoset from url",
+			desc: &atest.GRPCDesc{
+				ProtoSet: "http://localhost/pb",
+			},
+			prepare: func() {
+				gock.New("http://localhost/pb").
+					Reply(200).
+					File("grpc_test/test.pb")
+			},
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:  "/grpctest.Main/Unary",
+					Body: "{}",
+				},
+				Expect: atest.Response{
+					Body: getJSONOrCache("unary", &testsrv.HelloReply{
+						Message: "Hello!",
+					}),
+				},
+			},
+			verify: func(t *testing.T, output any, err error) {
+				assert.Nil(t, err)
+			},
+		},
+	}
+
+	doGRPCTest(t, l, nil, &atest.GRPCDesc{
 		ProtoSet: "grpc_test/test.pb",
-	})
+	},
+		addition...)
 	s.Stop()
 }
 
@@ -88,7 +156,7 @@ func TestGRPCReflectTestCase(t *testing.T) {
 
 	l := runServer(t, s)
 
-	doGRPCTest(t, l, &atest.GRPCDesc{
+	doGRPCTest(t, l, nil, &atest.GRPCDesc{
 		ServerReflection: true,
 	})
 	s.Stop()
@@ -160,6 +228,23 @@ func TestGRPCTestError(t *testing.T) {
 			},
 		},
 		{
+			name:   "test missing descriptor source",
+			execer: nil,
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:  "/grpctest.Main/Unary",
+					Body: "{}",
+				},
+			},
+			ctx:  nil,
+			desc: &atest.GRPCDesc{},
+			prepare: func() {
+			},
+			verify: func(t *testing.T, output any, err error) {
+				assert.NotNil(t, err)
+			},
+		},
+		{
 			name:   "test server is closed",
 			execer: nil,
 			testCase: &atest.TestCase{
@@ -183,7 +268,7 @@ func TestGRPCTestError(t *testing.T) {
 		},
 	}
 
-	runUnits(tests, t, l, &atest.GRPCDesc{})
+	runUnits(tests, t, l, nil, &atest.GRPCDesc{})
 }
 
 func runServer(t *testing.T, s *grpc.Server) net.Listener {
@@ -195,7 +280,7 @@ func runServer(t *testing.T, s *grpc.Server) net.Listener {
 	return l
 }
 
-func doGRPCTest(t *testing.T, l net.Listener, desc *atest.GRPCDesc) {
+func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRPCDesc, addition ...testUnit) {
 	tests := []testUnit{
 		{
 			name:   "test unary rpc",
@@ -366,11 +451,11 @@ func doGRPCTest(t *testing.T, l net.Listener, desc *atest.GRPCDesc) {
 			},
 		},
 	}
-
-	runUnits(tests, t, l, desc)
+	tests = append(tests, addition...)
+	runUnits(tests, t, l, sec, desc)
 }
 
-func runUnits(tests []testUnit, t *testing.T, l net.Listener, desc *atest.GRPCDesc) {
+func runUnits(tests []testUnit, t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRPCDesc) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
@@ -388,6 +473,7 @@ func runUnits(tests []testUnit, t *testing.T, l net.Listener, desc *atest.GRPCDe
 			if tt.execer != nil {
 				runner.WithExecer(tt.execer)
 			}
+			runner.WithSecure(sec)
 			tt.testCase.Request.API = l.Addr().String() + tt.testCase.Request.API
 			output, err := runner.RunTestCase(tt.testCase, tt.ctx, context.TODO())
 			tt.verify(t, output, err)
