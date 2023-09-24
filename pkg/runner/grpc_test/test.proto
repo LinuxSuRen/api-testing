@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+option go_package = "github.com/linuxsuren/api-testing/pkg/runner/grpc_test";
+
+package grpctest;
+
+service Main {
+    rpc Unary(Empty) returns (HelloReply);
+    rpc ClientStream(stream StreamMessage) returns (StreamMessageRepeated);
+    rpc ServerStream(StreamMessageRepeated) returns (stream StreamMessage);
+    rpc BidStream(stream StreamMessage) returns (stream StreamMessage);
+
+    rpc TestBasicType(BasicType) returns (BasicType);
+    rpc TestAdvancedType(AdvancedType) returns (AdvancedType);
+};
+
+message Empty {
+}
+
+message HelloReply {
+    string message = 1;
+}
+
+message StreamMessage{
+    int32 MsgID = 1;
+    int32 ExpectLen =2;
+}
+message StreamMessageRepeated{
+    repeated StreamMessage data = 1;
+}
+  
+message BasicType {
+    int32 Int32 = 1;
+    int64 Int64 = 2;
+    uint32 Uint32 = 3;
+    uint64 Uint64 = 4;
+    float Float32 = 5;
+    double Float64 = 6;
+    string String = 7;
+    bool Bool = 8;
+}
+
+message AdvancedType {
+    repeated int32 Int32Array = 1;
+    repeated int64 Int64Array = 2;
+    repeated uint32 Uint32Array = 3;
+    repeated uint64 Uint64Array = 4;
+    repeated float Float32Array = 5;
+    repeated double Float64Array = 6;
+
+    repeated string StringArray = 7;
+    repeated bool BoolArray = 8;
+
+    map<string, HelloReply> HelloReplyMap = 9;
+}
+
+

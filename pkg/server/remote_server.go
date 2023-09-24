@@ -232,7 +232,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		testCase.Request.RenderAPI(suite.API)
 
 		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
-		if getter, ok := suiteRunner.(runner.HTTPResponseRecord); ok {
+		if getter, ok := suiteRunner.(runner.ResponseRecord); ok {
 			resp := getter.GetResponseRecord()
 			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
 				StatusCode: int32(resp.StatusCode),

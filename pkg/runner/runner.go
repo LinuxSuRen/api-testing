@@ -20,7 +20,7 @@ type TestCaseRunner interface {
 }
 
 // HTTPResponseRecord represents a http response record
-type HTTPResponseRecord interface {
+type ResponseRecord interface {
 	GetResponseRecord() SimpleResponse
 }
 
