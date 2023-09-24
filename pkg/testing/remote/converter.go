@@ -35,13 +35,15 @@ func ConvertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 		Spec: &server.APISpec{
 			Kind: suite.Spec.Kind,
 			Url:  suite.Spec.URL,
-			Secure: &server.Secure{
-				Insecure:   suite.Spec.Secure.Insecure,
-				Cert:       suite.Spec.Secure.CertFile,
-				Ca:         suite.Spec.Secure.CAFile,
-				ServerName: suite.Spec.Secure.ServerName,
-			},
 		},
+	}
+	if suite.Spec.Secure != nil {
+		result.Spec.Secure = &server.Secure{
+			Insecure:   suite.Spec.Secure.Insecure,
+			Cert:       suite.Spec.Secure.CertFile,
+			Ca:         suite.Spec.Secure.CAFile,
+			ServerName: suite.Spec.Secure.ServerName,
+		}
 	}
 	if suite.Spec.GRPC != nil {
 		result.Spec.Grpc = &server.GRPC{
