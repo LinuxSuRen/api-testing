@@ -345,13 +345,15 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 			Spec: &APISpec{
 				Kind: suite.Spec.Kind,
 				Url:  suite.Spec.URL,
-				Secure: &Secure{
-					Insecure:   suite.Spec.Secure.Insecure,
-					Cert:       suite.Spec.Secure.CertFile,
-					Ca:         suite.Spec.Secure.CAFile,
-					ServerName: suite.Spec.Secure.ServerName,
-				},
 			},
+		}
+		if suite.Spec.Secure != nil {
+			result.Spec.Secure = &Secure{
+				Insecure:   suite.Spec.Secure.Insecure,
+				Cert:       suite.Spec.Secure.CertFile,
+				Ca:         suite.Spec.Secure.CAFile,
+				ServerName: suite.Spec.Secure.ServerName,
+			}
 		}
 		if suite.Spec.GRPC != nil {
 			result.Spec.Grpc = &GRPC{
