@@ -44,6 +44,19 @@ import (
 
 var cache sync.Map
 
+const (
+	unary        = "/grpctest.Main/Unary"
+	basic        = "/grpctest.Main/TestBasicType"
+	advanced     = "/grpctest.Main/TestAdvancedType"
+	clienSstream = "/grpctest.Main/ClientStream"
+	serverStream = "/grpctest.Main/ServerStream"
+	bidStream    = "/grpctest.Main/BidStream"
+
+	unknownRPC = "/grpctest.Main/UnknownName"
+
+	pburi = "http://localhost/pb"
+)
+
 type testUnit struct {
 	name     string
 	execer   fakeruntime.Execer
@@ -102,11 +115,11 @@ func TestGRPCProtoSetTestCase(t *testing.T) {
 		{
 			name: "test get protoset from url but url is error",
 			desc: &atest.GRPCDesc{
-				ProtoSet: "http://localhost/pb",
+				ProtoSet: pburi,
 			},
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/Unary",
+					API:  unary,
 					Body: "{}",
 				},
 			},
@@ -126,7 +139,7 @@ func TestGRPCProtoSetTestCase(t *testing.T) {
 			},
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/Unary",
+					API:  unary,
 					Body: "{}",
 				},
 				Expect: atest.Response{
@@ -171,85 +184,68 @@ func TestGRPCTestError(t *testing.T) {
 
 	tests := []testUnit{
 		{
-			name:   "test proto not found",
-			execer: nil,
+			name: "test proto not found",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/Unary",
+					API:  unary,
 					Body: "{}",
 				},
 			},
-			ctx: nil,
 			desc: &atest.GRPCDesc{
 				ProtoFile: "unknown",
 			},
-			prepare: func() {
-			},
 			verify: func(t *testing.T, output any, err error) {
 				assert.NotNil(t, err)
 			},
 		},
 		{
-			name:   "test proto set found",
-			execer: nil,
+			name: "test proto set found",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/Unary",
+					API:  unary,
 					Body: "{}",
 				},
 			},
-			ctx: nil,
 			desc: &atest.GRPCDesc{
 				ProtoSet: "unknown",
 			},
-			prepare: func() {
-			},
 			verify: func(t *testing.T, output any, err error) {
 				assert.NotNil(t, err)
 			},
 		},
 		{
-			name:   "test reflect on unsupported server",
-			execer: nil,
+			name: "test reflect on unsupported server",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/Unary",
+					API:  unary,
 					Body: "{}",
 				},
 			},
-			ctx: nil,
 			desc: &atest.GRPCDesc{
 				ServerReflection: true,
 			},
-			prepare: func() {
-			},
 			verify: func(t *testing.T, output any, err error) {
 				assert.NotNil(t, err)
 			},
 		},
 		{
-			name:   "test missing descriptor source",
-			execer: nil,
+			name: "test missing descriptor source",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/Unary",
+					API:  unary,
 					Body: "{}",
 				},
 			},
-			ctx:  nil,
 			desc: &atest.GRPCDesc{},
-			prepare: func() {
-			},
 			verify: func(t *testing.T, output any, err error) {
 				assert.NotNil(t, err)
 			},
 		},
 		{
-			name:   "test server is closed",
-			execer: nil,
+			name: "test server is closed",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/Unary",
+					API:  unary,
 					Body: "{}",
 				},
 				Expect: atest.Response{
@@ -258,7 +254,6 @@ func TestGRPCTestError(t *testing.T) {
 					}),
 				},
 			},
-			ctx: nil,
 			prepare: func() {
 				s.Stop()
 			},
@@ -283,11 +278,10 @@ func runServer(t *testing.T, s *grpc.Server) net.Listener {
 func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRPCDesc, addition ...testUnit) {
 	tests := []testUnit{
 		{
-			name:   "test unary rpc",
-			execer: nil,
+			name: "test unary rpc",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/Unary",
+					API:  unary,
 					Body: "{}",
 				},
 				Expect: atest.Response{
@@ -304,7 +298,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			name: "test client stream rpc",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API: "/grpctest.Main/ClientStream",
+					API: clienSstream,
 					Body: getJSONOrCache("stream", []*testsrv.StreamMessage{
 						{MsgID: 1, ExpectLen: 3},
 						{MsgID: 2, ExpectLen: 3},
@@ -330,7 +324,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			name: "test server stream rpc",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/ServerStream",
+					API:  serverStream,
 					Body: getJSONOrCache("streamRepeted", nil),
 				},
 				Expect: atest.Response{
@@ -346,7 +340,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			name: "test bid stream rpc",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/BidStream",
+					API:  bidStream,
 					Body: getJSONOrCache("stream", nil),
 				},
 				Expect: atest.Response{
@@ -361,7 +355,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			name: "test basic type",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API: "/grpctest.Main/TestBasicType",
+					API: basic,
 					Body: getJSONOrCache("basic",
 						&testsrv.BasicType{
 							Int32:   rand.Int31(),
@@ -386,7 +380,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			name: "test advanced type",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API: "/grpctest.Main/TestAdvancedType",
+					API: advanced,
 					Body: getJSONOrCache("advanced",
 						&testsrv.AdvancedType{
 							Int32Array:   []int32{rand.Int31(), rand.Int31()},
@@ -411,11 +405,10 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			},
 		},
 		{
-			name:   "test unknown rpc",
-			execer: nil,
+			name: "test unknown rpc",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/UnknownName",
+					API:  unknownRPC,
 					Body: "{}",
 				},
 			},
@@ -425,11 +418,10 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			},
 		},
 		{
-			name:   "test invalid input",
-			execer: nil,
+			name: "test invalid input",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/TestBasicType",
+					API:  basic,
 					Body: "{",
 				},
 			},
@@ -438,11 +430,10 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			},
 		},
 		{
-			name:   "test wrong input type",
-			execer: nil,
+			name: "test wrong input type",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
-					API:  "/grpctest.Main/TestBasicType",
+					API:  basic,
 					Body: getJSONOrCache("unary", nil),
 				},
 			},

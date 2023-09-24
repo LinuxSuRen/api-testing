@@ -479,9 +479,6 @@ func verifyResponsePayload(md protoreflect.MethodDescriptor, caseName string, ex
 			return r
 		}(),
 	}
-	if md.IsStreamingClient() {
-
-	}
 
 	if err = payloadFieldsVerify(md, caseName, expect, jsonPayload); err != nil {
 		return
