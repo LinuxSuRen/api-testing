@@ -11,6 +11,8 @@ FROM golang:1.18 AS builder
 
 ARG VERSION
 ARG GOPROXY
+# it could be -toolexec="skywalking-go-agent"
+ARG TOOLEXEC
 WORKDIR /workspace
 COPY cmd/ cmd/
 COPY pkg/ pkg/
@@ -34,7 +36,7 @@ COPY --from=ui /workspace/dist/assets/*.css cmd/data/index.css
 COPY --from=sk /usr/local/bin/skywalking-go-agent /usr/local/bin/skywalking-go-agent
 
 RUN GOPROXY=${GOPROXY} go mod download
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -toolexec="skywalking-go-agent" -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}" -o atest .
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build ${TOOLEXEC} -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}" -o atest .
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go

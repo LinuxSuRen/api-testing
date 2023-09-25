@@ -53,6 +53,7 @@ func createServerCmd(execer fakeruntime.Execer, gRPCServer gRPCServer, httpServe
 	flags.StringVarP(&opt.consolePath, "console-path", "", "", "The path of the console")
 	flags.StringVarP(&opt.configDir, "config-dir", "", os.ExpandEnv("$HOME/.config/atest"), "The config directory")
 	flags.StringVarP(&opt.secretServer, "secret-server", "", "", "The secret server URL")
+	flags.StringVarP(&opt.skyWalking, "skywalking", "", "", "Push the browser tracing data to the Apache SkyWalking URL")
 	return
 }
 
@@ -68,6 +69,7 @@ type serverOption struct {
 	consolePath  string
 	secretServer string
 	configDir    string
+	skyWalking   string
 }
 
 func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
@@ -159,6 +161,10 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 
+		postRequestProxyFunc := postRequestProxy(o.skyWalking)
+		mux.HandlePath(http.MethodPost, "/browser/{app}", postRequestProxyFunc)
+		mux.HandlePath(http.MethodPost, "/v3/segments", postRequestProxyFunc)
+
 		// Create non-global registry.
 		reg := prometheus.NewRegistry()
 
@@ -178,6 +184,20 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		err = util.IgnoreErrServerClosed(err)
 	}
 	return
+}
+
+func postRequestProxy(proxy string) func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	if proxy == "" {
+		return func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {}
+	}
+
+	if strings.HasSuffix(proxy, "/") {
+		proxy = strings.TrimSuffix(proxy, "/")
+	}
+
+	return func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		http.Post(fmt.Sprintf("%s%s", proxy, r.URL.Path), "application/json", r.Body)
+	}
 }
 
 func startPlugins(execer fakeruntime.Execer, kinds *server.StoreKinds) (err error) {

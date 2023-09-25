@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/h2non/gock"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
@@ -170,6 +171,35 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 
 		opt.getAtestBinary(resp, req, map[string]string{})
 		assert.Equal(t, "failed to read atest: open : no such file or directory", resp.GetBody().String())
+	})
+}
+
+func TestProxy(t *testing.T) {
+	t.Run("normal", func(t *testing.T) {
+		gock.Off()
+
+		gock.New("http://localhost:8080").Post("/api/v1/echo").Reply(http.StatusOK)
+		gock.New("http://localhost:9090").Post("/api/v1/echo").Reply(http.StatusOK)
+
+		handle := postRequestProxy("http://localhost:9090/")
+		req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/echo", strings.NewReader(`{"message": "hello"}`))
+		assert.NoError(t, err)
+
+		resp := newFakeResponseWriter()
+		handle(resp, req, map[string]string{})
+	})
+
+	t.Run("no proxy", func(t *testing.T) {
+		gock.Off()
+
+		gock.New("http://localhost:8080").Post("/api/v1/echo").Reply(http.StatusOK)
+
+		handle := postRequestProxy("")
+		req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/echo", strings.NewReader(`{"message": "hello"}`))
+		assert.NoError(t, err)
+
+		resp := newFakeResponseWriter()
+		handle(resp, req, map[string]string{})
 	})
 }
 

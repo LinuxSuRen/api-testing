@@ -18,6 +18,7 @@
   "dependencies": {
     "element-plus": "^2.3.7",
     "intro.js": "^7.0.1",
+    "skywalking-client-js": "^0.10.0",
     "vue": "^3.3.4",
     "vue-i18n": "^9.2.2",
     "vue-json-viewer": "^3.0.4",
