@@ -1,10 +1,11 @@
 IMG_TOOL?=podman
 BINARY?=atest
+TOOLEXEC?=-toolexec="skywalking-go-agent"
 
 build:
 	mkdir -p bin
 	rm -rf bin/atest
-	go build -o bin/atest main.go
+	go build ${TOOLEXEC} -a -o bin/atest main.go
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
 embed-ui:
@@ -17,7 +18,7 @@ clean-embed-ui:
 	git checkout cmd/data/index.js
 	git checkout cmd/data/index.css
 build-embed-ui: embed-ui
-	GOOS=${OS} go build -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git rev-parse --short HEAD)" -o bin/${BINARY} main.go
+	GOOS=${OS} go build ${TOOLEXEC} -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git rev-parse --short HEAD)" -o bin/${BINARY} main.go
 	make clean-embed-ui
 build-win-embed-ui:
 	BINARY=atest.exe OS=windows make build-embed-ui

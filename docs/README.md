@@ -134,8 +134,16 @@ pipeline {
 ```
 
 ## Report
-
 You can see the test results from [Grafana](prometheus.md).
+
+## Monitoring
+It could monitor the server and browser via the [Apache SkyWalking](https://skywalking.apache.org/).
+Please add the following flag if you want to get the browser tracing data:
+
+```shell
+# 12800 is the HTTP port of Apache SkyWalking
+atest server --skywalking http://localhost:12800
+```
 
 ## Storage
 There are multiple storage backends supported. See the status from the list:
