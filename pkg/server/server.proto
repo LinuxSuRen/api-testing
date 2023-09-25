@@ -92,6 +92,7 @@ message Secure {
   string cert = 2;
   string ca = 3;
   string serverName = 4;
+  string key = 5;
 }
 
 message GRPC{

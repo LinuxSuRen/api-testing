@@ -353,6 +353,7 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 				Cert:       suite.Spec.Secure.CertFile,
 				Ca:         suite.Spec.Secure.CAFile,
 				ServerName: suite.Spec.Secure.ServerName,
+				Key:        suite.Spec.Secure.KeyFile,
 			}
 		}
 		if suite.Spec.GRPC != nil {

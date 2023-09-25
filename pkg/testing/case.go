@@ -26,7 +26,8 @@ type Secure struct {
 	Insecure   bool   `yaml:"insecure,omitempty" json:"insecure,omitempty"`
 	CertFile   string `yaml:"cert,omitempty" json:"cert,omitempty"`
 	CAFile     string `yaml:"ca,omitempty" json:"ca,omitempty"`
-	ServerName string `yaml:"serverName,omitempty",json:"serverName,omitempty"`
+	KeyFile    string `yaml:"key,omitempty" json:"key,omitempty"`
+	ServerName string `yaml:"serverName,omitempty" json:"serverName,omitempty"`
 }
 
 // TestCase represents a test case

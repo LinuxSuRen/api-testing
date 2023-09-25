@@ -82,7 +82,10 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                        "ca": {
+                        "key": {
+                            "type": "string"
+                        },
+                        "serverName": {
                             "type": "string"
                         },
                         "cert": {
