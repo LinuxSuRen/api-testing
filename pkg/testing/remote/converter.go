@@ -37,6 +37,15 @@ func ConvertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 			Url:  suite.Spec.URL,
 		},
 	}
+	if suite.Spec.Secure != nil {
+		result.Spec.Secure = &server.Secure{
+			Insecure:   suite.Spec.Secure.Insecure,
+			Cert:       suite.Spec.Secure.CertFile,
+			Ca:         suite.Spec.Secure.CAFile,
+			ServerName: suite.Spec.Secure.ServerName,
+			Key:        suite.Spec.Secure.KeyFile,
+		}
+	}
 	if suite.Spec.GRPC != nil {
 		result.Spec.Grpc = &server.GRPC{
 			Import:           suite.Spec.GRPC.ImportPath,

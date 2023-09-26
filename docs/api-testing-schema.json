@@ -77,6 +77,24 @@
                             "type": "boolean"
                         }
                     }
+                },
+                "secure": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "key": {
+                            "type": "string"
+                        },
+                        "serverName": {
+                            "type": "string"
+                        },
+                        "cert": {
+                            "type": "string"
+                        },
+                        "insecure": {
+                            "type": "boolean"
+                        }
+                    }
                 }
             }
         },
@@ -155,7 +173,7 @@
                         "type": "string"
                     }
                 },
-                "verify":{
+                "verify": {
                     "type": "array",
                     "items": {
                         "type": "string"

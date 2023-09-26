@@ -101,9 +101,24 @@ grpc-ts:
 	protoc -I=pkg/server server.proto \
     --js_out=import_style=commonjs,binary:console/atest-ui/src \
     --grpc-web_out=import_style=typescript,mode=grpcwebtext:console/atest-ui/src
-grpc-java:
-	protoc --plugin=protoc-gen-grpc-java=/usr/local/bin/protoc-gen-grpc-java \
-    --grpc-java_out=bin --proto_path=pkg/server server.proto
+# grpc-java:
+# 	protoc --plugin=protoc-gen-grpc-java=/usr/local/bin/protoc-gen-grpc-java \
+#     --grpc-java_out=bin --proto_path=pkg/server server.proto
+grpc-decs:
+	protoc --proto_path=. \
+	--descriptor_set_out=.github/testing/server.pb \
+    pkg/server/server.proto 
+
+grpc-testproto:
+	protoc -I . \
+	--descriptor_set_out=pkg/runner/grpc_test/test.pb \
+	pkg/runner/grpc_test/test.proto
+
+	protoc -I . \
+	--go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+	pkg/runner/grpc_test/test.proto
+
 install-tool:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2

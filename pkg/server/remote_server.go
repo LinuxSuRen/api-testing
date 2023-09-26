@@ -228,12 +228,13 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		suiteRunner := runner.GetTestSuiteRunner(suite)
 		suiteRunner.WithOutputWriter(buf)
 		suiteRunner.WithWriteLevel(task.Level)
+		suiteRunner.WithSecure(suite.Spec.Secure)
 
 		// reuse the API prefix
 		testCase.Request.RenderAPI(suite.API)
 
 		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
-		if getter, ok := suiteRunner.(runner.HTTPResponseRecord); ok {
+		if getter, ok := suiteRunner.(runner.ResponseRecord); ok {
 			resp := getter.GetResponseRecord()
 			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
 				StatusCode: int32(resp.StatusCode),
@@ -347,6 +348,15 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 				Kind: suite.Spec.Kind,
 				Url:  suite.Spec.URL,
 			},
+		}
+		if suite.Spec.Secure != nil {
+			result.Spec.Secure = &Secure{
+				Insecure:   suite.Spec.Secure.Insecure,
+				Cert:       suite.Spec.Secure.CertFile,
+				Ca:         suite.Spec.Secure.CAFile,
+				ServerName: suite.Spec.Secure.ServerName,
+				Key:        suite.Spec.Secure.KeyFile,
+			}
 		}
 		if suite.Spec.GRPC != nil {
 			result.Spec.Grpc = &GRPC{

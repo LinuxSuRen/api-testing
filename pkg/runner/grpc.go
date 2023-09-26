@@ -22,8 +22,11 @@ package runner
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -33,24 +36,28 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/tidwall/gjson"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/dynamicpb"
 )
 
 type gRPCTestCaseRunner struct {
 	UnimplementedRunner
-	host  string
-	proto testing.GRPCDesc
+	host     string
+	proto    testing.GRPCDesc
+	response SimpleResponse
 	// fdCache sync.Map
 }
 
 var regexFullQualifiedName = regexp.MustCompile(`^([\w\.:]+)\/([\w\.]+)\/(\w+)$`)
+var regexURLPrefix = regexp.MustCompile(`^https?://`)
 
 func NewGRPCTestCaseRunner(host string, proto testing.GRPCDesc) TestCaseRunner {
 	runner := &gRPCTestCaseRunner{
@@ -88,7 +95,18 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	}
 
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
-	conn, err := grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	var conn *grpc.ClientConn
+	if r.Secure == nil || r.Secure.Insecure {
+		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	} else {
+		cerd, err := credentials.NewClientTLSFromFile(r.Secure.CertFile, r.Secure.ServerName)
+		if err != nil {
+			return nil, err
+		}
+		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(cerd))
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +114,9 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 
 	md, err := getMethodDescriptor(ctx, r, testcase, conn)
 	if err != nil {
+		if err == protoregistry.NotFound {
+			return nil, fmt.Errorf("api %q is not found", testcase.Request.API)
+		}
 		return nil, err
 	}
 
@@ -108,7 +129,7 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	record.Body = strings.Join(respsStr, ",")
 	r.log.Debug("response body: %s\n", record.Body)
 
-	output, err = verifyResponsePayload(testcase.Name, testcase.Expect, respsStr)
+	output, err = verifyResponsePayload(md, testcase.Name, testcase.Expect, respsStr)
 	if err != nil {
 		return nil, err
 	}
@@ -116,21 +137,16 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	return output, nil
 }
 
+func (r *gRPCTestCaseRunner) GetResponseRecord() SimpleResponse {
+	return r.response
+}
+
 func invokeRequest(ctx context.Context, md protoreflect.MethodDescriptor, payload string, conn *grpc.ClientConn) (respones []string, err error) {
 	resps := make([]*dynamicpb.Message, 0)
 	if md.IsStreamingClient() || md.IsStreamingServer() {
-		gpayload := gjson.Parse(payload)
-		if !gpayload.IsArray() {
-			return nil, fmt.Errorf("payload is not a JSON array")
-		}
-
-		reqs := make([]*dynamicpb.Message, len(gpayload.Array()))
-		for i, v := range gpayload.Array() {
-			req, err := getReqMessagePb(md, v.Raw)
-			if err != nil {
-				return nil, err
-			}
-			reqs[i] = req
+		reqs, err := getStreamMessagepb(md.Input(), payload)
+		if err != nil {
+			return nil, err
 		}
 
 		resps, err = invokeRPCStream(ctx, conn, md, reqs)
@@ -139,7 +155,7 @@ func invokeRequest(ctx context.Context, md protoreflect.MethodDescriptor, payloa
 		}
 		return buildResponses(resps)
 	}
-	request, err := getReqMessagePb(md, payload)
+	request, err := getMessagePb(md.Input(), payload)
 	if err != nil {
 		return nil, err
 	}
@@ -153,8 +169,30 @@ func invokeRequest(ctx context.Context, md protoreflect.MethodDescriptor, payloa
 	return buildResponses(resps)
 }
 
-func getReqMessagePb(md protoreflect.MethodDescriptor, message string) (messagepb *dynamicpb.Message, err error) {
-	request := dynamicpb.NewMessage(md.Input())
+func getStreamMessagepb(md protoreflect.MessageDescriptor, messages string) ([]*dynamicpb.Message, error) {
+	gpayload := gjson.Parse(messages)
+	var garray []gjson.Result
+
+	if !gpayload.IsArray() {
+		garray = []gjson.Result{gpayload}
+	} else {
+		garray = gpayload.Array()
+	}
+	reqs := make([]*dynamicpb.Message, len(garray))
+
+	for i, v := range garray {
+		req, err := getMessagePb(md, v.Raw)
+		if err != nil {
+			return nil, err
+		}
+		reqs[i] = req
+	}
+
+	return reqs, nil
+}
+
+func getMessagePb(md protoreflect.MessageDescriptor, message string) (messagepb *dynamicpb.Message, err error) {
+	request := dynamicpb.NewMessage(md)
 	if message != "" {
 		err := protojson.Unmarshal([]byte(message), request)
 		if err != nil {
@@ -191,7 +229,7 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 	if r.proto.ServerReflection {
 		dp, err = getByReflect(ctx, r, fullname, conn)
 	} else {
-		if r.proto.ProtoFile == "" {
+		if r.proto.ProtoFile == "" && r.proto.ProtoSet == "" {
 			return nil, fmt.Errorf("missing descriptor source")
 		}
 		dp, err = getByProto(ctx, r, fullname)
@@ -202,16 +240,20 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 	}
 
 	if dp.IsPlaceholder() {
-		return nil, fmt.Errorf("%q is not found", fullname)
+		return nil, protoregistry.NotFound
 	}
 
 	if md, ok := dp.(protoreflect.MethodDescriptor); ok {
 		return md, nil
 	}
-	return nil, fmt.Errorf("%q is not a gRPC method", fullname)
+	return nil, protoregistry.NotFound
 }
 
 func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflect.FullName) (protoreflect.Descriptor, error) {
+	if r.proto.ProtoSet != "" {
+		return getByProtoSet(ctx, r, fullName)
+	}
+
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(
 			&protocompile.SourceResolver{
@@ -226,6 +268,47 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 	}
 
 	dp, err := linker.AsResolver().FindDescriptorByName(fullName)
+	if err != nil {
+		return nil, err
+	}
+
+	// r.fdCache.Store(fullName.Parent(), dp.ParentFile())
+	return dp, nil
+}
+
+func getByProtoSet(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflect.FullName) (protoreflect.Descriptor, error) {
+	var decs []byte
+	var err error
+	if regexURLPrefix.FindString(r.proto.ProtoSet) != "" {
+		resp, err := http.Get(r.proto.ProtoSet)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		decs, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		decs, err = os.ReadFile(r.proto.ProtoSet)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	fds := &descriptorpb.FileDescriptorSet{}
+	err = proto.Unmarshal(decs, fds)
+	if err != nil {
+		return nil, err
+	}
+
+	prfs, err := protodesc.NewFiles(fds)
+	if err != nil {
+		return nil, err
+	}
+
+	dp, err := prfs.FindDescriptorByName(fullName)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +366,7 @@ func getByReflect(ctx context.Context, r *gRPCTestCaseRunner, fullName protorefl
 		}
 	}
 
-	return nil, fmt.Errorf("%q is not found", fullName)
+	return nil, protoregistry.NotFound
 }
 
 func getMdFromFd(fd protoreflect.FileDescriptor, fullname protoreflect.FullName) (md protoreflect.MethodDescriptor, err error) {
@@ -384,12 +467,20 @@ sendLoop:
 	}
 }
 
-func verifyResponsePayload(caseName string, expect testing.Response, jsonPayload []string) (output any, err error) {
+func verifyResponsePayload(md protoreflect.MethodDescriptor, caseName string, expect testing.Response, jsonPayload []string) (output any, err error) {
 	mapOutput := map[string]any{
-		"data": jsonPayload,
+		"data": func() []map[string]any {
+			r := make([]map[string]any, len(jsonPayload))
+			for i := range jsonPayload {
+				m := map[string]any{}
+				_ = json.Unmarshal([]byte(jsonPayload[i]), &m)
+				r[i] = m
+			}
+			return r
+		}(),
 	}
 
-	if err = payloadFieldsVerify(caseName, expect, jsonPayload); err != nil {
+	if err = payloadFieldsVerify(md, caseName, expect, jsonPayload); err != nil {
 		return
 	}
 
@@ -400,17 +491,20 @@ func verifyResponsePayload(caseName string, expect testing.Response, jsonPayload
 	return
 }
 
-func payloadFieldsVerify(caseName string, expect testing.Response, jsonPayload []string) error {
+func payloadFieldsVerify(md protoreflect.MethodDescriptor, caseName string, expect testing.Response, jsonPayload []string) error {
 	if expect.Body == "" {
 		return nil
 	}
 
 	if !gjson.Valid(expect.Body) {
-		fmt.Printf("expect.Body: %v\n", expect.Body)
 		return fmt.Errorf("case %q: expect body is not a valid JSON", caseName)
 	}
 
-	exp := gjson.Parse(expect.Body)
+	exp, err := parseExpect(md, expect)
+	if err != nil {
+		return err
+	}
+
 	gjsonPayload := make([]gjson.Result, len(jsonPayload))
 	for i := range jsonPayload {
 		gjsonPayload[i] = gjson.Parse(jsonPayload[i])
@@ -436,4 +530,29 @@ func payloadFieldsVerify(caseName string, expect testing.Response, jsonPayload [
 		return nil
 	}
 	return fmt.Errorf("case %q: unknown expect content", caseName)
+}
+
+func parseExpect(md protoreflect.MethodDescriptor, expect testing.Response) (exps gjson.Result, err error) {
+	b := strings.TrimSpace(expect.Body)
+	var msgb []byte
+	if b[0] == '[' {
+		msgpbs, err := getStreamMessagepb(md.Output(), b)
+		if err != nil {
+			return gjson.Result{}, err
+		}
+		msgb = append(msgb, '[')
+		for i := range msgpbs {
+			msg, _ := json.Marshal(msgpbs[i])
+			msgb = append(msgb, msg...)
+			msg = append(msg, ',')
+		}
+		msgb[len(msgb)-1] = ']'
+	} else {
+		msgpb, err := getMessagePb(md.Output(), expect.Body)
+		if err != nil {
+			return gjson.Result{}, err
+		}
+		msgb, _ = json.Marshal(msgpb)
+	}
+	return gjson.ParseBytes(msgb), nil
 }

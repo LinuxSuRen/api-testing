@@ -83,14 +83,23 @@ message TestSuite {
 message APISpec {
   string kind = 1;
   string url = 2;
-  GRPC grpc=3;
+  GRPC grpc = 3;
+  Secure secure = 4;
+}
+
+message Secure {
+  bool insecure = 1;
+  string cert = 2;
+  string ca = 3;
+  string serverName = 4;
+  string key = 5;
 }
 
 message GRPC{
-  repeated string import =1;
-  bool serverReflection =2;
-  string protofile =3;
-  string protoset =4;
+  repeated string import = 1;
+  bool serverReflection = 2;
+  string protofile = 3;
+  string protoset = 4;
 }
 
 message TestSuiteIdentity {
