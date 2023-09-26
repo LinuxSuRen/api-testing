@@ -46,7 +46,14 @@ Mirror Images: docker.m.daocloud.io/linuxsuren/api-testing`,
 	flags.StringVarP(&opt.localStorage, "local-storage", "", "/var/data/atest",
 		"The local storage path which will be mounted into the container")
 	flags.StringVarP(&opt.secretServer, "secret-server", "", "", "The secret server URL")
+	flags.StringVarP(&opt.skyWalking, "skywalking", "", "", "Push the browser tracing data to the Apache SkyWalking URL")
 	return
+}
+
+type serverFeatureOption struct {
+	secretServer string
+	skyWalking   string
+	localStorage string
 }
 
 type serviceOption struct {
@@ -56,11 +63,10 @@ type serviceOption struct {
 	image      string
 	version    string
 	fakeruntime.Execer
-	mode         string
-	localStorage string
-	pull         string
-	secretServer string
+	mode string
+	pull string
 
+	serverFeatureOption
 	stdOut io.Writer
 }
 
@@ -215,7 +221,7 @@ func (o *serviceOption) getContainerService() (service Service, err error) {
 			clientPath = client
 		}
 		service = newContainerService(o.Execer, clientPath,
-			o.image, o.version, o.pull, o.localStorage, o.secretServer, o.stdOut)
+			o.image, o.version, o.pull, o.serverFeatureOption, o.stdOut)
 	}
 	return
 }
@@ -322,13 +328,15 @@ type containerService struct {
 	pull         string
 	localStorage string
 	secretServer string
+	skyWalking   string
 	stdOut       io.Writer
 	errOut       io.Writer
 }
 
 const defaultImage = "ghcr.io/linuxsuren/api-testing"
 
-func newContainerService(execer fakeruntime.Execer, client, image, tag, pull, localStorage string, secretServer string, writer io.Writer) (svc Service) {
+func newContainerService(execer fakeruntime.Execer, client, image, tag, pull string,
+	featureOption serverFeatureOption, writer io.Writer) (svc Service) {
 	if tag == "" {
 		tag = "latest"
 	}
@@ -343,8 +351,9 @@ func newContainerService(execer fakeruntime.Execer, client, image, tag, pull, lo
 		image:        image,
 		tag:          tag,
 		pull:         pull,
-		localStorage: localStorage,
-		secretServer: secretServer,
+		localStorage: featureOption.localStorage,
+		secretServer: featureOption.secretServer,
+		skyWalking:   featureOption.skyWalking,
 		stdOut:       writer,
 		errOut:       writer,
 	}
@@ -413,6 +422,9 @@ func (s *containerService) getStartArgs() []string {
 		"atest", "server"}
 	if s.secretServer != "" {
 		args = append(args, "--secret-server="+s.secretServer)
+	}
+	if s.skyWalking != "" {
+		args = append(args, "--skywalking="+s.skyWalking)
 	}
 	args = append(args, "--console-path=/var/www/html")
 	return args

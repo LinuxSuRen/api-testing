@@ -173,7 +173,9 @@ func TestService(t *testing.T) {
 				NewFakeGRPCServer(), server.NewFakeHTTPServer())
 			normalRoot.SetOut(buf)
 			normalRoot.SetArgs([]string{"service", "--action", tt.action,
-				"--script-path", tmpFile.Name(), "--mode", tt.mode, "--image="})
+				"--script-path", tmpFile.Name(), "--mode", tt.mode, "--image=",
+				"--skywalking=http://localhost:8080",
+				"--secret-server=http://localhost:9090"})
 			err = normalRoot.Execute()
 			assert.Nil(t, err)
 			assert.Equal(t, tt.expectOutput, strings.TrimSpace(buf.String()))
