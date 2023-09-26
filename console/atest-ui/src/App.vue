@@ -13,6 +13,7 @@ import type { Suite } from './types'
 import { GetLastTestCaseLocation, SetLastTestCaseLocation } from './views/cache'
 import { DefaultResponseProcess } from './views/net'
 import { useI18n } from 'vue-i18n'
+import ClientMonitor from 'skywalking-client-js';
 
 const { t } = useI18n()
 
@@ -281,6 +282,14 @@ const filterTestCases = (value: string, data: Tree) => {
 }
 
 const viewName = ref('')
+watch(viewName, (val) => {
+  ClientMonitor.setPerformance({
+    service: 'atest-ui',
+    serviceVersion: 'v0.0.1',
+    pagePath: val,
+    useFmp: true
+  });
+})
 </script>
 
 <template>

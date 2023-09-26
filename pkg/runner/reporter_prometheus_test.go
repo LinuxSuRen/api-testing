@@ -25,6 +25,7 @@ SOFTWARE.
 package runner_test
 
 import (
+	"errors"
 	"net/http"
 	"testing"
 	"time"
@@ -50,5 +51,12 @@ func TestPutRecordToPrometheus(t *testing.T) {
 		Name:      "bar",
 		BeginTime: now,
 		EndTime:   now.Add(time.Second * 3),
+	})
+	reporter.PutRecord(&runner.ReportRecord{
+		Group:     "foo",
+		Name:      "bar",
+		BeginTime: now,
+		EndTime:   now.Add(time.Second * 3),
+		Error:     errors.New("fake"),
 	})
 }

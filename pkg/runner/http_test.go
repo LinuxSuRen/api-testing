@@ -26,7 +26,8 @@ func TestTestCase(t *testing.T) {
 	}
 	defaultPrepare := func() {
 		gock.New(urlLocalhost).
-			Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`)
+			Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`).
+			SetHeader(util.ContentType, util.JSON)
 	}
 	defaultPostPrepare := func() {
 		gock.New(urlLocalhost).
@@ -80,6 +81,7 @@ func TestTestCase(t *testing.T) {
 				MatchHeader("key", "value").
 				Reply(http.StatusOK).
 				SetHeader("type", "generic").
+				SetHeader(util.ContentType, util.JSON).
 				File("testdata/generic_response.json")
 		},
 		verify: func(t *testing.T, output interface{}, err error) {
@@ -99,6 +101,7 @@ func TestTestCase(t *testing.T) {
 			gock.New(urlLocalhost).
 				Get("/foo").
 				Reply(http.StatusOK).
+				SetHeader(util.ContentType, util.JSON).
 				BodyString(`["foo", "bar"]`)
 		},
 		verify: func(t *testing.T, output interface{}, err error) {
@@ -120,7 +123,8 @@ func TestTestCase(t *testing.T) {
 		prepare: func() {
 			gock.New(urlLocalhost).
 				Post("/foo").BodyString(genericBody).
-				Reply(http.StatusOK).BodyString("123")
+				Reply(http.StatusOK).BodyString("123").
+				SetHeader(util.ContentType, util.JSON)
 		},
 	}, {
 		name: "response from a not found file",
@@ -478,7 +482,7 @@ func TestBodyFiledsVerify(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := bodyFieldsVerify(tt.bodyFields, []byte(tt.body))
+			err := bodyFieldsVerifyAsJSON(tt.bodyFields, []byte(tt.body))
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})
 	}
@@ -501,7 +505,8 @@ func noError(t *testing.T, output interface{}, err error) {
 
 func prepareForFoo() {
 	gock.New(urlLocalhost).
-		Get("/foo").Reply(http.StatusOK).BodyString(genericBody)
+		Get("/foo").Reply(http.StatusOK).BodyString(genericBody).
+		SetHeader(util.ContentType, util.JSON)
 }
 
 //go:embed testdata/generic_response.json

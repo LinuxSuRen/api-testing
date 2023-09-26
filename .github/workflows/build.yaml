@@ -45,7 +45,7 @@ jobs:
           go-version: 1.18.x
       - name: API Test
         run: |
-          make build copy
+          TOOLEXEC= make build copy
           sudo atest service install
           sudo atest service restart
           sudo atest service status
@@ -111,7 +111,7 @@ jobs:
           cache-dependency-path: console/atest-ui/package-lock.json
       - name: Build
         run: |
-          make build-embed-ui copy
+          TOOLEXEC= make build-embed-ui copy
           sudo atest service install
           sudo atest service restart
       - name: Test

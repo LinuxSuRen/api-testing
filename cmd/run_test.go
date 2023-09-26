@@ -66,7 +66,7 @@ func TestRunSuite(t *testing.T) {
 				Get("/bar").
 				Reply(http.StatusOK)
 		},
-		hasError: true,
+		hasError: false,
 	}, {
 		name:      "not found file",
 		suiteFile: "testdata/fake.yaml",
