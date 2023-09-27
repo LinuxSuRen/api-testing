@@ -151,16 +151,7 @@ func (g *gRPCLoader) GetTestSuite(name string, full bool) (suite testing.TestSui
 	var result *TestSuite
 	if result, err = g.client.GetTestSuite(g.ctx,
 		&TestSuite{Name: name, Full: full}); err == nil {
-		suite = testing.TestSuite{
-			Name: result.Name,
-			API:  result.Api,
-		}
-
-		if result.Items != nil {
-			for i := range result.Items {
-				suite.Items = append(suite.Items, ConvertToNormalTestCase(result.Items[i]))
-			}
-		}
+		suite = *ConvertToNormalTestSuite(result)
 	}
 	return
 }

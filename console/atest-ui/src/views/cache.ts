@@ -1,6 +1,7 @@
 export interface TestCaseResponse {
     output: string
-    body: {}
+    body: {},
+    statusCode: number
 }
 
 export function GetTestCaseResponseCache(id: string) {
