@@ -64,7 +64,8 @@ const sendRequest = async () => {
 
       SetTestCaseResponseCache(suite + '-' + name, {
         body: testResult.value.bodyObject,
-        output: e.output
+        output: e.output,
+        statusCode: testResult.value.statusCode
       } as TestCaseResponse)
     })
     .catch((e) => {
@@ -159,14 +160,15 @@ function load() {
   }
 
   // load cache
-  console.log('load cache')
   const cache = GetTestCaseResponseCache(suite + '-' + name)
   if (cache.body) {
     testResult.value.bodyObject = cache.body
     testResult.value.output = cache.output
+    testResult.value.statusCode = cache.statusCode
   } else {
     testResult.value.bodyObject = {}
     testResult.value.output = ''
+    testResult.value.statusCode = 0
   }
 
   const requestOptions = {
@@ -643,6 +645,9 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
       <el-footer>
         <el-tabs v-model="testResultActiveTab" class="demo-tabs">
           <el-tab-pane label="Output" name="output">
+            <el-tag class="ml-2" type="success" v-if="testResult.statusCode && testResult.error === ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
+            <el-tag class="ml-2" type="danger" v-if="testResult.statusCode && testResult.error !== ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
+
             <el-input
               v-model="testResult.output"
               :autosize="{ minRows: 4, maxRows: 6 }"
@@ -656,7 +661,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           </el-tab-pane>
           <el-tab-pane name="response-header">
             <template #label>
-              <el-badge :value="testResult.header.length" class="item"> Header </el-badge>
+              <el-badge :value="testResult.header.length" class="item">Header</el-badge>
             </template>
             <el-table :data="testResult.header" style="width: 100%">
               <el-table-column label="Key" width="200">
