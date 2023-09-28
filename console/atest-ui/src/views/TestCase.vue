@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { TabsPaneContext } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
@@ -86,7 +85,7 @@ function generateCode() {
     body: JSON.stringify({
       TestSuite: suite,
       TestCase: name,
-      Generator: "golang"
+      Generator: currentCodeGenerator.value
     })
   }
   fetch('/server.Runner/GenerateCode', requestOptions)
@@ -96,7 +95,7 @@ function generateCode() {
         message: 'Code generated!',
         type: 'success'
       })
-      testResult.value.output = e.message
+      currentCodeContent.value = e.message
     })
     .catch((e) => {
       ElMessage.error('Oops, ' + e)
@@ -319,6 +318,29 @@ function deleteTestCase() {
   })
 }
 
+const codeDialogOpened = ref(false)
+const codeGenerators = ref('')
+const currentCodeGenerator = ref('')
+const currentCodeContent = ref('')
+function openCodeDialog() {
+  codeDialogOpened.value = true
+
+  fetch('/server.Runner/ListCodeGenerator', {
+    method: 'POST'
+  })
+  .then((response) => response.json())
+  .then((e) => {
+    codeGenerators.value = e.data
+  })
+
+  if (currentCodeGenerator.value !== '') {
+    generateCode()
+  }
+}
+watch(currentCodeGenerator, () => {
+  generateCode()
+})
+
 const options = GetHTTPMethods()
 const activeName = ref('second')
 
@@ -451,6 +473,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
             >{{ t('button.save') }}</el-button
           >
           <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
+          <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
         </div>
         <el-select
           v-model="testCaseWithSuite.data.request.method"
@@ -479,7 +502,6 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
         </el-autocomplete>
 
         <el-button type="primary" @click="sendRequest" :loading="requestLoading">{{ t('button.send') }}</el-button>
-        <el-button type="primary" @click="generateCode">Generator Code</el-button>
       </el-header>
 
       <el-main>
@@ -635,11 +657,41 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           <el-tab-pane label="Schema" name="schema">
             <el-input
               v-model="testCaseWithSuite.data.response.schema"
-              :autosize="{ minRows: 4, maxRows: 8 }"
+              :autosize="{ minRows: 4, maxRows: 20 }"
               type="textarea"
             />
           </el-tab-pane>
         </el-tabs>
+
+        <el-drawer v-model="codeDialogOpened" :direction="direction">
+          <template #header>
+            <h4>Code Generator</h4>
+          </template>
+          <template #default>
+            <div>
+              <el-select
+                v-model="currentCodeGenerator"
+                class="m-2"
+                size="middle"
+              >
+                <el-option
+                  v-for="item in codeGenerators"
+                  :key="item.key"
+                  :label="item.key"
+                  :value="item.key"
+                />
+              </el-select>
+            </div>
+            <div>
+              <el-input
+                v-model="currentCodeContent"
+                :autosize="{ minRows: 4, maxRows: 100 }"
+                type="textarea"
+                placeholder="Please input"
+              />
+            </div>
+          </template>
+        </el-drawer>
       </el-main>
 
       <el-footer>
