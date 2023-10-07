@@ -595,7 +595,7 @@ func TestCodeGenerator(t *testing.T) {
 	t.Run("ListCodeGenerator", func(t *testing.T) {
 		generators, err := server.ListCodeGenerator(ctx, &Empty{})
 		assert.NoError(t, err)
-		assert.Equal(t, 1, len(generators.Data))
+		assert.Equal(t, 2, len(generators.Data))
 	})
 
 	t.Run("GenerateCode, no generator found", func(t *testing.T) {

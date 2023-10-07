@@ -11,7 +11,8 @@
         "toolbox": "Tool Box",
         "refresh": "Refresh",
         "newtestcase": "New TestCase",
-        "verify": "Verify"
+        "verify": "Verify",
+        "generateCode": "Generate Code"
     },
     "title": {
         "createTestSuite": "Create Test Suite",

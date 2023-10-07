@@ -1,5 +1,7 @@
 package testing
 
+import "sort"
+
 // TestSuite represents a set of test cases
 type TestSuite struct {
 	Name  string            `yaml:"name,omitempty" json:"name,omitempty"`
@@ -62,13 +64,13 @@ type Job struct {
 
 // Request represents a HTTP request
 type Request struct {
-	API          string            `yaml:"api" json:"api"`
-	Method       string            `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=GET,enum=POST,enum=PUT,enum=DELETE"`
-	Query        map[string]string `yaml:"query,omitempty" json:"query,omitempty"`
-	Header       map[string]string `yaml:"header,omitempty" json:"header,omitempty"`
-	Form         map[string]string `yaml:"form,omitempty" json:"form,omitempty"`
-	Body         string            `yaml:"body,omitempty" json:"body,omitempty"`
-	BodyFromFile string            `yaml:"bodyFromFile,omitempty" json:"bodyFromFile,omitempty"`
+	API          string              `yaml:"api" json:"api"`
+	Method       string              `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=GET,enum=POST,enum=PUT,enum=DELETE"`
+	Query        SortedKeysStringMap `yaml:"query,omitempty" json:"query,omitempty"`
+	Header       map[string]string   `yaml:"header,omitempty" json:"header,omitempty"`
+	Form         map[string]string   `yaml:"form,omitempty" json:"form,omitempty"`
+	Body         string              `yaml:"body,omitempty" json:"body,omitempty"`
+	BodyFromFile string              `yaml:"bodyFromFile,omitempty" json:"bodyFromFile,omitempty"`
 }
 
 // Response is the expected response
@@ -85,4 +87,14 @@ type Response struct {
 type ConditionalVerify struct {
 	Condition []string `yaml:"condition,omitempty" json:"condition,omitempty"`
 	Verify    []string `yaml:"verify,omitempty" json:"verify,omitempty"`
+}
+
+type SortedKeysStringMap map[string]string
+
+func (m SortedKeysStringMap) Keys() (keys []string) {
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return
 }
