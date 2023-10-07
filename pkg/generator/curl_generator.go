@@ -50,7 +50,9 @@ func (g *curlGenerator) Generate(testcase *testing.TestCase) (result string, err
 		testcase.Request.API += "?"
 	}
 
-	for k, v := range testcase.Request.Query {
+	queryKeys := testcase.Request.Query.Keys()
+	for _, k := range queryKeys {
+		v := testcase.Request.Query[k]
 		testcase.Request.API += k + "=" + v + "&"
 	}
 

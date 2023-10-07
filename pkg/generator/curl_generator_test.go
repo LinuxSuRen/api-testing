@@ -55,7 +55,7 @@ func TestCurlGenerator(t *testing.T) {
 				},
 			},
 		},
-		expect: `curl -X GET 'http://foo?size=10&page=1'`,
+		expect: `curl -X GET 'http://foo?page=1&size=10'`,
 	}, {
 		name: "basic HTTP POST",
 		testCase: atest.TestCase{
