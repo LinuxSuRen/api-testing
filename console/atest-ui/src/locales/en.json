@@ -45,6 +45,7 @@
         "401": "401 Unauthorized",
         "403": "403 Forbidden",
         "405": "405 Method Not Allowed",
+        "409": "409 Conflict",
         "422": "422 Unprocessable Content",
         "500": "500 Internal Server Error",
         "502": "502 Bad Gateway",

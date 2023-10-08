@@ -7,7 +7,7 @@ RUN npm run build-only
 
 FROM apache/skywalking-go:0.2.0-go1.18 AS sk
 
-FROM golang:1.18 AS builder
+FROM golang:1.19 AS builder
 
 ARG VERSION
 ARG GOPROXY

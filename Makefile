@@ -1,6 +1,7 @@
 IMG_TOOL?=podman
 BINARY?=atest
 TOOLEXEC?=-toolexec="skywalking-go-agent"
+GOPROXY?=https://goproxy.cn,direct
 
 build:
 	mkdir -p bin
@@ -27,7 +28,7 @@ goreleaser:
 	make clean-embed-ui
 build-image:
 	${IMG_TOOL} build -t ghcr.io/linuxsuren/api-testing:master . \
-		--build-arg GOPROXY=https://goproxy.cn,direct \
+		--build-arg GOPROXY=${GOPROXY} \
 		--build-arg VERSION=$(shell git describe --abbrev=0 --tags)-$(shell git rev-parse --short HEAD)
 run-image:
 	docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing:master
