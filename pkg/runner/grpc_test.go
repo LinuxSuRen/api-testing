@@ -302,7 +302,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 					Body: "{}",
 				},
 				Expect: atest.Response{
-					Body: getJSONOrCache("unaryneq", &testsrv.HelloReply{
+					Body: getJSONOrCache(nil, &testsrv.HelloReply{
 						Message: "Happy!",
 					}),
 				},
@@ -376,7 +376,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 					Body: getJSONOrCache("stream", nil),
 				},
 				Expect: atest.Response{
-					Body: getJSONOrCache("streamneq", []*testsrv.StreamMessage{
+					Body: getJSONOrCache(nil, []*testsrv.StreamMessage{
 						{MsgID: 1, ExpectLen: 2},
 						{MsgID: 2, ExpectLen: 2},
 					}),
@@ -394,7 +394,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 					Body: getJSONOrCache("stream", nil),
 				},
 				Expect: atest.Response{
-					Body: getJSONOrCache("streamneq", []*testsrv.StreamMessage{
+					Body: getJSONOrCache(nil, []*testsrv.StreamMessage{
 						{MsgID: 4, ExpectLen: 3},
 						{MsgID: 5, ExpectLen: 3},
 						{MsgID: 6, ExpectLen: 3},
@@ -479,7 +479,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 						}),
 				},
 				Expect: atest.Response{
-					Body: getJSONOrCache("advancedneq",
+					Body: getJSONOrCache(nil,
 						&testsrv.AdvancedType{
 							Int32Array:   []int32{rand.Int31(), rand.Int31()},
 							Int64Array:   []int64{rand.Int63(), rand.Int63()},
@@ -601,13 +601,18 @@ func TestAPINameMatch(t *testing.T) {
 	)
 }
 
-func getJSONOrCache(k string, s any) (msg string) {
-	v, ok := cache.Load(k)
-	if ok {
+// getJSONOrCache can store the JSON string of value.
+//
+// Let key be nil represent not using cache.
+func getJSONOrCache(key any, value any) (msg string) {
+	v, ok := cache.Load(key)
+	if ok && key != nil {
 		return v.(string)
 	}
-	b, _ := json.Marshal(s)
+	b, _ := json.Marshal(value)
 	msg = string(b)
-	cache.Store(k, msg)
+	if key != nil {
+		cache.Store(key, msg)
+	}
 	return
 }
