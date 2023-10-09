@@ -1,6 +1,6 @@
 module github.com/linuxsuren/api-testing
 
-go 1.18
+go 1.19
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
@@ -76,3 +76,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	skywalking.apache.org/repo/goapi v0.0.0-20230314034821-0c5a44bb767a // indirect
 )
+
+replace github.com/antonmedv/expr v1.15.0 => github.com/linuxsuren/expr v1.20.0-unknown
