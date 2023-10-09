@@ -295,6 +295,23 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			},
 		},
 		{
+			name: "test unary rpc not equal",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:  unary,
+					Body: "{}",
+				},
+				Expect: atest.Response{
+					Body: getJSONOrCache(nil, &testsrv.HelloReply{
+						Message: "Happy!",
+					}),
+				},
+			},
+			verify: func(t *testing.T, output any, err error) {
+				assert.NotNil(t, err)
+			},
+		},
+		{
 			name: "test client stream rpc",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
@@ -352,6 +369,43 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			},
 		},
 		{
+			name: "test bid stream rpc len not equal",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:  bidStream,
+					Body: getJSONOrCache("stream", nil),
+				},
+				Expect: atest.Response{
+					Body: getJSONOrCache(nil, []*testsrv.StreamMessage{
+						{MsgID: 1, ExpectLen: 2},
+						{MsgID: 2, ExpectLen: 2},
+					}),
+				},
+			},
+			verify: func(t *testing.T, output any, err error) {
+				assert.NotNil(t, err)
+			},
+		},
+		{
+			name: "test bid stream rpc content not equal",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:  bidStream,
+					Body: getJSONOrCache("stream", nil),
+				},
+				Expect: atest.Response{
+					Body: getJSONOrCache(nil, []*testsrv.StreamMessage{
+						{MsgID: 4, ExpectLen: 3},
+						{MsgID: 5, ExpectLen: 3},
+						{MsgID: 6, ExpectLen: 3},
+					}),
+				},
+			},
+			verify: func(t *testing.T, output any, err error) {
+				assert.NotNil(t, err)
+			},
+		},
+		{
 			name: "test basic type",
 			testCase: &atest.TestCase{
 				Request: atest.Request{
@@ -402,6 +456,47 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 			},
 			verify: func(t *testing.T, output any, err error) {
 				assert.Nil(t, err)
+			},
+		},
+		{
+			name: "test advanced type not equal",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API: advanced,
+					Body: getJSONOrCache("advanced",
+						&testsrv.AdvancedType{
+							Int32Array:   []int32{rand.Int31(), rand.Int31()},
+							Int64Array:   []int64{rand.Int63(), rand.Int63()},
+							Uint32Array:  []uint32{rand.Uint32(), rand.Uint32()},
+							Uint64Array:  []uint64{rand.Uint64(), rand.Uint64()},
+							Float32Array: []float32{rand.Float32(), rand.Float32()},
+							Float64Array: []float64{rand.NormFloat64(), rand.NormFloat64()},
+							StringArray:  []string{time.Now().Format(time.RFC3339), time.Now().Format(time.RFC822)},
+							BoolArray:    []bool{true, false},
+							HelloReplyMap: map[string]*testsrv.HelloReply{"key": {
+								Message: "Hello",
+							}},
+						}),
+				},
+				Expect: atest.Response{
+					Body: getJSONOrCache(nil,
+						&testsrv.AdvancedType{
+							Int32Array:   []int32{rand.Int31(), rand.Int31()},
+							Int64Array:   []int64{rand.Int63(), rand.Int63()},
+							Uint32Array:  []uint32{rand.Uint32(), rand.Uint32()},
+							Uint64Array:  []uint64{rand.Uint64(), rand.Uint64()},
+							Float32Array: []float32{rand.Float32(), rand.Float32()},
+							Float64Array: []float64{rand.NormFloat64(), rand.NormFloat64()},
+							StringArray:  []string{time.Now().Format(time.RFC3339), time.Now().Format(time.RFC822)},
+							BoolArray:    []bool{true, false},
+							HelloReplyMap: map[string]*testsrv.HelloReply{"key": {
+								Message: "Happy",
+							}},
+						}),
+				},
+			},
+			verify: func(t *testing.T, output any, err error) {
+				assert.NotNil(t, err)
 			},
 		},
 		{
@@ -506,13 +601,18 @@ func TestAPINameMatch(t *testing.T) {
 	)
 }
 
-func getJSONOrCache(k string, s any) (msg string) {
-	v, ok := cache.Load(k)
-	if ok {
+// getJSONOrCache can store the JSON string of value.
+//
+// Let key be nil represent not using cache.
+func getJSONOrCache(key any, value any) (msg string) {
+	v, ok := cache.Load(key)
+	if ok && key != nil {
 		return v.(string)
 	}
-	b, _ := json.Marshal(s)
+	b, _ := json.Marshal(value)
 	msg = string(b)
-	cache.Store(k, msg)
+	if key != nil {
+		cache.Store(key, msg)
+	}
 	return
 }

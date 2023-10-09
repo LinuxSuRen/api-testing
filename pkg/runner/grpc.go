@@ -542,7 +542,7 @@ func parseExpect(md protoreflect.MethodDescriptor, expect testing.Response) (exp
 		}
 		msgb = append(msgb, '[')
 		for i := range msgpbs {
-			msg, _ := json.Marshal(msgpbs[i])
+			msg, _ := protojson.Marshal(msgpbs[i])
 			msgb = append(msgb, msg...)
 			msg = append(msg, ',')
 		}
@@ -552,7 +552,7 @@ func parseExpect(md protoreflect.MethodDescriptor, expect testing.Response) (exp
 		if err != nil {
 			return gjson.Result{}, err
 		}
-		msgb, _ = json.Marshal(msgpb)
+		msgb, _ = protojson.Marshal(msgpb)
 	}
 	return gjson.ParseBytes(msgb), nil
 }
