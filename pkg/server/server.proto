@@ -65,6 +65,7 @@ message Items {
 message TestCaseIdentity {
   string suite = 1;
   string testcase = 2;
+  repeated Pair parameters = 3;
 }
 
 message TestSuiteSource {
@@ -113,6 +114,7 @@ message TestTask {
   string caseName = 3;
   string level = 4;
   map<string, string> env = 5;
+  repeated Pair parameters = 6;
 }
 
 message TestResult {

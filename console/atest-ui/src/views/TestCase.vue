@@ -37,7 +37,8 @@ const sendRequest = async () => {
     },
     body: JSON.stringify({
       suite: suite,
-      testcase: name
+      testcase: name,
+      parameters: parameters.value
     })
   }
   fetch('/server.Runner/RunTestCase', requestOptions)
@@ -66,12 +67,43 @@ const sendRequest = async () => {
         output: e.output,
         statusCode: testResult.value.statusCode
       } as TestCaseResponse)
+
+      parameters.value = []
     })
     .catch((e) => {
+      parameters.value = []
+
       requestLoading.value = false
       ElMessage.error('Oops, ' + e)
       testResult.value.bodyObject = JSON.parse(e.body)
     })
+}
+
+const parameterDialogOpened = ref(false)
+const parameters = ref([] as Pair[])
+function openParameterDialog() {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': props.store
+    },
+    body: JSON.stringify({
+      name: props.suite
+    })
+  }
+  fetch('/server.Runner/GetTestSuite', requestOptions)
+    .then((response) => response.json())
+    .then((e) => {
+      parameters.value = e.param
+      parameterDialogOpened.value = true
+    })
+    .catch((e) => {
+      ElMessage.error('Oops, ' + e)
+    })
+}
+function sendRequestWithParameter() {
+  parameterDialogOpened.value = false
+  sendRequest()
 }
 
 function generateCode() {
@@ -501,7 +533,14 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           </template>
         </el-autocomplete>
 
-        <el-button type="primary" @click="sendRequest" :loading="requestLoading">{{ t('button.send') }}</el-button>
+        <el-dropdown split-button type="primary" @click="sendRequest" :loading="requestLoading">
+          {{ t('button.send') }}
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="openParameterDialog">{{ t('button.sendWithParam') }}</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+        </el-dropdown>
       </el-header>
 
       <el-main>
@@ -663,7 +702,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           </el-tab-pane>
         </el-tabs>
 
-        <el-drawer v-model="codeDialogOpened" :direction="direction">
+        <el-drawer v-model="codeDialogOpened">
           <template #header>
             <h4>Code Generator</h4>
           </template>
@@ -690,6 +729,30 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
                 placeholder="Please input"
               />
             </div>
+          </template>
+        </el-drawer>
+
+        <el-drawer v-model="parameterDialogOpened">
+          <template #header>
+            <h4>API Request Parameters</h4>
+          </template>
+          <template #default>
+            <el-table :data="parameters" style="width: 100%">
+              <el-table-column label="Key" width="180">
+                <template #default="scope">
+                  <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange"/>
+                </template>
+              </el-table-column>
+              <el-table-column label="Value">
+                <template #default="scope">
+                  <div style="display: flex; align-items: center">
+                    <el-input v-model="scope.row.value" placeholder="Value" />
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
+
+            <el-button type="primary" @click="sendRequestWithParameter">{{ t('button.send') }}</el-button>
           </template>
         </el-drawer>
       </el-main>

@@ -12,7 +12,8 @@
         "refresh": "Refresh",
         "newtestcase": "New TestCase",
         "verify": "Verify",
-        "generateCode": "Generate Code"
+        "generateCode": "Generate Code",
+        "sendWithParam": "Send With Parameter"
     },
     "title": {
         "createTestSuite": "Create Test Suite",
