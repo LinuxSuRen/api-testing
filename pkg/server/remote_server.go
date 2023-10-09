@@ -220,6 +220,10 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		err = nil
 		return
 	}
+	// inject the parameters from input
+	if len(task.Parameters) > 0 {
+		dataContext[testing.ContextKeyGlobalParam] = pairToMap(task.Parameters)
+	}
 
 	buf := new(bytes.Buffer)
 	reply = &TestResult{}
@@ -463,10 +467,11 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 	var data []byte
 	if data, err = yaml.Marshal(targetTestSuite); err == nil {
 		task := &TestTask{
-			Kind:     "testcaseInSuite",
-			Data:     string(data),
-			CaseName: in.Testcase,
-			Level:    "debug",
+			Kind:       "testcaseInSuite",
+			Data:       string(data),
+			CaseName:   in.Testcase,
+			Level:      "debug",
+			Parameters: in.Parameters,
 		}
 
 		var reply *TestResult
