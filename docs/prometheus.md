@@ -1,4 +1,4 @@
-## Push the test results into Prometheus
+## Pushing the test results into Prometheus
 
 You can use the following command to do it:
 
@@ -10,7 +10,7 @@ atest run --report prometheus --report-file http://localhost:9091 \
 It will push the test results data into Prometheus [PushGateway](https://github.com/prometheus/pushgateway).
 Then Prometheus could get the metrics from it.
 
-skip the following instructions if you are familiar with Prometheus:
+Skip the following instructions if you are familiar with Prometheus:
 ```shell
 docker run \
     -p 9090:9090 \
