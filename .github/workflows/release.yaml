@@ -161,8 +161,10 @@ jobs:
         run: |
           echo ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }} | helm registry login docker.io -u linuxsuren --password-stdin
           export APP_VERSION=${{ steps.vars.outputs.tag }}
+          export HELM_VERSION=${{ steps.vars.outputs.tag }}
           if [[ ! "$line" =~ ^v ]]
           then
-            export APP_VERSION=v0.0.1-helm
+            unset APP_VERSION
+            unset HELM_VERSION
           fi
           make helm-package helm-push
