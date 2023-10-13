@@ -12,3 +12,4 @@ cmd/data/index.js
 cmd/data/index.css
 operator/bundle
 oryxbuildbinary
+helm/*.tgz

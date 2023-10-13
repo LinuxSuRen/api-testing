@@ -2,6 +2,7 @@ IMG_TOOL?=podman
 BINARY?=atest
 TOOLEXEC?=-toolexec="skywalking-go-agent"
 GOPROXY?=https://goproxy.cn,direct
+APP_VERSION?=v0.0.13
 
 build:
 	mkdir -p bin
@@ -42,6 +43,14 @@ copy-restart: build-embed-ui
 	atest service stop
 	make copy
 	atest service restart
+
+# helm
+helm-package:
+	helm package helm/api-testing --version ${APP_VERSION}-helm --app-version ${APP_VERSION} -d bin
+helm-push:
+	helm push bin/api-testing-${APP_VERSION}-helm.tgz oci://docker.io/linuxsuren
+helm-lint:
+	helm lint helm/api-testing
 
 # plugins
 plugin-git:
