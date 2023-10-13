@@ -154,3 +154,10 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Set output
+        id: vars
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+      - name: Release Helm
+        run: |
+          echo ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }} | helm registry login docker.io -u linuxsuren --password-stdin
+          APP_VERSION=${{ steps.vars.outputs.tag }} make helm-package helm-push

@@ -19,6 +19,7 @@ You can install in various methods:
 * Web server
 * [Kubernetes](https://github.com/LinuxSuRen/api-testing/tree/master/docs/manifests/kubernetes)
 * [Argo CD](https://github.com/LinuxSuRen/api-testing/blob/master/docs/manifests/argocd/simple.yaml)
+* [Helm](helm.md)
 
 If you're developing APIs locally, the best way is installing it as a container service.
 Then you can access it via your browser.

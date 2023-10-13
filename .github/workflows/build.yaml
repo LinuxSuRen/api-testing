@@ -20,6 +20,9 @@ jobs:
       - name: Long Test
         run: |
           make testlong
+      - name: Lint Helm
+        run: |
+          make helm-package helm-lint
       - name: Report
         if: github.actor == 'linuxsuren'
         env:
