@@ -11,6 +11,8 @@ github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAE
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 h1:bvNMNQO63//z+xNgfBlViaCIJKLlCJ6/fmUseuG0wVQ=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883/go.mod h1:rCTlJbsFo29Kk6CurOXKm700vrz8f0KW0JNfpkRJY/8=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
+github.com/antonmedv/expr v1.15.0 h1:sBHNMx1i+b1lZfkBFGhicvSLW6RLnca3R0B7jWrk8iM=
+github.com/antonmedv/expr v1.15.0/go.mod h1:0E/6TxnOlRNp81GMzX9QfDPAmHo2Phg00y4JUv1ihsE=
 github.com/apache/skywalking-go v0.2.0 h1:LXYVOp5RvwbGP8kjJX5JnVSCbm0zYF6w3r2XYXUGHyw=
 github.com/apache/skywalking-go v0.2.0/go.mod h1:r2FrabK/0XftMyosqre7WFZvZ1mEOVssJROo8xgcEW8=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
@@ -124,8 +126,6 @@ github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
-github.com/linuxsuren/expr v1.20.0-unknown h1:jZWEk27ejKomVw4ngSTTI+q8GApESZOYVeCEkU5PJwE=
-github.com/linuxsuren/expr v1.20.0-unknown/go.mod h1:0E/6TxnOlRNp81GMzX9QfDPAmHo2Phg00y4JUv1ihsE=
 github.com/linuxsuren/go-fake-runtime v0.0.1 h1:ByXNvKgn5g+qnvS4KJIq/OP/fA3qCMRGxwlxsU6Weh8=
 github.com/linuxsuren/go-fake-runtime v0.0.1/go.mod h1:zmh6J78hSnWZo68faMA2eKOdaEp8eFbERHi3ZB9xHCQ=
 github.com/linuxsuren/unstructured v0.0.1 h1:ilUA8MUYbR6l9ebo/YPV2bKqlf62bzQursDSE+j00iU=

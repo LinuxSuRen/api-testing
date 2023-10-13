@@ -417,7 +417,7 @@ func (s *containerService) getStartArgs() []string {
 		fmt.Sprintf("--pull=%s", s.pull),
 		"--network=host",
 		"-v", s.localStorage + ":/var/www/data",
-		"-v", "/root/.config/atest:/root/.config/atest",
+		"-v", os.ExpandEnv("$HOME/.config/atest:/root/.config/atest"),
 		s.image + ":" + s.tag,
 		"atest", "server"}
 	if s.secretServer != "" {
