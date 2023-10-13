@@ -25,7 +25,10 @@ SOFTWARE.
 // Package util provides a set of common functions
 package util
 
-import "strings"
+import (
+	"net/http"
+	"strings"
+)
 
 // MakeSureNotNil makes sure the parameter is not nil
 func MakeSureNotNil[T any](inter T) T {
@@ -60,6 +63,15 @@ func EmptyThenDefault(val, defVal string) string {
 		val = defVal
 	}
 	return val
+}
+
+// GetFirstHeaderValue retursn the first value of the header
+func GetFirstHeaderValue(header http.Header, key string) (val string) {
+	values := header[key]
+	if len(values) > 0 {
+		val = values[0]
+	}
+	return
 }
 
 // ContentType is the HTTP header key
