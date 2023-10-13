@@ -222,7 +222,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		}
 	}
 
-	respType := resp.Header.Get(util.ContentType)
+	respType := util.GetFirstHeaderValue(resp.Header, util.ContentType)
 	if output, err = verifyResponseBodyData(testcase.Name, testcase.Expect, respType, responseBodyData); err != nil {
 		return
 	}

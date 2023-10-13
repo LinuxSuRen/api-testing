@@ -76,4 +76,3 @@ require (
 )
 
 replace github.com/linuxsuren/api-testing => ../../.
-replace github.com/antonmedv/expr => github.com/linuxsuren/expr v1.20.0-unknown
