@@ -19,7 +19,7 @@ export function SetTestCaseResponseCache(id: string, resp: TestCaseResponse) {
 
 const lastTestCaseLocationKey = "api-testing-case-location"
 export function GetLastTestCaseLocation() {
-    const val = sessionStorage.getItem(lastTestCaseLocationKey)
+    const val = localStorage.getItem(lastTestCaseLocationKey)
     if (val && val !== '') {
         return JSON.parse(val)
     } else {
@@ -28,7 +28,7 @@ export function GetLastTestCaseLocation() {
 }
 
 export function SetLastTestCaseLocation(suite: string, testcase: string) {
-    sessionStorage.setItem(lastTestCaseLocationKey, JSON.stringify({
+    localStorage.setItem(lastTestCaseLocationKey, JSON.stringify({
         suite: suite,
         testcase: testcase
     }))
