@@ -93,6 +93,17 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.19.x
+      - name: Set output
+        id: vars
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+      - name: Package Helm
+        run: |
+          export APP_VERSION=${{ steps.vars.outputs.tag }}
+          if [[ ! "$line" =~ ^v ]]
+          then
+            export APP_VERSION=v0.0.1-helm
+          fi
+          make helm-package
       - name: Core Image
         run: GOPROXY=direct IMG_TOOL=docker make build-image
       - name: Operator Image
