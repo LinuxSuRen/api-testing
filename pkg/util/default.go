@@ -70,6 +70,7 @@ func GetFirstHeaderValue(header http.Header, key string) (val string) {
 	values := header[key]
 	if len(values) > 0 {
 		val = values[0]
+		val = strings.Split(val, ";")[0]
 	}
 	return
 }

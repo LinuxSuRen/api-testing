@@ -160,4 +160,9 @@ jobs:
       - name: Release Helm
         run: |
           echo ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }} | helm registry login docker.io -u linuxsuren --password-stdin
-          APP_VERSION=${{ steps.vars.outputs.tag }} make helm-package helm-push
+          export APP_VERSION=${{ steps.vars.outputs.tag }}
+          if [[ ! "$line" =~ ^v ]]
+          then
+            export APP_VERSION=v0.0.1-helm
+          fi
+          make helm-package helm-push

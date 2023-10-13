@@ -100,6 +100,13 @@ func TestGetFirstHeaderValue(t *testing.T) {
 		},
 		key:    "abc",
 		expect: "def",
+	}, {
+		name: "have ; in the value",
+		header: http.Header{
+			"abc": []string{"def;ghi"},
+		},
+		key:    "abc",
+		expect: "def",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
