@@ -1,7 +1,9 @@
+# ATEST
+
 Welcome to use `atest` to improve your code quality.
 
 ## Get started
-You can use `atest` as a CLI or other ways:
+You can use `atest` as a CLI or as:
 
 * Web UI
 * [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=linuxsuren.api-testing)
@@ -13,7 +15,7 @@ See also the screenshots below:
 ![image](https://github.com/LinuxSuRen/api-testing/assets/1450685/e959f560-1fb5-4592-9f45-ec883c385785)
 
 ## Installation
-You can install in various methods:
+There are various ways of installing `atest`:
 
 * CLI via `hd i atest`
 * Web server
@@ -21,29 +23,31 @@ You can install in various methods:
 * [Argo CD](https://github.com/LinuxSuRen/api-testing/blob/master/docs/manifests/argocd/simple.yaml)
 * [Helm](helm.md)
 
-If you're developing APIs locally, the best way is installing it as a container service.
+If you're developing APIs locally, the best way is to install it as a container service.
 Then you can access it via your browser.
 
 Currently, it supports the following kinds of services:
 
 * Operate System services
-  * Linux, and Darwin
-* [Podman](https://github.com/containers/podman), and Docker
+  * Linux and Darwin
+* [Podman](https://github.com/containers/podman) and Docker
 
-Please see the following example usage:
+### Have a look at the following example usage:
+
+#### Podman
 
 ```shell
 sudo atest service install -m podman --version master
 ```
 
-or run in Docker:
+#### Docker
 ```shell
 docker run -v /var/www/sample:/var/www/sample \
   --network host \
   linuxsuren/api-testing:master
 ```
 
-the default web server port is `8080`. So you can visit it via: http://localhost:8080
+The default web server port is `8080`. So you can visit it via: http://localhost:8080
 
 ## Run in k3s
 
@@ -56,22 +60,22 @@ kustomize build sample/kubernetes/docker.io/ | k3s kubectl apply -f -
 ```
 
 ## Run your test cases
-The test suite file could be in local, or in the HTTP server. See the following different ways:
+The test suite file could be local, or in the HTTP server. Have a look at some examples:
 
 * `atest run -p your-local-file.yaml`
 * `atest run -p https://gitee.com/linuxsuren/api-testing/raw/master/sample/testsuite-gitee.yaml`
 * `atest run -p http://localhost:8080/server.Runner/ConvertTestSuite?suite=sample`
 
-For the last one, it represents the API Testing server.
+The last example pertains to the API Testing server.
 
 ## Functions
 
 There are two kinds of functions for two situations: template rendering and test results verification.
 
-* Template rendering functions base on [the Go template](https://pkg.go.dev/text/template)
-* The verification functions base on [expr library](https://expr.medv.io/)
+* Template rendering functions are based on [the Go template](https://pkg.go.dev/text/template)
+* The verification functions are based on [expr library](https://expr.medv.io/)
 
-You can query the supported functions by using the following command or on the UI page:
+You can query the supported functions on the UI page or by using the command:
 
 ```shell
 atest func
@@ -79,8 +83,7 @@ atest func
 
 ## Hooks
 
-In some cases you may want to run the test cases after a HTTP server is ready. Then you can use the hooks feature.
-Such as:
+In some cases you may want to run the test cases after an HTTP server is ready. Then you can use the hooks feature as follows:
 
 ```yaml
 name: Gitlab
@@ -113,7 +116,7 @@ jmeter -n -t bin/gitee.jmx
 Please feel free to bring more test tool converters.
 
 ## Run in Jenkins
-You can run the API testings in Jenkins, see also the following example:
+You can run the API testings in Jenkins, as demonstrated in the example below:
 
 ```Jenkinsfile
 pipeline {
@@ -135,10 +138,10 @@ pipeline {
 ```
 
 ## Report
-You can see the test results from [Grafana](prometheus.md).
+You can see the test results in [Grafana](prometheus.md).
 
 ## Monitoring
-It could monitor the server and browser via the [Apache SkyWalking](https://skywalking.apache.org/).
+It can monitor the server and browser via the [Apache SkyWalking](https://skywalking.apache.org/).
 Please add the following flag if you want to get the browser tracing data:
 
 ```shell
@@ -168,18 +171,18 @@ podman run --pull always -p 8080:8080 ghcr.io/linuxsuren/api-testing:master
 # Visit it from http://localhost:8080 once it's ready.
 ```
 
-or, you can run the CLI in terminal like this:
+Or, you can run the CLI in the terminal like this:
 
 ```shell
 atest server --local-storage 'sample/*.yaml' --console-path console/atest-ui/dist
 ```
 
-using the host network mode if you want to connect to your local environment:
+Use the host network mode if you want to connect to your local environment:
 ```shell
 podman run --pull always --network host ghcr.io/linuxsuren/api-testing:master
 ```
 
-### ORM DataBase Storage
+### ORM Database Storage
 Start a database with the following command if you don't have a database already. You can install [tiup](https://tiup.io/) via `hd i tiup`.
 
 ```shell
@@ -220,7 +223,7 @@ podman run --network host \
     ghcr.io/linuxsuren/api-testing:master atest-store-s3
 ```
 
-See also the expected configuration below:
+Have a look at the expected configuration below:
 
 ```yaml
 - name: s3
@@ -246,7 +249,7 @@ podman run --network host \
     ghcr.io/linuxsuren/api-testing:master atest-store-git
 ```
 
-See also the expected configuration below:
+Have a look at the expected configuration below:
 
 ```yaml
 - name: git
@@ -261,7 +264,7 @@ See also the expected configuration below:
 ```
 
 ## Secret Server
-You can put the sensitive information into a secret server. For example, [Vault](https://www.github.com/hashicorp/vault).
+You can put sensitive information into a secret server. For example, [Vault](https://www.github.com/hashicorp/vault).
 
 Connect to [a vault extension](https://github.com/LinuxSuRen/api-testing-secret-extension) via flag: `--secret-server`. Such as:
 
@@ -270,16 +273,16 @@ atest server --secret-server localhost:7073
 ```
 
 ## Extensions
-Developers could have storage, secret extensions. Implement a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.
+Developers can have storage, secret extensions. Implementing a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.
 
 ## Official Images
-You could find the official images from both [Docker Hub](https://hub.docker.com/r/linuxsuren/api-testing) and [GitHub Images](https://github.com/users/LinuxSuRen/packages/container/package/api-testing). See the image path:
+You can find the official images from both [Docker Hub](https://hub.docker.com/r/linuxsuren/api-testing) and [GitHub Images](https://github.com/users/LinuxSuRen/packages/container/package/api-testing). See the image path:
 
 * `ghcr.io/linuxsuren/api-testing:latest`
 * `linuxsuren/api-testing:latest`
 * `docker.m.daocloud.io/linuxsuren/api-testing` (mirror)
 
-The tag `latest` represents the latest release version. The tag `master` represents the image of the latest master branch. We highly recommend you using a fixed version instead of those in a production environment.
+The tag `latest` represents the latest release version. The tag `master` represents the image of the latest master branch. We highly recommend you to use a fixed version instead of those in a production environment.
 
 ## Release Notes
 * [v0.0.13](release-note-v0.0.13.md)
