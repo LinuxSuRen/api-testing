@@ -525,6 +525,9 @@ func mapToPair(data map[string]string) (pairs []*Pair) {
 func pairToInterMap(pairs []*Pair) (data map[string]interface{}) {
 	data = make(map[string]interface{})
 	for _, pair := range pairs {
+		if pair.Key == "" {
+			continue
+		}
 		data[pair.Key] = pair.Value
 	}
 	return
@@ -533,6 +536,9 @@ func pairToInterMap(pairs []*Pair) (data map[string]interface{}) {
 func pairToMap(pairs []*Pair) (data map[string]string) {
 	data = make(map[string]string)
 	for _, pair := range pairs {
+		if pair.Key == "" {
+			continue
+		}
 		data[pair.Key] = pair.Value
 	}
 	return
@@ -555,10 +561,10 @@ func convertToTestingTestCase(in *TestCase) (result testing.TestCase) {
 	}
 
 	if resp != nil {
-		result.Expect.Body = resp.Body
-		result.Expect.Schema = resp.Schema
+		result.Expect.Body = strings.TrimSpace(resp.Body)
+		result.Expect.Schema = strings.TrimSpace(resp.Schema)
 		result.Expect.StatusCode = int(resp.StatusCode)
-		result.Expect.Verify = resp.Verify
+		result.Expect.Verify = util.RemoeEmptyFromSlice(resp.Verify)
 		result.Expect.ConditionalVerify = convertConditionalVerify(resp.ConditionalVerify)
 		result.Expect.BodyFieldsExpect = pairToInterMap(resp.BodyFieldsExpect)
 		result.Expect.Header = pairToMap(resp.Header)
