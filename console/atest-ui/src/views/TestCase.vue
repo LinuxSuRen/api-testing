@@ -279,23 +279,6 @@ const saveLoading = ref(false)
 function saveTestCase(tip: boolean = true) {
   saveLoading.value = true
 
-  // remove empty pair
-  testCaseWithSuite.value.data.request.header = testCaseWithSuite.value.data.request.header.filter(
-    (e) => e.key !== ''
-  )
-  testCaseWithSuite.value.data.request.query = testCaseWithSuite.value.data.request.query.filter(
-    (e) => e.key !== ''
-  )
-  testCaseWithSuite.value.data.request.form = testCaseWithSuite.value.data.request.form.filter(
-    (e) => e.key !== ''
-  )
-  testCaseWithSuite.value.data.response.header =
-    testCaseWithSuite.value.data.response.header.filter((e) => e.key !== '')
-  testCaseWithSuite.value.data.response.bodyFieldsExpect =
-    testCaseWithSuite.value.data.response.bodyFieldsExpect.filter((e) => e.key !== '')
-  testCaseWithSuite.value.data.response.verify =
-    testCaseWithSuite.value.data.response.verify.filter((e) => e !== '')
-
   const requestOptions = {
     method: 'POST',
     headers: {
