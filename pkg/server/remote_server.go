@@ -632,8 +632,22 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 		reply.Message = fmt.Sprintf("generator '%s' not found", in.Generator)
 	} else {
 		var result testing.TestCase
+		var suite testing.TestSuite
+
 		loader := s.getLoader(ctx)
+
+		if suite, err = loader.GetTestSuite(in.TestSuite, true); err != nil {
+			return
+		}
+
+		dataContext := map[string]interface{}{}
+		if err = suite.Render(dataContext); err != nil {
+			return
+		}
+
 		if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
+			result.Request.RenderAPI(suite.API)
+
 			output, genErr := instance.Generate(&result)
 			reply.Success = genErr == nil
 			reply.Message = util.OrErrorMessage(genErr, output)
