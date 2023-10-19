@@ -1,13 +1,13 @@
-FROM node:20-alpine3.17 AS ui
+FROM docker.io/library/node:20-alpine3.17 AS ui
 
 WORKDIR /workspace
 COPY console/atest-ui .
 RUN npm install --ignore-scripts --registry=https://registry.npmmirror.com
 RUN npm run build-only
 
-FROM apache/skywalking-go:0.2.0-go1.18 AS sk
+FROM docker.io/apache/skywalking-go:0.2.0-go1.18 AS sk
 
-FROM golang:1.19 AS builder
+FROM docker.io/golang:1.19 AS builder
 
 ARG VERSION
 ARG GOPROXY
@@ -42,7 +42,7 @@ RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-or
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
 
-FROM ubuntu:23.04
+FROM docker.io/library/ubuntu:23.04
 
 LABEL "com.github.actions.name"="API testing"
 LABEL "com.github.actions.description"="API testing"
@@ -63,11 +63,10 @@ COPY --from=builder /workspace/atest-store-git /usr/local/bin/atest-store-git
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
-RUN mkdir -p /var/www/data
 COPY --from=builder /workspace/sample /var/www/sample
 
 RUN apt update -y && \
     # required for atest-store-git
     apt install -y --no-install-recommends ssh-client ca-certificates
 
-CMD ["atest", "server", "--local-storage=/var/www/sample/*.yaml", "--local-storage=/var/www/data/*.yaml"]
+CMD ["atest", "server", "--local-storage=/var/www/sample/*.yaml"]

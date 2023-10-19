@@ -2,7 +2,7 @@ IMG_TOOL?=podman
 BINARY?=atest
 TOOLEXEC?=-toolexec="skywalking-go-agent"
 GOPROXY?=https://goproxy.cn,direct
-HELM_VERSION?=v0.0.1
+HELM_VERSION?=v0.0.2
 APP_VERSION?=v0.0.13
 
 build:

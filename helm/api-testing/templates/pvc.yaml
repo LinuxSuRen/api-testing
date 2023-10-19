@@ -1,0 +1,22 @@
+{{- $core := .Values.persistence.persistentVolumeClaim.core -}}
+{{- if and .Values.persistence.enabled (not $core.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name:  {{ include "api-testing.fullname" . }}
+  labels:
+    {{- include "api-testing.labels" . | nindent 4 }}
+spec:
+  accessModes: 
+    - {{ $core.accessMode }}
+  resources:
+    requests:
+      storage: {{ $core.size }}
+  {{- if $core.storageClass }}
+    {{- if eq "-" $core.storageClass }}
+  storageClassName: ""
+    {{- else }}
+  storageClassName: {{ $core.storageClass }}
+    {{- end }}
+  {{- end }}
+{{- end }}

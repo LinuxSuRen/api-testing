@@ -199,7 +199,26 @@ func (s *storeFactory) CreateStore(store Store) (err error) {
 }
 
 func (s *storeFactory) save(storeConfig *StoreConfig) (err error) {
-	if err = os.MkdirAll(s.configDir, 0755);err==nil{
+	for i, item := range storeConfig.Stores {
+		if item.Kind.Name != "" {
+			storeConfig.Stores[i].Kind.Enabled = true
+
+			foundPlugin := false
+			for j, kind := range storeConfig.Plugins {
+				if kind.Name == item.Kind.Name {
+					foundPlugin = true
+					storeConfig.Plugins[j].Enabled = true
+					break
+				}
+			}
+
+			if !foundPlugin {
+				storeConfig.Plugins = append(storeConfig.Plugins, storeConfig.Stores[i].Kind)
+			}
+		}
+	}
+
+	if err = os.MkdirAll(s.configDir, 0755); err == nil {
 		var data []byte
 		if data, err = yaml.Marshal(storeConfig); err == nil {
 			err = os.WriteFile(path.Join(s.configDir, "stores.yaml"), data, 0644)

@@ -1,3 +1,4 @@
+{{- $core := .Values.persistence.persistentVolumeClaim.core -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -45,6 +46,13 @@ spec:
             httpGet:
               path: /
               port: http
+          volumeMounts:
+          - name: data
+            mountPath: /var/www/sample
+            subPath: {{ $core.subPath }}
+          - name: data
+            mountPath: /root
+            subPath: config
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
@@ -59,3 +67,16 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+      {{- if not .Values.persistence.enabled }}
+      - name: "data"
+        emptyDir: {}
+      {{- else if $core.existingClaim }}
+      - name: "data"
+        persistentVolumeClaim:
+          claimName: {{ $core.existingClaim }}
+      {{- else }}
+      - name: "data"
+        persistentVolumeClaim:
+          claimName: {{ include "api-testing.fullname" . }}
+      {{- end -}}
