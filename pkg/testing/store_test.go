@@ -62,8 +62,9 @@ func TestStoreFactory(t *testing.T) {
 		assert.Equal(t, &Store{
 			Name: "db",
 			Kind: StoreKind{
-				Name: "database",
-				URL:  "localhost:7071",
+				Name:    "database",
+				URL:     "localhost:7071",
+				Enabled: true,
 			},
 			URL:      "localhost:4000",
 			Username: "root",

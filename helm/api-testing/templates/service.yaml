@@ -11,5 +11,8 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+      {{- if and .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end}}
   selector:
     {{- include "api-testing.selectorLabels" . | nindent 4 }}

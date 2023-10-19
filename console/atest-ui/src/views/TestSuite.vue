@@ -68,10 +68,14 @@ function save() {
   fetch('/server.Runner/UpdateTestSuite', requestOptions)
     .then((response) => response.json())
     .then((e) => {
-      ElMessage({
-        message: 'Updated.',
-        type: 'success'
-      })
+      if (e.error === "") {
+        ElMessage({
+          message: 'Updated.',
+          type: 'success'
+        })
+      } else {
+        ElMessage.error('Oops, ' + e.message)
+      }
     })
     .catch((e) => {
       ElMessage.error('Oops, ' + e)

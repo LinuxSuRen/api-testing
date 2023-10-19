@@ -31,8 +31,9 @@ func ToGRPCStore(store testing.Store) (result *Store) {
 	result = &Store{
 		Name: store.Name,
 		Kind: &StoreKind{
-			Name: store.Kind.Name,
-			Url:  store.Kind.URL,
+			Name:    store.Kind.Name,
+			Url:     store.Kind.URL,
+			Enabled: store.Kind.Enabled,
 		},
 		Description: store.Description,
 		Url:         store.URL,
