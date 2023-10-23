@@ -11,6 +11,8 @@ build:
 	go build ${TOOLEXEC} -a -o bin/atest main.go
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
+build-ext-orm:
+	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-orm extensions/store-orm/main.go
 embed-ui:
 	cd console/atest-ui && npm i && npm run build-only
 	cp console/atest-ui/dist/index.html cmd/data/index.html

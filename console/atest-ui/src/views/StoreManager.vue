@@ -4,6 +4,7 @@ import { reactive, ref } from 'vue'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
+import { SupportedExtensions } from './store'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -266,7 +267,19 @@ function updateKeys() {
             <el-input v-model="storeForm.password" type="password" test-id="store-form-password" />
           </el-form-item>
           <el-form-item :label="t('field.pluginName')" prop="pluginName">
-            <el-input v-model="storeForm.kind.name" test-id="store-form-plugin-name" />
+            <el-select
+              v-model="storeForm.kind.name"
+              test-id="store-form-plugin-name"
+              class="m-2"
+              size="middle"
+            >
+              <el-option
+                v-for="item in SupportedExtensions()"
+                :key="item.value"
+                :label="item.key"
+                :value="item.value"
+              />
+            </el-select>
           </el-form-item>
           <el-form-item :label="t('field.pluginURL')" prop="plugin">
             <el-input v-model="storeForm.kind.url" test-id="store-form-plugin" />
