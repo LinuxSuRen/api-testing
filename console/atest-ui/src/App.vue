@@ -15,7 +15,15 @@ import { DefaultResponseProcess } from './views/net'
 import { useI18n } from 'vue-i18n'
 import ClientMonitor from 'skywalking-client-js';
 
+import setTheme from './theme'
+
 const { t } = useI18n()
+
+
+function switchAppMode()
+{
+  setTheme(appMode.value)
+}
 
 interface Tree {
   id: string
@@ -116,6 +124,7 @@ interface Store {
 }
 
 const stores = ref([] as Store[])
+const appMode = ref(false)
 function loadStores() {
   const requestOptions = {
     method: 'POST',
@@ -298,6 +307,10 @@ watch(viewName, (val) => {
       <el-header style="height: 30px;justify-content: flex-end;">
         <el-button type="primary" :icon="Edit" @click="viewName = 'secret'" data-intro="Manage the secrets."/>
         <el-button type="primary" :icon="Share" @click="viewName = 'store'" data-intro="Manage the store backends." />
+        <el-form-item label="Dark Mode" style="margin-left:20px;">
+    <el-switch type="primary" data-intro="Switch light and dark modes" v-model="appMode" @click="switchAppMode"/>
+  </el-form-item>
+        
       </el-header>
 
       <el-main>
@@ -459,6 +472,7 @@ nav {
   text-align: center;
   margin-top: 2rem;
 }
+
 
 nav a.router-link-exact-active {
   color: var(--color-text);
