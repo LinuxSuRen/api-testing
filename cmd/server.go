@@ -119,12 +119,14 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		template.SetSecretGetter(remote.NewGRPCSecretGetter(secretServer))
 	}
 
-	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, o.configDir)
+	storeExtMgr := server.NewStoreExtManager(o.execer)
+
+	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir)
 	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
 	if storeKindsErr != nil {
 		cmd.PrintErrf("failed to get store kinds, error: %p\n", storeKindsErr)
 	} else {
-		if err = startPlugins(o.execer, kinds); err != nil {
+		if err = startPlugins(storeExtMgr, kinds); err != nil {
 			return
 		}
 	}
@@ -146,11 +148,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		<-clean
 		_ = lis.Close()
 		_ = o.httpServer.Shutdown(ctx)
-		for _, file := range filesNeedToBeRemoved {
-			if err = os.RemoveAll(file); err != nil {
-				log.Printf("failed to remove %s, error: %v", file, err)
-			}
-		}
+		_ = storeExtMgr.StopAll()
 	}()
 
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc)) //  runtime.WithIncomingHeaderMatcher(func(key string) (s string, b bool) {
@@ -200,22 +198,13 @@ func postRequestProxy(proxy string) func(w http.ResponseWriter, r *http.Request,
 	}
 }
 
-func startPlugins(execer fakeruntime.Execer, kinds *server.StoreKinds) (err error) {
+func startPlugins(storeExtMgr server.ExtManager, kinds *server.StoreKinds) (err error) {
 	const socketPrefix = "unix://"
 
 	for _, kind := range kinds.Data {
 		if kind.Enabled && strings.HasPrefix(kind.Url, socketPrefix) {
-			binaryPath, lookErr := execer.LookPath(kind.Name)
-			if lookErr != nil {
-				log.Printf("failed to find %s, error: %v", kind.Name, lookErr)
-			} else {
-				go func(socketURL, plugin string) {
-					socketFile := strings.TrimPrefix(socketURL, socketPrefix)
-					filesNeedToBeRemoved = append(filesNeedToBeRemoved, socketFile)
-					if err = execer.RunCommand(plugin, "--socket", socketFile); err != nil {
-						log.Printf("failed to start %s, error: %v", socketURL, err)
-					}
-				}(kind.Url, binaryPath)
+			if err = storeExtMgr.Start(kind.Name, kind.Url); err != nil {
+				break
 			}
 		}
 	}

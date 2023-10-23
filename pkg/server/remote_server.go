@@ -57,6 +57,7 @@ type server struct {
 	loader             testing.Writer
 	storeWriterFactory testing.StoreWriterFactory
 	configDir          string
+	storeExtMgr        ExtManager
 
 	secretServer SecretServiceServer
 }
@@ -97,7 +98,7 @@ func (f *fakeSecretServer) UpdateSecret(ctx context.Context, in *Secret) (reply 
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, secretServer SecretServiceServer, configDir string) RunnerServer {
+func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, secretServer SecretServiceServer, storeExtMgr ExtManager, configDir string) RunnerServer {
 	if secretServer == nil {
 		secretServer = &fakeSecretServer{}
 	}
@@ -107,6 +108,7 @@ func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWrit
 		storeWriterFactory: storeWriterFactory,
 		configDir:          configDir,
 		secretServer:       secretServer,
+		storeExtMgr:        storeExtMgr,
 	}
 }
 
@@ -829,13 +831,19 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err error) {
 	reply = &Store{}
 	storeFactory := testing.NewStoreFactory(s.configDir)
-	err = storeFactory.CreateStore(ToNormalStore(in))
+	store := ToNormalStore(in)
+	if err = storeFactory.CreateStore(store); err == nil && s.storeExtMgr != nil {
+		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
+	}
 	return
 }
 func (s *server) UpdateStore(ctx context.Context, in *Store) (reply *Store, err error) {
 	reply = &Store{}
 	storeFactory := testing.NewStoreFactory(s.configDir)
-	err = storeFactory.UpdateStore(ToNormalStore(in))
+	store := ToNormalStore(in)
+	if err = storeFactory.UpdateStore(store); err == nil && s.storeExtMgr != nil {
+		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
+	}
 	return
 }
 func (s *server) DeleteStore(ctx context.Context, in *Store) (reply *Store, err error) {
