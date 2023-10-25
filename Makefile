@@ -4,7 +4,7 @@ TOOLEXEC?=-toolexec="skywalking-go-agent"
 GOPROXY?=https://goproxy.cn,direct
 HELM_VERSION?=v0.0.2
 APP_VERSION?=v0.0.13
-HELM_REPORT?=docker.io/linuxsuren
+HELM_REPO?=docker.io/linuxsuren
 
 build:
 	mkdir -p bin
@@ -30,7 +30,7 @@ build-win-embed-ui:
 	BINARY=atest.exe OS=windows make build-embed-ui
 goreleaser:
 	goreleaser build --rm-dist --snapshot
-	make clean-embed-ui
+	make clean-embed-uif
 build-image:
 	${IMG_TOOL} build -t ghcr.io/linuxsuren/api-testing:master . \
 		--build-arg GOPROXY=${GOPROXY} \
