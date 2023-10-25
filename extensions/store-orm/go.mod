@@ -6,7 +6,7 @@ require (
 	github.com/linuxsuren/api-testing v0.0.11
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.4
-	google.golang.org/grpc v1.55.0
+	google.golang.org/grpc v1.56.3
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.2
 )
