@@ -34,6 +34,25 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          - atest
+          - server
+          - --local-storage=/var/www/sample/*.yaml
+          {{- if .Values.skywalking.endpoint.http }}
+          - --skywalking={{ .Values.skywalking.endpoint.http }}
+          {{- end }}
+          env:
+          {{- if .Values.skywalking.endpoint.grpc }}
+          - name: SW_AGENT_REPORTER_GRPC_BACKEND_SERVICE
+            value: {{ .Values.skywalking.endpoint.grpc }}
+          - name: SW_AGENT_REPORTER_DISCARD
+            value: "false"
+          {{- else }}
+          - name: SW_AGENT_REPORTER_DISCARD
+            value: "true"
+          {{- end }}
+          - name: SW_AGENT_NAME
+            value: atest
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

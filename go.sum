@@ -13,8 +13,10 @@ github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883/go.mod h1:rCTlJbsFo
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/antonmedv/expr v1.15.0 h1:sBHNMx1i+b1lZfkBFGhicvSLW6RLnca3R0B7jWrk8iM=
 github.com/antonmedv/expr v1.15.0/go.mod h1:0E/6TxnOlRNp81GMzX9QfDPAmHo2Phg00y4JUv1ihsE=
-github.com/apache/skywalking-go v0.2.0 h1:LXYVOp5RvwbGP8kjJX5JnVSCbm0zYF6w3r2XYXUGHyw=
-github.com/apache/skywalking-go v0.2.0/go.mod h1:r2FrabK/0XftMyosqre7WFZvZ1mEOVssJROo8xgcEW8=
+github.com/apache/skywalking-go v0.3.0 h1:e8yUYUWm8EvDSyTIESfGgRBw/0/Bnc40GbzPKK1P+mI=
+github.com/apache/skywalking-go v0.3.0/go.mod h1:r2FrabK/0XftMyosqre7WFZvZ1mEOVssJROo8xgcEW8=
+github.com/apache/skywalking-go v0.3.1-0.20231024132233-74b68861aed0 h1:MQXzXwo1Z5gObA8aaf8xvZvcon2euM7d5eMFBmvizjQ=
+github.com/apache/skywalking-go v0.3.1-0.20231024132233-74b68861aed0/go.mod h1:r2FrabK/0XftMyosqre7WFZvZ1mEOVssJROo8xgcEW8=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/bufbuild/protocompile v0.6.0 h1:Uu7WiSQ6Yj9DbkdnOe7U4mNKp58y9WDMKDn28/ZlunY=

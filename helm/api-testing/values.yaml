@@ -86,6 +86,11 @@ persistence:
       accessMode: ReadWriteMany
       size: 500Mi
 
+skywalking:
+  endpoint:
+    http: "" # http://skywalking-skywalking-helm-oap.skywalking.svc:12800
+    grpc: "" # skywalking-skywalking-helm-oap.skywalking.svc:11800
+
 nodeSelector: {}
 
 tolerations: []

@@ -4,6 +4,7 @@ TOOLEXEC?=-toolexec="skywalking-go-agent"
 GOPROXY?=https://goproxy.cn,direct
 HELM_VERSION?=v0.0.2
 APP_VERSION?=v0.0.13
+HELM_REPORT?=docker.io/linuxsuren
 
 build:
 	mkdir -p bin
@@ -51,7 +52,7 @@ copy-restart: build-embed-ui
 helm-package:
 	helm package helm/api-testing --version ${HELM_VERSION}-helm --app-version ${APP_VERSION} -d bin
 helm-push:
-	helm push bin/api-testing-${HELM_VERSION}-helm.tgz oci://docker.io/linuxsuren
+	helm push bin/api-testing-${HELM_VERSION}-helm.tgz oci://${HELM_REPO}
 helm-lint:
 	helm lint helm/api-testing
 

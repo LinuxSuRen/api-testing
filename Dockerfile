@@ -5,20 +5,21 @@ COPY console/atest-ui .
 RUN npm install --ignore-scripts --registry=https://registry.npmmirror.com
 RUN npm run build-only
 
-FROM docker.io/apache/skywalking-go:0.2.0-go1.18 AS sk
+# FROM docker.io/apache/skywalking-go:0.4.0-go1.19 AS sk
+# use above tag once https://github.com/apache/skywalking-go/pull/134 got released
+FROM ghcr.io/apache/skywalking-go/skywalking-go:74b68861aed04b4d78fcc5b4bcd925113f7de81d-go1.19 AS sk
 
 FROM docker.io/golang:1.19 AS builder
 
 ARG VERSION
 ARG GOPROXY
-# it could be -toolexec="skywalking-go-agent"
-ARG TOOLEXEC
 WORKDIR /workspace
 COPY cmd/ cmd/
 COPY pkg/ pkg/
 COPY extensions/ extensions/
 COPY operator/ operator/
 COPY .github/testing/*.yaml sample/
+COPY .github/ .github/
 COPY sample/ sample/
 COPY docs/ docs/
 COPY go.mod go.mod
@@ -36,11 +37,11 @@ COPY --from=ui /workspace/dist/assets/*.css cmd/data/index.css
 COPY --from=sk /usr/local/bin/skywalking-go-agent /usr/local/bin/skywalking-go-agent
 
 RUN GOPROXY=${GOPROXY} go mod download
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build ${TOOLEXEC} -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}" -o atest .
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -toolexec="skywalking-go-agent" -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}" -o atest .
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -toolexec="skywalking-go-agent" -a -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
 
 FROM docker.io/library/ubuntu:23.04
 
@@ -67,6 +68,7 @@ COPY --from=builder /workspace/sample /var/www/sample
 
 RUN apt update -y && \
     # required for atest-store-git
-    apt install -y --no-install-recommends ssh-client ca-certificates
+    apt install -y --no-install-recommends ssh-client ca-certificates && \
+    apt install -y curl
 
 CMD ["atest", "server", "--local-storage=/var/www/sample/*.yaml"]
