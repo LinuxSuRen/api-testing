@@ -146,6 +146,10 @@ Please add the following flag if you want to get the browser tracing data:
 
 ```shell
 # 12800 is the HTTP port of Apache SkyWalking
+# 11800 is the gRPC port of Apache SkyWalking
+export SW_AGENT_REPORTER_GRPC_BACKEND_SERVICE=localhost:11800
+export SW_AGENT_REPORTER_DISCARD=false
+
 atest server --skywalking http://localhost:12800
 ```
 

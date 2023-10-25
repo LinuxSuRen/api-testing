@@ -27,6 +27,7 @@ package main
 import (
 	"os"
 
+	_ "github.com/apache/skywalking-go"
 	"github.com/linuxsuren/api-testing/extensions/store-git/cmd"
 )
 
