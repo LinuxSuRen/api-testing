@@ -19,7 +19,6 @@ import setTheme from './theme'
 
 const { t } = useI18n()
 
-
 function switchAppMode()
 {
   setTheme(appMode.value)
@@ -31,17 +30,20 @@ interface Tree {
   parent: string
   parentID: string
   store: string
+  kind: string
   children?: Tree[]
 }
 
 const testCaseName = ref('')
 const testSuite = ref('')
 const store = ref('')
+const testSuiteKind = ref('')
 const handleNodeClick = (data: Tree) => {
   if (data.children) {
     viewName.value = 'testsuite'
     testSuite.value = data.label
     store.value = data.store
+    testSuiteKind.value = data.kind
 
     const requestOptions = {
       method: 'POST',
@@ -61,6 +63,7 @@ const handleNodeClick = (data: Tree) => {
             data.children?.push({
               id: data.label + item.name,
               label: item.name,
+              kind: data.kind,
               store: data.store,
               parent: data.label,
               parentID: data.id
@@ -73,6 +76,7 @@ const handleNodeClick = (data: Tree) => {
     testCaseName.value = data.label
     testSuite.value = data.parent
     store.value = data.store
+    testSuiteKind.value = data.kind
     viewName.value = 'testcase'
   }
 }
@@ -99,6 +103,7 @@ function loadTestSuites(storeName: string) {
           let suite = {
             id: k,
             label: k,
+            kind: d.data[k].kind,
             store: storeName,
             children: [] as Tree[]
           } as Tree
@@ -108,6 +113,7 @@ function loadTestSuites(storeName: string) {
               id: k + item,
               label: item,
               store: storeName,
+              kind: suite.kind,
               parent: k,
               parentID: suite.id
             } as Tree)
@@ -176,6 +182,7 @@ function loadStores() {
         treeRef.value!.setCheckedKeys([targetChild.id], false)
         testSuite.value = targetSuite.label
         store.value = targetSuite.store
+        testSuiteKind.value = targetChild.kind
       } else {
         viewName.value = ""
       }
@@ -190,7 +197,8 @@ const suiteFormRef = ref<FormInstance>()
 const testSuiteForm = reactive({
   name: '',
   api: '',
-  store: ''
+  store: '',
+  kind: ''
 })
 const importSuiteFormRef = ref<FormInstance>()
 const importSuiteForm = reactive({
@@ -223,7 +231,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         },
         body: JSON.stringify({
           name: testSuiteForm.name,
-          api: testSuiteForm.api
+          api: testSuiteForm.api,
+          kind: testSuiteForm.kind
         })
       }
 
@@ -299,6 +308,14 @@ watch(viewName, (val) => {
     useFmp: true
   });
 })
+
+const suiteKinds = [{
+  "name": "HTTP",
+}, {
+  "name": "gRPC",
+}, {
+  "name": "tRPC",
+}]
 </script>
 
 <template>
@@ -348,6 +365,7 @@ watch(viewName, (val) => {
               v-else-if="viewName === 'testcase'"
               :store="store"
               :suite="testSuite"
+              :kindName="testSuiteKind"
               :name="testCaseName"
               @updated="loadStores"
               data-intro="This is the test case editor. You can edit the test case here."
@@ -387,6 +405,19 @@ watch(viewName, (val) => {
               placeholder="Storage Location" size="middle">
               <el-option
                 v-for="item in stores"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item :label="t('field.suiteKind')" prop="kind">
+            <el-select v-model="testSuiteForm.kind" class="m-2"
+              filterable=true
+              default-first-option=true
+              size="middle">
+              <el-option
+                v-for="item in suiteKinds"
                 :key="item.name"
                 :label="item.name"
                 :value="item.name"

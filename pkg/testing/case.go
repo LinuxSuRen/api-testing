@@ -23,6 +23,7 @@ type RPCDesc struct {
 	ServerReflection bool     `yaml:"serverReflection,omitempty" json:"serverReflection,omitempty"`
 	ProtoFile        string   `yaml:"protofile,omitempty" json:"protofile,omitempty"`
 	ProtoSet         string   `yaml:"protoset,omitempty" json:"protoset,omitempty"`
+	Raw              string   `yaml:"raw,omitempty" json:"raw,omitempty"`
 }
 
 type Secure struct {

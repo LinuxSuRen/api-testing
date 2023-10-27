@@ -285,6 +285,7 @@ func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err e
 			for _, item := range suite.Items {
 				items.Data = append(items.Data, item.Name)
 			}
+			items.Kind = suite.Spec.Kind
 			reply.Data[suite.Name] = items
 		}
 	}
@@ -298,7 +299,15 @@ func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (re
 	if loader == nil {
 		reply.Error = "no loader found"
 	} else {
-		err = loader.CreateSuite(in.Name, in.Api)
+		if err = loader.CreateSuite(in.Name, in.Api); err == nil {
+			err = loader.UpdateSuite(testing.TestSuite{
+				Name: in.Name,
+				API:  in.Api,
+				Spec: testing.APISpec{
+					Kind: in.Kind,
+				},
+			})
+		}
 	}
 	return
 }
@@ -365,11 +374,12 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 			}
 		}
 		if suite.Spec.RPC != nil {
-			result.Spec.Grpc = &GRPC{
+			result.Spec.Rpc = &RPC{
 				Import:           suite.Spec.RPC.ImportPath,
 				ServerReflection: suite.Spec.RPC.ServerReflection,
 				Protofile:        suite.Spec.RPC.ProtoFile,
 				Protoset:         suite.Spec.RPC.ProtoSet,
+				Raw:              suite.Spec.RPC.Raw,
 			}
 		}
 	}

@@ -258,6 +258,13 @@ function paramChange() {
       </el-table-column>
     </el-table>
 
+    <el-input
+        v-if="suite.spec.rpc"
+        v-model="suite.spec.rpc.raw"
+        :autosize="{ minRows: 4, maxRows: 8 }"
+        type="textarea"
+      />
+
     <el-button type="primary" @click="save">{{ t('button.save') }}</el-button>
     <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
     <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
@@ -277,7 +284,7 @@ function paramChange() {
           <el-form-item :label="t('field.name')" prop="name">
             <el-input v-model="testCaseForm.name" test-id="case-form-name"/>
           </el-form-item>
-          <el-form-item label="Method" prop="method">
+          <el-form-item label="Method" prop="method" v-if="suite.spec.kind === ''">
             <el-input v-model="testCaseForm.method" test-id="case-form-method" />
           </el-form-item>
           <el-form-item label="API" prop="api">

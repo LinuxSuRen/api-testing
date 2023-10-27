@@ -19,6 +19,12 @@ func ConvertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
 			Kind: suite.Spec.Kind,
 			URL:  suite.Spec.Url,
 		}
+
+		if suite.Spec.Rpc != nil {
+			result.Spec.RPC = &testing.RPCDesc{
+				Raw: suite.Spec.Rpc.Raw,
+			}
+		}
 	}
 
 	for _, testcase := range suite.Items {
@@ -47,11 +53,12 @@ func ConvertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 		}
 	}
 	if suite.Spec.RPC != nil {
-		result.Spec.Grpc = &server.GRPC{
+		result.Spec.Rpc = &server.RPC{
 			Import:           suite.Spec.RPC.ImportPath,
 			ServerReflection: suite.Spec.RPC.ServerReflection,
 			Protofile:        suite.Spec.RPC.ProtoFile,
 			Protoset:         suite.Spec.RPC.ProtoSet,
+			Raw:              suite.Spec.RPC.Raw,
 		}
 	}
 

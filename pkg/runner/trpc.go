@@ -24,6 +24,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -41,13 +42,15 @@ type tRPCTestCaseRunner struct {
 	host     string
 	proto    testing.RPCDesc
 	response SimpleResponse
+	cc       client.Client
 }
 
-func NewTRPCTestCaseRunner(host string, proto testing.RPCDesc) TestCaseRunner {
+func NewTRPCTestCaseRunner(host string, proto testing.RPCDesc, cc client.Client) TestCaseRunner {
 	runner := &tRPCTestCaseRunner{
 		UnimplementedRunner: NewDefaultUnimplementedRunner(),
 		host:                host,
 		proto:               proto,
+		cc:                  cc,
 	}
 	return runner
 }
@@ -59,7 +62,7 @@ func (r *tRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 		rr.EndTime = time.Now()
 		rr.Error = err
 		rr.API = testcase.Request.API
-		rr.Method = "gRPC"
+		rr.Method = "tRPC"
 		r.testReporter.PutRecord(rr)
 	}(record)
 
@@ -90,7 +93,7 @@ func (r *tRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	}
 
 	payload := testcase.Request.Body
-	resp, err := invokeTRPCRequest(ctx, fd, md, payload, r.host)
+	resp, err := invokeTRPCRequest(ctx, r.cc, fd, md, payload, r.host)
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +121,21 @@ func getTRPCMethodDescriptor(proto testing.RPCDesc, testcase *testing.TestCase) 
 		parser.WithMultiVersion(false),
 	}
 
+	if proto.Raw != "" {
+		var tempF *os.File
+		if tempF, err = os.CreateTemp(os.TempDir(), "proto"); err != nil {
+			return
+		}
+		defer func() {
+			_ = os.Remove(tempF.Name())
+		}()
+
+		if err = os.WriteFile(tempF.Name(), []byte(proto.Raw), 0644); err != nil {
+			return
+		}
+		proto.ProtoFile = tempF.Name()
+	}
+
 	if fd, err = parser.Parse(
 		proto.ProtoFile,
 		[]string{},
@@ -129,7 +147,7 @@ func getTRPCMethodDescriptor(proto testing.RPCDesc, testcase *testing.TestCase) 
 	return
 }
 
-func invokeTRPCRequest(ctx context.Context, fd *descriptor.FileDescriptor, md *descriptor.RPCDescriptor, payload string, host string) (
+func invokeTRPCRequest(ctx context.Context, cc client.Client, fd *descriptor.FileDescriptor, md *descriptor.RPCDescriptor, payload string, host string) (
 	resp map[string]string, err error) {
 	ctx, msg := codec.WithCloneMessage(ctx)
 	defer codec.PutBackMessage(msg)
@@ -145,9 +163,9 @@ func invokeTRPCRequest(ctx context.Context, fd *descriptor.FileDescriptor, md *d
 	callopts := []client.Option{}
 	callopts = append(callopts, client.WithTarget(host))
 
-	cc := codec.GetClient(trpc.ProtocolName)
+	ccc := codec.GetClient(trpc.ProtocolName)
 
-	_, err = cc.Encode(msg, []byte(payload))
+	_, err = ccc.Encode(msg, []byte(payload))
 
 	req := map[string]string{}
 	if err = json.Unmarshal([]byte(payload), &req); err != nil {
@@ -158,7 +176,7 @@ func invokeTRPCRequest(ctx context.Context, fd *descriptor.FileDescriptor, md *d
 
 	resp = make(map[string]string)
 
-	c := client.New()
+	c := cc //client.New()
 	err = c.Invoke(ctx, req, &resp, callopts...)
 	return
 }

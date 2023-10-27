@@ -97,6 +97,9 @@
                             "type": "boolean"
                         }
                     }
+                },
+                "raw": {
+                    "type": "string"
                 }
             }
         },
