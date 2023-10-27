@@ -12,12 +12,13 @@ type TestSuite struct {
 }
 
 type APISpec struct {
-	Kind   string    `yaml:"kind,omitempty" json:"kind,omitempty"`
-	URL    string    `yaml:"url,omitempty" json:"url,omitempty"`
-	GRPC   *GRPCDesc `yaml:"grpc,omitempty" json:"grpc,omitempty"`
-	Secure *Secure   `yaml:"secure,omitempty" json:"secure,omitempty"`
+	Kind   string   `yaml:"kind,omitempty" json:"kind,omitempty"`
+	URL    string   `yaml:"url,omitempty" json:"url,omitempty"`
+	RPC    *RPCDesc `yaml:"rpc,omitempty" json:"rpc,omitempty"`
+	Secure *Secure  `yaml:"secure,omitempty" json:"secure,omitempty"`
 }
-type GRPCDesc struct {
+
+type RPCDesc struct {
 	ImportPath       []string `yaml:"import,omitempty" json:"import,omitempty"`
 	ServerReflection bool     `yaml:"serverReflection,omitempty" json:"serverReflection,omitempty"`
 	ProtoFile        string   `yaml:"protofile,omitempty" json:"protofile,omitempty"`

@@ -46,12 +46,12 @@ func ConvertToGRPCTestSuite(suite *testing.TestSuite) (result *TestSuite) {
 			Key:        suite.Spec.Secure.KeyFile,
 		}
 	}
-	if suite.Spec.GRPC != nil {
+	if suite.Spec.RPC != nil {
 		result.Spec.Grpc = &server.GRPC{
-			Import:           suite.Spec.GRPC.ImportPath,
-			ServerReflection: suite.Spec.GRPC.ServerReflection,
-			Protofile:        suite.Spec.GRPC.ProtoFile,
-			Protoset:         suite.Spec.GRPC.ProtoSet,
+			Import:           suite.Spec.RPC.ImportPath,
+			ServerReflection: suite.Spec.RPC.ServerReflection,
+			Protofile:        suite.Spec.RPC.ProtoFile,
+			Protoset:         suite.Spec.RPC.ProtoSet,
 		}
 	}
 

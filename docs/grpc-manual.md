@@ -10,11 +10,11 @@ To create a gRPC testsuite based on service reflection, just add the following c
 
 ```yaml
 spec:
-  grpc:
+  rpc:
     serverReflection: true
 ```
 
-Field `grpc` has five subfields in total:
+Field `rpc` has five subfields in total:
 
 | Name             | Type     | Optional |
 | ---------------- | -------- | -------- |

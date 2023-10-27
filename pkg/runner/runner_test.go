@@ -31,6 +31,6 @@ func TestRunnerFactory(t *testing.T) {
 	runner := GetTestSuiteRunner(&atest.TestSuite{})
 	assert.IsType(t, NewSimpleTestCaseRunner(), runner)
 
-	runner = GetTestSuiteRunner(&atest.TestSuite{Spec: atest.APISpec{GRPC: &atest.GRPCDesc{}}})
-	assert.IsType(t, NewGRPCTestCaseRunner("", atest.GRPCDesc{}), runner)
+	runner = GetTestSuiteRunner(&atest.TestSuite{Spec: atest.APISpec{RPC: &atest.RPCDesc{}}})
+	assert.IsType(t, NewGRPCTestCaseRunner("", atest.RPCDesc{}), runner)
 }

@@ -33,6 +33,7 @@ import (
 func Verify(expect testing.Response, data map[string]any) (err error) {
 	for _, verifyExpr := range expect.Verify {
 		var ok bool
+		fmt.Println(data, "==", verifyExpr)
 		if ok, err = verify(verifyExpr, data); !ok {
 			err = fmt.Errorf("failed to verify: %q, %v", verifyExpr, err)
 			return

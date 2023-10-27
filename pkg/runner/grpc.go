@@ -51,7 +51,7 @@ import (
 type gRPCTestCaseRunner struct {
 	UnimplementedRunner
 	host     string
-	proto    testing.GRPCDesc
+	proto    testing.RPCDesc
 	response SimpleResponse
 	// fdCache sync.Map
 }
@@ -59,7 +59,7 @@ type gRPCTestCaseRunner struct {
 var regexFullQualifiedName = regexp.MustCompile(`^([\w\.:]+)\/([\w\.]+)\/(\w+)$`)
 var regexURLPrefix = regexp.MustCompile(`^https?://`)
 
-func NewGRPCTestCaseRunner(host string, proto testing.GRPCDesc) TestCaseRunner {
+func NewGRPCTestCaseRunner(host string, proto testing.RPCDesc) TestCaseRunner {
 	runner := &gRPCTestCaseRunner{
 		UnimplementedRunner: NewDefaultUnimplementedRunner(),
 		host:                host,
