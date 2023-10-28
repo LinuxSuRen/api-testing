@@ -78,6 +78,10 @@ func TestGRPCTestCase(t *testing.T) {
 		ImportPath: []string{"grpc_test"},
 		ProtoFile:  "test.proto",
 	})
+
+	doGRPCTest(t, l, nil, &atest.RPCDesc{
+		Raw: sampleProto,
+	})
 	s.Stop()
 }
 func TestGRPCTestCaseWithSecure(t *testing.T) {

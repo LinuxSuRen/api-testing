@@ -362,48 +362,7 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 	loader := s.getLoader(ctx)
 	var suite *testing.TestSuite
 	if suite, _, err = loader.GetSuite(in.Name); err == nil && suite != nil {
-		result = &TestSuite{
-			Name:  suite.Name,
-			Api:   suite.API,
-			Param: mapToPair(suite.Param),
-			Spec: &APISpec{
-				Kind: suite.Spec.Kind,
-				Url:  suite.Spec.URL,
-			},
-		}
-		if suite.Spec.Secure != nil {
-			result.Spec.Secure = &Secure{
-				Insecure:   suite.Spec.Secure.Insecure,
-				Cert:       suite.Spec.Secure.CertFile,
-				Ca:         suite.Spec.Secure.CAFile,
-				ServerName: suite.Spec.Secure.ServerName,
-				Key:        suite.Spec.Secure.KeyFile,
-			}
-		}
-		if suite.Spec.RPC != nil {
-			result.Spec.Rpc = &RPC{
-				Import:           suite.Spec.RPC.ImportPath,
-				ServerReflection: suite.Spec.RPC.ServerReflection,
-				Protofile:        suite.Spec.RPC.ProtoFile,
-				Protoset:         suite.Spec.RPC.ProtoSet,
-				Raw:              suite.Spec.RPC.Raw,
-			}
-		}
-	}
-	return
-}
-
-func convertToTestingTestSuite(in *TestSuite) (suite *testing.TestSuite) {
-	suite = &testing.TestSuite{
-		Name:  in.Name,
-		API:   in.Api,
-		Param: pairToMap(in.Param),
-	}
-	if in.Spec != nil {
-		suite.Spec = testing.APISpec{
-			Kind: in.Spec.Kind,
-			URL:  in.Spec.Url,
-		}
+		result = ToGRPCSuite(suite)
 	}
 	return
 }
@@ -411,7 +370,7 @@ func convertToTestingTestSuite(in *TestSuite) (suite *testing.TestSuite) {
 func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
 	loader := s.getLoader(ctx)
-	err = loader.UpdateSuite(*convertToTestingTestSuite(in))
+	err = loader.UpdateSuite(*ToNormalSuite(in))
 	return
 }
 
@@ -428,7 +387,7 @@ func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (resul
 	if items, err = loader.ListTestCase(in.Name); err == nil {
 		result = &Suite{}
 		for _, item := range items {
-			result.Items = append(result.Items, convertToGRPCTestCase(item))
+			result.Items = append(result.Items, ToGRPCTestCase(item))
 		}
 	}
 	return
@@ -438,34 +397,7 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	var result testing.TestCase
 	loader := s.getLoader(ctx)
 	if result, err = loader.GetTestCase(in.Suite, in.Testcase); err == nil {
-		reply = convertToGRPCTestCase(result)
-	}
-	return
-}
-
-func convertToGRPCTestCase(testCase testing.TestCase) (result *TestCase) {
-	req := &Request{
-		Api:    testCase.Request.API,
-		Method: testCase.Request.Method,
-		Query:  mapToPair(testCase.Request.Query),
-		Header: mapToPair(testCase.Request.Header),
-		Form:   mapToPair(testCase.Request.Form),
-		Body:   testCase.Request.Body,
-	}
-
-	resp := &Response{
-		StatusCode:       int32(testCase.Expect.StatusCode),
-		Body:             testCase.Expect.Body,
-		Header:           mapToPair(testCase.Expect.Header),
-		BodyFieldsExpect: mapInterToPair(testCase.Expect.BodyFieldsExpect),
-		Verify:           testCase.Expect.Verify,
-		Schema:           testCase.Expect.Schema,
-	}
-
-	result = &TestCase{
-		Name:     testCase.Name,
-		Request:  req,
-		Response: resp,
+		reply = ToGRPCTestCase(result)
 	}
 	return
 }
@@ -563,34 +495,6 @@ func pairToMap(pairs []*Pair) (data map[string]string) {
 	return
 }
 
-func convertToTestingTestCase(in *TestCase) (result testing.TestCase) {
-	result = testing.TestCase{
-		Name: in.Name,
-	}
-	req := in.Request
-	resp := in.Response
-
-	if req != nil {
-		result.Request.API = req.Api
-		result.Request.Method = req.Method
-		result.Request.Body = req.Body
-		result.Request.Header = pairToMap(req.Header)
-		result.Request.Form = pairToMap(req.Form)
-		result.Request.Query = pairToMap(req.Query)
-	}
-
-	if resp != nil {
-		result.Expect.Body = strings.TrimSpace(resp.Body)
-		result.Expect.Schema = strings.TrimSpace(resp.Schema)
-		result.Expect.StatusCode = int(resp.StatusCode)
-		result.Expect.Verify = util.RemoeEmptyFromSlice(resp.Verify)
-		result.Expect.ConditionalVerify = convertConditionalVerify(resp.ConditionalVerify)
-		result.Expect.BodyFieldsExpect = pairToInterMap(resp.BodyFieldsExpect)
-		result.Expect.Header = pairToMap(resp.Header)
-	}
-	return
-}
-
 func convertConditionalVerify(verify []*ConditionalVerify) (result []testing.ConditionalVerify) {
 	if verify != nil {
 		result = make([]testing.ConditionalVerify, 0)
@@ -608,7 +512,7 @@ func convertConditionalVerify(verify []*ConditionalVerify) (result []testing.Con
 func (s *server) CreateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
 	loader := s.getLoader(ctx)
-	err = loader.CreateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
+	err = loader.CreateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
 	return
 }
 
@@ -619,7 +523,7 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 		return
 	}
 	loader := s.getLoader(ctx)
-	err = loader.UpdateTestCase(in.SuiteName, convertToTestingTestCase(in.Data))
+	err = loader.UpdateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
 	return
 }
 

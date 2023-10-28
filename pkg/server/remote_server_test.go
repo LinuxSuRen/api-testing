@@ -415,7 +415,7 @@ func TestListTestCase(t *testing.T) {
 					BodyFieldsExpect: map[string]interface{}{},
 					Verify:           nil,
 				},
-			}, convertToTestingTestCase(result))
+			}, ToNormalTestCase(result))
 		}
 	})
 

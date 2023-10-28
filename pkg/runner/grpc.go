@@ -229,7 +229,7 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 	if r.proto.ServerReflection {
 		dp, err = getByReflect(ctx, r, fullname, conn)
 	} else {
-		if r.proto.ProtoFile == "" && r.proto.ProtoSet == "" {
+		if r.proto.ProtoFile == "" && r.proto.ProtoSet == "" && r.proto.Raw == "" {
 			return nil, fmt.Errorf("missing descriptor source")
 		}
 		dp, err = getByProto(ctx, r, fullname)
@@ -260,6 +260,23 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 				ImportPaths: r.proto.ImportPath,
 			},
 		),
+	}
+
+	// save the proto to a temp file if the raw content given
+	if r.proto.Raw != "" {
+		f, err := os.CreateTemp(os.TempDir(), "proto")
+		if err != nil {
+			err = fmt.Errorf("failed to create temp file when saving proto content: %v", err)
+			return nil, err
+		}
+		defer os.Remove(f.Name())
+
+		_, err = f.WriteString(r.proto.Raw)
+		if err != nil {
+			err = fmt.Errorf("failed to write proto content to file %q: %v", f.Name(), err)
+			return nil, err
+		}
+		r.proto.ProtoFile = f.Name()
 	}
 
 	linker, err := compiler.Compile(ctx, r.proto.ProtoFile)
