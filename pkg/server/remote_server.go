@@ -300,13 +300,20 @@ func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (re
 		reply.Error = "no loader found"
 	} else {
 		if err = loader.CreateSuite(in.Name, in.Api); err == nil {
-			err = loader.UpdateSuite(testing.TestSuite{
+			toUpdate := testing.TestSuite{
 				Name: in.Name,
 				API:  in.Api,
 				Spec: testing.APISpec{
 					Kind: in.Kind,
 				},
-			})
+			}
+
+			switch strings.ToLower(in.Kind) {
+			case "grpc", "trpc":
+				toUpdate.Spec.RPC = &testing.RPCDesc{}
+			}
+
+			err = loader.UpdateSuite(toUpdate)
 		}
 	}
 	return

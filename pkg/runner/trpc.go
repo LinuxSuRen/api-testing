@@ -87,15 +87,25 @@ func (r *tRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	fd, md, err := getTRPCMethodDescriptor(r.proto, testcase)
 	if err != nil {
 		if err == protoregistry.NotFound {
-			return nil, fmt.Errorf("api %q is not found", testcase.Request.API)
+			return nil, fmt.Errorf("API %q is not found", testcase.Request.API)
 		}
 		return nil, err
+	}
+	if md == nil {
+		return nil, fmt.Errorf("API %q is not found", testcase.Request.API)
 	}
 
 	payload := testcase.Request.Body
 	resp, err := invokeTRPCRequest(ctx, r.cc, fd, md, payload, r.host)
 	if err != nil {
 		return nil, err
+	}
+
+	if data, err := json.Marshal(resp); err == nil {
+		record.Body = string(data)
+		r.response = SimpleResponse{
+			Body: record.Body,
+		}
 	}
 
 	r.log.Debug("response body: %s\n", record.Body)
@@ -169,7 +179,6 @@ func invokeTRPCRequest(ctx context.Context, cc client.Client, fd *descriptor.Fil
 
 	req := map[string]string{}
 	if err = json.Unmarshal([]byte(payload), &req); err != nil {
-		fmt.Println(payload)
 		err = fmt.Errorf("failed to unmarshal payload, error: %v", err)
 		return
 	}

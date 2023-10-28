@@ -492,7 +492,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
         </div>
         <el-select
-          v-if="props.kindName !== 'tRPC'"
+          v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'"
           v-model="testCaseWithSuite.data.request.method"
           class="m-2"
           placeholder="Method"
@@ -530,7 +530,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
 
       <el-main>
         <el-tabs v-model="activeName" class="demo-tabs">
-          <el-tab-pane label="Query" name="query" v-if="props.kindName !== 'tRPC'">
+          <el-tab-pane label="Query" name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
             <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
               <el-table-column label="Key" width="180">
                 <template #default="scope">
@@ -551,7 +551,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
             </el-table>
           </el-tab-pane>
 
-          <el-tab-pane label="Headers" name="second" v-if="props.kindName !== 'tRPC'">
+          <el-tab-pane label="Headers" name="second" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
             <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
               <el-table-column label="Key" width="180">
                 <template #default="scope">
@@ -606,7 +606,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
             </el-table>
           </el-tab-pane>
 
-          <el-tab-pane label="Expected" name="expected" v-if="props.kindName !== 'tRPC'">
+          <el-tab-pane label="Expected" name="expected" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
             <el-row :gutter="20">
               <span
                 class="ml-3 w-50 text-gray-600 inline-flex items-center"
@@ -628,7 +628,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
             />
           </el-tab-pane>
 
-          <el-tab-pane label="Expected Headers" name="expected-headers" v-if="props.kindName !== 'tRPC'">
+          <el-tab-pane label="Expected Headers" name="expected-headers" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
             <el-table :data="testCaseWithSuite.data.response.header" style="width: 100%">
               <el-table-column label="Key" width="180">
                 <template #default="scope">
@@ -649,7 +649,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
             </el-table>
           </el-tab-pane>
 
-          <el-tab-pane label="BodyFiledExpect" name="fourth" v-if="props.kindName !== 'tRPC'">
+          <el-tab-pane label="BodyFiledExpect" name="fourth" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
             <el-table :data="testCaseWithSuite.data.response.bodyFieldsExpect" style="width: 100%">
               <el-table-column label="Key" width="180">
                 <template #default="scope">
@@ -672,13 +672,13 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
             </el-table>
           </el-tab-pane>
 
-          <el-tab-pane label="Verify" name="fifth" v-if="props.kindName !== 'tRPC'">
+          <el-tab-pane label="Verify" name="fifth" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
             <div v-for="verify in testCaseWithSuite.data.response.verify" :key="verify">
               <el-input :value="verify" />
             </div>
           </el-tab-pane>
 
-          <el-tab-pane label="Schema" name="schema" v-if="props.kindName !== 'tRPC'">
+          <el-tab-pane label="Schema" name="schema" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
             <el-input
               v-model="testCaseWithSuite.data.response.schema"
               :autosize="{ minRows: 4, maxRows: 20 }"
