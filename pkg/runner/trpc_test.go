@@ -41,7 +41,7 @@ func TestTRPC(t *testing.T) {
 		testcase := &atest.TestCase{
 			Name: "Unary",
 			Request: atest.Request{
-				API:  "Unary",
+				API:  "/Main/Unary",
 				Body: "{}",
 			},
 		}
@@ -54,7 +54,7 @@ func TestTRPC(t *testing.T) {
 		_, err := tRPCRunner.RunTestCase(&atest.TestCase{
 			Name: "Fake",
 			Request: atest.Request{
-				API:  "Fake",
+				API:  "/Main/Fake",
 				Body: "{}",
 			},
 		}, nil, context.Background())
