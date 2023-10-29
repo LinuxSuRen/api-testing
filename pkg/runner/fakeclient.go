@@ -21,16 +21,15 @@ SOFTWARE.
 package runner
 
 import (
-	"testing"
-
-	atest "github.com/linuxsuren/api-testing/pkg/testing"
-	"github.com/stretchr/testify/assert"
+	"context"
+	"trpc.group/trpc-go/trpc-go/client"
 )
 
-func TestRunnerFactory(t *testing.T) {
-	runner := GetTestSuiteRunner(&atest.TestSuite{})
-	assert.IsType(t, NewSimpleTestCaseRunner(), runner)
+type fakeClient struct {
+	err error
+}
 
-	runner = GetTestSuiteRunner(&atest.TestSuite{Spec: atest.APISpec{RPC: &atest.RPCDesc{}}})
-	assert.IsType(t, NewGRPCTestCaseRunner("", atest.RPCDesc{}), runner)
+func (f*fakeClient)Invoke(ctx context.Context, reqBody interface{}, rspBody interface{}, opt ...client.Option) (err error) {
+	err = f.err
+	return
 }

@@ -57,11 +57,13 @@ jobs:
 
           atest convert -p .github/testing/core.yaml --converter jmeter -t sample.jmx
       - name: Report API Test
-        uses: thollander/actions-comment-pull-request@v2
+        if: github.event.pull_request.user.login == 'linuxsuren'
+        uses: thollander/actions-comment-pull-request@v2.4.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           filePath: .github/workflows/report.md
+          comment_tag: execution
       - name: Run JMeter Tests
         uses: rbhadti94/apache-jmeter-action@v0.5.0
         with:

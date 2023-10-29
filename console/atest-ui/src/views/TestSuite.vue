@@ -232,7 +232,9 @@ function paramChange() {
 <template>
   <div class="common-layout">
     <el-text class="mx-1" type="primary">{{ suite.name }}</el-text>
-    <el-input class="mx-1" v-model="suite.api" placeholder="API" test-id="suite-editor-api"></el-input>
+
+    <el-input class="w-50 m-2" v-model="suite.api" placeholder="API" test-id="suite-editor-api"></el-input>
+
     <el-select v-model="suite.spec.kind" class="m-2" placeholder="API Spec Kind" size="middle">
       <el-option
         v-for="item in apiSpecKinds"
@@ -243,20 +245,34 @@ function paramChange() {
     </el-select>
     <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
 
-    <el-table :data="suite.param" style="width: 100%">
-      <el-table-column label="Key" width="180">
-        <template #default="scope">
-          <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="Value">
-        <template #default="scope">
-          <div style="display: flex; align-items: center">
-            <el-input v-model="scope.row.value" placeholder="Value" />
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div>
+      <span>{{ t('title.param') }}</span>
+      <el-table :data="suite.param" style="width: 100%">
+        <el-table-column label="Key" width="180">
+          <template #default="scope">
+            <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange"/>
+          </template>
+        </el-table-column>
+        <el-table-column label="Value">
+          <template #default="scope">
+            <div style="display: flex; align-items: center">
+              <el-input v-model="scope.row.value" placeholder="Value" />
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-divider />
+    </div>
+
+    <div v-if="suite.spec.rpc">
+      <span>{{ t('title.protoContent') }}</span>
+      <el-input
+        v-model="suite.spec.rpc.raw"
+        :autosize="{ minRows: 4, maxRows: 8 }"
+        type="textarea"
+        />
+      <el-divider />
+    </div>
 
     <el-button type="primary" @click="save">{{ t('button.save') }}</el-button>
     <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
@@ -277,7 +293,7 @@ function paramChange() {
           <el-form-item :label="t('field.name')" prop="name">
             <el-input v-model="testCaseForm.name" test-id="case-form-name"/>
           </el-form-item>
-          <el-form-item label="Method" prop="method">
+          <el-form-item label="Method" prop="method" v-if="suite.spec.kind !== 'tRPC' && suite.spec.kind !== 'gRPC'">
             <el-input v-model="testCaseForm.method" test-id="case-form-method" />
           </el-form-item>
           <el-form-item label="API" prop="api">

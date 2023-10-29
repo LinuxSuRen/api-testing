@@ -90,3 +90,67 @@ func TestToNormalStore(t *testing.T) {
 		}},
 	}))
 }
+
+func TestToGRPCSuite(t *testing.T) {
+	assert.Equal(t, &TestSuite{
+		Name: "test",
+		Api:  "api",
+		Param: []*Pair{{
+			Key: "foo", Value: "bar",
+		}},
+		Spec: &APISpec{
+			Secure: &Secure{
+				Insecure: true,
+			},
+			Rpc: &RPC{
+				Raw: "raw",
+			},
+		},
+	}, ToGRPCSuite(&atest.TestSuite{
+		Name: "test",
+		API:  "api",
+		Param: map[string]string{
+			"foo": "bar",
+		},
+		Spec: atest.APISpec{
+			Secure: &atest.Secure{
+				Insecure: true,
+			},
+			RPC: &atest.RPCDesc{
+				Raw: "raw",
+			},
+		},
+	}))
+}
+
+func TestToNormalSuite(t *testing.T) {
+	assert.Equal(t, &atest.TestSuite{
+		Name: "test",
+		API:  "api",
+		Param: map[string]string{
+			"foo": "bar",
+		},
+		Spec: atest.APISpec{
+			Secure: &atest.Secure{
+				Insecure: true,
+			},
+			RPC: &atest.RPCDesc{
+				Raw: "raw",
+			},
+		},
+	}, ToNormalSuite(&TestSuite{
+		Name: "test",
+		Api:  "api",
+		Param: []*Pair{{
+			Key: "foo", Value: "bar",
+		}},
+		Spec: &APISpec{
+			Secure: &Secure{
+				Insecure: true,
+			},
+			Rpc: &RPC{
+				Raw: "raw",
+			},
+		},
+	}))
+}

@@ -20,13 +20,29 @@ SOFTWARE.
 
 package runner
 
-import "github.com/linuxsuren/api-testing/pkg/testing"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/testing"
+	"trpc.group/trpc-go/trpc-go/client"
+)
 
 // GetTestSuiteRunner returns a proper runner according to the given test suite.
 func GetTestSuiteRunner(suite *testing.TestSuite) TestCaseRunner {
 	// TODO: should be refactored to meet more types of runners
-	if suite.Spec.GRPC != nil {
-		return NewGRPCTestCaseRunner(suite.API, *suite.Spec.GRPC)
+	kind := suite.Spec.Kind
+
+	if suite.Spec.RPC != nil {
+		switch strings.ToLower(kind) {
+		case "", "grpc":
+			return NewGRPCTestCaseRunner(suite.API, *suite.Spec.RPC)
+		case "trpc":
+			return NewTRPCTestCaseRunner(suite.API, *suite.Spec.RPC, client.New())
+		default:
+			fmt.Println("unknown test suite, try to use HTTP runner")
+		}
 	}
+
 	return NewSimpleTestCaseRunner()
 }

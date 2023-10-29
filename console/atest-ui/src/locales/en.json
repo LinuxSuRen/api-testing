@@ -20,7 +20,9 @@
         "createTestCase": "Create Test Case",
         "createStore": "Create Store",
         "createSecret": "Create Secret",
-        "secretManager": "Secret Manager"
+        "secretManager": "Secret Manager",
+        "protoContent": "Proto Content",
+        "param": "Parameter"
     },
     "tip": {
         "filter": "Filter Keyword"
@@ -35,7 +37,8 @@
         "pluginURL": "Plugin URL",
         "status": "Status",
         "operations": "Operations",
-        "storageLocation": "Storage Location"
+        "storageLocation": "Storage Location",
+        "suiteKind": "Suite Kind"
     },
     "//see http spec": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
     "httpCode": {

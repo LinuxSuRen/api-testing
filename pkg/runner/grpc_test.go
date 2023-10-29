@@ -61,7 +61,7 @@ type testUnit struct {
 	name     string
 	execer   fakeruntime.Execer
 	testCase *atest.TestCase
-	desc     *atest.GRPCDesc
+	desc     *atest.RPCDesc
 	ctx      any
 	prepare  func()
 	verify   func(t *testing.T, output any, err error)
@@ -74,9 +74,13 @@ func TestGRPCTestCase(t *testing.T) {
 
 	l := runServer(t, s)
 
-	doGRPCTest(t, l, nil, &atest.GRPCDesc{
+	doGRPCTest(t, l, nil, &atest.RPCDesc{
 		ImportPath: []string{"grpc_test"},
 		ProtoFile:  "test.proto",
+	})
+
+	doGRPCTest(t, l, nil, &atest.RPCDesc{
+		Raw: sampleProto,
 	})
 	s.Stop()
 }
@@ -96,7 +100,7 @@ func TestGRPCTestCaseWithSecure(t *testing.T) {
 			CertFile:   "grpc_test/testassets/server.pem",
 			ServerName: "atest",
 		},
-		&atest.GRPCDesc{
+		&atest.RPCDesc{
 			ImportPath: []string{"grpc_test"},
 			ProtoFile:  "test.proto",
 		})
@@ -114,7 +118,7 @@ func TestGRPCProtoSetTestCase(t *testing.T) {
 	addition := []testUnit{
 		{
 			name: "test get protoset from url but url is error",
-			desc: &atest.GRPCDesc{
+			desc: &atest.RPCDesc{
 				ProtoSet: pburi,
 			},
 			testCase: &atest.TestCase{
@@ -129,7 +133,7 @@ func TestGRPCProtoSetTestCase(t *testing.T) {
 		},
 		{
 			name: "test get protoset from url",
-			desc: &atest.GRPCDesc{
+			desc: &atest.RPCDesc{
 				ProtoSet: "http://localhost/pb",
 			},
 			prepare: func() {
@@ -154,7 +158,7 @@ func TestGRPCProtoSetTestCase(t *testing.T) {
 		},
 	}
 
-	doGRPCTest(t, l, nil, &atest.GRPCDesc{
+	doGRPCTest(t, l, nil, &atest.RPCDesc{
 		ProtoSet: "grpc_test/test.pb",
 	},
 		addition...)
@@ -169,7 +173,7 @@ func TestGRPCReflectTestCase(t *testing.T) {
 
 	l := runServer(t, s)
 
-	doGRPCTest(t, l, nil, &atest.GRPCDesc{
+	doGRPCTest(t, l, nil, &atest.RPCDesc{
 		ServerReflection: true,
 	})
 	s.Stop()
@@ -191,7 +195,7 @@ func TestGRPCTestError(t *testing.T) {
 					Body: "{}",
 				},
 			},
-			desc: &atest.GRPCDesc{
+			desc: &atest.RPCDesc{
 				ProtoFile: "unknown",
 			},
 			verify: func(t *testing.T, output any, err error) {
@@ -206,7 +210,7 @@ func TestGRPCTestError(t *testing.T) {
 					Body: "{}",
 				},
 			},
-			desc: &atest.GRPCDesc{
+			desc: &atest.RPCDesc{
 				ProtoSet: "unknown",
 			},
 			verify: func(t *testing.T, output any, err error) {
@@ -221,7 +225,7 @@ func TestGRPCTestError(t *testing.T) {
 					Body: "{}",
 				},
 			},
-			desc: &atest.GRPCDesc{
+			desc: &atest.RPCDesc{
 				ServerReflection: true,
 			},
 			verify: func(t *testing.T, output any, err error) {
@@ -236,7 +240,7 @@ func TestGRPCTestError(t *testing.T) {
 					Body: "{}",
 				},
 			},
-			desc: &atest.GRPCDesc{},
+			desc: &atest.RPCDesc{},
 			verify: func(t *testing.T, output any, err error) {
 				assert.NotNil(t, err)
 			},
@@ -263,7 +267,7 @@ func TestGRPCTestError(t *testing.T) {
 		},
 	}
 
-	runUnits(tests, t, l, nil, &atest.GRPCDesc{})
+	runUnits(tests, t, l, nil, &atest.RPCDesc{})
 }
 
 func runServer(t *testing.T, s *grpc.Server) net.Listener {
@@ -275,7 +279,7 @@ func runServer(t *testing.T, s *grpc.Server) net.Listener {
 	return l
 }
 
-func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRPCDesc, addition ...testUnit) {
+func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.RPCDesc, addition ...testUnit) {
 	tests := []testUnit{
 		{
 			name: "test unary rpc",
@@ -541,7 +545,7 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRP
 	runUnits(tests, t, l, sec, desc)
 }
 
-func runUnits(tests []testUnit, t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.GRPCDesc) {
+func runUnits(tests []testUnit, t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.RPCDesc) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()

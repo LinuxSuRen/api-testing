@@ -4,7 +4,7 @@
 name: grpc-sample
 api: 127.0.0.1:7070
 spec:
-  grpc:
+  rpc:
     import:
       - ./pkg/server
     protofile: server.proto

@@ -47,7 +47,9 @@
                     "type": "string",
                     "enum": [
                         "openapi",
-                        "swagger"
+                        "swagger",
+                        "grpc",
+                        "trpc"
                     ]
                 },
                 "url": {
@@ -57,7 +59,7 @@
                         "http"
                     ]
                 },
-                "grpc": {
+                "rpc": {
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
@@ -95,6 +97,9 @@
                             "type": "boolean"
                         }
                     }
+                },
+                "raw": {
+                    "type": "string"
                 }
             }
         },

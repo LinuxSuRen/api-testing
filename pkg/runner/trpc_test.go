@@ -21,16 +21,46 @@ SOFTWARE.
 package runner
 
 import (
+	"context"
 	"testing"
+
+	_ "embed"
 
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRunnerFactory(t *testing.T) {
-	runner := GetTestSuiteRunner(&atest.TestSuite{})
-	assert.IsType(t, NewSimpleTestCaseRunner(), runner)
+func TestTRPC(t *testing.T) {
+	fakeClient := &fakeClient{}
+	tRPCRunner := NewTRPCTestCaseRunner("localhost:8080", atest.RPCDesc{
+		Raw: sampleProto,
+	}, fakeClient)
+	assert.NotNil(t, tRPCRunner)
 
-	runner = GetTestSuiteRunner(&atest.TestSuite{Spec: atest.APISpec{RPC: &atest.RPCDesc{}}})
-	assert.IsType(t, NewGRPCTestCaseRunner("", atest.RPCDesc{}), runner)
+	t.Run("normal", func(t *testing.T) {
+		testcase := &atest.TestCase{
+			Name: "Unary",
+			Request: atest.Request{
+				API:  "/Main/Unary",
+				Body: "{}",
+			},
+		}
+
+		_, err := tRPCRunner.RunTestCase(testcase, nil, context.Background())
+		assert.NoError(t, err)
+	})
+
+	t.Run("no case found", func(t *testing.T) {
+		_, err := tRPCRunner.RunTestCase(&atest.TestCase{
+			Name: "Fake",
+			Request: atest.Request{
+				API:  "/Main/Fake",
+				Body: "{}",
+			},
+		}, nil, context.Background())
+		assert.Error(t, err)
+	})
 }
+
+//go:embed grpc_test/test.proto
+var sampleProto string

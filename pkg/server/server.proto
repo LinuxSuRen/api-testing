@@ -60,6 +60,7 @@ message Suites {
 
 message Items {
   repeated string data = 1;
+  string kind = 2;
 }
 
 message TestCaseIdentity {
@@ -84,7 +85,7 @@ message TestSuite {
 message APISpec {
   string kind = 1;
   string url = 2;
-  GRPC grpc = 3;
+  RPC rpc = 3;
   Secure secure = 4;
 }
 
@@ -96,16 +97,18 @@ message Secure {
   string key = 5;
 }
 
-message GRPC{
+message RPC{
   repeated string import = 1;
   bool serverReflection = 2;
   string protofile = 3;
   string protoset = 4;
+  string raw = 5;
 }
 
 message TestSuiteIdentity {
   string name = 1;
   string api = 2;
+  string kind = 3;
 }
 
 message TestTask {
