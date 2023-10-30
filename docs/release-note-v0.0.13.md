@@ -10,7 +10,7 @@ docker run -v /var/www/sample:/var/www/sample \
   linuxsuren/api-testing:master
 ```
 
-或者，直接[下载二进制文件](https://github.com/LinuxSuRen/api-testing/releases/tag/v0.0.12)后启动：
+或者，直接[下载二进制文件](https://github.com/LinuxSuRen/api-testing/releases/tag/v0.0.13)后启动：
 
 ```shell
 atest server --local-storage /var/www/sample
