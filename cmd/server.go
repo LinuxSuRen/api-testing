@@ -267,7 +267,7 @@ func debugHandler(mux *runtime.ServeMux) {
 var filesNeedToBeRemoved = []string{}
 
 func (o *serverOption) getAtestBinary(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	w.Header().Set("Content-Disposition", "attachment; filename=atest")
+	w.Header().Set(util.ContentDisposition, "attachment; filename=atest")
 	w.Header().Set(util.ContentType, "application/octet-stream")
 	w.Header().Set("Content-Transfer-Encoding", "binary")
 	w.Header().Set("Expires", "0")

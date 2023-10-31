@@ -121,7 +121,9 @@ func ToNormalSuite(suite *TestSuite) (result *testing.TestSuite) {
 		}
 		if suite.Spec.Rpc != nil {
 			result.Spec.RPC = &testing.RPCDesc{
-				Raw: suite.Spec.Rpc.Raw,
+				Raw:        suite.Spec.Rpc.Raw,
+				ProtoFile:  suite.Spec.Rpc.Protofile,
+				ImportPath: suite.Spec.Rpc.Import,
 			}
 		}
 	}

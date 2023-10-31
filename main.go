@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	_ "github.com/apache/skywalking-go"
+	// _ "github.com/apache/skywalking-go"
 	"github.com/linuxsuren/api-testing/cmd"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	exec "github.com/linuxsuren/go-fake-runtime"

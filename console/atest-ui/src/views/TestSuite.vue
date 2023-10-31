@@ -22,7 +22,11 @@ const suite = ref({
   param: [] as Pair[],
   spec: {
     kind: '',
-    url: ''
+    url: '',
+    rpc: {
+      raw: '',
+      protofile: ''
+    }
   }
 } as Suite)
 function load() {
@@ -58,6 +62,11 @@ watch(props, () => {
 })
 
 function save() {
+  const oldImportPath = suite.value.spec.rpc.import
+  if (oldImportPath !== '') {
+    const importPath = oldImportPath.split(',')
+    suite.value.spec.rpc.import = importPath
+  }
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -76,8 +85,11 @@ function save() {
       } else {
         ElMessage.error('Oops, ' + e.message)
       }
+
+      suite.value.spec.rpc.import = oldImportPath
     })
     .catch((e) => {
+      suite.value.spec.rpc.import = oldImportPath
       ElMessage.error('Oops, ' + e)
     })
 }
@@ -271,6 +283,14 @@ function paramChange() {
         :autosize="{ minRows: 4, maxRows: 8 }"
         type="textarea"
         />
+      <div>
+        <span>{{ t('title.protoImport') }}</span>
+        <el-input class="mx-1" v-model="suite.spec.rpc.import"></el-input>
+      </div>
+      <div>
+        <span>{{ t('title.protoFile') }}</span>
+        <el-input class="mx-1" v-model="suite.spec.rpc.protofile"></el-input>
+      </div>
       <el-divider />
     </div>
 

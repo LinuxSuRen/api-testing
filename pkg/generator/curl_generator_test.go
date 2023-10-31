@@ -29,6 +29,7 @@ import (
 	"testing"
 
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 )
 
 func TestCurlGenerator(t *testing.T) {
@@ -71,7 +72,7 @@ func TestCurlGenerator(t *testing.T) {
 			Request: atest.Request{
 				API: fooForTest,
 				Header: map[string]string{
-					"Content-Type": "text/plain",
+					"Content-Type": util.Plain,
 					"Connection":   "keep-alive",
 				},
 			},
