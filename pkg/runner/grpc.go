@@ -21,12 +21,16 @@ SOFTWARE.
 package runner
 
 import (
+	"archive/zip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -34,6 +38,7 @@ import (
 	"github.com/bufbuild/protocompile"
 	"github.com/linuxsuren/api-testing/pkg/compare"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/tidwall/gjson"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -46,6 +51,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/dynamicpb"
+	"trpc.group/trpc-go/trpc-go/log"
 )
 
 type gRPCTestCaseRunner struct {
@@ -254,10 +260,29 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 		return getByProtoSet(ctx, r, fullName)
 	}
 
+	protoFile, importPath, parentProtoDir, err := loadProtoFiles(r.proto.ProtoFile)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(importPath) == 0 {
+		importPath = r.proto.ImportPath
+	}
+
+	if parentProtoDir != "" {
+		for i, p := range importPath {
+			importPath[i] = filepath.Join(parentProtoDir, p)
+		}
+		if len(importPath) == 0 {
+			importPath = append(importPath, parentProtoDir)
+		}
+	}
+
+	log.Infof("proto import files: %v", importPath)
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(
 			&protocompile.SourceResolver{
-				ImportPaths: r.proto.ImportPath,
+				ImportPaths: importPath,
 			},
 		),
 	}
@@ -276,10 +301,10 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 			err = fmt.Errorf("failed to write proto content to file %q: %v", f.Name(), err)
 			return nil, err
 		}
-		r.proto.ProtoFile = f.Name()
+		protoFile = f.Name()
 	}
 
-	linker, err := compiler.Compile(ctx, r.proto.ProtoFile)
+	linker, err := compiler.Compile(ctx, protoFile)
 	if err != nil {
 		return nil, err
 	}
@@ -482,6 +507,106 @@ sendLoop:
 			resps = append(resps, resp)
 		}
 	}
+}
+
+func loadProtoFiles(protoFile string) (targetProtoFile string, importPath []string, protoParentDir string, err error) {
+	if !regexURLPrefix.MatchString(protoFile) {
+		targetProtoFile = protoFile
+		return
+	}
+
+	var protoURL *url.URL
+	if protoURL, err = url.Parse(protoFile); err != nil {
+		return
+	}
+
+	log.Infof("start to download proto file %q\n", protoFile)
+	resp, err := http.Get(protoFile)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("unexpected status code %d with %q", resp.StatusCode, protoFile)
+		return
+	}
+
+	var f *os.File
+	contentType := resp.Header.Get(util.ContentType)
+	if contentType != util.ZIP {
+		var data []byte
+		if data, err = io.ReadAll(resp.Body); err == nil {
+			if f, err = os.CreateTemp(os.TempDir(), "proto"); err == nil {
+				_, err = f.Write(data)
+				targetProtoFile = f.Name()
+			}
+		}
+	} else {
+		targetProtoFile = protoURL.Query().Get("file")
+		if targetProtoFile == "" {
+			err = errors.New("query parameter file is empty")
+			return
+		}
+
+		attachment := resp.Header.Get(util.ContentDisposition)
+		filename := strings.TrimPrefix(attachment, "attachment; filename=")
+		name := strings.TrimSuffix(filename, filepath.Ext(filename))
+
+		parentDir := os.TempDir()
+		if f, err = os.CreateTemp(parentDir, filename); err == nil {
+			_, err = io.Copy(f, resp.Body)
+
+			protoParentDir = filepath.Join(parentDir, name)
+			err = extractFiles(f.Name(), protoParentDir, targetProtoFile)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+func extractFiles(sourceFile, targetDir, filter string) (err error) {
+	if sourceFile == "" || targetDir == "" {
+		err = errors.New("source or target filename is empty")
+		return
+	}
+
+	var archive *zip.ReadCloser
+	if archive, err = zip.OpenReader(sourceFile); err != nil {
+		return
+	}
+	defer func() {
+		_ = archive.Close()
+	}()
+
+	for _, f := range archive.File {
+		if f.FileInfo().IsDir() {
+			continue
+		}
+
+		targetFilePath := filepath.Join(targetDir, f.Name)
+		if err = os.MkdirAll(filepath.Dir(targetFilePath), os.ModePerm); err != nil {
+			return
+		}
+
+		var targetFile *os.File
+		if targetFile, err = os.OpenFile(targetFilePath,
+			os.O_CREATE|os.O_RDWR, f.Mode()); err != nil {
+			continue
+		}
+
+		var fileInArchive io.ReadCloser
+		fileInArchive, err = f.Open()
+		if err != nil {
+			continue
+		}
+
+		_, err = io.Copy(targetFile, fileInArchive)
+		_ = targetFile.Close()
+	}
+	return
 }
 
 func verifyResponsePayload(md protoreflect.MethodDescriptor, caseName string, expect testing.Response, jsonPayload []string) (output any, err error) {

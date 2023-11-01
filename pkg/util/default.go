@@ -77,8 +77,11 @@ func GetFirstHeaderValue(header http.Header, key string) (val string) {
 
 // ContentType is the HTTP header key
 const (
-	ContentType       = "Content-Type"
-	MultiPartFormData = "multipart/form-data"
-	Form              = "application/x-www-form-urlencoded"
-	JSON              = "application/json"
+	ContentType        = "Content-Type"
+	ContentDisposition = "Content-Disposition"
+	MultiPartFormData  = "multipart/form-data"
+	Form               = "application/x-www-form-urlencoded"
+	JSON               = "application/json"
+	ZIP                = "application/zip"
+	Plain              = "text/plain"
 )

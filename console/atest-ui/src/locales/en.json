@@ -22,6 +22,8 @@
         "createSecret": "Create Secret",
         "secretManager": "Secret Manager",
         "protoContent": "Proto Content",
+        "protoFile": "Proto File",
+        "protoImport": "Proto Import",
         "param": "Parameter"
     },
     "tip": {
