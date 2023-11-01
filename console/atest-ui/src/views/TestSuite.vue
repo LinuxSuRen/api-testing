@@ -63,7 +63,7 @@ watch(props, () => {
 
 function save() {
   const oldImportPath = suite.value.spec.rpc.import
-  if (oldImportPath !== '') {
+  if (typeof oldImportPath === 'string' && oldImportPath !== '') {
     const importPath = oldImportPath.split(',')
     suite.value.spec.rpc.import = importPath
   }
