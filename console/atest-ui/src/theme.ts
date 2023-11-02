@@ -19,7 +19,7 @@ const darkTheme: { [k: string]: string } = {
 }
 
 
-export default function setTheme(darkMode: boolean) {
+export default function setAsDarkTheme(darkMode: boolean) {
   const theme = darkMode ? darkTheme : lightTheme
   Object.keys(theme).forEach((key) => {
     document.documentElement.style.setProperty(key, theme[key])

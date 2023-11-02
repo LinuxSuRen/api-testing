@@ -628,13 +628,14 @@ func TestLoadProtoFiles(t *testing.T) {
 	t.Run("single file URL", func(t *testing.T) {
 		defer gock.Clean()
 		gock.New("http://localhost").Get("/test.proto").
+			MatchParam("rand", "123").
 			Reply(http.StatusOK).
 			File("grpc_test/test.proto")
 
-		targetProtoFile, importPath, _, err := loadProtoFiles("http://localhost/test.proto")
+		targetProtoFile, importPath, _, err := loadProtoFiles("http://localhost/test.proto?rand=123")
 		defer os.Remove(targetProtoFile)
 
-		assert.True(t, strings.HasPrefix(targetProtoFile, os.TempDir()))
+		assert.True(t, strings.HasPrefix(targetProtoFile, os.TempDir()), targetProtoFile)
 		assert.Empty(t, importPath)
 		assert.NoError(t, err)
 	})
@@ -642,10 +643,11 @@ func TestLoadProtoFiles(t *testing.T) {
 	t.Run("URL with zip file, the query is missing", func(t *testing.T) {
 		defer gock.Clean()
 		gock.New("http://localhost").Get("/test.proto").
+			MatchParam("rand", "234").
 			Reply(http.StatusOK).
 			AddHeader(util.ContentType, util.ZIP)
 
-		_, _, _, err := loadProtoFiles("http://localhost/test.proto")
+		_, _, _, err := loadProtoFiles("http://localhost/test.proto?rand=234")
 		assert.Error(t, err)
 	})
 
