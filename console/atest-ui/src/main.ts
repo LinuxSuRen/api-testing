@@ -11,6 +11,8 @@ import 'intro.js/introjs.css'
 import { setupI18n } from './i18n'
 import en from './locales/en.json'
 import zh from './locales/zh.json'
+import ClientMonitor from 'skywalking-client-js'
+import { name, version } from '../package'
 
 const app = createApp(App)
 
@@ -25,6 +27,13 @@ const i18n = setupI18n({
     en, zh
   }
 })
+
+app.config.errorHandler = (error) => {
+  ClientMonitor.reportFrameErrors({
+    service: name,
+    serviceVersion: version,
+  }, error);
+}
 
 app.use(ElementPlus, {
   locale: lang === 'zh' ? zhCn : enUS

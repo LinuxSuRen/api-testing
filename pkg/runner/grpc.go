@@ -521,7 +521,7 @@ func loadProtoFiles(protoFile string) (targetProtoFile string, importPath []stri
 	}
 
 	log.Infof("start to download proto file %q\n", protoFile)
-	resp, err := http.Get(protoFile)
+	resp, err := util.GetDefaultCachedHTTPClient().Get(protoFile)
 	if err != nil {
 		return
 	}

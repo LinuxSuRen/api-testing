@@ -13,15 +13,17 @@ import type { Suite } from './types'
 import { GetLastTestCaseLocation, SetLastTestCaseLocation } from './views/cache'
 import { DefaultResponseProcess } from './views/net'
 import { useI18n } from 'vue-i18n'
-import ClientMonitor from 'skywalking-client-js';
+import ClientMonitor from 'skywalking-client-js'
+import { name, version } from '../package'
 
-import setTheme from './theme'
+import setAsDarkTheme from './theme'
 
 const { t } = useI18n()
 
+const asDarkMode = ref(false)
 function switchAppMode()
 {
-  setTheme(appMode.value)
+  setAsDarkTheme(asDarkMode.value)
 }
 
 interface Tree {
@@ -130,7 +132,6 @@ interface Store {
 }
 
 const stores = ref([] as Store[])
-const appMode = ref(false)
 function loadStores() {
   const requestOptions = {
     method: 'POST',
@@ -302,10 +303,16 @@ const filterTestCases = (value: string, data: Tree) => {
 const viewName = ref('')
 watch(viewName, (val) => {
   ClientMonitor.setPerformance({
-    service: 'atest-ui',
-    serviceVersion: 'v0.0.1',
+    service: name,
+    serviceVersion: version,
     pagePath: val,
-    useFmp: true
+    useFmp: true,
+    enableSPA: true,
+    customTags: [{
+      key: 'theme', value: asDarkMode.value ? 'dark' : 'light'
+    }, {
+      key: 'store', value: store.value
+    }]
   });
 })
 
@@ -325,9 +332,8 @@ const suiteKinds = [{
         <el-button type="primary" :icon="Edit" @click="viewName = 'secret'" data-intro="Manage the secrets."/>
         <el-button type="primary" :icon="Share" @click="viewName = 'store'" data-intro="Manage the store backends." />
         <el-form-item label="Dark Mode" style="margin-left:20px;">
-    <el-switch type="primary" data-intro="Switch light and dark modes" v-model="appMode" @click="switchAppMode"/>
-  </el-form-item>
-        
+          <el-switch type="primary" data-intro="Switch light and dark modes" v-model="asDarkMode" @click="switchAppMode"/>
+        </el-form-item>
       </el-header>
 
       <el-main>

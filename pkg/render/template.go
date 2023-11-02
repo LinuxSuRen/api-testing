@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"math/rand"
 	"strings"
 
 	"github.com/Masterminds/sprig/v3"
@@ -114,6 +115,11 @@ var advancedFuncs = []AdvancedFunc{{
 		} else {
 			return err.Error()
 		}
+	},
+}, {
+	FuncName: "randEnum",
+	Func: func(items ...string) string {
+		return items[rand.Intn(len(items))]
 	},
 }}
 
