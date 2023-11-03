@@ -27,12 +27,15 @@ package generator
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/bufbuild/protocompile"
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -57,6 +60,11 @@ func parseGRPCService(service string) string {
 }
 
 func generateGRPCPayloadAsJSON(rpc *testing.RPCDesc, service string) (resultJSON string, err error) {
+	if rpc == nil {
+		err = errors.New("rpc is missing")
+		return
+	}
+
 	protoFile := rpc.ProtoFile
 	protoContent := rpc.Raw
 
@@ -87,17 +95,24 @@ func generateGRPCPayloadAsJSON(rpc *testing.RPCDesc, service string) (resultJSON
 		}
 	}
 
-	var accessor func(path string) (io.ReadCloser, error)
+	var protoLibrary map[string]string
+	if protoLibrary, err = apispec.GetProtoFiles(); err != nil {
+		return
+	}
+
 	if protoContent != "" {
-		accessor = protocompile.SourceAccessorFromMap(map[string]string{
-			protoFile: protoContent,
-		})
+		protoLibrary[protoFile] = protoContent
 	}
 
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(
 			&protocompile.SourceResolver{
-				Accessor:    accessor,
+				Accessor: func(path string) (io.ReadCloser, error) {
+					if content, ok := protoLibrary[strings.TrimPrefix(path, parentProtoDir+"/")]; ok {
+						return io.NopCloser(strings.NewReader(content)), nil
+					}
+					return os.Open(path)
+				},
 				ImportPaths: importPath,
 			},
 		),
@@ -174,6 +189,10 @@ func generateGRPCPayloadAsJSON(rpc *testing.RPCDesc, service string) (resultJSON
 			if strKey, ok := key.(string); ok {
 				result[strKey] = randFuncMap[md.MapValue().Kind()](md.MapValue())
 			}
+		} else if md.IsList() {
+			child := md.Message().Fields().Get(0)
+			randFunc := randFuncMap[child.Kind()]
+			result[md.JSONName()] = []interface{}{randFunc(child)}
 		} else {
 			for i := 0; i < md.Message().Fields().Len(); i++ {
 				field := md.Message().Fields().Get(i)

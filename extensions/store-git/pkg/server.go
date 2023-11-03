@@ -322,6 +322,9 @@ type gitOptions struct {
 }
 
 func (g *gitOptions) newLoader() (loader testing.Writer, err error) {
+	if g.targetPath == "" {
+		g.targetPath = "."
+	}
 	parentDir := path.Join(g.cache, g.targetPath)
 	if err = os.MkdirAll(parentDir, 0755); err == nil {
 		loader = testing.NewFileWriter(parentDir)

@@ -36,6 +36,7 @@ import (
 	"time"
 
 	"github.com/bufbuild/protocompile"
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/compare"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -278,11 +279,22 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 		}
 	}
 
+	var protoLibrary map[string]string
+	if protoLibrary, err = apispec.GetProtoFiles(); err != nil {
+		return nil, err
+	}
+
 	log.Infof("proto import files: %v", importPath)
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(
 			&protocompile.SourceResolver{
 				ImportPaths: importPath,
+				Accessor: func(path string) (io.ReadCloser, error) {
+					if content, ok := protoLibrary[strings.TrimPrefix(path, parentProtoDir+"/")]; ok {
+						return io.NopCloser(strings.NewReader(content)), nil
+					}
+					return os.Open(path)
+				},
 			},
 		),
 	}
