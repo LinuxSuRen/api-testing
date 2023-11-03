@@ -28,7 +28,7 @@ import "github.com/linuxsuren/api-testing/pkg/testing"
 
 // CodeGenerator is the interface of code generator
 type CodeGenerator interface {
-	Generate(testcase *testing.TestCase) (result string, err error)
+	Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (result string, err error)
 }
 
 var codeGenerators = map[string]CodeGenerator{}

@@ -571,7 +571,7 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 		if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
 			result.Request.RenderAPI(suite.API)
 
-			output, genErr := instance.Generate(&result)
+			output, genErr := instance.Generate(&suite, &result)
 			reply.Success = genErr == nil
 			reply.Message = util.OrErrorMessage(genErr, output)
 		}

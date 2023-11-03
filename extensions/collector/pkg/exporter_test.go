@@ -31,7 +31,7 @@ func TestSampleExporter(t *testing.T) {
 	var result string
 	result, err = exporter.Export()
 	assert.NoError(t, err)
-	assert.Equal(t, sampleSuite, result)
+	assert.Equal(t, sampleSuite, result, result)
 }
 
 func newRequest() (request *http.Request, err error) {

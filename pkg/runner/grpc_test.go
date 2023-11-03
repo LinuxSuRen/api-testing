@@ -26,9 +26,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
-	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -38,7 +36,6 @@ import (
 	"github.com/h2non/gock"
 	testsrv "github.com/linuxsuren/api-testing/pkg/runner/grpc_test"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
-	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -608,67 +605,6 @@ func TestAPINameMatch(t *testing.T) {
 		err,
 		"unexpect trailing character",
 	)
-}
-
-func TestLoadProtoFiles(t *testing.T) {
-	t.Run("plain string proto file", func(t *testing.T) {
-		targetProtoFile, importPath, _, _ := loadProtoFiles("test.proto")
-		assert.Equal(t, "test.proto", targetProtoFile)
-		assert.Empty(t, importPath)
-	})
-
-	t.Run("URL with invalid status code", func(t *testing.T) {
-		defer gock.Clean()
-		gock.New("http://localhost").Get("/test.proto").Reply(http.StatusNotFound)
-
-		_, _, _, err := loadProtoFiles("http://localhost/test.proto")
-		assert.Error(t, err)
-	})
-
-	t.Run("single file URL", func(t *testing.T) {
-		defer gock.Clean()
-		gock.New("http://localhost").Get("/test.proto").
-			MatchParam("rand", "123").
-			Reply(http.StatusOK).
-			File("grpc_test/test.proto")
-
-		targetProtoFile, importPath, _, err := loadProtoFiles("http://localhost/test.proto?rand=123")
-		defer os.Remove(targetProtoFile)
-
-		assert.True(t, strings.HasPrefix(targetProtoFile, os.TempDir()), targetProtoFile)
-		assert.Empty(t, importPath)
-		assert.NoError(t, err)
-	})
-
-	t.Run("URL with zip file, the query is missing", func(t *testing.T) {
-		defer gock.Clean()
-		gock.New("http://localhost").Get("/test.proto").
-			MatchParam("rand", "234").
-			Reply(http.StatusOK).
-			AddHeader(util.ContentType, util.ZIP)
-
-		_, _, _, err := loadProtoFiles("http://localhost/test.proto?rand=234")
-		assert.Error(t, err)
-	})
-
-	t.Run("URL with zip file", func(t *testing.T) {
-		defer gock.Clean()
-		gock.New("http://localhost").Get("/test.proto").
-			MatchParam("file", "testdata/report.html").
-			Reply(http.StatusOK).
-			AddHeader(util.ContentType, util.ZIP).
-			AddHeader(util.ContentDisposition, "attachment; filename=test.zip").
-			File("testdata/test.zip")
-
-		_, _, targetProtoFileDir, err := loadProtoFiles("http://localhost/test.proto?file=testdata/report.html")
-		defer os.RemoveAll(targetProtoFileDir)
-
-		assert.True(t, strings.HasPrefix(targetProtoFileDir, os.TempDir()))
-		assert.NoError(t, err)
-	})
-
-	assert.Error(t, extractFiles("a", "", ""))
-	assert.Error(t, extractFiles("", "b", ""))
 }
 
 // getJSONOrCache can store the JSON string of value.

@@ -61,7 +61,7 @@ func TestGenerators(t *testing.T) {
 		},
 	}
 	t.Run("golang", func(t *testing.T) {
-		result, err := generator.GetCodeGenerator("golang").Generate(testcase)
+		result, err := generator.GetCodeGenerator("golang").Generate(nil, testcase)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedGoCode, result)
 	})
@@ -71,7 +71,7 @@ func TestGenerators(t *testing.T) {
 		"key": "value",
 	}
 	t.Run("golang form HTTP request", func(t *testing.T) {
-		result, err := generator.GetCodeGenerator("golang").Generate(formRequest)
+		result, err := generator.GetCodeGenerator("golang").Generate(nil, formRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedFormRequestGoCode, result, result)
 	})

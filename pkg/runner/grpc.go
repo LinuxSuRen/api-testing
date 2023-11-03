@@ -260,7 +260,7 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 		return getByProtoSet(ctx, r, fullName)
 	}
 
-	protoFile, importPath, parentProtoDir, err := loadProtoFiles(r.proto.ProtoFile)
+	protoFile, importPath, parentProtoDir, err := util.LoadProtoFiles(r.proto.ProtoFile)
 	if err != nil {
 		return nil, err
 	}
