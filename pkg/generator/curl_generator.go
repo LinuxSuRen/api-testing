@@ -41,7 +41,7 @@ func NewCurlGenerator() CodeGenerator {
 	return &curlGenerator{}
 }
 
-func (g *curlGenerator) Generate(testcase *testing.TestCase) (result string, err error) {
+func (g *curlGenerator) Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (result string, err error) {
 	if testcase.Request.Method == "" {
 		testcase.Request.Method = http.MethodGet
 	}

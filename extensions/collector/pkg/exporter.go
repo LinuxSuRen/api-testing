@@ -7,7 +7,7 @@ import (
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	atestpkg "github.com/linuxsuren/api-testing/pkg/testing"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // SampleExporter is a sample exporter

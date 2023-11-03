@@ -41,7 +41,7 @@ func NewGolangGenerator() CodeGenerator {
 	return &golangGenerator{}
 }
 
-func (g *golangGenerator) Generate(testcase *testing.TestCase) (result string, err error) {
+func (g *golangGenerator) Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (result string, err error) {
 	if testcase.Request.Method == "" {
 		testcase.Request.Method = http.MethodGet
 	}
