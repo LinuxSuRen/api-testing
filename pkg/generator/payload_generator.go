@@ -180,7 +180,7 @@ func generateGRPCPayloadAsJSON(rpc *testing.RPCDesc, service string) (resultJSON
 	}
 	randFuncMap[protoreflect.EnumKind] = func(md protoreflect.FieldDescriptor) any {
 		enums := md.Enum().Values()
-		return enums.Get(rand.Intn(enums.Len())).Name()
+		return enums.Get(rand.Intn(enums.Len())).Index()
 	}
 	randFuncMap[protoreflect.MessageKind] = func(md protoreflect.FieldDescriptor) any {
 		result := map[string]any{}

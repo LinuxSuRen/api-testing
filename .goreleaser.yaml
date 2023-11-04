@@ -14,6 +14,9 @@ builds:
       - linux
       - windows
       - darwin
+    goarch:
+      - amd64
+      - arm64
     ldflags:
       - -w
       - -s
@@ -27,6 +30,24 @@ builds:
       - linux
       - windows
       - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -w
+      - -s
+  - env:
+      - CGO_ENABLED=0
+    id: atest-store-git
+    binary: atest-store-git
+    main: ./extensions/store-git/main.go
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
     ldflags:
       - -w
       - -s
@@ -43,6 +64,15 @@ archives:
     id: collector
     builds:
       - collector
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+  - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
+    id: atest-store-git
+    builds:
+      - atest-store-git
     format_overrides:
       - goos: windows
         format: zip
