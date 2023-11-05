@@ -558,7 +558,6 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 		var suite testing.TestSuite
 
 		loader := s.getLoader(ctx)
-
 		if suite, err = loader.GetTestSuite(in.TestSuite, true); err != nil {
 			return
 		}
@@ -753,6 +752,12 @@ func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err 
 	reply = &Store{}
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	store := ToNormalStore(in)
+	switch store.Kind.Name {
+	case "atest-store-git":
+		if store.Kind.URL == "" {
+			store.Kind.URL = fmt.Sprintf("unix://%s", os.ExpandEnv("$HOME/.config/atest/git.sock"))
+		}
+	}
 	if err = storeFactory.CreateStore(store); err == nil && s.storeExtMgr != nil {
 		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
 	}

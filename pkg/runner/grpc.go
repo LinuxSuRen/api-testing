@@ -36,6 +36,7 @@ import (
 	"time"
 
 	"github.com/bufbuild/protocompile"
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/compare"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -70,6 +71,7 @@ func NewGRPCTestCaseRunner(host string, proto testing.RPCDesc) TestCaseRunner {
 		UnimplementedRunner: NewDefaultUnimplementedRunner(),
 		host:                host,
 		proto:               proto,
+		response:            SimpleResponse{},
 	}
 	return runner
 }
@@ -106,11 +108,12 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	if r.Secure == nil || r.Secure.Insecure {
 		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
-		cerd, err := credentials.NewClientTLSFromFile(r.Secure.CertFile, r.Secure.ServerName)
+		var cred credentials.TransportCredentials
+		cred, err = credentials.NewClientTLSFromFile(r.Secure.CertFile, r.Secure.ServerName)
 		if err != nil {
 			return nil, err
 		}
-		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(cerd))
+		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(cred))
 	}
 
 	if err != nil {
@@ -132,7 +135,12 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 		return nil, err
 	}
 
-	record.Body = strings.Join(respsStr, ",")
+	if len(respsStr) == 0 {
+		record.Body = strings.Join(respsStr, ",")
+	} else {
+		record.Body = respsStr[0]
+	}
+	r.response.Body = record.Body
 	r.log.Debug("response body: %s\n", record.Body)
 
 	output, err = verifyResponsePayload(md, testcase.Name, testcase.Expect, respsStr)
@@ -140,7 +148,11 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 		return nil, err
 	}
 
-	return output, nil
+	if output == nil {
+		output = map[string]any{}
+		err = json.Unmarshal([]byte(record.Body), &output)
+	}
+	return
 }
 
 func (r *gRPCTestCaseRunner) GetResponseRecord() SimpleResponse {
@@ -198,14 +210,15 @@ func getStreamMessagepb(md protoreflect.MessageDescriptor, messages string) ([]*
 }
 
 func getMessagePb(md protoreflect.MessageDescriptor, message string) (messagepb *dynamicpb.Message, err error) {
-	request := dynamicpb.NewMessage(md)
+	messagepb = dynamicpb.NewMessage(md)
 	if message != "" {
-		err := protojson.Unmarshal([]byte(message), request)
+		err = protojson.Unmarshal([]byte(message), messagepb)
 		if err != nil {
-			return nil, err
+
+			err = fmt.Errorf("failed to unmarshal %q message: %v", messagepb.Descriptor().Name(), err)
 		}
 	}
-	return request, nil
+	return
 }
 
 func buildResponses(resps []*dynamicpb.Message) ([]string, error) {
@@ -278,11 +291,22 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 		}
 	}
 
+	var protoLibrary map[string]string
+	if protoLibrary, err = apispec.GetProtoFiles(); err != nil {
+		return nil, err
+	}
+
 	log.Infof("proto import files: %v", importPath)
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(
 			&protocompile.SourceResolver{
 				ImportPaths: importPath,
+				Accessor: func(path string) (io.ReadCloser, error) {
+					if content, ok := protoLibrary[strings.TrimPrefix(path, parentProtoDir+"/")]; ok {
+						return io.NopCloser(strings.NewReader(content)), nil
+					}
+					return os.Open(path)
+				},
 			},
 		),
 	}
@@ -393,6 +417,7 @@ func getByReflect(ctx context.Context, r *gRPCTestCaseRunner, fullName protorefl
 	for _, fdb := range fdresp.FileDescriptorProto {
 		fdp := &descriptorpb.FileDescriptorProto{}
 		if err := proto.Unmarshal(fdb, fdp); err != nil {
+			err = fmt.Errorf("failed to unmarshal file descriptor proto: %v", err)
 			return nil, err
 		}
 
@@ -449,12 +474,11 @@ func getMethodName(md protoreflect.MethodDescriptor) string {
 }
 
 // invokeRPC sends an unary RPC to gRPC server.
-func invokeRPC(ctx context.Context, conn grpc.ClientConnInterface, method protoreflect.MethodDescriptor, request *dynamicpb.Message) (resp *dynamicpb.Message, err error) {
+func invokeRPC(ctx context.Context, conn grpc.ClientConnInterface, method protoreflect.MethodDescriptor, request *dynamicpb.Message) (
+	resp *dynamicpb.Message, err error) {
 	resp = dynamicpb.NewMessage(method.Output())
-	if err := conn.Invoke(ctx, getMethodName(method), request, resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
+	err = conn.Invoke(ctx, getMethodName(method), request, resp)
+	return
 }
 
 // invokeRPCStream combine all three types of streaming rpc into a single function.

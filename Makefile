@@ -14,6 +14,8 @@ build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
 build-ext-orm:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-orm extensions/store-orm/main.go
+build-ui:
+	cd console/atest-ui && npm i && npm run build-only
 embed-ui:
 	cd console/atest-ui && npm i && npm run build-only
 	cp console/atest-ui/dist/index.html cmd/data/index.html
@@ -30,15 +32,15 @@ build-win-embed-ui:
 	BINARY=atest.exe OS=windows make build-embed-ui
 goreleaser:
 	goreleaser build --rm-dist --snapshot
-	make clean-embed-uif
+	make clean-embed-ui
 build-image:
 	${IMG_TOOL} build -t ghcr.io/linuxsuren/api-testing:master . \
 		--build-arg GOPROXY=${GOPROXY} \
 		--build-arg VERSION=$(shell git describe --abbrev=0 --tags)-$(shell git rev-parse --short HEAD)
 run-image:
 	docker run -p 7070:7070 -p 8080:8080 ghcr.io/linuxsuren/api-testing:master
-run-server:
-	go run . server --local-storage 'sample/*.yaml' --console-path console/atest-ui/dist
+run-server: build-ui
+	go run . server --local-storage 'bin/*.yaml' --console-path console/atest-ui/dist
 run-console:
 	cd console/atest-ui && npm run dev
 copy:

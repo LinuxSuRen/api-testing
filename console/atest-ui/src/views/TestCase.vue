@@ -128,11 +128,19 @@ function generateCode() {
         message: 'Code generated!',
         type: 'success'
       })
-      currentCodeContent.value = e.message
+      if (currentCodeGenerator.value === "gRPCPayload") {
+        currentCodeContent.value = JSON.stringify(JSON.parse(e.message), null, 4)
+      } else {
+        currentCodeContent.value = e.message
+      }
     })
     .catch((e) => {
       ElMessage.error('Oops, ' + e)
     })
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(currentCodeContent.value);
 }
 
 const queryBodyFields = (queryString: string, cb: any) => {
@@ -705,6 +713,8 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
                   :value="item.key"
                 />
               </el-select>
+              <el-button type="primary" @click="generateCode">{{ t('button.refresh') }}</el-button>
+              <el-button type="primary" @click="copyCode">{{ t('button.copy') }}</el-button>
             </div>
             <div>
               <el-input
