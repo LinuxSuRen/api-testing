@@ -41,7 +41,7 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
 	google.golang.org/genproto v0.0.0-20230526203410-71b5a4ffd15e // indirect
-	google.golang.org/grpc v1.57.0 // indirect
+	google.golang.org/grpc v1.57.1 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
 	trpc.group/trpc-go/fbs v1.0.0 // indirect
 	trpc.group/trpc-go/tnet v1.0.0 // indirect
