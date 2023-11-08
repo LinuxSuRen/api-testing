@@ -110,6 +110,9 @@ jobs:
           make helm-package
       - name: Core Image
         run: GOPROXY=direct IMG_TOOL=docker make build-image
+      - name: Run e2e
+        run: |
+          make test-e2e
       - name: Operator Image
         run: cd operator && make docker-build
 

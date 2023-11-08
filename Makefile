@@ -10,12 +10,17 @@ build:
 	mkdir -p bin
 	rm -rf bin/atest
 	go build ${TOOLEXEC} -a -o bin/atest main.go
+build-ext: build-ext-git build-ext-orm build-ext-s3
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
 build-ext-orm:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-orm extensions/store-orm/main.go
+build-ext-etcd:
+	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-etcd extensions/store-etcd/main.go
 build-ui:
 	cd console/atest-ui && npm i && npm run build-only
+build-ext-s3:
+	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-s3 extensions/store-s3/main.go
 embed-ui:
 	cd console/atest-ui && npm i && npm run build-only
 	cp console/atest-ui/dist/index.html cmd/data/index.html
@@ -45,6 +50,8 @@ run-console:
 	cd console/atest-ui && npm run dev
 copy:
 	sudo cp bin/atest /usr/local/bin/
+copy-ext:
+	sudo cp bin/atest-store-* /usr/local/bin/
 copy-restart: build-embed-ui
 	atest service stop
 	make copy
@@ -69,7 +76,7 @@ testlong:
 	go test pkg/limit/limiter_long_test.go -v
 test-ui:
 	cd console/atest-ui && npm run test:unit
-test-e2e:
+test-ui-e2e:
 	cd console/atest-ui && npm run test:e2e
 test-collector:
 	go test github.com/linuxsuren/api-testing/extensions/collector/./... -cover -v -coverprofile=collector-coverage.out
@@ -83,11 +90,15 @@ test-store-s3:
 test-store-git:
 	go test github.com/linuxsuren/api-testing/extensions/store-git/./... -cover -v -coverprofile=store-git-coverage.out
 	go tool cover -func=store-git-coverage.out
+test-store-etcd:
+	go test github.com/linuxsuren/api-testing/extensions/store-etcd/./... -cover -v -coverprofile=store-etcd-coverage.out
+	go tool cover -func=store-etcd-coverage.out
 test-operator:
 	cd operator && make test # converage file path: operator/cover.out
-test-all-backend: test test-collector test-store-orm test-store-s3 test-store-git #test-operator
+test-all-backend: test test-collector test-store-orm test-store-s3 test-store-git test-store-etcd
 test-all: test-all-backend test-ui
-
+test-e2e:
+	cd extensions/e2e && docker-compose build && docker-compose up && docker-compose down
 install-precheck:
 	cp .github/pre-commit .git/hooks/pre-commit
 

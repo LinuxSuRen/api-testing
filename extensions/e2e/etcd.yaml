@@ -1,0 +1,136 @@
+#!api-testing
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
+# https://docs.gitlab.com/ee/api/api_resources.html
+name: atest
+api: |
+  {{default "http://localhost:8080/server.Runner" (env "SERVER")}}
+param:
+  suiteName: "{{randAlpha 6}}"
+  caseName: "{{randAlpha 6}}"
+items:
+- name: CreateStore
+  before:
+    items:
+      - httpReady("http://localhost:8080/healthz", 2400)
+      - httpReady("http://localhost:2379/health", 2400)
+  request:
+    api: /CreateStore
+    method: POST
+    body: |
+      {
+        "name": "etcd",
+        "url": "localhost:2379",
+        "kind": {
+          "name": "atest-store-etcd"
+        }
+      }
+- name: createSuite
+  before:
+    items:
+      - sleep(3)
+  request:
+    api: /CreateTestSuite
+    method: POST
+    header:
+      X-Store-Name: etcd
+    body: |
+      {
+        "name": "{{.param.suiteName}}",
+        "api": "http://localhost:8080/server.Runner"
+      }
+- name: updateSuite
+  request:
+    api: /UpdateTestSuite
+    method: POST
+    header:
+      X-Store-Name: etcd
+    body: |
+      {
+        "name": "{{.param.suiteName}}",
+        "api": "http://localhost:8080/server.Runner",
+        "param": [{
+          "name": "name",
+          "value": "linuxsuren"
+        }]
+      }
+- name: getSuite
+  request:
+    api: /GetTestSuite
+    method: POST
+    header:
+      X-Store-Name: etcd
+    body: |
+      {
+        "name": "{{.param.suiteName}}"
+      }
+  expect:
+      bodyFieldsExpect:
+        api: http://localhost:8080/server.Runner
+- name: createTestCase
+  request:
+    api: /CreateTestCase
+    method: POST
+    header:
+      X-Store-Name: etcd
+    body: |
+      {
+        "suiteName": "{{.param.suiteName}}",
+        "data": {
+          "name": "{{.param.caseName}}",
+          "request": {
+            "api": "/GetTestSuite",
+            "method": "POST",
+            "header": [{
+              "name": "X-Store-Name",
+              "value": "etcd"
+            }]
+          }
+        }
+      }
+- name: updateTestCase
+  request:
+    api: /UpdateTestCase
+    method: POST
+    header:
+      X-Store-Name: etcd
+    body: |
+      {
+        "suiteName": "{{.param.suiteName}}",
+        "data": {
+          "name": "{{.param.caseName}}",
+          "request": {
+            "api": "/GetTestSuite",
+            "method": "POST",
+            "header": [{
+              "name": "X-Store-Name",
+              "value": "etcd"
+            }],
+            "body": "good"
+          }
+        }
+      }
+- name: getTestCase
+  request:
+    api: /GetTestCase
+    method: POST
+    header:
+      X-Store-Name: etcd
+    body: |
+      {
+        "suite": "{{.param.suiteName}}",
+        "testcase": "{{.param.caseName}}"
+      }
+  expect:
+      bodyFieldsExpect:
+        request.body: good
+- name: deleteTestCase
+  request:
+    api: /DeleteTestCase
+    method: POST
+    header:
+      X-Store-Name: etcd
+    body: |
+      {
+        "suite": "{{.param.suiteName}}",
+        "testcase": "{{.param.caseName}}"
+      }

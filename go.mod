@@ -18,11 +18,12 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/signintech/gopdf v0.18.0
 	github.com/spf13/cobra v1.6.1
+	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.14.4
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/sync v0.3.0
-	google.golang.org/grpc v1.55.0
+	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	trpc.group/trpc-go/trpc-cmdline v1.0.5
@@ -83,7 +84,6 @@ require (
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.12.0 // indirect
 	github.com/subosito/gotenv v1.4.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect

@@ -41,6 +41,7 @@ RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -toolexec="skywalking-go-agent" -a
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-etcd extensions/store-etcd/main.go
 RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -toolexec="skywalking-go-agent" -a -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
 
 FROM docker.io/library/ubuntu:23.04
@@ -60,6 +61,7 @@ COPY --from=builder /workspace/atest /usr/local/bin/atest
 COPY --from=builder /workspace/atest-collector /usr/local/bin/atest-collector
 COPY --from=builder /workspace/atest-store-orm /usr/local/bin/atest-store-orm
 COPY --from=builder /workspace/atest-store-s3 /usr/local/bin/atest-store-s3
+COPY --from=builder /workspace/atest-store-etcd /usr/local/bin/atest-store-etcd
 COPY --from=builder /workspace/atest-store-git /usr/local/bin/atest-store-git
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md

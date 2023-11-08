@@ -161,8 +161,8 @@ There are multiple storage backends supported. See the status from the list:
 | Local Storage | Ready |
 | S3 | Ready |
 | ORM DataBase | Developing |
-| Git Repository | Developing |
-| Etcd DataBase | Developing |
+| Git Repository | Ready |
+| Etcd DataBase | Ready |
 
 ### Local Storage
 Local storage is the built-in solution. You can run it with the following command:

@@ -130,6 +130,11 @@ func ToNormalSuite(suite *TestSuite) (result *testing.TestSuite) {
 	return
 }
 
+func ToNormalSuiteYAML(suite *TestSuite) ([]byte, error) {
+	result := ToNormalSuite(suite)
+	return testing.ToYAML(result)
+}
+
 func ToGRPCTestCase(testCase testing.TestCase) (result *TestCase) {
 	req := &Request{
 		Api:    testCase.Request.API,

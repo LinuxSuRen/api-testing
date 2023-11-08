@@ -1,3 +1,27 @@
+/*
+MIT License
+
+Copyright (c) 2023 API Testing Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 package remote
 
 import (
@@ -21,6 +45,12 @@ func TestConvert(t *testing.T) {
 			Spec: atest.APISpec{
 				Kind: "http",
 				URL:  "/v1",
+				RPC: &atest.RPCDesc{
+					Raw: "fake",
+				},
+				Secure: &atest.Secure{
+					KeyFile: "fake",
+				},
 			},
 			Items: []atest.TestCase{{
 				Name: "fake",
@@ -30,6 +60,12 @@ func TestConvert(t *testing.T) {
 			Spec: &server.APISpec{
 				Url:  "/v1",
 				Kind: "http",
+				Rpc: &server.RPC{
+					Raw: "fake",
+				},
+				Secure: &server.Secure{
+					Key: "fake",
+				},
 			},
 			Items: []*server.TestCase{{
 				Name: "fake",
@@ -41,12 +77,21 @@ func TestConvert(t *testing.T) {
 		result := ConvertToGRPCTestSuite(&atest.TestSuite{
 			API:   "v1",
 			Param: defaultMap,
+			Spec: atest.APISpec{
+				RPC: &atest.RPCDesc{
+					Raw: "fake",
+				},
+				Secure: &atest.Secure{
+					KeyFile: "fake",
+				},
+			},
 			Items: []atest.TestCase{{
 				Name: "fake",
 			}},
 		})
 		assert.Equal(t, "v1", result.Api)
 		assert.Equal(t, defaultPairs, result.Param)
+		assert.Equal(t, "fake", result.Spec.Secure.Key)
 	})
 
 	t.Run("convertToNormalTestCase", func(t *testing.T) {

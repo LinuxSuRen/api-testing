@@ -22,16 +22,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package pkg
 
 import (
-	"os"
-
-	"github.com/linuxsuren/api-testing/extensions/store-git/cmd"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-func main() {
-	if err := cmd.NewRootCommand().Execute(); err != nil {
-		os.Exit(1)
-	}
+type SimpleKV interface {
+	clientv3.KV
+	Close() error
+}
+
+type KVFactory interface {
+	New(cfg clientv3.Config) (SimpleKV, error)
+}
+
+type realEtcd struct{}
+
+func NewRealEtcd() KVFactory {
+	return &realEtcd{}
+}
+
+func (r *realEtcd) New(cfg clientv3.Config) (SimpleKV, error) {
+	return clientv3.New(cfg)
 }

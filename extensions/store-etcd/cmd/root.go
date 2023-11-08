@@ -22,16 +22,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package cmd
 
 import (
-	"os"
-
-	"github.com/linuxsuren/api-testing/extensions/store-git/cmd"
+	"github.com/linuxsuren/api-testing/extensions/store-etcd/pkg"
+	ext "github.com/linuxsuren/api-testing/pkg/extension"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	if err := cmd.NewRootCommand().Execute(); err != nil {
-		os.Exit(1)
+// NewRootCommand returns the root Command
+func NewRootCommand() (c *cobra.Command) {
+	opt := &options{
+		Extension: ext.NewExtension("etcd", 7073),
 	}
+	c = &cobra.Command{
+		Use:   opt.GetFullName(),
+		Short: "A store extension for etcd",
+		RunE:  opt.runE,
+	}
+	opt.AddFlags(c.Flags())
+	c.Flags().StringVarP(&opt.endpoint, "endpoint", "", "", "The etcd server endpoint")
+	return
+}
+
+type options struct {
+	*ext.Extension
+	endpoint string
+}
+
+func (o *options) runE(c *cobra.Command, _ []string) (err error) {
+	remoteServer := pkg.NewRemoteServer(o.endpoint, pkg.NewRealEtcd())
+	err = ext.CreateRunner(o.Extension, c, remoteServer)
+	return
 }

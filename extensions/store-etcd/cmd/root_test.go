@@ -22,16 +22,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package cmd
 
 import (
-	"os"
+	"io"
+	"testing"
 
-	"github.com/linuxsuren/api-testing/extensions/store-git/cmd"
+	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
-func main() {
-	if err := cmd.NewRootCommand().Execute(); err != nil {
-		os.Exit(1)
-	}
+func TestNewRootCmd(t *testing.T) {
+	t.Run("not run", func(t *testing.T) {
+		cmd := newRootCmdForTest()
+		assert.NotNil(t, cmd)
+		assert.Equal(t, "atest-store-etcd", cmd.Use)
+		assert.Equal(t, "7073", cmd.Flags().Lookup("port").Value.String())
+	})
+
+	t.Run("invalid port", func(t *testing.T) {
+		cmd := newRootCmdForTest()
+		cmd.SetArgs([]string{"--port", "-1"})
+		err := cmd.Execute()
+		assert.Error(t, err)
+	})
+}
+
+func newRootCmdForTest() *cobra.Command {
+	cmd := NewRootCommand()
+	cmd.SetOut(io.Discard)
+	return cmd
 }

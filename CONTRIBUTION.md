@@ -29,7 +29,7 @@ Other usage of this:
 
 ```shell
 docker run -p 12800:12800 -p 9412:9412 docker.io/apache/skywalking-oap-server:9.0.0
-docker run -p 8080:8080 -e SW_OAP_ADDRESS=http://localhost:12800 -e SW_ZIPKIN_ADDRESS=http://localhost:9412 docker.io/apache/skywalking-ui:9.0.0
+docker run -p 8080:8080 -e SW_OAP_ADDRESS=http://172.11.0.6:12800 -e SW_ZIPKIN_ADDRESS=http://172.11.0.6:9412 docker.io/apache/skywalking-ui:9.0.0
 
 make build
 
@@ -40,4 +40,14 @@ export SW_AGENT_METER_COLLECT_INTERVAL=3
 export SW_AGENT_LOG_TYPE=std
 export SW_AGENT_REPORTER_DISCARD=true
 ./bin/atest server --local-storage 'bin/*.yaml' --http-port 8082 --port 7072 --console-path console/atest-ui/dist/
+```
+
+Run SkyWalking with BanYanDB
+```shell
+docker run -p 17912:17912 -p 17913:17913 apache/skywalking-banyandb:latest  standalone
+
+docker run -p 12800:12800 -p 9412:9412 \
+    -e SW_STORAGE=banyandb \
+    -e SW_STORAGE_BANYANDB_HOST=192.168.1.98 \
+    docker.io/apache/skywalking-oap-server
 ```
