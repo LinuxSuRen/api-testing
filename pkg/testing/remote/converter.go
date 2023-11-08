@@ -1,3 +1,27 @@
+/*
+MIT License
+
+Copyright (c) 2023 API Testing Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 package remote
 
 import (
@@ -12,26 +36,38 @@ func ConvertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
 		Name:  suite.Name,
 		API:   suite.Api,
 		Param: pairToMap(suite.Param),
-	}
-
-	if suite.Spec != nil {
-		result.Spec = testing.APISpec{
-			Kind: suite.Spec.Kind,
-			URL:  suite.Spec.Url,
-		}
-
-		if suite.Spec.Rpc != nil {
-			result.Spec.RPC = &testing.RPCDesc{
-				Raw:              suite.Spec.Rpc.Raw,
-				ProtoFile:        suite.Spec.Rpc.Protofile,
-				ImportPath:       suite.Spec.Rpc.Import,
-				ServerReflection: suite.Spec.Rpc.ServerReflection,
-			}
-		}
+		Spec:  ConvertToNormalTestSuiteSpec(suite.Spec),
 	}
 
 	for _, testcase := range suite.Items {
 		result.Items = append(result.Items, ConvertToNormalTestCase(testcase))
+	}
+	return
+}
+
+func ConvertToNormalTestSuiteSpec(spec *server.APISpec) (result testing.APISpec) {
+	if spec != nil {
+		result = testing.APISpec{
+			Kind: spec.Kind,
+			URL:  spec.Url,
+		}
+		if spec.Rpc != nil {
+			result.RPC = &testing.RPCDesc{
+				Raw:              spec.Rpc.Raw,
+				ProtoFile:        spec.Rpc.Protofile,
+				ImportPath:       spec.Rpc.Import,
+				ServerReflection: spec.Rpc.ServerReflection,
+			}
+		}
+		if spec.Secure != nil {
+			result.Secure = &testing.Secure{
+				Insecure:   spec.Secure.Insecure,
+				CertFile:   spec.Secure.Cert,
+				CAFile:     spec.Secure.Ca,
+				ServerName: spec.Secure.ServerName,
+				KeyFile:    spec.Secure.Key,
+			}
+		}
 	}
 	return
 }

@@ -13,6 +13,10 @@ export function SupportedExtensions() {
         {
           value: 'atest-store-orm',
           key: 'atest-store-orm'
+        },
+        {
+          value: 'atest-store-etcd',
+          key: 'atest-store-etcd'
         }
     ] as Pair[]
 }

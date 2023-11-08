@@ -22,16 +22,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package extension
 
 import (
-	"os"
-
-	"github.com/linuxsuren/api-testing/extensions/store-git/cmd"
+	"github.com/stretchr/testify/assert"
+	"strings"
+	"testing"
 )
 
-func main() {
-	if err := cmd.NewRootCommand().Execute(); err != nil {
-		os.Exit(1)
+func TestGetListenAddress(t *testing.T) {
+	opt := &Extension{}
+	opt.Socket = "test"
+	opt.Port = 8080
+	protocol, address := opt.GetListenAddress()
+	if protocol != "unix" {
+		t.Errorf("Expected unix, but got %s", protocol)
 	}
+	if address != "test" {
+		t.Errorf("Expected test, but got %s", address)
+	}
+	opt.Socket = ""
+	protocol, address = opt.GetListenAddress()
+	if protocol != "tcp" {
+		t.Errorf("Expected tcp, but got %s", protocol)
+	}
+	if address != ":8080" {
+		t.Errorf("Expected :8080, but got %s", address)
+	}
+}
+
+func TestStoreName(t *testing.T) {
+	assert.True(t, strings.HasPrefix(StoreName("fake"), "atest-store-"))
 }

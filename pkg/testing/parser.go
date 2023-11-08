@@ -104,7 +104,7 @@ func ParseTestCaseFromData(data []byte) (testCase *TestCase, err error) {
 	return
 }
 
-// ParseTestSuiteFromFile
+// ParseTestSuiteFromFile parses from suite path
 func ParseTestSuiteFromFile(suitePath string) (testSuite *TestSuite, err error) {
 	var data []byte
 	if data, err = os.ReadFile(suitePath); err == nil {
@@ -121,10 +121,15 @@ func GetHeader() string {
 `
 }
 
+func ToYAML(suite *TestSuite) ([]byte, error) {
+	data, err := yaml.Marshal(suite)
+	return data, err
+}
+
 // SaveTestSuiteToFile saves the test suite to file
 func SaveTestSuiteToFile(suite *TestSuite, suitePath string) (err error) {
 	var data []byte
-	if data, err = yaml.Marshal(suite); err == nil {
+	if data, err = ToYAML(suite); err == nil {
 		// add header
 		data = append([]byte(GetHeader()), data...)
 		err = os.WriteFile(suitePath, data, 0644)

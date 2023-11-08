@@ -17,7 +17,7 @@ This is a API testing tool.
 *   Pre and post handle with the API request
 *   Run in server mode, and provide the [gRPC](pkg/server/server.proto) and HTTP endpoint
 *   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
-*   Multiple storage backends supported(Local, ORM Database, S3, Git, etc)
+*   Multiple storage backends supported(Local, ORM Database, S3, Git, Etcd, etc)
 *   [HTTP API record](extensions/collector)
 *   Install in mutiple use cases(CLI, Container, Native-Service, Operator, Helm, etc)
 *   Monitoring integration with Prometheus, Skywalking

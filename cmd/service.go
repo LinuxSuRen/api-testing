@@ -29,8 +29,10 @@ atest service start`,
 Try use sudo if you met any permission issues.
 
 You could choose the alternative images:
-Sync Images: linuxsuren/api-testing
-Mirror Images: docker.m.daocloud.io/linuxsuren/api-testing`,
+Docker Hub: docker.io/linuxsuren/api-testing
+GitHub Container Registry: ghcr.io/linuxsuren/api-testing
+Scarf: linuxsuren.docker.scarf.sh/linuxsuren/api-testing
+DaoCloud: docker.m.daocloud.io/linuxsuren/api-testing`,
 		PreRunE: opt.preRunE,
 		RunE:    opt.runE,
 	}
@@ -333,7 +335,7 @@ type containerService struct {
 	errOut       io.Writer
 }
 
-const defaultImage = "ghcr.io/linuxsuren/api-testing"
+const defaultImage = "linuxsuren.docker.scarf.sh/linuxsuren/api-testing"
 
 func newContainerService(execer fakeruntime.Execer, client, image, tag, pull string,
 	featureOption serverFeatureOption, writer io.Writer) (svc Service) {

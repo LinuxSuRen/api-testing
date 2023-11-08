@@ -28,6 +28,7 @@ package runner
 import (
 	"fmt"
 	"net/http"
+	"os/exec"
 	"time"
 
 	"github.com/antonmedv/expr/ast"
@@ -41,6 +42,13 @@ var extensionFuncs = []*ast.Function{
 	{
 		Name: "httpReady",
 		Func: ExprFuncHTTPReady,
+	},
+	{
+		Name: "exec",
+		Func: func(params ...interface{}) (res any, err error) {
+			exec.Command("sh", "-c", params[0].(string)).Run()
+			return
+		},
 	},
 }
 

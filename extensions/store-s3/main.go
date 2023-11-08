@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	cmd := cmd.NewRootCmd(&pkg.DefaultS3Creator{})
-	if err := cmd.Execute(); err != nil {
+	c := cmd.NewRootCmd(&pkg.DefaultS3Creator{})
+	if err := c.Execute(); err != nil {
 		os.Exit(1)
 	}
 }

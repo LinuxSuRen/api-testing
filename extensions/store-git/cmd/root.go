@@ -25,73 +25,31 @@ SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-	"net"
-	"os"
-	"os/signal"
-
 	"github.com/linuxsuren/api-testing/extensions/store-git/pkg"
-	"github.com/linuxsuren/api-testing/pkg/testing/remote"
+	ext "github.com/linuxsuren/api-testing/pkg/extension"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
 )
 
 // NewRootCommand returns the root Command
 func NewRootCommand() (c *cobra.Command) {
-	opt := &options{}
+	opt := &options{
+		Extension: ext.NewExtension("git", 7074),
+	}
 	c = &cobra.Command{
-		Use:   "atest-store-git",
+		Use:   opt.GetFullName(),
 		Short: "A store extension for git",
 		RunE:  opt.runE,
 	}
-	flags := c.Flags()
-	flags.IntVarP(&opt.port, "port", "p", 7074, "The port to listen on")
-	flags.StringVarP(&opt.socket, "socket", "", "", "The socket to listen on, for instance: /var/run/atest-ext-store-git.sock")
+	opt.AddFlags(c.Flags())
 	return
 }
 
 type options struct {
-	port   int
-	socket string
+	*ext.Extension
 }
 
-func (o *options) getListenAddress() (protocol, address string) {
-	if o.socket != "" {
-		protocol = "unix"
-		address = o.socket
-	} else {
-		protocol = "tcp"
-		address = fmt.Sprintf(":%d", o.port)
-	}
-	return
-}
-
-func (o *options) runE(c *cobra.Command, args []string) (err error) {
-	removeServer := pkg.NewRemoteServer()
-	protocol, address := o.getListenAddress()
-
-	var lis net.Listener
-	lis, err = net.Listen(protocol, address)
-	if err != nil {
-		return
-	}
-
-	gRPCServer := grpc.NewServer()
-	remote.RegisterLoaderServer(gRPCServer, removeServer)
-	c.Printf("Git storage extension is running at %s\n", address)
-
-	endChan := make(chan os.Signal, 1)
-	signal.Notify(endChan, os.Interrupt, os.Kill)
-	go func() {
-		select {
-		case <-endChan:
-		case <-c.Context().Done():
-		}
-		fmt.Println("Stopping the server...")
-		_ = os.Remove(o.socket)
-		gRPCServer.Stop()
-	}()
-
-	err = gRPCServer.Serve(lis)
+func (o *options) runE(c *cobra.Command, _ []string) (err error) {
+	remoteServer := pkg.NewRemoteServer()
+	err = ext.CreateRunner(o.Extension, c, remoteServer)
 	return
 }

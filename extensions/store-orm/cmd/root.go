@@ -1,4 +1,5 @@
-/**
+/*
+*
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -24,48 +25,30 @@ SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-	"net"
-
 	"github.com/linuxsuren/api-testing/extensions/store-orm/pkg"
-	"github.com/linuxsuren/api-testing/pkg/testing/remote"
+	ext "github.com/linuxsuren/api-testing/pkg/extension"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
 )
 
 func NewRootCommand() (c *cobra.Command) {
-	opt := &option{}
+	opt := &option{
+		Extension: ext.NewExtension("orm", 7071),
+	}
 	c = &cobra.Command{
-		Use:   "store-orm",
+		Use:   opt.GetFullName(),
 		Short: "Storage extension of api-testing",
 		RunE:  opt.runE,
 	}
-	flags := c.Flags()
-	flags.IntVarP(&opt.port, "port", "p", 7071, "The port of gRPC server")
+	opt.AddFlags(c.Flags())
 	return
 }
 
-func (o *option) runE(cmd *cobra.Command, args []string) (err error) {
-	removeServer := pkg.NewRemoteServer()
-
-	var lis net.Listener
-	lis, err = net.Listen("tcp", fmt.Sprintf(":%d", o.port))
-	if err != nil {
-		return
-	}
-
-	gRPCServer := grpc.NewServer()
-	remote.RegisterLoaderServer(gRPCServer, removeServer)
-
-	go func() {
-		<-cmd.Context().Done()
-		gRPCServer.Stop()
-	}()
-	cmd.Println("ORM storage extension is running at port", o.port)
-	err = gRPCServer.Serve(lis)
+func (o *option) runE(c *cobra.Command, args []string) (err error) {
+	remoteServer := pkg.NewRemoteServer()
+	err = ext.CreateRunner(o.Extension, c, remoteServer)
 	return
 }
 
 type option struct {
-	port int
+	*ext.Extension
 }

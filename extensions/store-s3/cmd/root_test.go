@@ -14,7 +14,7 @@ func TestNewRootCmd(t *testing.T) {
 	t.Run("not run", func(t *testing.T) {
 		cmd := newRootCmdForTest()
 		assert.NotNil(t, cmd)
-		assert.Equal(t, "store-s3", cmd.Use)
+		assert.Equal(t, "atest-store-s3", cmd.Use)
 		assert.Equal(t, "7072", cmd.Flags().Lookup("port").Value.String())
 	})
 
