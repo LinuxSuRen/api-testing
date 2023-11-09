@@ -26,12 +26,14 @@ package extension
 
 import (
 	"fmt"
+	"net"
+	"os"
+
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
+	"github.com/linuxsuren/api-testing/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
-	"net"
-	"os"
 )
 
 // Extension is the default command option of the extension
@@ -82,7 +84,7 @@ func CreateRunner(ext *Extension, c *cobra.Command, removeServer remote.LoaderSe
 
 	gRPCServer := grpc.NewServer()
 	remote.RegisterLoaderServer(gRPCServer, removeServer)
-	c.Printf("%s is running at %s\n", ext.GetFullName(), address)
+	c.Printf("%s@%s is running at %s\n", ext.GetFullName(), version.GetVersion(), address)
 
 	RegisterStopSignal(c.Context(), func() {
 		_ = os.Remove(ext.Socket)

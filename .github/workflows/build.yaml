@@ -111,7 +111,11 @@ jobs:
       - name: Core Image
         run: GOPROXY=direct IMG_TOOL=docker make build-image
       - name: Run e2e
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
         run: |
+          sudo curl -L https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+          sudo chmod u+x /usr/local/bin/docker-compose
           make test-e2e
       - name: Operator Image
         run: cd operator && make docker-build
@@ -136,4 +140,4 @@ jobs:
           sudo atest service install
           sudo atest service restart
       - name: Test
-        run: make test-ui test-e2e
+        run: make test-ui

@@ -33,19 +33,18 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
+	"github.com/linuxsuren/api-testing/pkg/version"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type remoteserver struct {
-	endpoint  string
 	kvFactory KVFactory
 	remote.UnimplementedLoaderServer
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer(endpoint string, kvFactory KVFactory) remote.LoaderServer {
+func NewRemoteServer(kvFactory KVFactory) remote.LoaderServer {
 	return &remoteserver{
-		endpoint:  endpoint,
 		kvFactory: kvFactory,
 	}
 }
@@ -245,8 +244,10 @@ func (s *remoteserver) DeleteTestCase(ctx context.Context, testcase *server.Test
 	}
 	return
 }
-func (s *remoteserver) Verify(ctx context.Context, in *server.Empty) (reply *server.CommonResult, err error) {
-	reply = &server.CommonResult{}
+func (s *remoteserver) Verify(ctx context.Context, in *server.Empty) (reply *server.ExtensionStatus, err error) {
+	reply = &server.ExtensionStatus{
+		Version: version.GetVersion(),
+	}
 
 	var cli SimpleKV
 	cli, err = s.getClient(ctx)
@@ -256,9 +257,18 @@ func (s *remoteserver) Verify(ctx context.Context, in *server.Empty) (reply *ser
 	}
 
 	defer cli.Close()
-	reply.Success = true
+	// try to connect
+	if _, err = cli.Get(ctx, keyPrefix, connectTestOption()...); err == nil {
+		reply.Ready = true
+	}
 	return
 }
+
+func connectTestOption() []clientv3.OpOption {
+	return []clientv3.OpOption{clientv3.WithLimit(1), clientv3.WithPrefix(),
+		clientv3.WithCountOnly(), clientv3.WithKeysOnly()}
+}
+
 func getTestCase(ctx context.Context, cli SimpleKV, suiteName, caseName string) (testcase *testing.TestCase, index int, testsuite *testing.TestSuite, err error) {
 	index = NotFound
 	var resp *clientv3.GetResponse

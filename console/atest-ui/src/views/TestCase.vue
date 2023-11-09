@@ -1,26 +1,29 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Edit, Delete } from '@element-plus/icons-vue'
+import { Edit, Delete, Search } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
 import type { Pair, TestResult, TestCaseWithSuite } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
-import { GetTestCaseResponseCache, SetTestCaseResponseCache } from './cache'
+import { Cache } from './cache'
 import type { TestCaseResponse } from './cache'
 import { useI18n } from 'vue-i18n'
+import { JSONPath } from 'jsonpath-plus'
 
 const { t } = useI18n()
 
 const props = defineProps({
   name: String,
   suite: String,
-  store: String,
   kindName: String,
 })
+const store = Cache.GetCurrentStore()
 const emit = defineEmits(['updated'])
 
-let querySuggestedAPIs = NewSuggestedAPIsQuery(props.store!, props.suite!)
-const testResultActiveTab = ref('output')
+let querySuggestedAPIs = NewSuggestedAPIsQuery(store.name!, props.suite!)
+const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
+watch(testResultActiveTab, Cache.WatchResponseActiveTab)
+
 const requestLoading = ref(false)
 const testResult = ref({ header: [] as Pair[] } as TestResult)
 const sendRequest = async () => {
@@ -34,7 +37,7 @@ const sendRequest = async () => {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify({
       suite: suite,
@@ -61,9 +64,10 @@ const sendRequest = async () => {
       }
       if (e.body !== '') {
         testResult.value.bodyObject = JSON.parse(e.body)
+        testResult.value.originBodyObject = JSON.parse(e.body)
       }
 
-      SetTestCaseResponseCache(suite + '-' + name, {
+      Cache.SetTestCaseResponseCache(suite + '-' + name, {
         body: testResult.value.bodyObject,
         output: e.output,
         statusCode: testResult.value.statusCode
@@ -77,7 +81,22 @@ const sendRequest = async () => {
       requestLoading.value = false
       ElMessage.error('Oops, ' + e)
       testResult.value.bodyObject = JSON.parse(e.body)
+      testResult.value.originBodyObject = JSON.parse(e.body)
     })
+}
+
+const responseBodyFilterText = ref('')
+function responseBodyFilter() {
+  if (responseBodyFilterText.value === '') {
+    testResult.value.bodyObject = testResult.value.originBodyObject
+  } else {
+    const query = JSONPath({
+      path: responseBodyFilterText.value,
+      json: testResult.value.originBodyObject,
+      resultType: 'value'
+    })
+    testResult.value.bodyObject = query[0]
+  }
 }
 
 const parameterDialogOpened = ref(false)
@@ -86,7 +105,7 @@ function openParameterDialog() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify({
       name: props.suite
@@ -113,7 +132,7 @@ function generateCode() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify({
       TestSuite: suite,
@@ -200,7 +219,7 @@ function load() {
   }
 
   // load cache
-  const cache = GetTestCaseResponseCache(suite + '-' + name)
+  const cache = Cache.GetTestCaseResponseCache(suite + '-' + name)
   if (cache.body) {
     testResult.value.bodyObject = cache.body
     testResult.value.output = cache.output
@@ -210,11 +229,12 @@ function load() {
     testResult.value.output = ''
     testResult.value.statusCode = 0
   }
+  testResult.value.originBodyObject = testResult.value.bodyObject
 
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify({
       suite: suite,
@@ -291,7 +311,7 @@ function saveTestCase(tip: boolean = true) {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify(testCaseWithSuite.value)
   }
@@ -318,7 +338,7 @@ function deleteTestCase() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify({
       suite: suite,
@@ -366,7 +386,8 @@ watch(currentCodeGenerator, () => {
 })
 
 const options = GetHTTPMethods()
-const activeName = ref('body')
+const requestActiveTab = ref(Cache.GetPreference().requestActiveTab)
+watch(requestActiveTab, Cache.WatchRequestActiveTab)
 
 function bodyFiledExpectChange() {
   const data = testCaseWithSuite.value.data.response.bodyFieldsExpect
@@ -468,7 +489,7 @@ const pupularHeaders = ref([] as Pair[])
 const requestOptions = {
   method: 'POST',
   headers: {
-    'X-Store-Name': props.store
+    'X-Store-Name': store.name
   },
 }
 fetch('/server.Runner/PopularHeaders', requestOptions)
@@ -494,8 +515,11 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
       <el-header style="padding-left: 5px">
         <div style="margin-bottom: 5px">
           <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
-            >{{ t('button.save') }}</el-button
-          >
+            disabled v-if="store.readOnly"
+            >{{ t('button.save') }}</el-button>
+          <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
+            v-if="!store.readOnly"
+            >{{ t('button.save') }}</el-button>
           <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
           <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
         </div>
@@ -537,7 +561,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
       </el-header>
 
       <el-main>
-        <el-tabs v-model="activeName" class="demo-tabs">
+        <el-tabs v-model="requestActiveTab" class="demo-tabs">
           <el-tab-pane label="Query" name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
             <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
               <el-table-column label="Key" width="180">
@@ -767,6 +791,8 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
             />
           </el-tab-pane>
           <el-tab-pane label="Body" name="body">
+            <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
+              clearable label="dddd" placeholder="$.key" />
             <JsonViewer :value="testResult.bodyObject" :expand-depth="5" copyable boxed sort />
           </el-tab-pane>
           <el-tab-pane name="response-header">

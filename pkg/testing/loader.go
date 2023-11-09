@@ -9,7 +9,7 @@ type Loader interface {
 	GetCount() int
 	Reset()
 
-	Verify() (err error)
+	Verify() (readOnly bool, err error)
 }
 
 type Writer interface {

@@ -41,17 +41,15 @@ func NewRootCommand() (c *cobra.Command) {
 		RunE:  opt.runE,
 	}
 	opt.AddFlags(c.Flags())
-	c.Flags().StringVarP(&opt.endpoint, "endpoint", "", "", "The etcd server endpoint")
 	return
 }
 
 type options struct {
 	*ext.Extension
-	endpoint string
 }
 
 func (o *options) runE(c *cobra.Command, _ []string) (err error) {
-	remoteServer := pkg.NewRemoteServer(o.endpoint, pkg.NewRealEtcd())
+	remoteServer := pkg.NewRemoteServer(pkg.NewRealEtcd())
 	err = ext.CreateRunner(o.Extension, c, remoteServer)
 	return
 }

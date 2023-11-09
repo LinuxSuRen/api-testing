@@ -18,6 +18,9 @@ export interface TestResult {
   error: string
   statusCode: number
   header: Pair[]
+
+  // inner fileds
+  originBodyObject:{}
 }
 
 export interface Pair {

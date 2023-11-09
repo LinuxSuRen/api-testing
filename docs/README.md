@@ -198,7 +198,7 @@ tiup playground --db.host 0.0.0.0
 mkdir bin
 echo "- name: db
   kind:
-    name: database
+    name: atest-store-orm
     url: localhost:7071
   url: localhost:4000
   username: root
@@ -233,15 +233,16 @@ Have a look at the expected configuration below:
 - name: s3
   url: http://172.11.0.13:30999   # address of the s3 server
   kind:
-    name: s3
+    name: atest-store-s3
     url: localhost:7072           # address of the s3 storage extension
   properties:
     accessKeyID: 6e03rIMChrsZ6YZl
     secretAccessKey: F0xH6o2qRYTyAUyRuXO81B4gj7zUrSaj
+    sessiontoken: ""
+    region: cn
     disableSSL:  true
     forcepathstyle: true
     bucket: vm1
-    region: cn
 ```
 
 ### Git Storage
@@ -261,10 +262,13 @@ Have a look at the expected configuration below:
   username: linuxsuren
   password: linuxsuren
   kind:
-    name: git
+    name: atest-store-git         # the extension binary file name
     url: localhost:7074           # address of the git storage extension
-  properties:
-    targetPath: .
+  properties:                     # optional properties for specific features
+    targetPath: .                 # target path to find YAML files
+    name: linuxsuren              # the name for git commit
+    email: linuxsuren@github.com  # the email address for git commit
+    insecure: false               # whether to use insecure
 ```
 
 ## Secret Server

@@ -1,0 +1,12 @@
+version: '3.1'
+services:
+  testing:
+    image: "linuxsuren.docker.scarf.sh/linuxsuren/api-testing:master"
+    ports:
+      - 8080:8080
+  etcd:
+    image: "bitnami/etcd:3.5.10"
+    expose:
+      - "2379"
+    environment:
+      ALLOW_NONE_AUTHENTICATION: "yes"

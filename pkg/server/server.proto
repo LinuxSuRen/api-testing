@@ -45,7 +45,7 @@ service Runner {
     rpc CreateStore(Store) returns (Store) {}
     rpc UpdateStore(Store) returns (Store) {}
     rpc DeleteStore(Store) returns (Store) {}
-    rpc VerifyStore(SimpleQuery) returns (CommonResult) {}
+    rpc VerifyStore(SimpleQuery) returns (ExtensionStatus) {}
 
     // secret related interfaces
     rpc GetSecrets(Empty) returns (Secrets) {}
@@ -212,6 +212,8 @@ message Store {
   repeated Pair properties = 6;
   StoreKind kind = 7;
   bool ready = 8;
+  bool readOnly = 9;
+  bool disabled = 10;
 }
 
 message StoreKinds {
@@ -251,6 +253,13 @@ message Secret {
   string Name = 1;
   string Value = 2;
   string Description = 3;
+}
+
+message ExtensionStatus {
+    bool ready = 1;
+    bool readOnly = 2;
+    string version = 3;
+    string message = 4;
 }
 
 message Empty {

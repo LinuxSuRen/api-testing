@@ -1,15 +1,92 @@
+version: '3.1'
 services:
   testing:
     build: .
     environment:
+      GITEE_TOKEN: "$GITEE_TOKEN"
+    depends_on:
+      etcd:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
+      # postgres:
+      #   condition: service_healthy
+      # clickhouse:
+      #   condition: service_healthy
+      # minio:
+      #   condition: service_started
+    links:
+      - etcd
+      - mysql
+      - mariadb
+      # - minio
+      # - postgres
+      # - clickhouse
+  etcd:
+    image: "bitnami/etcd:3.5.10"
+    expose:
+      - "2379"
+    environment:
       ALLOW_NONE_AUTHENTICATION: "yes"
-  #   depends_on:
-  #     - etcd
-  #   links:
-  #     - etcd
-  # etcd:
-  #   image: "bitnami/etcd:3.5.10"
-  #   expose:
-  #     - "2379"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/2379"]
+      interval: 3s
+      timeout: 30s
+      retries: 10
+      start_period: 3s
+  mysql:
+    image: mysql:8.2.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: atest
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/3306"]
+      interval: 3s
+      timeout: 30s
+      retries: 10
+      start_period: 3s
+  mariadb:
+    image: mariadb:11.0
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: atest
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/3306"]
+      interval: 3s
+      timeout: 30s
+      retries: 10
+      start_period: 3s
+  minio:
+    image: bitnami/minio:2023.11.6
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: root
+      MINIO_SERVER_HOST: minio
+      MINIO_DEFAULT_BUCKETS: bucket
+  # postgres:
+  #   image: postgres:16.0
   #   environment:
-  #     ALLOW_NONE_AUTHENTICATION: "yes"
+  #     POSTGRES_USER: root
+  #     POSTGRES_PASSWORD: root
+  #     POSTGRES_DB: atest
+  #   healthcheck:
+  #     test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/5432"]
+  #     interval: 3s
+  #     timeout: 30s
+  #     retries: 10
+  #     start_period: 3s
+  # clickhouse:
+  #   image: bitnami/clickhouse:23.10.2
+  #   environment:
+  #     CLICKHOUSE_ADMIN_USER: root
+  #     CLICKHOUSE_ADMIN_PASSWORD: root
+  #     CLICKHOUSE_MYSQL_PORT: 9004
+  #   healthcheck:
+  #     test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/9004"]
+  #     interval: 3s
+  #     timeout: 30s
+  #     retries: 10
+  #     start_period: 3s

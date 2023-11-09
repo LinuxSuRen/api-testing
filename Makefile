@@ -6,21 +6,27 @@ HELM_VERSION?=v0.0.2
 APP_VERSION?=v0.0.13
 HELM_REPO?=docker.io/linuxsuren
 
+fmt:
+	go fmt ./...
+	cd extensions/store-etcd && go fmt ./...
+	cd extensions/store-git && go fmt ./...
+	cd extensions/store-orm && go fmt ./...
+	cd extensions/store-s3 && go fmt ./...
 build:
 	mkdir -p bin
 	rm -rf bin/atest
 	go build ${TOOLEXEC} -a -o bin/atest main.go
-build-ext: build-ext-git build-ext-orm build-ext-s3
+build-ext: build-ext-git build-ext-orm build-ext-s3 build-ext-etcd
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
 build-ext-orm:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-orm extensions/store-orm/main.go
 build-ext-etcd:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-etcd extensions/store-etcd/main.go
-build-ui:
-	cd console/atest-ui && npm i && npm run build-only
 build-ext-s3:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-s3 extensions/store-s3/main.go
+build-ui:
+	cd console/atest-ui && npm i && npm run build-only
 embed-ui:
 	cd console/atest-ui && npm i && npm run build-only
 	cp console/atest-ui/dist/index.html cmd/data/index.html
@@ -98,7 +104,7 @@ test-operator:
 test-all-backend: test test-collector test-store-orm test-store-s3 test-store-git test-store-etcd
 test-all: test-all-backend test-ui
 test-e2e:
-	cd extensions/e2e && docker-compose build && docker-compose up && docker-compose down
+	cd extensions/e2e && ./start.sh
 install-precheck:
 	cp .github/pre-commit .git/hooks/pre-commit
 
@@ -151,3 +157,7 @@ install-tool:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 	hd i protoc-gen-grpc-web
 	hd i protoc-gen-grpc-gateway
+init-env:
+	curl https://linuxsuren.github.io/tools/install.sh|bash
+	hd i cli/cli
+	gh extension install linuxsuren/gh-dev

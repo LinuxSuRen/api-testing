@@ -95,8 +95,10 @@ func TestNewGRPCLoader(t *testing.T) {
 		err = writer.DeleteSuite("")
 		assert.Error(t, err)
 
-		err = writer.Verify()
+		var readonly bool
+		readonly, err = writer.Verify()
 		assert.Error(t, err)
+		assert.False(t, readonly)
 	})
 
 	t.Run("NewGRPCloaderFromStore", func(t *testing.T) {

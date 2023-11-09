@@ -5,16 +5,17 @@ import { Edit } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery } from './types'
+import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
 const props = defineProps({
   name: String,
-  store: String,
 })
+const store = Cache.GetCurrentStore()
 const emit = defineEmits(['updated'])
-let querySuggestedAPIs = NewSuggestedAPIsQuery(props.store!, props.name!)
+let querySuggestedAPIs = NewSuggestedAPIsQuery(store.name, props.name!)
 
 const suite = ref({
   name: '',
@@ -30,12 +31,12 @@ const suite = ref({
   }
 } as Suite)
 function load() {
-  if (!props.name || props.store === "") return
+  if (!props.name || store.name === "") return
 
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify({
       name: props.name
@@ -70,7 +71,7 @@ function save() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify(suite.value)
   }
@@ -108,7 +109,7 @@ const rules = reactive<FormRules<Suite>>({
 
 function openNewTestCaseDialog() {
   dialogVisible.value = true
-  querySuggestedAPIs = NewSuggestedAPIsQuery(props.store!, props.name!)
+  querySuggestedAPIs = NewSuggestedAPIsQuery(store.name!, props.name!)
 }
 
 const submitForm = async (formEl: FormInstance | undefined) => {
@@ -120,7 +121,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       const requestOptions = {
         method: 'POST',
         headers: {
-          'X-Store-Name': props.store
+          'X-Store-Name': store.name
         },
         body: JSON.stringify({
           suiteName: props.name,
@@ -150,7 +151,7 @@ function del() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify({
       name: props.name
@@ -174,7 +175,7 @@ function convert() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': props.store
+      'X-Store-Name': store.name
     },
     body: JSON.stringify({
       Generator: 'jmeter',
@@ -294,7 +295,8 @@ function paramChange() {
       <el-divider />
     </div>
 
-    <el-button type="primary" @click="save">{{ t('button.save') }}</el-button>
+    <el-button type="primary" @click="save" v-if="!store.readOnly">{{ t('button.save') }}</el-button>
+    <el-button type="primary" @click="save" disabled v-if="store.readOnly">{{ t('button.save') }}</el-button>
     <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
     <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
     <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>

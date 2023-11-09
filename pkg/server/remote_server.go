@@ -735,7 +735,8 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 			grpcStore := ToGRPCStore(item)
 
 			storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
-			grpcStore.Ready = sErr == nil && storeStatus.Success
+			grpcStore.Ready = sErr == nil && storeStatus.Ready
+			grpcStore.ReadOnly = storeStatus.ReadOnly
 			grpcStore.Password = "******" // return a placeholder instead of the actual value for the security reason
 
 			reply.Data = append(reply.Data, grpcStore)
@@ -767,6 +768,7 @@ func (s *server) UpdateStore(ctx context.Context, in *Store) (reply *Store, err 
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	store := ToNormalStore(in)
 	if err = storeFactory.UpdateStore(store); err == nil && s.storeExtMgr != nil {
+		// TODO need to restart extension if config was changed
 		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
 	}
 	return
@@ -777,13 +779,13 @@ func (s *server) DeleteStore(ctx context.Context, in *Store) (reply *Store, err 
 	err = storeFactory.DeleteStore(in.Name)
 	return
 }
-func (s *server) VerifyStore(ctx context.Context, in *SimpleQuery) (reply *CommonResult, err error) {
-	// TODO need to implement
-	reply = &CommonResult{}
+func (s *server) VerifyStore(ctx context.Context, in *SimpleQuery) (reply *ExtensionStatus, err error) {
+	reply = &ExtensionStatus{}
 	var loader testing.Writer
 	if loader, err = s.getLoaderByStoreName(in.Name); err == nil && loader != nil {
-		verifyErr := loader.Verify()
-		reply.Success = verifyErr == nil
+		readOnly, verifyErr := loader.Verify()
+		reply.Ready = verifyErr == nil
+		reply.ReadOnly = readOnly
 		reply.Message = util.OKOrErrorMessage(verifyErr)
 	}
 	return

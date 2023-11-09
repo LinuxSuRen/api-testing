@@ -39,7 +39,7 @@ func TestRemoteServer(t *testing.T) {
 	ctx := remote.WithIncomingStoreContext(context.Background(), &atest.Store{
 		Name: "test",
 	})
-	remoteServer := NewRemoteServer("endpoint", &fakeKV{
+	remoteServer := NewRemoteServer(&fakeKV{
 		data: map[string]string{},
 	})
 
@@ -128,7 +128,7 @@ func TestRemoteServer(t *testing.T) {
 
 	verifyResult, err := remoteServer.Verify(ctx, &server.Empty{})
 	if assert.NoError(t, err) {
-		assert.True(t, verifyResult.Success)
+		assert.True(t, verifyResult.Ready)
 	}
 }
 

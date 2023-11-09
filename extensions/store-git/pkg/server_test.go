@@ -61,7 +61,8 @@ func TestGetClient(t *testing.T) {
 
 		result, err := gitClient.Verify(ctx, &server.Empty{})
 		assert.NoError(t, err)
-		assert.False(t, result.Success)
+		assert.False(t, result.Ready)
+		assert.True(t, result.ReadOnly)
 	})
 
 	t.Run("ListTestSuite", func(t *testing.T) {

@@ -10,7 +10,7 @@ import { ElTree, ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Edit, Share } from '@element-plus/icons-vue'
 import type { Suite } from './types'
-import { GetLastTestCaseLocation, SetLastTestCaseLocation } from './views/cache'
+import { Cache } from './views/cache'
 import { DefaultResponseProcess } from './views/net'
 import { useI18n } from 'vue-i18n'
 import ClientMonitor from 'skywalking-client-js'
@@ -20,11 +20,12 @@ import setAsDarkTheme from './theme'
 
 const { t } = useI18n()
 
-const asDarkMode = ref(false)
-function switchAppMode()
-{
+const asDarkMode = ref(Cache.GetPreference().darkTheme)
+setAsDarkTheme(asDarkMode.value)
+watch(asDarkMode, Cache.WatchDarkTheme)
+watch(asDarkMode, () => {
   setAsDarkTheme(asDarkMode.value)
-}
+})
 
 interface Tree {
   id: string
@@ -38,14 +39,13 @@ interface Tree {
 
 const testCaseName = ref('')
 const testSuite = ref('')
-const store = ref('')
 const testSuiteKind = ref('')
 const handleNodeClick = (data: Tree) => {
   if (data.children) {
     viewName.value = 'testsuite'
     testSuite.value = data.label
-    store.value = data.store
     testSuiteKind.value = data.kind
+    Cache.SetCurrentStore(data.store)
 
     const requestOptions = {
       method: 'POST',
@@ -74,10 +74,10 @@ const handleNodeClick = (data: Tree) => {
         }
       })
   } else {
-    SetLastTestCaseLocation(data.parentID, data.id)
+    Cache.SetLastTestCaseLocation(data.parentID, data.id)
     testCaseName.value = data.label
     testSuite.value = data.parent
-    store.value = data.store
+    Cache.SetCurrentStore(data.store)
     testSuiteKind.value = data.kind
     viewName.value = 'testcase'
   }
@@ -141,15 +141,16 @@ function loadStores() {
     .then(async (d) => {
       stores.value = d.data
       data.value = [] as Tree[]
+      Cache.SetStores(d.data)
 
       for (const item of d.data) {
-        if (item.ready) {
+        if (item.ready && !item.disabled) {
           await loadTestSuites(item.name)()
         }
       }
 
       if (data.value.length > 0) {
-        const key = GetLastTestCaseLocation()
+        const key = Cache.GetLastTestCaseLocation()
 
         let targetSuite = {} as Tree
         let targetChild = {} as Tree
@@ -182,7 +183,7 @@ function loadStores() {
         treeRef.value!.setCurrentKey(targetChild.id)
         treeRef.value!.setCheckedKeys([targetChild.id], false)
         testSuite.value = targetSuite.label
-        store.value = targetSuite.store
+        Cache.SetCurrentStore(targetSuite.store )
         testSuiteKind.value = targetChild.kind
       } else {
         viewName.value = ""
@@ -311,7 +312,7 @@ watch(viewName, (val) => {
     customTags: [{
       key: 'theme', value: asDarkMode.value ? 'dark' : 'light'
     }, {
-      key: 'store', value: store.value
+      key: 'store', value: Cache.GetCurrentStore().name
     }]
   });
 })
@@ -332,7 +333,7 @@ const suiteKinds = [{
         <el-button type="primary" :icon="Edit" @click="viewName = 'secret'" data-intro="Manage the secrets."/>
         <el-button type="primary" :icon="Share" @click="viewName = 'store'" data-intro="Manage the store backends." />
         <el-form-item label="Dark Mode" style="margin-left:20px;">
-          <el-switch type="primary" data-intro="Switch light and dark modes" v-model="asDarkMode" @click="switchAppMode"/>
+          <el-switch type="primary" data-intro="Switch light and dark modes" v-model="asDarkMode" />
         </el-form-item>
       </el-header>
 
@@ -369,7 +370,6 @@ const suiteKinds = [{
             />
             <TestCase
               v-else-if="viewName === 'testcase'"
-              :store="store"
               :suite="testSuite"
               :kindName="testSuiteKind"
               :name="testCaseName"
@@ -379,7 +379,6 @@ const suiteKinds = [{
             <TestSuite
               v-else-if="viewName === 'testsuite'"
               :name="testSuite"
-              :store="store"
               @updated="loadStores"
               data-intro="This is the test suite editor. You can edit the test suite here."
             />

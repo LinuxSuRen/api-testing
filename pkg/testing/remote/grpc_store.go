@@ -27,6 +27,7 @@ package remote
 import (
 	context "context"
 	"errors"
+	"time"
 
 	server "github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -187,10 +188,15 @@ func (g *gRPCLoader) DeleteSuite(name string) (err error) {
 	return
 }
 
-func (g *gRPCLoader) Verify() (err error) {
-	var result *server.CommonResult
-	if result, err = g.client.Verify(g.ctx, &server.Empty{}); err == nil {
-		if !result.Success {
+func (g *gRPCLoader) Verify() (readOnly bool, err error) {
+	// avoid to long to wait the response
+	ctx, cancel := context.WithTimeout(g.ctx, time.Second*3)
+	defer cancel()
+
+	var result *server.ExtensionStatus
+	if result, err = g.client.Verify(ctx, &server.Empty{}); err == nil {
+		readOnly = result.ReadOnly
+		if !result.Ready {
 			err = errors.New(result.Message)
 		}
 	}

@@ -41,6 +41,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"github.com/linuxsuren/api-testing/pkg/version"
 )
 
 type gitClient struct {
@@ -250,11 +251,18 @@ func (s *gitClient) DeleteTestCase(ctx context.Context, testcase *server.TestCas
 	}
 	return
 }
-func (s *gitClient) Verify(ctx context.Context, in *server.Empty) (reply *server.CommonResult, err error) {
+func (s *gitClient) Verify(ctx context.Context, in *server.Empty) (reply *server.ExtensionStatus, err error) {
 	_, clientErr := s.ListTestSuite(ctx, in)
-	reply = &server.CommonResult{
-		Success: clientErr == nil,
+	reply = &server.ExtensionStatus{
+		Ready:   clientErr == nil,
 		Message: util.OKOrErrorMessage(clientErr),
+		Version: version.GetVersion(),
+	}
+
+	// no git repository allows to write files without authentication
+	store := remote.GetStoreFromContext(ctx)
+	if store != nil {
+		reply.ReadOnly = store.Username == "" || store.Password == ""
 	}
 	return
 }

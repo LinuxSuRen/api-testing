@@ -71,7 +71,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 			socketFile := strings.TrimPrefix(socketURL, s.socketPrefix)
 			s.filesNeedToBeRemoved = append(s.filesNeedToBeRemoved, socketFile)
 			s.extStatusMap[name] = true
-			if err = s.execer.RunCommand(plugin, "--socket", socketFile); err != nil {
+			if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, "--socket", socketFile); err != nil {
 				log.Printf("failed to start %s, error: %v", socketURL, err)
 			}
 		}(socket, binaryPath)

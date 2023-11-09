@@ -7,7 +7,6 @@ import (
 
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
-	atesting "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,7 +39,9 @@ func TestFileLoader(t *testing.T) {
 			}
 			tt.verify(t, loader)
 
-			assert.NoError(t, loader.Verify())
+			readonly, err := loader.Verify()
+			assert.NoError(t, err)
+			assert.False(t, readonly)
 		})
 	}
 }
@@ -186,7 +187,7 @@ func TestSuite(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		var testcase atesting.TestCase
+		var testcase atest.TestCase
 		testcase, err = writer.GetTestCase("test", "login")
 		if assert.NoError(t, err) {
 			assert.Equal(t, urlTestLogin, testcase.Request.API)
