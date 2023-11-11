@@ -1,3 +1,8 @@
+# See https://www.gitpod.io/docs/configure/workspaces
 tasks:
-  - init: make build
-    command: docker run --pull always --network host ghcr.io/linuxsuren/api-testing:master
+  - init: make init-env
+    before: IMG_TOOL=docker GOPROXY= make build-ext copy-ext build-image
+    command: cd console/atest-ui/ && npm i
+
+ports:
+  - port: 5713  # console interactive port

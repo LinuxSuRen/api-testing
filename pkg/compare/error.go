@@ -90,7 +90,7 @@ func newNoEqualErr(field string, err error) error {
 		Path:    []string{field},
 		Message: "",
 	}
-	
+
 	if err != nil {
 		if v, ok := err.(*noEqualErr); ok {
 			noEqerr.Path = append(noEqerr.Path, v.Path...)

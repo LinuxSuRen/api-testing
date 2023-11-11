@@ -22,7 +22,9 @@ const emptyStore = function() {
     properties: [{
         key: '',
         value: ''
-    }]
+    }],
+    disabled: false,
+    readonly: false
   } as Store
 }
 const stores = ref([] as Store[])
@@ -38,6 +40,8 @@ interface Store {
   username: string
   password: string
   ready: boolean
+  disabled: boolean
+  readonly: boolean
   kind: {
     name: string
     url: string
@@ -86,6 +90,7 @@ function editStore(name: string) {
     stores.value.forEach((e: Store) => {
         if (e.name === name) {
             setStoreForm(e)
+            return
         }
     })
     createAction.value = false
@@ -97,7 +102,13 @@ function setStoreForm(store: Store) {
     storeForm.username = store.username
     storeForm.password = store.password
     storeForm.kind = store.kind
+    storeForm.disabled = store.disabled
+    storeForm.readonly = store.readonly
     storeForm.properties = store.properties
+    storeForm.properties.push({
+        key: '',
+        value: ''
+      })
 }
 
 function addStore() {
@@ -107,7 +118,9 @@ function addStore() {
 }
 
 const rules = reactive<FormRules<Store>>({
-  name: [{ required: true, message: 'Name is required', trigger: 'blur' }]
+  name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
+  url: [{ required: true, message: 'URL is required', trigger: 'blur' }],
+  "kind.name": [{ required: true, message: 'Plugin is required', trigger: 'blur' }]
 })
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -166,7 +179,7 @@ function storeVerify(formEl: FormInstance | undefined) {
       }
     })
     .then((e) => {
-      if (e.success) {
+      if (e.ready) {
         ElMessage({
           message: 'Verified!',
           type: 'success'
@@ -283,6 +296,9 @@ function updateKeys() {
           </el-form-item>
           <el-form-item :label="t('field.pluginURL')" prop="plugin">
             <el-input v-model="storeForm.kind.url" test-id="store-form-plugin" />
+          </el-form-item>
+          <el-form-item :label="t('field.disabled')" prop="disabled">
+            <el-switch v-model="storeForm.disabled" />
           </el-form-item>
           <el-form-item :label="t('field.properties')" prop="properties">
             <el-table :data="storeForm.properties" style="width: 100%">

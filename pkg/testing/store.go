@@ -45,6 +45,8 @@ type Store struct {
 	URL         string
 	Username    string
 	Password    string
+	ReadOnly    bool
+	Disabled    bool
 	Properties  map[string]string
 }
 
@@ -57,6 +59,8 @@ func (s *Store) ToMap() (result map[string]string) {
 		"url":         s.URL,
 		"username":    s.Username,
 		"password":    s.Password,
+		"readonly":    fmt.Sprintf("%t", s.ReadOnly),
+		"disabled":    fmt.Sprintf("%t", s.Disabled),
 	}
 	for key, val := range s.Properties {
 		result["pro."+key] = val
@@ -71,6 +75,8 @@ func MapToStore(data map[string]string) (store Store) {
 		URL:         data["url"],
 		Username:    data["username"],
 		Password:    data["password"],
+		ReadOnly:    data["readonly"] == "true",
+		Disabled:    data["disabled"] == "true",
 		Kind: StoreKind{
 			Name: data["kind"],
 			URL:  data["kind.url"],

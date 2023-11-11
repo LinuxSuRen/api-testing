@@ -133,9 +133,11 @@ var sampleStoreMap = map[string]string{
 	"kind.url":    fooURL,
 	"kind":        "test",
 	"description": "desc",
+	"disabled":    "false",
 	"username":    "user",
 	"password":    "pass",
 	"pro.key":     "val",
+	"readonly":    "false",
 }
 
 var sampleStore = &Store{

@@ -21,16 +21,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 package pkg
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"github.com/linuxsuren/api-testing/pkg/version"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -46,9 +50,23 @@ func NewRemoteServer() (s remote.LoaderServer) {
 	return
 }
 
-func createDB(user, address, database string) (db *gorm.DB, err error) {
-	dsn := fmt.Sprintf("%s:@tcp(%s)/%s?charset=utf8mb4", user, address, database)
-	fmt.Println("try to connect to", dsn)
+func createDB(user, password, address, database, driver string) (db *gorm.DB, err error) {
+	var dsn string
+	switch driver {
+	case "mysql", "":
+		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4", user, password, address, database)
+	case "postgres":
+		obj := strings.Split(address, ":")
+		host, port := obj[0], obj[1]
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai", host, user, password, database, port)
+	case "clickhouse":
+		dsn = fmt.Sprintf("tcp://%s?database=%s&username=%s&password=%s&read_timeout=10&write_timeout=20", address, database, user, password)
+	default:
+		err = fmt.Errorf("invalid database driver %q", driver)
+		return
+	}
+
+	log.Printf("try to connect to %q", dsn)
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
@@ -75,13 +93,15 @@ func (s *dbserver) getClient(ctx context.Context) (db *gorm.DB, err error) {
 		}
 
 		database := "atest"
-		for key, val := range store.Properties {
-			if key == "database" {
-				database = val
-			}
+		driver := "mysql"
+		if v, ok := store.Properties["database"]; ok && v != "" {
+			database = v
+		}
+		if v, ok := store.Properties["driver"]; ok && v != "" {
+			driver = v
 		}
 
-		if db, err = createDB(store.Username, store.URL, database); err == nil {
+		if db, err = createDB(store.Username, store.Password, store.URL, database, driver); err == nil {
 			dbCache[store.Name] = db
 		}
 	}
@@ -237,11 +257,12 @@ func (s *dbserver) DeleteTestCase(ctx context.Context, testcase *server.TestCase
 	return
 }
 
-func (s *dbserver) Verify(ctx context.Context, in *server.Empty) (reply *server.CommonResult, err error) {
+func (s *dbserver) Verify(ctx context.Context, in *server.Empty) (reply *server.ExtensionStatus, err error) {
 	db, clientErr := s.getClient(ctx)
-	reply = &server.CommonResult{
-		Success: err == nil && db != nil,
+	reply = &server.ExtensionStatus{
+		Ready:   err == nil && db != nil,
 		Message: util.OKOrErrorMessage(clientErr),
+		Version: version.GetVersion(),
 	}
 	return
 }

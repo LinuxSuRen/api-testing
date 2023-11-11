@@ -29,7 +29,7 @@ type fakeClient struct {
 	err error
 }
 
-func (f*fakeClient)Invoke(ctx context.Context, reqBody interface{}, rspBody interface{}, opt ...client.Option) (err error) {
+func (f *fakeClient) Invoke(ctx context.Context, reqBody interface{}, rspBody interface{}, opt ...client.Option) (err error) {
 	err = f.err
 	return
 }

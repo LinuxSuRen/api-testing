@@ -7,22 +7,43 @@ api: |
 param:
   suiteName: "{{randAlpha 6}}"
   caseName: "{{randAlpha 6}}"
+  store: "{{randAlpha 3}}"
 items:
 - name: CreateStore
   before:
     items:
       - httpReady("http://localhost:8080/healthz", 2400)
-      - httpReady("http://localhost:2379/health", 2400)
   request:
     api: /CreateStore
     method: POST
     body: |
       {
-        "name": "etcd",
-        "url": "localhost:2379",
+        "name": "{{.param.store}}",
+        "url": "{{env "target"}}",
+        "username": "{{default "root" (env "username")}}",
+        "password": "{{default "root" (env "password")}}",
         "kind": {
-          "name": "atest-store-etcd"
-        }
+          "name": "atest-store-{{env "kind"}}"
+        },
+        "properties": [{
+          "key": "driver",
+          "value": "{{default "mysql" (env "driver")}}"
+        }, {
+          "key": "database",
+          "value": "{{default "atest" (env "dbname")}}"
+        }, {
+          "key": "bucket",
+          "value": "bucket"
+        }, {
+          "key": "region",
+          "value": "cn"
+        }, {
+          "key": "disablessl",
+          "value": "true"
+        }, {
+          "key": "targetPath",
+          "value": "api-testing"
+        }]
       }
 - name: createSuite
   before:
@@ -32,7 +53,7 @@ items:
     api: /CreateTestSuite
     method: POST
     header:
-      X-Store-Name: etcd
+      X-Store-Name: "{{.param.store}}"
     body: |
       {
         "name": "{{.param.suiteName}}",
@@ -43,7 +64,7 @@ items:
     api: /UpdateTestSuite
     method: POST
     header:
-      X-Store-Name: etcd
+      X-Store-Name: "{{.param.store}}"
     body: |
       {
         "name": "{{.param.suiteName}}",
@@ -58,7 +79,7 @@ items:
     api: /GetTestSuite
     method: POST
     header:
-      X-Store-Name: etcd
+      X-Store-Name: "{{.param.store}}"
     body: |
       {
         "name": "{{.param.suiteName}}"
@@ -71,7 +92,7 @@ items:
     api: /CreateTestCase
     method: POST
     header:
-      X-Store-Name: etcd
+      X-Store-Name: "{{.param.store}}"
     body: |
       {
         "suiteName": "{{.param.suiteName}}",
@@ -82,7 +103,7 @@ items:
             "method": "POST",
             "header": [{
               "name": "X-Store-Name",
-              "value": "etcd"
+              "value": "{{.param.store}}"
             }]
           }
         }
@@ -92,7 +113,7 @@ items:
     api: /UpdateTestCase
     method: POST
     header:
-      X-Store-Name: etcd
+      X-Store-Name: "{{.param.store}}"
     body: |
       {
         "suiteName": "{{.param.suiteName}}",
@@ -103,7 +124,7 @@ items:
             "method": "POST",
             "header": [{
               "name": "X-Store-Name",
-              "value": "etcd"
+              "value": "{{.param.store}}"
             }],
             "body": "good"
           }
@@ -114,7 +135,7 @@ items:
     api: /GetTestCase
     method: POST
     header:
-      X-Store-Name: etcd
+      X-Store-Name: "{{.param.store}}"
     body: |
       {
         "suite": "{{.param.suiteName}}",
@@ -128,7 +149,7 @@ items:
     api: /DeleteTestCase
     method: POST
     header:
-      X-Store-Name: etcd
+      X-Store-Name: "{{.param.store}}"
     body: |
       {
         "suite": "{{.param.suiteName}}",

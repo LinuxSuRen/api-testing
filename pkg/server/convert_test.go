@@ -42,6 +42,7 @@ func TestToGRPCStore(t *testing.T) {
 		Url:      urlFoo,
 		Username: "user",
 		Password: "pass",
+		Disabled: true,
 		Properties: []*Pair{{
 			Key: "foo", Value: "bar",
 		}},
@@ -55,6 +56,7 @@ func TestToGRPCStore(t *testing.T) {
 		URL:      urlFoo,
 		Username: "user",
 		Password: "pass",
+		Disabled: true,
 		Properties: map[string]string{
 			"foo": "bar",
 		},

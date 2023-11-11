@@ -8,6 +8,8 @@ stores:
       url: localhost:4000
       username: root
       password: ""
+      readonly: false
+      disabled: false
       properties:
         database: test
 plugins:

@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 package pkg
 
 import (
@@ -90,6 +91,6 @@ func TestNewRemoteServer(t *testing.T) {
 	t.Run("Verify", func(t *testing.T) {
 		reply, err := remoteServer.Verify(defaultCtx, nil)
 		assert.NoError(t, err)
-		assert.False(t, reply.Success)
+		assert.False(t, reply.Ready)
 	})
 }

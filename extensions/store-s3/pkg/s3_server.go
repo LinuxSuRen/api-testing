@@ -1,9 +1,34 @@
+/**
+MIT License
+
+Copyright (c) 2023 API Testing Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 package pkg
 
 import (
 	"bytes"
 	"context"
 	"errors"
+	"log"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -14,6 +39,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"github.com/linuxsuren/api-testing/pkg/version"
 	"gopkg.in/yaml.v3"
 )
 
@@ -170,11 +196,12 @@ func (s *s3Client) DeleteTestCase(ctx context.Context, testcase *server.TestCase
 	}
 	return
 }
-func (s *s3Client) Verify(ctx context.Context, in *server.Empty) (reply *server.CommonResult, err error) {
+func (s *s3Client) Verify(ctx context.Context, in *server.Empty) (reply *server.ExtensionStatus, err error) {
 	_, clientErr := s.ListTestSuite(ctx, in)
-	reply = &server.CommonResult{
-		Success: err == nil,
+	reply = &server.ExtensionStatus{
+		Ready:   err == nil,
 		Message: util.OKOrErrorMessage(clientErr),
+		Version: version.GetVersion(),
 	}
 	return
 }
@@ -189,11 +216,19 @@ func (s *s3Client) getClient(ctx context.Context) (db *s3WithBucket, err error) 
 		}
 
 		options := mapToS3Options(store.Properties)
+		if options.AccessKeyID == "" {
+			options.AccessKeyID = store.Username
+		}
+		if options.SecretAccessKey == "" {
+			options.SecretAccessKey = store.Password
+		}
+
+		log.Println("s3 server", store.URL)
 
 		var sess *session.Session
 		sess, err = createClientFromSs3Options(options, store.URL)
 		if err == nil {
-			svc := s.S3Creator.New(sess) // s3.New(sess)
+			svc := s.S3Creator.New(sess)
 			db = &s3WithBucket{S3API: svc, bucket: options.Bucket}
 			clientCache[store.Name] = db
 		}

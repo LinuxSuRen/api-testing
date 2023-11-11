@@ -380,7 +380,7 @@ func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 	return
 }
 
-func (l *fileLoader) Verify() (err error) {
+func (l *fileLoader) Verify() (readOnly bool, err error) {
 	// always be okay
 	return
 }

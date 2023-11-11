@@ -38,6 +38,7 @@
         "plugin": "Plugin",
         "pluginName": "Plugin Name",
         "pluginURL": "Plugin URL",
+        "disabled": "Disabled",
         "status": "Status",
         "operations": "Operations",
         "storageLocation": "Storage Location",

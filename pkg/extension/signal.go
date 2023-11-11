@@ -2,7 +2,7 @@ package extension
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 )
@@ -19,11 +19,11 @@ func RegisterStopSignal(ctx context.Context, callback func(), servers ...StopAbl
 		case <-endChan:
 		case <-ctx.Done():
 		}
-		fmt.Println("Stopping the server...")
 		if callback != nil {
 			callback()
 		}
 		for _, server := range servers {
+			log.Println("Stopping the server...")
 			server.Stop()
 		}
 	}(ctx)

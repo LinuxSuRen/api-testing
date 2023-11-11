@@ -44,6 +44,7 @@ func ToGRPCStore(store testing.Store) (result *Store) {
 		Url:         store.URL,
 		Username:    store.Username,
 		Password:    store.Password,
+		Disabled:    store.Disabled,
 		Properties:  mapToPair(store.Properties),
 	}
 	return
@@ -57,6 +58,7 @@ func ToNormalStore(store *Store) (result testing.Store) {
 		URL:         store.Url,
 		Username:    store.Username,
 		Password:    store.Password,
+		Disabled:    store.Disabled,
 		Properties:  pairToMap(store.Properties),
 	}
 	if store.Kind != nil {

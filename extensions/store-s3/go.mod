@@ -100,3 +100,5 @@ require (
 	trpc.group/trpc-go/trpc-go v1.0.1 // indirect
 	trpc.group/trpc/trpc-protocol/pb/go/trpc v1.0.0 // indirect
 )
+
+replace github.com/linuxsuren/api-testing => ../../.
