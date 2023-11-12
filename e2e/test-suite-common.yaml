@@ -3,16 +3,18 @@
 # https://docs.gitlab.com/ee/api/api_resources.html
 name: atest
 api: |
-  {{default "http://localhost:8080/server.Runner" (env "SERVER")}}
+  {{default "http://localhost:8080" (env "SERVER")}}/server.Runner
 param:
   suiteName: "{{randAlpha 6}}"
   caseName: "{{randAlpha 6}}"
   store: "{{randAlpha 3}}"
+  server: |
+    {{default "http://localhost:8080" (env "SERVER")}}
 items:
 - name: CreateStore
   before:
     items:
-      - httpReady("http://localhost:8080/healthz", 2400)
+      - httpReady("{{.param.server}}/healthz", 2400)
   request:
     api: /CreateStore
     method: POST

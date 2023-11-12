@@ -3,12 +3,19 @@
 # https://docs.gitlab.com/ee/api/api_resources.html
 name: atest
 api: |
-  {{default "http://localhost:8080/server.Runner" (env "SERVER")}}
+    {{default "http://localhost:8080" (env "SERVER")}}/server.Runner
+param:
+  server: |
+    {{default "http://localhost:8080" (env "SERVER")}}
 items:
-- name: CreateStore
+- name: healthz
   before:
     items:
-      - httpReady("http://localhost:8080/healthz", 2400)
+      - httpReady("{{.param.server}}/healthz", 6000)
+  request:
+    api: |
+      {{default "http://localhost:8080" (env "SERVER")}}/healthz
+- name: CreateStore
   request:
     api: /CreateStore
     method: POST
@@ -20,7 +27,6 @@ items:
           "name": "atest-store-git"
         }
       }
-
 - name: listSuite
   before:
     items:

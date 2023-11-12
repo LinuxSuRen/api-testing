@@ -104,7 +104,7 @@ test-operator:
 test-all-backend: test test-collector test-store-orm test-store-s3 test-store-git test-store-etcd
 test-all: test-all-backend test-ui
 test-e2e:
-	cd extensions/e2e && ./start.sh
+	cd e2e && ./start.sh && ./start.sh compose-k8s.yaml
 install-precheck:
 	cp .github/pre-commit .git/hooks/pre-commit
 
