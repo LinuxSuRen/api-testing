@@ -3,3 +3,4 @@ console/atest-ui/dist
 .git/
 bin/
 dist/
+.vscode/

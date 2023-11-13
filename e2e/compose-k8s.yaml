@@ -1,0 +1,69 @@
+version: '3.1'
+services:
+  testing:
+    build:
+      context: ..
+      dockerfile: e2e/Dockerfile
+    command: [ "/workspace/k8s.sh" ]
+    depends_on:
+      server:
+        condition: service_started
+    links:
+      - server
+      - agent
+    volumes:
+      - k8s:/root/.kube
+
+  server:
+    image: "rancher/k3s:${K3S_VERSION:-v1.25.15-k3s2}"
+    command: server
+    tmpfs:
+    - /run
+    - /var/run
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+    privileged: true
+    restart: always
+    environment:
+    - K3S_TOKEN=abcd
+    - K3S_KUBECONFIG_OUTPUT=/output/config
+    - K3S_KUBECONFIG_MODE=666
+    volumes:
+    - k8s:/output
+    # This is just so that we get the kubeconfig file out
+    # - .:/output
+    ports:
+    - 30000:30000
+    # - 6443:6443  # Kubernetes API Server
+    # - 80:80      # Ingress controller port 80
+    # - 443:443    # Ingress controller port 443
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/6443"]
+      interval: 3s
+      timeout: 30s
+      retries: 10
+      start_period: 3s
+
+  agent:
+    image: "rancher/k3s:${K3S_VERSION:-v1.25.15-k3s2}"
+    tmpfs:
+    - /run
+    - /var/run
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+    privileged: true
+    restart: always
+    environment:
+    - K3S_URL=https://server:6443
+    - K3S_TOKEN=abcd
+    links:
+      - server
+
+volumes:
+  k8s: {}
