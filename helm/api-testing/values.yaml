@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  registry: docker.io
+  registry: linuxsuren.docker.scarf.sh
   repository: linuxsuren/api-testing
   tag: ""
   digest: ""
