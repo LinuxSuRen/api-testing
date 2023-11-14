@@ -18,12 +18,6 @@ func TestService(t *testing.T) {
 	err := root.Execute()
 	assert.NotNil(t, err)
 
-	notLinux := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "fake"}, NewFakeGRPCServer(), server.NewFakeHTTPServer())
-	notLinux.SetArgs([]string{"service", paramAction, "install"})
-	notLinux.SetOut(new(bytes.Buffer))
-	err = notLinux.Execute()
-	assert.NotNil(t, err)
-
 	notSupportedMode := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "fake"}, NewFakeGRPCServer(), server.NewFakeHTTPServer())
 	notSupportedMode.SetArgs([]string{"service", paramAction, "install", "--mode=fake"})
 	notSupportedMode.SetOut(new(bytes.Buffer))

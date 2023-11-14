@@ -9,7 +9,7 @@ jobs:
   Test:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.0.0
+      - uses: actions/checkout@v4
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -41,7 +41,7 @@ jobs:
       pull-requests: write 
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.0.0
+      - uses: actions/checkout@v4
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -72,7 +72,7 @@ jobs:
   Build:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.0.0
+      - uses: actions/checkout@v4
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -90,14 +90,17 @@ jobs:
   BuildImage:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.0.0
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: 1.19.x
       - name: Set output
         id: vars
-        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+        run: echo "tag=$(git describe --tags)" >> $GITHUB_OUTPUT
       - name: Package Helm
         run: |
           export APP_VERSION=${{ steps.vars.outputs.tag }}
@@ -123,7 +126,7 @@ jobs:
   BuildEmbedUI:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.0.0
+      - uses: actions/checkout@v4
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
