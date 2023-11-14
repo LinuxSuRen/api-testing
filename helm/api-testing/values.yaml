@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: linuxsuren/api-testing
-  tag: "v0.0.2-helm"
+  tag: ""
   digest: ""
   # Overrides the image tag whose default is the chart appVersion.
   ## Specify a imagePullPolicy
