@@ -8,7 +8,8 @@ helm install --kube-apiserver https://server:6443 --kube-token abcd --kube-insec
     --set service.type=NodePort \
     --set service.nodePort=30000 \
     --set persistence.enabled=false \
-    --set image.repository=linuxsuren.docker.scarf.sh/linuxsuren/api-testing \
+    --set image.registry=linuxsuren.docker.scarf.sh \
+    --set image.repository=linuxsuren/api-testing \
     --set image.tag=master
 
 SERVER=http://server:30000 atest run -p git.yaml
