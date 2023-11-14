@@ -40,7 +40,6 @@ import (
 
 	"log"
 
-	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/generator"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
@@ -364,6 +363,7 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 	if suite, _, err = loader.GetSuite(in.Name); err == nil && suite != nil {
 		result = ToGRPCSuite(suite)
 	}
+	fmt.Println(suite, "==", result, "==", in.Name)
 	return
 }
 
@@ -635,23 +635,13 @@ func (s *server) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity) (r
 		return
 	}
 
-	if suite.Spec.URL == "" {
-		return
-	}
-
 	log.Println("Finding APIs from", in.Name, "with loader", reflect.TypeOf(loader))
-	var swaggerAPI *apispec.Swagger
-	if swaggerAPI, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil && swaggerAPI != nil {
-		for api, item := range swaggerAPI.Paths {
-			for method, oper := range item {
-				reply.Data = append(reply.Data, &TestCase{
-					Name: oper.OperationId,
-					Request: &Request{
-						Api:    api,
-						Method: strings.ToUpper(method),
-					},
-				})
-			}
+
+	suiteRunner := runner.GetTestSuiteRunner(suite)
+	var result []*testing.TestCase
+	if result, err = suiteRunner.GetSuggestedAPIs(suite, in.Api); err == nil && result != nil {
+		for i := range result {
+			reply.Data = append(reply.Data, ToGRPCTestCase(*result[i]))
 		}
 	}
 	return

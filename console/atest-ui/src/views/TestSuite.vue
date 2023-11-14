@@ -15,7 +15,7 @@ const props = defineProps({
 })
 const store = Cache.GetCurrentStore()
 const emit = defineEmits(['updated'])
-let querySuggestedAPIs = NewSuggestedAPIsQuery(store.name, props.name!)
+let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name, props.name!)
 
 const suite = ref({
   name: '',
@@ -26,11 +26,13 @@ const suite = ref({
     url: '',
     rpc: {
       raw: '',
-      protofile: ''
+      protofile: '',
+      serverReflection: false
     }
   }
 } as Suite)
 function load() {
+  const store = Cache.GetCurrentStore()
   if (!props.name || store.name === "") return
 
   const requestOptions = {
@@ -71,7 +73,7 @@ function save() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': Cache.GetCurrentStore().name
     },
     body: JSON.stringify(suite.value)
   }
@@ -109,7 +111,7 @@ const rules = reactive<FormRules<Suite>>({
 
 function openNewTestCaseDialog() {
   dialogVisible.value = true
-  querySuggestedAPIs = NewSuggestedAPIsQuery(store.name!, props.name!)
+  querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.name!)
 }
 
 const submitForm = async (formEl: FormInstance | undefined) => {
@@ -121,7 +123,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       const requestOptions = {
         method: 'POST',
         headers: {
-          'X-Store-Name': store.name
+          'X-Store-Name': Cache.GetCurrentStore().name
         },
         body: JSON.stringify({
           suiteName: props.name,
@@ -151,7 +153,7 @@ function del() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': Cache.GetCurrentStore().name
     },
     body: JSON.stringify({
       name: props.name
@@ -175,7 +177,7 @@ function convert() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': Cache.GetCurrentStore().name
     },
     body: JSON.stringify({
       Generator: 'jmeter',
@@ -278,12 +280,18 @@ function paramChange() {
     </div>
 
     <div v-if="suite.spec.rpc">
-      <span>{{ t('title.protoContent') }}</span>
-      <el-input
-        v-model="suite.spec.rpc.raw"
-        :autosize="{ minRows: 4, maxRows: 8 }"
-        type="textarea"
-        />
+      <div>
+        <span>{{ t('title.refelction') }}</span>
+        <el-switch v-model="suite.spec.rpc.serverReflection" />
+      </div>
+      <div>
+        <span>{{ t('title.protoContent') }}</span>
+        <el-input
+          v-model="suite.spec.rpc.raw"
+          :autosize="{ minRows: 4, maxRows: 8 }"
+          type="textarea"
+          />
+      </div>
       <div>
         <span>{{ t('title.protoImport') }}</span>
         <el-input class="mx-1" v-model="suite.spec.rpc.import"></el-input>
@@ -295,8 +303,8 @@ function paramChange() {
       <el-divider />
     </div>
 
-    <el-button type="primary" @click="save" v-if="!store.readOnly">{{ t('button.save') }}</el-button>
-    <el-button type="primary" @click="save" disabled v-if="store.readOnly">{{ t('button.save') }}</el-button>
+    <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
+    <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
     <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
     <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
     <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>

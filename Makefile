@@ -1,21 +1,23 @@
-IMG_TOOL?=podman
+IMG_TOOL?=docker
 BINARY?=atest
-TOOLEXEC?=-toolexec="skywalking-go-agent"
-GOPROXY?=https://goproxy.cn,direct
+TOOLEXEC?= #-toolexec="skywalking-go-agent"
+BUILD_FLAG?=-ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git describe --tags) \
+	-X github.com/linuxsuren/api-testing/pkg/version.date=$(shell date +%Y-%m-%d)"
+GOPROXY?=direct
 HELM_VERSION?=v0.0.2
 APP_VERSION?=v0.0.13
 HELM_REPO?=docker.io/linuxsuren
 
 fmt:
 	go fmt ./...
-	cd extensions/store-etcd && go fmt ./...
-	cd extensions/store-git && go fmt ./...
-	cd extensions/store-orm && go fmt ./...
-	cd extensions/store-s3 && go fmt ./...
+	cd extensions/store-etcd && go mod tidy && go fmt ./...
+	cd extensions/store-git && go mod tidy && go fmt ./...
+	cd extensions/store-orm && go mod tidy && go fmt ./...
+	cd extensions/store-s3 && go mod tidy && go fmt ./...
 build:
 	mkdir -p bin
 	rm -rf bin/atest
-	go build ${TOOLEXEC} -a -o bin/atest main.go
+	go build ${TOOLEXEC} -a ${BUILD_FLAG} -o bin/atest main.go
 build-ext: build-ext-git build-ext-orm build-ext-s3 build-ext-etcd
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go

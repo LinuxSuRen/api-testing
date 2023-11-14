@@ -30,6 +30,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	_ "embed"
@@ -243,123 +244,121 @@ func TestTestCase(t *testing.T) {
 			assert.NotNil(t, err)
 			assert.Contains(t, err.Error(), "not found field")
 		},
-	},
-		{
-			name: "verify failed",
-			testCase: &atest.TestCase{
-				Request: atest.Request{
-					API: urlFoo,
-				},
-				Expect: atest.Response{
-					Verify: []string{
-						"len(data.items) > 0",
-					},
-				},
+	}, {
+		name: "verify failed",
+		testCase: &atest.TestCase{
+			Request: atest.Request{
+				API: urlFoo,
 			},
-			prepare: defaultPrepare,
-			verify: func(t *testing.T, output interface{}, err error) {
-				if assert.NotNil(t, err) {
-					assert.Contains(t, err.Error(), "failed to verify")
-				}
+			Expect: atest.Response{
+				Verify: []string{
+					"len(data.items) > 0",
+				},
 			},
 		},
-		{
-			name: "failed to compile",
-			testCase: &atest.TestCase{
-				Request: fooRequst,
-				Expect: atest.Response{
-					Verify: []string{
-						`println("12")`,
-					},
+		prepare: defaultPrepare,
+		verify: func(t *testing.T, output interface{}, err error) {
+			if assert.NotNil(t, err) {
+				assert.Contains(t, err.Error(), "failed to verify")
+			}
+		},
+	}, {
+		name: "failed to compile",
+		testCase: &atest.TestCase{
+			Request: fooRequst,
+			Expect: atest.Response{
+				Verify: []string{
+					`println("12")`,
 				},
 			},
-			prepare: defaultPrepare,
-			verify: func(t *testing.T, output interface{}, err error) {
-				assert.NotNil(t, err)
-				assert.Contains(t, err.Error(), "unknown name println")
-			},
-		}, {
-			name: "failed to compile",
-			testCase: &atest.TestCase{
-				Request: fooRequst,
-				Expect: atest.Response{
-					Verify: []string{
-						`1 + 1`,
-					},
+		},
+		prepare: defaultPrepare,
+		verify: func(t *testing.T, output interface{}, err error) {
+			assert.NotNil(t, err)
+			assert.Contains(t, err.Error(), "unknown name println")
+		},
+	}, {
+		name: "failed to compile",
+		testCase: &atest.TestCase{
+			Request: fooRequst,
+			Expect: atest.Response{
+				Verify: []string{
+					`1 + 1`,
 				},
 			},
-			prepare: defaultPrepare,
-			verify: func(t *testing.T, output interface{}, err error) {
-				assert.NotNil(t, err)
-				assert.Contains(t, err.Error(), "expected bool, but got int")
+		},
+		prepare: defaultPrepare,
+		verify: func(t *testing.T, output interface{}, err error) {
+			assert.NotNil(t, err)
+			assert.Contains(t, err.Error(), "expected bool, but got int")
+		},
+	}, {
+		name: "wrong API format",
+		testCase: &atest.TestCase{
+			Request: atest.Request{
+				API:    "ssh://localhost/foo",
+				Method: "fake,fake",
 			},
-		}, {
-			name: "wrong API format",
-			testCase: &atest.TestCase{
-				Request: atest.Request{
-					API:    "ssh://localhost/foo",
-					Method: "fake,fake",
+		},
+		verify: func(t *testing.T, output interface{}, err error) {
+			assert.NotNil(t, err)
+			assert.Contains(t, err.Error(), "invalid method")
+		},
+	}, {
+		name: "failed to render API",
+		testCase: &atest.TestCase{
+			Request: atest.Request{
+				API: "http://localhost/foo/{{.abc}",
+			},
+		},
+		verify: func(t *testing.T, output interface{}, err error) {
+			assert.NotNil(t, err)
+			assert.Contains(t, err.Error(), "template: api:1:")
+		},
+	}, {
+		name: "multipart form request",
+		testCase: &atest.TestCase{
+			Request: atest.Request{
+				API:    urlFoo,
+				Method: http.MethodPost,
+				Header: map[string]string{
+					util.ContentType: "multipart/form-data",
 				},
+				Form: defaultForm,
 			},
-			verify: func(t *testing.T, output interface{}, err error) {
-				assert.NotNil(t, err)
-				assert.Contains(t, err.Error(), "invalid method")
-			},
-		}, {
-			name: "failed to render API",
-			testCase: &atest.TestCase{
-				Request: atest.Request{
-					API: "http://localhost/foo/{{.abc}",
+		},
+		prepare: defaultPostPrepare,
+		verify:  noError,
+	}, {
+		name: "normal form request",
+		testCase: &atest.TestCase{
+			Request: atest.Request{
+				API:    urlFoo,
+				Method: http.MethodPost,
+				Header: map[string]string{
+					util.ContentType: "application/x-www-form-urlencoded",
 				},
+				Form: defaultForm,
 			},
-			verify: func(t *testing.T, output interface{}, err error) {
-				assert.NotNil(t, err)
-				assert.Contains(t, err.Error(), "template: api:1:")
+		},
+		prepare: defaultPostPrepare,
+		verify:  noError,
+	}, {
+		name: "body is a template",
+		testCase: &atest.TestCase{
+			Request: atest.Request{
+				API:    urlFoo,
+				Method: http.MethodPost,
+				Body:   `{"name":"{{lower "HELLO"}}"}`,
 			},
-		}, {
-			name: "multipart form request",
-			testCase: &atest.TestCase{
-				Request: atest.Request{
-					API:    urlFoo,
-					Method: http.MethodPost,
-					Header: map[string]string{
-						util.ContentType: "multipart/form-data",
-					},
-					Form: defaultForm,
-				},
-			},
-			prepare: defaultPostPrepare,
-			verify:  noError,
-		}, {
-			name: "normal form request",
-			testCase: &atest.TestCase{
-				Request: atest.Request{
-					API:    urlFoo,
-					Method: http.MethodPost,
-					Header: map[string]string{
-						util.ContentType: "application/x-www-form-urlencoded",
-					},
-					Form: defaultForm,
-				},
-			},
-			prepare: defaultPostPrepare,
-			verify:  noError,
-		}, {
-			name: "body is a template",
-			testCase: &atest.TestCase{
-				Request: atest.Request{
-					API:    urlFoo,
-					Method: http.MethodPost,
-					Body:   `{"name":"{{lower "HELLO"}}"}`,
-				},
-			},
-			prepare: func() {
-				gock.New(urlLocalhost).
-					Post("/foo").BodyString(`{"name":"hello"}`).
-					Reply(http.StatusOK).BodyString(`{}`)
-			},
-			verify: noError,
-		}}
+		},
+		prepare: func() {
+			gock.New(urlLocalhost).
+				Post("/foo").BodyString(`{"name":"hello"}`).
+				Reply(http.StatusOK).BodyString(`{}`)
+		},
+		verify: noError,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer gock.Clean()
@@ -510,6 +509,28 @@ func TestBodyFiledsVerify(t *testing.T) {
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})
 	}
+}
+
+func TestGetSuggestedAPIs(t *testing.T) {
+	runner := NewSimpleTestCaseRunner()
+	// not a swagger
+	result, err := runner.GetSuggestedAPIs(&atest.TestSuite{}, "")
+	assert.NoError(t, err, err)
+	assert.Empty(t, result)
+
+	// swagger
+	gock.Off()
+	gock.New(urlFoo).Get("swagger.json").Reply(http.StatusOK).File("testdata/swagger.json")
+	result, err = runner.GetSuggestedAPIs(&atest.TestSuite{
+		Spec: atest.APISpec{
+			Kind: "swagger",
+			URL:  urlFoo + "/swagger.json",
+		},
+	}, "")
+	assert.NoError(t, err, err)
+	assert.NotEmpty(t, result)
+	method := result[0].Request.Method
+	assert.Equal(t, strings.ToUpper(method), method)
 }
 
 const defaultSchemaForTest = `{"properties": {

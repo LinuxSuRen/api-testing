@@ -27,6 +27,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -36,6 +37,9 @@ import (
 	"time"
 
 	"github.com/bufbuild/protocompile"
+	"github.com/bufbuild/protocompile/linker"
+	"github.com/jhump/protoreflect/desc"
+	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/compare"
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -45,6 +49,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1"
+	"google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protodesc"
@@ -52,7 +57,6 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/dynamicpb"
-	"trpc.group/trpc-go/trpc-go/log"
 )
 
 type gRPCTestCaseRunner struct {
@@ -105,19 +109,8 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
 
 	var conn *grpc.ClientConn
-	if r.Secure == nil || r.Secure.Insecure {
-		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	} else {
-		var cred credentials.TransportCredentials
-		cred, err = credentials.NewClientTLSFromFile(r.Secure.CertFile, r.Secure.ServerName)
-		if err != nil {
-			return nil, err
-		}
-		conn, err = grpc.Dial(getHost(testcase.Request.API, r.host), grpc.WithTransportCredentials(cred))
-	}
-
-	if err != nil {
-		return nil, err
+	if conn, err = r.getConnection(getHost(testcase.Request.API, r.host)); err != nil {
+		return
 	}
 	defer conn.Close()
 
@@ -151,6 +144,84 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	if output == nil {
 		output = map[string]any{}
 		err = json.Unmarshal([]byte(record.Body), &output)
+	}
+	return
+}
+
+func (r *gRPCTestCaseRunner) getConnection(host string) (conn *grpc.ClientConn, err error) {
+	if r.Secure == nil || r.Secure.Insecure {
+		conn, err = grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	} else {
+		var cred credentials.TransportCredentials
+		cred, err = credentials.NewClientTLSFromFile(r.Secure.CertFile, r.Secure.ServerName)
+		if err == nil {
+			conn, err = grpc.Dial(host, grpc.WithTransportCredentials(cred))
+		}
+	}
+	return
+}
+
+func (r *gRPCTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api string) (result []*testing.TestCase, err error) {
+	if suite.Spec.RPC.ServerReflection {
+		var conn *grpc.ClientConn
+		if conn, err = r.getConnection(suite.API); err != nil {
+			return
+		}
+
+		stub := grpc_reflection_v1alpha.NewServerReflectionClient(conn)
+		client := grpcreflect.NewClientV1Alpha(context.Background(), stub)
+
+		var allSvcs []string
+		allSvcs, err = client.ListServices()
+		if err != nil {
+			return
+		}
+		for _, svc := range allSvcs {
+			var fd *desc.FileDescriptor
+			if fd, err = client.FileContainingSymbol(svc); err != nil {
+				return
+			}
+			svcs := fd.GetServices()
+
+			for _, item := range svcs {
+				for _, fdb := range item.GetMethods() {
+					result = append(result, &testing.TestCase{
+						Name: fdb.GetName(),
+						Request: testing.Request{
+							API: fmt.Sprintf("/%s/%s", svc, fdb.GetName()),
+						},
+					})
+				}
+			}
+		}
+		return
+	}
+
+	var linkerFiles linker.Files
+	linkerFiles, err = compileProto(context.Background(), r)
+	if err != nil {
+		return
+	}
+
+	for _, f := range linkerFiles {
+		for j := 0; j < f.Services().Len(); j++ {
+			svc := f.Services().Get(j)
+
+			methodCount := svc.Methods().Len()
+			for m := 0; m < methodCount; m++ {
+				method := svc.Methods().Get(m)
+				methodName := string(method.Name())
+				api := "/" + string(method.FullName())
+				api = strings.ReplaceAll(api, "."+methodName, "/"+methodName)
+
+				result = append(result, &testing.TestCase{
+					Name: string(methodName),
+					Request: testing.Request{
+						API: api,
+					},
+				})
+			}
+		}
 	}
 	return
 }
@@ -268,14 +339,13 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 	return nil, protoregistry.NotFound
 }
 
-func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflect.FullName) (protoreflect.Descriptor, error) {
-	if r.proto.ProtoSet != "" {
-		return getByProtoSet(ctx, r, fullName)
-	}
-
-	protoFile, importPath, parentProtoDir, err := util.LoadProtoFiles(r.proto.ProtoFile)
+func compileProto(ctx context.Context, r *gRPCTestCaseRunner) (fileLinker linker.Files, err error) {
+	var protoFile string
+	var importPath []string
+	var parentProtoDir string
+	protoFile, importPath, parentProtoDir, err = util.LoadProtoFiles(r.proto.ProtoFile)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	if len(importPath) == 0 {
@@ -293,10 +363,10 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 
 	var protoLibrary map[string]string
 	if protoLibrary, err = apispec.GetProtoFiles(); err != nil {
-		return nil, err
+		return
 	}
 
-	log.Infof("proto import files: %v", importPath)
+	log.Println("proto import files", importPath)
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(
 			&protocompile.SourceResolver{
@@ -313,22 +383,31 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 
 	// save the proto to a temp file if the raw content given
 	if r.proto.Raw != "" {
-		f, err := os.CreateTemp(os.TempDir(), "proto")
+		var f *os.File
+		f, err = os.CreateTemp(os.TempDir(), "proto")
 		if err != nil {
 			err = fmt.Errorf("failed to create temp file when saving proto content: %v", err)
-			return nil, err
+			return
 		}
 		defer os.Remove(f.Name())
 
 		_, err = f.WriteString(r.proto.Raw)
 		if err != nil {
 			err = fmt.Errorf("failed to write proto content to file %q: %v", f.Name(), err)
-			return nil, err
+			return
 		}
 		protoFile = f.Name()
 	}
 
-	linker, err := compiler.Compile(ctx, protoFile)
+	return compiler.Compile(ctx, protoFile)
+}
+
+func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflect.FullName) (protoreflect.Descriptor, error) {
+	if r.proto.ProtoSet != "" {
+		return getByProtoSet(ctx, r, fullName)
+	}
+
+	linker, err := compileProto(ctx, r)
 	if err != nil {
 		return nil, err
 	}
@@ -544,7 +623,7 @@ func loadProtoFiles(protoFile string) (targetProtoFile string, importPath []stri
 		return
 	}
 
-	log.Infof("start to download proto file %q\n", protoFile)
+	log.Println("start to download proto file", protoFile)
 	resp, err := util.GetDefaultCachedHTTPClient().Get(protoFile)
 	if err != nil {
 		return

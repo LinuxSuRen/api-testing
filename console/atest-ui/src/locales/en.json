@@ -25,7 +25,8 @@
         "protoContent": "Proto Content",
         "protoFile": "Proto File",
         "protoImport": "Proto Import",
-        "param": "Parameter"
+        "param": "Parameter",
+        "refelction": "Refelction"
     },
     "tip": {
         "filter": "Filter Keyword"

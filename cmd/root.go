@@ -17,7 +17,7 @@ func NewRootCmd(execer fakeruntime.Execer, gRPCServer gRPCServer,
 		Short: "API testing tool",
 	}
 	c.SetOut(os.Stdout)
-	c.Version = version.GetVersion()
+	c.Version = "\n" + version.GetDetailedVersion()
 	c.AddCommand(createInitCommand(execer),
 		createRunCommand(), createSampleCmd(),
 		createServerCmd(execer, gRPCServer, httpServer), createJSONSchemaCmd(),

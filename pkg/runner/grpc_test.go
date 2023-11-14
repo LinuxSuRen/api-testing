@@ -26,6 +26,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"net/http"
 	"os"
 	"sync"
 	"testing"
@@ -594,17 +595,68 @@ func TestAPINameMatch(t *testing.T) {
 		"match full qualified name long",
 	)
 
-	qn, err = splitFullQualifiedName("127.0.0.1:7070//server.Runner/GetVersion")
+	_, err = splitFullQualifiedName("127.0.0.1:7070//server.Runner/GetVersion")
 	assert.NotNil(t,
 		err,
 		"unexpect leading character",
 	)
 
-	qn, err = splitFullQualifiedName("127.0.0.1:7070/server.Runner/GetVersion/")
+	_, err = splitFullQualifiedName("127.0.0.1:7070/server.Runner/GetVersion/")
 	assert.NotNil(t,
 		err,
 		"unexpect trailing character",
 	)
+}
+
+func TestGRPCGetSuggestedAPIs(t *testing.T) {
+	protoFile := "grpc_test/test.proto"
+
+	t.Run("normal", func(t *testing.T) {
+		runner := NewGRPCTestCaseRunner("", atest.RPCDesc{
+			ProtoFile: protoFile,
+		})
+		result, err := runner.GetSuggestedAPIs(&atest.TestSuite{
+			Spec: atest.APISpec{
+				RPC: &atest.RPCDesc{
+					ProtoFile: protoFile,
+				},
+			},
+		}, "")
+		assert.NoError(t, err, err)
+		assert.NotEmpty(t, result)
+		assert.Equal(t, "/grpctest.Main/Unary", result[0].Request.API)
+	})
+
+	t.Run("not found proto file", func(t *testing.T) {
+		runner := NewGRPCTestCaseRunner("", atest.RPCDesc{
+			ProtoFile: "fake",
+		})
+		_, err := runner.GetSuggestedAPIs(&atest.TestSuite{
+			Spec: atest.APISpec{
+				RPC: &atest.RPCDesc{
+					ProtoFile: "fake",
+				},
+			},
+		}, "")
+		assert.Error(t, err, err)
+	})
+
+	t.Run("invalid refelction API", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(urlFoo).Get("/").Reply(http.StatusNotFound)
+
+		desc := atest.RPCDesc{
+			ServerReflection: true,
+		}
+		runner := NewGRPCTestCaseRunner("", desc)
+		_, err := runner.GetSuggestedAPIs(&atest.TestSuite{
+			API: urlFoo,
+			Spec: atest.APISpec{
+				RPC: &desc,
+			},
+		}, "")
+		assert.Error(t, err, err)
+	})
 }
 
 // getJSONOrCache can store the JSON string of value.
@@ -622,6 +674,3 @@ func getJSONOrCache(key any, value any) (msg string) {
 	}
 	return
 }
-
-//go:embed grpc_test/test.proto
-var protoFileForTest string
