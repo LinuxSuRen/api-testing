@@ -20,7 +20,7 @@ const props = defineProps({
 const store = Cache.GetCurrentStore()
 const emit = defineEmits(['updated'])
 
-let querySuggestedAPIs = NewSuggestedAPIsQuery(store.name!, props.suite!)
+let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.suite!)
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
 watch(testResultActiveTab, Cache.WatchResponseActiveTab)
 
@@ -37,7 +37,7 @@ const sendRequest = async () => {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': Cache.GetCurrentStore().name
     },
     body: JSON.stringify({
       suite: suite,
@@ -105,7 +105,7 @@ function openParameterDialog() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': Cache.GetCurrentStore().name
     },
     body: JSON.stringify({
       name: props.suite
@@ -132,7 +132,7 @@ function generateCode() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': Cache.GetCurrentStore().name
     },
     body: JSON.stringify({
       TestSuite: suite,
@@ -234,7 +234,7 @@ function load() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': Cache.GetCurrentStore().name
     },
     body: JSON.stringify({
       suite: suite,
@@ -311,7 +311,7 @@ function saveTestCase(tip: boolean = true) {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': Cache.GetCurrentStore().name
     },
     body: JSON.stringify(testCaseWithSuite.value)
   }
@@ -338,7 +338,7 @@ function deleteTestCase() {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': Cache.GetCurrentStore().name
     },
     body: JSON.stringify({
       suite: suite,
@@ -489,7 +489,7 @@ const pupularHeaders = ref([] as Pair[])
 const requestOptions = {
   method: 'POST',
   headers: {
-    'X-Store-Name': store.name
+    'X-Store-Name': Cache.GetCurrentStore().name
   },
 }
 fetch('/server.Runner/PopularHeaders', requestOptions)
@@ -515,10 +515,10 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
       <el-header style="padding-left: 5px">
         <div style="margin-bottom: 5px">
           <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
-            disabled v-if="store.readOnly"
+            disabled v-if="Cache.GetCurrentStore().readOnly"
             >{{ t('button.save') }}</el-button>
           <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
-            v-if="!store.readOnly"
+            v-if="!Cache.GetCurrentStore().readOnly"
             >{{ t('button.save') }}</el-button>
           <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
           <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>

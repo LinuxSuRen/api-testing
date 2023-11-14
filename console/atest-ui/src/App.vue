@@ -42,6 +42,7 @@ const testSuite = ref('')
 const testSuiteKind = ref('')
 const handleNodeClick = (data: Tree) => {
   if (data.children) {
+    Cache.SetCurrentStore(data.store)
     viewName.value = 'testsuite'
     testSuite.value = data.label
     testSuiteKind.value = data.kind
@@ -63,7 +64,7 @@ const handleNodeClick = (data: Tree) => {
           data.children = []
           d.items.forEach((item: any) => {
             data.children?.push({
-              id: data.label + item.name,
+              id: data.label,
               label: item.name,
               kind: data.kind,
               store: data.store,
@@ -74,10 +75,10 @@ const handleNodeClick = (data: Tree) => {
         }
       })
   } else {
+    Cache.SetCurrentStore(data.store)
     Cache.SetLastTestCaseLocation(data.parentID, data.id)
     testCaseName.value = data.label
     testSuite.value = data.parent
-    Cache.SetCurrentStore(data.store)
     testSuiteKind.value = data.kind
     viewName.value = 'testcase'
   }

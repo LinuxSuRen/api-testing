@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -144,13 +145,13 @@ func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
 		var data []byte
 		var loadErr error
 		if data, loadErr = loadData(target); err != nil {
-			fmt.Println("failed to load data", loadErr)
+			log.Println("failed to load data", loadErr)
 			continue
 		}
 
 		var testSuite *TestSuite
 		if testSuite, loadErr = Parse(data); loadErr != nil {
-			fmt.Println("failed to parse data", loadErr)
+			log.Println("failed to parse data", loadErr, "from", target)
 			continue
 		}
 		suites = append(suites, *testSuite)
@@ -171,6 +172,11 @@ func (l *fileLoader) GetTestSuite(name string, full bool) (suite TestSuite, err 
 }
 
 func (l *fileLoader) CreateSuite(name, api string) (err error) {
+	if name == "" {
+		err = fmt.Errorf("name is required")
+		return
+	}
+
 	var absPath string
 	var suite *TestSuite
 	if suite, absPath, err = l.GetSuite(name); err != nil {

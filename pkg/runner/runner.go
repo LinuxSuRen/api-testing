@@ -12,6 +12,7 @@ import (
 // TestCaseRunner represents a test case runner
 type TestCaseRunner interface {
 	RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error)
+	GetSuggestedAPIs(suite *testing.TestSuite, api string) ([]*testing.TestCase, error)
 	WithSecure(secure *testing.Secure)
 	WithOutputWriter(io.Writer)
 	WithWriteLevel(level string)

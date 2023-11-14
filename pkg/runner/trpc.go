@@ -117,6 +117,11 @@ func (r *tRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	return
 }
 
+func (r *tRPCTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api string) (result []*testing.TestCase, err error) {
+	// TODO need to implement
+	return
+}
+
 func (r *tRPCTestCaseRunner) GetResponseRecord() SimpleResponse {
 	return r.response
 }

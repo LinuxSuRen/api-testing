@@ -67,6 +67,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3.0.0
+      - name: Set output
+        id: vars
+        run: git describe --tags >> $GITHUB_OUTPUT
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
       - name: Log into registry ${{ env.REGISTRY }}
@@ -92,6 +95,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: VERSION=${{ steps.vars.outputs.tag }}
 
   image-operator:
     runs-on: ubuntu-20.04
@@ -129,6 +133,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3.0.0
+      - name: Set output
+        id: vars
+        run: git describe --tags >> $GITHUB_OUTPUT
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
       - name: Log into registry ${{ env.REGISTRY_DOCKERHUB }}
@@ -154,9 +161,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Set output
-        id: vars
-        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+          build-args: VERSION=${{ steps.vars.outputs.tag }}
       - name: Release Helm
         run: |
           echo ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }} | helm registry login docker.io -u linuxsuren --password-stdin

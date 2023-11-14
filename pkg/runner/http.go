@@ -14,6 +14,7 @@ import (
 	"github.com/andreyvit/diff"
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -228,6 +229,29 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	}
 
 	err = jsonSchemaValidation(testcase.Expect.Schema, responseBodyData)
+	return
+}
+
+func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api string) (result []*testing.TestCase, err error) {
+	if suite.Spec.URL == "" || suite.Spec.Kind != "swagger" {
+		return
+	}
+
+	var swaggerAPI *apispec.Swagger
+	if swaggerAPI, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil && swaggerAPI != nil {
+		result = []*testing.TestCase{}
+		for api, item := range swaggerAPI.Paths {
+			for method, oper := range item {
+				result = append(result, &testing.TestCase{
+					Name: oper.OperationId,
+					Request: testing.Request{
+						API:    api,
+						Method: strings.ToUpper(method),
+					},
+				})
+			}
+		}
+	}
 	return
 }
 

@@ -34,6 +34,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	_ "embed"
 
@@ -51,6 +52,7 @@ const (
 
 func TestRemoteServer(t *testing.T) {
 	ctx := context.Background()
+	defer gock.Off()
 
 	loader := atesting.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
@@ -522,12 +524,15 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	})
 
 	t.Run("with swagger URL, not accessed", func(t *testing.T) {
+		gock.Off()
+		name := fmt.Sprintf("fake-%d", time.Now().Second())
 		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{
-			Name: "fake",
+			Name: name,
 		})
+		assert.NoError(t, err)
 
 		_, err = server.UpdateTestSuite(ctx, &TestSuite{
-			Name: "fake",
+			Name: name,
 			Spec: &APISpec{
 				Url: urlFoo + "/v2",
 			},
@@ -536,11 +541,12 @@ func TestGetSuggestedAPIs(t *testing.T) {
 
 		gock.New(urlFoo).Get("/v2").Reply(500)
 
-		_, err = server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: "fake"})
+		_, err = server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: name})
 		assert.NoError(t, err)
 	})
 
 	t.Run("normal", func(t *testing.T) {
+		gock.Off()
 		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{
 			Name: "fake-1",
 		})
@@ -549,7 +555,8 @@ func TestGetSuggestedAPIs(t *testing.T) {
 		_, err = server.UpdateTestSuite(ctx, &TestSuite{
 			Name: "fake-1",
 			Spec: &APISpec{
-				Url: urlFoo + "/v1",
+				Kind: "swagger",
+				Url:  urlFoo + "/v1",
 			},
 		})
 		assert.NoError(t, err)
@@ -694,7 +701,7 @@ func TestCodeGenerator(t *testing.T) {
 			Kind: "postman",
 			Url:  urlFoo,
 		})
-		assert.Error(t, err)
+		assert.Error(t, err, err)
 		assert.False(t, result.Success)
 	})
 }
