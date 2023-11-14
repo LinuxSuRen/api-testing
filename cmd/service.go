@@ -61,7 +61,7 @@ type serverFeatureOption struct {
 type serviceOption struct {
 	action     string
 	scriptPath string
-	service    Service
+	service    service.Service
 	image      string
 	version    string
 	fakeruntime.Execer
@@ -98,7 +98,7 @@ func (o *serviceOption) preRunE(c *cobra.Command, args []string) (err error) {
 
 	switch serviceMode(o.mode) {
 	case ServiceModeOS:
-		o.service, err = o.getOSService()
+		o.service = service.NewService(o.Execer, o.scriptPath)
 	default:
 		o.service, err = o.getContainerService()
 	}
@@ -155,16 +155,6 @@ func (a Action) All() []Action {
 		ActionRestart, ActionStatus}
 }
 
-// Service is the interface of service
-type Service interface {
-	Start() (string, error)     // start the service
-	Stop() (string, error)      // stop the service gracefully
-	Restart() (string, error)   // restart the service gracefully
-	Status() (string, error)    // status of the service
-	Install() (string, error)   // install the service
-	Uninstall() (string, error) // uninstall the service
-}
-
 func emptyThenDefault(value, defaultValue string) string {
 	if value == "" {
 		value = defaultValue
@@ -172,40 +162,17 @@ func emptyThenDefault(value, defaultValue string) string {
 	return value
 }
 
-func (o *serviceOption) getOSService() (service Service, err error) {
-	if o.Execer.OS() != fakeruntime.OSLinux && o.Execer.OS() != fakeruntime.OSDarwin {
-		err = fmt.Errorf("only support on Linux/Darwin instead of %s", o.Execer.OS())
-	} else {
-		service = newService(o.Execer, o.scriptPath)
-	}
+func (o *serviceOption) getOSService() (svc service.Service, err error) {
+	//if o.Execer.OS() != fakeruntime.OSLinux && o.Execer.OS() != fakeruntime.OSDarwin {
+	//	err = fmt.Errorf("only support on Linux/Darwin instead of %s", o.Execer.OS())
+	//} else {
+	//	svc = service.NewService(o.Execer, o.scriptPath)
+	//}
+	svc = service.NewService(o.Execer, o.scriptPath)
 	return
 }
 
-func newService(execer fakeruntime.Execer, scriptPath string) (service Service) {
-	switch execer.OS() {
-	case fakeruntime.OSDarwin:
-		service = &macOSService{
-			commonService: commonService{
-				Execer:     execer,
-				scriptPath: emptyThenDefault(scriptPath, "/Library/LaunchDaemons/com.github.linuxsuren.atest.plist"),
-				script:     macOSServiceScript,
-			},
-			cli: "launchctl",
-			id:  "com.github.linuxsuren.atest",
-		}
-	case fakeruntime.OSLinux:
-		service = &linuxService{
-			commonService: commonService{
-				Execer:     execer,
-				scriptPath: emptyThenDefault(scriptPath, "/lib/systemd/system/atest.service"),
-				script:     linuxServiceScript,
-			},
-		}
-	}
-	return
-}
-
-func (o *serviceOption) getContainerService() (service Service, err error) {
+func (o *serviceOption) getContainerService() (service service.Service, err error) {
 	var client string
 	switch serviceMode(o.mode) {
 	case ServiceModeDocker:
@@ -234,93 +201,6 @@ type commonService struct {
 	script     string
 }
 
-type macOSService struct {
-	commonService
-	cli string
-	id  string
-}
-
-var (
-	//go:embed data/macos_service.xml
-	macOSServiceScript string
-	//go:embed data/linux_service.txt
-	linuxServiceScript string
-)
-
-func (s *macOSService) Start() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("sudo", "", s.cli, "start", s.id)
-	return
-}
-
-func (s *macOSService) Stop() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("sudo", "", s.cli, "stop", s.id)
-	return
-}
-
-func (s *macOSService) Restart() (output string, err error) {
-	if output, err = s.Stop(); err == nil {
-		output, err = s.Start()
-	}
-	return
-}
-
-func (s *macOSService) Status() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("sudo", "", s.cli, "runstats", s.id)
-	return
-}
-
-func (s *macOSService) Install() (output string, err error) {
-	if err = os.WriteFile(s.scriptPath, []byte(s.script), os.ModeAppend); err == nil {
-		output, err = s.Execer.RunCommandAndReturn("sudo", "", s.cli, "enable", s.id)
-	}
-	return
-}
-
-func (s *macOSService) Uninstall() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn("sudo", "", s.cli, "disable", s.id)
-	return
-}
-
-type linuxService struct {
-	commonService
-}
-
-func (s *linuxService) Start() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "start", service.ServiceName)
-	return
-}
-
-func (s *linuxService) Stop() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "stop", service.ServiceName)
-	return
-}
-
-func (s *linuxService) Restart() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "restart", service.ServiceName)
-	return
-}
-
-func (s *linuxService) Status() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "status", service.ServiceName)
-	if err != nil && err.Error() == "exit status 3" {
-		// this is normal case
-		err = nil
-	}
-	return
-}
-
-func (s *linuxService) Install() (output string, err error) {
-	if err = os.WriteFile(s.scriptPath, []byte(s.script), os.ModeAppend); err == nil {
-		output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "enable", service.ServiceName)
-	}
-	return
-}
-
-func (s *linuxService) Uninstall() (output string, err error) {
-	output, err = s.Execer.RunCommandAndReturn(service.SystemCtl, "", "disable", service.ServiceName)
-	return
-}
-
 type containerService struct {
 	Execer       fakeruntime.Execer
 	name         string
@@ -338,7 +218,7 @@ type containerService struct {
 const defaultImage = "linuxsuren.docker.scarf.sh/linuxsuren/api-testing"
 
 func newContainerService(execer fakeruntime.Execer, client, image, tag, pull string,
-	featureOption serverFeatureOption, writer io.Writer) (svc Service) {
+	featureOption serverFeatureOption, writer io.Writer) (svc service.Service) {
 	if tag == "" {
 		tag = "latest"
 	}

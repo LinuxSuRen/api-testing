@@ -17,7 +17,7 @@ fmt:
 build:
 	mkdir -p bin
 	rm -rf bin/atest
-	go build ${TOOLEXEC} -a ${BUILD_FLAG} -o bin/atest main.go
+	go build ${TOOLEXEC} -a ${BUILD_FLAG} -o bin/${BINARY} main.go
 build-ext: build-ext-git build-ext-orm build-ext-s3 build-ext-etcd
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
@@ -41,8 +41,12 @@ clean-embed-ui:
 build-embed-ui: embed-ui
 	GOOS=${OS} go build ${TOOLEXEC} -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git rev-parse --short HEAD)" -o bin/${BINARY} main.go
 	make clean-embed-ui
+build-darwin:
+	BINARY=atest_darwin GOOS=darwin make build
+build-win:
+	BINARY=atest.exe GOOS=windows make build
 build-win-embed-ui:
-	BINARY=atest.exe OS=windows make build-embed-ui
+	BINARY=atest.exe GOOS=windows make build-embed-ui
 goreleaser:
 	goreleaser build --rm-dist --snapshot
 	make clean-embed-ui

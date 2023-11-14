@@ -178,6 +178,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		debugHandler(mux)
 		o.httpServer.WithHandler(mux)
 		log.Printf("HTTP server listening at %v", httplis.Addr())
+		log.Printf("Server is running.")
 		err = o.httpServer.Serve(httplis)
 		err = util.IgnoreErrServerClosed(err)
 	}
