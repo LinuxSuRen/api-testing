@@ -199,7 +199,7 @@ jobs:
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
         with:
           registry: ${{ env.REGISTRY_ALIYUN }}
-          username: linuxsuren
+          username: ${{ secrets.REGISTRY_ALIYUN_USER }}
           password: ${{ secrets.REGISTRY_ALIYUN_PUBLISH_SECRETS }}
       - name: Extract Docker metadata
         id: meta
