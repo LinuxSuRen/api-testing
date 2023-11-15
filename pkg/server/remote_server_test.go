@@ -98,7 +98,7 @@ func TestRemoteServer(t *testing.T) {
 
 	var ver *HelloReply
 	ver, err = server.GetVersion(ctx, &Empty{})
-	assert.Empty(t, ver.Message)
+	assert.Equal(t, "unknown", ver.Message)
 	assert.Nil(t, err)
 
 	ver, err = server.Sample(ctx, &Empty{})

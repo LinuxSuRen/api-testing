@@ -6,6 +6,7 @@ import JsonViewer from 'vue-json-viewer'
 import type { Pair, TestResult, TestCaseWithSuite } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
 import { Cache } from './cache'
+import { API } from './net'
 import type { TestCaseResponse } from './cache'
 import { useI18n } from 'vue-i18n'
 import { JSONPath } from 'jsonpath-plus'
@@ -17,13 +18,13 @@ const props = defineProps({
   suite: String,
   kindName: String,
 })
-const store = Cache.GetCurrentStore()
 const emit = defineEmits(['updated'])
 
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.suite!)
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
 watch(testResultActiveTab, Cache.WatchResponseActiveTab)
 
+const parameters = ref([] as Pair[])
 const requestLoading = ref(false)
 const testResult = ref({ header: [] as Pair[] } as TestResult)
 const sendRequest = async () => {
@@ -34,55 +35,46 @@ const sendRequest = async () => {
   requestLoading.value = true
   const name = props.name
   const suite = props.suite
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
-    },
-    body: JSON.stringify({
-      suite: suite,
-      testcase: name,
+
+  API.RunTestCase({
+    suiteName: suite,
+    name: name,
       parameters: parameters.value
-    })
-  }
-  fetch('/server.Runner/RunTestCase', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
-      testResult.value = e
-      requestLoading.value = false
+  }, (e) => {
+    testResult.value = e
+    requestLoading.value = false
 
-      if (e.error !== '') {
-        ElMessage({
-          message: e.error,
-          type: 'error'
-        })
-      } else {
-        ElMessage({
-          message: 'Pass!',
-          type: 'success'
-        })
-      }
-      if (e.body !== '') {
-        testResult.value.bodyObject = JSON.parse(e.body)
-        testResult.value.originBodyObject = JSON.parse(e.body)
-      }
-
-      Cache.SetTestCaseResponseCache(suite + '-' + name, {
-        body: testResult.value.bodyObject,
-        output: e.output,
-        statusCode: testResult.value.statusCode
-      } as TestCaseResponse)
-
-      parameters.value = []
-    })
-    .catch((e) => {
-      parameters.value = []
-
-      requestLoading.value = false
-      ElMessage.error('Oops, ' + e)
+    if (e.error !== '') {
+      ElMessage({
+        message: e.error,
+        type: 'error'
+      })
+    } else {
+      ElMessage({
+        message: 'Pass!',
+        type: 'success'
+      })
+    }
+    if (e.body !== '') {
       testResult.value.bodyObject = JSON.parse(e.body)
       testResult.value.originBodyObject = JSON.parse(e.body)
-    })
+    }
+
+    Cache.SetTestCaseResponseCache(suite + '-' + name, {
+      body: testResult.value.bodyObject,
+      output: e.output,
+      statusCode: testResult.value.statusCode
+    } as TestCaseResponse)
+
+    parameters.value = []
+  }, (e) => {
+    parameters.value = []
+
+    requestLoading.value = false
+    ElMessage.error('Oops, ' + e)
+    testResult.value.bodyObject = JSON.parse(e.body)
+    testResult.value.originBodyObject = JSON.parse(e.body)
+  })
 }
 
 const responseBodyFilterText = ref('')
@@ -100,27 +92,15 @@ function responseBodyFilter() {
 }
 
 const parameterDialogOpened = ref(false)
-const parameters = ref([] as Pair[])
 function openParameterDialog() {
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
-    },
-    body: JSON.stringify({
-      name: props.suite
-    })
-  }
-  fetch('/server.Runner/GetTestSuite', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
+  API.GetTestSuite(props.suite, (e) => {
       parameters.value = e.param
       parameterDialogOpened.value = true
-    })
-    .catch((e) => {
-      ElMessage.error('Oops, ' + e)
-    })
+  }, (e) => {
+    ElMessage.error('Oops, ' + e)
+  })
 }
+
 function sendRequestWithParameter() {
   parameterDialogOpened.value = false
   sendRequest()
@@ -129,20 +109,12 @@ function sendRequestWithParameter() {
 function generateCode() {
   const name = props.name
   const suite = props.suite
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
-    },
-    body: JSON.stringify({
-      TestSuite: suite,
-      TestCase: name,
-      Generator: currentCodeGenerator.value
-    })
-  }
-  fetch('/server.Runner/GenerateCode', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
+
+  API.GenerateCode({
+    suiteName: suite,
+    name: name,
+    generator: currentCodeGenerator.value
+  }, (e) => {
       ElMessage({
         message: 'Code generated!',
         type: 'success'
@@ -152,8 +124,7 @@ function generateCode() {
       } else {
         currentCodeContent.value = e.message
       }
-    })
-    .catch((e) => {
+    }, (e) => {
       ElMessage.error('Oops, ' + e)
     })
 }
@@ -231,19 +202,10 @@ function load() {
   }
   testResult.value.originBodyObject = testResult.value.bodyObject
 
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
-    },
-    body: JSON.stringify({
-      suite: suite,
-      testcase: name
-    })
-  }
-  fetch('/server.Runner/GetTestCase', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
+  API.GetTestCase({
+    suiteName: suite,
+    name: name
+  }, (e) => {
       if (e.request.method === '') {
         e.request.method = 'GET'
       }
@@ -308,14 +270,7 @@ const saveLoading = ref(false)
 function saveTestCase(tip: boolean = true) {
   saveLoading.value = true
 
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
-    },
-    body: JSON.stringify(testCaseWithSuite.value)
-  }
-  fetch('/server.Runner/UpdateTestCase', requestOptions).then((e) => {
+  API.UpdateTestCase(testCaseWithSuite.value, (e) => {
     if (tip) {
       if (e.ok) {
         ElMessage({
@@ -335,17 +290,11 @@ function saveTestCase(tip: boolean = true) {
 function deleteTestCase() {
   const name = props.name
   const suite = props.suite
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
-    },
-    body: JSON.stringify({
-      suite: suite,
-      testcase: name
-    })
-  }
-  fetch('/server.Runner/DeleteTestCase', requestOptions).then((e) => {
+
+  API.DeleteTestCase({
+    suiteName: suite,
+    name: name
+  }, (e) => {
     if (e.ok) {
       emit('updated', 'hello from child')
 
@@ -369,11 +318,7 @@ const currentCodeContent = ref('')
 function openCodeDialog() {
   codeDialogOpened.value = true
 
-  fetch('/server.Runner/ListCodeGenerator', {
-    method: 'POST'
-  })
-  .then((response) => response.json())
-  .then((e) => {
+  API.ListCodeGenerator((e) => {
     codeGenerators.value = e.data
   })
 
@@ -486,17 +431,10 @@ function insertOrUpdateIntoMap(pair: Pair, pairs: Pair[]) {
 }
 
 const pupularHeaders = ref([] as Pair[])
-const requestOptions = {
-  method: 'POST',
-  headers: {
-    'X-Store-Name': Cache.GetCurrentStore().name
-  },
-}
-fetch('/server.Runner/PopularHeaders', requestOptions)
-  .then((response) => response.json())
-  .then((e) => {
-    pupularHeaders.value = e.data
-  })
+API.PopularHeaders((e) => {
+  pupularHeaders.value = e.data
+})
+
 const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
   const results = queryString
     ? pupularHeaders.value.filter(CreateFilter(queryString))

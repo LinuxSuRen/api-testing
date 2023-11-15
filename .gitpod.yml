@@ -1,6 +1,6 @@
 # See https://www.gitpod.io/docs/configure/workspaces
 tasks:
-  - init: make init-env
+  - init: make init-env install-precheck
     before: IMG_TOOL=docker GOPROXY= make build-ext copy-ext build-image
     command: cd console/atest-ui/ && npm i
 

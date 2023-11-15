@@ -363,7 +363,6 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 	if suite, _, err = loader.GetSuite(in.Name); err == nil && suite != nil {
 		result = ToGRPCSuite(suite)
 	}
-	fmt.Println(suite, "==", result, "==", in.Name)
 	return
 }
 
