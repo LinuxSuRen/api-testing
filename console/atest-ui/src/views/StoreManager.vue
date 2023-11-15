@@ -4,6 +4,7 @@ import { reactive, ref } from 'vue'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
+import { API } from './net'
 import { SupportedExtensions } from './store'
 import { useI18n } from 'vue-i18n'
 
@@ -50,39 +51,24 @@ interface Store {
 }
 
 function loadStores() {
-  const requestOptions = {
-    method: 'POST',
-  }
-  fetch('/server.Runner/GetStores', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
-      stores.value = e.data
-    })
-    .catch((e) => {
-      ElMessage.error('Oops, ' + e)
-    })
+  API.GetStores((e) => {
+    stores.value = e.data
+  }, (e) => {
+    ElMessage.error('Oops, ' + e)
+  })
 }
 loadStores()
 
 function deleteStore(name: string) {
-  const requestOptions = {
-    method: 'POST',
-    body: JSON.stringify({
-      name: name
+  API.DeleteStore(name, (e) => {
+    ElMessage({
+      message: 'Deleted.',
+      type: 'success'
     })
-  }
-  fetch('/server.Runner/DeleteStore', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
-      ElMessage({
-        message: 'Deleted.',
-        type: 'success'
-      })
-      loadStores()
-    })
-    .catch((e) => {
-      ElMessage.error('Oops, ' + e)
-    })
+    loadStores()
+  }, (e) => {
+    ElMessage.error('Oops, ' + e)
+  })
 }
 
 function editStore(name: string) {
@@ -161,36 +147,19 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
 function storeVerify(formEl: FormInstance | undefined) {
   if (!formEl) return
-
-  const requestOptions = {
-    method: 'POST',
-    body: JSON.stringify({
-      name: storeForm.name
-    })
-  }
   
-  let api = '/server.Runner/VerifyStore'
-  fetch(api, requestOptions)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(response.statusText)
-      } else {
-        return response.json()
-      }
-    })
-    .then((e) => {
-      if (e.ready) {
-        ElMessage({
-          message: 'Verified!',
-          type: 'success'
-        })
-      } else {
-        ElMessage.error(e.message)
-      }
-    })
-    .catch((e) => {
-      ElMessage.error('Oops, ' + e)
-    })
+  API.VerifyStore(setStoreForm.name, (e) => {
+    if (e.ready) {
+      ElMessage({
+        message: 'Verified!',
+        type: 'success'
+      })
+    } else {
+      ElMessage.error(e.message)
+    }
+  }, (e) => {
+    ElMessage.error('Oops, ' + e)
+  })
 }
 
 function updateKeys() {

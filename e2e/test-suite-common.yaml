@@ -8,20 +8,13 @@ param:
   suiteName: "{{randAlpha 6}}"
   caseName: "{{randAlpha 6}}"
   store: "{{randAlpha 3}}"
-<<<<<<< HEAD:e2e/test-suite-common.yaml
   server: |
     {{default "http://localhost:8080" (env "SERVER")}}
-=======
->>>>>>> 1f91a9f (feat: support set a store as readonly (#269)):extensions/e2e/test-suite-common.yaml
 items:
 - name: CreateStore
   before:
     items:
-<<<<<<< HEAD:e2e/test-suite-common.yaml
       - httpReady("{{.param.server}}/healthz", 2400)
-=======
-      - httpReady("http://localhost:8080/healthz", 2400)
->>>>>>> 1f91a9f (feat: support set a store as readonly (#269)):extensions/e2e/test-suite-common.yaml
   request:
     api: /CreateStore
     method: POST

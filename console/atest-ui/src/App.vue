@@ -10,8 +10,8 @@ import { ElTree, ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Edit, Share } from '@element-plus/icons-vue'
 import type { Suite } from './types'
+import { API } from './views/net'
 import { Cache } from './views/cache'
-import { DefaultResponseProcess } from './views/net'
 import { useI18n } from 'vue-i18n'
 import ClientMonitor from 'skywalking-client-js'
 import { name, version } from '../package'
@@ -48,18 +48,7 @@ const handleNodeClick = (data: Tree) => {
     testSuiteKind.value = data.kind
     Cache.SetCurrentStore(data.store)
 
-    const requestOptions = {
-      method: 'POST',
-      headers: {
-        'X-Store-Name': data.store
-      },
-      body: JSON.stringify({
-        name: data.label
-      })
-    }
-    fetch('/server.Runner/ListTestCase', requestOptions)
-      .then((response) => response.json())
-      .then((d) => {
+    API.ListTestCase(data.label, data.store, (d) => {
         if (d.items && d.items.length > 0) {
           data.children = []
           d.items.forEach((item: any) => {
@@ -73,7 +62,7 @@ const handleNodeClick = (data: Tree) => {
             } as Tree)
           })
         }
-      })
+    })
   } else {
     Cache.SetCurrentStore(data.store)
     Cache.SetLastTestCaseLocation(data.parentID, data.id)
@@ -133,13 +122,16 @@ interface Store {
 }
 
 const stores = ref([] as Store[])
+const storesLoading = ref(false)
 function loadStores() {
+  storesLoading.value = true
   const requestOptions = {
     method: 'POST',
   }
   fetch('/server.Runner/GetStores', requestOptions)
     .then((response) => response.json())
     .then(async (d) => {
+      storesLoading.value = false
       stores.value = d.data
       data.value = [] as Tree[]
       Cache.SetStores(d.data)
@@ -227,21 +219,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     if (valid) {
       suiteCreatingLoading.value = true
 
-      const requestOptions = {
-        method: 'POST',
-        headers: {
-          'X-Store-Name': testSuiteForm.store
-        },
-        body: JSON.stringify({
-          name: testSuiteForm.name,
-          api: testSuiteForm.api,
-          kind: testSuiteForm.kind
-        })
-      }
-
-      fetch('/server.Runner/CreateTestSuite', requestOptions)
-        .then(DefaultResponseProcess())
-        .then((e) => {
+      API.CreateTestSuite(testSuiteForm, (e) => {
           suiteCreatingLoading.value = false
           if (e.error !== "") {
             ElMessage.error('Oops, ' + e.error)
@@ -272,23 +250,11 @@ const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
     if (valid) {
       suiteCreatingLoading.value = true
 
-      const requestOptions = {
-        method: 'POST',
-        headers: {
-          'X-Store-Name': importSuiteForm.store
-        },
-        body: JSON.stringify({
-          url: importSuiteForm.url
-        })
-      }
-
-      fetch('/server.Runner/ImportTestSuite', requestOptions)
-        .then((response) => response.json())
-        .then(() => {
-          loadStores()
-          importDialogVisible.value = false
-          formEl.resetFields()
-        })
+      API.ImportTestSuite(importSuiteForm, () => {
+        loadStores()
+        importDialogVisible.value = false
+        formEl.resetFields()
+      })
     }
   })
 }
@@ -325,6 +291,11 @@ const suiteKinds = [{
 }, {
   "name": "tRPC",
 }]
+
+const appVersion = ref('')
+API.GetVersion((d) => {
+  appVersion.value = d.message
+})
 </script>
 
 <template>
@@ -340,7 +311,7 @@ const suiteKinds = [{
 
       <el-main>
         <el-container style="height: 100%">
-          <el-aside width="200px">
+          <el-aside>
             <el-button type="primary" @click="openTestSuiteCreateDialog"
               data-intro="Click here to create a new test suite"
               test-id="open-new-suite-dialog" :icon="Edit">{{ t('button.new') }}</el-button>
@@ -350,6 +321,7 @@ const suiteKinds = [{
             <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
 
             <el-tree
+              v-loading="storesLoading"
               :data=data
               highlight-current
               :check-on-click-node="true"
@@ -361,8 +333,6 @@ const suiteKinds = [{
               @node-click="handleNodeClick"
               data-intro="This is the test suite tree. You can click the test suite to edit it."
             />
-
-            <TemplateFunctions/>
           </el-aside>
 
           <el-main>
@@ -392,6 +362,10 @@ const suiteKinds = [{
           </el-main>
         </el-container>
       </el-main>
+    <div style="position: absolute; bottom: 0px; right: 10px;">
+      <a href="https://github.com/LinuxSuRen/api-testing" target="_blank" rel="noopener">{{appVersion}}</a>
+    </div>
+    <TemplateFunctions/>
     </el-container>
   </div>
 

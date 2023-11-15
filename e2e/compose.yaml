@@ -1,7 +1,9 @@
 version: '3.1'
 services:
   testing:
-    build: .
+    build:
+      context: ..
+      dockerfile: e2e/Dockerfile
     environment:
       GITEE_TOKEN: "$GITEE_TOKEN"
     depends_on:
@@ -33,7 +35,7 @@ services:
     healthcheck:
       test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/2379"]
       interval: 3s
-      timeout: 30s
+      timeout: 60s
       retries: 10
       start_period: 3s
   mysql:
@@ -45,7 +47,7 @@ services:
     healthcheck:
       test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/3306"]
       interval: 3s
-      timeout: 30s
+      timeout: 60s
       retries: 10
       start_period: 3s
   mariadb:
@@ -56,7 +58,7 @@ services:
     healthcheck:
       test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/3306"]
       interval: 3s
-      timeout: 30s
+      timeout: 60s
       retries: 10
       start_period: 3s
   minio:

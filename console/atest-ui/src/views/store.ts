@@ -1,4 +1,4 @@
-import { Pair } from './types'
+import type { Pair } from './types'
 
 export function SupportedExtensions() {
     return [

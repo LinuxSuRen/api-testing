@@ -4,16 +4,16 @@ import { reactive, ref, watch } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
-import { NewSuggestedAPIsQuery } from './types'
+import { NewSuggestedAPIsQuery, GetHTTPMethods } from './types'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
+import { API } from './net'
 
 const { t } = useI18n()
 
 const props = defineProps({
   name: String,
 })
-const store = Cache.GetCurrentStore()
 const emit = defineEmits(['updated'])
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name, props.name!)
 
@@ -35,18 +35,7 @@ function load() {
   const store = Cache.GetCurrentStore()
   if (!props.name || store.name === "") return
 
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': store.name
-    },
-    body: JSON.stringify({
-      name: props.name
-    })
-  }
-  fetch('/server.Runner/GetTestSuite', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
+  API.GetTestSuite(props.name, (e) => {
       suite.value = e
       if (suite.value.param.length === 0) {
         suite.value.param.push({
@@ -54,8 +43,7 @@ function load() {
           value: ''
         } as Pair)
       }
-    })
-    .catch((e) => {
+    }, (e) => {
       ElMessage.error('Oops, ' + e)
     })
 }
@@ -70,16 +58,8 @@ function save() {
     const importPath = oldImportPath.split(',')
     suite.value.spec.rpc.import = importPath
   }
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
-    },
-    body: JSON.stringify(suite.value)
-  }
-  fetch('/server.Runner/UpdateTestSuite', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
+
+  API.UpdateTestSuite(suite.value, (e) => {
       if (e.error === "") {
         ElMessage({
           message: 'Updated.',
@@ -90,8 +70,7 @@ function save() {
       }
 
       suite.value.spec.rpc.import = oldImportPath
-    })
-    .catch((e) => {
+    }, (e) => {
       suite.value.spec.rpc.import = oldImportPath
       ElMessage.error('Oops, ' + e)
     })
@@ -120,29 +99,15 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     if (valid) {
       suiteCreatingLoading.value = true
 
-      const requestOptions = {
-        method: 'POST',
-        headers: {
-          'X-Store-Name': Cache.GetCurrentStore().name
-        },
-        body: JSON.stringify({
-          suiteName: props.name,
-          data: {
-            name: testCaseForm.name,
-            request: {
-              api: testCaseForm.api,
-              method: testCaseForm.method
-            }
-          }
-        })
-      }
-
-      fetch('/server.Runner/CreateTestCase', requestOptions)
-        .then((response) => response.json())
-        .then(() => {
-          suiteCreatingLoading.value = false
-          emit('updated', 'hello from child')
-        })
+      API.CreateTestCase({
+        suiteName: props.name,
+        name: testCaseForm.name,
+        api: testCaseForm.api,
+        method: testCaseForm.method
+      }, () => {
+        suiteCreatingLoading.value = false
+        emit('updated', 'hello from child')
+      })
 
       dialogVisible.value = false
     }
@@ -150,43 +115,19 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 }
 
 function del() {
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
-    },
-    body: JSON.stringify({
-      name: props.name
-    })
-  }
-  fetch('/server.Runner/DeleteTestSuite', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
+  API.DeleteTestSuite(props.name, () => {
       ElMessage({
         message: 'Deleted.',
         type: 'success'
       })
       emit('updated')
-    })
-    .catch((e) => {
+    }, (e) => {
       ElMessage.error('Oops, ' + e)
     })
 }
 
 function convert() {
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
-    },
-    body: JSON.stringify({
-      Generator: 'jmeter',
-      TestSuite: props.name
-    })
-  }
-  fetch('/server.Runner/ConvertTestSuite', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
+  API.ConvertTestSuite(props.name, 'jmeter', (e) => {
       const blob = new Blob([e.message], { type: `text/xml;charset=utf-8;` });
       const link = document.createElement('a');
       if (link.download !== undefined) {
@@ -204,8 +145,7 @@ function convert() {
         type: 'success'
       })
       emit('updated')
-    })
-    .catch((e) => {
+    }, (e) => {
       ElMessage.error('Oops, ' + e)
     })
 }
@@ -324,7 +264,20 @@ function paramChange() {
             <el-input v-model="testCaseForm.name" test-id="case-form-name"/>
           </el-form-item>
           <el-form-item label="Method" prop="method" v-if="suite.spec.kind !== 'tRPC' && suite.spec.kind !== 'gRPC'">
-            <el-input v-model="testCaseForm.method" test-id="case-form-method" />
+            <el-select
+              v-model="testCaseForm.method"
+              class="m-2"
+              placeholder="Method"
+              size="middle"
+              test-id="case-form-method"
+            >
+              <el-option
+                v-for="item in GetHTTPMethods()"
+                :key="item.value"
+                :label="item.key"
+                :value="item.value"
+              />
+            </el-select>
           </el-form-item>
           <el-form-item label="API" prop="api">
             <el-autocomplete
