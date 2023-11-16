@@ -32,6 +32,7 @@ You could choose the alternative images:
 Docker Hub: docker.io/linuxsuren/api-testing
 GitHub Container Registry: ghcr.io/linuxsuren/api-testing
 Scarf: linuxsuren.docker.scarf.sh/linuxsuren/api-testing
+AliYun: registry.aliyuncs.com/linuxsuren/api-testing
 DaoCloud: docker.m.daocloud.io/linuxsuren/api-testing`,
 		PreRunE: opt.preRunE,
 		RunE:    opt.runE,

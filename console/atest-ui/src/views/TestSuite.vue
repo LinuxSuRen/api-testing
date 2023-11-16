@@ -53,10 +53,15 @@ watch(props, () => {
 })
 
 function save() {
-  const oldImportPath = suite.value.spec.rpc.import
-  if (typeof oldImportPath === 'string' && oldImportPath !== '') {
-    const importPath = oldImportPath.split(',')
-    suite.value.spec.rpc.import = importPath
+  let oldImportPath = ""
+  let hasImport = false
+  if (suite.value.spec && suite.value.spec.rpc) {
+    oldImportPath = suite.value.spec.rpc.import
+    hasImport = true
+    if (typeof oldImportPath === 'string' && oldImportPath !== '') {
+      const importPath = oldImportPath.split(',')
+      suite.value.spec.rpc.import = importPath
+    }
   }
 
   API.UpdateTestSuite(suite.value, (e) => {
@@ -69,9 +74,13 @@ function save() {
         ElMessage.error('Oops, ' + e.message)
       }
 
-      suite.value.spec.rpc.import = oldImportPath
+      if (hasImport) {
+        suite.value.spec.rpc.import = oldImportPath
+      }
     }, (e) => {
-      suite.value.spec.rpc.import = oldImportPath
+      if (hasImport) {
+        suite.value.spec.rpc.import = oldImportPath
+      }
       ElMessage.error('Oops, ' + e)
     })
 }
