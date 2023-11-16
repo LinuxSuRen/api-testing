@@ -76,7 +76,7 @@ interface ImportSource {
 }
 
 function UpdateTestSuite(suite: any,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {

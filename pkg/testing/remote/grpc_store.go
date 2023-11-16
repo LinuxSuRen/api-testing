@@ -190,7 +190,7 @@ func (g *gRPCLoader) DeleteSuite(name string) (err error) {
 
 func (g *gRPCLoader) Verify() (readOnly bool, err error) {
 	// avoid to long to wait the response
-	ctx, cancel := context.WithTimeout(g.ctx, time.Second*3)
+	ctx, cancel := context.WithTimeout(g.ctx, time.Second*5)
 	defer cancel()
 
 	var result *server.ExtensionStatus
