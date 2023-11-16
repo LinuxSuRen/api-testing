@@ -152,7 +152,7 @@ func TestRunTestCase(t *testing.T) {
 		Testcase: "get",
 	})
 	assert.NoError(t, err)
-	assert.Contains(t, result.Output, "start to run: 'get'\nstart to send request to http://foo\nresponse body:")
+	assert.Contains(t, "start to run: 'get'\nstart to send request to http://foo\nstatus code: 200\n", result.Output)
 }
 
 func TestFindParentTestCases(t *testing.T) {

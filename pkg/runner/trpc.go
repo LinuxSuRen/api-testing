@@ -69,7 +69,7 @@ func (r *tRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 
 	defer func() {
 		if err == nil {
-			err = runJob(testcase.After, dataContext)
+			err = runJob(testcase.After, dataContext, output)
 		}
 	}()
 
@@ -78,7 +78,7 @@ func (r *tRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 		return
 	}
 
-	if err = runJob(testcase.Before, dataContext); err != nil {
+	if err = runJob(testcase.Before, dataContext, nil); err != nil {
 		return
 	}
 

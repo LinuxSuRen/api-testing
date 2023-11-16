@@ -17,7 +17,7 @@ fmt:
 build:
 	mkdir -p bin
 	rm -rf bin/atest
-	go build ${TOOLEXEC} -a ${BUILD_FLAG} -o bin/${BINARY} main.go
+	CGO_ENABLED=0 go build ${TOOLEXEC} -a ${BUILD_FLAG} -o bin/${BINARY} main.go
 build-ext: build-ext-git build-ext-orm build-ext-s3 build-ext-etcd
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
