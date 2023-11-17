@@ -36,7 +36,7 @@ interface AppVersion {
   message: string
 }
 
-function GetVersion(callback: (v: AppVersion) => {}) {
+function GetVersion(callback: (v: AppVersion) => void) {
   const requestOptions = {
     method: 'POST',
   }
