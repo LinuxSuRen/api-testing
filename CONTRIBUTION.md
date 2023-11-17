@@ -51,3 +51,8 @@ docker run -p 12800:12800 -p 9412:9412 \
     -e SW_STORAGE_BANYANDB_HOST=192.168.1.98 \
     docker.io/apache/skywalking-oap-server
 ```
+
+## FAQ
+
+* Got sum missing match error of go.
+  * Run command: `go clean -modcache && go mod tidy`

@@ -297,15 +297,16 @@ const appVersionLink = ref('https://github.com/LinuxSuRen/api-testing')
 API.GetVersion((d) => {
   appVersion.value = d.message
   const version = d.message.match('^v\\d*.\\d*.\\d*')
-  const dirtyVersion = d.message.match('^v\\d*.\\d*.\\d*-g')
+  const dirtyVersion = d.message.match('^v\\d*.\\d*.\\d*-\\d*-g')
 
   if (!version && !dirtyVersion) {
     return
   }
 
+  console.log(dirtyVersion)
   if (dirtyVersion && dirtyVersion.length > 0) {
     appVersionLink.value = appVersionLink.value + '/commit/' + d.message.replace(dirtyVersion[0], '')
-  } else {
+  } else if (version && version.length > 0) {
     appVersionLink.value = appVersionLink.value + '/releases/tag/' + version[0]
   }
 })

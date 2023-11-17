@@ -50,11 +50,15 @@ interface Store {
   properties: Pair[]
 }
 
+const storesLoading = ref(false)
 function loadStores() {
+  storesLoading.value = true
   API.GetStores((e) => {
     stores.value = e.data
   }, (e) => {
     ElMessage.error('Oops, ' + e)
+  }, () => {
+    storesLoading.value = false
   })
 }
 loadStores()
@@ -148,7 +152,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 function storeVerify(formEl: FormInstance | undefined) {
   if (!formEl) return
   
-  API.VerifyStore(setStoreForm.name, (e) => {
+  API.VerifyStore(storeForm.name, (e) => {
     if (e.ready) {
       ElMessage({
         message: 'Verified!',
@@ -180,7 +184,7 @@ function updateKeys() {
         <el-button type="primary" @click="addStore" :icon="Edit">{{t('button.new')}}</el-button>
         <el-button type="primary" @click="loadStores">{{t('button.refresh')}}</el-button>
     </div>
-    <el-table :data="stores" style="width: 100%">
+    <el-table :data="stores" style="width: 100%" v-loading=storesLoading>
       <el-table-column :label="t('field.name')" width="180">
         <template #default="scope">
           <el-input v-model="scope.row.name" placeholder="Name"/>

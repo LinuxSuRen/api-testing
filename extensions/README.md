@@ -6,6 +6,7 @@ Ports in extensions:
 | s3   | 4072 |
 | etcd | 4073 |
 | git  | 4074 |
+| mongodb | 4075 |
 
 ## Contribute a new extension
 

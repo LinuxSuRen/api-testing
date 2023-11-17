@@ -17,6 +17,10 @@ export function SupportedExtensions() {
         {
           value: 'atest-store-etcd',
           key: 'atest-store-etcd'
+        },
+        {
+          value: 'atest-store-mongodb',
+          key: 'atest-store-mongodb'
         }
     ] as Pair[]
 }

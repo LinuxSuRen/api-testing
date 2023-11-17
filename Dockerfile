@@ -36,14 +36,15 @@ COPY --from=ui /workspace/dist/assets/*.css cmd/data/index.css
 
 COPY --from=sk /usr/local/bin/skywalking-go-agent /usr/local/bin/skywalking-go-agent
 
-RUN GOPROXY=${GOPROXY} go mod download
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -toolexec="skywalking-go-agent" -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}\
+# RUN GOPROXY=${GOPROXY} go mod download
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -toolexec="skywalking-go-agent" -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}\
     -X github.com/linuxsuren/api-testing/pkg/version.date=$(date +%Y-%m-%d)" -o atest .
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-collector extensions/collector/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -ldflags "-w -s" -o atest-store-etcd extensions/store-etcd/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -toolexec="skywalking-go-agent" -a -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-collector extensions/collector/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-etcd extensions/store-etcd/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-mongodb extensions/store-mongodb/main.go
+RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -toolexec="skywalking-go-agent" -a -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
 
 FROM docker.io/library/ubuntu:23.04
 
@@ -64,6 +65,7 @@ COPY --from=builder /workspace/atest-store-orm /usr/local/bin/atest-store-orm
 COPY --from=builder /workspace/atest-store-s3 /usr/local/bin/atest-store-s3
 COPY --from=builder /workspace/atest-store-etcd /usr/local/bin/atest-store-etcd
 COPY --from=builder /workspace/atest-store-git /usr/local/bin/atest-store-git
+COPY --from=builder /workspace/atest-store-mongodb /usr/local/bin/atest-store-mongodb
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 

@@ -9,6 +9,7 @@ echo "start  to run testing"
 kind=orm target=mysql:3306 driver=mysql atest run -p test-suite-common.yaml
 kind=orm target=mariadb:3306 driver=mysql atest run -p test-suite-common.yaml
 kind=etcd target=etcd:2379 atest run -p test-suite-common.yaml
+kind=mongodb target=mongo:27017 atest run -p test-suite-common.yaml
 if [ -z "$GITEE_TOKEN" ]
 then
     atest run -p git.yaml
