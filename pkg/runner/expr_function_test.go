@@ -25,9 +25,14 @@ SOFTWARE.
 package runner_test
 
 import (
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"testing"
 
+	"github.com/antonmedv/expr"
+	"github.com/antonmedv/expr/vm"
 	"github.com/h2non/gock"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/stretchr/testify/assert"
@@ -60,7 +65,7 @@ func TestExprFuncSleep(t *testing.T) {
 
 func TestExprFuncHTTPReady(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
-		defer gock.Clean()
+		defer gock.Off()
 		gock.New(urlFoo).Reply(http.StatusOK)
 
 		_, err := runner.ExprFuncHTTPReady(urlFoo, 1)
@@ -68,7 +73,7 @@ func TestExprFuncHTTPReady(t *testing.T) {
 	})
 
 	t.Run("failed", func(t *testing.T) {
-		defer gock.Clean()
+		defer gock.Off()
 		gock.New(urlFoo).Reply(http.StatusNotFound)
 
 		_, err := runner.ExprFuncHTTPReady(urlFoo, 1)
@@ -89,4 +94,95 @@ func TestExprFuncHTTPReady(t *testing.T) {
 		_, err := runner.ExprFuncHTTPReady(urlFoo, "two")
 		assert.Error(t, err)
 	})
+
+	t.Run("check the response", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(urlFoo).Reply(http.StatusOK).BodyString(`{"name": "test"}`)
+		_, err := runner.ExprFuncHTTPReady(urlFoo, 1, `data.name == "test"`)
+		assert.NoError(t, err)
+	})
+
+	t.Run("response is not JSON", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(urlFoo).Reply(http.StatusOK).BodyString(`name: test`)
+		_, err := runner.ExprFuncHTTPReady(urlFoo, 1, `data.name == "test"`)
+		assert.Error(t, err)
+	})
+
+	t.Run("response checking result is failed", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(urlFoo).Reply(http.StatusOK).BodyString(`{"name": "test"}`)
+		_, err := runner.ExprFuncHTTPReady(urlFoo, 1, `data.name == "test"`)
+		assert.NoError(t, err)
+	})
+
+	t.Run("not a bool expr", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(urlFoo).Reply(http.StatusOK).BodyString(`{"name": "test"}`)
+		_, err := runner.ExprFuncHTTPReady(urlFoo, 1, `name + "test"`)
+		assert.Error(t, err)
+	})
+
+	t.Run("failed to compile", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(urlFoo).Reply(http.StatusOK).BodyString(`{"name": "test"}`)
+		_, err := runner.ExprFuncHTTPReady(urlFoo, 1, `1~!@`)
+		assert.Error(t, err)
+	})
+}
+
+func TestFunctions(t *testing.T) {
+	tmpFile, err := os.CreateTemp(os.TempDir(), "test")
+	if err != nil {
+		t.Fatal("failed to create temp file")
+	}
+	defer os.Remove(tmpFile.Name())
+
+	tests := []struct {
+		name      string
+		expr      string
+		syntaxErr bool
+		verify    func(t *testing.T, result any, resultErr error)
+	}{{
+		name:      "invalid syntax",
+		expr:      "sleep 1",
+		syntaxErr: true,
+	}, {
+		name: "command",
+		expr: `command("echo 1")`,
+		verify: func(t *testing.T, result any, resultErr error) {
+			assert.NoError(t, resultErr)
+			assert.Equal(t, "1\n", result)
+		},
+	}, {
+		name: "writeFile",
+		expr: fmt.Sprintf(`writeFile("%s", "hello")`, tmpFile.Name()),
+		verify: func(t *testing.T, result any, resultErr error) {
+			assert.NoError(t, resultErr)
+
+			data, err := io.ReadAll(tmpFile)
+			assert.NoError(t, err)
+			assert.Equal(t, "hello", string(data))
+		},
+	}}
+
+	for i, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var program *vm.Program
+			program, err = expr.Compile(tt.expr, expr.Env(tt))
+			if tt.syntaxErr {
+				assert.Error(t, err, "%q %d", tt.name, i)
+				return
+			}
+			if !assert.NotNil(t, program, "%q %d", tt.name, i) {
+				return
+			}
+
+			var result any
+			result, err = expr.Run(program, tt)
+			if tt.verify != nil {
+				tt.verify(t, result, err)
+			}
+		})
+	}
 }

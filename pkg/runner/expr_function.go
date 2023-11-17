@@ -26,31 +26,20 @@ SOFTWARE.
 package runner
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"time"
 
+	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/ast"
+	"github.com/antonmedv/expr/builtin"
+	"github.com/antonmedv/expr/vm"
 )
-
-var extensionFuncs = []*ast.Function{
-	{
-		Name: "sleep",
-		Func: ExprFuncSleep,
-	},
-	{
-		Name: "httpReady",
-		Func: ExprFuncHTTPReady,
-	},
-	{
-		Name: "exec",
-		Func: func(params ...interface{}) (res any, err error) {
-			exec.Command("sh", "-c", params[0].(string)).Run()
-			return
-		},
-	},
-}
 
 // ExprFuncSleep is an expr function for sleeping
 func ExprFuncSleep(params ...interface{}) (res interface{}, err error) {
@@ -90,14 +79,88 @@ func ExprFuncHTTPReady(params ...interface{}) (res interface{}, err error) {
 		return
 	}
 
+	var resp *http.Response
 	for i := 0; i < retry; i++ {
-		var resp *http.Response
-		if resp, err = http.Get(api); err == nil && resp != nil && resp.StatusCode == http.StatusOK {
+		resp, err = http.Get(api)
+		alive := err == nil && resp != nil && resp.StatusCode == http.StatusOK
+
+		if alive && len(params) >= 3 {
+			log.Println("checking the response")
+			exprText := params[2].(string)
+
+			// check the response
+			var data []byte
+			if data, err = io.ReadAll(resp.Body); err == nil {
+				unstruct := make(map[string]interface{})
+
+				if err = json.Unmarshal(data, &unstruct); err != nil {
+					log.Printf("failed to unmarshal the response data: %v\n", err)
+					return
+				}
+
+				unstruct["data"] = unstruct
+				var program *vm.Program
+				if program, err = expr.Compile(exprText, expr.Env(unstruct)); err != nil {
+					log.Printf("failed to compile: %s, %v\n", exprText, err)
+					return
+				}
+
+				var result interface{}
+				if result, err = expr.Run(program, unstruct); err != nil {
+					log.Printf("failed to Run: %s, %v\n", exprText, err)
+					return
+				}
+
+				if val, ok := result.(bool); ok {
+					if val {
+						return
+					}
+				} else {
+					err = fmt.Errorf("the result of %s should be a bool", exprText)
+					return
+				}
+			}
+		} else if alive {
 			return
 		}
-		fmt.Println("waiting for", api)
+
+		log.Println("waiting for", api)
 		time.Sleep(1 * time.Second)
 	}
 	err = fmt.Errorf("failed to wait for the API ready in %d times", retry)
 	return
+}
+
+func init() {
+	builtin.Builtins = append(builtin.Builtins, []*ast.Function{
+		{
+			Name: "sleep",
+			Func: ExprFuncSleep,
+		},
+		{
+			Name: "httpReady",
+			Func: ExprFuncHTTPReady,
+		},
+		{
+			Name: "command",
+			Func: func(params ...interface{}) (res any, err error) {
+				var output []byte
+				output, err = exec.Command("sh", "-c", params[0].(string)).CombinedOutput()
+				if output != nil {
+					res = string(output)
+				}
+				return
+			},
+		},
+		{
+			Name: "writeFile",
+			Func: func(params ...interface{}) (res any, err error) {
+				filename := params[0]
+				content := params[1]
+
+				err = os.WriteFile(filename.(string), []byte(content.(string)), 0644)
+				return
+			},
+		},
+	}...)
 }

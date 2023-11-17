@@ -1,3 +1,27 @@
+/*
+MIT License
+
+Copyright (c) 2023 API Testing Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 package runner
 
 import (
@@ -21,55 +45,6 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/xeipuuv/gojsonschema"
 )
-
-// LevelWriter represents a writer with level
-type LevelWriter interface {
-	Info(format string, a ...any)
-	Debug(format string, a ...any)
-}
-
-// FormatPrinter represents a formart printer with level
-type FormatPrinter interface {
-	Fprintf(w io.Writer, level, format string, a ...any) (n int, err error)
-}
-
-type defaultLevelWriter struct {
-	level int
-	io.Writer
-	FormatPrinter
-}
-
-// NewDefaultLevelWriter creates a default LevelWriter instance
-func NewDefaultLevelWriter(level string, writer io.Writer) LevelWriter {
-	result := &defaultLevelWriter{
-		Writer: writer,
-	}
-	switch level {
-	case "debug":
-		result.level = 7
-	case "info":
-		result.level = 3
-	}
-	return result
-}
-
-// Fprintf implements interface FormatPrinter
-func (w *defaultLevelWriter) Fprintf(writer io.Writer, level int, format string, a ...any) (n int, err error) {
-	if level <= w.level {
-		return fmt.Fprintf(writer, format, a...)
-	}
-	return
-}
-
-// Info writes the info level message
-func (w *defaultLevelWriter) Info(format string, a ...any) {
-	w.Fprintf(w.Writer, 3, format, a...)
-}
-
-// Debug writes the debug level message
-func (w *defaultLevelWriter) Debug(format string, a ...any) {
-	w.Fprintf(w.Writer, 7, format, a...)
-}
 
 // ReportResult represents the report result of a set of the same API requests
 type ReportResult struct {
@@ -154,7 +129,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 	defer func() {
 		if err == nil {
-			err = runJob(testcase.After, dataContext)
+			err = runJob(testcase.After, dataContext, output)
 		}
 	}()
 
@@ -184,7 +159,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		request.Header.Add(key, val)
 	}
 
-	if err = runJob(testcase.Before, dataContext); err != nil {
+	if err = runJob(testcase.Before, dataContext, nil); err != nil {
 		return
 	}
 
@@ -201,12 +176,14 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		return
 	}
 
+	r.log.Debug("status code: %d\n", resp.StatusCode)
+
 	var responseBodyData []byte
 	if responseBodyData, err = r.withResponseRecord(resp); err != nil {
 		return
 	}
 	record.Body = string(responseBodyData)
-	r.log.Debug("response body: %s\n", record.Body)
+	r.log.Trace("response body: %s\n", record.Body)
 
 	if err = testcase.Expect.Render(nil); err != nil {
 		return
@@ -384,12 +361,15 @@ func valueCompare(expect interface{}, acutalResult gjson.Result, key string) (er
 	return
 }
 
-func runJob(job *testing.Job, ctx interface{}) (err error) {
+func runJob(job *testing.Job, ctx interface{}, current interface{}) (err error) {
 	if job == nil {
 		return
 	}
 	var program *vm.Program
-	env := struct{}{}
+	env := map[string]interface{}{
+		"ctx":     ctx,
+		"current": current,
+	}
 
 	for _, item := range job.Items {
 		var exprText string
@@ -398,7 +378,7 @@ func runJob(job *testing.Job, ctx interface{}) (err error) {
 			break
 		}
 
-		if program, err = expr.Compile(exprText, getCustomExprFuncs(env)...); err != nil {
+		if program, err = expr.Compile(exprText, expr.Env(env)); err != nil {
 			fmt.Printf("failed to compile: %s, %v\n", item, err)
 			return
 		}
@@ -407,14 +387,6 @@ func runJob(job *testing.Job, ctx interface{}) (err error) {
 			fmt.Printf("failed to Run: %s, %v\n", item, err)
 			return
 		}
-	}
-	return
-}
-
-func getCustomExprFuncs(env any) (opts []expr.Option) {
-	opts = append(opts, expr.Env(env))
-	for _, item := range extensionFuncs {
-		opts = append(opts, expr.Function(item.Name, item.Func))
 	}
 	return
 }
