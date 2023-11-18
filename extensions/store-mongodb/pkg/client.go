@@ -30,6 +30,7 @@ import (
 	"fmt"
 
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -38,30 +39,27 @@ func (s *dbserver) getClient(ctx context.Context) (collection *mongo.Collection,
 	store := remote.GetStoreFromContext(ctx)
 	if store == nil {
 		err = errors.New("no connect to mongodb")
-	} else {
-		databaseName := "testing"
-		collectionName := "atest"
+		return
+	}
 
-		if store.Properties != nil {
-			if v, ok := store.Properties["database"]; ok && v != "" {
-				databaseName = v
-			}
-			if v, ok := store.Properties["collection"]; ok && v != "" {
-				collectionName = v
-			}
-		}
+	if store.Properties == nil {
+		store.Properties = map[string]string{}
+	}
 
-		address := fmt.Sprintf("mongodb://%s:%s@%s", store.Username, store.Password, store.URL)
-		var client *mongo.Client
-		client, err = mongo.Connect(ctx, options.Client().ApplyURI(address))
-		// TODO need a way to maintain the connection of it
-		if err == nil {
+	databaseName := util.EmptyThenDefault(store.Properties["database"], "testing")
+	collectionName := util.EmptyThenDefault(store.Properties["collection"], "atest")
+
+	address := fmt.Sprintf("mongodb://%s:%s@%s", store.Username, store.Password, store.URL)
+	var client *mongo.Client
+	client, err = mongo.Connect(ctx, options.Client().ApplyURI(address))
+	if err != nil {
+		return
+	}
+
+	collection = client.Database(databaseName).Collection(collectionName)
+	if collection == nil {
+		if err = client.Database(databaseName).CreateCollection(ctx, collectionName); err == nil {
 			collection = client.Database(databaseName).Collection(collectionName)
-			if collection == nil {
-				if err = client.Database(databaseName).CreateCollection(ctx, collectionName); err == nil {
-					collection = client.Database(databaseName).Collection(collectionName)
-				}
-			}
 		}
 	}
 	return
