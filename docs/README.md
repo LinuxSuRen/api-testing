@@ -160,9 +160,10 @@ There are multiple storage backends supported. See the status from the list:
 |---|---|
 | Local Storage | Ready |
 | S3 | Ready |
-| ORM DataBase | Developing |
+| ORM DataBase | Ready |
 | Git Repository | Ready |
-| Etcd DataBase | Ready |
+| Etcd | Ready |
+| MongoDB | Devloping |
 
 ### Local Storage
 Local storage is the built-in solution. You can run it with the following command:
@@ -269,6 +270,23 @@ Have a look at the expected configuration below:
     name: linuxsuren              # the name for git commit
     email: linuxsuren@github.com  # the email address for git commit
     insecure: false               # whether to use insecure
+```
+
+### MongoDB Storage
+You can use a MongoDB as the storage backend.
+
+Have a look at the expected configuration below:
+
+```yaml
+- name: mongodb
+  url: 172.11.0.13:27017   # address of the mongodb
+  username: linuxsuren
+  password: linuxsuren
+  kind:
+    name: atest-store-mongodb     # the extension binary file name
+  properties:                     # optional properties for specific features
+    database: testing             # the database name
+    collection: atest             # the collection name
 ```
 
 ## Secret Server

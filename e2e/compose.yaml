@@ -13,6 +13,8 @@ services:
         condition: service_healthy
       mariadb:
         condition: service_healthy
+      mongo:
+        condition: service_healthy
       # postgres:
       #   condition: service_healthy
       # clickhouse:
@@ -23,6 +25,7 @@ services:
       - etcd
       - mysql
       - mariadb
+      - mongo
       # - minio
       # - postgres
       # - clickhouse
@@ -68,6 +71,17 @@ services:
       MINIO_ROOT_PASSWORD: root
       MINIO_SERVER_HOST: minio
       MINIO_DEFAULT_BUCKETS: bucket
+  mongo:
+    image: mongo
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/27017"]
+      interval: 3s
+      timeout: 60s
+      retries: 10
+      start_period: 3s
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
   # postgres:
   #   image: postgres:16.0
   #   environment:

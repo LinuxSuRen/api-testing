@@ -36,7 +36,7 @@ interface AppVersion {
   message: string
 }
 
-function GetVersion(callback: (v: AppVersion) => {}) {
+function GetVersion(callback: (v: AppVersion) => void) {
   const requestOptions = {
     method: 'POST',
   }
@@ -90,7 +90,7 @@ function UpdateTestSuite(suite: any,
 }
 
 function GetTestSuite(name: string, callback: () => {},
-  errHandle: (e: any) => {}) {
+  errHandle: (e: any) => void) {
   const store = Cache.GetCurrentStore()
   const requestOptions = {
     method: 'POST',
@@ -107,7 +107,7 @@ function GetTestSuite(name: string, callback: () => {},
 }
 
 function DeleteTestSuite(name: string,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -123,7 +123,7 @@ function DeleteTestSuite(name: string,
 }
 
 function ConvertTestSuite(suiteName: string, genertor: string,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -163,7 +163,7 @@ interface TestCase {
 }
 
 function CreateTestCase(testcase: TestCase,
-  callback: () => {}, errHandle?: (e: any) => {} | null) {
+  callback: () => {}, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -187,7 +187,7 @@ function CreateTestCase(testcase: TestCase,
 }
 
 function UpdateTestCase(testcase: any,
-  callback: () => {}, errHandle?: (e: any) => {} | null) {
+  callback: () => {}, errHandle?: (e: any) => void | null) {
     const requestOptions = {
       method: 'POST',
       headers: {
@@ -201,7 +201,7 @@ function UpdateTestCase(testcase: any,
 }
 
 function GetTestCase(req: TestCase,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -218,7 +218,7 @@ function GetTestCase(req: TestCase,
 }
 
 function ListTestCase(suite: string, store: string,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -234,7 +234,7 @@ function ListTestCase(suite: string, store: string,
 }
 
 function DeleteTestCase(testcase: TestCase,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
     const requestOptions = {
       method: 'POST',
       headers: {
@@ -256,7 +256,7 @@ interface RunTestCaseRequest {
 }
 
 function RunTestCase(request: RunTestCaseRequest,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -280,7 +280,7 @@ interface GenerateRequest {
 }
 
 function GenerateCode(request: GenerateRequest,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -297,14 +297,14 @@ function GenerateCode(request: GenerateRequest,
     .then(callback).catch(errHandle)
 }
 
-function ListCodeGenerator(callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+function ListCodeGenerator(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   fetch('/server.Runner/ListCodeGenerator', {
     method: 'POST'
   }).then(DefaultResponseProcess)
   .then(callback).catch(errHandle)
 }
 
-function PopularHeaders(callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+function PopularHeaders(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -316,17 +316,18 @@ function PopularHeaders(callback: (d: any) => {}, errHandle?: (e: any) => {} | n
     .then(callback).catch(errHandle)
 }
 
-function GetStores(callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+function GetStores(callback: (d: any) => void,
+  errHandle?: (e: any) => void | null, final?: () => void | null) {
   const requestOptions = {
     method: 'POST',
   }
   fetch('/server.Runner/GetStores', requestOptions)
-  .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle).finally(final)
 }
 
 function DeleteStore(name: string,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     body: JSON.stringify({
@@ -339,7 +340,7 @@ function DeleteStore(name: string,
 }
 
 function VerifyStore(name: string,
-  callback: (d: any) => {}, errHandle?: (e: any) => {} | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     body: JSON.stringify({

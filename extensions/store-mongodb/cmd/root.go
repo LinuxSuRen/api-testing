@@ -22,17 +22,33 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-
-package main
+package cmd
 
 import (
-	"os"
-
-	"github.com/linuxsuren/api-testing/extensions/store-orm/cmd"
+	"github.com/linuxsuren/api-testing/extensions/store-mongodb/pkg"
+	ext "github.com/linuxsuren/api-testing/pkg/extension"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	if err := cmd.NewRootCommand().Execute(); err != nil {
-		os.Exit(1)
+func NewRootCommand() (c *cobra.Command) {
+	opt := &option{
+		Extension: ext.NewExtension("mongodb", 4075),
 	}
+	c = &cobra.Command{
+		Use:   opt.GetFullName(),
+		Short: "Storage extension of api-testing",
+		RunE:  opt.runE,
+	}
+	opt.AddFlags(c.Flags())
+	return
+}
+
+func (o *option) runE(c *cobra.Command, args []string) (err error) {
+	remoteServer := pkg.NewRemoteServer()
+	err = ext.CreateRunner(o.Extension, c, remoteServer)
+	return
+}
+
+type option struct {
+	*ext.Extension
 }

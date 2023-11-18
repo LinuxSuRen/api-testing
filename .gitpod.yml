@@ -1,4 +1,4 @@
-# See https://www.gitpod.io/docs/configure/workspaces
+
 tasks:
   - init: make init-env install-precheck
     before: IMG_TOOL=docker GOPROXY= make build-ext copy-ext build-image
@@ -6,3 +6,7 @@ tasks:
 
 ports:
   - port: 5713  # console interactive port
+
+vscode:
+  extensions:
+    - golang.goteractive port

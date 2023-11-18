@@ -28,7 +28,7 @@ package main
 import (
 	"os"
 
-	"github.com/linuxsuren/api-testing/extensions/store-orm/cmd"
+	"github.com/linuxsuren/api-testing/extensions/store-mongodb/cmd"
 )
 
 func main() {

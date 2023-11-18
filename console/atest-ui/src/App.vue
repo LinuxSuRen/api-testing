@@ -293,8 +293,22 @@ const suiteKinds = [{
 }]
 
 const appVersion = ref('')
+const appVersionLink = ref('https://github.com/LinuxSuRen/api-testing')
 API.GetVersion((d) => {
   appVersion.value = d.message
+  const version = d.message.match('^v\\d*.\\d*.\\d*')
+  const dirtyVersion = d.message.match('^v\\d*.\\d*.\\d*-\\d*-g')
+
+  if (!version && !dirtyVersion) {
+    return
+  }
+
+  console.log(dirtyVersion)
+  if (dirtyVersion && dirtyVersion.length > 0) {
+    appVersionLink.value = appVersionLink.value + '/commit/' + d.message.replace(dirtyVersion[0], '')
+  } else if (version && version.length > 0) {
+    appVersionLink.value = appVersionLink.value + '/releases/tag/' + version[0]
+  }
 })
 </script>
 
@@ -363,7 +377,7 @@ API.GetVersion((d) => {
         </el-container>
       </el-main>
     <div style="position: absolute; bottom: 0px; right: 10px;">
-      <a href="https://github.com/LinuxSuRen/api-testing" target="_blank" rel="noopener">{{appVersion}}</a>
+      <a :href=appVersionLink target="_blank" rel="noopener">{{appVersion}}</a>
     </div>
     <TemplateFunctions/>
     </el-container>

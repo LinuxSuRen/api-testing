@@ -9,16 +9,18 @@ APP_VERSION?=v0.0.13
 HELM_REPO?=docker.io/linuxsuren
 
 fmt:
+	go mod tidy
 	go fmt ./...
 	cd extensions/store-etcd && go mod tidy && go fmt ./...
 	cd extensions/store-git && go mod tidy && go fmt ./...
 	cd extensions/store-orm && go mod tidy && go fmt ./...
 	cd extensions/store-s3 && go mod tidy && go fmt ./...
+	cd extensions/store-mongodb && go mod tidy && go fmt ./...
 build:
 	mkdir -p bin
 	rm -rf bin/atest
 	CGO_ENABLED=0 go build ${TOOLEXEC} -a ${BUILD_FLAG} -o bin/${BINARY} main.go
-build-ext: build-ext-git build-ext-orm build-ext-s3 build-ext-etcd
+build-ext: build-ext-git build-ext-orm build-ext-s3 build-ext-etcd build-ext-mongodb
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
 build-ext-orm:
@@ -27,6 +29,8 @@ build-ext-etcd:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-etcd extensions/store-etcd/main.go
 build-ext-s3:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-s3 extensions/store-s3/main.go
+build-ext-mongodb:
+	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-mongodb extensions/store-mongodb/main.go
 build-ui:
 	cd console/atest-ui && npm i && npm run build-only
 embed-ui:
