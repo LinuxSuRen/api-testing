@@ -543,6 +543,26 @@ func doGRPCTest(t *testing.T, l net.Listener, sec *atest.Secure, desc *atest.RPC
 				assert.NotNil(t, err)
 			},
 		},
+		{
+			name: "having the header",
+			testCase: &atest.TestCase{
+				Request: atest.Request{
+					API:  unary,
+					Body: "{}",
+					Header: map[string]string{
+						"Message": "Good!",
+					},
+				},
+				Expect: atest.Response{
+					Body: getJSONOrCache(nil, &testsrv.HelloReply{
+						Message: "Good!",
+					}),
+				},
+			},
+			verify: func(t *testing.T, output any, err error) {
+				assert.Nil(t, err)
+			},
+		},
 	}
 	tests = append(tests, addition...)
 	runUnits(tests, t, l, sec, desc)

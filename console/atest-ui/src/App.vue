@@ -408,6 +408,7 @@ API.GetVersion((d) => {
           <el-form-item :label="t('field.suiteKind')" prop="kind">
             <el-select v-model="testSuiteForm.kind" class="m-2"
               filterable=true
+              test-id="suite-form-kind"
               default-first-option=true
               size="middle">
               <el-option

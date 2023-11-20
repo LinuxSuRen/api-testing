@@ -235,6 +235,35 @@ func (r *Request) GetBody() (reader io.Reader, err error) {
 // Render renders the response
 func (r *Response) Render(ctx interface{}) (err error) {
 	r.StatusCode = util.ZeroThenDefault(r.StatusCode, http.StatusOK)
+
+	toDel := []string{}
+	for k, v := range r.BodyFieldsExpect {
+		var keyStr string
+		if keyStr, err = render.Render("bodyFieldsExpect key", k, ctx); err == nil {
+			if k != keyStr {
+				// means the key is a template string
+				toDel = append(toDel, k)
+				k = keyStr
+			}
+		} else {
+			return
+		}
+
+		valStr, ok := v.(string)
+		if !ok {
+			continue
+		}
+
+		if valStr, err = render.Render("bodyFieldsExpect value", valStr, ctx); err == nil {
+			r.BodyFieldsExpect[k] = valStr
+		} else {
+			return
+		}
+	}
+
+	for _, k := range toDel {
+		delete(r.BodyFieldsExpect, k)
+	}
 	return
 }
 

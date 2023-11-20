@@ -5,7 +5,7 @@ mkdir -p /root/.config/atest
 
 nohup atest server&
 
-echo "start  to run testing"
+echo "start to run testing"
 kind=orm target=mysql:3306 driver=mysql atest run -p test-suite-common.yaml
 kind=orm target=mariadb:3306 driver=mysql atest run -p test-suite-common.yaml
 kind=etcd target=etcd:2379 atest run -p test-suite-common.yaml
