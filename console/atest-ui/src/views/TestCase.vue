@@ -521,7 +521,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
             </el-table>
           </el-tab-pane>
 
-          <el-tab-pane label="Headers" name="second" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+          <el-tab-pane label="Headers" name="second">
             <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
               <el-table-column label="Key" width="180">
                 <template #default="scope">

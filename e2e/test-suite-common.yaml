@@ -7,6 +7,8 @@ api: |
 param:
   suiteName: "{{randAlpha 6}}"
   caseName: "{{randAlpha 6}}"
+  gRPCSuiteName: "{{randAlpha 6}}"
+  gRPCCaseName: "{{randAlpha 6}}"
   store: "{{randAlpha 3}}"
   server: |
     {{default "http://localhost:8080" (env "SERVER")}}
@@ -87,8 +89,8 @@ items:
         "name": "{{.param.suiteName}}"
       }
   expect:
-      bodyFieldsExpect:
-        api: http://localhost:8080/server.Runner
+    bodyFieldsExpect:
+      api: http://localhost:8080/server.Runner
 - name: createTestCase
   request:
     api: /CreateTestCase
@@ -144,8 +146,8 @@ items:
         "testcase": "{{.param.caseName}}"
       }
   expect:
-      bodyFieldsExpect:
-        request.body: good
+    bodyFieldsExpect:
+      request.body: good
 - name: deleteTestCase
   request:
     api: /DeleteTestCase
@@ -156,4 +158,61 @@ items:
       {
         "suite": "{{.param.suiteName}}",
         "testcase": "{{.param.caseName}}"
+      }
+- name: createGRPCSuite
+  request:
+    api: /CreateTestSuite
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "name": "{{.param.gRPCSuiteName}}",
+        "api": "localhost:7070",
+        "kind": "grpc"
+      }
+- name: createGRPCTestCase
+  request:
+    api: /CreateTestCase
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "suiteName": "{{.param.gRPCSuiteName}}",
+        "data": {
+          "name": "{{.param.gRPCCaseName}}",
+          "request": {
+            "api": "/server.Runner/GetSuites",
+            "header": [{
+              "key": "X-Store-Name",
+              "value": "{{.param.store}}"
+            }]
+          }
+        }
+      }
+- name: getGRPCTestCase
+  request:
+    api: /GetTestCase
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "suite": "{{.param.gRPCSuiteName}}",
+        "testcase": "{{.param.gRPCCaseName}}"
+      }
+  expect:
+    bodyFieldsExpect:
+      request.header.0.value: "{{.param.store}}"
+- name: runGRPCTestCase
+  request:
+    api: /RunTestCase
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "suite": "{{.param.gRPCSuiteName}}",
+        "testcase": "{{.param.gRPCCaseName}}"
       }

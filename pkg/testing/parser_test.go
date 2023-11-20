@@ -1,3 +1,27 @@
+/**
+MIT License
+
+Copyright (c) 2023 API Testing Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 package testing_test
 
 import (
@@ -219,6 +243,44 @@ func TestResponseRender(t *testing.T) {
 			assert.Equal(t, http.StatusOK, req.StatusCode)
 		},
 		hasErr: false,
+	}, {
+		name: "have bodyFieldsExpect",
+		ctx: map[string]string{
+			"name": "linuxsuren",
+		},
+		response: &atest.Response{
+			BodyFieldsExpect: map[string]interface{}{
+				"{{.name}}": "{{.name}}",
+			},
+		},
+		verify: func(t *testing.T, req *atest.Response) {
+			assert.Equal(t, "linuxsuren", req.BodyFieldsExpect["linuxsuren"])
+		},
+		hasErr: false,
+	}, {
+		name: "bodyFieldsExpect, template syntax error with key",
+		response: &atest.Response{
+			BodyFieldsExpect: map[string]interface{}{
+				"{{.name": "{{.name}",
+			},
+		},
+		hasErr: true,
+	}, {
+		name: "bodyFieldsExpect, template syntax error with value",
+		response: &atest.Response{
+			BodyFieldsExpect: map[string]interface{}{
+				"name": "{{.name}",
+			},
+		},
+		hasErr: true,
+	}, {
+		name: "bodyFieldsExpect value is not string",
+		response: &atest.Response{
+			BodyFieldsExpect: map[string]interface{}{
+				"name": []string{},
+			},
+		},
+		hasErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -228,6 +290,12 @@ func TestResponseRender(t *testing.T) {
 			}
 		})
 	}
+
+	req := &atest.Request{
+		API: "/good",
+	}
+	req.RenderAPI("/api/v1")
+	assert.Equal(t, "/api/v1/good", req.API)
 }
 
 func TestTestCase(t *testing.T) {

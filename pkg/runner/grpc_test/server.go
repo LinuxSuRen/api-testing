@@ -22,6 +22,7 @@ package grpc_test
 
 import (
 	"context"
+	"google.golang.org/grpc/metadata"
 	"io"
 )
 
@@ -29,9 +30,22 @@ type TestServer struct {
 	UnimplementedMainServer
 }
 
-func (s *TestServer) Unary(context.Context, *Empty) (*HelloReply, error) {
+func (s *TestServer) Unary(ctx context.Context, _ *Empty) (*HelloReply, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	var msg string
+	if ok {
+		// just for test purpose
+		if items := md.Get("message"); len(items) > 0 {
+			msg = items[0]
+		}
+	}
+
+	if msg == "" {
+		msg = "Hello!"
+	}
+
 	return &HelloReply{
-		Message: "Hello!",
+		Message: msg,
 	}, nil
 }
 

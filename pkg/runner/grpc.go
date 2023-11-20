@@ -21,20 +21,19 @@ SOFTWARE.
 package runner
 
 import (
-	"archive/zip"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc/metadata"
 
 	"github.com/bufbuild/protocompile"
 	"github.com/bufbuild/protocompile/linker"
@@ -106,10 +105,11 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 		return
 	}
 
-	r.log.Info("start to send request to %s\n", testcase.Request.API)
+	server := getHost(testcase.Request.API, r.host)
+	r.log.Info("start to send request to %s\n", server)
 
 	var conn *grpc.ClientConn
-	if conn, err = r.getConnection(getHost(testcase.Request.API, r.host)); err != nil {
+	if conn, err = r.getConnection(server); err != nil {
 		return
 	}
 	defer conn.Close()
@@ -121,6 +121,9 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 		}
 		return nil, err
 	}
+
+	// pass the headers into gRPC request metadata
+	ctx = metadata.NewOutgoingContext(ctx, metadata.New(testcase.Request.Header))
 
 	payload := testcase.Request.Body
 	respsStr, err := invokeRequest(ctx, md, payload, conn)
@@ -552,11 +555,13 @@ func getMethodName(md protoreflect.MethodDescriptor) string {
 	return fmt.Sprintf("/%s/%s", md.Parent().FullName(), md.Name())
 }
 
-// invokeRPC sends an unary RPC to gRPC server.
+// invokeRPC sends a unary RPC to gRPC server.
 func invokeRPC(ctx context.Context, conn grpc.ClientConnInterface, method protoreflect.MethodDescriptor, request *dynamicpb.Message) (
 	resp *dynamicpb.Message, err error) {
 	resp = dynamicpb.NewMessage(method.Output())
-	err = conn.Invoke(ctx, getMethodName(method), request, resp)
+	md, _ := metadata.FromIncomingContext(ctx)
+
+	err = conn.Invoke(ctx, getMethodName(method), request, resp, grpc.Header(&md))
 	return
 }
 
@@ -610,106 +615,6 @@ sendLoop:
 			resps = append(resps, resp)
 		}
 	}
-}
-
-func loadProtoFiles(protoFile string) (targetProtoFile string, importPath []string, protoParentDir string, err error) {
-	if !regexURLPrefix.MatchString(protoFile) {
-		targetProtoFile = protoFile
-		return
-	}
-
-	var protoURL *url.URL
-	if protoURL, err = url.Parse(protoFile); err != nil {
-		return
-	}
-
-	log.Println("start to download proto file", protoFile)
-	resp, err := util.GetDefaultCachedHTTPClient().Get(protoFile)
-	if err != nil {
-		return
-	}
-
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("unexpected status code %d with %q", resp.StatusCode, protoFile)
-		return
-	}
-
-	var f *os.File
-	contentType := resp.Header.Get(util.ContentType)
-	if contentType != util.ZIP {
-		var data []byte
-		if data, err = io.ReadAll(resp.Body); err == nil {
-			if f, err = os.CreateTemp(os.TempDir(), "proto"); err == nil {
-				_, err = f.Write(data)
-				targetProtoFile = f.Name()
-			}
-		}
-	} else {
-		targetProtoFile = protoURL.Query().Get("file")
-		if targetProtoFile == "" {
-			err = errors.New("query parameter file is empty")
-			return
-		}
-
-		attachment := resp.Header.Get(util.ContentDisposition)
-		filename := strings.TrimPrefix(attachment, "attachment; filename=")
-		name := strings.TrimSuffix(filename, filepath.Ext(filename))
-
-		parentDir := os.TempDir()
-		if f, err = os.CreateTemp(parentDir, filename); err == nil {
-			_, err = io.Copy(f, resp.Body)
-
-			protoParentDir = filepath.Join(parentDir, name)
-			err = extractFiles(f.Name(), protoParentDir, targetProtoFile)
-			if err != nil {
-				return
-			}
-		}
-	}
-	return
-}
-
-func extractFiles(sourceFile, targetDir, filter string) (err error) {
-	if sourceFile == "" || targetDir == "" {
-		err = errors.New("source or target filename is empty")
-		return
-	}
-
-	var archive *zip.ReadCloser
-	if archive, err = zip.OpenReader(sourceFile); err != nil {
-		return
-	}
-	defer func() {
-		_ = archive.Close()
-	}()
-
-	for _, f := range archive.File {
-		if f.FileInfo().IsDir() {
-			continue
-		}
-
-		targetFilePath := filepath.Join(targetDir, f.Name)
-		if err = os.MkdirAll(filepath.Dir(targetFilePath), os.ModePerm); err != nil {
-			return
-		}
-
-		var targetFile *os.File
-		if targetFile, err = os.OpenFile(targetFilePath,
-			os.O_CREATE|os.O_RDWR, f.Mode()); err != nil {
-			continue
-		}
-
-		var fileInArchive io.ReadCloser
-		fileInArchive, err = f.Open()
-		if err != nil {
-			continue
-		}
-
-		_, err = io.Copy(targetFile, fileInArchive)
-		_ = targetFile.Close()
-	}
-	return
 }
 
 func verifyResponsePayload(md protoreflect.MethodDescriptor, caseName string, expect testing.Response, jsonPayload []string) (output any, err error) {

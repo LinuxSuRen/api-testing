@@ -185,7 +185,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	record.Body = string(responseBodyData)
 	r.log.Trace("response body: %s\n", record.Body)
 
-	if err = testcase.Expect.Render(nil); err != nil {
+	if err = testcase.Expect.Render(dataContext); err != nil {
 		return
 	}
 	if err = expectInt(testcase.Name, testcase.Expect.StatusCode, resp.StatusCode); err != nil {

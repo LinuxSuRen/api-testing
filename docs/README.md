@@ -298,6 +298,12 @@ Connect to [a vault extension](https://github.com/LinuxSuRen/api-testing-secret-
 atest server --secret-server localhost:7073
 ```
 
+## Verify
+
+| Item | Description |
+|---|---|
+| `expect.bodyFieldsExpect` | See also the syntax from https://github.com/tidwall/gjson |
+
 ## Extensions
 Developers can have storage, secret extensions. Implementing a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.
 
@@ -311,6 +317,7 @@ You can find the official images from both [Docker Hub](https://hub.docker.com/r
 The tag `latest` represents the latest release version. The tag `master` represents the image of the latest master branch. We highly recommend you to use a fixed version instead of those in a production environment.
 
 ## Release Notes
+* [v0.0.14](release-note-v0.0.14.md)
 * [v0.0.13](release-note-v0.0.13.md)
 * [v0.0.12](release-note-v0.0.12.md)
 
