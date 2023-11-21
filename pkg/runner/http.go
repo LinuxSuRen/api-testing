@@ -27,11 +27,10 @@ package runner
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
-	"reflect"
 	"strings"
 	"time"
 
@@ -42,7 +41,6 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
-	"github.com/tidwall/gjson"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -288,75 +286,21 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseTy
 		}
 	}
 
-	if responseType != util.JSON {
+	verifier := NewBodyVerify(responseType, expect)
+	if verifier == nil {
+		log.Printf("no body verify support with %q\n", responseType)
 		return
 	}
 
-	var bodyMap map[string]interface{}
-	mapOutput := map[string]interface{}{}
-	if err = json.Unmarshal(responseBodyData, &mapOutput); err != nil {
-		switch b := err.(type) {
-		case *json.UnmarshalTypeError:
-			if b.Value != "array" {
-				return
-			}
-
-			var arrayOutput []interface{}
-			if err = json.Unmarshal(responseBodyData, &arrayOutput); err != nil {
-				return
-			}
-			output = arrayOutput
-			mapOutput["data"] = arrayOutput
-		default:
-			return
-		}
-	} else {
-		bodyMap = mapOutput
-		output = mapOutput
-		mapOutput = map[string]interface{}{
-			"data": bodyMap,
-		}
-	}
-
-	if err = bodyFieldsVerifyAsJSON(expect.BodyFieldsExpect, responseBodyData); err != nil {
+	if output, err = verifier.Parse(responseBodyData); err != nil {
 		return
 	}
 
-	err = Verify(expect, mapOutput)
-	return
-}
-
-func bodyFieldsVerifyAsJSON(bodyFieldsExpect map[string]interface{}, responseBodyData []byte) (err error) {
-	for key, expectVal := range bodyFieldsExpect {
-		result := gjson.Get(string(responseBodyData), key)
-		if result.Exists() {
-			err = valueCompare(expectVal, result, key)
-		} else {
-			err = fmt.Errorf("not found field: %s", key)
-		}
-
-		if err != nil {
-			break
-		}
+	mapOutput := map[string]interface{}{
+		"data": output,
 	}
-	return
-}
-
-func valueCompare(expect interface{}, acutalResult gjson.Result, key string) (err error) {
-	var actual interface{}
-	actual = acutalResult.Value()
-
-	if !reflect.DeepEqual(expect, actual) {
-		switch acutalResult.Type {
-		case gjson.Number:
-			expect = fmt.Sprintf("%v", expect)
-			actual = fmt.Sprintf("%v", actual)
-
-			if strings.Compare(expect.(string), actual.(string)) == 0 {
-				return
-			}
-		}
-		err = fmt.Errorf("field[%s] expect value: '%v', actual: '%v'", key, expect, actual)
+	if err = verifier.Verify(responseBodyData); err == nil {
+		err = Verify(expect, mapOutput)
 	}
 	return
 }

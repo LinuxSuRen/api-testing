@@ -29,6 +29,7 @@ import (
 
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,5 +53,18 @@ func TestVerify(t *testing.T) {
 			}},
 		}, nil)
 		assert.NoError(t, err)
+	})
+
+	t.Run("verify YAML contentType", func(t *testing.T) {
+		assert.Nil(t, runner.NewBodyVerify("fake", nil))
+		verfier := runner.NewBodyVerify(util.YAML, nil)
+		assert.NotNil(t, verfier)
+
+		obj, err := verfier.Parse([]byte(`name: linuxsuren`))
+		assert.NoError(t, err)
+		assert.Equal(t, map[string]interface{}{
+			"name": "linuxsuren",
+		}, obj)
+		assert.NoError(t, verfier.Verify(nil))
 	})
 }

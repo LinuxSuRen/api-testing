@@ -145,8 +145,7 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 	}
 
 	if output == nil {
-		output = map[string]any{}
-		err = json.Unmarshal([]byte(record.Body), &output)
+		output, err = NewBodyVerify(util.JSON, nil).Parse([]byte(record.Body))
 	}
 	return
 }

@@ -21,12 +21,18 @@ SOFTWARE.
 package runner
 
 import (
+	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
 	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
+	"github.com/tidwall/gjson"
+	"gopkg.in/yaml.v3"
 )
 
 // Verify if the data satisfies the expression.
@@ -70,10 +76,103 @@ func verify(verify string, data map[string]any) (ok bool, err error) {
 	}
 
 	var result interface{}
-	if result, err = expr.Run(program, data); err != nil {
-		return
+	if result, err = expr.Run(program, data); err == nil {
+		ok = result.(bool)
 	}
+	return
+}
 
-	ok = result.(bool)
+type BodyVerifier interface {
+	Parse(data []byte) (interface{}, error)
+	Verify(data []byte) error
+}
+
+type BodyGetter interface {
+	GetBody() string
+	GetBodyFieldsExpect() map[string]interface{}
+}
+
+func NewBodyVerify(contentType string, body BodyGetter) BodyVerifier {
+	switch contentType {
+	case util.JSON:
+		return &jsonBodyVerifier{body: body}
+	case util.YAML:
+		return &yamlBodyVerifier{body: body}
+	default:
+		return nil
+	}
+}
+
+type jsonBodyVerifier struct {
+	body BodyGetter
+}
+
+func (v *jsonBodyVerifier) Parse(data []byte) (obj interface{}, err error) {
+	mapOutput := map[string]interface{}{}
+	if err = json.Unmarshal(data, &mapOutput); err != nil {
+		switch b := err.(type) {
+		case *json.UnmarshalTypeError:
+			if b.Value != "array" {
+				return
+			}
+
+			var arrayOutput []interface{}
+			if err = json.Unmarshal(data, &arrayOutput); err == nil {
+				obj = arrayOutput
+			}
+		}
+	} else {
+		obj = mapOutput
+	}
+	return
+}
+
+func (v *jsonBodyVerifier) Verify(data []byte) (err error) {
+	for key, expectVal := range v.body.GetBodyFieldsExpect() {
+		result := gjson.Get(string(data), key)
+		if result.Exists() {
+			err = valueCompare(expectVal, result, key)
+		} else {
+			err = fmt.Errorf("not found field: %s", key)
+		}
+
+		if err != nil {
+			break
+		}
+	}
+	return
+}
+
+type yamlBodyVerifier struct {
+	body BodyGetter
+}
+
+func (v *yamlBodyVerifier) Parse(data []byte) (obj interface{}, err error) {
+	obj = map[string]interface{}{}
+	err = yaml.Unmarshal(data, &obj)
+	return
+}
+
+func (v *yamlBodyVerifier) Verify(data []byte) (err error) {
+	// TODO need to implement
+	return
+}
+
+func valueCompare(expect interface{}, acutalResult gjson.Result, key string) (err error) {
+	var actual interface{}
+	actual = acutalResult.Value()
+
+	if !reflect.DeepEqual(expect, actual) {
+		switch acutalResult.Type {
+		case gjson.Number:
+			expect = fmt.Sprintf("%v", expect)
+			actual = fmt.Sprintf("%v", actual)
+
+			if strings.Compare(expect.(string), actual.(string)) == 0 {
+				return
+			}
+		}
+		err = fmt.Errorf("field[%s] expect value: '%v', actual: '%v'", key, expect, actual)
+	}
 	return
 }
