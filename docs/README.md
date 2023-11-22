@@ -304,6 +304,13 @@ atest server --secret-server localhost:7073
 |---|---|
 | `expect.bodyFieldsExpect` | See also the syntax from https://github.com/tidwall/gjson |
 
+## OAuth
+It support GitHub, [Dex](https://github.com/dexidp/dex) as OAuth provider. See also the following usage:
+
+```shell
+atest server --auth oauth --client-id your-id --client-secret your-secret
+```
+
 ## Extensions
 Developers can have storage, secret extensions. Implementing a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.
 

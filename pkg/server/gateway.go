@@ -11,5 +11,9 @@ import (
 func MetadataStoreFunc(ctx context.Context, r *http.Request) (md metadata.MD) {
 	store := r.Header.Get(HeaderKeyStoreName)
 	md = metadata.Pairs(HeaderKeyStoreName, store)
+
+	if auth := r.Header.Get("X-Auth"); auth != "" {
+		md.Set("Auth", auth)
+	}
 	return
 }

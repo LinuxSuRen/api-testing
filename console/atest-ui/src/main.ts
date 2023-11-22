@@ -28,6 +28,12 @@ const i18n = setupI18n({
   }
 })
 
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get('access_token');
+if (token && token !== '') {
+  sessionStorage.setItem('token', token)
+}
+
 app.config.errorHandler = (error) => {
   ClientMonitor.reportFrameErrors({
     service: name,

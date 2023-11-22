@@ -26,6 +26,10 @@ import { Cache } from './cache'
 
 function DefaultResponseProcess(response: any) {
   if (!response.ok) {
+    switch (response.status) {
+      case 401:
+        throw new Error("Unauthenticated")
+    }
     throw new Error(response.statusText)
   } else {
     return response.json()
@@ -52,11 +56,13 @@ interface TestSuite {
   kind: string
 }
 
-function CreateTestSuite(suite: TestSuite, callback: () => {}) {
+function CreateTestSuite(suite: TestSuite,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': suite.store
+      'X-Store-Name': suite.store,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       name: suite.name,
@@ -67,7 +73,7 @@ function CreateTestSuite(suite: TestSuite, callback: () => {}) {
 
   fetch('/server.Runner/CreateTestSuite', requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback)
+    .then(callback).catch(errHandle)
 }
 
 interface ImportSource {
@@ -80,7 +86,8 @@ function UpdateTestSuite(suite: any,
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
     },
     body: JSON.stringify(suite)
   }
@@ -89,13 +96,14 @@ function UpdateTestSuite(suite: any,
     .then(callback).catch(errHandle)
 }
 
-function GetTestSuite(name: string, callback: () => {},
+function GetTestSuite(name: string, callback: () => void,
   errHandle: (e: any) => void) {
   const store = Cache.GetCurrentStore()
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store.name
+      'X-Store-Name': store.name,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       name: name
@@ -111,7 +119,8 @@ function DeleteTestSuite(name: string,
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       name: name
@@ -127,7 +136,8 @@ function ConvertTestSuite(suiteName: string, genertor: string,
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       Generator: genertor,
@@ -139,11 +149,12 @@ function ConvertTestSuite(suiteName: string, genertor: string,
   .then(callback).catch(errHandle)
 }
 
-function ImportTestSuite(source: ImportSource, callback: () => {}) {
+function ImportTestSuite(source: ImportSource, callback: () => void) {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': source.store
+      'X-Store-Name': source.store,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       url: source.url
@@ -167,7 +178,8 @@ function CreateTestCase(testcase: TestCase,
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       suiteName: testcase.suiteName,
@@ -191,7 +203,8 @@ function UpdateTestCase(testcase: any,
     const requestOptions = {
       method: 'POST',
       headers: {
-        'X-Store-Name': Cache.GetCurrentStore().name
+        'X-Store-Name': Cache.GetCurrentStore().name,
+        'X-Auth': getToken()
       },
       body: JSON.stringify(testcase)
     }
@@ -205,7 +218,8 @@ function GetTestCase(req: TestCase,
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       suite: req.suiteName,
@@ -222,7 +236,8 @@ function ListTestCase(suite: string, store: string,
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': store
+      'X-Store-Name': store,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       name: suite
@@ -238,7 +253,8 @@ function DeleteTestCase(testcase: TestCase,
     const requestOptions = {
       method: 'POST',
       headers: {
-        'X-Store-Name': Cache.GetCurrentStore().name
+        'X-Store-Name': Cache.GetCurrentStore().name,
+        'X-Auth': getToken()
       },
       body: JSON.stringify({
         suite: testcase.suiteName,
@@ -260,7 +276,8 @@ function RunTestCase(request: RunTestCaseRequest,
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       suite: request.suiteName,
@@ -284,7 +301,8 @@ function GenerateCode(request: GenerateRequest,
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
     },
     body: JSON.stringify({
       TestSuite: request.suiteName,
@@ -299,7 +317,10 @@ function GenerateCode(request: GenerateRequest,
 
 function ListCodeGenerator(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   fetch('/server.Runner/ListCodeGenerator', {
-    method: 'POST'
+    method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
   }).then(DefaultResponseProcess)
   .then(callback).catch(errHandle)
 }
@@ -308,7 +329,8 @@ function PopularHeaders(callback: (d: any) => void, errHandle?: (e: any) => void
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': Cache.GetCurrentStore().name
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
     },
   }
   fetch('/server.Runner/PopularHeaders', requestOptions)
@@ -320,6 +342,9 @@ function GetStores(callback: (d: any) => void,
   errHandle?: (e: any) => void | null, final?: () => void | null) {
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
   }
   fetch('/server.Runner/GetStores', requestOptions)
     .then(DefaultResponseProcess)
@@ -330,6 +355,9 @@ function DeleteStore(name: string,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
     body: JSON.stringify({
       name: name
     })
@@ -343,6 +371,9 @@ function VerifyStore(name: string,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
     body: JSON.stringify({
       name: name
     })
@@ -354,11 +385,21 @@ function VerifyStore(name: string,
     .then(callback).catch(errHandle)
 }
 
+function getToken() {
+  const token = sessionStorage.getItem('token')
+  if (!token) {
+    return ''
+  }
+  return token
+}
+
 export const API = {
+  DefaultResponseProcess,
   GetVersion,
   CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,
   CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
   GenerateCode, ListCodeGenerator,
   PopularHeaders,
-  GetStores, DeleteStore, VerifyStore
+  GetStores, DeleteStore, VerifyStore,
+  getToken
 }

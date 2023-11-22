@@ -10,8 +10,7 @@ import (
 )
 
 // NewRootCmd creates the root command
-func NewRootCmd(execer fakeruntime.Execer, gRPCServer gRPCServer,
-	httpServer server.HTTPServer) (c *cobra.Command) {
+func NewRootCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c *cobra.Command) {
 	c = &cobra.Command{
 		Use:   "atest",
 		Short: "API testing tool",
@@ -20,7 +19,7 @@ func NewRootCmd(execer fakeruntime.Execer, gRPCServer gRPCServer,
 	c.Version = "\n" + version.GetDetailedVersion()
 	c.AddCommand(createInitCommand(execer),
 		createRunCommand(), createSampleCmd(),
-		createServerCmd(execer, gRPCServer, httpServer), createJSONSchemaCmd(),
+		createServerCmd(execer, httpServer), createJSONSchemaCmd(),
 		createServiceCommand(execer), createFunctionCmd(), createConvertCommand())
 	return
 }

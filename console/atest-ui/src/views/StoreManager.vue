@@ -120,6 +120,9 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
       const requestOptions = {
         method: 'POST',
+        headers: {
+          'X-Auth': API.getToken()
+        },
         body: JSON.stringify(storeForm)
       }
       

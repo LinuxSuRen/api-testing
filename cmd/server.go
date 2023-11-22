@@ -1,9 +1,34 @@
+/*
+MIT License
+
+Copyright (c) 2023 API Testing Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 // Package cmd provides all the commands
 package cmd
 
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -19,6 +44,7 @@ import (
 	pprof "net/http/pprof"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/linuxsuren/api-testing/pkg/oauth"
 	template "github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -29,13 +55,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
-func createServerCmd(execer fakeruntime.Execer, gRPCServer gRPCServer, httpServer server.HTTPServer) (c *cobra.Command) {
+func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c *cobra.Command) {
 	opt := &serverOption{
-		gRPCServer: gRPCServer,
 		httpServer: httpServer,
 		execer:     execer,
 	}
@@ -54,6 +81,16 @@ func createServerCmd(execer fakeruntime.Execer, gRPCServer gRPCServer, httpServe
 	flags.StringVarP(&opt.configDir, "config-dir", "", os.ExpandEnv("$HOME/.config/atest"), "The config directory")
 	flags.StringVarP(&opt.secretServer, "secret-server", "", "", "The secret server URL")
 	flags.StringVarP(&opt.skyWalking, "skywalking", "", "", "Push the browser tracing data to the Apache SkyWalking HTTP URL")
+	flags.StringVarP(&opt.auth, "auth", "", "", "The auth mode, supported: oauth. Keep it empty to disable auth")
+	flags.StringVarP(&opt.oauthProvider, "oauth-provider", "", "github", "The oauth provider, supported: github")
+	flags.StringVarP(&opt.oauthServer, "oauth-server", "", "", "The oAuth server address, required if it is a private server")
+	flags.BoolVarP(&opt.oauthSkipTls, "oauth-skip-tls", "", false, "Skip TLS verify when connect to oauth server")
+	flags.StringArrayVarP(&opt.oauthGroup, "oauth-group", "", []string{}, "Alow specific groups, all groups is ok if it is empty")
+	flags.StringVarP(&opt.clientID, "client-id", "", "", "ClientID is the application's ID")
+	flags.StringVarP(&opt.clientSecret, "client-secret", "", "", "ClientSecret is the application's secret")
+	flags.BoolVarP(&opt.dryRun, "dry-run", "", false, "Do not really start a gRPC server")
+
+	c.Flags().MarkHidden("dry-run")
 	return
 }
 
@@ -70,9 +107,58 @@ type serverOption struct {
 	secretServer string
 	configDir    string
 	skyWalking   string
+
+	auth          string
+	oauthProvider string
+	// ClientID is the application's ID.
+	clientID string
+	// ClientSecret is the application's secret.
+	clientSecret string
+	oauthServer  string
+	oauthSkipTls bool
+	oauthGroup   []string
+
+	dryRun bool
+
+	// inner fields, not as command flags
+	provider oauth.OAuthProvider
 }
 
 func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
+	var grpcOpts []grpc.ServerOption
+
+	if o.auth == "oauth" {
+		if o.provider = oauth.GetOAuthProvider(o.oauthProvider); o.provider == nil {
+			err = fmt.Errorf("not support: %q", o.oauthProvider)
+			return
+		}
+
+		if o.provider.GetServer() != "" {
+			// returns empty string if it's a private server
+			o.oauthServer = o.provider.GetServer()
+		} else {
+			o.provider.SetServer(o.oauthServer)
+		}
+
+		if o.clientID == "" || o.clientSecret == "" {
+			err = errors.New("--client-id and --client-secret flags are required when auth enabled")
+			return
+		}
+
+		if o.oauthServer == "" {
+			err = errors.New("oAuth server address is required")
+			return
+		}
+
+		grpcOpts = append(grpcOpts, oauth.NewAuthInterceptor(o.oauthGroup))
+	}
+
+	if o.dryRun {
+		o.gRPCServer = &fakeGRPCServer{}
+	} else {
+		o.gRPCServer = grpc.NewServer(grpcOpts...)
+	}
+
 	o.configDir = os.ExpandEnv(o.configDir)
 	err = o.execer.MkdirAll(o.configDir, 0755)
 	return
@@ -151,8 +237,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		_ = storeExtMgr.StopAll()
 	}()
 
-	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc)) //  runtime.WithIncomingHeaderMatcher(func(key string) (s string, b bool) {
-	err = server.RegisterRunnerHandlerServer(ctx, mux, remoteServer)
+	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))
+	err = server.RegisterRunnerHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	if err == nil {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
@@ -165,6 +251,16 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 
 		// Create non-global registry.
 		reg := prometheus.NewRegistry()
+
+		// register oauth endpoint
+		if o.auth == "oauth" {
+			authHandler := oauth.NewAuth(o.provider, oauth2.Config{
+				ClientID:     o.clientID,
+				ClientSecret: o.clientSecret,
+			}, o.oauthSkipTls)
+			mux.HandlePath(http.MethodGet, "/token", authHandler.RequestCode)
+			mux.HandlePath(http.MethodGet, "/oauth2/callback", authHandler.Callback)
+		}
 
 		// Add go runtime metrics and process collectors.
 		reg.MustRegister(
@@ -264,8 +360,6 @@ func debugHandler(mux *runtime.ServeMux) {
 		}
 	})
 }
-
-var filesNeedToBeRemoved = []string{}
 
 func (o *serverOption) getAtestBinary(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 	w.Header().Set(util.ContentDisposition, "attachment; filename=atest")

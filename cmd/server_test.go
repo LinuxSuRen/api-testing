@@ -70,10 +70,9 @@ func TestPrintProto(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"},
-				&fakeGRPCServer{}, server.NewFakeHTTPServer())
+			root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
 			root.SetOut(buf)
-			root.SetArgs(tt.args)
+			root.SetArgs(append(tt.args, "--dry-run"))
 			err := root.Execute()
 			tt.verify(t, buf, err)
 		})
@@ -225,6 +224,43 @@ func TestProxy(t *testing.T) {
 		resp := newFakeResponseWriter()
 		handle(resp, req, map[string]string{})
 	})
+}
+
+func TestOAuth(t *testing.T) {
+	tests := []struct {
+		name   string
+		args   []string
+		hasErr bool
+	}{{
+
+		name:   "invalid oauth provider",
+		args:   []string{"server", "--auth=oauth", "--oauth-provider=fake"},
+		hasErr: true,
+	}, {
+		name:   "client-id is missing",
+		args:   []string{"server", "--auth=oauth", "--client-secret=fake"},
+		hasErr: true,
+	}, {
+		name:   "client-secret is missing",
+		args:   []string{"server", "--auth=oauth", "--client-id=fake"},
+		hasErr: true,
+	}, {
+		name:   "oauth is ok",
+		args:   []string{"server", "--auth=oauth", "--client-id=fake", "--client-secret=fake"},
+		hasErr: false,
+	}}
+	for i, tt := range tests {
+		buf := new(bytes.Buffer)
+		root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
+		root.SetOut(buf)
+		root.SetArgs(append(tt.args, "--dry-run"))
+		err := root.Execute()
+		if tt.hasErr {
+			assert.Error(t, err, "should have error in case[%d] %q", i, tt.name)
+		} else {
+			assert.NoError(t, err, "should not have error in case[%d] %q", i, tt.name)
+		}
+	}
 }
 
 type fakeResponseWriter struct {
