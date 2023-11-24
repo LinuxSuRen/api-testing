@@ -12,13 +12,13 @@ import (
 )
 
 func TestService(t *testing.T) {
-	root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, NewFakeGRPCServer(), server.NewFakeHTTPServer())
+	root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
 	root.SetArgs([]string{"service", "fake"})
 	root.SetOut(new(bytes.Buffer))
 	err := root.Execute()
 	assert.NotNil(t, err)
 
-	notSupportedMode := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "fake"}, NewFakeGRPCServer(), server.NewFakeHTTPServer())
+	notSupportedMode := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "fake"}, server.NewFakeHTTPServer())
 	notSupportedMode.SetArgs([]string{"service", paramAction, "install", "--mode=fake"})
 	notSupportedMode.SetOut(new(bytes.Buffer))
 	assert.NotNil(t, notSupportedMode.Execute())
@@ -164,7 +164,7 @@ func TestService(t *testing.T) {
 
 			buf := new(bytes.Buffer)
 			normalRoot := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: tt.targetOS, ExpectOutput: tt.expectOutput},
-				NewFakeGRPCServer(), server.NewFakeHTTPServer())
+				server.NewFakeHTTPServer())
 			normalRoot.SetOut(buf)
 			normalRoot.SetArgs([]string{"service", "--action", tt.action,
 				"--script-path", tmpFile.Name(), "--mode", tt.mode, "--image=",

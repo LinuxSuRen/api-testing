@@ -528,6 +528,7 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 
 func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (reply *HelloReply, err error) {
 	loader := s.getLoader(ctx)
+	reply = &HelloReply{}
 	err = loader.DeleteTestCase(in.Suite, in.Testcase)
 	return
 }

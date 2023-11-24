@@ -40,7 +40,7 @@ import (
 
 func TestConvert(t *testing.T) {
 	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"},
-		cmd.NewFakeGRPCServer(), server.NewFakeHTTPServer())
+		server.NewFakeHTTPServer())
 	c.SetOut(io.Discard)
 
 	t.Run("normal", func(t *testing.T) {

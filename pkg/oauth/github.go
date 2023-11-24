@@ -1,4 +1,4 @@
-/*
+/**
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -22,28 +22,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package cmd_test
+package oauth
 
-import (
-	"bytes"
-	"testing"
+import "log"
 
-	"github.com/linuxsuren/api-testing/cmd"
-	"github.com/linuxsuren/api-testing/pkg/server"
-	"github.com/linuxsuren/api-testing/sample"
-	fakeruntime "github.com/linuxsuren/go-fake-runtime"
-	"github.com/stretchr/testify/assert"
-)
+type githubOAuthProvider struct {
+}
 
-func TestSampleCmd(t *testing.T) {
-	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"},
-		server.NewFakeHTTPServer())
+// AllScopes returns all the supported scopes
+// See also https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps
+func (p *githubOAuthProvider) AllScopes() []string {
+	return []string{"repo", "public_repo", "read:org", "user", "read:user", "user:email"}
+}
+func (p *githubOAuthProvider) MinimalScopes() []string {
+	return []string{"read:user", "public_repo"}
+}
+func (p *githubOAuthProvider) GetName() string {
+	return "github"
+}
+func (p *githubOAuthProvider) GetServer() string {
+	return "https://github.com/login"
+}
+func (p *githubOAuthProvider) SetServer(_ string) {
+	log.Println("not support")
+}
+func (p *githubOAuthProvider) GetTokenURL() string {
+	return "/oauth/access_token"
+}
+func (p *githubOAuthProvider) GetAuthURL() string {
+	return "/oauth/authorize"
+}
+func (p *githubOAuthProvider) GetUserInfoURL() string {
+	return "https://api.github.com/user"
+}
 
-	buf := new(bytes.Buffer)
-	c.SetOut(buf)
-
-	c.SetArgs([]string{"sample"})
-	err := c.Execute()
-	assert.Nil(t, err)
-	assert.Equal(t, sample.TestSuiteGitLab+"\n", buf.String())
+func init() {
+	RegisterOAuthProvider(&githubOAuthProvider{})
 }

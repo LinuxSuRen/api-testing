@@ -82,6 +82,7 @@ const (
 	MultiPartFormData  = "multipart/form-data"
 	Form               = "application/x-www-form-urlencoded"
 	JSON               = "application/json"
+	YAML               = "application/yaml"
 	ZIP                = "application/zip"
 	Plain              = "text/plain"
 )

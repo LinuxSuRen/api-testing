@@ -505,7 +505,13 @@ func TestBodyFiledsVerify(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := bodyFieldsVerifyAsJSON(tt.bodyFields, []byte(tt.body))
+			verifier := &jsonBodyVerifier{
+				body: &atest.Response{
+					BodyFieldsExpect: tt.bodyFields,
+				},
+			}
+
+			err := verifier.Verify([]byte(tt.body))
 			assert.Equal(t, tt.hasErr, err != nil, err)
 		})
 	}

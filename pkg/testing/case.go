@@ -86,6 +86,14 @@ type Response struct {
 	Schema            string                 `yaml:"schema,omitempty" json:"schema,omitempty"`
 }
 
+func (r Response) GetBody() string {
+	return r.Body
+}
+
+func (r Response) GetBodyFieldsExpect() map[string]interface{} {
+	return r.BodyFieldsExpect
+}
+
 type ConditionalVerify struct {
 	Condition []string `yaml:"condition,omitempty" json:"condition,omitempty"`
 	Verify    []string `yaml:"verify,omitempty" json:"verify,omitempty"`

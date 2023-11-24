@@ -1,4 +1,4 @@
-/*
+/**
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -22,28 +22,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package cmd_test
+package oauth
 
-import (
-	"bytes"
-	"testing"
+type dexOAuthProvider struct {
+	server string
+}
 
-	"github.com/linuxsuren/api-testing/cmd"
-	"github.com/linuxsuren/api-testing/pkg/server"
-	"github.com/linuxsuren/api-testing/sample"
-	fakeruntime "github.com/linuxsuren/go-fake-runtime"
-	"github.com/stretchr/testify/assert"
-)
+// AllScopes returns all the supported scopes
+func (p *dexOAuthProvider) AllScopes() []string {
+	return []string{"openid", "email", "groups", "profile", "offline_access"}
+}
+func (p *dexOAuthProvider) MinimalScopes() []string {
+	return p.AllScopes()
+}
+func (p *dexOAuthProvider) GetName() string {
+	return "dex"
+}
+func (p *dexOAuthProvider) GetServer() string {
+	return p.server
+}
+func (p *dexOAuthProvider) SetServer(server string) {
+	p.server = server
+}
+func (p *dexOAuthProvider) GetTokenURL() string {
+	return "/api/dex/token"
+}
+func (p *dexOAuthProvider) GetAuthURL() string {
+	return "/api/dex/auth"
+}
+func (p *dexOAuthProvider) GetUserInfoURL() string {
+	return "/api/dex/userinfo"
+}
 
-func TestSampleCmd(t *testing.T) {
-	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"},
-		server.NewFakeHTTPServer())
-
-	buf := new(bytes.Buffer)
-	c.SetOut(buf)
-
-	c.SetArgs([]string{"sample"})
-	err := c.Execute()
-	assert.Nil(t, err)
-	assert.Equal(t, sample.TestSuiteGitLab+"\n", buf.String())
+func init() {
+	RegisterOAuthProvider(&dexOAuthProvider{})
 }

@@ -129,6 +129,9 @@ grpc-gw:
     --grpc-gateway_opt logtostderr=true \
     --grpc-gateway_opt paths=source_relative \
     --grpc-gateway_opt generate_unbound_methods=true \
+	--openapiv2_out . \
+	--openapiv2_opt logtostderr=true \
+	--openapiv2_opt generate_unbound_methods=true \
     pkg/server/server.proto
 grpc-java:
 	protoc --plugin=protoc-gen-grpc-java \
@@ -162,12 +165,15 @@ grpc-testproto:
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
 	pkg/runner/grpc_test/test.proto
 
-install-tool:
+hd:
+	curl https://linuxsuren.github.io/tools/install.sh|bash
+install-tool: hd
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 	hd i protoc-gen-grpc-web
 	hd i protoc-gen-grpc-gateway
-init-env:
-	curl https://linuxsuren.github.io/tools/install.sh|bash
+	sudo hd get https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.18.1/protoc-gen-openapiv2-v2.18.1-linux-x86_64 -o /usr/local/bin/protoc-gen-openapiv2
+	sudo chmod +x /usr/local/bin/protoc-gen-openapiv2
+init-env: hd
 	hd i cli/cli
 	gh extension install linuxsuren/gh-dev
