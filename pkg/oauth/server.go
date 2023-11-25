@@ -25,6 +25,7 @@ SOFTWARE.
 package oauth
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -54,6 +55,7 @@ func NewAuth(provider OAuthProvider, config oauth2.Config, skipTlsVerify bool) *
 	config.Scopes = provider.MinimalScopes()
 	config.Endpoint.TokenURL = fmt.Sprintf("%s%s", provider.GetServer(), provider.GetTokenURL())
 	config.Endpoint.AuthURL = fmt.Sprintf("%s%s", provider.GetServer(), provider.GetAuthURL())
+	config.Endpoint.DeviceAuthURL = "https://github.com/login/device/code"
 	return &auth{
 		provider:      provider,
 		config:        config,
@@ -81,6 +83,10 @@ func (a *auth) Callback(w http.ResponseWriter, r *http.Request, pathParams map[s
 	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, sslcli)
 
 	token, err := a.config.Exchange(ctx, code, oauth2.VerifierOption(a.verifier))
+	a.getUserInfo(w, r, token, err)
+}
+
+func (a *auth) getUserInfo(w http.ResponseWriter, r *http.Request, token *oauth2.Token, err error) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,6 +102,33 @@ func (a *auth) Callback(w http.ResponseWriter, r *http.Request, pathParams map[s
 	}
 
 	http.Redirect(w, r, "/?access_token="+token.AccessToken, http.StatusFound)
+}
+
+func (a *auth) RequestLocalToken(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	deviceCode := r.FormValue("device_code")
+	response, ok := deviceAuthResponseMap[deviceCode]
+	if !ok {
+		http.Error(w, "device code not found", http.StatusBadRequest)
+		return
+	}
+
+	token, err := a.config.DeviceAccessToken(r.Context(), response)
+	a.getUserInfo(w, r, token, err)
+}
+
+var deviceAuthResponseMap = map[string]*oauth2.DeviceAuthResponse{}
+
+func (a *auth) RequestLocalCode(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	response, err := a.config.DeviceAuth(context.Background())
+	if err != nil {
+		log.Println("failed to get device auth", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	deviceAuthResponseMap[response.DeviceCode] = response
+
+	data, _ := json.Marshal(response)
+	w.Write(data)
 }
 
 func (a *auth) RequestCode(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
