@@ -25,13 +25,14 @@ SOFTWARE.
 package oauth
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/util"
 )
 
 type OAuthProvider interface {
@@ -81,12 +82,7 @@ func GetUserInfo(server OAuthProvider, token string, skipTlsVerify bool) (userIn
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	client := http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTlsVerify},
-		},
-	}
-
+	client := util.TlsAwareHTTPClient(skipTlsVerify)
 	var resp *http.Response
 	if resp, err = client.Do(req); err != nil {
 		return

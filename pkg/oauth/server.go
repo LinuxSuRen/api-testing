@@ -30,7 +30,6 @@ import (
 	"net/http"
 
 	"context"
-	"crypto/tls"
 
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"golang.org/x/oauth2"
@@ -78,10 +77,7 @@ func (a *auth) Callback(w http.ResponseWriter, r *http.Request, pathParams map[s
 	}
 	log.Println("get code", code)
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: a.skipTlsVerify},
-	}
-	sslcli := &http.Client{Transport: tr}
+	sslcli := util.TlsAwareHTTPClient(a.skipTlsVerify)
 	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, sslcli)
 
 	token, err := a.config.Exchange(ctx, code, oauth2.VerifierOption(a.verifier))
