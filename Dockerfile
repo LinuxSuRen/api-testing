@@ -18,9 +18,7 @@ COPY cmd/ cmd/
 COPY pkg/ pkg/
 COPY extensions/ extensions/
 COPY operator/ operator/
-COPY .github/testing/*.yaml sample/
 COPY .github/ .github/
-COPY sample/ sample/
 COPY docs/ docs/
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -69,11 +67,9 @@ COPY --from=builder /workspace/atest-store-mongodb /usr/local/bin/atest-store-mo
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
-COPY --from=builder /workspace/sample /var/www/sample
-
 RUN apt update -y && \
     # required for atest-store-git
     apt install -y --no-install-recommends ssh-client ca-certificates && \
     apt install -y curl
 
-CMD ["atest", "server", "--local-storage=/var/www/sample/*.yaml"]
+CMD ["atest", "server", "--local-storage=/var/data/atest/*.yaml"]

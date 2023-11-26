@@ -24,6 +24,8 @@ This is a API testing tool.
 
 ## Get started
 
+[![Deployed on Zeabur](https://zeabur.com/deployed-on-zeabur-dark.svg)](https://zeabur.com?referralCode=LinuxSuRen&utm_source=LinuxSuRen&utm_campaign=oss)
+
 Install it via [hd](https://github.com/LinuxSuRen/http-downloader) or download from [releases](https://github.com/LinuxSuRen/api-testing/releases):
 
 ```shell

@@ -1,4 +1,4 @@
-# ATEST
+# API Testing
 
 Welcome to use `atest` to improve your code quality.
 
@@ -31,6 +31,8 @@ Currently, it supports the following kinds of services:
 * Operate System services
   * Linux and Darwin
 * [Podman](https://github.com/containers/podman) and Docker
+
+[![Deployed on Zeabur](https://zeabur.com/deployed-on-zeabur-dark.svg)](https://zeabur.com?referralCode=LinuxSuRen&utm_source=LinuxSuRen&utm_campaign=oss)
 
 ### Have a look at the following example usage:
 
