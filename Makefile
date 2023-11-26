@@ -172,6 +172,10 @@ install-tool: hd
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 	hd i protoc-gen-grpc-web
 	hd i protoc-gen-grpc-gateway
+	hd get protocolbuffers/protobuf@v25.1 -o protobuf.zip
+	unzip protobuf.zip bin/protoc
+	rm -rf protobuf.zip
+	sudo install bin/protoc /usr/local/bin/
 	sudo hd get https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.18.1/protoc-gen-openapiv2-v2.18.1-linux-x86_64 -o /usr/local/bin/protoc-gen-openapiv2
 	sudo chmod +x /usr/local/bin/protoc-gen-openapiv2
 init-env: hd

@@ -34,6 +34,7 @@ import (
 func TestToGRPCStore(t *testing.T) {
 	assert.Equal(t, &Store{
 		Name:        "test",
+		Owner:       "rick",
 		Description: "desc",
 		Kind: &StoreKind{
 			Name: "test",
@@ -48,6 +49,7 @@ func TestToGRPCStore(t *testing.T) {
 		}},
 	}, ToGRPCStore(atest.Store{
 		Name:        "test",
+		Owner:       "rick",
 		Description: "desc",
 		Kind: atest.StoreKind{
 			Name: "test",

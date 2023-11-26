@@ -129,6 +129,7 @@ func TestStoreFactory(t *testing.T) {
 
 var sampleStoreMap = map[string]string{
 	"name":        "test",
+	"owner":       "",
 	"url":         fooURL,
 	"kind.url":    fooURL,
 	"kind":        "test",

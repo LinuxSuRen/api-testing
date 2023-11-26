@@ -186,8 +186,11 @@ function loadStores() {
         viewName.value = ""
       }
     }).catch((e) => {
-      ElMessage.error('Oops, ' + e)
-      loginDialogVisible.value = true
+      if(e.message === "Unauthenticated") {
+        loginDialogVisible.value = true
+      } else {
+        ElMessage.error('Oops, ' + e)
+      }
     }).finally(() => {
       storesLoading.value = false
     })

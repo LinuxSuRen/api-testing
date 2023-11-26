@@ -32,6 +32,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const token = urlParams.get('access_token');
 if (token && token !== '') {
   sessionStorage.setItem('token', token)
+  window.location.href='/'
 }
 
 app.config.errorHandler = (error) => {

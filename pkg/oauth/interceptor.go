@@ -53,32 +53,26 @@ func (a *authInter) authInterceptor(ctx context.Context, req interface{}, info *
 		return handler(ctx, req)
 	}
 
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		data := md.Get("auth")
-		if len(data) > 0 {
-			user := GetUser(data[0])
-			if user != nil {
-				approve := len(a.groups) == 0
-				for _, g := range a.groups {
-					for _, gg := range user.Groups {
-						if g == gg {
-							approve = true
-							break
-						}
-					}
-					if approve {
-						break
-					}
+	if user := GetUserFromContext(ctx); user != nil {
+		approve := len(a.groups) == 0
+		for _, g := range a.groups {
+			for _, gg := range user.Groups {
+				if g == gg {
+					approve = true
+					break
 				}
-
-				if approve {
-					resp, err = handler(ctx, req)
-				} else {
-					err = errors.New("invalid group")
-				}
-				return
+			}
+			if approve {
+				break
 			}
 		}
+
+		if approve {
+			resp, err = handler(ctx, req)
+		} else {
+			err = errors.New("invalid group")
+		}
+		return
 	}
 
 	msg := "no auth found"
@@ -89,5 +83,15 @@ func (a *authInter) authInterceptor(ctx context.Context, req interface{}, info *
 	sta := status.New(codes.Unauthenticated, msg)
 	resp = sta
 	err = sta.Err()
+	return
+}
+
+func GetUserFromContext(ctx context.Context) (user *UserInfo) {
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		data := md.Get("auth")
+		if len(data) > 0 {
+			user = GetUser(data[0])
+		}
+	}
 	return
 }

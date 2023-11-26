@@ -205,15 +205,16 @@ message Stores {
 
 message Store {
   string name = 1;
-  string description = 2;
-  string url = 3;
-  string username = 4;
-  string password = 5;
-  repeated Pair properties = 6;
-  StoreKind kind = 7;
-  bool ready = 8;
-  bool readOnly = 9;
-  bool disabled = 10;
+  string owner = 2;
+  string description = 3;
+  string url = 4;
+  string username = 5;
+  string password = 6;
+  repeated Pair properties = 7;
+  StoreKind kind = 8;
+  bool ready = 9;
+  bool readOnly = 10;
+  bool disabled = 11;
 }
 
 message StoreKinds {

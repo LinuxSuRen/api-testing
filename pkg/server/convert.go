@@ -34,7 +34,8 @@ import (
 // ToGRPCStore convert the normal store to GRPC store
 func ToGRPCStore(store testing.Store) (result *Store) {
 	result = &Store{
-		Name: store.Name,
+		Name:  store.Name,
+		Owner: store.Owner,
 		Kind: &StoreKind{
 			Name:    store.Kind.Name,
 			Url:     store.Kind.URL,
@@ -54,6 +55,7 @@ func ToGRPCStore(store testing.Store) (result *Store) {
 func ToNormalStore(store *Store) (result testing.Store) {
 	result = testing.Store{
 		Name:        store.Name,
+		Owner:       store.Owner,
 		Description: store.Description,
 		URL:         store.Url,
 		Username:    store.Username,
