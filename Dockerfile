@@ -19,6 +19,7 @@ COPY pkg/ pkg/
 COPY extensions/ extensions/
 COPY operator/ operator/
 COPY .github/ .github/
+COPY sample/ sample/
 COPY docs/ docs/
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -72,4 +73,4 @@ RUN apt update -y && \
     apt install -y --no-install-recommends ssh-client ca-certificates && \
     apt install -y curl
 
-CMD ["atest", "server", "--local-storage=/var/data/atest/*.yaml"]
+CMD ["atest", "server", "--local-storage=/var/data/api-testing/*.yaml"]
