@@ -1,7 +1,6 @@
 package kubernetes
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/linuxsuren/api-testing/pkg/util"
 	unstructured "github.com/linuxsuren/unstructured/pkg"
 )
 
@@ -64,11 +64,7 @@ var client *http.Client
 // GetClient returns a default client
 func GetClient() *http.Client {
 	if client == nil {
-		client = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			},
-		}
+		client = util.TlsAwareHTTPClient(true) // TODO should have a way to change it
 	}
 	return client
 }

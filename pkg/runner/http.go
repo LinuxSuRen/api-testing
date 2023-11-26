@@ -26,7 +26,6 @@ package runner
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
@@ -131,12 +130,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		}
 	}()
 
-	client := http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-
+	client := util.TlsAwareHTTPClient(true) // TODO should have a way to change it
 	contextDir := NewContextKeyBuilder().ParentDir().GetContextValueOrEmpty(ctx)
 	if err = testcase.Request.Render(dataContext, contextDir); err != nil {
 		return
@@ -165,7 +159,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 	// TODO only do this for unit testing, should remove it once we have a better way
 	if strings.HasPrefix(testcase.Request.API, "http://") {
-		client = *http.DefaultClient
+		client = http.DefaultClient
 	}
 
 	// send the HTTP request

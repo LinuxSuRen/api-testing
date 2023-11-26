@@ -26,10 +26,17 @@ package util
 
 import (
 	"bytes"
+	"crypto/tls"
 	"io"
-	"io/ioutil"
 	"net/http"
 )
+
+func TlsAwareHTTPClient(insecure bool) *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
+	}
+	return &http.Client{Transport: tr}
+}
 
 func GetDefaultCachedHTTPClient() *http.Client {
 	return &http.Client{
@@ -47,19 +54,13 @@ type cachedClient struct {
 	cacheData map[string][]byte
 }
 
-type cachedResponse struct {
-	body   []byte
-	header http.Header
-	status int
-}
-
 func (c *cachedClient) RoundTrip(req *http.Request) (*http.Response, error) {
 	key := req.URL.String()
 
 	var cachedData *http.Response
 	var ok bool
 	if cachedData, ok = c.cache[key]; ok {
-		cachedData.Body = ioutil.NopCloser(bytes.NewReader(c.cacheData[key]))
+		cachedData.Body = io.NopCloser(bytes.NewReader(c.cacheData[key]))
 		return cachedData, nil
 	}
 
@@ -69,7 +70,7 @@ func (c *cachedClient) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 	var data []byte
 	if data, err = io.ReadAll(resp.Body); err == nil {
-		resp.Body = ioutil.NopCloser(bytes.NewReader(data))
+		resp.Body = io.NopCloser(bytes.NewReader(data))
 	}
 	c.cache[key] = resp
 	c.cacheData[key] = data

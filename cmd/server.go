@@ -258,7 +258,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 				ClientID:     o.clientID,
 				ClientSecret: o.clientSecret,
 			}, o.oauthSkipTls)
-			mux.HandlePath(http.MethodGet, "/token", authHandler.RequestCode)
+			mux.HandlePath(http.MethodGet, "/oauth2/token", authHandler.RequestCode)
+			mux.HandlePath(http.MethodGet, "/oauth2/getLocalCode", authHandler.RequestLocalCode)
+			mux.HandlePath(http.MethodGet, "/oauth2/getUserInfoFromLocalCode", authHandler.RequestLocalToken)
 			mux.HandlePath(http.MethodGet, "/oauth2/callback", authHandler.Callback)
 		}
 
