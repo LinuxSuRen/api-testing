@@ -1,5 +1,6 @@
 stores:
     - name: db
+      owner: ""
       kind:
         name: database
         url: localhost:7071

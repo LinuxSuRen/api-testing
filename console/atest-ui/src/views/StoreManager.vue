@@ -37,6 +37,7 @@ const storeForm = reactive(emptyStore())
 
 interface Store {
   name: string
+  owner: string
   url: string
   username: string
   password: string

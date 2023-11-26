@@ -40,6 +40,7 @@ type StoreConfig struct {
 
 type Store struct {
 	Name        string
+	Owner       string
 	Kind        StoreKind
 	Description string
 	URL         string
@@ -53,6 +54,7 @@ type Store struct {
 func (s *Store) ToMap() (result map[string]string) {
 	result = map[string]string{
 		"name":        s.Name,
+		"owner":       s.Owner,
 		"kind":        s.Kind.Name,
 		"kind.url":    s.Kind.URL,
 		"description": s.Description,
@@ -71,6 +73,7 @@ func (s *Store) ToMap() (result map[string]string) {
 func MapToStore(data map[string]string) (store Store) {
 	store = Store{
 		Name:        data["name"],
+		Owner:       data["owner"],
 		Description: data["description"],
 		URL:         data["url"],
 		Username:    data["username"],
@@ -100,6 +103,7 @@ type StoreKind struct {
 
 type StoreGetterAndSetter interface {
 	GetStores() (stores []Store, err error)
+	GetStoresByOwner(owner string) (stores []Store, err error)
 	GetStore(name string) (store *Store, err error)
 	DeleteStore(name string) (err error)
 	UpdateStore(store Store) (err error)
@@ -128,6 +132,24 @@ func (s *storeFactory) GetStores() (stores []Store, err error) {
 	var storeConfig *StoreConfig
 	if storeConfig, err = s.getStoreConfig(); err == nil {
 		stores = storeConfig.Stores
+	}
+	return
+}
+
+func (s *storeFactory) GetStoresByOwner(owner string) (stores []Store, err error) {
+	var all []Store
+	all, err = s.GetStores()
+	if owner == "" {
+		return all, err
+	}
+	if err == nil {
+		for _, item := range all {
+			if item.Owner != owner {
+				continue
+			}
+
+			stores = append(stores, item)
+		}
 	}
 	return
 }
@@ -188,7 +210,7 @@ func (s *storeFactory) CreateStore(store Store) (err error) {
 		exist := false
 		for i := range storeConfig.Stores {
 			item := storeConfig.Stores[i]
-			if item.Name == store.Name {
+			if item.Name == store.Name && item.Owner == store.Owner {
 				exist = true
 				break
 			}

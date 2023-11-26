@@ -41,6 +41,7 @@ import (
 	"log"
 
 	"github.com/linuxsuren/api-testing/pkg/generator"
+	"github.com/linuxsuren/api-testing/pkg/oauth"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -715,9 +716,14 @@ func (s *server) GetStoreKinds(context.Context, *Empty) (kinds *StoreKinds, err 
 }
 
 func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err error) {
+	user := oauth.GetUserFromContext(ctx)
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	var stores []testing.Store
-	if stores, err = storeFactory.GetStores(); err == nil {
+	var owner string
+	if user != nil {
+		owner = user.Name
+	}
+	if stores, err = storeFactory.GetStoresByOwner(owner); err == nil {
 		reply = &Stores{
 			Data: make([]*Store, 0),
 		}
@@ -741,6 +747,11 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 }
 func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err error) {
 	reply = &Store{}
+	user := oauth.GetUserFromContext(ctx)
+	if user != nil {
+		in.Owner = user.Name
+	}
+
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	store := ToNormalStore(in)
 
