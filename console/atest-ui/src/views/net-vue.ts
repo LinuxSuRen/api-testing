@@ -1,14 +1,18 @@
-/*
+/**
 MIT License
+
 Copyright (c) 2023 API Testing Authors.
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,31 +22,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package runner
+import { API } from './net'
+import type { Ref } from 'vue'
+import { ElMessage } from 'element-plus'
 
-import (
-	"log"
-	"strings"
+function UpdateTestCase(testcase: any,
+    callback: (d: any) => void, errHandle?: (e: any) => void | null,
+    loadingRef?: Ref<Boolean>) {
+    API.UpdateTestCase(testcase, callback, errHandle, (e: boolean) => {
+        if (loadingRef) {
+            loadingRef.value = e
+        }
+    })
+}
 
-	"github.com/linuxsuren/api-testing/pkg/testing"
-	"trpc.group/trpc-go/trpc-go/client"
-)
+function ErrorTip(e: {
+    statusText:''
+}) {
+    ElMessage.error('Oops, ' + e.statusText)
+}
 
-// GetTestSuiteRunner returns a proper runner according to the given test suite.
-func GetTestSuiteRunner(suite *testing.TestSuite) TestCaseRunner {
-	// TODO: should be refactored to meet more types of runners
-	kind := suite.Spec.Kind
-
-	if suite.Spec.RPC != nil {
-		switch strings.ToLower(kind) {
-		case "", "grpc":
-			return NewGRPCTestCaseRunner(suite.API, *suite.Spec.RPC)
-		case "trpc":
-			return NewTRPCTestCaseRunner(suite.API, *suite.Spec.RPC, client.New())
-		default:
-			log.Println("unknown test suite, try to use HTTP runner")
-		}
-	}
-
-	return NewSimpleTestCaseRunner()
+export const UIAPI = {
+    UpdateTestCase,
+    ErrorTip
 }

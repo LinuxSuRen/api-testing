@@ -28,6 +28,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 	"sync"
@@ -228,7 +229,7 @@ func (o *runOption) runSuiteWithDuration(loader testing.Loader) (err error) {
 				defer sem.Release(1)
 				defer wait.Done()
 				defer func() {
-					fmt.Println("routing end with", time.Since(now))
+					log.Println("routing end with", time.Since(now))
 				}()
 
 				dataContext := getDefaultContext()

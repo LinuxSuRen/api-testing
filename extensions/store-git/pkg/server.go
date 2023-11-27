@@ -29,6 +29,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 	"time"
@@ -62,7 +63,7 @@ func (s *gitClient) loadCache(ctx context.Context) (opt *gitOptions, err error) 
 	branch := "master"
 	repoAddr := opt.cloneOptions.URL
 	configDir := opt.cache
-	fmt.Println("load cache from", repoAddr)
+	log.Println("load cache from", repoAddr)
 
 	if ok, _ := util.PathExists(configDir); ok {
 		var repo *git.Repository

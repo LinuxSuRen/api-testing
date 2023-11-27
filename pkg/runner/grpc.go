@@ -314,7 +314,7 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 
 	var dp protoreflect.Descriptor
 	// if fd, ok := r.fdCache.Load(fullname.Parent()); ok {
-	// 	fmt.Println("hit cache",fullname)
+	// 	log.Println("hit cache",fullname)
 	// 	return getMdFromFd(fd.(protoreflect.FileDescriptor), fullname)
 	// }
 

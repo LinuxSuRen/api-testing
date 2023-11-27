@@ -7,6 +7,7 @@ import type { Pair, TestResult, TestCaseWithSuite } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
 import { Cache } from './cache'
 import { API } from './net'
+import { UIAPI } from './net-vue'
 import type { TestCaseResponse } from './cache'
 import { useI18n } from 'vue-i18n'
 import { JSONPath } from 'jsonpath-plus'
@@ -71,7 +72,7 @@ const sendRequest = async () => {
     parameters.value = []
 
     requestLoading.value = false
-    ElMessage.error('Oops, ' + e)
+    UIAPI.ErrorTip(e)
     testResult.value.bodyObject = JSON.parse(e.body)
     testResult.value.originBodyObject = JSON.parse(e.body)
   })
@@ -96,9 +97,7 @@ function openParameterDialog() {
   API.GetTestSuite(props.suite, (e) => {
       parameters.value = e.param
       parameterDialogOpened.value = true
-  }, (e) => {
-    ElMessage.error('Oops, ' + e)
-  })
+  }, UIAPI.ErrorTip)
 }
 
 function sendRequestWithParameter() {
@@ -124,9 +123,7 @@ function generateCode() {
       } else {
         currentCodeContent.value = e.message
       }
-    }, (e) => {
-      ElMessage.error('Oops, ' + e)
-    })
+    }, UIAPI.ErrorTip)
 }
 
 function copyCode() {
@@ -268,23 +265,14 @@ watch(testCaseWithSuite, (after, before) => {
 
 const saveLoading = ref(false)
 function saveTestCase(tip: boolean = true) {
-  saveLoading.value = true
-
-  API.UpdateTestCase(testCaseWithSuite.value, (e) => {
+  UIAPI.UpdateTestCase(testCaseWithSuite.value, (e) => {
     if (tip) {
-      if (e.ok) {
-        ElMessage({
-          message: 'Saved.',
-          type: 'success'
-        })
-  
-        needUpdate.value = false
-      } else {
-        ElMessage.error('Oops, ' + e.statusText)
-      }
+      ElMessage({
+        message: 'Saved.',
+        type: 'success'
+      })
     }
-    saveLoading.value = false
-  })
+  }, UIAPI.ErrorTip, saveLoading)
 }
 
 function deleteTestCase() {
@@ -306,7 +294,7 @@ function deleteTestCase() {
       // clean all the values
       testCaseWithSuite.value = emptyTestCaseWithSuite
     } else {
-      ElMessage.error('Oops, ' + e.statusText)
+      UIAPI.ErrorTip(e)
     }
   })
 }

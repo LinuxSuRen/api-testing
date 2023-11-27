@@ -26,7 +26,7 @@ package generator
 
 import (
 	"encoding/xml"
-	"fmt"
+	"log"
 	"net/url"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -60,7 +60,7 @@ func (c *jmeterConverter) buildJmeterTestPlan(testSuite *testing.TestSuite) (res
 	for _, item := range testSuite.Items {
 		item.Request.RenderAPI(testSuite.API)
 		if reqRenderErr := item.Request.Render(emptyCtx, ""); reqRenderErr != nil {
-			fmt.Println("Error rendering request: ", reqRenderErr)
+			log.Println("Error rendering request: ", reqRenderErr)
 		}
 
 		api, err := url.Parse(item.Request.API)
