@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -85,7 +86,7 @@ type defaultResourceValidator struct {
 // Exist returns true if the specific resource exist
 func (v *defaultResourceValidator) Exist() bool {
 	if v.err != nil {
-		fmt.Println(v.err)
+		log.Println(v.err)
 		return false
 	}
 	return v.data != nil && len(v.data) > 0

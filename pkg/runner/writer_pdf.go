@@ -51,7 +51,7 @@ func (w *pdfResultWriter) Output(result []ReportResult) (err error) {
 
 	pdf := gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
-	fmt.Println(findfont.List()[len(findfont.List())-1])
+	log.Println(findfont.List()[len(findfont.List())-1])
 	fontPath, err := findfont.Find("DejaVuSerif.ttf")
 	if err != nil {
 		panic(err)

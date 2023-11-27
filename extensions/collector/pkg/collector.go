@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 )
@@ -64,19 +65,19 @@ func (c *Collects) Stop() {
 }
 
 func (c *Collects) handleEvents() {
-	fmt.Println("handle events")
+	log.Println("handle events")
 	c.once.Do(func() {
 		go func() {
-			fmt.Println("start handle events")
+			log.Println("start handle events")
 			for {
 				select {
 				case key := <-c.signal:
-					fmt.Println("receive signal", key)
+					log.Println("receive signal", key)
 					for _, e := range c.events {
 						e(c.keys[key])
 					}
 				case <-c.stopSignal:
-					fmt.Println("stop")
+					log.Println("stop")
 					return
 				}
 			}

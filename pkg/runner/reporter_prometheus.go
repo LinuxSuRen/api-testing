@@ -25,7 +25,7 @@ SOFTWARE.
 package runner
 
 import (
-	"fmt"
+	"log"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -91,7 +91,7 @@ func (w *prometheusReporter) PutRecord(record *ReportRecord) {
 		}
 
 		if err := pusher.Push(); err != nil {
-			fmt.Println("Could not push completion time to Pushgateway:", err)
+			log.Println("Could not push completion time to Pushgateway:", err)
 		}
 	}()
 	if w.sync {

@@ -1,3 +1,27 @@
+/**
+MIT License
+
+Copyright (c) 2023 API Testing Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 package testing
 
 import (
@@ -117,7 +141,7 @@ func (l *fileLoader) Put(item string) (err error) {
 		if files, err = filepath.Glob(pattern); err == nil {
 			l.paths = append(l.paths, files...)
 		}
-		fmt.Println(pattern, "pattern", len(files))
+		log.Println(pattern, "pattern", len(files))
 	}
 	return
 }
@@ -189,9 +213,15 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 		if l.parent == "" {
 			l.parent = path.Dir(absPath)
 		}
+
+		if err = os.MkdirAll(l.parent, 0755); err != nil {
+			err = fmt.Errorf("failed to create %q", l.parent)
+			return
+		}
+
 		newSuiteFile := path.Join(l.parent, fmt.Sprintf("%s.yaml", name))
 		if newSuiteFile, err = filepath.Abs(newSuiteFile); err == nil {
-			fmt.Println("new suite file:", newSuiteFile)
+			log.Println("new suite file:", newSuiteFile)
 
 			suite := &TestSuite{
 				Name: name,

@@ -27,7 +27,7 @@ package pkg
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/server"
@@ -291,7 +291,7 @@ func saveTestSuite(ctx context.Context, cli SimpleKV, suite *testing.TestSuite) 
 	var data []byte
 	if data, err = testing.ToYAML(suite); err == nil {
 		_, err = cli.Put(ctx, getKey(suite.Name), string(data))
-		fmt.Println("save to etcd", err)
+		log.Println("save to etcd", err)
 	}
 	return
 }

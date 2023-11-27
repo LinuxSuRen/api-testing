@@ -40,6 +40,13 @@ interface AppVersion {
   message: string
 }
 
+function safeToggleFunc(toggle?: (e: boolean) => void) {
+  if (!toggle) {
+    return (e: boolean) => {}
+  }
+  return toggle
+}
+
 function GetVersion(callback: (v: AppVersion) => void) {
   const requestOptions = {
     method: 'POST',
@@ -96,8 +103,8 @@ function UpdateTestSuite(suite: any,
     .then(callback).catch(errHandle)
 }
 
-function GetTestSuite(name: string, callback: () => void,
-  errHandle: (e: any) => void) {
+function GetTestSuite(name: string,
+  callback: (d: any) => void, errHandle: (e: any) => void) {
   const store = Cache.GetCurrentStore()
   const requestOptions = {
     method: 'POST',
@@ -149,7 +156,7 @@ function ConvertTestSuite(suiteName: string, genertor: string,
   .then(callback).catch(errHandle)
 }
 
-function ImportTestSuite(source: ImportSource, callback: () => void) {
+function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -174,7 +181,7 @@ interface TestCase {
 }
 
 function CreateTestCase(testcase: TestCase,
-  callback: () => {}, errHandle?: (e: any) => void | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -199,7 +206,8 @@ function CreateTestCase(testcase: TestCase,
 }
 
 function UpdateTestCase(testcase: any,
-  callback: () => {}, errHandle?: (e: any) => void | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => void | null,
+  toggle?: (e: boolean) => void) {
     const requestOptions = {
       method: 'POST',
       headers: {
@@ -208,9 +216,13 @@ function UpdateTestCase(testcase: any,
       },
       body: JSON.stringify(testcase)
     }
+    safeToggleFunc(toggle)(true)
     fetch('/server.Runner/UpdateTestCase', requestOptions)
       .then(DefaultResponseProcess)
       .then(callback).catch(errHandle)
+      .finally(() => {
+        safeToggleFunc(toggle)(false)
+      })
 }
 
 function GetTestCase(req: TestCase,
@@ -227,7 +239,7 @@ function GetTestCase(req: TestCase,
     })
   }
   fetch('/server.Runner/GetTestCase', requestOptions)
-    .then((response) => response.json())
+    .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
 

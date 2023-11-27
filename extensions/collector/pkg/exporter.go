@@ -3,6 +3,7 @@ package pkg
 import (
 	"fmt"
 	"io"
+	"log"
 	"strings"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -30,7 +31,7 @@ func NewSampleExporter(saveResponseBody bool) *SampleExporter {
 func (e *SampleExporter) Add(reqAndResp *RequestAndResponse) {
 	r, resp := reqAndResp.Request, reqAndResp.Response
 
-	fmt.Println("receive", r.URL.Path)
+	log.Println("receive", r.URL.Path)
 	req := atestpkg.Request{
 		API:    r.URL.String(),
 		Method: r.Method,
