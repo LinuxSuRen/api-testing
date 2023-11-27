@@ -397,6 +397,93 @@ function VerifyStore(name: string,
     .then(callback).catch(errHandle)
 }
 
+function GetSecrets(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
+  }
+  fetch('/server.Runner/GetSecrets', requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback)
+    .catch(errHandle)
+}
+
+function FunctionsQuery(filter: string,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      name: filter
+    })
+  }
+  fetch('/server.Runner/FunctionsQuery', requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle)
+}
+
+function DeleteSecret(name: string,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      name: name
+    })
+  }
+  fetch('/server.Runner/DeleteSecret', requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback)
+    .catch(errHandle)
+}
+
+function CreateOrUpdateSecret(payload: any, create: boolean,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null,
+  toggle?: (e: boolean) => void) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify(payload)
+  }
+  
+  let api = '/server.Runner/CreateSecret'
+  if (!create) {
+    api = '/server.Runner/UpdateSecret'
+  }
+
+  safeToggleFunc(toggle)(true)
+  fetch(api, requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle).finally(() => {
+      safeToggleFunc(toggle)(false)
+    })
+}
+
+function GetSuggestedAPIs(name: string,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      name: name
+    })
+  }
+  fetch('/server.Runner/GetSuggestedAPIs', requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback)
+}
+
 function getToken() {
   const token = sessionStorage.getItem('token')
   if (!token) {
@@ -413,5 +500,8 @@ export const API = {
   GenerateCode, ListCodeGenerator,
   PopularHeaders,
   GetStores, DeleteStore, VerifyStore,
+  FunctionsQuery,
+  GetSecrets, DeleteSecret, CreateOrUpdateSecret,
+  GetSuggestedAPIs,
   getToken
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { Pair } from './types'
+import { API } from './net'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -10,17 +11,9 @@ const query = ref('')
 const funcs = ref([] as Pair[])
 
 function queryFuncs() {
-    const requestOptions = {
-      method: 'POST',
-      body: JSON.stringify({
-        name: query.value
-      })
-    }
-    fetch('/server.Runner/FunctionsQuery', requestOptions)
-      .then((response) => response.json())
-      .then((e) => {
-        funcs.value = e.data
-      })
+    API.FunctionsQuery(query.value, (d) => {
+        funcs.value = d.data
+    })
 }
 </script>
 

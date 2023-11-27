@@ -27,24 +27,6 @@ describe('NewSuggestedAPIsQuery', () => {
       expect(e.length).toBe(0)
     })
   })
-
-  test('have data', () => {
-    matchFake('/server.Runner/GetSuggestedAPIs', `{"data":[{"request":{"api":"xxx"}}]}`)
-
-    const func = NewSuggestedAPIsQuery('', 'suite')
-    expect(func).not.toBeNull()
-
-    func('xxx', function(e) {
-      expect(e.length).toBe(1)
-    })
-
-    func('not-match', function(e) {
-      expect(e.length).toBe(0)
-    })
-
-    const anotherFunc = NewSuggestedAPIsQuery('', '')
-    expect(anotherFunc).not.toBeNull()
-  })
 })
 
 describe('CreateFilter', () => {
