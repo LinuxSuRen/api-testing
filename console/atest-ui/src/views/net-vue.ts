@@ -36,6 +36,16 @@ function UpdateTestCase(testcase: any,
     })
 }
 
+function CreateOrUpdateSecret(payload: any, create: boolean,
+    callback: (d: any) => void,
+    loadingRef?: Ref<Boolean>) {
+    API.CreateOrUpdateSecret(payload, create, callback, ErrorTip, (e: boolean) => {
+        if (loadingRef) {
+            loadingRef.value = e
+        }
+    })
+}
+
 function ErrorTip(e: {
     statusText:''
 }) {
@@ -43,6 +53,6 @@ function ErrorTip(e: {
 }
 
 export const UIAPI = {
-    UpdateTestCase,
+    UpdateTestCase, CreateOrUpdateSecret,
     ErrorTip
 }

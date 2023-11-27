@@ -3,6 +3,8 @@ import { ElMessage } from 'element-plus'
 import { reactive, ref } from 'vue'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
+import { API } from './net'
+import { UIAPI } from './net-vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -21,45 +23,20 @@ interface Secret {
 }
 
 function loadStores() {
-  const requestOptions = {
-    method: 'POST',
-  }
-  fetch('/server.Runner/GetSecrets', requestOptions)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(response.statusText)
-      } else {
-        response.json()
-      }
-    })
-    .then((e) => {
-      secrets.value = e.data
-    })
-    .catch((e) => {
-      ElMessage.error('Oops, ' + e)
-    })
+  API.GetSecrets((e) => {
+    secrets.value = e.data
+  }, UIAPI.ErrorTip)
 }
 loadStores()
 
 function deleteSecret(name: string) {
-  const requestOptions = {
-    method: 'POST',
-    body: JSON.stringify({
-      name: name
-    })
-  }
-  fetch('/server.Runner/DeleteSecret', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
+  API.DeleteSecret(name, () => {
       ElMessage({
         message: 'Deleted.',
         type: 'success'
       })
       loadStores()
-    })
-    .catch((e) => {
-      ElMessage.error('Oops, ' + e)
-    })
+    }, UIAPI.ErrorTip)
 }
 
 function editSecret(name: string) {
@@ -84,26 +61,11 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid: boolean, fields) => {
     if (valid) {
-      creatingLoading.value = true
-
-      const requestOptions = {
-        method: 'POST',
-        body: JSON.stringify(secret.value)
-      }
-      
-      let api = '/server.Runner/CreateSecret'
-      if (!createAction.value) {
-        api = '/server.Runner/UpdateSecret'
-      }
-
-      fetch(api, requestOptions)
-        .then((response) => response.json())
-        .then(() => {
-          creatingLoading.value = false
+      UIAPI.CreateOrUpdateSecret(secret.value, createAction.value, () => {
           loadStores()
           dialogVisible.value = false
           formEl.resetFields()
-        })
+      }, creatingLoading)
     }
   })
 }

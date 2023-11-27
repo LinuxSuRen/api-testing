@@ -24,6 +24,7 @@ SOFTWARE.
 
 import { ref } from 'vue'
 import _ from 'lodash'
+import { API } from './net'
 
 export interface Suite {
   name: string
@@ -109,24 +110,13 @@ function loadCache(store: string, suite: string, callback: Function) {
     return
   }
 
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-      'X-Store-Name': store
-    },
-    body: JSON.stringify({
-      name: suite
+  API.GetSuggestedAPIs(suite, (e) => {
+    localCache.value = e.data
+    localCache.value.forEach((v: TestCaseWithValue) => {
+      v.value = v.request.api
     })
-  }
-  fetch('/server.Runner/GetSuggestedAPIs', requestOptions)
-    .then((response) => response.json())
-    .then((e) => {
-      localCache.value = e.data
-      localCache.value.forEach((v: TestCaseWithValue) => {
-        v.value = v.request.api
-      })
-      callback()
-    })
+    callback()
+  })
 }
 
 interface TestCaseWithValue extends TestCase, Pair {}
