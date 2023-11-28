@@ -84,5 +84,6 @@ const (
 	JSON               = "application/json"
 	YAML               = "application/yaml"
 	ZIP                = "application/zip"
+	OctetStream        = "application/octet-stream"
 	Plain              = "text/plain"
 )

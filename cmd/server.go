@@ -364,7 +364,9 @@ func debugHandler(mux *runtime.ServeMux) {
 }
 
 func (o *serverOption) getAtestBinary(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	w.Header().Set(util.ContentDisposition, "attachment; filename=atest")
+	name := util.EmptyThenDefault(r.URL.Query().Get("name"), "atest")
+
+	w.Header().Set(util.ContentDisposition, fmt.Sprintf("attachment; filename=%s", name))
 	w.Header().Set(util.ContentType, "application/octet-stream")
 	w.Header().Set("Content-Transfer-Encoding", "binary")
 	w.Header().Set("Expires", "0")
@@ -372,12 +374,12 @@ func (o *serverOption) getAtestBinary(w http.ResponseWriter, r *http.Request, pa
 	w.Header().Set("Cache-Control", "no-cache")
 
 	var data []byte
-	if atestPath, err := o.execer.LookPath("atest"); err == nil {
+	if atestPath, err := o.execer.LookPath(name); err == nil {
 		if data, err = os.ReadFile(atestPath); err != nil {
-			data = []byte(fmt.Sprintf("failed to read atest: %v", err))
+			data = []byte(fmt.Sprintf("failed to read %q: %v", name, err))
 		}
 	} else {
-		data = []byte("not found atest")
+		data = []byte(fmt.Sprintf("not found %q", name))
 	}
 	w.Write(data)
 }

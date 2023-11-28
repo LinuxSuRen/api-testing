@@ -177,7 +177,7 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 		resp := newFakeResponseWriter()
 
 		opt.getAtestBinary(resp, req, map[string]string{})
-		assert.Equal(t, "not found atest", resp.GetBody().String())
+		assert.Equal(t, `not found "atest"`, resp.GetBody().String())
 	})
 
 	t.Run("download atest, failed to read", func(t *testing.T) {
@@ -193,7 +193,7 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 		resp := newFakeResponseWriter()
 
 		opt.getAtestBinary(resp, req, map[string]string{})
-		assert.Equal(t, "failed to read atest: open : no such file or directory", resp.GetBody().String())
+		assert.Equal(t, `failed to read "atest": open : no such file or directory`, resp.GetBody().String())
 	})
 }
 
