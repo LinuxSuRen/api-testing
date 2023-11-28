@@ -170,13 +170,6 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 	r.log.Debug("status code: %d\n", resp.StatusCode)
 
-	var responseBodyData []byte
-	if responseBodyData, err = r.withResponseRecord(resp); err != nil {
-		return
-	}
-	record.Body = string(responseBodyData)
-	r.log.Trace("response body: %s\n", record.Body)
-
 	if err = testcase.Expect.Render(dataContext); err != nil {
 		return
 	}
@@ -193,11 +186,23 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	}
 
 	respType := util.GetFirstHeaderValue(resp.Header, util.ContentType)
-	if output, err = verifyResponseBodyData(testcase.Name, testcase.Expect, respType, responseBodyData); err != nil {
-		return
-	}
 
-	err = jsonSchemaValidation(testcase.Expect.Schema, responseBodyData)
+	var responseBodyData []byte
+	if isNonBinaryContent(respType) {
+		if responseBodyData, err = r.withResponseRecord(resp); err != nil {
+			return
+		}
+		record.Body = string(responseBodyData)
+		r.log.Trace("response body: %s\n", record.Body)
+
+		if output, err = verifyResponseBodyData(testcase.Name, testcase.Expect, respType, responseBodyData); err != nil {
+			return
+		}
+
+		err = jsonSchemaValidation(testcase.Expect.Schema, responseBodyData)
+	} else {
+		r.log.Trace(fmt.Sprintf("skip to read the body due to it is not struct content: %q\n", respType))
+	}
 	return
 }
 
@@ -327,4 +332,14 @@ func runJob(job *testing.Job, ctx interface{}, current interface{}) (err error) 
 		}
 	}
 	return
+}
+
+// isNonBinaryContent detect if the content belong to binary
+func isNonBinaryContent(contentType string) bool {
+	switch contentType {
+	case util.JSON, util.YAML, util.Plain:
+		return true
+	default:
+		return false
+	}
 }

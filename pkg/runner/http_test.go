@@ -191,7 +191,8 @@ func TestTestCase(t *testing.T) {
 		},
 		prepare: func() {
 			gock.New(urlLocalhost).
-				Get("/foo").Reply(http.StatusOK).BodyString("foo")
+				Get("/foo").Reply(http.StatusOK).
+				SetHeader(util.ContentType, util.Plain).BodyString("foo")
 		},
 	}, {
 		name: "not match with header",
@@ -537,6 +538,28 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	assert.NotEmpty(t, result)
 	method := result[0].Request.Method
 	assert.Equal(t, strings.ToUpper(method), method)
+}
+
+func TestIsStructContent(t *testing.T) {
+	tests := []struct {
+		contentType string
+		expectOk    bool
+	}{{
+		contentType: util.JSON,
+		expectOk:    true,
+	}, {
+		contentType: util.YAML,
+		expectOk:    true,
+	}, {
+		contentType: util.OctetStream,
+		expectOk:    false,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.contentType, func(t *testing.T) {
+			ok := isNonBinaryContent(tt.contentType)
+			assert.Equal(t, tt.expectOk, ok)
+		})
+	}
 }
 
 const defaultSchemaForTest = `{"properties": {

@@ -32,6 +32,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -280,7 +281,7 @@ func (s *gitClient) getClient(ctx context.Context) (opt *gitOptions, err error) 
 		insecure := store.Properties["insecure"] == "true"
 
 		opt = &gitOptions{
-			cache:      path.Join(os.TempDir(), store.Name),
+			cache:      filepath.Join(os.TempDir(), store.Name),
 			targetPath: store.Properties["targetpath"],
 			name:       store.Properties["name"],
 			email:      store.Properties["email"],

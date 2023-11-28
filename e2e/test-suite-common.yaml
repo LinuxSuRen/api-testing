@@ -216,3 +216,73 @@ items:
         "suite": "{{.param.gRPCSuiteName}}",
         "testcase": "{{.param.gRPCCaseName}}"
       }
+- name: version
+  request:
+    api: /GetVersion
+    method: POST
+- name: popularHeaders
+  request:
+    api: /PopularHeaders
+    method: POST
+  expect:
+    verify:
+      - any(data.data, {.key == "Content-Type"})
+      - any(data.data, {.key == "Authorization"})
+- name: functionsQuery
+  request:
+    api: /FunctionsQuery
+    method: POST
+    body: |
+      {"name": "rand"}
+  expect:
+    verify:
+      - any(data.data, {.key == "randNumeric"})
+      - any(data.data, {.key == "randAlpha"})
+      - len(data.data) >= 8
+- name: findUnknownFunction
+  request:
+    api: /FunctionsQuery
+    method: POST
+    body: |
+      {"name": "{{randAlpha 8}}"}
+  expect:
+    verify:
+      - len(data.data) == 0
+- name: listCodeGenerator
+  request:
+    api: /ListCodeGenerator
+    method: POST
+  expect:
+    verify:
+      - any(data.data, {.key == "curl"})
+      - len(data.data) >= 3
+
+## Other
+- name: downloadTool
+  request:
+    api: |
+      {{.param.server}}/get
+  expect:
+    header:
+      Content-Type: application/octet-stream
+      Content-Disposition: attachment; filename=atest
+      Content-Transfer-Encoding: binary
+- name: downloadExtGit
+  request:
+    api: |
+      {{.param.server}}/get?name=atest-store-git
+  expect:
+    header:
+      Content-Type: application/octet-stream
+      Content-Disposition: attachment; filename=atest-store-git
+      Content-Transfer-Encoding: binary
+- name: oauth
+  request:
+    api: |
+      {{.param.server}}/oauth2/token
+  expect:
+    statusCode: 404
+- name: debugCmdLine
+  request:
+    api: |
+      {{.param.server}}/debug/pprof/cmdline
