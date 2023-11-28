@@ -5,10 +5,6 @@ COPY console/atest-ui .
 RUN npm install --ignore-scripts --registry=https://registry.npmmirror.com
 RUN npm run build-only
 
-# FROM docker.io/apache/skywalking-go:0.4.0-go1.19 AS sk
-# use above tag once https://github.com/apache/skywalking-go/pull/134 got released
-FROM ghcr.io/apache/skywalking-go/skywalking-go:74b68861aed04b4d78fcc5b4bcd925113f7de81d-go1.19 AS sk
-
 FROM docker.io/golang:1.19 AS builder
 
 ARG VERSION
@@ -33,17 +29,15 @@ COPY --from=ui /workspace/dist/index.html cmd/data/index.html
 COPY --from=ui /workspace/dist/assets/*.js cmd/data/index.js
 COPY --from=ui /workspace/dist/assets/*.css cmd/data/index.css
 
-COPY --from=sk /usr/local/bin/skywalking-go-agent /usr/local/bin/skywalking-go-agent
-
-# RUN GOPROXY=${GOPROXY} go mod download
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -toolexec="skywalking-go-agent" -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}\
+# RUN go mod download
+RUN CGO_ENABLED=0 go build -v -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}\
     -X github.com/linuxsuren/api-testing/pkg/version.date=$(date +%Y-%m-%d)" -o atest .
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-collector extensions/collector/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-etcd extensions/store-etcd/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-mongodb extensions/store-mongodb/main.go
-RUN GOPROXY=${GOPROXY} CGO_ENABLED=0 go build -v -toolexec="skywalking-go-agent" -a -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
+RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-collector extensions/collector/main.go
+RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
+RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
+RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-etcd extensions/store-etcd/main.go
+RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-mongodb extensions/store-mongodb/main.go
+RUN CGO_ENABLED=0 go build -v -a -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
 
 FROM docker.io/library/ubuntu:23.04
 

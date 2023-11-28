@@ -36,6 +36,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -51,27 +52,28 @@ func NewRemoteServer() (s remote.LoaderServer) {
 }
 
 func createDB(user, password, address, database, driver string) (db *gorm.DB, err error) {
+	var dialector gorm.Dialector
 	var dsn string
 	switch driver {
 	case "mysql", "":
 		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4", user, password, address, database)
+		dialector = mysql.Open(dsn)
 	case "postgres":
 		obj := strings.Split(address, ":")
 		host, port := obj[0], obj[1]
 		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai", host, user, password, database, port)
-	case "clickhouse":
-		dsn = fmt.Sprintf("tcp://%s?database=%s&username=%s&password=%s&read_timeout=10&write_timeout=20", address, database, user, password)
+		dialector = postgres.Open(dsn)
 	default:
 		err = fmt.Errorf("invalid database driver %q", driver)
 		return
 	}
 
 	log.Printf("try to connect to %q", dsn)
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	db, err = gorm.Open(dialector, &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
-		err = fmt.Errorf("failed to connect to %s, %v", dsn, err)
+		err = fmt.Errorf("failed to connect to %q %v", dsn, err)
 		return
 	}
 
