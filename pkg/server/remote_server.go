@@ -185,7 +185,11 @@ func (s *server) getLoader(ctx context.Context) (loader testing.Writer) {
 				return
 			}
 
-			loader, _ = s.getLoaderByStoreName(storeName)
+			var err error
+			if loader, err = s.getLoaderByStoreName(storeName); err != nil {
+				log.Println("failed to get loader", storeName, err)
+				loader = testing.NewNonWriter()
+			}
 		}
 	}
 	return
