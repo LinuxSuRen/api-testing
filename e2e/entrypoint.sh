@@ -21,8 +21,7 @@ kind=mongodb target=mongo:27017 atest run -p test-suite-common.yaml
 # fi
 
 # TODO need to fix below cases
-# kind=orm target=postgres:5432 driver=postgres atest run -p test-suite-common.yaml
-# kind=orm target=clickhouse:9004 driver=mysql dbname=default atest run -p test-suite-common.yaml
+kind=orm target=postgres:5432 driver=postgres atest run -p test-suite-common.yaml
 # kind=s3 target=minio:9000 atest run -p test-suite-common.yaml
 
 cat /root/.config/atest/stores.yaml

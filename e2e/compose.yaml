@@ -15,10 +15,8 @@ services:
         condition: service_healthy
       mongo:
         condition: service_healthy
-      # postgres:
-      #   condition: service_healthy
-      # clickhouse:
-      #   condition: service_healthy
+      postgres:
+        condition: service_healthy
       # minio:
       #   condition: service_started
     links:
@@ -27,8 +25,7 @@ services:
       - mariadb
       - mongo
       # - minio
-      # - postgres
-      # - clickhouse
+      - postgres
   etcd:
     image: "bitnami/etcd:3.5.10"
     expose:
@@ -82,27 +79,15 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
-  # postgres:
-  #   image: postgres:16.0
-  #   environment:
-  #     POSTGRES_USER: root
-  #     POSTGRES_PASSWORD: root
-  #     POSTGRES_DB: atest
-  #   healthcheck:
-  #     test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/5432"]
-  #     interval: 3s
-  #     timeout: 30s
-  #     retries: 10
-  #     start_period: 3s
-  # clickhouse:
-  #   image: bitnami/clickhouse:23.10.2
-  #   environment:
-  #     CLICKHOUSE_ADMIN_USER: root
-  #     CLICKHOUSE_ADMIN_PASSWORD: root
-  #     CLICKHOUSE_MYSQL_PORT: 9004
-  #   healthcheck:
-  #     test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/9004"]
-  #     interval: 3s
-  #     timeout: 30s
-  #     retries: 10
-  #     start_period: 3s
+  postgres:
+    image: postgres:16.0
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: atest
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/5432"]
+      interval: 3s
+      timeout: 30s
+      retries: 10
+      start_period: 3s
