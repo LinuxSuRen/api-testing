@@ -8,6 +8,7 @@ describe('gRPC', () => {
   it('Create Suite', () => {
     cy.visit('/')
     cy.get('.introjs-skipbutton').click()
+    cy.get('[test-id="testing-menu"]').click()
 
     createTestSuite(store, 'gRPC', suiteName, sampleAPIAddress)
   })
