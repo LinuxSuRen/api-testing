@@ -10,6 +10,7 @@ describe('Suite Manage', () => {
   it('Create Suite', () => {
     cy.visit('/')
     cy.get('.introjs-skipbutton').click()
+    cy.get('[test-id="testing-menu"]').click()
 
     cy.contains('span', 'Tool Box')
     createTestSuite(store, 'HTTP', suiteName, sampleAPIAddress)
