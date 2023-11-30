@@ -33,7 +33,7 @@ import (
 func NewRootCmd(s3Creator pkg.S3Creator) (c *cobra.Command) {
 	opt := &option{
 		s3Creator: s3Creator,
-		Extension: ext.NewExtension("s3", 7072),
+		Extension: ext.NewExtension("s3", "store", 7072),
 	}
 	c = &cobra.Command{
 		Use:   opt.GetFullName(),

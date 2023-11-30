@@ -25,8 +25,6 @@ SOFTWARE.
 package extension
 
 import (
-	"github.com/stretchr/testify/assert"
-	"strings"
 	"testing"
 )
 
@@ -49,8 +47,4 @@ func TestGetListenAddress(t *testing.T) {
 	if address != ":8080" {
 		t.Errorf("Expected :8080, but got %s", address)
 	}
-}
-
-func TestStoreName(t *testing.T) {
-	assert.True(t, strings.HasPrefix(StoreName("fake"), "atest-store-"))
 }

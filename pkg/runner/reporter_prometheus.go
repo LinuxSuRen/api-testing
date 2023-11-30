@@ -57,8 +57,7 @@ func (w *prometheusReporter) PutRecord(record *ReportRecord) {
 	go func() {
 		defer wait.Done()
 
-		var responseTime prometheus.Gauge
-		responseTime = prometheus.NewGauge(prometheus.GaugeOpts{
+		responseTime := prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace:   namespace,
 			Name:        "response_time",
 			ConstLabels: getConstLabels(record),
@@ -98,6 +97,10 @@ func (w *prometheusReporter) PutRecord(record *ReportRecord) {
 		wait.Wait()
 	}
 	return
+}
+
+func (r *prometheusReporter) GetResourceUsage() []ResourceUsage {
+	return nil
 }
 
 func getConstLabels(record *ReportRecord) prometheus.Labels {

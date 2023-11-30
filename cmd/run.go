@@ -30,6 +30,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -37,10 +39,13 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/limit"
 	"github.com/linuxsuren/api-testing/pkg/runner"
+	"github.com/linuxsuren/api-testing/pkg/runner/monitor"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"golang.org/x/sync/semaphore"
+	"google.golang.org/grpc"
 )
 
 type runOption struct {
@@ -63,6 +68,7 @@ type runOption struct {
 	level              string
 	caseItems          []string
 	githubReportOption *runner.GithubPRCommentOption
+	monitorDocker      string
 
 	// for internal use
 	loader testing.Loader
@@ -70,7 +76,7 @@ type runOption struct {
 
 func newDefaultRunOption() *runOption {
 	return &runOption{
-		reporter:           runner.NewMemoryTestReporter(),
+		reporter:           runner.NewMemoryTestReporter(nil, ""),
 		reportWriter:       runner.NewResultWriter(os.Stdout),
 		loader:             testing.NewFileLoader(),
 		githubReportOption: &runner.GithubPRCommentOption{},
@@ -112,6 +118,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
 	flags.Int32VarP(&opt.qps, "qps", "", 5, "QPS")
 	flags.Int32VarP(&opt.burst, "burst", "", 5, "burst")
+	flags.StringVarP(&opt.monitorDocker, "monitor-docker", "", "", "The docker container name to monitor")
 	addGitHubReportFlags(flags, opt.githubReportOption)
 	return
 }
@@ -163,7 +170,47 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
+	if err == nil {
+		err = o.startMonitor()
+	}
+
 	o.caseItems = args
+	return
+}
+
+func (o *runOption) startMonitor() (err error) {
+	if o.monitorDocker == "" {
+		return
+	}
+
+	var monitorBin string
+	if monitorBin, err = exec.LookPath("atest-monitor-docker"); err != nil {
+		return
+	}
+
+	sockFile := os.ExpandEnv(fmt.Sprintf("$HOME/.config/atest/%s.sock", "atest-monitor-docker"))
+	os.MkdirAll(filepath.Dir(sockFile), 0755)
+
+	execer := fakeruntime.DefaultExecer{}
+	go func(socketURL, plugin string) {
+		if err = execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, "server", "--socket", socketURL); err != nil {
+			log.Printf("failed to start %s, error: %v", socketURL, err)
+		}
+	}(sockFile, monitorBin)
+
+	for i := 0; i < 6; i++ {
+		_, fErr := os.Stat(sockFile)
+		if fErr == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	var conn *grpc.ClientConn
+	monitorServer := fmt.Sprintf("unix://%s", sockFile)
+	if conn, err = grpc.Dial(monitorServer, grpc.WithInsecure()); err == nil {
+		o.reporter = runner.NewMemoryTestReporter(monitor.NewMonitorClient(conn), o.monitorDocker)
+	}
 	return
 }
 
@@ -172,7 +219,7 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 	o.context = cmd.Context()
 	o.limiter = limit.NewDefaultRateLimiter(o.qps, o.burst)
 	defer func() {
-		cmd.Printf("consume: %s\n", time.Since(o.startTime).String())
+		cmd.Printf("\nconsume: %s\n", time.Since(o.startTime).String())
 		o.limiter.Stop()
 	}()
 
@@ -195,6 +242,7 @@ func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 	var reportErr error
 	var results runner.ReportResultSlice
 	if results, reportErr = o.reporter.ExportAllReportResults(); reportErr == nil {
+		o.reportWriter.WithResourceUsage(o.reporter.GetResourceUsage())
 		outputErr := o.reportWriter.Output(results)
 		println(cmd, outputErr, "failed to Output all reports", outputErr)
 	}

@@ -24,13 +24,17 @@ SOFTWARE.
 
 package runner
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // TestReporter is the interface of the report
 type TestReporter interface {
 	PutRecord(*ReportRecord)
 	GetAllRecords() []*ReportRecord
 	ExportAllReportResults() (ReportResultSlice, error)
+	GetResourceUsage() []ResourceUsage
 }
 
 // ReportRecord represents the raw data of a request
@@ -61,7 +65,7 @@ func (r *ReportRecord) ErrorCount() int {
 // GetErrorMessage returns the error message
 func (r *ReportRecord) GetErrorMessage() string {
 	if r.ErrorCount() > 0 {
-		return r.Body
+		return fmt.Sprintf("Case: %s. error: %v. body: %s", r.Name, r.Error, r.Body)
 	} else {
 		return ""
 	}
@@ -72,4 +76,10 @@ func NewReportRecord() *ReportRecord {
 	return &ReportRecord{
 		BeginTime: time.Now(),
 	}
+}
+
+type ResourceUsage struct {
+	Memory uint64
+	CPU    uint64
+	Time   time.Time
 }

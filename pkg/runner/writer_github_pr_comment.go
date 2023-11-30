@@ -193,6 +193,10 @@ func (w *githubPRCommentWriter) WithAPIConverage(apiConverage apispec.APIConvera
 	return
 }
 
+func (w *githubPRCommentWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
+	return w
+}
+
 func unmarshalResponseBody(resp *http.Response, expectedCode int, obj interface{}) (err error) {
 	if resp.StatusCode != expectedCode {
 		err = fmt.Errorf("expect status code: %d, but %d", expectedCode, resp.StatusCode)

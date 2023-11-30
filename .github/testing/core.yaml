@@ -4,13 +4,15 @@
 name: atest
 api: |
   {{default "http://localhost:8080/server.Runner" (env "SERVER")}}
+param:
+  name: "{{randAlpha 6}}"
 items:
 - name: createSuite
   request:
     api: /CreateTestSuite
     method: POST
     body: |
-      {"name": "{{randAlpha 6}}"}
+      {"name": "{{.param.name}}"}
 - name: suites
   request:
     api: /GetSuites
@@ -20,10 +22,10 @@ items:
     api: /GetTestSuite
     method: POST
     body: |
-      {"name": "{{randAlpha 6}}"}
+      {"name": "{{.param.name}}"}
   expect:
     bodyFieldsExpect:
-      name: ""
+      name: "{{.param.name}}"
       api: ""
 - name: UpdateTestSuite
   request:
@@ -31,7 +33,7 @@ items:
     method: POST
     body: |
       {
-        "name": "{{index (keys .suites.data) 0}}",
+        "name": "{{.param.name}}",
         "api": "{{randAlpha 6}}"}
       }
 - name: DeleteTestSuiteNotFound
@@ -48,7 +50,7 @@ items:
     api: /ListTestCase
     method: POST
     body: |
-      {"name": "{{index (keys .suites.data) (randInt 0 (len (keys .suites.data)))}}"}
+      {"name": "{{.param.name}}"}
 - name: list-testcases-not-found
   request:
     api: /ListTestCase
@@ -95,7 +97,7 @@ items:
     method: POST
     body: |
       {
-        "TestSuite": "{{index (keys .suites.data) 0}}",
+        "TestSuite": "{{.param.name}}",
         "TestCase": "{{randAlpha 6}}",
         "Generator": "golang"
       }
@@ -117,7 +119,7 @@ items:
     method: POST
     body: |
       {
-        "TestSuite": "{{index (keys .suites.data) 0}}",
+        "TestSuite": "{{.param.name}}",
         "Generator": "jmeter"
       }
   expect:
@@ -155,4 +157,4 @@ items:
     api: /DeleteTestSuite
     method: POST
     body: |
-      {"name": "{{index (keys .suites.data) 0}}"}
+      {"name": "{{.param.name}}"}

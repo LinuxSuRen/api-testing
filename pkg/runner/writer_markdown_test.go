@@ -116,6 +116,50 @@ func TestMarkdownWriter(t *testing.T) {
 | api | 3ns | 4ns | 2ns | 3 | 1 |
 </details>`, buf.String())
 	})
+
+	t.Run("with resource usage", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		writer := runner.NewMarkdownResultWriter(buf)
+		writer.WithAPIConverage(nil)
+		writer.WithResourceUsage([]runner.ResourceUsage{{
+			CPU:    1,
+			Memory: 1,
+		}})
+		err := writer.Output(createSlice(sample, 2))
+		assert.Nil(t, err)
+		assert.Equal(t, `There are 2 test cases:
+
+| API | Average | Max | Min | Count | Error |
+|---|---|---|---|---|---|
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+
+Resource usage:
+* CPU: 1
+* Memory: 1`, buf.String())
+	})
+
+	t.Run("have error message", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		writer := runner.NewMarkdownResultWriter(buf)
+		writer.WithAPIConverage(nil)
+		result := sample
+		result.LastErrorMessage = "error happend"
+		err := writer.Output(createSlice(result, 2))
+		assert.Nil(t, err)
+		assert.Equal(t, `There are 2 test cases:
+
+| API | Average | Max | Min | Count | Error |
+|---|---|---|---|---|---|
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+
+<details>
+  <summary><b>See the error message</b></summary>
+* error happend
+* error happend
+</details>`, buf.String())
+	})
 }
 
 func createSlice(sample runner.ReportResult, count int) (result []runner.ReportResult) {

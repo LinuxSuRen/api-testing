@@ -29,6 +29,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/linuxsuren/api-testing/pkg/runner/monitor"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	"github.com/spf13/cobra"
@@ -41,13 +42,15 @@ type Extension struct {
 	Port   int
 	Socket string
 
+	kind string
 	name string
 	port int
 }
 
-func NewExtension(name string, port int) *Extension {
+func NewExtension(name, kind string, port int) *Extension {
 	return &Extension{
 		name: name,
+		kind: kind,
 		port: port,
 	}
 }
@@ -55,7 +58,7 @@ func NewExtension(name string, port int) *Extension {
 func (o *Extension) AddFlags(flags *pflag.FlagSet) {
 	flags.IntVarP(&o.Port, "port", "p", o.port, "The port to listen on")
 	flags.StringVarP(&o.Socket, "socket", "", "",
-		fmt.Sprintf("The socket to listen on, for instance: /var/run/%s.sock", StoreName(o.name)))
+		fmt.Sprintf("The socket to listen on, for instance: /var/run/%s.sock", o.GetFullName()))
 }
 
 func (o *Extension) GetListenAddress() (protocol, address string) {
@@ -70,10 +73,10 @@ func (o *Extension) GetListenAddress() (protocol, address string) {
 }
 
 func (o *Extension) GetFullName() string {
-	return StoreName(o.name)
+	return fmt.Sprintf("atest-%s-%s", o.kind, o.name)
 }
 
-func CreateRunner(ext *Extension, c *cobra.Command, removeServer remote.LoaderServer) (err error) {
+func CreateRunner(ext *Extension, c *cobra.Command, remoteServer remote.LoaderServer) (err error) {
 	protocol, address := ext.GetListenAddress()
 
 	var lis net.Listener
@@ -83,7 +86,7 @@ func CreateRunner(ext *Extension, c *cobra.Command, removeServer remote.LoaderSe
 	}
 
 	gRPCServer := grpc.NewServer()
-	remote.RegisterLoaderServer(gRPCServer, removeServer)
+	remote.RegisterLoaderServer(gRPCServer, remoteServer)
 	c.Printf("%s@%s is running at %s\n", ext.GetFullName(), version.GetVersion(), address)
 
 	RegisterStopSignal(c.Context(), func() {
@@ -94,6 +97,23 @@ func CreateRunner(ext *Extension, c *cobra.Command, removeServer remote.LoaderSe
 	return
 }
 
-func StoreName(name string) string {
-	return fmt.Sprintf("atest-store-%s", name)
+func CreateMonitor(ext *Extension, c *cobra.Command, remoteServer monitor.MonitorServer) (err error) {
+	protocol, address := ext.GetListenAddress()
+
+	var lis net.Listener
+	lis, err = net.Listen(protocol, address)
+	if err != nil {
+		return
+	}
+
+	gRPCServer := grpc.NewServer()
+	monitor.RegisterMonitorServer(gRPCServer, remoteServer)
+	c.Printf("%s@%s is running at %s\n", ext.GetFullName(), version.GetVersion(), address)
+
+	RegisterStopSignal(c.Context(), func() {
+		_ = os.Remove(ext.Socket)
+	}, gRPCServer)
+
+	err = gRPCServer.Serve(lis)
+	return
 }

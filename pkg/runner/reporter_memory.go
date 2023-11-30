@@ -25,18 +25,30 @@ SOFTWARE.
 package runner
 
 import (
+	"context"
+	"log"
 	"sort"
 	"time"
+
+	"github.com/linuxsuren/api-testing/pkg/runner/monitor"
 )
 
 type memoryTestReporter struct {
-	records []*ReportRecord
+	records        []*ReportRecord
+	resourceUsages []ResourceUsage
+	resMonitor     monitor.MonitorClient
+	monitorTarget  string
 }
 
 // NewMemoryTestReporter creates a memory based test reporter
-func NewMemoryTestReporter() TestReporter {
+func NewMemoryTestReporter(resMonitor monitor.MonitorClient, monitorTarget string) TestReporter {
+	if resMonitor == nil {
+		resMonitor = monitor.NewDumyMonitor()
+	}
 	return &memoryTestReporter{
-		records: []*ReportRecord{},
+		records:       []*ReportRecord{},
+		resMonitor:    resMonitor,
+		monitorTarget: monitorTarget,
 	}
 }
 
@@ -51,6 +63,18 @@ type ReportResultWithTotal struct {
 // PutRecord puts the record to memory
 func (r *memoryTestReporter) PutRecord(record *ReportRecord) {
 	r.records = append(r.records, record)
+	usage, err := r.resMonitor.GetResourceUsage(context.TODO(), &monitor.Target{
+		Name: r.monitorTarget,
+	})
+	if err != nil {
+		log.Println("failed to get resource usage:", err)
+	} else {
+		r.resourceUsages = append(r.resourceUsages, ResourceUsage{
+			Memory: usage.Memory,
+			CPU:    usage.Cpu,
+			Time:   time.Now(),
+		})
+	}
 }
 
 // GetAllRecords returns all the records
@@ -111,6 +135,10 @@ func (r *memoryTestReporter) ExportAllReportResults() (result ReportResultSlice,
 
 	sort.Sort(result)
 	return
+}
+
+func (r *memoryTestReporter) GetResourceUsage() []ResourceUsage {
+	return r.resourceUsages
 }
 
 func getLaterTime(a, b time.Time) time.Time {

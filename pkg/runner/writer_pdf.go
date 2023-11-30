@@ -119,3 +119,7 @@ func (w *pdfResultWriter) Output(result []ReportResult) (err error) {
 func (w *pdfResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
 	return w
 }
+
+func (w *pdfResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
+	return w
+}
