@@ -46,7 +46,7 @@ func NewGithubPRCommentWriter(opt *GithubPRCommentOption) (ReportResultWriter, e
 	var err error
 
 	opt.Token = util.EmptyThenDefault(opt.Token, os.Getenv("GITHUB_TOKEN"))
-	if opt.Repo == "" || opt.Identity == "" || opt.Token == "" || opt.PR <= 0 {
+	if opt.Repo == "" || opt.Identity == "" || opt.Token == "" {
 		err = fmt.Errorf("GitHub report parameters are not enough")
 	}
 	return &githubPRCommentWriter{
@@ -88,6 +88,11 @@ func (w *githubPRCommentWriter) loadExistData(newData []ReportResult) (result []
 }
 
 func (w *githubPRCommentWriter) Output(result []ReportResult) (err error) {
+	if w.PR <= 0 {
+		log.Println("skip reporting to GitHub due to without a valid PR number")
+		return
+	}
+
 	if result, err = w.loadExistData(result); err != nil {
 		err = fmt.Errorf("failed to load exist data: %v", err)
 		return

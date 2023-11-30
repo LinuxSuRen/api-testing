@@ -6,6 +6,8 @@ services:
       dockerfile: e2e/Dockerfile
     environment:
       GITEE_TOKEN: "$GITEE_TOKEN"
+      GITHUB_TOKEN: "$GITHUB_TOKEN"
+      PULL_REQUEST: "$PULL_REQUEST"
     depends_on:
       etcd:
         condition: service_healthy
@@ -19,6 +21,10 @@ services:
         condition: service_healthy
       # minio:
       #   condition: service_started
+    volumes:
+      - type: volume
+        source: cache
+        target: /var/data
     links:
       - etcd
       - mysql
@@ -91,3 +97,6 @@ services:
       timeout: 30s
       retries: 10
       start_period: 3s
+
+volumes:
+  cache:

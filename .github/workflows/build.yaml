@@ -58,14 +58,6 @@ jobs:
           sudo atest service status
 
           atest convert -p .github/testing/core.yaml --converter jmeter -t sample.jmx
-      # - name: Report API Test
-      #   if: github.event.pull_request.user.login == 'linuxsuren'
-      #   uses: thollander/actions-comment-pull-request@v2.4.3
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     filePath: .github/workflows/report.md
-      #     comment_tag: execution
       - name: Run JMeter Tests
         uses: rbhadti94/apache-jmeter-action@v0.5.0
         with:
@@ -118,6 +110,8 @@ jobs:
       - name: Run e2e
         env:
           GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_REQUEST: ${{ github.event.number }}
         run: |
           sudo curl -L https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
           sudo chmod u+x /usr/local/bin/docker-compose
