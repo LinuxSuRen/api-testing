@@ -47,23 +47,25 @@ jobs:
         with:
           go-version: 1.19.x
       - name: API Test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TOOLEXEC= make build copy
           sudo atest service install
           sudo atest service restart
           sudo atest service status
-          atest run -p '.github/testing/*.yaml' --request-ignore-error --report md --report-file .github/workflows/report.md
+          atest run -p '.github/testing/*.yaml' --request-ignore-error --report github --report-file bin/report.json --report-github-repo linuxsuren/api-testing --report-github-pr ${{ github.event.number }}
           sudo atest service status
 
           atest convert -p .github/testing/core.yaml --converter jmeter -t sample.jmx
-      - name: Report API Test
-        if: github.event.pull_request.user.login == 'linuxsuren'
-        uses: thollander/actions-comment-pull-request@v2.4.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          filePath: .github/workflows/report.md
-          comment_tag: execution
+      # - name: Report API Test
+      #   if: github.event.pull_request.user.login == 'linuxsuren'
+      #   uses: thollander/actions-comment-pull-request@v2.4.3
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     filePath: .github/workflows/report.md
+      #     comment_tag: execution
       - name: Run JMeter Tests
         uses: rbhadti94/apache-jmeter-action@v0.5.0
         with:

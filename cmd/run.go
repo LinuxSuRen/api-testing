@@ -39,6 +39,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -61,6 +62,7 @@ type runOption struct {
 	swaggerURL         string
 	level              string
 	caseItems          []string
+	githubReportOption *runner.GithubPRCommentOption
 
 	// for internal use
 	loader testing.Loader
@@ -68,9 +70,10 @@ type runOption struct {
 
 func newDefaultRunOption() *runOption {
 	return &runOption{
-		reporter:     runner.NewMemoryTestReporter(),
-		reportWriter: runner.NewResultWriter(os.Stdout),
-		loader:       testing.NewFileLoader(),
+		reporter:           runner.NewMemoryTestReporter(),
+		reportWriter:       runner.NewResultWriter(os.Stdout),
+		loader:             testing.NewFileLoader(),
+		githubReportOption: &runner.GithubPRCommentOption{},
 	}
 }
 
@@ -109,6 +112,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
 	flags.Int32VarP(&opt.qps, "qps", "", 5, "QPS")
 	flags.Int32VarP(&opt.burst, "burst", "", 5, "burst")
+	addGitHubReportFlags(flags, opt.githubReportOption)
 	return
 }
 
@@ -117,7 +121,7 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 
 	if o.reportFile != "" && !strings.HasPrefix(o.reportFile, "http://") && !strings.HasPrefix(o.reportFile, "https://") {
 		var reportFile *os.File
-		if reportFile, err = os.Create(o.reportFile); err != nil {
+		if reportFile, err = os.OpenFile(o.reportFile, os.O_RDWR|os.O_CREATE, 0666); err != nil {
 			return
 		}
 
@@ -143,6 +147,9 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 			return
 		}
 		o.reporter = runner.NewPrometheusWriter(o.reportFile, false)
+	case "github":
+		o.githubReportOption.ReportFile = o.reportFile
+		o.reportWriter, err = runner.NewGithubPRCommentWriter(o.githubReportOption)
 	default:
 		err = fmt.Errorf("not supported report type: '%s'", o.report)
 	}
@@ -298,6 +305,13 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 		dataContext[testCase.Name] = output
 	}
 	return
+}
+
+func addGitHubReportFlags(flags *pflag.FlagSet, opt *runner.GithubPRCommentOption) {
+	flags.StringVarP(&opt.Repo, "report-github-repo", "", "", "The GitHub repository for reporting, for instance: linuxsuren/api-testing")
+	flags.IntVarP(&opt.PR, "report-github-pr", "", -1, "The GitHub pull-request number for reporting")
+	flags.StringVarP(&opt.Identity, "report-github-identity", "", "Reported by api-testing.", "The identity for find the existing comment")
+	flags.StringVarP(&opt.Token, "report-github-token", "", "", "GitHub token, take it from environment variable $GITHUB_TOKEN if this flag is empty")
 }
 
 func getDefaultContext() map[string]interface{} {

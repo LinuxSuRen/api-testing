@@ -44,7 +44,18 @@ func NewMarkdownResultWriter(writer io.Writer) ReportResultWriter {
 
 // Output writes the Markdown based report to target writer
 func (w *markdownResultWriter) Output(result []ReportResult) (err error) {
-	return render.RenderThenPrint("md-report", markdownReport, result, w.writer)
+	report := &markdownReport{
+		Total: len(result),
+		Items: result,
+	}
+
+	for _, item := range result {
+		if item.Error > 0 {
+			report.Error++
+		}
+	}
+
+	return render.RenderThenPrint("md-report", markdownReportTpl, report, w.writer)
 }
 
 // WithAPIConverage sets the api coverage
@@ -53,5 +64,11 @@ func (w *markdownResultWriter) WithAPIConverage(apiConverage apispec.APIConverag
 	return w
 }
 
+type markdownReport struct {
+	Total int
+	Error int
+	Items []ReportResult
+}
+
 //go:embed data/report.md
-var markdownReport string
+var markdownReportTpl string

@@ -33,30 +33,94 @@ import (
 )
 
 func TestMarkdownWriter(t *testing.T) {
-	buf := new(bytes.Buffer)
-	writer := runner.NewMarkdownResultWriter(buf)
-	writer.WithAPIConverage(nil)
+	sample := runner.ReportResult{
+		API:     "api",
+		Average: 3,
+		Max:     4,
+		Min:     2,
+		Count:   3,
+		Error:   0,
+	}
+	errSample := runner.ReportResult{
+		API:     "api",
+		Average: 3,
+		Max:     4,
+		Min:     2,
+		Count:   3,
+		Error:   1,
+	}
 
-	err := writer.Output([]runner.ReportResult{{
-		API:     "api",
-		Average: 3,
-		Max:     4,
-		Min:     2,
-		Count:   3,
-		Error:   0,
-	}, {
-		API:     "api",
-		Average: 3,
-		Max:     4,
-		Min:     2,
-		Count:   3,
-		Error:   0,
-	}})
-	assert.Nil(t, err)
-	assert.Equal(t, `There are 2 test cases:
+	t.Run("short", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		writer := runner.NewMarkdownResultWriter(buf)
+		writer.WithAPIConverage(nil)
+		err := writer.Output(createSlice(sample, 2))
+		assert.Nil(t, err)
+		assert.Equal(t, `There are 2 test cases:
 
 | API | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |`, buf.String())
+	})
+
+	t.Run("long", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		writer := runner.NewMarkdownResultWriter(buf)
+		writer.WithAPIConverage(nil)
+		err := writer.Output(createSlice(sample, 8))
+		assert.Nil(t, err)
+		assert.Equal(t, `There are 8 test cases:
+
+<details>
+  <summary><b>See all test records</b></summary>
+
+| API | Average | Max | Min | Count | Error |
+|---|---|---|---|---|---|
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+</details>`, buf.String())
+	})
+
+	t.Run("long, there are error cases", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		writer := runner.NewMarkdownResultWriter(buf)
+		writer.WithAPIConverage(nil)
+		err := writer.Output(append(createSlice(sample, 8), errSample))
+		assert.Nil(t, err)
+		assert.Equal(t, `There are 9 test cases:
+
+| API | Average | Max | Min | Count | Error |
+|---|---|---|---|---|---|
+| api | 3ns | 4ns | 2ns | 3 | 1 |
+
+<details>
+  <summary><b>See all test records</b></summary>
+
+| API | Average | Max | Min | Count | Error |
+|---|---|---|---|---|---|
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 1 |
+</details>`, buf.String())
+	})
+}
+
+func createSlice(sample runner.ReportResult, count int) (result []runner.ReportResult) {
+	for i := 0; i < count; i++ {
+		result = append(result, sample)
+	}
+	return
 }
