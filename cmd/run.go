@@ -320,6 +320,11 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 		return
 	}
 
+	suiteRunner := runner.GetTestSuiteRunner(testSuite)
+	suiteRunner.WithTestReporter(o.reporter)
+	suiteRunner.WithSecure(testSuite.Spec.Secure)
+	suiteRunner.WithOutputWriter(os.Stdout)
+	suiteRunner.WithWriteLevel(o.level)
 	for _, testCase := range testSuite.Items {
 		if !testCase.InScope(o.caseItems) {
 			continue
@@ -338,12 +343,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 			ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
 			ctxWithTimeout = context.WithValue(ctxWithTimeout, runner.ContextKey("").ParentDir(), loader.GetContext())
 
-			runner := runner.GetTestSuiteRunner(testSuite)
-			runner.WithTestReporter(o.reporter)
-			runner.WithSecure(testSuite.Spec.Secure)
-			runner.WithOutputWriter(os.Stdout)
-			runner.WithWriteLevel(o.level)
-			if output, err = runner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
+			if output, err = suiteRunner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
 				err = fmt.Errorf("failed to run '%s', %v", testCase.Name, err)
 				return
 			} else {
