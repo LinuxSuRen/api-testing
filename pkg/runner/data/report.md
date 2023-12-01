@@ -29,3 +29,20 @@ There are {{ .Total }} test cases:
 | {{$val.API}} | {{$val.Average}} | {{$val.Max}} | {{$val.Min}} | {{$val.Count}} | {{$val.Error}} |
 {{- end }}
 {{- end }}
+
+{{- if gt .LastResourceUsage.Memory 0 }}
+
+Resource usage:
+* CPU: {{ .LastResourceUsage.CPU }}
+* Memory: {{ .LastResourceUsage.Memory }}
+{{- end }}
+
+{{- if .Errors }}
+
+<details>
+  <summary><b>See the error message</b></summary>
+{{- range $val := .Errors}}
+* {{ $val }}
+{{- end }}
+</details>
+{{- end }}

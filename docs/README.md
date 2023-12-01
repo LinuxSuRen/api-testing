@@ -300,6 +300,13 @@ Connect to [a vault extension](https://github.com/LinuxSuRen/api-testing-secret-
 atest server --secret-server localhost:7073
 ```
 
+## Application monitor
+You can get the resource usage in the report through Docker:
+
+```shell
+atest run -p sample/testsuite-gitlab.yaml --monitor-docker test --report md
+```
+
 ## Verify
 
 | Item | Description |

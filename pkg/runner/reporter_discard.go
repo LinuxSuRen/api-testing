@@ -46,3 +46,7 @@ func (r *discardTestReporter) GetAllRecords() []*ReportRecord {
 func (r *discardTestReporter) ExportAllReportResults() (ReportResultSlice, error) {
 	return nil, nil
 }
+
+func (r *discardTestReporter) GetResourceUsage() []ResourceUsage {
+	return nil
+}

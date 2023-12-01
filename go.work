@@ -7,4 +7,5 @@ use ./extensions/store-orm
 use ./extensions/store-s3
 use ./extensions/store-git
 use ./extensions/store-mongodb
+use ./extensions/monitor-docker
 use ./operator

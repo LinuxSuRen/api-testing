@@ -20,7 +20,7 @@ build:
 	mkdir -p bin
 	rm -rf bin/atest
 	CGO_ENABLED=0 go build ${TOOLEXEC} -a ${BUILD_FLAG} -o bin/${BINARY} main.go
-build-ext: build-ext-git build-ext-orm build-ext-s3 build-ext-etcd build-ext-mongodb
+build-ext: build-ext-git build-ext-orm build-ext-s3 build-ext-etcd build-ext-mongodb build-ext-monitor-docker
 build-ext-git:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
 build-ext-orm:
@@ -31,6 +31,8 @@ build-ext-s3:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-s3 extensions/store-s3/main.go
 build-ext-mongodb:
 	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-mongodb extensions/store-mongodb/main.go
+build-ext-monitor-docker:
+	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-monitor-docker extensions/monitor-docker/main.go
 build-ui:
 	cd console/atest-ui && npm i && npm run build-only
 embed-ui:
@@ -67,7 +69,7 @@ run-console:
 copy:
 	sudo cp bin/atest /usr/local/bin/
 copy-ext:
-	sudo cp bin/atest-store-* /usr/local/bin/
+	sudo cp bin/atest-* /usr/local/bin/
 copy-restart: build-embed-ui
 	atest service stop
 	make copy
@@ -123,7 +125,8 @@ grpc:
 	--go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
     pkg/server/server.proto \
-	pkg/testing/remote/loader.proto
+	pkg/testing/remote/loader.proto \
+    pkg/runner/monitor/monitor.proto
 grpc-gw:
 	protoc -I . --grpc-gateway_out . \
     --grpc-gateway_opt logtostderr=true \

@@ -32,7 +32,7 @@ import (
 
 func NewRootCommand() (c *cobra.Command) {
 	opt := &option{
-		Extension: ext.NewExtension("orm", 7071),
+		Extension: ext.NewExtension("orm", "store", 7071),
 	}
 	c = &cobra.Command{
 		Use:   opt.GetFullName(),

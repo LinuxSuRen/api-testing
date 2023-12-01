@@ -1,4 +1,4 @@
-/*
+/**
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -22,41 +22,44 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package runner
+package pkg
 
 import (
-	_ "embed"
+	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 
-	"github.com/linuxsuren/api-testing/pkg/apispec"
+	"github.com/docker/cli/cli/command"
+	"github.com/docker/docker/api/types"
+	"github.com/linuxsuren/api-testing/pkg/runner/monitor"
 )
 
-type jsonResultWriter struct {
-	writer io.Writer
-}
-
-// NewJSONResultWriter creates a new jsonResultWriter
-func NewJSONResultWriter(writer io.Writer) ReportResultWriter {
-	return &jsonResultWriter{writer: writer}
-}
-
-// Output writes the JSON base report to target writer
-func (w *jsonResultWriter) Output(result []ReportResult) (err error) {
-	jsonData, err := json.Marshal(result)
-	if err != nil {
-		return err
+func NewRemoteServer(dockerCli command.Cli) monitor.MonitorServer {
+	return &monitorServer{
+		dockerCli: dockerCli,
 	}
-	_, err = fmt.Fprint(w.writer, string(jsonData))
+}
+
+type monitorServer struct {
+	dockerCli command.Cli
+	monitor.UnimplementedMonitorServer
+}
+
+func (s *monitorServer) GetResourceUsage(ctx context.Context, target *monitor.Target) (usage *monitor.ResourceUsage, err error) {
+	var st types.ContainerStats
+	st, err = s.dockerCli.Client().ContainerStatsOneShot(ctx, target.Name)
+	if err != nil {
+		return
+	}
+
+	var data []byte
+	if data, err = io.ReadAll(st.Body); err == nil {
+		stats := &types.StatsJSON{}
+		if err = json.Unmarshal(data, stats); err == nil {
+			usage = &monitor.ResourceUsage{
+				Memory: stats.MemoryStats.Usage,
+			}
+		}
+	}
 	return
-}
-
-// WithAPIConverage sets the api coverage
-func (w *jsonResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
-	return w
-}
-
-func (w *jsonResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
-	return w
 }

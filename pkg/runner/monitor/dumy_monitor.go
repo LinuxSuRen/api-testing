@@ -22,41 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package runner
+package monitor
 
 import (
-	_ "embed"
-	"encoding/json"
-	"fmt"
-	"io"
+	context "context"
 
-	"github.com/linuxsuren/api-testing/pkg/apispec"
+	grpc "google.golang.org/grpc"
 )
 
-type jsonResultWriter struct {
-	writer io.Writer
+type dumyMonitor struct{}
+
+func NewDumyMonitor() MonitorClient {
+	return &dumyMonitor{}
 }
 
-// NewJSONResultWriter creates a new jsonResultWriter
-func NewJSONResultWriter(writer io.Writer) ReportResultWriter {
-	return &jsonResultWriter{writer: writer}
-}
-
-// Output writes the JSON base report to target writer
-func (w *jsonResultWriter) Output(result []ReportResult) (err error) {
-	jsonData, err := json.Marshal(result)
-	if err != nil {
-		return err
-	}
-	_, err = fmt.Fprint(w.writer, string(jsonData))
-	return
-}
-
-// WithAPIConverage sets the api coverage
-func (w *jsonResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
-	return w
-}
-
-func (w *jsonResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
-	return w
+func (m *dumyMonitor) GetResourceUsage(ctx context.Context, in *Target, opts ...grpc.CallOption) (*ResourceUsage, error) {
+	return &ResourceUsage{}, nil
 }

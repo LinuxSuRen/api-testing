@@ -1,4 +1,4 @@
-/*
+/**
 MIT License
 
 Copyright (c) 2023 API Testing Authors.
@@ -22,41 +22,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package runner
+package cmd
 
 import (
-	_ "embed"
-	"encoding/json"
-	"fmt"
-	"io"
-
-	"github.com/linuxsuren/api-testing/pkg/apispec"
+	"github.com/docker/cli/cli/command"
+	"github.com/linuxsuren/api-testing/extensions/monitor-docker/pkg"
+	ext "github.com/linuxsuren/api-testing/pkg/extension"
+	"github.com/spf13/cobra"
 )
 
-type jsonResultWriter struct {
-	writer io.Writer
-}
-
-// NewJSONResultWriter creates a new jsonResultWriter
-func NewJSONResultWriter(writer io.Writer) ReportResultWriter {
-	return &jsonResultWriter{writer: writer}
-}
-
-// Output writes the JSON base report to target writer
-func (w *jsonResultWriter) Output(result []ReportResult) (err error) {
-	jsonData, err := json.Marshal(result)
-	if err != nil {
-		return err
+func NewRootCommand(dockerCli command.Cli) (c *cobra.Command) {
+	opt := options{
+		dockerCli: dockerCli,
+		Extension: ext.NewExtension("docker", "monitor", 7074),
 	}
-	_, err = fmt.Fprint(w.writer, string(jsonData))
+	c = &cobra.Command{
+		Use:  "server",
+		RunE: opt.runE,
+	}
+	opt.AddFlags(c.Flags())
 	return
 }
 
-// WithAPIConverage sets the api coverage
-func (w *jsonResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
-	return w
+type options struct {
+	*ext.Extension
+	dockerCli command.Cli
 }
 
-func (w *jsonResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
-	return w
+func (o *options) runE(c *cobra.Command, _ []string) (err error) {
+	remoteServer := pkg.NewRemoteServer(o.dockerCli)
+	err = ext.CreateMonitor(o.Extension, c, remoteServer)
+	return
 }

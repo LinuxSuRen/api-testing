@@ -53,5 +53,9 @@ func (w *htmlResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) R
 	return w
 }
 
+func (w *htmlResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
+	return w
+}
+
 //go:embed data/html.html
 var htmlReport string

@@ -37,7 +37,8 @@ RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-orm extensions/sto
 RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
 RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-etcd extensions/store-etcd/main.go
 RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-mongodb extensions/store-mongodb/main.go
-RUN CGO_ENABLED=0 go build -v -a -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
+RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
+RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-monitor-docker extensions/monitor-docker/main.go
 
 FROM docker.io/library/ubuntu:23.04
 
@@ -59,6 +60,7 @@ COPY --from=builder /workspace/atest-store-s3 /usr/local/bin/atest-store-s3
 COPY --from=builder /workspace/atest-store-etcd /usr/local/bin/atest-store-etcd
 COPY --from=builder /workspace/atest-store-git /usr/local/bin/atest-store-git
 COPY --from=builder /workspace/atest-store-mongodb /usr/local/bin/atest-store-mongodb
+COPY --from=builder /workspace/atest-monitor-docker /usr/local/bin/atest-monitor-docker
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 

@@ -93,7 +93,7 @@ func TestExportAllReportResults(t *testing.T) {
 			Min:              time.Second * 2,
 			Count:            3,
 			Error:            1,
-			LastErrorMessage: "fake",
+			LastErrorMessage: "Case: . error: fake. body: fake",
 		}, {
 			API:     "GET http://bar",
 			Average: time.Second,
@@ -106,6 +106,7 @@ func TestExportAllReportResults(t *testing.T) {
 	}, {
 		name: "first record has error",
 		records: []*runner.ReportRecord{{
+			Name:      "fake",
 			API:       urlFoo,
 			Method:    http.MethodGet,
 			BeginTime: now,
@@ -120,12 +121,12 @@ func TestExportAllReportResults(t *testing.T) {
 			Min:              time.Second * 4,
 			Count:            1,
 			Error:            1,
-			LastErrorMessage: "fake",
+			LastErrorMessage: "Case: fake. error: fake. body: fake",
 		}},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			reporter := runner.NewMemoryTestReporter()
+			reporter := runner.NewMemoryTestReporter(nil, "")
 			assert.NotNil(t, reporter)
 
 			for i := range tt.records {
@@ -136,6 +137,8 @@ func TestExportAllReportResults(t *testing.T) {
 			result, err := reporter.ExportAllReportResults()
 			assert.Nil(t, err)
 			assert.Equal(t, tt.expect, result)
+
+			assert.Equal(t, len(tt.records), len(reporter.GetResourceUsage()))
 		})
 	}
 }

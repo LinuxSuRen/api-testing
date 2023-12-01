@@ -33,8 +33,9 @@ import (
 )
 
 type markdownResultWriter struct {
-	writer       io.Writer
-	apiConverage apispec.APIConverage
+	writer        io.Writer
+	apiConverage  apispec.APIConverage
+	resourceUsage []ResourceUsage
 }
 
 // NewMarkdownResultWriter creates the Markdown writer
@@ -48,10 +49,16 @@ func (w *markdownResultWriter) Output(result []ReportResult) (err error) {
 		Total: len(result),
 		Items: result,
 	}
+	if len(w.resourceUsage) > 0 {
+		report.LastResourceUsage = w.resourceUsage[len(w.resourceUsage)-1]
+	}
 
 	for _, item := range result {
 		if item.Error > 0 {
 			report.Error++
+		}
+		if item.LastErrorMessage != "" {
+			report.Errors = append(report.Errors, item.LastErrorMessage)
 		}
 	}
 
@@ -64,10 +71,17 @@ func (w *markdownResultWriter) WithAPIConverage(apiConverage apispec.APIConverag
 	return w
 }
 
+func (w *markdownResultWriter) WithResourceUsage(resurceUage []ResourceUsage) ReportResultWriter {
+	w.resourceUsage = resurceUage
+	return w
+}
+
 type markdownReport struct {
-	Total int
-	Error int
-	Items []ReportResult
+	Total             int
+	Error             int
+	Items             []ReportResult
+	LastResourceUsage ResourceUsage
+	Errors            []string
 }
 
 //go:embed data/report.md
