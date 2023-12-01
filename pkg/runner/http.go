@@ -78,6 +78,7 @@ func (r ReportResultSlice) Swap(i, j int) {
 type simpleTestCaseRunner struct {
 	UnimplementedRunner
 	simpleResponse SimpleResponse
+	cookies        []*http.Cookie
 }
 
 // NewSimpleTestCaseRunner creates the instance of the simple test case runner
@@ -85,6 +86,7 @@ func NewSimpleTestCaseRunner() TestCaseRunner {
 	runner := &simpleTestCaseRunner{
 		UnimplementedRunner: NewDefaultUnimplementedRunner(),
 		simpleResponse:      SimpleResponse{},
+		cookies:             []*http.Cookie{},
 	}
 	return runner
 }
@@ -155,6 +157,9 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		return
 	}
 
+	for _, cookie := range r.cookies {
+		request.AddCookie(cookie)
+	}
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
 
 	// TODO only do this for unit testing, should remove it once we have a better way
@@ -203,6 +208,8 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	} else {
 		r.log.Trace(fmt.Sprintf("skip to read the body due to it is not struct content: %q\n", respType))
 	}
+
+	r.cookies = append(r.cookies, resp.Cookies()...)
 	return
 }
 
