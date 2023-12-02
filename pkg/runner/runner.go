@@ -62,7 +62,7 @@ func NewDefaultUnimplementedRunner() UnimplementedRunner {
 		testReporter: NewDiscardTestReporter(),
 		writer:       io.Discard,
 		log:          NewDefaultLevelWriter("info", io.Discard),
-		execer:       fakeruntime.DefaultExecer{},
+		execer:       fakeruntime.NewDefaultExecer(),
 	}
 }
 

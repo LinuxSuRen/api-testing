@@ -1,3 +1,4 @@
+[![CLA assistant](https://cla-assistant.io/readme/badge/LinuxSuRen/api-testing)](https://cla-assistant.io/LinuxSuRen/api-testing)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3f16717cd6f841118006f12c346e9341)](https://app.codacy.com/gh/LinuxSuRen/api-testing/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/3f16717cd6f841118006f12c346e9341)](https://app.codacy.com/gh/LinuxSuRen/api-testing/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 ![GitHub All Releases](https://img.shields.io/github/downloads/linuxsuren/api-testing/total)

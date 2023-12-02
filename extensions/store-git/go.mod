@@ -78,7 +78,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/linuxsuren/go-fake-runtime v0.0.1 // indirect
+	github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231202091833-f1e4aceb5638 // indirect
 	github.com/linuxsuren/unstructured v0.0.1 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
