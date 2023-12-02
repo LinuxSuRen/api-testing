@@ -124,6 +124,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 }
 
 func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
+	o.context = cmd.Context()
 	writer := cmd.OutOrStdout()
 
 	if o.reportFile != "" && !strings.HasPrefix(o.reportFile, "http://") && !strings.HasPrefix(o.reportFile, "https://") {
@@ -191,7 +192,7 @@ func (o *runOption) startMonitor() (err error) {
 	sockFile := os.ExpandEnv(fmt.Sprintf("$HOME/.config/atest/%s.sock", "atest-monitor-docker"))
 	os.MkdirAll(filepath.Dir(sockFile), 0755)
 
-	execer := fakeruntime.DefaultExecer{}
+	execer := fakeruntime.NewDefaultExecerWithContext(o.context)
 	go func(socketURL, plugin string) {
 		if err = execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, "server", "--socket", socketURL); err != nil {
 			log.Printf("failed to start %s, error: %v", socketURL, err)
@@ -216,7 +217,6 @@ func (o *runOption) startMonitor() (err error) {
 
 func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 	o.startTime = time.Now()
-	o.context = cmd.Context()
 	o.limiter = limit.NewDefaultRateLimiter(o.qps, o.burst)
 	defer func() {
 		cmd.Printf("\nconsume: %s\n", time.Since(o.startTime).String())

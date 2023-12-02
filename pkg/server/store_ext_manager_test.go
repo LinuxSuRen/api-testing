@@ -32,7 +32,7 @@ import (
 )
 
 func TestStoreExtManager(t *testing.T) {
-	mgr := NewStoreExtManager(fakeruntime.DefaultExecer{})
+	mgr := NewStoreExtManager(fakeruntime.NewDefaultExecer())
 
 	t.Run("not found", func(t *testing.T) {
 		err := mgr.Start("fake", "")

@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	c := cmd.NewRootCmd(exec.DefaultExecer{}, server.NewDefaultHTTPServer())
+	c := cmd.NewRootCmd(exec.NewDefaultExecer(), server.NewDefaultHTTPServer())
 	if err := c.Execute(); err != nil {
 		os.Exit(1)
 	}

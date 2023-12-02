@@ -125,6 +125,7 @@ type serverOption struct {
 }
 
 func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
+	o.execer.WithContext(cmd.Context())
 	var grpcOpts []grpc.ServerOption
 
 	if o.auth == "oauth" {
