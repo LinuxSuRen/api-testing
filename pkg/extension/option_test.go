@@ -26,6 +26,9 @@ package extension
 
 import (
 	"testing"
+
+	"github.com/spf13/pflag"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetListenAddress(t *testing.T) {
@@ -47,4 +50,16 @@ func TestGetListenAddress(t *testing.T) {
 	if address != ":8080" {
 		t.Errorf("Expected :8080, but got %s", address)
 	}
+}
+
+func TestExtension(t *testing.T) {
+	extMgr := NewExtension("git", "store", -1)
+	assert.NotNil(t, extMgr)
+	assert.Equal(t, "atest-store-git", extMgr.GetFullName())
+
+	flags := &pflag.FlagSet{}
+	extMgr.AddFlags(flags)
+
+	assert.NotNil(t, flags.Lookup("port"))
+	assert.NotNil(t, flags.Lookup("socket"))
 }

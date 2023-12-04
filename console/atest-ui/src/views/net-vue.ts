@@ -46,6 +46,16 @@ function CreateOrUpdateSecret(payload: any, create: boolean,
     })
 }
 
+function CreateOrUpdateStore(payload: any, create: boolean,
+    callback: (d: any) => void,
+    loadingRef?: Ref<Boolean>) {
+    API.CreateOrUpdateStore(payload, create, callback, ErrorTip, (e: boolean) => {
+        if (loadingRef) {
+            loadingRef.value = e
+        }
+    })
+}
+
 function ErrorTip(e: {
     statusText:''
 }) {
@@ -54,5 +64,6 @@ function ErrorTip(e: {
 
 export const UIAPI = {
     UpdateTestCase, CreateOrUpdateSecret,
+    CreateOrUpdateStore,
     ErrorTip
 }

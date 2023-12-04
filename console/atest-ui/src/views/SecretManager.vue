@@ -22,12 +22,12 @@ interface Secret {
   Value: string
 }
 
-function loadStores() {
+function loadSecrets() {
   API.GetSecrets((e) => {
     secrets.value = e.data
   }, UIAPI.ErrorTip)
 }
-loadStores()
+loadSecrets()
 
 function deleteSecret(name: string) {
   API.DeleteSecret(name, () => {
@@ -35,7 +35,7 @@ function deleteSecret(name: string) {
         message: 'Deleted.',
         type: 'success'
       })
-      loadStores()
+      loadSecrets()
     }, UIAPI.ErrorTip)
 }
 
@@ -59,10 +59,10 @@ const rules = reactive<FormRules<Secret>>({
 })
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  await formEl.validate((valid: boolean, fields) => {
+  await formEl.validate((valid: boolean) => {
     if (valid) {
       UIAPI.CreateOrUpdateSecret(secret.value, createAction.value, () => {
-          loadStores()
+          loadSecrets()
           dialogVisible.value = false
           formEl.resetFields()
       }, creatingLoading)

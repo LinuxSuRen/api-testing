@@ -31,8 +31,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 	"github.com/h2non/gock"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/stretchr/testify/assert"

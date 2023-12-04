@@ -194,7 +194,7 @@ func (o *runOption) startMonitor() (err error) {
 
 	execer := fakeruntime.NewDefaultExecerWithContext(o.context)
 	go func(socketURL, plugin string) {
-		if err = execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, "server", "--socket", socketURL); err != nil {
+		if err = execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, nil, "server", "--socket", socketURL); err != nil {
 			log.Printf("failed to start %s, error: %v", socketURL, err)
 		}
 	}(sockFile, monitorBin)

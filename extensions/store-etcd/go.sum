@@ -613,8 +613,6 @@ github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883/go.mod h1:rCTlJbsFo
 github.com/andybalholm/brotli v1.0.4 h1:V7DdXeJtZscaqfNuAdSRuRFzuiKlHSC/Zh3zl9qY3JY=
 github.com/andybalholm/brotli v1.0.4/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
-github.com/antonmedv/expr v1.15.0 h1:sBHNMx1i+b1lZfkBFGhicvSLW6RLnca3R0B7jWrk8iM=
-github.com/antonmedv/expr v1.15.0/go.mod h1:0E/6TxnOlRNp81GMzX9QfDPAmHo2Phg00y4JUv1ihsE=
 github.com/apache/arrow/go/v10 v10.0.1/go.mod h1:YvhnlEePVnBS4+0z3fhPfUy7W1Ikj0Ih0vcRo/gZ1M0=
 github.com/apache/arrow/go/v11 v11.0.0/go.mod h1:Eg5OsL5H+e299f7u5ssuXsuHQVEGC4xei5aX110hRiI=
 github.com/apache/thrift v0.16.0/go.mod h1:PHK3hniurgQaNMZYaCLEqXKsYK8upmhPbmdP2FXSqgU=
@@ -660,6 +658,8 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/envoyproxy/protoc-gen-validate v0.6.7/go.mod h1:dyJXwwfPK2VSqiB9Klm1J6romD608Ba7Hij42vrOBCo=
 github.com/envoyproxy/protoc-gen-validate v0.9.1/go.mod h1:OKNgG7TCp5pF4d6XftA0++PMirau2/yoOwVac3AbF2w=
 github.com/envoyproxy/protoc-gen-validate v0.10.1/go.mod h1:DRjgyB0I43LtJapqN6NiRwroiAU2PaFuvk/vjgh61ss=
+github.com/expr-lang/expr v1.15.6 h1:dQFgzj5DBu3wnUz8+PGLZdPMpefAvxaCFTNM3iSjkGA=
+github.com/expr-lang/expr v1.15.6/go.mod h1:uCkhfG+x7fcZ5A5sXHKuQ07jGZRl6J0FCAaf2k4PtVQ=
 github.com/flopp/go-findfont v0.1.0 h1:lPn0BymDUtJo+ZkV01VS3661HL6F4qFlkhcJN55u6mU=
 github.com/flopp/go-findfont v0.1.0/go.mod h1:wKKxRDjD024Rh7VMwoU90i6ikQRCr+JTHB5n4Ejkqvw=
 github.com/fogleman/gg v1.2.1-0.20190220221249-0403632d5b90/go.mod h1:R/bRT+9gY/C5z7JzPU0zXsXHKM4/ayA+zqcVNZzPa1k=
@@ -842,8 +842,8 @@ github.com/lestrrat-go/envload v0.0.0-20180220234015-a3eb8ddeffcc h1:RKf14vYWi2t
 github.com/lestrrat-go/envload v0.0.0-20180220234015-a3eb8ddeffcc/go.mod h1:kopuH9ugFRkIXf3YoqHKyrJ9YfUFsckUU9S7B+XP+is=
 github.com/lestrrat-go/strftime v1.0.6 h1:CFGsDEt1pOpFNU+TJB0nhz9jl+K0hZSLE205AhTIGQQ=
 github.com/lestrrat-go/strftime v1.0.6/go.mod h1:f7jQKgV5nnJpYgdEasS+/y7EsTb8ykN2z68n3TtcTaw=
-github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231202091833-f1e4aceb5638 h1:4gfAkFURZJMne11sE8OFQJm0UHVNS887296Kp7qWhc8=
-github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231202091833-f1e4aceb5638/go.mod h1:zmh6J78hSnWZo68faMA2eKOdaEp8eFbERHi3ZB9xHCQ=
+github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231204030606-17f24f6abd3a h1:3VX9EVEE5ctpSFqTip7dVnTrarNVPcA/yAjKxKklUzw=
+github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231204030606-17f24f6abd3a/go.mod h1:zmh6J78hSnWZo68faMA2eKOdaEp8eFbERHi3ZB9xHCQ=
 github.com/linuxsuren/unstructured v0.0.1 h1:ilUA8MUYbR6l9ebo/YPV2bKqlf62bzQursDSE+j00iU=
 github.com/linuxsuren/unstructured v0.0.1/go.mod h1:KH6aTj+FegzGBzc1vS6mzZx3/duhTUTEVyW5sO7p4as=
 github.com/lyft/protoc-gen-star v0.6.0/go.mod h1:TGAoBVkt8w7MPG72TrKIu85MIdXwDuzJYeZuUPFPNwA=

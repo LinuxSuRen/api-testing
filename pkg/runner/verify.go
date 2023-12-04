@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"

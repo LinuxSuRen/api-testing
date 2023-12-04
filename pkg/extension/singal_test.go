@@ -22,29 +22,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import type { Pair } from './types'
+package extension
 
-export function SupportedExtensions() {
-    return [
-        {
-          value: 'atest-store-git',
-          key: 'atest-store-git'
-        },
-        {
-          value: 'atest-store-s3',
-          key: 'atest-store-s3'
-        },
-        {
-          value: 'atest-store-orm',
-          key: 'atest-store-orm'
-        },
-        {
-          value: 'atest-store-etcd',
-          key: 'atest-store-etcd'
-        },
-        {
-          value: 'atest-store-mongodb',
-          key: 'atest-store-mongodb'
-        }
-    ] as Pair[]
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestRegisterStopSignal(t *testing.T) {
+	var stoppedA bool
+	fs := &fakeServer{}
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second)
+	cancel()
+	RegisterStopSignal(ctx, func() {
+		stoppedA = true
+	}, fs)
+	time.Sleep(time.Second * 2)
+	assert.True(t, stoppedA)
+	assert.True(t, fs.signal)
+}
+
+type fakeServer struct {
+	signal bool
+}
+
+func (s *fakeServer) Stop() {
+	s.signal = true
 }

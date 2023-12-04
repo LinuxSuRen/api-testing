@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/antonmedv/expr"
+	"github.com/expr-lang/expr"
 	"github.com/h2non/gock"
 	"github.com/linuxsuren/api-testing/pkg/runner/kubernetes"
 	"github.com/linuxsuren/api-testing/pkg/util"

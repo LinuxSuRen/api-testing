@@ -5,16 +5,16 @@ go 1.19
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/antonmedv/expr v1.15.0
 	github.com/bufbuild/protocompile v0.6.0
 	github.com/cucumber/godog v0.12.6
+	github.com/expr-lang/expr v1.15.6
 	github.com/flopp/go-findfont v0.1.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/h2non/gock v1.2.0
 	github.com/invopop/jsonschema v0.7.0
 	github.com/jhump/protoreflect v1.15.3
-	github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231202091833-f1e4aceb5638
+	github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231204030606-17f24f6abd3a
 	github.com/linuxsuren/unstructured v0.0.1
 	github.com/prometheus/client_golang v1.16.0
 	github.com/signintech/gopdf v0.18.0

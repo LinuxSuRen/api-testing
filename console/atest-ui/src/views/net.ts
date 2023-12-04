@@ -350,6 +350,30 @@ function PopularHeaders(callback: (d: any) => void, errHandle?: (e: any) => void
     .then(callback).catch(errHandle)
 }
 
+function CreateOrUpdateStore(payload: any, create: boolean,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null,
+  toggle?: (e: boolean) => void) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify(payload)
+  }
+  
+  let api = '/server.Runner/CreateStore'
+  if (!create) {
+    api = '/server.Runner/UpdateStore'
+  }
+
+  safeToggleFunc(toggle)(true)
+  fetch(api, requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle).finally(() => {
+      safeToggleFunc(toggle)(false)
+    })
+}
+
 function GetStores(callback: (d: any) => void,
   errHandle?: (e: any) => void | null, final?: () => void | null) {
   const requestOptions = {
@@ -499,7 +523,7 @@ export const API = {
   CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
   GenerateCode, ListCodeGenerator,
   PopularHeaders,
-  GetStores, DeleteStore, VerifyStore,
+  CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
   FunctionsQuery,
   GetSecrets, DeleteSecret, CreateOrUpdateSecret,
   GetSuggestedAPIs,

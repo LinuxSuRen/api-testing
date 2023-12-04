@@ -14,7 +14,7 @@ type StopAble interface {
 
 func RegisterStopSignal(ctx context.Context, callback func(), servers ...StopAble) {
 	endChan := make(chan os.Signal, 1)
-	signal.Notify(endChan, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(endChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
 	go func(ctx context.Context) {
 		select {
 		case <-endChan:

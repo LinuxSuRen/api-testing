@@ -29,6 +29,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"syscall"
 
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 )
@@ -39,21 +40,27 @@ type ExtManager interface {
 }
 
 type storeExtManager struct {
-	stopSignal           chan struct{}
 	execer               fakeruntime.Execer
 	socketPrefix         string
 	filesNeedToBeRemoved []string
 	extStatusMap         map[string]bool
+	processs             []fakeruntime.Process
+	processChan          chan fakeruntime.Process
+	stopSingal           chan struct{}
 }
 
 var s *storeExtManager
 
 func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
 	if s == nil {
-		s = &storeExtManager{}
+		s = &storeExtManager{
+			processChan: make(chan fakeruntime.Process, 0),
+			stopSingal:  make(chan struct{}, 1),
+		}
 		s.execer = execer
 		s.socketPrefix = "unix://"
 		s.extStatusMap = map[string]bool{}
+		s.processCollect()
 	}
 	return s
 }
@@ -71,7 +78,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 			socketFile := strings.TrimPrefix(socketURL, s.socketPrefix)
 			s.filesNeedToBeRemoved = append(s.filesNeedToBeRemoved, socketFile)
 			s.extStatusMap[name] = true
-			if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, "--socket", socketFile); err != nil {
+			if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, s.processChan, "--socket", socketFile); err != nil {
 				log.Printf("failed to start %s, error: %v", socketURL, err)
 			}
 		}(socket, binaryPath)
@@ -80,10 +87,25 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 }
 
 func (s *storeExtManager) StopAll() error {
-	for _, file := range s.filesNeedToBeRemoved {
-		if err := os.RemoveAll(file); err != nil {
-			log.Printf("failed to remove %s, error: %v", file, err)
+	log.Println("stop", len(s.processs), "extensions")
+	for _, p := range s.processs {
+		if p != nil {
+			p.Signal(syscall.SIGTERM)
 		}
 	}
+	s.stopSingal <- struct{}{}
 	return nil
+}
+
+func (s *storeExtManager) processCollect() {
+	go func() {
+		for {
+			select {
+			case p := <-s.processChan:
+				s.processs = append(s.processs, p)
+			case <-s.stopSingal:
+				return
+			}
+		}
+	}()
 }

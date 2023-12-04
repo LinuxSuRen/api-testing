@@ -324,9 +324,9 @@ func (s *podmanService) Install() (output string, err error) {
 
 func (s *podmanService) Start() (output string, err error) {
 	if s.exist() {
-		err = s.Execer.RunCommandWithIO(s.client, "", s.stdOut, s.errOut, "start", s.name)
+		err = s.Execer.RunCommandWithIO(s.client, "", s.stdOut, s.errOut, nil, "start", s.name)
 	} else {
-		err = s.Execer.RunCommandWithIO(s.client, "", s.stdOut, s.errOut, s.getStartArgs()...)
+		err = s.Execer.RunCommandWithIO(s.client, "", s.stdOut, s.errOut, nil, s.getStartArgs()...)
 		if err == nil {
 			output, err = s.installService()
 		}
