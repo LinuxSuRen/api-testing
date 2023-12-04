@@ -45,10 +45,9 @@ func NewJSONResultWriter(writer io.Writer) ReportResultWriter {
 // Output writes the JSON base report to target writer
 func (w *jsonResultWriter) Output(result []ReportResult) (err error) {
 	jsonData, err := json.Marshal(result)
-	if err != nil {
-		return err
+	if err == nil {
+		_, err = fmt.Fprint(w.writer, string(jsonData))
 	}
-	_, err = fmt.Fprint(w.writer, string(jsonData))
 	return
 }
 

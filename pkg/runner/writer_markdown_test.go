@@ -28,6 +28,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/stretchr/testify/assert"
 )
@@ -159,6 +160,24 @@ Resource usage:
 * error happend
 * error happend
 </details>`, buf.String())
+	})
+
+	t.Run("with api converage", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		writer := runner.NewMarkdownResultWriter(buf)
+		writer.WithAPIConverage(apispec.NewFakeAPISpec([][]string{{
+			"api", "GET",
+		}}))
+		err := writer.Output(createSlice(sample, 2))
+		assert.Nil(t, err)
+		assert.Equal(t, `There are 2 test cases:
+
+| API | Average | Max | Min | Count | Error |
+|---|---|---|---|---|---|
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+| api | 3ns | 4ns | 2ns | 3 | 0 |
+
+API Coverage: 1/1`, buf.String())
 	})
 }
 

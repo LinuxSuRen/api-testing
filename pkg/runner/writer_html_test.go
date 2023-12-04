@@ -60,6 +60,7 @@ func TestHTMLResultWriter(t *testing.T) {
 			err := w.Output(tt.results)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expect, tt.buf.String())
+			assert.NotNil(t, w.WithResourceUsage(nil))
 		})
 	}
 }

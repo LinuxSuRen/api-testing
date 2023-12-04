@@ -14,7 +14,7 @@ require (
 	github.com/h2non/gock v1.2.0
 	github.com/invopop/jsonschema v0.7.0
 	github.com/jhump/protoreflect v1.15.3
-	github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231204030606-17f24f6abd3a
+	github.com/linuxsuren/go-fake-runtime v0.0.4
 	github.com/linuxsuren/unstructured v0.0.1
 	github.com/prometheus/client_golang v1.16.0
 	github.com/signintech/gopdf v0.18.0

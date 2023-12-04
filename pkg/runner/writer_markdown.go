@@ -61,6 +61,7 @@ func (w *markdownResultWriter) Output(result []ReportResult) (err error) {
 			report.Errors = append(report.Errors, item.LastErrorMessage)
 		}
 	}
+	report.Converage.Covered, report.Converage.Total = apiConverageCount(result, w.apiConverage)
 
 	return render.RenderThenPrint("md-report", markdownReportTpl, report, w.writer)
 }
@@ -82,6 +83,12 @@ type markdownReport struct {
 	Items             []ReportResult
 	LastResourceUsage ResourceUsage
 	Errors            []string
+	Converage         converage
+}
+
+type converage struct {
+	Covered int
+	Total   int
 }
 
 //go:embed data/report.md

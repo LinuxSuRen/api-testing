@@ -842,8 +842,8 @@ github.com/lestrrat-go/envload v0.0.0-20180220234015-a3eb8ddeffcc h1:RKf14vYWi2t
 github.com/lestrrat-go/envload v0.0.0-20180220234015-a3eb8ddeffcc/go.mod h1:kopuH9ugFRkIXf3YoqHKyrJ9YfUFsckUU9S7B+XP+is=
 github.com/lestrrat-go/strftime v1.0.6 h1:CFGsDEt1pOpFNU+TJB0nhz9jl+K0hZSLE205AhTIGQQ=
 github.com/lestrrat-go/strftime v1.0.6/go.mod h1:f7jQKgV5nnJpYgdEasS+/y7EsTb8ykN2z68n3TtcTaw=
-github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231204030606-17f24f6abd3a h1:3VX9EVEE5ctpSFqTip7dVnTrarNVPcA/yAjKxKklUzw=
-github.com/linuxsuren/go-fake-runtime v0.0.3-0.20231204030606-17f24f6abd3a/go.mod h1:zmh6J78hSnWZo68faMA2eKOdaEp8eFbERHi3ZB9xHCQ=
+github.com/linuxsuren/go-fake-runtime v0.0.4 h1:y+tvBuw6MKTCav8Bo5HWwaXhBx1Z//VAvqI3gpOWqvw=
+github.com/linuxsuren/go-fake-runtime v0.0.4/go.mod h1:zmh6J78hSnWZo68faMA2eKOdaEp8eFbERHi3ZB9xHCQ=
 github.com/linuxsuren/unstructured v0.0.1 h1:ilUA8MUYbR6l9ebo/YPV2bKqlf62bzQursDSE+j00iU=
 github.com/linuxsuren/unstructured v0.0.1/go.mod h1:KH6aTj+FegzGBzc1vS6mzZx3/duhTUTEVyW5sO7p4as=
 github.com/lyft/protoc-gen-star v0.6.0/go.mod h1:TGAoBVkt8w7MPG72TrKIu85MIdXwDuzJYeZuUPFPNwA=
