@@ -13,8 +13,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/antonmedv/expr/builtin"
 	"github.com/cucumber/godog"
+	"github.com/expr-lang/expr/builtin"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/spf13/cobra"
 )

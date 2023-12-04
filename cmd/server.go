@@ -207,6 +207,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	storeExtMgr := server.NewStoreExtManager(o.execer)
+	defer storeExtMgr.StopAll()
 
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir)
 	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
@@ -219,7 +220,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	clean := make(chan os.Signal, 1)
-	signal.Notify(clean, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(clean, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
 
 	s := o.gRPCServer
 	go func() {
@@ -233,9 +234,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 
 	go func() {
 		<-clean
+		log.Println("stopping the server")
 		_ = lis.Close()
 		_ = o.httpServer.Shutdown(ctx)
-		_ = storeExtMgr.StopAll()
 	}()
 
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))

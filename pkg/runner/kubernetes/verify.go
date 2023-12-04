@@ -1,6 +1,6 @@
 package kubernetes
 
-import "github.com/antonmedv/expr"
+import "github.com/expr-lang/expr"
 
 // PodValidatorFunc returns a expr for checking pod existing
 func PodValidatorFunc() expr.Option {

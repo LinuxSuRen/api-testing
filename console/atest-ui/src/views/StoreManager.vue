@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
 import { API } from './net'
+import { UIAPI } from './net-vue'
 import { SupportedExtensions } from './store'
 import { useI18n } from 'vue-i18n'
 
@@ -115,43 +116,24 @@ const rules = reactive<FormRules<Store>>({
 })
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  await formEl.validate((valid: boolean, fields) => {
+  await formEl.validate((valid: boolean) => {
     if (valid) {
-      creatingLoading.value = true
-
-      const requestOptions = {
-        method: 'POST',
-        headers: {
-          'X-Auth': API.getToken()
-        },
-        body: JSON.stringify(storeForm)
-      }
-      
-      let api = '/server.Runner/CreateStore'
-      if (!createAction.value) {
-        api = '/server.Runner/UpdateStore'
-      }
-
-      fetch(api, requestOptions)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(response.statusText)
-          } else {
-            return response.json()
-          }
-        })
-        .then(() => {
+      UIAPI.CreateOrUpdateStore(storeForm, createAction.value, () => {
           loadStores()
           dialogVisible.value = false
           formEl.resetFields()
-        })
-        .catch((e) => {
-          ElMessage.error('Oops, ' + e)
-        })
-        creatingLoading.value = false
+      }, creatingLoading)
     }
   })
 }
+
+watch(storeForm, (e) => {
+  if (e.kind.name === '') {
+    if (e.url.startsWith('https://github.com') || e.url.startsWith('https://gitee.com')) {
+      e.kind.name = 'atest-store-git'
+    }
+  }
+})
 
 function storeVerify(formEl: FormInstance | undefined) {
   if (!formEl) return
