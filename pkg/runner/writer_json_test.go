@@ -56,4 +56,5 @@ func TestJSONResultWriter(t *testing.T) {
 	assert.Equal(t,
 		"[{\"API\":\"api\",\"Count\":3,\"Average\":3,\"Max\":4,\"Min\":2,\"QPS\":0,\"Error\":0,\"LastErrorMessage\":\"\"},{\"API\":\"api\",\"Count\":3,\"Average\":3,\"Max\":4,\"Min\":2,\"QPS\":0,\"Error\":0,\"LastErrorMessage\":\"\"}]",
 		buf.String())
+	assert.NotNil(t, writer.WithResourceUsage(nil))
 }

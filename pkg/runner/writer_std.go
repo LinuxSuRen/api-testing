@@ -78,15 +78,25 @@ func (w *stdResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter 
 }
 
 func apiConveragePrint(result []ReportResult, apiConverage apispec.APIConverage, w io.Writer) {
+	covered, total := apiConverageCount(result, apiConverage)
+	if total > 0 {
+		fmt.Fprintf(w, "\nAPI Coverage: %d/%d\n", covered, total)
+	}
+}
+
+func apiConverageCount(result []ReportResult, apiConverage apispec.APIConverage) (covered, total int) {
 	if apiConverage == nil {
 		return
 	}
 
-	var covered int
 	for _, item := range result {
 		if apiConverage.HaveAPI(item.API, "GET") {
 			covered++
 		}
 	}
-	fmt.Fprintf(w, "\nAPI Coverage: %d/%d\n", covered, apiConverage.APICount())
+	total = apiConverage.APICount()
+	if covered > total {
+		covered = total
+	}
+	return covered, total
 }

@@ -46,3 +46,8 @@ Resource usage:
 {{- end }}
 </details>
 {{- end }}
+
+{{- if gt .Converage.Total 0 }}
+
+API Coverage: {{ .Converage.Covered }}/{{ .Converage.Total }}
+{{- end }}

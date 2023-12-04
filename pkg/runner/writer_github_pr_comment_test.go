@@ -69,6 +69,7 @@ func TestGithubPRCommentWriter(t *testing.T) {
 		err = writer.Output(nil)
 		assert.NoError(t, err)
 		assert.Nil(t, writer.WithAPIConverage(nil))
+		assert.NotNil(t, writer.WithResourceUsage(nil))
 	})
 
 	t.Run("error with getting comments", func(t *testing.T) {
