@@ -24,7 +24,10 @@ SOFTWARE.
 
 package util
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 // OKOrErrorMessage returns OK or error message
 func OKOrErrorMessage(err error) string {
@@ -37,6 +40,13 @@ func OrErrorMessage(err error, message string) string {
 		return err.Error()
 	}
 	return message
+}
+
+func ErrorWrap(err error, msg string, args ...interface{}) error {
+	if err != nil {
+		err = fmt.Errorf(msg, args...)
+	}
+	return err
 }
 
 // IgnoreErrServerClosed ignores ErrServerClosed
