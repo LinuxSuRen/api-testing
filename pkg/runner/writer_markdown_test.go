@@ -57,7 +57,7 @@ func TestMarkdownWriter(t *testing.T) {
 		writer.WithAPIConverage(nil)
 		err := writer.Output(createSlice(sample, 2))
 		assert.Nil(t, err)
-		assert.Equal(t, `There are 2 test cases:
+		assert.Equal(t, `There are 2 test cases, failed count 0:
 
 | API | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
@@ -71,7 +71,7 @@ func TestMarkdownWriter(t *testing.T) {
 		writer.WithAPIConverage(nil)
 		err := writer.Output(createSlice(sample, 8))
 		assert.Nil(t, err)
-		assert.Equal(t, `There are 8 test cases:
+		assert.Equal(t, `There are 8 test cases, failed count 0:
 
 <details>
   <summary><b>See all test records</b></summary>
@@ -95,7 +95,7 @@ func TestMarkdownWriter(t *testing.T) {
 		writer.WithAPIConverage(nil)
 		err := writer.Output(append(createSlice(sample, 8), errSample))
 		assert.Nil(t, err)
-		assert.Equal(t, `There are 9 test cases:
+		assert.Equal(t, `There are 9 test cases, failed count 1:
 
 | API | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
@@ -128,7 +128,7 @@ func TestMarkdownWriter(t *testing.T) {
 		}})
 		err := writer.Output(createSlice(sample, 2))
 		assert.Nil(t, err)
-		assert.Equal(t, `There are 2 test cases:
+		assert.Equal(t, `There are 2 test cases, failed count 0:
 
 | API | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
@@ -148,7 +148,7 @@ Resource usage:
 		result.LastErrorMessage = "error happend"
 		err := writer.Output(createSlice(result, 2))
 		assert.Nil(t, err)
-		assert.Equal(t, `There are 2 test cases:
+		assert.Equal(t, `There are 2 test cases, failed count 0:
 
 | API | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
@@ -170,7 +170,7 @@ Resource usage:
 		}}))
 		err := writer.Output(createSlice(sample, 2))
 		assert.Nil(t, err)
-		assert.Equal(t, `There are 2 test cases:
+		assert.Equal(t, `There are 2 test cases, failed count 0:
 
 | API | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|

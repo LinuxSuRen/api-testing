@@ -1,4 +1,4 @@
-There are {{ .Total }} test cases:
+There are {{ .Total }} test cases, failed count {{ .Error }}:
  
 {{- if gt .Total 6 }}
 {{- if gt .Error 0 }}

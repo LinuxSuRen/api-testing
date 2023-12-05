@@ -1,6 +1,6 @@
 module github.com/linuxsuren/api-testing/extensions/monitor-docker
 
-go 1.19
+go 1.20
 
 require (
 	github.com/docker/cli v24.0.7+incompatible

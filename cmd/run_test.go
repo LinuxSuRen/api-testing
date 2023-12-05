@@ -171,6 +171,13 @@ func TestRunCommand(t *testing.T) {
 		prepare: fooPrepare,
 		args:    []string{"-p", "[]]$#%*^&()"},
 		hasErr:  true,
+	}, {
+		name: "request-ignore-error",
+		prepare: func() {
+			gock.New(urlFoo).Get("/bar").Reply(http.StatusBadRequest)
+		},
+		args:   []string{"-p", simpleSuite, "--request-ignore-error"},
+		hasErr: true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

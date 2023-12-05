@@ -515,8 +515,12 @@ func convertConditionalVerify(verify []*ConditionalVerify) (result []testing.Con
 
 func (s *server) CreateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
-	loader := s.getLoader(ctx)
-	err = loader.CreateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
+	if in.Data == nil {
+		err = errors.New("data is required")
+	} else {
+		loader := s.getLoader(ctx)
+		err = loader.CreateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
+	}
 	return
 }
 

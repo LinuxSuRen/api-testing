@@ -26,6 +26,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -41,6 +42,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/runner/monitor"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -320,6 +322,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 		return
 	}
 
+	var errs []error
 	suiteRunner := runner.GetTestSuiteRunner(testSuite)
 	suiteRunner.WithTestReporter(o.reporter)
 	suiteRunner.WithSecure(testSuite.Spec.Secure)
@@ -343,14 +346,20 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 			ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
 			ctxWithTimeout = context.WithValue(ctxWithTimeout, runner.ContextKey("").ParentDir(), loader.GetContext())
 
-			if output, err = suiteRunner.RunTestCase(&testCase, dataContext, ctxWithTimeout); err != nil && !o.requestIgnoreError {
-				err = fmt.Errorf("failed to run '%s', %v", testCase.Name, err)
-				return
-			} else {
-				err = nil
+			output, err = suiteRunner.RunTestCase(&testCase, dataContext, ctxWithTimeout)
+			if err = util.ErrorWrap(err, "failed to run '%s', %v", testCase.Name, err); err != nil {
+				if o.requestIgnoreError {
+					errs = append(errs, err)
+				} else {
+					return
+				}
 			}
 		}
 		dataContext[testCase.Name] = output
+	}
+
+	if len(errs) > 0 {
+		err = errors.Join(errs...)
 	}
 	return
 }
