@@ -58,6 +58,7 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -275,7 +276,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}).ServeHTTP(w, r)
 		})
 
-		debugHandler(mux)
+		debugHandler(mux, remoteServer)
 		o.httpServer.WithHandler(mux)
 		log.Printf("HTTP server listening at %v", httplis.Addr())
 		log.Printf("Server is running.")
@@ -346,9 +347,32 @@ func frontEndHandlerWithLocation(consolePath string) func(w http.ResponseWriter,
 	}
 }
 
-func debugHandler(mux *runtime.ServeMux) {
+func debugHandler(mux *runtime.ServeMux, remoteServer server.RunnerServer) {
 	mux.HandlePath(http.MethodGet, "/debug/pprof/{sub}", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		switch sub := pathParams["sub"]; sub {
+		sub := pathParams["sub"]
+		extName := r.URL.Query().Get("name")
+		if extName != "" && remoteServer != nil {
+			log.Println("get pprof of extension:", extName)
+
+			ctx := metadata.NewIncomingContext(r.Context(), metadata.New(map[string]string{
+				server.HeaderKeyStoreName: extName,
+			}))
+
+			data, err := remoteServer.PProf(ctx, &server.PProfRequest{
+				Name: sub,
+			})
+			if err == nil {
+				w.Header().Set("Content-Type", "application/octet-stream")
+				w.Write(data.Data)
+			} else {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(err.Error()))
+			}
+
+			return
+		}
+
+		switch sub {
 		case "cmdline":
 			pprof.Cmdline(w, r)
 		case "profile":

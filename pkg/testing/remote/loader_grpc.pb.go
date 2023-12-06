@@ -34,6 +34,7 @@ type LoaderClient interface {
 	UpdateTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.TestCase, error)
 	DeleteTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.Empty, error)
 	Verify(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.ExtensionStatus, error)
+	PProf(ctx context.Context, in *server.PProfRequest, opts ...grpc.CallOption) (*server.PProfData, error)
 }
 
 type loaderClient struct {
@@ -143,6 +144,15 @@ func (c *loaderClient) Verify(ctx context.Context, in *server.Empty, opts ...grp
 	return out, nil
 }
 
+func (c *loaderClient) PProf(ctx context.Context, in *server.PProfRequest, opts ...grpc.CallOption) (*server.PProfData, error) {
+	out := new(server.PProfData)
+	err := c.cc.Invoke(ctx, "/remote.Loader/PProf", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoaderServer is the server API for Loader service.
 // All implementations must embed UnimplementedLoaderServer
 // for forward compatibility
@@ -158,6 +168,7 @@ type LoaderServer interface {
 	UpdateTestCase(context.Context, *server.TestCase) (*server.TestCase, error)
 	DeleteTestCase(context.Context, *server.TestCase) (*server.Empty, error)
 	Verify(context.Context, *server.Empty) (*server.ExtensionStatus, error)
+	PProf(context.Context, *server.PProfRequest) (*server.PProfData, error)
 	mustEmbedUnimplementedLoaderServer()
 }
 
@@ -197,6 +208,9 @@ func (UnimplementedLoaderServer) DeleteTestCase(context.Context, *server.TestCas
 }
 func (UnimplementedLoaderServer) Verify(context.Context, *server.Empty) (*server.ExtensionStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Verify not implemented")
+}
+func (UnimplementedLoaderServer) PProf(context.Context, *server.PProfRequest) (*server.PProfData, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PProf not implemented")
 }
 func (UnimplementedLoaderServer) mustEmbedUnimplementedLoaderServer() {}
 
@@ -409,6 +423,24 @@ func _Loader_Verify_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Loader_PProf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.PProfRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).PProf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/PProf",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).PProf(ctx, req.(*server.PProfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Loader_ServiceDesc is the grpc.ServiceDesc for Loader service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -459,6 +491,10 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Verify",
 			Handler:    _Loader_Verify_Handler,
+		},
+		{
+			MethodName: "PProf",
+			Handler:    _Loader_PProf_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

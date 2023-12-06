@@ -30,6 +30,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/linuxsuren/api-testing/pkg/extension"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
@@ -260,6 +261,14 @@ func (s *remoteserver) Verify(ctx context.Context, in *server.Empty) (reply *ser
 	// try to connect
 	if _, err = cli.Get(ctx, keyPrefix, connectTestOption()...); err == nil {
 		reply.Ready = true
+	}
+	return
+}
+func (s *remoteserver) PProf(ctx context.Context, in *server.PProfRequest) (data *server.PProfData, err error) {
+	log.Println("pprof", in.Name)
+
+	data = &server.PProfData{
+		Data: extension.LoadPProf(in.Name),
 	}
 	return
 }

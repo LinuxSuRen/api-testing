@@ -20,6 +20,7 @@ service Loader {
     rpc DeleteTestCase(server.TestCase) returns (server.Empty) {}
 
     rpc Verify(server.Empty) returns (server.ExtensionStatus) {}
+    rpc PProf(server.PProfRequest) returns (server.PProfData) {}
 }
 
 message TestSuites {

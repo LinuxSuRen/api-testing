@@ -27,6 +27,7 @@ package remote
 import (
 	context "context"
 	"errors"
+	"log"
 	"time"
 
 	server "github.com/linuxsuren/api-testing/pkg/server"
@@ -201,4 +202,14 @@ func (g *gRPCLoader) Verify() (readOnly bool, err error) {
 		}
 	}
 	return
+}
+
+func (g *gRPCLoader) PProf(name string) []byte {
+	data, err := g.client.PProf(context.Background(), &server.PProfRequest{
+		Name: name,
+	})
+	if err != nil {
+		log.Println("failed to get pprof:", err)
+	}
+	return data.Data
 }

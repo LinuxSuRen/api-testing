@@ -132,7 +132,7 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 			"allocs", "block", "goroutine", "heap", "mutex", "threadcreate"}
 
 		mu := runtime.NewServeMux()
-		debugHandler(mu)
+		debugHandler(mu, nil)
 
 		ready := make(chan struct{})
 		var err error

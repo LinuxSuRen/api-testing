@@ -799,6 +799,39 @@
         ]
       }
     },
+    "/server.Runner/PProf": {
+      "post": {
+        "summary": "extension",
+        "operationId": "Runner_PProf",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverPProfData"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverPProfRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
     "/server.Runner/PopularHeaders": {
       "post": {
         "summary": "common services",
@@ -1219,6 +1252,23 @@
           }
         },
         "kind": {
+          "type": "string"
+        }
+      }
+    },
+    "serverPProfData": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "serverPProfRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
           "type": "string"
         }
       }
