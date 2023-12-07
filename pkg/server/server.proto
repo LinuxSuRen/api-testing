@@ -52,6 +52,9 @@ service Runner {
     rpc CreateSecret(Secret) returns (CommonResult) {}
     rpc DeleteSecret(Secret) returns (CommonResult) {}
     rpc UpdateSecret(Secret) returns (CommonResult) {}
+
+    // extension
+    rpc PProf(PProfRequest) returns (PProfData) {}
 }
 
 message Suites {
@@ -261,6 +264,14 @@ message ExtensionStatus {
     bool readOnly = 2;
     string version = 3;
     string message = 4;
+}
+
+message PProfRequest {
+    string name = 1;
+}
+
+message PProfData {
+    bytes data = 1;
 }
 
 message Empty {

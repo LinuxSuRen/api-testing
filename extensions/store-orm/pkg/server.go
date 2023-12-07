@@ -31,6 +31,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/linuxsuren/api-testing/pkg/extension"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -265,6 +266,14 @@ func (s *dbserver) Verify(ctx context.Context, in *server.Empty) (reply *server.
 		Ready:   err == nil && db != nil,
 		Message: util.OKOrErrorMessage(clientErr),
 		Version: version.GetVersion(),
+	}
+	return
+}
+func (s *dbserver) PProf(ctx context.Context, in *server.PProfRequest) (data *server.PProfData, err error) {
+	log.Println("pprof", in.Name)
+
+	data = &server.PProfData{
+		Data: extension.LoadPProf(in.Name),
 	}
 	return
 }

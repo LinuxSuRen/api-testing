@@ -420,3 +420,8 @@ func (l *fileLoader) Verify() (readOnly bool, err error) {
 	// always be okay
 	return
 }
+
+func (l *fileLoader) PProf(string) []byte {
+	// not support
+	return nil
+}

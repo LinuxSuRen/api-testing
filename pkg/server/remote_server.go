@@ -180,7 +180,7 @@ func (s *server) getLoader(ctx context.Context) (loader testing.Writer) {
 	if mdd, ok = metadata.FromIncomingContext(ctx); ok {
 		storeNameMeta := mdd.Get(HeaderKeyStoreName)
 		if len(storeNameMeta) > 0 {
-			storeName := storeNameMeta[0]
+			storeName := strings.TrimSpace(storeNameMeta[0])
 			if storeName == "local" || storeName == "" {
 				return
 			}
@@ -812,6 +812,13 @@ func (s *server) DeleteSecret(ctx context.Context, in *Secret) (reply *CommonRes
 }
 func (s *server) UpdateSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
 	return s.secretServer.UpdateSecret(ctx, in)
+}
+func (s *server) PProf(ctx context.Context, in *PProfRequest) (reply *PProfData, err error) {
+	loader := s.getLoader(ctx)
+	reply = &PProfData{
+		Data: loader.PProf(in.Name),
+	}
+	return
 }
 
 func (s *server) getLoaderByStoreName(storeName string) (loader testing.Writer, err error) {

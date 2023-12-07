@@ -109,3 +109,8 @@ func (l *nonLoader) Verify() (readOnly bool, err error) {
 	// always be okay
 	return
 }
+
+func (l *nonLoader) PProf(string) []byte {
+	// not support
+	return nil
+}

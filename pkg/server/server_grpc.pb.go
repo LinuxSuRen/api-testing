@@ -62,6 +62,8 @@ type RunnerClient interface {
 	CreateSecret(ctx context.Context, in *Secret, opts ...grpc.CallOption) (*CommonResult, error)
 	DeleteSecret(ctx context.Context, in *Secret, opts ...grpc.CallOption) (*CommonResult, error)
 	UpdateSecret(ctx context.Context, in *Secret, opts ...grpc.CallOption) (*CommonResult, error)
+	// extension
+	PProf(ctx context.Context, in *PProfRequest, opts ...grpc.CallOption) (*PProfData, error)
 }
 
 type runnerClient struct {
@@ -391,6 +393,15 @@ func (c *runnerClient) UpdateSecret(ctx context.Context, in *Secret, opts ...grp
 	return out, nil
 }
 
+func (c *runnerClient) PProf(ctx context.Context, in *PProfRequest, opts ...grpc.CallOption) (*PProfData, error) {
+	out := new(PProfData)
+	err := c.cc.Invoke(ctx, "/server.Runner/PProf", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RunnerServer is the server API for Runner service.
 // All implementations must embed UnimplementedRunnerServer
 // for forward compatibility
@@ -435,6 +446,8 @@ type RunnerServer interface {
 	CreateSecret(context.Context, *Secret) (*CommonResult, error)
 	DeleteSecret(context.Context, *Secret) (*CommonResult, error)
 	UpdateSecret(context.Context, *Secret) (*CommonResult, error)
+	// extension
+	PProf(context.Context, *PProfRequest) (*PProfData, error)
 	mustEmbedUnimplementedRunnerServer()
 }
 
@@ -540,6 +553,9 @@ func (UnimplementedRunnerServer) DeleteSecret(context.Context, *Secret) (*Common
 }
 func (UnimplementedRunnerServer) UpdateSecret(context.Context, *Secret) (*CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateSecret not implemented")
+}
+func (UnimplementedRunnerServer) PProf(context.Context, *PProfRequest) (*PProfData, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PProf not implemented")
 }
 func (UnimplementedRunnerServer) mustEmbedUnimplementedRunnerServer() {}
 
@@ -1156,6 +1172,24 @@ func _Runner_UpdateSecret_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_PProf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PProfRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).PProf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/PProf",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).PProf(ctx, req.(*PProfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Runner_ServiceDesc is the grpc.ServiceDesc for Runner service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1290,6 +1324,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateSecret",
 			Handler:    _Runner_UpdateSecret_Handler,
+		},
+		{
+			MethodName: "PProf",
+			Handler:    _Runner_PProf_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

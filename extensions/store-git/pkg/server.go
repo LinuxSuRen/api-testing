@@ -39,6 +39,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/linuxsuren/api-testing/pkg/extension"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
@@ -265,6 +266,14 @@ func (s *gitClient) Verify(ctx context.Context, in *server.Empty) (reply *server
 	store := remote.GetStoreFromContext(ctx)
 	if store != nil {
 		reply.ReadOnly = store.Username == "" || store.Password == ""
+	}
+	return
+}
+func (s *gitClient) PProf(ctx context.Context, in *server.PProfRequest) (data *server.PProfData, err error) {
+	log.Println("pprof", in.Name)
+
+	data = &server.PProfData{
+		Data: extension.LoadPProf(in.Name),
 	}
 	return
 }

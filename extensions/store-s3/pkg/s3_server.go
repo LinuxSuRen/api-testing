@@ -35,6 +35,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/linuxsuren/api-testing/pkg/extension"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
@@ -202,6 +203,14 @@ func (s *s3Client) Verify(ctx context.Context, in *server.Empty) (reply *server.
 		Ready:   err == nil,
 		Message: util.OKOrErrorMessage(clientErr),
 		Version: version.GetVersion(),
+	}
+	return
+}
+func (s *s3Client) PProf(ctx context.Context, in *server.PProfRequest) (data *server.PProfData, err error) {
+	log.Println("pprof", in.Name)
+
+	data = &server.PProfData{
+		Data: extension.LoadPProf(in.Name),
 	}
 	return
 }

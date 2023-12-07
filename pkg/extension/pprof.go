@@ -22,34 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package testing
+package extension
 
-// Loader is an interface for test cases loader
-type Loader interface {
-	HasMore() bool
-	Load() ([]byte, error)
-	Put(string) (err error)
-	GetContext() string
-	GetCount() int
-	Reset()
+import (
+	"bytes"
+	"runtime/pprof"
+)
 
-	Verify() (readOnly bool, err error)
-	PProf(name string) []byte
-}
-
-type Writer interface {
-	Loader
-
-	ListTestCase(suite string) (testcases []TestCase, err error)
-	GetTestCase(suite, name string) (testcase TestCase, err error)
-	CreateTestCase(suite string, testcase TestCase) (err error)
-	UpdateTestCase(suite string, testcase TestCase) (err error)
-	DeleteTestCase(suite, testcase string) (err error)
-
-	ListTestSuite() (suites []TestSuite, err error)
-	GetTestSuite(name string, full bool) (suite TestSuite, err error)
-	CreateSuite(name, api string) (err error)
-	GetSuite(name string) (*TestSuite, string, error)
-	UpdateSuite(TestSuite) (err error)
-	DeleteSuite(name string) (err error)
+func LoadPProf(name string) []byte {
+	buf := new(bytes.Buffer)
+	if p := pprof.Lookup(name); p != nil {
+		p.WriteTo(buf, 0)
+	}
+	return buf.Bytes()
 }
