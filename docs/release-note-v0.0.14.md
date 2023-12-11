@@ -6,7 +6,7 @@
 
 ```shell
 docker run --network host \
-  linuxsuren/api-testing:master
+  linuxsuren/api-testing:v0.0.14
 ```
 
 或者，直接[下载二进制文件](https://github.com/LinuxSuRen/api-testing/releases/tag/v0.0.14)后启动：
