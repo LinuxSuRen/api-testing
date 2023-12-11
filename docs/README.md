@@ -333,6 +333,7 @@ You can find the official images from both [Docker Hub](https://hub.docker.com/r
 The tag `latest` represents the latest release version. The tag `master` represents the image of the latest master branch. We highly recommend you to use a fixed version instead of those in a production environment.
 
 ## Release Notes
+* [v0.0.15](release-note-v0.0.15.md)
 * [v0.0.14](release-note-v0.0.14.md)
 * [v0.0.13](release-note-v0.0.13.md)
 * [v0.0.12](release-note-v0.0.12.md)
