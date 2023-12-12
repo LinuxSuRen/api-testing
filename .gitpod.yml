@@ -10,3 +10,4 @@ ports:
 vscode:
   extensions:
     - golang.goteractive port
+    - linuxsuren.api-testing
