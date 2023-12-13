@@ -56,6 +56,8 @@ jobs:
           sudo atest service status
           atest run -p '.github/testing/*.yaml' --request-ignore-error --report github --report-file bin/report.json --report-github-repo linuxsuren/api-testing --report-github-pr ${{ github.event.number }}
           sudo atest service status
+          sudo atest service stop
+          sudo atest service uninstall
 
           atest convert -p .github/testing/core.yaml --converter jmeter -t sample.jmx
       - name: Run JMeter Tests

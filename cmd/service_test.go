@@ -26,10 +26,12 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/linuxsuren/api-testing/cmd/service"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/stretchr/testify/assert"
@@ -119,81 +121,27 @@ func TestService(t *testing.T) {
 		action:       "uninstall",
 		targetOS:     fakeruntime.OSDarwin,
 		expectOutput: "output4",
-	}, {
-		name:         "start in podman",
-		action:       "start",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         string(ServiceModePodman),
-		expectOutput: "",
-	}, {
-		name:         "start in docker",
-		action:       "start",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         string(ServiceModeDocker),
-		expectOutput: "",
-	}, {
-		name:         "stop in docker",
-		action:       "stop",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         string(ServiceModeDocker),
-		expectOutput: "",
-	}, {
-		name:         "restart in docker",
-		action:       "restart",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         string(ServiceModeDocker),
-		expectOutput: "",
-	}, {
-		name:         "status in docker",
-		action:       "status",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         string(ServiceModeDocker),
-		expectOutput: "",
-	}, {
-		name:         "install in docker",
-		action:       "install",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         string(ServiceModeDocker),
-		expectOutput: "",
-	}, {
-		name:         "uninstall in docker",
-		action:       "uninstall",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         string(ServiceModeDocker),
-		expectOutput: "",
-	}, {
-		name:         "install in podman",
-		action:       "install",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         ServiceModePodman.String(),
-		expectOutput: "",
-	}, {
-		name:         "uninstall in podman",
-		action:       "uninstall",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         ServiceModePodman.String(),
-		expectOutput: "",
-	}, {
-		name:         "stop in podman",
-		action:       "stop",
-		targetOS:     fakeruntime.OSLinux,
-		mode:         ServiceModePodman.String(),
-		expectOutput: "",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.mode == "" {
-				tt.mode = string(ServiceModeOS)
+				tt.mode = string(service.ServiceModeOS)
 			}
 
 			buf := new(bytes.Buffer)
 			normalRoot := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: tt.targetOS, ExpectOutput: tt.expectOutput},
 				server.NewFakeHTTPServer())
 			normalRoot.SetOut(buf)
-			normalRoot.SetArgs([]string{"service", "--action", tt.action,
+			normalRoot.SetArgs([]string{"service",
 				"--script-path", tmpFile.Name(), "--mode", tt.mode, "--image=",
 				"--skywalking=http://localhost:8080",
-				"--secret-server=http://localhost:9090"})
+				"--secret-server=http://localhost:9090",
+				tt.action})
+			fmt.Println([]string{"service",
+				"--script-path", tmpFile.Name(), "--mode", tt.mode, "--image=",
+				"--skywalking=http://localhost:8080",
+				"--secret-server=http://localhost:9090",
+				tt.action})
 			err = normalRoot.Execute()
 			assert.Nil(t, err)
 			assert.Equal(t, tt.expectOutput, strings.TrimSpace(buf.String()))

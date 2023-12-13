@@ -27,6 +27,8 @@ package version
 
 import "fmt"
 
+const UnknownVersion = "unknown"
+
 // should be injected during the build process
 var version string
 var date string
@@ -34,7 +36,7 @@ var date string
 // GetVersion returns the version
 func GetVersion() string {
 	if version == "" {
-		return "unknown"
+		return UnknownVersion
 	}
 	return version
 }

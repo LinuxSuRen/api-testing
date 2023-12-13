@@ -9,5 +9,6 @@ ports:
 
 vscode:
   extensions:
-    - golang.goteractive port
     - linuxsuren.api-testing
+    - golang.go
+    - Vue.volar

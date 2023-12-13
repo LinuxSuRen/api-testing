@@ -25,8 +25,10 @@ package service
 
 import (
 	_ "embed"
-	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"os"
+
+	"github.com/linuxsuren/api-testing/pkg/util"
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 )
 
 type macOSService struct {
@@ -39,7 +41,7 @@ func NewService(execer fakeruntime.Execer, scriptPath string) Service {
 	return &macOSService{
 		commonService: commonService{
 			Execer:     execer,
-			scriptPath: emptyThenDefault(scriptPath, "/Library/LaunchDaemons/com.github.linuxsuren.atest.plist"),
+			scriptPath: util.EmptyThenDefault(scriptPath, "/Library/LaunchDaemons/com.github.linuxsuren.atest.plist"),
 			script:     macOSServiceScript,
 		},
 	}
@@ -77,6 +79,11 @@ func (s *macOSService) Install() (output string, err error) {
 func (s *macOSService) Uninstall() (output string, err error) {
 	output, err = s.Execer.RunCommandAndReturn("sudo", "", s.cli, "disable", s.id)
 	return
+}
+
+func (s *macOSService) Available() bool {
+	// TODO need a way to determine if it's available
+	return true
 }
 
 //go:embed data/macos_service.xml
