@@ -25,9 +25,10 @@ package service
 
 import (
 	"fmt"
+	"os/exec"
+
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"golang.org/x/sys/windows/svc/mgr"
-	"os/exec"
 )
 
 func NewService(execer fakeruntime.Execer, scriptPath string) Service {
@@ -113,4 +114,9 @@ func (s *windowsService) Uninstall() (output string, err error) {
 		}
 	}
 	return
+}
+
+func (s *windowsService) Available() bool {
+	// TODO need a way to determine if it's available
+	return true
 }

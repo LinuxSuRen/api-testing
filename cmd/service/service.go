@@ -20,7 +20,9 @@ SOFTWARE.
 
 package service
 
-import fakeruntime "github.com/linuxsuren/go-fake-runtime"
+import (
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
+)
 
 // Service is the interface of service
 type Service interface {
@@ -30,6 +32,7 @@ type Service interface {
 	Status() (string, error)    // status of the service
 	Install() (string, error)   // install the service
 	Uninstall() (string, error) // uninstall the service
+	Available() bool
 }
 
 type commonService struct {
@@ -38,9 +41,56 @@ type commonService struct {
 	script     string
 }
 
-func emptyThenDefault(value, defaultValue string) string {
-	if value == "" {
-		value = defaultValue
+type ServiceMode string
+
+const (
+	ServiceModeOS        ServiceMode = "os"
+	ServiceModeContainer ServiceMode = "container"
+	ServiceModePodman    ServiceMode = "podman"
+	ServiceModeDocker    ServiceMode = "docker"
+)
+
+func (s ServiceMode) All() []ServiceMode {
+	return []ServiceMode{ServiceModeOS, ServiceModeContainer,
+		ServiceModePodman, ServiceModeDocker}
+}
+
+func (s ServiceMode) String() string {
+	return string(s)
+}
+
+type ServerFeatureOption struct {
+	SecretServer string
+	SkyWalking   string
+	LocalStorage string
+}
+
+func GetAvailableService(mode ServiceMode, execer fakeruntime.Execer,
+	containerOption ContainerOption, featureOption ServerFeatureOption,
+	scriptPath string) (svc Service) {
+	osService := NewService(execer, scriptPath)
+	dockerService := NewContainerService(execer, "docker", featureOption, containerOption)
+	podmanService := NewContainerService(execer, "podman", featureOption, containerOption)
+
+	switch mode {
+	case ServiceModeOS:
+		svc = osService
+	case ServiceModeDocker, ServiceModeContainer:
+		svc = dockerService
+	case ServiceModePodman:
+		svc = podmanService
+	default:
+		if osService.Available() {
+			svc = osService
+		} else if dockerService.Available() {
+			svc = dockerService
+		} else if podmanService.Available() {
+			svc = podmanService
+		}
 	}
-	return value
+
+	if svc != nil && !svc.Available() {
+		svc = nil
+	}
+	return
 }

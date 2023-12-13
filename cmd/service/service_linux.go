@@ -25,15 +25,18 @@ package service
 
 import (
 	_ "embed"
-	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"os"
+	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/util"
+	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 )
 
 func NewService(execer fakeruntime.Execer, scriptPath string) Service {
 	return &linuxService{
 		commonService: commonService{
 			Execer:     execer,
-			scriptPath: emptyThenDefault(scriptPath, "/lib/systemd/system/atest.service"),
+			scriptPath: util.EmptyThenDefault(scriptPath, "/lib/systemd/system/atest.service"),
 			script:     linuxServiceScript,
 		},
 	}
@@ -77,6 +80,12 @@ func (s *linuxService) Install() (output string, err error) {
 func (s *linuxService) Uninstall() (output string, err error) {
 	output, err = s.Execer.RunCommandAndReturn(SystemCtl, "", "disable", ServiceName)
 	return
+}
+
+func (s *linuxService) Available() bool {
+	output, err := s.Execer.RunCommandAndReturn("systemctl", "", "is-system-running")
+	output = strings.TrimSpace(output)
+	return err == nil && output != "offline"
 }
 
 //go:embed data/linux_service.txt
