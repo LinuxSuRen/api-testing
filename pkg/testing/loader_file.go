@@ -425,3 +425,7 @@ func (l *fileLoader) PProf(string) []byte {
 	// not support
 	return nil
 }
+
+func (l *fileLoader) Close() {
+	// not support
+}

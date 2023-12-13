@@ -114,3 +114,7 @@ func (l *nonLoader) PProf(string) []byte {
 	// not support
 	return nil
 }
+
+func (l *nonLoader) Close() {
+	// not support
+}
