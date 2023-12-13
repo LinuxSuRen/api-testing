@@ -278,6 +278,7 @@ func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, 
 
 func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err error) {
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	reply = &Suites{
 		Data: make(map[string]*Items),
 	}
@@ -300,6 +301,7 @@ func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err e
 func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	if loader == nil {
 		reply.Error = "no loader found"
 	} else {
@@ -348,6 +350,7 @@ func (s *server) ImportTestSuite(ctx context.Context, in *TestSuiteSource) (resu
 	}
 
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 
 	if err = loader.CreateSuite(suite.Name, suite.API); err != nil {
 		return
@@ -364,6 +367,7 @@ func (s *server) ImportTestSuite(ctx context.Context, in *TestSuiteSource) (resu
 
 func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (result *TestSuite, err error) {
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	var suite *testing.TestSuite
 	if suite, _, err = loader.GetSuite(in.Name); err == nil && suite != nil {
 		result = ToGRPCSuite(suite)
@@ -374,6 +378,7 @@ func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (resul
 func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	err = loader.UpdateSuite(*ToNormalSuite(in))
 	return
 }
@@ -381,6 +386,7 @@ func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *Hel
 func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	err = loader.DeleteSuite(in.Name)
 	return
 }
@@ -388,6 +394,7 @@ func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (re
 func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (result *Suite, err error) {
 	var items []testing.TestCase
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	if items, err = loader.ListTestCase(in.Name); err == nil {
 		result = &Suite{}
 		for _, item := range items {
@@ -400,6 +407,7 @@ func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (resul
 func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *TestCase, err error) {
 	var result testing.TestCase
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	if result, err = loader.GetTestCase(in.Suite, in.Testcase); err == nil {
 		reply = ToGRPCTestCase(result)
 	}
@@ -410,6 +418,7 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 	var targetTestSuite testing.TestSuite
 
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	targetTestSuite, err = loader.GetTestSuite(in.Suite, true)
 	if err != nil {
 		err = nil
@@ -519,6 +528,7 @@ func (s *server) CreateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 		err = errors.New("data is required")
 	} else {
 		loader := s.getLoader(ctx)
+		defer loader.Close()
 		err = loader.CreateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
 	}
 	return
@@ -531,12 +541,14 @@ func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (rep
 		return
 	}
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	err = loader.UpdateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
 	return
 }
 
 func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (reply *HelloReply, err error) {
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	reply = &HelloReply{}
 	err = loader.DeleteTestCase(in.Suite, in.Testcase)
 	return
@@ -609,6 +621,7 @@ func (s *server) ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest) 
 	} else {
 		var result testing.TestSuite
 		loader := s.getLoader(ctx)
+		defer loader.Close()
 		if result, err = loader.GetTestSuite(in.TestSuite, true); err == nil {
 			output, genErr := instance.Convert(&result)
 			reply.Success = genErr == nil
@@ -640,6 +653,7 @@ func (s *server) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity) (r
 
 	var suite *testing.TestSuite
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	if suite, _, err = loader.GetSuite(in.Name); err != nil || suite == nil {
 		return
 	}
@@ -815,6 +829,7 @@ func (s *server) UpdateSecret(ctx context.Context, in *Secret) (reply *CommonRes
 }
 func (s *server) PProf(ctx context.Context, in *PProfRequest) (reply *PProfData, err error) {
 	loader := s.getLoader(ctx)
+	defer loader.Close()
 	reply = &PProfData{
 		Data: loader.PProf(in.Name),
 	}

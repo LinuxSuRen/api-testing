@@ -39,6 +39,7 @@ type gRPCLoader struct {
 	store  *testing.Store
 	client LoaderClient
 	ctx    context.Context
+	conn   *grpc.ClientConn
 }
 
 func NewGRPCloaderFromStore() testing.StoreWriterFactory {
@@ -54,6 +55,7 @@ func (g *gRPCLoader) NewInstance(store testing.Store) (writer testing.Writer, er
 			store:  &store,
 			ctx:    WithStoreContext(context.Background(), &store),
 			client: NewLoaderClient(conn),
+			conn:   conn,
 		}
 	}
 	return
@@ -212,4 +214,10 @@ func (g *gRPCLoader) PProf(name string) []byte {
 		log.Println("failed to get pprof:", err)
 	}
 	return data.Data
+}
+
+func (g *gRPCLoader) Close() {
+	if g.conn != nil {
+		g.conn.Close()
+	}
 }
