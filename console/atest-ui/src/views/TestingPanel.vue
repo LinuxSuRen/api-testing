@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import WelcomePage from './WelcomePage.vue'
 import TestCase from './TestCase.vue'
 import TestSuite from './TestSuite.vue'
 import TemplateFunctions from './TemplateFunctions.vue'
 import { reactive, ref, watch } from 'vue'
 import { ElTree, ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { Edit } from '@element-plus/icons-vue'
+import { Edit, Refresh } from '@element-plus/icons-vue'
 import type { Suite } from './types'
 import { API } from './net'
 import { Cache } from './cache'
@@ -303,7 +302,7 @@ const suiteKinds = [{
 <template>
   <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
     <el-container style="height: 100%">
-      <el-main>
+      <el-main style="padding-top: 5px; padding-bottom: 5px;">
         <el-container style="height: 100%">
           <el-aside>
             <el-button type="primary" @click="openTestSuiteCreateDialog"
@@ -312,8 +311,8 @@ const suiteKinds = [{
             <el-button type="primary" @click="openTestSuiteImportDialog"
               data-intro="Click here to import from Postman"
               test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
-            <el-button type="primary" @click="loadStores">{{ t('button.refresh') }}</el-button>
-            <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
+            <el-button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</el-button>
+            <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" style="padding: 5px;" />
 
             <el-tree
               v-loading="storesLoading"
@@ -331,13 +330,14 @@ const suiteKinds = [{
             <TemplateFunctions/>
           </el-aside>
 
-          <el-main>
+          <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px;">
             <TestCase
               v-if="viewName === 'testcase'"
               :suite="testSuite"
               :kindName="testSuiteKind"
               :name="testCaseName"
               @updated="loadStores"
+              style="height: 100%;"
               data-intro="This is the test case editor. You can edit the test case here."
             />
             <TestSuite

@@ -21,6 +21,7 @@
     "jsonpath-plus": "^7.2.0",
     "skywalking-client-js": "^0.10.0",
     "vue": "^3.3.4",
+    "vue-codemirror": "^6.1.1",
     "vue-i18n": "^9.2.2",
     "vue-json-viewer": "^3.0.4",
     "vue-router": "^4.2.2"
