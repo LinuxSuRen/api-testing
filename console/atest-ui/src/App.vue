@@ -41,14 +41,13 @@ API.GetVersion((d) => {
 })
 
 const panelName = ref('')
-const sideWidth = ref("width: 300px")
+const sideWidth = ref("width: 300px; display: flex;flex-direction: column;")
 const isCollapse = ref(false)
 watch(isCollapse, (e) => {
-  console.log(e)
   if (e) {
-    sideWidth.value = "width: 80px"
+    sideWidth.value = "width: 80px; display: flex;flex-direction: column;"
   } else {
-    sideWidth.value = "width: 300px"
+    sideWidth.value = "width: 300px; display: flex;flex-direction: column;"
   }
 })
 const handleSelect = (key: string) => {
@@ -64,7 +63,7 @@ const handleSelect = (key: string) => {
         <el-radio-button :label="true">-</el-radio-button>
       </el-radio-group>
       <el-menu
-        class="el-menu-vertical-demo"
+        style="flex-grow: 1;"
         default-active="welcome"
         :collapse="isCollapse"
         @select="handleSelect"
