@@ -41,13 +41,13 @@ API.GetVersion((d) => {
 })
 
 const panelName = ref('')
-const sideWidth = ref("width: 300px; display: flex;flex-direction: column;")
+const sideWidth = ref("width: 200px; display: flex;flex-direction: column;")
 const isCollapse = ref(false)
 watch(isCollapse, (e) => {
   if (e) {
     sideWidth.value = "width: 80px; display: flex;flex-direction: column;"
   } else {
-    sideWidth.value = "width: 300px; display: flex;flex-direction: column;"
+    sideWidth.value = "width: 200px; display: flex;flex-direction: column;"
   }
 })
 const handleSelect = (key: string) => {
@@ -58,7 +58,7 @@ const handleSelect = (key: string) => {
 <template>
   <el-container style="height: 100%">
     <el-aside :style="sideWidth">
-      <el-radio-group v-model="isCollapse" style="margin-bottom: 20px">
+      <el-radio-group v-model="isCollapse">
         <el-radio-button :label="false">+</el-radio-button>
         <el-radio-button :label="true">-</el-radio-button>
       </el-radio-group>
@@ -87,7 +87,7 @@ const handleSelect = (key: string) => {
       </el-menu>
     </el-aside>
 
-    <el-main>
+    <el-main style="padding-top: 5px; padding-bottom: 5px;">
       <TestingPanel v-if="panelName === 'testing'" />
       <StoreManager v-else-if="panelName === 'store'" />
       <SecretManager v-else-if="panelName === 'secret'" />

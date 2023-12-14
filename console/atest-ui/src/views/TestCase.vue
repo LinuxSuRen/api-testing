@@ -11,6 +11,7 @@ import { UIAPI } from './net-vue'
 import type { TestCaseResponse } from './cache'
 import { useI18n } from 'vue-i18n'
 import { JSONPath } from 'jsonpath-plus'
+import { Codemirror } from 'vue-codemirror'
 
 const { t } = useI18n()
 
@@ -436,19 +437,19 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
 </script>
 
 <template>
-  <div class="common-layout">
-    <el-container style="height: 60vh">
-      <el-header style="padding-left: 5px">
-        <div style="margin-bottom: 5px">
-          <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
-            disabled v-if="Cache.GetCurrentStore().readOnly"
-            >{{ t('button.save') }}</el-button>
-          <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
-            v-if="!Cache.GetCurrentStore().readOnly"
-            >{{ t('button.save') }}</el-button>
-          <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
-          <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
-        </div>
+  <el-container>
+    <el-header style="padding-left: 5px;">
+      <div style="margin-bottom: 5px">
+        <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
+          disabled v-if="Cache.GetCurrentStore().readOnly"
+          >{{ t('button.save') }}</el-button>
+        <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
+          v-if="!Cache.GetCurrentStore().readOnly"
+          >{{ t('button.save') }}</el-button>
+        <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
+        <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
+      </div>
+      <div style="display: flex;">
         <el-select
           v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'"
           v-model="testCaseWithSuite.data.request.method"
@@ -468,7 +469,7 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
           v-model="testCaseWithSuite.data.request.api"
           :fetch-suggestions="querySuggestedAPIs"
           placeholder="API Address"
-          style="width: 50%; margin-left: 5px; margin-right: 5px"
+          style="width: 50%; margin-left: 5px; margin-right: 5px; flex-grow: 1;"
         >
           <template #default="{ item }">
             <div class="value">{{ item.request.method }}</div>
@@ -484,70 +485,67 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
               </el-dropdown-menu>
             </template>
         </el-dropdown>
-      </el-header>
+      </div>
+    </el-header>
 
-      <el-main>
-        <el-tabs v-model="requestActiveTab" class="demo-tabs">
-          <el-tab-pane label="Query" name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
-            <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
-              <el-table-column label="Key" width="180">
-                <template #default="scope">
-                  <el-autocomplete
-                    v-model="scope.row.key"
-                    placeholder="Key"
-                    @change="queryChange"
-                  />
-                </template>
-              </el-table-column>
-              <el-table-column label="Value">
-                <template #default="scope">
-                  <div style="display: flex; align-items: center">
-                    <el-input v-model="scope.row.value" placeholder="Value" />
-                  </div>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-tab-pane>
+    <el-main style="padding-left: 5px;">
+      <el-tabs v-model="requestActiveTab">
+        <el-tab-pane label="Query" name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+          <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
+            <el-table-column label="Key" width="180">
+              <template #default="scope">
+                <el-autocomplete
+                  v-model="scope.row.key"
+                  placeholder="Key"
+                  @change="queryChange"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="Value">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-input v-model="scope.row.value" placeholder="Value" />
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
 
-          <el-tab-pane label="Headers" name="second">
-            <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
-              <el-table-column label="Key" width="180">
-                <template #default="scope">
-                  <el-autocomplete
-                    v-model="scope.row.key"
-                    :fetch-suggestions="queryPupularHeaders"
-                    placeholder="Key"
-                    @change="headerChange"
-                  />
-                </template>
-              </el-table-column>
-              <el-table-column label="Value">
-                <template #default="scope">
-                  <div style="display: flex; align-items: center">
-                    <el-input v-model="scope.row.value" placeholder="Value" />
-                  </div>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-tab-pane>
+        <el-tab-pane label="Headers" name="header">
+          <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
+            <el-table-column label="Key" width="180">
+              <template #default="scope">
+                <el-autocomplete
+                  v-model="scope.row.key"
+                  :fetch-suggestions="queryPupularHeaders"
+                  placeholder="Key"
+                  @change="headerChange"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="Value">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-input v-model="scope.row.value" placeholder="Value" />
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
 
-          <el-tab-pane label="Body" name="body">
-            <el-radio-group v-model="bodyType" @change="bodyTypeChange">
-              <el-radio :label="1">none</el-radio>
-              <el-radio :label="2">form-data</el-radio>
-              <el-radio :label="3">raw</el-radio>
-              <el-radio :label="4">x-www-form-urlencoded</el-radio>
-              <el-radio :label="5">JSON</el-radio>
-            </el-radio-group>
+        <el-tab-pane label="Body" name="body">
+          <el-radio-group v-model="bodyType" @change="bodyTypeChange">
+            <el-radio :label="1">none</el-radio>
+            <el-radio :label="2">form-data</el-radio>
+            <el-radio :label="3">raw</el-radio>
+            <el-radio :label="4">x-www-form-urlencoded</el-radio>
+            <el-radio :label="5">JSON</el-radio>
+          </el-radio-group>
 
-            <el-input
-              v-if="bodyType === 3 || bodyType === 5"
-              v-model="testCaseWithSuite.data.request.body"
-              :autosize="{ minRows: 4, maxRows: 8 }"
-              type="textarea"
-              placeholder="Please input"
+          <div style="flex-grow: 1;">
+            <Codemirror v-if="bodyType === 3 || bodyType === 5"
               @change="jsonForamt"
-            />
+              v-model="testCaseWithSuite.data.request.body"/>
             <el-table :data="testCaseWithSuite.data.request.form" style="width: 100%" v-if="bodyType === 4">
               <el-table-column label="Key" width="180">
                 <template #default="scope">
@@ -562,186 +560,174 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
                 </template>
               </el-table-column>
             </el-table>
-          </el-tab-pane>
+          </div>
+        </el-tab-pane>
 
-          <el-tab-pane label="Expected" name="expected" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
-            <el-row :gutter="20">
-              <span
-                class="ml-3 w-50 text-gray-600 inline-flex items-center"
-                style="margin-left: 15px; margin-right: 15px"
-                >Status Code:</span
-              >
-              <el-input
-                v-model="testCaseWithSuite.data.response.statusCode"
-                class="w-50 m-2"
-                placeholder="Please input"
-                style="width: 200px"
-              />
-            </el-row>
+        <el-tab-pane label="Expected" name="expected" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+          <el-row :gutter="20">
+            <span
+              class="ml-3 w-50 text-gray-600 inline-flex items-center"
+              style="margin-left: 15px; margin-right: 15px"
+              >Status Code:</span
+            >
             <el-input
-              v-model="testCaseWithSuite.data.response.body"
-              :autosize="{ minRows: 4, maxRows: 8 }"
-              type="textarea"
-              placeholder="Expected Body"
-            />
-          </el-tab-pane>
-
-          <el-tab-pane label="Expected Headers" name="expected-headers" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
-            <el-table :data="testCaseWithSuite.data.response.header" style="width: 100%">
-              <el-table-column label="Key" width="180">
-                <template #default="scope">
-                  <el-input
-                    v-model="scope.row.key"
-                    placeholder="Key"
-                    @change="expectedHeaderChange"
-                  />
-                </template>
-              </el-table-column>
-              <el-table-column label="Value">
-                <template #default="scope">
-                  <div style="display: flex; align-items: center">
-                    <el-input v-model="scope.row.value" placeholder="Value" />
-                  </div>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-tab-pane>
-
-          <el-tab-pane label="BodyFiledExpect" name="fourth" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
-            <el-table :data="testCaseWithSuite.data.response.bodyFieldsExpect" style="width: 100%">
-              <el-table-column label="Key" width="180">
-                <template #default="scope">
-                  <el-autocomplete
-                    v-model="scope.row.key"
-                    :fetch-suggestions="queryBodyFields"
-                    clearable
-                    placeholder="Key"
-                    @change="bodyFiledExpectChange"
-                  />
-                </template>
-              </el-table-column>
-              <el-table-column label="Value">
-                <template #default="scope">
-                  <div style="display: flex; align-items: center">
-                    <el-input v-model="scope.row.value" placeholder="Value" />
-                  </div>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-tab-pane>
-
-          <el-tab-pane label="Verify" name="fifth" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
-            <div v-for="verify in testCaseWithSuite.data.response.verify" :key="verify">
-              <el-input :value="verify" />
-            </div>
-          </el-tab-pane>
-
-          <el-tab-pane label="Schema" name="schema" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
-            <el-input
-              v-model="testCaseWithSuite.data.response.schema"
-              :autosize="{ minRows: 4, maxRows: 20 }"
-              type="textarea"
-            />
-          </el-tab-pane>
-        </el-tabs>
-
-        <el-drawer v-model="codeDialogOpened">
-          <template #header>
-            <h4>Code Generator</h4>
-          </template>
-          <template #default>
-            <div>
-              <el-select
-                v-model="currentCodeGenerator"
-                class="m-2"
-                size="middle"
-              >
-                <el-option
-                  v-for="item in codeGenerators"
-                  :key="item.key"
-                  :label="item.key"
-                  :value="item.key"
-                />
-              </el-select>
-              <el-button type="primary" @click="generateCode">{{ t('button.refresh') }}</el-button>
-              <el-button type="primary" @click="copyCode">{{ t('button.copy') }}</el-button>
-            </div>
-            <div>
-              <el-input
-                v-model="currentCodeContent"
-                :autosize="{ minRows: 4, maxRows: 100 }"
-                type="textarea"
-                placeholder="Please input"
-              />
-            </div>
-          </template>
-        </el-drawer>
-
-        <el-drawer v-model="parameterDialogOpened">
-          <template #header>
-            <h4>API Request Parameters</h4>
-          </template>
-          <template #default>
-            <el-table :data="parameters" style="width: 100%">
-              <el-table-column label="Key" width="180">
-                <template #default="scope">
-                  <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange"/>
-                </template>
-              </el-table-column>
-              <el-table-column label="Value">
-                <template #default="scope">
-                  <div style="display: flex; align-items: center">
-                    <el-input v-model="scope.row.value" placeholder="Value" />
-                  </div>
-                </template>
-              </el-table-column>
-            </el-table>
-
-            <el-button type="primary" @click="sendRequestWithParameter">{{ t('button.send') }}</el-button>
-          </template>
-        </el-drawer>
-      </el-main>
-
-      <el-footer>
-        <el-tabs v-model="testResultActiveTab" class="demo-tabs">
-          <el-tab-pane label="Output" name="output">
-            <el-tag class="ml-2" type="success" v-if="testResult.statusCode && testResult.error === ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
-            <el-tag class="ml-2" type="danger" v-if="testResult.statusCode && testResult.error !== ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
-
-            <el-input
-              v-model="testResult.output"
-              :autosize="{ minRows: 4, maxRows: 6 }"
-              readonly="true"
-              type="textarea"
+              v-model="testCaseWithSuite.data.response.statusCode"
+              class="w-50 m-2"
               placeholder="Please input"
+              style="width: 200px"
             />
-          </el-tab-pane>
-          <el-tab-pane label="Body" name="body">
-            <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
-              clearable label="dddd" placeholder="$.key" />
-            <JsonViewer :value="testResult.bodyObject" :expand-depth="5" copyable boxed sort />
-          </el-tab-pane>
-          <el-tab-pane name="response-header">
-            <template #label>
-              <el-badge :value="testResult.header.length" class="item">Header</el-badge>
-            </template>
-            <el-table :data="testResult.header" style="width: 100%">
-              <el-table-column label="Key" width="200">
-                <template #default="scope">
-                  <el-input v-model="scope.row.key" placeholder="Key" readonly="true" />
-                </template>
-              </el-table-column>
-              <el-table-column label="Value">
-                <template #default="scope">
-                  <div style="display: flex; align-items: center">
-                    <el-input v-model="scope.row.value" placeholder="Value" readonly="true" />
-                  </div>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-tab-pane>
-        </el-tabs>
-      </el-footer>
-    </el-container>
-  </div>
+          </el-row>
+          <el-input
+            v-model="testCaseWithSuite.data.response.body"
+            :autosize="{ minRows: 4, maxRows: 8 }"
+            type="textarea"
+            placeholder="Expected Body"
+          />
+        </el-tab-pane>
+
+        <el-tab-pane label="Expected Headers" name="expected-headers" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+          <el-table :data="testCaseWithSuite.data.response.header" style="width: 100%">
+            <el-table-column label="Key" width="180">
+              <template #default="scope">
+                <el-input
+                  v-model="scope.row.key"
+                  placeholder="Key"
+                  @change="expectedHeaderChange"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="Value">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-input v-model="scope.row.value" placeholder="Value" />
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+
+        <el-tab-pane label="BodyFiledExpect" name="bodyFieldExpect" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+          <el-table :data="testCaseWithSuite.data.response.bodyFieldsExpect" style="width: 100%">
+            <el-table-column label="Key" width="180">
+              <template #default="scope">
+                <el-autocomplete
+                  v-model="scope.row.key"
+                  :fetch-suggestions="queryBodyFields"
+                  clearable
+                  placeholder="Key"
+                  @change="bodyFiledExpectChange"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="Value">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-input v-model="scope.row.value" placeholder="Value" />
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+
+        <el-tab-pane label="Verify" name="verify" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+          <div v-for="verify in testCaseWithSuite.data.response.verify" :key="verify">
+            <el-input :value="verify" />
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="Schema" name="schema" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+          <el-input
+            v-model="testCaseWithSuite.data.response.schema"
+            :autosize="{ minRows: 4, maxRows: 20 }"
+            type="textarea"
+          />
+        </el-tab-pane>
+      </el-tabs>
+
+      <el-drawer v-model="codeDialogOpened" size="50%">
+        <template #header>
+          <h4>Code Generator</h4>
+        </template>
+        <template #default>
+          <div style="padding-bottom: 10px;">
+            <el-select
+              v-model="currentCodeGenerator"
+              class="m-2"
+              style="padding-right: 10px;"
+              size="middle"
+            >
+              <el-option
+                v-for="item in codeGenerators"
+                :key="item.key"
+                :label="item.key"
+                :value="item.key"
+              />
+            </el-select>
+            <el-button type="primary" @click="generateCode">{{ t('button.refresh') }}</el-button>
+            <el-button type="primary" @click="copyCode">{{ t('button.copy') }}</el-button>
+          </div>
+          <Codemirror v-model="currentCodeContent"/>
+        </template>
+      </el-drawer>
+
+      <el-drawer v-model="parameterDialogOpened">
+        <template #header>
+          <h4>API Request Parameters</h4>
+        </template>
+        <template #default>
+          <el-table :data="parameters" style="width: 100%">
+            <el-table-column label="Key" width="180">
+              <template #default="scope">
+                <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange"/>
+              </template>
+            </el-table-column>
+            <el-table-column label="Value">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-input v-model="scope.row.value" placeholder="Value" />
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <el-button type="primary" @click="sendRequestWithParameter">{{ t('button.send') }}</el-button>
+        </template>
+      </el-drawer>
+    </el-main>
+
+    <el-footer style="height: auto;">
+      <el-tabs v-model="testResultActiveTab">
+        <el-tab-pane label="Output" name="output">
+          <el-tag class="ml-2" type="success" v-if="testResult.statusCode && testResult.error === ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
+          <el-tag class="ml-2" type="danger" v-if="testResult.statusCode && testResult.error !== ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
+
+          <Codemirror v-model="testResult.output"/>
+        </el-tab-pane>
+        <el-tab-pane label="Body" name="body">
+          <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
+            clearable label="dddd" placeholder="$.key" />
+          <JsonViewer :value="testResult.bodyObject" :expand-depth="5" copyable boxed sort />
+        </el-tab-pane>
+        <el-tab-pane name="response-header">
+          <template #label>
+            <el-badge :value="testResult.header.length" class="item">Header</el-badge>
+          </template>
+          <el-table :data="testResult.header" style="width: 100%">
+            <el-table-column label="Key" width="200">
+              <template #default="scope">
+                <el-input v-model="scope.row.key" placeholder="Key" readonly="true" />
+              </template>
+            </el-table-column>
+            <el-table-column label="Value">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-input v-model="scope.row.value" placeholder="Value" readonly="true" />
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+    </el-footer>
+  </el-container>
 </template>
