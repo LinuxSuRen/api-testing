@@ -36,6 +36,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"runtime/debug"
 	"strings"
 	"syscall"
 	"time"
@@ -91,7 +92,11 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.StringVarP(&opt.clientSecret, "client-secret", "", os.Getenv("OAUTH_CLIENT_SECRET"), "ClientSecret is the application's secret")
 	flags.BoolVarP(&opt.dryRun, "dry-run", "", false, "Do not really start a gRPC server")
 
+	// gc releated flags
+	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
+
 	c.Flags().MarkHidden("dry-run")
+	c.Flags().MarkHidden("gc-percent")
 	return
 }
 
@@ -118,6 +123,8 @@ type serverOption struct {
 	oauthServer  string
 	oauthSkipTls bool
 	oauthGroup   []string
+
+	gcPercent int
 
 	dryRun bool
 
@@ -169,6 +176,8 @@ func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	ctx, cancel := context.WithCancel(cmd.Context())
 	defer cancel()
+
+	debug.SetGCPercent(o.gcPercent)
 
 	if o.printProto {
 		for _, val := range server.GetProtos() {
@@ -291,10 +300,7 @@ func postRequestProxy(proxy string) func(w http.ResponseWriter, r *http.Request,
 		return func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {}
 	}
 
-	if strings.HasSuffix(proxy, "/") {
-		proxy = strings.TrimSuffix(proxy, "/")
-	}
-
+	proxy = strings.TrimSuffix(proxy, "/")
 	return func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		http.Post(fmt.Sprintf("%s%s", proxy, r.URL.Path), "application/json", r.Body)
 	}

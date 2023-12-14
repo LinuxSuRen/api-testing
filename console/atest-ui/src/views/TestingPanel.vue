@@ -312,6 +312,7 @@ const suiteKinds = [{
             <el-button type="primary" @click="openTestSuiteImportDialog"
               data-intro="Click here to import from Postman"
               test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
+            <el-button type="primary" @click="loadStores">{{ t('button.refresh') }}</el-button>
             <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" />
 
             <el-tree
@@ -327,6 +328,7 @@ const suiteKinds = [{
               @node-click="handleNodeClick"
               data-intro="This is the test suite tree. You can click the test suite to edit it."
             />
+            <TemplateFunctions/>
           </el-aside>
 
           <el-main>
@@ -347,8 +349,6 @@ const suiteKinds = [{
           </el-main>
         </el-container>
       </el-main>
-
-    <TemplateFunctions/>
     </el-container>
   </div>
 

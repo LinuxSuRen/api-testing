@@ -18,7 +18,7 @@ function queryFuncs() {
 </script>
 
 <template>
-    <el-affix position="bottom" :offset="20">
+    <el-affix position="bottom" :offset="20" style="position: absolute; bottom: 5px;" >
         <el-button type="primary" @click="dialogVisible = !dialogVisible"
             data-intro="You can search your desired template functions.">{{ t('button.toolbox') }}</el-button>
     </el-affix>
