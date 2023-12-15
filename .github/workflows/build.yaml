@@ -54,6 +54,9 @@ jobs:
           sudo atest service install
           sudo atest service restart
           sudo atest service status
+          
+          # make test-ui-e2e
+
           atest run -p '.github/testing/*.yaml' --request-ignore-error --report github --report-file bin/report.json --report-github-repo linuxsuren/api-testing --report-github-pr ${{ github.event.number }}
           sudo atest service status
           sudo atest service stop

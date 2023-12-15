@@ -4,10 +4,26 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 
+function removeDataTestAttrs(node) {
+  if (node.type === 1 /* NodeTypes.ELEMENT */) {
+    node.props = node.props.filter(prop =>
+      prop.type === 6 /* NodeTypes.ATTRIBUTE */
+        ? prop.name !== 'test-id'
+        : true
+    )
+  }
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          nodeTransforms: true ? [removeDataTestAttrs] : [],
+        },
+      },
+    }),
     vueJsx(),
   ],
   resolve: {

@@ -286,3 +286,10 @@ items:
   request:
     api: |
       {{.param.server}}/debug/pprof/cmdline
+- name: favicon
+  request:
+    api: |
+      {{ .param.server }}/favicon.ico
+  expect:
+    header:
+      Content-Type: image/x-icon
