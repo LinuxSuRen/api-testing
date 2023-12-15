@@ -255,6 +255,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
+		mux.HandlePath(http.MethodGet, "/favicon.ico", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 
 		postRequestProxyFunc := postRequestProxy(o.skyWalking)
@@ -340,6 +341,9 @@ func frontEndHandlerWithLocation(consolePath string) func(w http.ResponseWriter,
 		case strings.HasSuffix(target, ".css"):
 			content = uiResourceCSS
 			customHeader[util.ContentType] = "text/css"
+		case strings.HasSuffix(target, ".ico"):
+			content = uiResourceIcon
+			customHeader[util.ContentType] = "image/x-icon"
 		}
 
 		if content != "" {
@@ -447,3 +451,6 @@ var uiResourceCSS string
 
 //go:embed data/index.html
 var uiResourceIndex string
+
+//go:embed data/favicon.ico
+var uiResourceIcon string

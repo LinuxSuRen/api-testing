@@ -117,6 +117,15 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 		assert.Equal(t, expect404, resp.GetBody().String())
 	})
 
+	t.Run("favicon", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, "/favicon.ico", nil)
+		assert.NoError(t, err)
+
+		resp := newFakeResponseWriter()
+		handler(resp, req, map[string]string{})
+		assert.Equal(t, "image/x-icon", resp.Header().Get(util.ContentType))
+	})
+
 	t.Run("healthz", func(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/healthz", nil)
 		assert.NoError(t, err)

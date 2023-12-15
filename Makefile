@@ -95,7 +95,7 @@ testlong:
 test-ui:
 	cd console/atest-ui && npm run test:unit
 test-ui-e2e:
-	cd console/atest-ui && npm run test:e2e
+	cd console/atest-ui && npm i && npm run test:e2e
 test-collector:
 	go test github.com/linuxsuren/api-testing/extensions/collector/./... -cover -v -coverprofile=collector-coverage.out
 	go tool cover -func=collector-coverage.out
