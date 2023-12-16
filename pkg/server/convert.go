@@ -145,7 +145,7 @@ func ToGRPCTestCase(testCase testing.TestCase) (result *TestCase) {
 	req := &Request{
 		Api:    testCase.Request.API,
 		Method: testCase.Request.Method,
-		Query:  mapToPair(testCase.Request.Query),
+		// Query:  mapToPair(testCase.Request.Query),
 		Header: mapToPair(testCase.Request.Header),
 		Form:   mapToPair(testCase.Request.Form),
 		Body:   testCase.Request.Body,
@@ -181,7 +181,7 @@ func ToNormalTestCase(in *TestCase) (result testing.TestCase) {
 		result.Request.Body = req.Body
 		result.Request.Header = pairToMap(req.Header)
 		result.Request.Form = pairToMap(req.Form)
-		result.Request.Query = pairToMap(req.Query)
+		result.Request.Query = pairToInterMap(req.Query)
 	}
 
 	if resp != nil {

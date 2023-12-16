@@ -99,7 +99,7 @@ func TestConvert(t *testing.T) {
 			Request: atest.Request{
 				API:    "/v1",
 				Header: defaultMap,
-				Query:  map[string]string{},
+				Query:  map[string]interface{}{},
 				Form:   map[string]string{},
 			},
 			Expect: atest.Response{
@@ -109,6 +109,7 @@ func TestConvert(t *testing.T) {
 		}, ConvertToNormalTestCase(&server.TestCase{
 			Request: &server.Request{
 				Api:    "/v1",
+				Query:  nil,
 				Header: defaultPairs,
 			},
 			Response: &server.Response{

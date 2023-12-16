@@ -354,6 +354,15 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 					return
 				}
 			}
+
+			reverseRunner := runner.NewReverseHTTPRunner(suiteRunner)
+			reverseRunner.WithTestReporter(runner.NewDiscardTestReporter())
+			if _, err = reverseRunner.RunTestCase(
+				&testCase, dataContext, ctxWithTimeout); err != nil {
+				err = fmt.Errorf("got error in reverse test: %w", err)
+				return
+			}
+			suiteRunner.WithTestReporter(o.reporter)
 		}
 		dataContext[testCase.Name] = output
 	}

@@ -117,7 +117,7 @@ func ConvertToNormalTestCase(testcase *server.TestCase) (result testing.TestCase
 			Method: testcase.Request.Method,
 			Body:   testcase.Request.Body,
 			Header: pairToMap(testcase.Request.Header),
-			Query:  pairToMap(testcase.Request.Query),
+			Query:  pairToMapInter(testcase.Request.Query),
 			Form:   pairToMap(testcase.Request.Form),
 		}
 	}
@@ -142,7 +142,7 @@ func ConvertToGRPCTestCase(testcase testing.TestCase) (result *server.TestCase) 
 			Method: testcase.Request.Method,
 			Body:   testcase.Request.Body,
 			Header: mapToPair(testcase.Request.Header),
-			Query:  mapToPair(testcase.Request.Query),
+			Query:  mapInterToPair(testcase.Request.Query),
 			Form:   mapToPair(testcase.Request.Form),
 		},
 		Response: &server.Response{
@@ -181,6 +181,14 @@ func mapInterToPair(data map[string]interface{}) (pairs []*server.Pair) {
 
 func pairToMap(pairs []*server.Pair) (data map[string]string) {
 	data = make(map[string]string)
+	for _, pair := range pairs {
+		data[pair.Key] = pair.Value
+	}
+	return
+}
+
+func pairToMapInter(pairs []*server.Pair) (data map[string]interface{}) {
+	data = make(map[string]interface{})
 	for _, pair := range pairs {
 		data[pair.Key] = pair.Value
 	}
