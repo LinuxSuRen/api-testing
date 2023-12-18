@@ -50,7 +50,7 @@ func TestCurlGenerator(t *testing.T) {
 		testCase: atest.TestCase{
 			Request: atest.Request{
 				API: fooForTest,
-				Query: map[string]string{
+				Query: map[string]interface{}{
 					"page": "1",
 					"size": "10",
 				},

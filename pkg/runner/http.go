@@ -148,6 +148,12 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		return
 	}
 
+	q := request.URL.Query()
+	for k := range testcase.Request.Query {
+		q.Add(k, testcase.Request.Query.GetValue(k))
+	}
+	request.URL.RawQuery = q.Encode()
+
 	// set headers
 	for key, val := range testcase.Request.Header {
 		request.Header.Add(key, val)

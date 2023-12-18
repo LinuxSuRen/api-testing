@@ -117,6 +117,8 @@ test-all-backend: test test-collector test-store-orm test-store-s3 test-store-gi
 test-all: test-all-backend test-ui
 test-e2e:
 	cd e2e && ./start.sh && ./start.sh compose-k8s.yaml
+fuzz:
+	cd pkg/util && go test -fuzz FuzzZeroThenDefault -fuzztime 6s
 install-precheck:
 	cp .github/pre-commit .git/hooks/pre-commit
 

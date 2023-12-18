@@ -80,7 +80,10 @@ func TestTestCase(t *testing.T) {
 			Request: atest.Request{
 				API:    urlFoo,
 				Header: defaultForm,
-				Body:   `{"foo":"bar"}`,
+				Query: map[string]interface{}{
+					"name": "linuxsuren",
+				},
+				Body: `{"foo":"bar"}`,
 			},
 			Expect: atest.Response{
 				StatusCode: http.StatusOK,

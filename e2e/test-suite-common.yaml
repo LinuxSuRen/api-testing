@@ -270,7 +270,9 @@ items:
 - name: downloadExtGit
   request:
     api: |
-      {{.param.server}}/get?name=atest-store-git
+      {{.param.server}}/get
+    query:
+      name: atest-store-git
   expect:
     header:
       Content-Type: application/octet-stream

@@ -24,7 +24,11 @@ SOFTWARE.
 
 package testing
 
-import "sort"
+import (
+	"sort"
+
+	"gopkg.in/yaml.v3"
+)
 
 // TestSuite represents a set of test cases
 type TestSuite struct {
@@ -123,7 +127,7 @@ type ConditionalVerify struct {
 	Verify    []string `yaml:"verify,omitempty" json:"verify,omitempty"`
 }
 
-type SortedKeysStringMap map[string]string
+type SortedKeysStringMap map[string]interface{}
 
 func (m SortedKeysStringMap) Keys() (keys []string) {
 	for k := range m {
@@ -131,4 +135,49 @@ func (m SortedKeysStringMap) Keys() (keys []string) {
 	}
 	sort.Strings(keys)
 	return
+}
+
+func (m SortedKeysStringMap) GetValue(key string) string {
+	val := m[key]
+
+	switch o := any(val).(type) {
+	case string:
+		return val.(string)
+	case map[string]interface{}:
+		verifier := convertToVerifier(o)
+		return verifier.Value
+	}
+
+	return ""
+}
+
+func (m SortedKeysStringMap) GetVerifier(key string) (verifier *Verifier) {
+	val := m[key]
+
+	switch o := any(val).(type) {
+	case map[string]interface{}:
+		verifier = convertToVerifier(o)
+	}
+
+	return
+}
+
+func convertToVerifier(data map[string]interface{}) (verifier *Verifier) {
+	verifier = &Verifier{}
+
+	if data, err := yaml.Marshal(data); err == nil {
+		if err = yaml.Unmarshal(data, verifier); err != nil {
+			verifier = nil
+		}
+	}
+	return
+}
+
+type Verifier struct {
+	Value     string `yaml:"value,omitempty" json:"value,omitempty"`
+	Required  bool   `yaml:"required,omitempty" json:"required,omitempty"`
+	Max       int    `yaml:"max"`
+	Min       int    `yaml:"min"`
+	MaxLength int    `yaml:"maxLength"`
+	MinLength int    `yaml:"minLength"`
 }

@@ -52,8 +52,7 @@ func (g *curlGenerator) Generate(testSuite *testing.TestSuite, testcase *testing
 
 	queryKeys := testcase.Request.Query.Keys()
 	for _, k := range queryKeys {
-		v := testcase.Request.Query[k]
-		testcase.Request.API += k + "=" + v + "&"
+		testcase.Request.API += k + "=" + testcase.Request.Query.GetValue(k) + "&"
 	}
 
 	testcase.Request.API = strings.TrimSuffix(testcase.Request.API, "&")

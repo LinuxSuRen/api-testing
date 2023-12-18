@@ -86,4 +86,5 @@ const (
 	ZIP                = "application/zip"
 	OctetStream        = "application/octet-stream"
 	Plain              = "text/plain"
+	Authorization      = "Authorization"
 )

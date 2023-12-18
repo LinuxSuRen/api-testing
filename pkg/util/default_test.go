@@ -42,6 +42,17 @@ func TestMakeSureNotNil(t *testing.T) {
 	assert.NotNil(t, util.MakeSureNotNil(map[string]string{}))
 }
 
+func FuzzZeroThenDefault(f *testing.F) {
+	f.Fuzz(func(t *testing.T, a, b int) {
+		val := util.ZeroThenDefault(a, b)
+		if a == 0 {
+			assert.Equal(t, b, val)
+		} else {
+			assert.Equal(t, a, val)
+		}
+	})
+}
+
 func TestEmptyThenDefault(t *testing.T) {
 	tests := []struct {
 		name   string
