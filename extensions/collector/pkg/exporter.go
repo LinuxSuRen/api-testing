@@ -40,7 +40,7 @@ func (e *SampleExporter) Add(reqAndResp *RequestAndResponse) {
 
 	if body := r.Body; body != nil {
 		if data, err := io.ReadAll(body); err == nil {
-			req.Body = string(data)
+			req.Body = testing.NewRequestBody(string(data))
 		}
 	}
 

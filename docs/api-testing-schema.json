@@ -49,7 +49,8 @@
                         "openapi",
                         "swagger",
                         "grpc",
-                        "trpc"
+                        "trpc",
+                        "graphql"
                     ]
                 },
                 "url": {
@@ -225,7 +226,11 @@
                     "additionalProperties": true
                 },
                 "body": {
-                    "type": "string"
+                    "anyOf": [{
+                        "type": "string"
+                    }, {
+                        "$ref": "#/definitions/GraphQL"
+                    }]
                 },
                 "bodyFromFile": {
                     "type": "string"
@@ -251,6 +256,26 @@
                 "items"
             ],
             "title": "Job"
+        },
+        "GraphQL": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "query": {
+                    "type": "string"
+                },
+                "operationName": {
+                    "type": "string"
+                },
+                "variables": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "query"
+            ],
+            "description": "Know more from https://graphql.org/",
+            "title": "GraphQL"
         }
     }
 }

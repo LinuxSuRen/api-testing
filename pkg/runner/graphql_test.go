@@ -17,24 +17,42 @@ limitations under the License.
 package runner
 
 import (
+	"context"
+	"net/http"
 	"testing"
 
+	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
 
-func TestAuthHeaderMutator(t *testing.T) {
-	mutator := &authHeaderMissingMutator{}
-	testcase := &atest.TestCase{
-		Request: atest.Request{
-			Header: map[string]string{
-				util.Authorization: "Basic xxyy",
-			},
-		},
-	}
-	result := mutator.Render(testcase)
-	_, ok := result.Request.Header[util.Authorization]
-	assert.False(t, ok)
-	assert.NotEmpty(t, testcase.Request.Header[util.Authorization])
+func TestGraphQL(t *testing.T) {
+	runner := NewSimpleTestCaseRunner()
+	graphqlRunner := NewGraphQLRunner(runner)
+
+	testcase := &atest.TestCase{}
+	err := yaml.Unmarshal([]byte(simpleGraphQLRequest), testcase)
+	assert.NoError(t, err)
+
+	defer gock.Off()
+	gock.New("http://foo").Post("/graphql").
+		MatchHeader(util.ContentType, util.JSON).
+		Reply(http.StatusOK)
+	_, err = graphqlRunner.RunTestCase(testcase, nil, context.TODO())
+	assert.NoError(t, err)
 }
+
+var simpleGraphQLRequest = `
+request:
+  api: http://foo/graphql
+  body:
+    query: |
+      query xxx {
+       	bookById(id: "book") {
+          id
+          name
+        }
+      }
+`

@@ -13,7 +13,7 @@ func main() {
 	{{- end}}
 	body := strings.NewReader(data.Encode())
 	{{- else}}
-	body := bytes.NewBufferString("{{.Request.Body}}")
+	body := bytes.NewBufferString("{{.Request.Body.String}}")
 	{{- end }}
 
 	req, err := http.NewRequest("{{.Request.Method}}," "{{.Request.API}}", body)

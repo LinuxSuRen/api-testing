@@ -1,0 +1,24 @@
+[
+    {
+        "Name": "foo",
+        "API": "api",
+        "Count": 3,
+        "Average": 3,
+        "Max": 4,
+        "Min": 2,
+        "QPS": 0,
+        "Error": 0,
+        "LastErrorMessage": ""
+    },
+    {
+        "Name": "bar",
+        "API": "api",
+        "Count": 3,
+        "Average": 3,
+        "Max": 4,
+        "Min": 2,
+        "QPS": 0,
+        "Error": 0,
+        "LastErrorMessage": ""
+    }
+]
