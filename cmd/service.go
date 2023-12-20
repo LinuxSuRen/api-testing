@@ -9,9 +9,9 @@ import (
 
 	_ "embed"
 
-	"github.com/linuxsuren/api-testing/cmd/service"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
+	service "github.com/linuxsuren/go-service"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +42,7 @@ DaoCloud: docker.m.daocloud.io/linuxsuren/api-testing`,
 	flags.StringVarP(&opt.scriptPath, "script-path", "", "", "The service script file path")
 	flags.StringVarP(&opt.mode, "mode", "m", "",
 		fmt.Sprintf("Availeble values: %v", service.ServiceModeOS.All()))
-	flags.StringVarP(&opt.image, "image", "", service.DefaultImage, "The image of the service which as a container")
+	flags.StringVarP(&opt.image, "image", "", defaultImage, "The image of the service which as a container")
 	flags.StringVarP(&opt.pull, "pull", "", "always", `Pull image before creating ("always"|"missing"|"never")`)
 	flags.StringVarP(&opt.version, "version", "", version.GetVersion(), "The version of the service image")
 	flags.StringVarP(&opt.LocalStorage, "local-storage", "", "/var/data/atest",
@@ -51,6 +51,8 @@ DaoCloud: docker.m.daocloud.io/linuxsuren/api-testing`,
 	flags.StringVarP(&opt.SkyWalking, "skywalking", "", "", "Push the browser tracing data to the Apache SkyWalking URL")
 	return
 }
+
+const defaultImage = "linuxsuren.docker.scarf.sh/linuxsuren/api-testing"
 
 type serviceOption struct {
 	action     string
@@ -62,29 +64,36 @@ type serviceOption struct {
 	mode string
 	pull string
 
-	service.ServerFeatureOption
-	stdOut io.Writer
+	SecretServer string
+	SkyWalking   string
+	LocalStorage string
+	stdOut       io.Writer
 }
 
 func (o *serviceOption) preRunE(c *cobra.Command, args []string) (err error) {
 	o.stdOut = c.OutOrStdout()
 	o.action = args[0]
 
-	o.service = service.GetAvailableService(service.ServiceMode(o.mode), o.Execer,
+	if o.service, err = service.GetAvailableService(service.ServiceMode(o.mode),
 		service.ContainerOption{
 			Image:  o.action,
 			Pull:   o.pull,
 			Tag:    o.version,
 			Writer: c.OutOrStdout(),
-		}, o.ServerFeatureOption, o.scriptPath)
+		}, service.CommonService{
+			ID:          "atest",
+			Name:        "atest",
+			Description: "API Testing Server",
+			Command:     "atest",
+			Args:        []string{"server"},
+			Execer:      o.Execer,
+		}); err != nil {
+		return
+	}
 
-	if o.service == nil {
-		err = fmt.Errorf("not supported service")
-	} else if err == nil {
-		local := os.ExpandEnv("$HOME/.config/atest")
-		if err = o.Execer.MkdirAll(local, os.ModePerm); err == nil {
-			err = o.Execer.MkdirAll(o.LocalStorage, os.ModePerm)
-		}
+	local := os.ExpandEnv("$HOME/.config/atest")
+	if err = o.Execer.MkdirAll(local, os.ModePerm); err == nil {
+		err = o.Execer.MkdirAll(o.LocalStorage, os.ModePerm)
 	}
 	return
 }
@@ -105,7 +114,7 @@ func (o *serviceOption) runE(c *cobra.Command, args []string) (err error) {
 	case ActionStatus:
 		output, err = o.service.Status()
 	default:
-		err = fmt.Errorf("not support action: '%s'", o.action)
+		err = fmt.Errorf("not support action: %q", o.action)
 	}
 
 	output = strings.TrimSpace(output)
