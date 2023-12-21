@@ -1,30 +1,22 @@
-/**
-MIT License
+/*
+Copyright 2023 API Testing Authors.
 
-Copyright (c) 2023 API Testing Authors.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+	http://www.apache.org/licenses/LICENSE-2.0
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 */
-
 package testing
 
 import (
+	"encoding/json"
 	"sort"
 
 	"gopkg.in/yaml.v3"
@@ -99,8 +91,60 @@ type Request struct {
 	Query        SortedKeysStringMap `yaml:"query,omitempty" json:"query,omitempty"`
 	Header       map[string]string   `yaml:"header,omitempty" json:"header,omitempty"`
 	Form         map[string]string   `yaml:"form,omitempty" json:"form,omitempty"`
-	Body         string              `yaml:"body,omitempty" json:"body,omitempty"`
+	Body         RequestBody         `yaml:"body,omitempty" json:"body,omitempty"`
 	BodyFromFile string              `yaml:"bodyFromFile,omitempty" json:"bodyFromFile,omitempty"`
+}
+
+type RequestBody struct {
+	Value  string `json:"value" yaml:"value"`
+	isJson bool
+}
+
+func NewRequestBody(val string) RequestBody {
+	return RequestBody{Value: val}
+}
+
+func (e *RequestBody) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
+	gql := &GraphQLRequestBody{}
+	err = unmarshal(gql)
+	if err != nil {
+		val := ""
+		if err = unmarshal(&val); err == nil {
+			e.Value = val
+		}
+	} else {
+		var data []byte
+		if data, err = json.Marshal(gql); err == nil {
+			e.Value = string(data)
+			e.isJson = true
+		}
+	}
+	return
+}
+
+func (e RequestBody) MarshalYAML() (val interface{}, err error) {
+	val = e.Value
+	if e.isJson {
+		gql := &GraphQLRequestBody{}
+		if err = json.Unmarshal([]byte(e.Value), gql); err == nil {
+			val = gql
+		}
+	}
+	return
+}
+
+var _ yaml.Marshaler = &RequestBody{}
+
+// var _ yaml.Unmarshaler = &RequestBody{}
+
+func (e RequestBody) String() string {
+	return e.Value
+}
+
+type GraphQLRequestBody struct {
+	Query         string            `yaml:"query" json:"query"`
+	OperationName string            `yaml:"operationName" json:"operationName"`
+	Variables     map[string]string `yaml:"variables" json:"variables"`
 }
 
 // Response is the expected response

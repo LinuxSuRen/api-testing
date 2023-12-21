@@ -1,27 +1,18 @@
-/**
-MIT License
+/*
+Copyright 2023 API Testing Authors.
 
-Copyright (c) 2023 API Testing Authors.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+	http://www.apache.org/licenses/LICENSE-2.0
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 */
-
 package testing
 
 import (
@@ -35,11 +26,12 @@ import (
 	"path"
 	"strings"
 
-	"github.com/ghodss/yaml"
+	yamlconv "github.com/ghodss/yaml"
 	"github.com/linuxsuren/api-testing/docs"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/xeipuuv/gojsonschema"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -54,7 +46,7 @@ func Parse(data []byte) (testSuite *TestSuite, err error) {
 	if err == nil {
 		// convert YAML to JSON
 		var jsonData []byte
-		if jsonData, err = yaml.YAMLToJSON(data); err == nil {
+		if jsonData, err = yamlconv.YAMLToJSON(data); err == nil {
 			schemaLoader := gojsonschema.NewStringLoader(docs.Schema)
 			documentLoader := gojsonschema.NewBytesLoader(jsonData)
 
@@ -168,7 +160,7 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 		if data, err = os.ReadFile(path.Join(dataDir, r.BodyFromFile)); err != nil {
 			return
 		}
-		r.Body = strings.TrimSpace(string(data))
+		r.Body = NewRequestBody(strings.TrimSpace(string(data)))
 	}
 
 	// template the header
@@ -177,8 +169,8 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 	}
 
 	// template the body
-	if result, err = render.Render("body", r.Body, ctx); err == nil {
-		r.Body = result
+	if result, err = render.Render("body", r.Body.String(), ctx); err == nil {
+		r.Body = NewRequestBody(result)
 	} else {
 		return
 	}
@@ -221,8 +213,8 @@ func (r *Request) GetBody() (reader io.Reader, err error) {
 			}
 			reader = strings.NewReader(data.Encode())
 		}
-	} else if r.Body != "" {
-		reader = bytes.NewBufferString(r.Body)
+	} else if r.Body.String() != "" {
+		reader = bytes.NewBufferString(r.Body.String())
 	} else if r.BodyFromFile != "" {
 		var data []byte
 		if data, err = os.ReadFile(r.BodyFromFile); err == nil {

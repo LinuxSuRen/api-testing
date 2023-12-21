@@ -1,27 +1,18 @@
-/**
-MIT License
+/*
+Copyright 2023 API Testing Authors.
 
-Copyright (c) 2023 API Testing Authors.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+	http://www.apache.org/licenses/LICENSE-2.0
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 */
-
 package server
 
 import (
@@ -40,7 +31,6 @@ import (
 
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
-	atesting "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/sample"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/metadata"
@@ -54,7 +44,7 @@ func TestRemoteServer(t *testing.T) {
 	ctx := context.Background()
 	defer gock.Off()
 
-	loader := atesting.NewFileWriter("")
+	loader := atest.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
 	server := NewRemoteServer(loader, nil, nil, nil, "")
 	_, err := server.Run(ctx, &TestTask{
@@ -138,7 +128,7 @@ func TestRemoteServer(t *testing.T) {
 }
 
 func TestRunTestCase(t *testing.T) {
-	loader := atesting.NewFileWriter("")
+	loader := atest.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
 	server := NewRemoteServer(loader, nil, nil, nil, "")
 
@@ -158,93 +148,93 @@ func TestRunTestCase(t *testing.T) {
 func TestFindParentTestCases(t *testing.T) {
 	tests := []struct {
 		name     string
-		testcase *atesting.TestCase
-		suite    *atesting.TestSuite
-		expect   []atesting.TestCase
+		testcase *atest.TestCase
+		suite    *atest.TestSuite
+		expect   []atest.TestCase
 	}{{
 		name: "normal",
-		testcase: &atesting.TestCase{
-			Request: atesting.Request{
+		testcase: &atest.TestCase{
+			Request: atest.Request{
 				Header: map[string]string{
 					"Authorization": BearerToken,
 				},
 			},
 		},
-		suite: &atesting.TestSuite{
-			Items: []atesting.TestCase{{
+		suite: &atest.TestSuite{
+			Items: []atest.TestCase{{
 				Name: "login",
 			}},
 		},
-		expect: []atesting.TestCase{{
+		expect: []atest.TestCase{{
 			Name: "login",
 		}},
 	}, {
 		name: "body",
-		testcase: &atesting.TestCase{
-			Request: atesting.Request{
-				Body: `{{.login.data}}`,
+		testcase: &atest.TestCase{
+			Request: atest.Request{
+				Body: atest.NewRequestBody(`{{.login.data}}`),
 			},
 		},
-		suite: &atesting.TestSuite{
-			Items: []atesting.TestCase{{
+		suite: &atest.TestSuite{
+			Items: []atest.TestCase{{
 				Name: "login",
 			}, {
 				Name: "user",
-				Request: atesting.Request{
-					Body: `{{.login.data}}`,
+				Request: atest.Request{
+					Body: atest.NewRequestBody(`{{.login.data}}`),
 				},
 			}},
 		},
-		expect: []atesting.TestCase{{
+		expect: []atest.TestCase{{
 			Name: "login",
 		}},
 	}, {
 		name:     "empty cases",
-		testcase: &atesting.TestCase{},
-		suite:    &atesting.TestSuite{},
+		testcase: &atest.TestCase{},
+		suite:    &atest.TestSuite{},
 	}, {
 		name: "complex",
-		testcase: &atesting.TestCase{
+		testcase: &atest.TestCase{
 			Name: "user",
-			Request: atesting.Request{
+			Request: atest.Request{
 				API: "/users/{{(index .login 0).name}}",
 			},
 		},
-		suite: &atesting.TestSuite{
-			Items: []atesting.TestCase{{
+		suite: &atest.TestSuite{
+			Items: []atest.TestCase{{
 				Name: "login",
 			}, {
 				Name: "user",
-				Request: atesting.Request{
+				Request: atest.Request{
 					API: "/users/{{(index .login 0).name}}",
 				},
 			}},
 		},
-		expect: []atesting.TestCase{{
+		expect: []atest.TestCase{{
 			Name: "login",
 		}},
 	}, {
 		name: "nest dep",
-		testcase: &atesting.TestCase{
+		testcase: &atest.TestCase{
 			Name: "user",
-			Request: atesting.Request{
+			Request: atest.Request{
 				API: "/users/{{(index .users 0).name}}{{randomKubernetesName}}",
 				Header: map[string]string{
 					"Authorization": BearerToken,
 				},
 			},
 		},
-		suite: &atesting.TestSuite{
-			Items: []atesting.TestCase{{
+		suite: &atest.TestSuite{
+			Items: []atest.TestCase{{
 				Name: "login",
 			}, {
 				Name: "users",
-				Request: atesting.Request{
+				Request: atest.Request{
 					API: "/users",
 				},
 			}, {
 				Name: "user",
-				Request: atesting.Request{
+				Request: atest.Request{
 					API: "/users/{{(index .users 0).name}}",
 					Header: map[string]string{
 						"Authorization": BearerToken,
@@ -252,11 +242,11 @@ func TestFindParentTestCases(t *testing.T) {
 				},
 			}},
 		},
-		expect: []atesting.TestCase{{
+		expect: []atest.TestCase{{
 			Name: "login",
 		}, {
 			Name: "users",
-			Request: atesting.Request{
+			Request: atest.Request{
 				API: "/users",
 			},
 		}},
@@ -310,7 +300,7 @@ func TestUpdateTestCase(t *testing.T) {
 
 		fmt.Fprint(tmpFile, simpleSuite)
 
-		writer := atesting.NewFileWriter("")
+		writer := atest.NewFileWriter("")
 		err = writer.Put(tmpFile.Name())
 		assert.NoError(t, err)
 
@@ -384,7 +374,7 @@ func TestListTestCase(t *testing.T) {
 	defer os.Remove(tmpFile.Name())
 
 	fmt.Fprint(tmpFile, simpleSuite)
-	writer := atesting.NewFileWriter(os.TempDir())
+	writer := atest.NewFileWriter(os.TempDir())
 	writer.Put(tmpFile.Name())
 
 	server := NewRemoteServer(writer, nil, nil, nil, "")
@@ -402,9 +392,9 @@ func TestListTestCase(t *testing.T) {
 		result, err := server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple", Testcase: "get"})
 		assert.NoError(t, err)
 		if assert.NotNil(t, result) {
-			assert.Equal(t, atesting.TestCase{
+			assert.Equal(t, atest.TestCase{
 				Name: "get",
-				Request: atesting.Request{
+				Request: atest.Request{
 					API: urlFoo,
 					Header: map[string]string{
 						"key": "value",
@@ -412,7 +402,7 @@ func TestListTestCase(t *testing.T) {
 					Query: map[string]interface{}{},
 					Form:  map[string]string{},
 				},
-				Expect: atesting.Response{
+				Expect: atest.Response{
 					Header:           map[string]string{},
 					BodyFieldsExpect: map[string]interface{}{},
 					Verify:           nil,
@@ -819,7 +809,7 @@ func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 	dir, _ := os.MkdirTemp(os.TempDir(), "remote-server-test")
 	call = func() { os.RemoveAll(dir) }
 
-	writer := atesting.NewFileWriter(dir)
+	writer := atest.NewFileWriter(dir)
 	server = NewRemoteServer(writer, newLocalloaderFromStore(), nil, nil, dir)
 	return
 }
@@ -827,12 +817,12 @@ func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 type fakeLocalLoaderFactory struct {
 }
 
-func newLocalloaderFromStore() atesting.StoreWriterFactory {
+func newLocalloaderFromStore() atest.StoreWriterFactory {
 	return &fakeLocalLoaderFactory{}
 }
 
-func (l *fakeLocalLoaderFactory) NewInstance(store atesting.Store) (writer atesting.Writer, err error) {
-	writer = atesting.NewFileWriter("")
+func (l *fakeLocalLoaderFactory) NewInstance(store atest.Store) (writer atest.Writer, err error) {
+	writer = atest.NewFileWriter("")
 	return
 }
 

@@ -13,30 +13,34 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package generator
+
+package runner
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/linuxsuren/api-testing/pkg/testing"
-	"gopkg.in/yaml.v3"
+	"github.com/linuxsuren/api-testing/pkg/util"
 )
 
-type rawConverter struct {
+type graphql struct {
+	TestCaseRunner
 }
 
-func init() {
-	RegisterTestSuiteConverter("raw", &rawConverter{})
-}
-
-func (c *rawConverter) Convert(testSuite *testing.TestSuite) (result string, err error) {
-	if err = testSuite.Render(make(map[string]interface{})); err == nil {
-		for _, item := range testSuite.Items {
-			item.Request.RenderAPI(testSuite.API)
-		}
-
-		var data []byte
-		if data, err = yaml.Marshal(testSuite); err == nil {
-			result = string(data)
-		}
+func NewGraphQLRunner(parent TestCaseRunner) TestCaseRunner {
+	return &graphql{
+		TestCaseRunner: parent,
 	}
-	return
+}
+
+func (r *graphql) RunTestCase(testcase *testing.TestCase, dataContext any, ctx context.Context) (
+	output any, err error) {
+	testcase.Request.Method = http.MethodPost
+
+	if testcase.Request.Header == nil {
+		testcase.Request.Header = make(map[string]string, 1)
+	}
+	testcase.Request.Header[util.ContentType] = util.JSON
+	return r.TestCaseRunner.RunTestCase(testcase, dataContext, ctx)
 }

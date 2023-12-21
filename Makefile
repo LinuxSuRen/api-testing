@@ -116,7 +116,7 @@ test-operator:
 test-all-backend: test test-collector test-store-orm test-store-s3 test-store-git test-store-etcd
 test-all: test-all-backend test-ui
 test-e2e:
-	cd e2e && ./start.sh && ./start.sh compose-k8s.yaml
+	cd e2e && ./start.sh && ./start.sh compose-k8s.yaml && ./start.sh compose-external.yaml
 fuzz:
 	cd pkg/util && go test -fuzz FuzzZeroThenDefault -fuzztime 6s
 install-precheck:

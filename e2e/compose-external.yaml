@@ -1,0 +1,32 @@
+version: '3.1'
+services:
+  testing:
+    image: ghcr.io/linuxsuren/api-testing:master
+    command: ["atest", "run", "-p=/workspace/e2e/test-suite.yaml"]
+    pull_policy: never
+    environment:
+      SERVER: http://server:8080
+    volumes:
+      - type: volume
+        source: cache
+        target: /workspace/e2e
+    depends_on:
+      server:
+        condition: service_healthy
+    links:
+      - server
+  server:
+    image: ghcr.io/devops-ws/learn-springboot:master
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/8080"]
+      interval: 3s
+      timeout: 60s
+      retries: 10
+      start_period: 3s
+    volumes:
+      - type: volume
+        source: cache
+        target: /workspace/e2e
+
+volumes:
+  cache:
