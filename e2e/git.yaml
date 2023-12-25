@@ -27,12 +27,3 @@ items:
           "name": "atest-store-git"
         }
       }
-- name: listSuite
-  before:
-    items:
-      - sleep(3)
-  request:
-    api: /GetSuites
-    method: POST
-    header:
-      X-Store-Name: git
