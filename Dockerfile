@@ -12,7 +12,6 @@ ARG GOPROXY
 WORKDIR /workspace
 COPY cmd/ cmd/
 COPY pkg/ pkg/
-COPY extensions/ extensions/
 COPY operator/ operator/
 COPY .github/ .github/
 COPY sample/ sample/
@@ -32,14 +31,15 @@ COPY --from=ui /workspace/dist/assets/*.css cmd/data/index.css
 # RUN go mod download
 RUN CGO_ENABLED=0 go build -v -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}\
     -X github.com/linuxsuren/api-testing/pkg/version.date=$(date +%Y-%m-%d)" -o atest .
-RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-collector extensions/collector/main.go
-RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-orm extensions/store-orm/main.go
-RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-s3 extensions/store-s3/main.go
-RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-etcd extensions/store-etcd/main.go
-RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-mongodb extensions/store-mongodb/main.go
-RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-store-git extensions/store-git/main.go
-RUN CGO_ENABLED=0 go build -v -ldflags "-w -s" -o atest-monitor-docker extensions/monitor-docker/main.go
 
+FROM ghcr.io/linuxsuren/atest-ext-store-mongodb:master as mango
+FROM ghcr.io/linuxsuren/atest-ext-store-git:master as git
+FROM ghcr.io/linuxsuren/atest-ext-store-s3:master as s3
+FROM ghcr.io/linuxsuren/atest-ext-store-etcd:master as etcd
+FROM ghcr.io/linuxsuren/atest-ext-store-orm:master as orm
+FROM ghcr.io/linuxsuren/atest-ext-monitor-docker:master as docker
+FROM ghcr.io/linuxsuren/atest-ext-collector:master as collector
+FROM ghcr.io/linuxsuren/api-testing-vault-extension:v0.0.1 as vault
 FROM docker.io/library/ubuntu:23.04
 
 LABEL "com.github.actions.name"="API testing"
@@ -54,13 +54,14 @@ LABEL "maintainer"="Rick <linuxsuren@gmail.com>"
 LABEL "Name"="API testing"
 
 COPY --from=builder /workspace/atest /usr/local/bin/atest
-COPY --from=builder /workspace/atest-collector /usr/local/bin/atest-collector
-COPY --from=builder /workspace/atest-store-orm /usr/local/bin/atest-store-orm
-COPY --from=builder /workspace/atest-store-s3 /usr/local/bin/atest-store-s3
-COPY --from=builder /workspace/atest-store-etcd /usr/local/bin/atest-store-etcd
-COPY --from=builder /workspace/atest-store-git /usr/local/bin/atest-store-git
-COPY --from=builder /workspace/atest-store-mongodb /usr/local/bin/atest-store-mongodb
-COPY --from=builder /workspace/atest-monitor-docker /usr/local/bin/atest-monitor-docker
+COPY --from=collector /usr/local/bin/atest-collector /usr/local/bin/atest-collector
+COPY --from=orm /usr/local/bin/atest-store-orm /usr/local/bin/atest-store-orm
+COPY --from=s3 /usr/local/bin/atest-store-s3 /usr/local/bin/atest-store-s3
+COPY --from=etcd /usr/local/bin/atest-store-etcd /usr/local/bin/atest-store-etcd
+COPY --from=git /usr/local/bin/atest-store-git /usr/local/bin/atest-store-git
+COPY --from=mango /usr/local/bin/atest-store-mongodb /usr/local/bin/atest-store-mongodb
+COPY --from=docker /usr/local/bin/atest-monitor-docker /usr/local/bin/atest-monitor-docker
+COPY --from=vault /usr/local/bin/atest-vault-ext /usr/local/bin
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 

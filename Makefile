@@ -11,28 +11,10 @@ HELM_REPO?=docker.io/linuxsuren
 fmt:
 	go mod tidy
 	go fmt ./...
-	cd extensions/store-etcd && go mod tidy && go fmt ./...
-	cd extensions/store-git && go mod tidy && go fmt ./...
-	cd extensions/store-orm && go mod tidy && go fmt ./...
-	cd extensions/store-s3 && go mod tidy && go fmt ./...
-	cd extensions/store-mongodb && go mod tidy && go fmt ./...
 build:
 	mkdir -p bin
 	rm -rf bin/atest
 	CGO_ENABLED=0 go build ${TOOLEXEC} -a ${BUILD_FLAG} -o bin/${BINARY} main.go
-build-ext: build-ext-git build-ext-orm build-ext-s3 build-ext-etcd build-ext-mongodb build-ext-monitor-docker
-build-ext-git:
-	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
-build-ext-orm:
-	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-orm extensions/store-orm/main.go
-build-ext-etcd:
-	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-etcd extensions/store-etcd/main.go
-build-ext-s3:
-	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-s3 extensions/store-s3/main.go
-build-ext-mongodb:
-	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-store-mongodb extensions/store-mongodb/main.go
-build-ext-monitor-docker:
-	CGO_ENABLED=0 go build -ldflags "-w -s" -o bin/atest-monitor-docker extensions/monitor-docker/main.go
 build-ui:
 	cd console/atest-ui && npm i && npm run build-only
 embed-ui:
@@ -68,8 +50,6 @@ run-console:
 	cd console/atest-ui && npm run dev
 copy:
 	sudo cp bin/atest /usr/local/bin/
-copy-ext:
-	sudo cp bin/atest-* /usr/local/bin/
 copy-restart: build-embed-ui
 	atest service stop
 	make copy
@@ -83,10 +63,6 @@ helm-push:
 helm-lint:
 	helm lint helm/api-testing
 
-# plugins
-plugin-git:
-	GOOS=${OS} go build -ldflags "-w -s" -o bin/atest-store-git extensions/store-git/main.go
-
 test:
 	go test ./... -cover -v -coverprofile=coverage.out
 	go tool cover -func=coverage.out
@@ -96,24 +72,9 @@ test-ui:
 	cd console/atest-ui && npm run test:unit
 test-ui-e2e:
 	cd console/atest-ui && npm i && npm run test:e2e
-test-collector:
-	go test github.com/linuxsuren/api-testing/extensions/collector/./... -cover -v -coverprofile=collector-coverage.out
-	go tool cover -func=collector-coverage.out
-test-store-orm:
-	go test github.com/linuxsuren/api-testing/extensions/store-orm/./... -cover -v -coverprofile=store-orm-coverage.out
-	go tool cover -func=store-orm-coverage.out
-test-store-s3:
-	go test github.com/linuxsuren/api-testing/extensions/store-s3/./... -cover -v -coverprofile=store-s3-coverage.out
-	go tool cover -func=store-s3-coverage.out
-test-store-git:
-	go test github.com/linuxsuren/api-testing/extensions/store-git/./... -cover -v -coverprofile=store-git-coverage.out
-	go tool cover -func=store-git-coverage.out
-test-store-etcd:
-	go test github.com/linuxsuren/api-testing/extensions/store-etcd/./... -cover -v -coverprofile=store-etcd-coverage.out
-	go tool cover -func=store-etcd-coverage.out
 test-operator:
 	cd operator && make test # converage file path: operator/cover.out
-test-all-backend: test test-collector test-store-orm test-store-s3 test-store-git test-store-etcd
+test-all-backend: test
 test-all: test-all-backend test-ui
 test-e2e:
 	cd e2e && ./start.sh && ./start.sh compose-k8s.yaml && ./start.sh compose-external.yaml
