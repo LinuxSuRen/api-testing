@@ -1,16 +1,19 @@
 Ports in extensions:
 
-| Name | Port |
-|------|------|
-| orm  | 4071 |
-| s3   | 4072 |
-| etcd | 4073 |
-| git  | 4074 |
-| mongodb | 4075 |
+| Type | Name | Port |
+|------|------|------|
+| Store | [orm](https://github.com/LinuxSuRen/atest-ext-store-orm)  | 4071 |
+| Store | [s3](https://github.com/LinuxSuRen/atest-ext-store-s3)   | 4072 |
+| Store | [etcd](https://github.com/LinuxSuRen/atest-ext-store-etcd) | 4073 |
+| Store | [git](https://github.com/LinuxSuRen/atest-ext-store-git)  | 4074 |
+| Store | [mongodb](https://github.com/LinuxSuRen/atest-ext-store-mongodb) | 4075 |
+| Monitor | [docker-monitor](https://github.com/LinuxSuRen/atest-ext-monitor-docker) |  |
+| Agent | [collector](https://github.com/LinuxSuRen/atest-ext-collector) |  |
+| Secret | [Vault](https://github.com/LinuxSuRen/api-testing-vault-extension) | |
 
 ## Contribute a new extension
 
-* First, create a directory in current directory. And please keep the same naming convertion.
+* First, create a repository. And please keep the same naming convertion.
 * Second, implement the `Loader` gRPC service which defined by [this proto](../pkg/testing/remote/loader.proto).
 * Finally, add the extension's name into function [SupportedExtensions](../console/atest-ui/src/views/store.ts).
 
