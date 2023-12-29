@@ -75,6 +75,12 @@ func NewGRPCTestCaseRunner(host string, proto testing.RPCDesc) TestCaseRunner {
 	return runner
 }
 
+func init() {
+	RegisterRunner("grpc", func(suite *testing.TestSuite) TestCaseRunner {
+		return NewGRPCTestCaseRunner(suite.API, *suite.Spec.RPC)
+	})
+}
+
 func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext any, ctx context.Context) (output any, err error) {
 	r.log.Info("start to run: '%s'\n", testcase.Name)
 	record := NewReportRecord()
@@ -226,6 +232,9 @@ func (r *gRPCTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api stri
 
 func (r *gRPCTestCaseRunner) GetResponseRecord() SimpleResponse {
 	return r.response
+}
+func (s *gRPCTestCaseRunner) WithSuite(suite *testing.TestSuite) {
+	// not need this parameter
 }
 
 func invokeRequest(ctx context.Context, md protoreflect.MethodDescriptor, payload string, conn *grpc.ClientConn) (respones []string, err error) {

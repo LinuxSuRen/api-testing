@@ -17,11 +17,9 @@ limitations under the License.
 package runner
 
 import (
-	"log"
-	"strings"
+	"fmt"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
-	"trpc.group/trpc-go/trpc-go/client"
 )
 
 // GetTestSuiteRunner returns a proper runner according to the given test suite.
@@ -29,21 +27,31 @@ func GetTestSuiteRunner(suite *testing.TestSuite) TestCaseRunner {
 	// TODO: should be refactored to meet more types of runners
 	kind := suite.Spec.Kind
 
-	if suite.Spec.RPC != nil {
-		switch strings.ToLower(kind) {
-		case "", "grpc":
-			return NewGRPCTestCaseRunner(suite.API, *suite.Spec.RPC)
-		case "trpc":
-			return NewTRPCTestCaseRunner(suite.API, *suite.Spec.RPC, client.New())
-		default:
-			log.Println("unknown test suite, try to use HTTP runner")
-		}
-	} else {
-		switch strings.ToLower(kind) {
-		case "graphql":
-			return NewGraphQLRunner(NewSimpleTestCaseRunner())
-		}
+	switch kind {
+	case "swagger", "":
+		kind = "http"
 	}
 
-	return NewSimpleTestCaseRunner()
+	if suite.Spec.RPC != nil && kind == "" {
+		kind = "grpc"
+	}
+
+	runner := runners[kind]
+	if runner != nil {
+		return runner(suite)
+	}
+	return nil
+}
+
+type RunnerCreator func(suite *testing.TestSuite) TestCaseRunner
+
+var runners map[string]RunnerCreator = make(map[string]RunnerCreator, 4)
+
+func RegisterRunner(kind string, runner RunnerCreator) error {
+	if _, ok := runners[kind]; ok {
+		return fmt.Errorf("duplicated kind %q", kind)
+	}
+
+	runners[kind] = runner
+	return nil
 }

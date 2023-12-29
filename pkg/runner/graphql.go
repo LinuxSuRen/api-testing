@@ -34,6 +34,12 @@ func NewGraphQLRunner(parent TestCaseRunner) TestCaseRunner {
 	}
 }
 
+func init() {
+	RegisterRunner("graphql", func(*testing.TestSuite) TestCaseRunner {
+		return NewGraphQLRunner(NewSimpleTestCaseRunner())
+	})
+}
+
 func (r *graphql) RunTestCase(testcase *testing.TestCase, dataContext any, ctx context.Context) (
 	output any, err error) {
 	testcase.Request.Method = http.MethodPost
@@ -43,4 +49,8 @@ func (r *graphql) RunTestCase(testcase *testing.TestCase, dataContext any, ctx c
 	}
 	testcase.Request.Header[util.ContentType] = util.JSON
 	return r.TestCaseRunner.RunTestCase(testcase, dataContext, ctx)
+}
+
+func (s *graphql) WithSuite(suite *testing.TestSuite) {
+	// not need this parameter
 }

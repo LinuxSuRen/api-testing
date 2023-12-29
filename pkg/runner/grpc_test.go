@@ -694,3 +694,6 @@ func getJSONOrCache(key any, value any) (msg string) {
 func getJSONOrCacheAsRequestBody(key any, value any) atest.RequestBody {
 	return atest.NewRequestBody(getJSONOrCache(key, value))
 }
+
+//go:embed grpc_test/test.proto
+var sampleProto string

@@ -84,6 +84,12 @@ func NewSimpleTestCaseRunner() TestCaseRunner {
 	return runner
 }
 
+func init() {
+	RegisterRunner("http", func(*testing.TestSuite) TestCaseRunner {
+		return NewSimpleTestCaseRunner()
+	})
+}
+
 // ContextKey is the alias type of string for context key
 type ContextKey string
 
@@ -251,6 +257,9 @@ func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (response
 // GetResponseRecord returns the response record
 func (r *simpleTestCaseRunner) GetResponseRecord() SimpleResponse {
 	return r.simpleResponse
+}
+func (s *simpleTestCaseRunner) WithSuite(suite *testing.TestSuite) {
+	// not need this parameter
 }
 
 func expectInt(name string, expect, actual int) (err error) {

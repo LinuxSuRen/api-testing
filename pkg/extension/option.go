@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/linuxsuren/api-testing/pkg/runner/monitor"
+	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	"github.com/spf13/cobra"
@@ -99,6 +100,27 @@ func CreateMonitor(ext *Extension, c *cobra.Command, remoteServer monitor.Monito
 
 	gRPCServer := grpc.NewServer()
 	monitor.RegisterMonitorServer(gRPCServer, remoteServer)
+	c.Printf("%s@%s is running at %s\n", ext.GetFullName(), version.GetVersion(), address)
+
+	RegisterStopSignal(c.Context(), func() {
+		_ = os.Remove(ext.Socket)
+	}, gRPCServer)
+
+	err = gRPCServer.Serve(lis)
+	return
+}
+
+func CreateExtensionRunner(ext *Extension, c *cobra.Command, remoteServer server.RunnerExtensionServer) (err error) {
+	protocol, address := ext.GetListenAddress()
+
+	var lis net.Listener
+	lis, err = net.Listen(protocol, address)
+	if err != nil {
+		return
+	}
+
+	gRPCServer := grpc.NewServer()
+	server.RegisterRunnerExtensionServer(gRPCServer, remoteServer)
 	c.Printf("%s@%s is running at %s\n", ext.GetFullName(), version.GetVersion(), address)
 
 	RegisterStopSignal(c.Context(), func() {
