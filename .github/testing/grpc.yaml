@@ -4,6 +4,7 @@
 name: grpc-sample
 api: 127.0.0.1:7070
 spec:
+  kind: grpc
   rpc:
     import:
       - ./pkg/server

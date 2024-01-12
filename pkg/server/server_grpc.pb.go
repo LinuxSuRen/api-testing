@@ -1340,3 +1340,89 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 	},
 	Metadata: "pkg/server/server.proto",
 }
+
+// RunnerExtensionClient is the client API for RunnerExtension service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type RunnerExtensionClient interface {
+	Run(ctx context.Context, in *TestSuiteWithCase, opts ...grpc.CallOption) (*CommonResult, error)
+}
+
+type runnerExtensionClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewRunnerExtensionClient(cc grpc.ClientConnInterface) RunnerExtensionClient {
+	return &runnerExtensionClient{cc}
+}
+
+func (c *runnerExtensionClient) Run(ctx context.Context, in *TestSuiteWithCase, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.RunnerExtension/Run", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// RunnerExtensionServer is the server API for RunnerExtension service.
+// All implementations must embed UnimplementedRunnerExtensionServer
+// for forward compatibility
+type RunnerExtensionServer interface {
+	Run(context.Context, *TestSuiteWithCase) (*CommonResult, error)
+	mustEmbedUnimplementedRunnerExtensionServer()
+}
+
+// UnimplementedRunnerExtensionServer must be embedded to have forward compatible implementations.
+type UnimplementedRunnerExtensionServer struct {
+}
+
+func (UnimplementedRunnerExtensionServer) Run(context.Context, *TestSuiteWithCase) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Run not implemented")
+}
+func (UnimplementedRunnerExtensionServer) mustEmbedUnimplementedRunnerExtensionServer() {}
+
+// UnsafeRunnerExtensionServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RunnerExtensionServer will
+// result in compilation errors.
+type UnsafeRunnerExtensionServer interface {
+	mustEmbedUnimplementedRunnerExtensionServer()
+}
+
+func RegisterRunnerExtensionServer(s grpc.ServiceRegistrar, srv RunnerExtensionServer) {
+	s.RegisterService(&RunnerExtension_ServiceDesc, srv)
+}
+
+func _RunnerExtension_Run_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestSuiteWithCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerExtensionServer).Run(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.RunnerExtension/Run",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerExtensionServer).Run(ctx, req.(*TestSuiteWithCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// RunnerExtension_ServiceDesc is the grpc.ServiceDesc for RunnerExtension service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var RunnerExtension_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "server.RunnerExtension",
+	HandlerType: (*RunnerExtensionServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Run",
+			Handler:    _RunnerExtension_Run_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/server/server.proto",
+}

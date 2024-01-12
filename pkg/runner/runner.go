@@ -34,6 +34,7 @@ type TestCaseRunner interface {
 	WithWriteLevel(level string)
 	WithTestReporter(TestReporter)
 	WithExecer(fakeruntime.Execer)
+	WithSuite(*testing.TestSuite)
 }
 
 // HTTPResponseRecord represents a http response record

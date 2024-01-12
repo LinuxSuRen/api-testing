@@ -7,6 +7,9 @@
   "tags": [
     {
       "name": "Runner"
+    },
+    {
+      "name": "RunnerExtension"
     }
   ],
   "consumes": [
@@ -1121,6 +1124,38 @@
           "Runner"
         ]
       }
+    },
+    "/server.RunnerExtension/Run": {
+      "post": {
+        "operationId": "RunnerExtension_Run",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverTestSuiteWithCase"
+            }
+          }
+        ],
+        "tags": [
+          "RunnerExtension"
+        ]
+      }
     }
   },
   "definitions": {
@@ -1721,6 +1756,17 @@
         },
         "data": {
           "type": "string"
+        }
+      }
+    },
+    "serverTestSuiteWithCase": {
+      "type": "object",
+      "properties": {
+        "suite": {
+          "$ref": "#/definitions/serverTestSuite"
+        },
+        "case": {
+          "$ref": "#/definitions/serverTestCase"
         }
       }
     },

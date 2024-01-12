@@ -92,9 +92,10 @@ func createRunCommand() (cmd *cobra.Command) {
 		Aliases: []string{"r"},
 		Example: `atest run -p sample.yaml
 See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
-		Short:   "Run the test suite",
-		PreRunE: opt.preRunE,
-		RunE:    opt.runE,
+		Short:        "Run the test suite",
+		PreRunE:      opt.preRunE,
+		SilenceUsage: true,
+		RunE:         opt.runE,
 	}
 
 	// set flags
@@ -320,6 +321,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 	suiteRunner.WithSecure(testSuite.Spec.Secure)
 	suiteRunner.WithOutputWriter(os.Stdout)
 	suiteRunner.WithWriteLevel(o.level)
+	suiteRunner.WithSuite(testSuite)
 	for _, testCase := range testSuite.Items {
 		if !testCase.InScope(o.caseItems) {
 			continue

@@ -57,6 +57,10 @@ service Runner {
     rpc PProf(PProfRequest) returns (PProfData) {}
 }
 
+service RunnerExtension {
+    rpc Run(TestSuiteWithCase) returns (CommonResult) {}
+}
+
 message Suites {
   map<string, Items> data = 1;
 }
@@ -83,6 +87,11 @@ message TestSuite {
   string api = 2;
   repeated Pair param = 3;
   APISpec spec = 4;
+}
+
+message TestSuiteWithCase {
+  TestSuite suite = 1;
+  TestCase case = 2;
 }
 
 message APISpec {
