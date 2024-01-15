@@ -18,6 +18,7 @@ package runner
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
@@ -36,6 +37,7 @@ func GetTestSuiteRunner(suite *testing.TestSuite) TestCaseRunner {
 		kind = "grpc"
 	}
 
+	kind = strings.ToLower(kind)
 	runner := runners[kind]
 	if runner != nil {
 		return runner(suite)
