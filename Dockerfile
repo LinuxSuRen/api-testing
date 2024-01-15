@@ -70,4 +70,5 @@ RUN apt update -y && \
     apt install -y --no-install-recommends ssh-client ca-certificates && \
     apt install -y curl
 
+EXPOSE 8080
 CMD ["atest", "server", "--local-storage=/var/data/api-testing/*.yaml"]

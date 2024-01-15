@@ -91,6 +91,14 @@ items:
   expect:
     bodyFieldsExpect:
       api: http://localhost:8080/server.Runner
+- name: GetSuggestedAPIs
+  request:
+    api: /GetSuggestedAPIs
+    method: POST
+    body: |
+      {
+        "name": "{{.param.suiteName}}"
+      }
 - name: createTestCase
   request:
     api: /CreateTestCase
