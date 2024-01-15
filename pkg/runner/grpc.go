@@ -77,6 +77,9 @@ func NewGRPCTestCaseRunner(host string, proto testing.RPCDesc) TestCaseRunner {
 
 func init() {
 	RegisterRunner("grpc", func(suite *testing.TestSuite) TestCaseRunner {
+		if suite.Spec.RPC == nil {
+			suite.Spec.RPC = &testing.RPCDesc{}
+		}
 		return NewGRPCTestCaseRunner(suite.API, *suite.Spec.RPC)
 	})
 }
