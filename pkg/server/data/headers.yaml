@@ -8,3 +8,5 @@
   value: en-US,en;q=0.5
 - key: Authorization
   value: "Bearer token"
+- key: Authorization
+  value: Basic {{ base64 "admin:123456" }}

@@ -354,6 +354,19 @@ function headerChange() {
     } as Pair)
   }
 }
+
+const headerValues = ref([] as Pair[])
+const headerSelect = (item: Record<string, any>) => {
+  headerValues.value = []
+  pupularHeaderPairs.value.filter((v) => {
+    if (v.key === item.value) {
+      headerValues.value.push({
+        key: v.value,
+        value: v.value
+      } as Pair)
+    }
+  })
+}
 function expectedHeaderChange() {
   const header = testCaseWithSuite.value.data.response.header
   let lastItem = header[header.length - 1]
@@ -420,14 +433,42 @@ function insertOrUpdateIntoMap(pair: Pair, pairs: Pair[]) {
 }
 
 const pupularHeaders = ref([] as Pair[])
+const pupularHeaderPairs = ref([] as Pair[])
 API.PopularHeaders((e) => {
-  pupularHeaders.value = e.data
+  const headerCache = new Map<string, string>();
+  for (var i = 0; i < e.data.length; i++) {
+    const pair = {
+      key: e.data[i].key,
+      value: e.data[i].value
+    } as Pair
+
+    pupularHeaderPairs.value.push(pair)
+
+    if (!headerCache.get(pair.key)) {
+      headerCache.set(pair.key, "index")
+
+      pupularHeaders.value.push({
+        key: e.data[i].key,
+        value: e.data[i].value
+      } as Pair)
+    }
+  }
 })
 
 const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
   const results = queryString
     ? pupularHeaders.value.filter(CreateFilter(queryString))
     : pupularHeaders.value
+
+  results.forEach((e) => {
+    e.value = e.key
+  })
+  cb(results)
+}
+const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
+  const results = queryString
+    ? headerValues.value.filter(CreateFilter(queryString))
+    : headerValues.value
 
   results.forEach((e) => {
     e.value = e.key
@@ -520,13 +561,18 @@ const queryPupularHeaders = (queryString: string, cb: (arg: any) => void) => {
                   :fetch-suggestions="queryPupularHeaders"
                   placeholder="Key"
                   @change="headerChange"
+                  @select="headerSelect"
                 />
               </template>
             </el-table-column>
             <el-table-column label="Value">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
-                  <el-input v-model="scope.row.value" placeholder="Value" />
+                  <el-autocomplete
+                    v-model="scope.row.value"
+                    :fetch-suggestions="queryHeaderValues"
+                    style="width: 100%;"
+                  />
                 </div>
               </template>
             </el-table-column>
