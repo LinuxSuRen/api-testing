@@ -8,20 +8,33 @@
         "save": "保存",
         "delete": "删除",
         "send": "发送",
+        "copy": "拷贝",
         "toolbox": "工具箱",
         "refresh": "刷新",
         "newtestcase": "新建测试用例",
-        "verify": "检查"
+        "verify": "检查",
+        "generateCode": "生成代码",
+        "sendWithParam": "参数化"
     },
     "title": {
         "createTestSuite": "创建测试用例集",
         "createTestCase": "创建测试用例",
         "createStore": "创建存储",
         "createSecret": "创建凭据",
-        "secretManager": "凭据管理"
+        "secretManager": "凭据管理",
+        "apiRequestParameter": "API 请求参数",
+        "codeGenerator": "代码生成",
+        "testing": "测试",
+        "welcome": "欢迎",
+        "secrets": "凭据",
+        "stores": "存储",
+        "parameter": "参数",
+        "templateQuery": "模板函数查询",
+        "output": "输出"
     },
     "tip": {
-        "filter": "过滤"
+        "filter": "过滤",
+        "noParameter": "无参数"
     },
     "field": {
         "name": "名称",
@@ -33,6 +46,9 @@
         "pluginURL": "插件地址",
         "status": "状态",
         "operations": "操作",
-        "storageLocation": "保存位置"
+        "storageLocation": "保存位置",
+        "suiteKind": "类型",
+        "key": "键",
+        "value": "值"
     }
 }

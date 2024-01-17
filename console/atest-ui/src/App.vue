@@ -12,6 +12,9 @@ import TestingPanel from './views/TestingPanel.vue'
 import StoreManager from './views/StoreManager.vue'
 import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 import setAsDarkTheme from './theme'
 
@@ -70,19 +73,19 @@ const handleSelect = (key: string) => {
       >
         <el-menu-item index="welcome">
           <el-icon><share /></el-icon>
-          <template #title>Welcome</template>
+          <template #title>{{ t('title.welcome') }}</template>
         </el-menu-item>
         <el-menu-item index="testing" test-id="testing-menu">
           <el-icon><icon-menu /></el-icon>
-          <template #title>Testing</template>
+          <template #title>{{ t('title.testing' )}}</template>
         </el-menu-item>
         <el-menu-item index="secret">
           <el-icon><document /></el-icon>
-          <template #title>Secrets</template>
+          <template #title>{{ t('title.secrets') }}</template>
         </el-menu-item>
         <el-menu-item index="store">
           <el-icon><location /></el-icon>
-          <template #title>Stores</template>
+          <template #title>{{ t('title.stores') }}</template>
         </el-menu-item>
       </el-menu>
     </el-aside>

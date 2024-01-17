@@ -23,7 +23,7 @@ function queryFuncs() {
             data-intro="You can search your desired template functions.">{{ t('button.toolbox') }}</el-button>
     </el-affix>
 
-    <el-dialog v-model="dialogVisible" title="Template Functions Query" width="40%" draggable destroy-on-close>
+    <el-dialog v-model="dialogVisible" :title="t('title.templateQuery')" width="40%" draggable destroy-on-close>
         <template #footer>
             <el-input v-model="query" placeholder="Query after enter" v-on:keyup.enter="queryFuncs" />
             <span class="dialog-footer">
