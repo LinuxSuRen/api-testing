@@ -692,7 +692,7 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
 
       <el-drawer v-model="codeDialogOpened" size="50%">
         <template #header>
-          <h4>Code Generator</h4>
+          <h4>{{ t('title.codeGenerator') }}</h4>
         </template>
         <template #default>
           <div style="padding-bottom: 10px;">
@@ -718,16 +718,17 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
 
       <el-drawer v-model="parameterDialogOpened">
         <template #header>
-          <h4>API Request Parameters</h4>
+          <h4>{{ t('title.apiRequestParameter') }}</h4>
         </template>
         <template #default>
-          <el-table :data="parameters" style="width: 100%">
-            <el-table-column label="Key" width="180">
+          <el-table :data="parameters" style="width: 100%"
+            :empty-text="t('tip.noParameter')">
+            <el-table-column :label="t('field.key')" width="180">
               <template #default="scope">
                 <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange"/>
               </template>
             </el-table-column>
-            <el-table-column label="Value">
+            <el-table-column :label="t('field.value')">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
                   <el-input v-model="scope.row.value" placeholder="Value" />
@@ -743,7 +744,7 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
 
     <el-footer style="height: auto;">
       <el-tabs v-model="testResultActiveTab">
-        <el-tab-pane label="Output" name="output">
+        <el-tab-pane :label="t('title.output')" name="output">
           <el-tag class="ml-2" type="success" v-if="testResult.statusCode && testResult.error === ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
           <el-tag class="ml-2" type="danger" v-if="testResult.statusCode && testResult.error !== ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
 

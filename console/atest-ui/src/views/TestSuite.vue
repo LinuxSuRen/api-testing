@@ -210,7 +210,7 @@ function paramChange() {
     <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
 
     <div>
-      <span>{{ t('title.param') }}</span>
+      <span>{{ t('title.parameter') }}</span>
       <el-table :data="suite.param" style="width: 100%">
         <el-table-column label="Key" width="180">
           <template #default="scope">

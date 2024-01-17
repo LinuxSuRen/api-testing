@@ -312,7 +312,7 @@ const suiteKinds = [{
               data-intro="Click here to import from Postman"
               test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
             <el-button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</el-button>
-            <el-input v-model="filterText" placeholder="Filter keyword" test-id="search" style="padding: 5px;" />
+            <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" style="padding: 5px;" />
 
             <el-tree
               v-loading="storesLoading"

@@ -25,11 +25,20 @@
         "protoContent": "Proto Content",
         "protoFile": "Proto File",
         "protoImport": "Proto Import",
-        "param": "Parameter",
-        "refelction": "Refelction"
+        "parameter": "Parameter",
+        "refelction": "Refelction",
+        "apiRequestParameter": "API Request Parameter",
+        "codeGenerator": "Code Generator",
+        "testing": "Testing",
+        "welcome": "Welcome",
+        "secrets": "Secrets",
+        "stores": "Stores",
+        "templateQuery": "Template Functions Query",
+        "output": "Output"
     },
     "tip": {
-        "filter": "Filter Keyword"
+        "filter": "Filter Keyword",
+        "noParameter": "No Parameter"
     },
     "field": {
         "name": "Name",
@@ -43,7 +52,9 @@
         "status": "Status",
         "operations": "Operations",
         "storageLocation": "Storage Location",
-        "suiteKind": "Suite Kind"
+        "suiteKind": "Suite Kind",
+        "key": "Key",
+        "value": "Value"
     },
     "//see http spec": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
     "httpCode": {
