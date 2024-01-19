@@ -9,7 +9,26 @@
         "/api/v1/users": {
             "get": {
                 "summary": "summary",
-                "operationId": "getUsers"
+                "operationId": "getUsers",
+                "parameters": [
+                    {
+                        "name": "text",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "count",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ]
             },
             "post": {
                 "summary": "summary",
