@@ -1,7 +1,7 @@
 
 tasks:
   - init: make init-env install-precheck
-    before: IMG_TOOL=docker GOPROXY= make build-ext copy-ext build-image
+    before: IMG_TOOL=docker GOPROXY= make build-image
     command: cd console/atest-ui/ && npm i
 
 ports:

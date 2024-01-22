@@ -1,3 +1,19 @@
+/*
+Copyright 2023 API Testing Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package apispec
 
 import (
@@ -9,14 +25,30 @@ import (
 )
 
 type Swagger struct {
-	Swagger string                           `json:"swagger"`
-	Paths   map[string]map[string]SwaggerAPI `json:"paths"`
-	Info    SwaggerInfo                      `json:"info"`
+	Swagger string `json:"swagger"`
+	// Paths includes all the API requests.
+	// The keys is the HTTP request method which as lower-case, for example: get, post.
+	Paths map[string]map[string]SwaggerAPI `json:"paths"`
+	Info  SwaggerInfo                      `json:"info"`
 }
 
 type SwaggerAPI struct {
-	OperationId string `json:"operationId"`
-	Summary     string `json:"summary"`
+	OperationId string      `json:"operationId"`
+	Parameters  []Parameter `json:"parameters"`
+	Summary     string      `json:"summary"`
+}
+
+type Parameter struct {
+	Name string `json:"name"`
+	// In represents the parameter type, supported values: query, path
+	In       string `json:"in"`
+	Required bool   `json:"required"`
+	Schema   Schema `json:"schema"`
+}
+
+type Schema struct {
+	Type   string `json:"type"`
+	Format string `json:"format"`
 }
 
 type SwaggerInfo struct {

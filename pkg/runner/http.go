@@ -228,13 +228,23 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 		result = []*testing.TestCase{}
 		for api, item := range swaggerAPI.Paths {
 			for method, oper := range item {
-				result = append(result, &testing.TestCase{
+				testcase := &testing.TestCase{
 					Name: oper.OperationId,
 					Request: testing.Request{
 						API:    api,
 						Method: strings.ToUpper(method),
+						Query:  make(testing.SortedKeysStringMap),
 					},
-				})
+				}
+
+				for _, param := range oper.Parameters {
+					switch param.In {
+					case "query":
+						// TODO should have a better way to provide the initial value
+						testcase.Request.Query[param.Name] = "todo"
+					}
+				}
+				result = append(result, testcase)
 			}
 		}
 	}
