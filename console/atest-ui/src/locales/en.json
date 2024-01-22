@@ -38,7 +38,9 @@
     },
     "tip": {
         "filter": "Filter Keyword",
-        "noParameter": "No Parameter"
+        "noParameter": "No Parameter",
+        "testsuite": "Test Suite:",
+        "apiAddress": "API Address:"
     },
     "field": {
         "name": "Name",

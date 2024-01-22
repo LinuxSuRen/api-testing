@@ -195,22 +195,36 @@ function paramChange() {
 
 <template>
   <div class="common-layout">
-    <el-text class="mx-1" type="primary">{{ suite.name }}</el-text>
+    {{ t('tip.testsuite') }}<el-text class="mx-1" type="primary">{{ suite.name }}</el-text>
 
-    <el-input class="w-50 m-2" v-model="suite.api" placeholder="API" test-id="suite-editor-api"></el-input>
+    <table style="width: 100%;">
+      <tr>
+        <td style="width: 20%;">
+          {{ t('tip.apiAddress') }}
+        </td>
+        <td style="width: 80%;">
+          <el-input class="w-50 m-2" v-model="suite.api" placeholder="API" test-id="suite-editor-api"></el-input>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <el-select v-model="suite.spec.kind" class="m-2" placeholder="API Spec Kind" size="middle">
+            <el-option
+              v-for="item in apiSpecKinds"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </td>
+        <td>
+          <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
+        </td>
+      </tr>
+    </table>
 
-    <el-select v-model="suite.spec.kind" class="m-2" placeholder="API Spec Kind" size="middle">
-      <el-option
-        v-for="item in apiSpecKinds"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value"
-      />
-    </el-select>
-    <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
-
-    <div>
-      <span>{{ t('title.parameter') }}</span>
+    <div style="margin-top: 10px;">
+      <el-text class="mx-1" type="primary">{{ t('title.parameter') }}</el-text>
       <el-table :data="suite.param" style="width: 100%">
         <el-table-column label="Key" width="180">
           <template #default="scope">
