@@ -531,7 +531,11 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
 
     <el-main style="padding-left: 5px;">
       <el-tabs v-model="requestActiveTab">
-        <el-tab-pane label="Query" name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+        <el-tab-pane name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+          <template #label>
+            <el-badge :value="testCaseWithSuite.data.request.query.length - 1"
+              :hidden="testCaseWithSuite.data.request.query.length === 1" class="item">Query</el-badge>
+          </template>
           <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
             <el-table-column label="Key" width="180">
               <template #default="scope">
@@ -552,7 +556,11 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
           </el-table>
         </el-tab-pane>
 
-        <el-tab-pane label="Headers" name="header">
+        <el-tab-pane name="header">
+          <template #label>
+            <el-badge :value="testCaseWithSuite.data.request.header.length - 1"
+              :hidden="testCaseWithSuite.data.request.header.length === 1" class="item">Header</el-badge>
+          </template>
           <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
             <el-table-column label="Key" width="180">
               <template #default="scope">
@@ -579,7 +587,10 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
           </el-table>
         </el-tab-pane>
 
-        <el-tab-pane label="Body" name="body">
+        <el-tab-pane name="body">
+          <template #label>
+            <el-badge :is-dot="testCaseWithSuite.data.request.body !== ''" class="item">Body</el-badge>
+          </template>
           <el-radio-group v-model="bodyType" @change="bodyTypeChange">
             <el-radio :label="1">none</el-radio>
             <el-radio :label="2">form-data</el-radio>
@@ -744,7 +755,10 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
 
     <el-footer style="height: auto;">
       <el-tabs v-model="testResultActiveTab">
-        <el-tab-pane :label="t('title.output')" name="output">
+        <el-tab-pane name="output">
+          <template #label>
+            <el-badge :is-dot="testResult.output !== ''" class="item">{{ t('title.output') }}</el-badge>
+          </template>
           <el-tag class="ml-2" type="success" v-if="testResult.statusCode && testResult.error === ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
           <el-tag class="ml-2" type="danger" v-if="testResult.statusCode && testResult.error !== ''">{{ t('httpCode.' + testResult.statusCode) }}</el-tag>
 
@@ -757,7 +771,8 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
         </el-tab-pane>
         <el-tab-pane name="response-header">
           <template #label>
-            <el-badge :value="testResult.header.length" class="item">Header</el-badge>
+            <el-badge :value="testResult.header.length" 
+              :hidden="testResult.header.length === 0" class="item">Header</el-badge>
           </template>
           <el-table :data="testResult.header" style="width: 100%">
             <el-table-column label="Key" width="200">
