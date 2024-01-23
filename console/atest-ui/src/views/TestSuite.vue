@@ -173,9 +173,7 @@ const apiSpecKinds = [
 ]
 
 const handleAPISelect = (item: TestCase) => {
-  if (testCaseForm.method === '') {
-    testCaseForm.method = item.request.method
-  }
+  testCaseForm.method = item.request.method
   if (testCaseForm.name === '') {
     testCaseForm.name = item.name
   }

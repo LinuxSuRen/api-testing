@@ -136,7 +136,7 @@ func ToGRPCTestCase(testCase testing.TestCase) (result *TestCase) {
 	req := &Request{
 		Api:    testCase.Request.API,
 		Method: testCase.Request.Method,
-		// Query:  mapToPair(testCase.Request.Query),
+		Query:  mapInterToPair(testCase.Request.Query),
 		Header: mapToPair(testCase.Request.Header),
 		Form:   mapToPair(testCase.Request.Form),
 		Body:   testCase.Request.Body.String(),
