@@ -40,7 +40,8 @@ FROM ghcr.io/linuxsuren/atest-ext-store-orm:master as orm
 FROM ghcr.io/linuxsuren/atest-ext-monitor-docker:master as docker
 FROM ghcr.io/linuxsuren/atest-ext-collector:master as collector
 FROM ghcr.io/linuxsuren/api-testing-vault-extension:v0.0.1 as vault
-FROM docker.io/library/ubuntu:23.04
+
+FROM docker.io/library/ubuntu:23.10
 
 LABEL "com.github.actions.name"="API testing"
 LABEL "com.github.actions.description"="API testing"
