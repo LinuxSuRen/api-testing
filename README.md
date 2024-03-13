@@ -1,8 +1,8 @@
 [![CLA assistant](https://cla-assistant.io/readme/badge/LinuxSuRen/api-testing)](https://cla-assistant.io/LinuxSuRen/api-testing)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3f16717cd6f841118006f12c346e9341)](https://app.codacy.com/gh/LinuxSuRen/api-testing/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/3f16717cd6f841118006f12c346e9341)](https://app.codacy.com/gh/LinuxSuRen/api-testing/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-![GitHub All Releases](https://img.shields.io/github/downloads/linuxsuren/api-testing/total)
-![Docker Pulls](https://img.shields.io/docker/pulls/linuxsuren/api-testing)
+[![GitHub All Releases](https://img.shields.io/github/downloads/linuxsuren/api-testing/total)](https://tooomm.github.io/github-release-stats/?username=linuxsuren&repository=api-testing)
+[![Docker Pulls](https://img.shields.io/docker/pulls/linuxsuren/api-testing)](https://hub.docker.com/r/linuxsuren/api-testing)
 [![LinuxSuRen/open-source-best-practice](https://img.shields.io/static/v1?label=OSBP&message=%E5%BC%80%E6%BA%90%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5&color=blue)](https://github.com/LinuxSuRen/open-source-best-practice)
 
 This is a API testing tool.
