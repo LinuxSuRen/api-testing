@@ -22,3 +22,9 @@ version: v0.0.3
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "v0.0.13"
+
+dependencies:
+  - name: mongodb
+    version: ^15.0.1
+    repository: oci://registry-1.docker.io/bitnamicharts
+    condition: mongodb.enabled

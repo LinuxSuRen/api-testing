@@ -19,4 +19,5 @@ spec:
   storageClassName: {{ $core.storageClass }}
     {{- end }}
   {{- end }}
+  volumeMode: {{ $core.volumeMode }}
 {{- end }}

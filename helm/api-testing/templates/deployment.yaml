@@ -37,7 +37,7 @@ spec:
           command:
           - atest
           - server
-          - --local-storage=/var/www/sample/*.yaml
+          - --local-storage=/root/.atest/data/*.yaml
           {{- if .Values.skywalking.endpoint.http }}
           - --skywalking={{ .Values.skywalking.endpoint.http }}
           {{- end }}
@@ -66,9 +66,6 @@ spec:
               path: /healthz
               port: http
           volumeMounts:
-          - name: data
-            mountPath: /var/www/sample
-            subPath: {{ $core.subPath }}
           - name: data
             mountPath: /root
             subPath: config

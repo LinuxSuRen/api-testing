@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  registry: linuxsuren.docker.scarf.sh
+  registry: docker.io
   repository: linuxsuren/api-testing
   tag: ""
   digest: ""
@@ -89,8 +89,9 @@ persistence:
       existingClaim: ""
       storageClass: ""
       subPath: ""
-      accessMode: ReadWriteMany
+      accessMode: ReadWriteOnce
       size: 500Mi
+      volumeMode: Filesystem
 
 skywalking:
   endpoint:
@@ -102,3 +103,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+mongodb:
+  enabled: false
