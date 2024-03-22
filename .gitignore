@@ -12,4 +12,6 @@ cmd/data/index.js
 cmd/data/index.css
 operator/bundle
 helm/*.tgz
+helm/api-testing/*.tgz
 oryxBuildBinary
+/helm/api-testing/charts/

@@ -4,7 +4,7 @@ TOOLEXEC?= #-toolexec="skywalking-go-agent"
 BUILD_FLAG?=-ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git describe --tags) \
 	-X github.com/linuxsuren/api-testing/pkg/version.date=$(shell date +%Y-%m-%d)"
 GOPROXY?=direct
-HELM_VERSION?=v0.0.2
+HELM_VERSION?=v0.0.3
 APP_VERSION?=v0.0.13
 HELM_REPO?=docker.io/linuxsuren
 
