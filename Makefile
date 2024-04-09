@@ -56,11 +56,13 @@ copy-restart: build-embed-ui
 	atest service restart
 
 # helm
-helm-package:
+helm-dev-update:
+	helm dep update helm/api-testing
+helm-package: helm-dev-update
 	helm package helm/api-testing --version ${HELM_VERSION}-helm --app-version ${APP_VERSION} -d bin
 helm-push:
 	helm push bin/api-testing-${HELM_VERSION}-helm.tgz oci://${HELM_REPO}
-helm-lint:
+helm-lint: helm-dev-update
 	helm lint helm/api-testing
 
 test:
