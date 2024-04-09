@@ -170,8 +170,9 @@ message Request {
   string method = 2;
   repeated Pair header = 3;
   repeated Pair query = 4;
-  repeated Pair form = 5;
-  string body = 6;
+  repeated Pair cookie = 5;
+  repeated Pair form = 6;
+  string body = 7;
 }
 
 message Response {

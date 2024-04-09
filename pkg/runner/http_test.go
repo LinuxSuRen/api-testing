@@ -74,6 +74,9 @@ func TestTestCase(t *testing.T) {
 				Query: map[string]interface{}{
 					"name": "linuxsuren",
 				},
+				Cookie: map[string]string{
+					"key": "value",
+				},
 				Body: atest.NewRequestBody(`{"foo":"bar"}`),
 			},
 			Expect: atest.Response{

@@ -1377,6 +1377,13 @@
             "$ref": "#/definitions/serverPair"
           }
         },
+        "cookie": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
         "form": {
           "type": "array",
           "items": {

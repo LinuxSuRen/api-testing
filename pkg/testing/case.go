@@ -90,6 +90,7 @@ type Request struct {
 	Method       string              `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=GET,enum=POST,enum=PUT,enum=DELETE"`
 	Query        SortedKeysStringMap `yaml:"query,omitempty" json:"query,omitempty"`
 	Header       map[string]string   `yaml:"header,omitempty" json:"header,omitempty"`
+	Cookie       map[string]string   `yaml:"cookie,omitempty" json:"cookie,omitempty"`
 	Form         map[string]string   `yaml:"form,omitempty" json:"form,omitempty"`
 	Body         RequestBody         `yaml:"body,omitempty" json:"body,omitempty"`
 	BodyFromFile string              `yaml:"bodyFromFile,omitempty" json:"bodyFromFile,omitempty"`

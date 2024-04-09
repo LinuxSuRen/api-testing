@@ -399,8 +399,9 @@ func TestListTestCase(t *testing.T) {
 					Header: map[string]string{
 						"key": "value",
 					},
-					Query: map[string]interface{}{},
-					Form:  map[string]string{},
+					Cookie: map[string]string{},
+					Query:  map[string]interface{}{},
+					Form:   map[string]string{},
 				},
 				Expect: atest.Response{
 					Header:           map[string]string{},

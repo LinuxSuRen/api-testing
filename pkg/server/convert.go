@@ -138,6 +138,7 @@ func ToGRPCTestCase(testCase testing.TestCase) (result *TestCase) {
 		Method: testCase.Request.Method,
 		Query:  mapInterToPair(testCase.Request.Query),
 		Header: mapToPair(testCase.Request.Header),
+		Cookie: mapToPair(testCase.Request.Cookie),
 		Form:   mapToPair(testCase.Request.Form),
 		Body:   testCase.Request.Body.String(),
 	}
@@ -171,6 +172,7 @@ func ToNormalTestCase(in *TestCase) (result testing.TestCase) {
 		result.Request.Method = req.Method
 		result.Request.Body = testing.NewRequestBody(req.Body)
 		result.Request.Header = pairToMap(req.Header)
+		result.Request.Cookie = pairToMap(req.Cookie)
 		result.Request.Form = pairToMap(req.Form)
 		result.Request.Query = pairToInterMap(req.Query)
 	}
