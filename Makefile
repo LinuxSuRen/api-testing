@@ -4,7 +4,7 @@ TOOLEXEC?= #-toolexec="skywalking-go-agent"
 BUILD_FLAG?=-ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git describe --tags) \
 	-X github.com/linuxsuren/api-testing/pkg/version.date=$(shell date +%Y-%m-%d)"
 GOPROXY?=direct
-HELM_VERSION?=v0.0.2
+HELM_VERSION?=v0.0.3
 APP_VERSION?=v0.0.13
 HELM_REPO?=docker.io/linuxsuren
 
@@ -56,11 +56,13 @@ copy-restart: build-embed-ui
 	atest service restart
 
 # helm
-helm-package:
+helm-dev-update:
+	helm dep update helm/api-testing
+helm-package: helm-dev-update
 	helm package helm/api-testing --version ${HELM_VERSION}-helm --app-version ${APP_VERSION} -d bin
 helm-push:
 	helm push bin/api-testing-${HELM_VERSION}-helm.tgz oci://${HELM_REPO}
-helm-lint:
+helm-lint: helm-dev-update
 	helm lint helm/api-testing
 
 test:
