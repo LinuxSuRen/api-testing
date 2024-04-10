@@ -219,6 +219,12 @@
                     "title": "Header",
                     "additionalProperties": true
                 },
+                "cookie": {
+                    "description": "HTTP request cookie",
+                    "type": "object",
+                    "title": "Cookie",
+                    "additionalProperties": true
+                },
                 "form": {
                     "description": "HTTP request form",
                     "type": "object",

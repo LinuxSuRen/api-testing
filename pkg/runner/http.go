@@ -165,6 +165,12 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	for _, cookie := range r.cookies {
 		request.AddCookie(cookie)
 	}
+	for k, v := range testcase.Request.Cookie {
+		request.AddCookie(&http.Cookie{
+			Name:  k,
+			Value: v,
+		})
+	}
 	r.log.Info("start to send request to %s\n", testcase.Request.API)
 
 	// TODO only do this for unit testing, should remove it once we have a better way

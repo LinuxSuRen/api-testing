@@ -164,6 +164,7 @@ const emptyTestCaseWithSuite: TestCaseWithSuite = {
       method: '',
       header: [],
       query: [],
+      cookie: [],
       form: [],
       body: ''
     },
@@ -209,6 +210,10 @@ function load() {
       }
 
       e.request.header.push({
+        key: '',
+        value: ''
+      })
+      e.request.cookie.push({
         key: '',
         value: ''
       })
@@ -349,6 +354,16 @@ function headerChange() {
   let lastItem = header[header.length - 1]
   if (lastItem.key !== '') {
     testCaseWithSuite.value.data.request.header.push({
+      key: '',
+      value: ''
+    } as Pair)
+  }
+}
+function cookieChange(){
+  const cookie = testCaseWithSuite.value.data.request.cookie
+  let lastItem = cookie[cookie.length - 1]
+  if (lastItem.key !== '') {
+    testCaseWithSuite.value.data.request.cookie.push({
       key: '',
       value: ''
     } as Pair)
@@ -581,6 +596,29 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
                     :fetch-suggestions="queryHeaderValues"
                     style="width: 100%;"
                   />
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+
+        <el-tab-pane name="cookie">
+          <template #label>
+            <el-badge :value="testCaseWithSuite.data.request.cookie.length - 1"
+              :hidden="testCaseWithSuite.data.request.cookie.length === 1" class="item">Cookie</el-badge>
+          </template>
+          <el-table :data="testCaseWithSuite.data.request.cookie" style="width: 100%">
+            <el-table-column label="Key">
+              <template #default="scope">
+                <el-input v-model="scope.row.key" placeholder="Key"
+                @change="cookieChange"  
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="Value">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                <el-input v-model="scope.row.value" placeholder="value"/>
                 </div>
               </template>
             </el-table-column>
