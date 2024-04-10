@@ -84,7 +84,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.StringVarP(&opt.clientSecret, "client-secret", "", os.Getenv("OAUTH_CLIENT_SECRET"), "ClientSecret is the application's secret")
 	flags.BoolVarP(&opt.dryRun, "dry-run", "", false, "Do not really start a gRPC server")
 
-	// gc releated flags
+	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
 
 	c.Flags().MarkHidden("dry-run")
@@ -209,8 +209,6 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	storeExtMgr := server.NewStoreExtManager(o.execer)
-	defer storeExtMgr.StopAll()
-
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir)
 	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
 	if storeKindsErr != nil {
@@ -236,6 +234,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 
 	go func() {
 		<-clean
+		log.Println("stopping the extensions")
+		storeExtMgr.StopAll()
 		log.Println("stopping the server")
 		_ = lis.Close()
 		_ = o.httpServer.Shutdown(ctx)
