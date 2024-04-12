@@ -1,5 +1,22 @@
 Please join us to improve this project.
 
+The backend is written by [Golang](https://go.dev/), and the front-end is written by [Vue](https://vuejs.org/).
+
+## For beginner
+You might need to know the following tech before get started.
+
+| Name                                                                        | Domain                                                                 |
+|-----------------------------------------------------------------------------|------------------------------------------------------------------------|
+| [HTTP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview) Protocol | Core                                                                   |
+| [RESTful](https://en.wikipedia.org/wiki/REST)                               | Core                                                                   |
+| [gRPC](https://grpc.io/)                                                    | `gRPC` runner extension                                                |
+| [Prometheus](https://prometheus.io/)                                        | Application monitor                                                    |
+| [Cobra](https://github.com/spf13/cobra)                                     | The Go CLI framework                                                   |
+| [Element Plus](https://element-plus.org/)                                   | The front-end framework                                                |
+| [Docker](https://www.docker.com/get-started/)                               | The container image build                                              |
+| [Helm chart](https://helm.sh/)                                              | The [Kubernetes](https://kubernetes.io/docs/home/) application package |
+| [GitHub Actions](https://docs.github.com/en/actions)                        | The continuous integration                                             |
+
 ## Setup development environment
 It's highly recommended you to configure the git pre-commit hook. It will force to run unit tests before commit.
 Run the following command:
