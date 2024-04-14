@@ -66,6 +66,16 @@ func TestGenerators(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, expectedFormRequestGoCode, result, result)
 	})
+
+	cookieRequest := &atest.TestCase{Request: formRequest.Request}
+	cookieRequest.Request.Cookie = map[string]string{
+		"name": "value",
+	}
+	t.Run("golang cookie HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("golang").Generate(nil, cookieRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedCookieRequestGoCode, result, result)
+	})
 }
 
 //go:embed testdata/expected_go_code.txt
@@ -73,3 +83,6 @@ var expectedGoCode string
 
 //go:embed testdata/expected_go_form_request_code.txt
 var expectedFormRequestGoCode string
+
+//go:embed testdata/expected_go_cookie_request_code.txt
+var expectedCookieRequestGoCode string

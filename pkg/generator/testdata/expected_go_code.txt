@@ -8,7 +8,7 @@ import (
 func main() {
 	body := bytes.NewBufferString("")
 
-	req, err := http.NewRequest("GET," "https://www.baidu.com", body)
+	req, err := http.NewRequest("GET", "https://www.baidu.com", body)
 	if err != nil {
 		panic(err)
 	}

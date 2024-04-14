@@ -15,6 +15,10 @@ func main() {
 		panic(err)
 	}
 	req.Header.Set("User-Agent", "atest")
+	req.AddCookie(&http.Cookie{
+		Name:  "name",
+		Value: "value",
+	})
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
