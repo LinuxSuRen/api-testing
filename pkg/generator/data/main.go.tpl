@@ -16,7 +16,7 @@ func main() {
 	body := bytes.NewBufferString("{{.Request.Body.String}}")
 	{{- end }}
 
-	req, err := http.NewRequest("{{.Request.Method}}," "{{.Request.API}}", body)
+	req, err := http.NewRequest("{{.Request.Method}}", "{{.Request.API}}", body)
 	if err != nil {
 		panic(err)
 	}
@@ -24,6 +24,15 @@ func main() {
 	{{- range $key, $val := .Request.Header}}
 	req.Header.Set("{{$key}}", "{{$val}}")
  	{{- end}}
+
+	{{- if gt (len .Request.Cookie) 0 }}
+	{{- range $key, $val := .Request.Cookie}}
+	req.AddCookie(&http.Cookie{
+		Name:  "{{$key}}",
+		Value: "{{$val}}",
+	})
+	{{- end}}
+	{{- end}}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
