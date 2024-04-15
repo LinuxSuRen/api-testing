@@ -21,6 +21,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"io"
 	"net/http"
 	"os"
@@ -197,10 +199,16 @@ func (s *server) getLoader(ctx context.Context) (loader testing.Writer) {
 	return
 }
 
+var ExecutionNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_total",
+	Help: "The total number of request execution",
+})
+
 // Run start to run the test task
 func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, err error) {
 	task.Level = withDefaultValue(task.Level, "info").(string)
 	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
+	ExecutionNum.Inc()
 
 	var suite *testing.TestSuite
 

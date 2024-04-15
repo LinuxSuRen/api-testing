@@ -18,6 +18,8 @@ package runner
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"strings"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -49,11 +51,19 @@ type RunnerCreator func(suite *testing.TestSuite) TestCaseRunner
 
 var runners map[string]RunnerCreator = make(map[string]RunnerCreator, 4)
 
+var (
+	runnersNum = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "atest_runners_total",
+		Help: "The total number of runners",
+	})
+)
+
 func RegisterRunner(kind string, runner RunnerCreator) error {
 	if _, ok := runners[kind]; ok {
 		return fmt.Errorf("duplicated kind %q", kind)
 	}
 
 	runners[kind] = runner
+	runnersNum.Inc()
 	return nil
 }

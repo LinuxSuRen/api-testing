@@ -297,6 +297,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		reg.MustRegister(
 			collectors.NewGoCollector(),
 			collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+			collectors.NewBuildInfoCollector(),
+			server.ExecutionNum,
 		)
 		mux.HandlePath(http.MethodGet, "/metrics", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 			promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}).ServeHTTP(w, r)
