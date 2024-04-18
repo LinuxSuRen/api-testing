@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"io"
 	"log"
@@ -205,11 +206,27 @@ func (s *inMemoryServer) initObjectData(obj Object) {
 		return
 	}
 
-	objData := map[string]interface{}{}
-	jsonErr := json.Unmarshal([]byte(obj.Sample), &objData)
-	if jsonErr == nil {
-		s.data[obj.Name] = append(s.data[obj.Name], objData)
+	defaultCount := 1
+	if obj.InitCount == nil {
+		obj.InitCount = &defaultCount
 	}
+
+	for i := 0; i < *obj.InitCount; i++ {
+		objData, jsonErr := jsonStrToInterface(obj.Sample)
+		if jsonErr == nil {
+			s.data[obj.Name] = append(s.data[obj.Name], objData)
+		} else {
+			log.Println(jsonErr)
+		}
+	}
+}
+
+func jsonStrToInterface(jsonStr string) (objData map[string]interface{}, err error) {
+	if jsonStr, err = render.Render("init object", jsonStr, nil); err == nil {
+		objData = map[string]interface{}{}
+		err = json.Unmarshal([]byte(jsonStr), &objData)
+	}
+	return
 }
 
 func (s *inMemoryServer) GetPort() string {

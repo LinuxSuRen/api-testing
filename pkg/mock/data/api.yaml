@@ -14,6 +14,13 @@ objects:
       {
         "name": "someone"
       }
+  - name: projects
+    initCount: 3
+    sample: |
+      {
+        "name": "api-testing",
+        "color": "{{ randEnum "blue" "read" "pink" }}"
+      }
 items:
   - name: repoList
     request:
