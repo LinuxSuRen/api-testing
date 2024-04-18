@@ -57,6 +57,12 @@ func TestGenerators(t *testing.T) {
 		assert.Equal(t, expectedGoCode, result)
 	})
 
+	t.Run("java", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("java").Generate(nil, testcase)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedJavaCode, result)
+	})
+
 	formRequest := &atest.TestCase{Request: testcase.Request}
 	formRequest.Request.Form = map[string]string{
 		"key": "value",
@@ -65,6 +71,13 @@ func TestGenerators(t *testing.T) {
 		result, err := generator.GetCodeGenerator("golang").Generate(nil, formRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedFormRequestGoCode, result, result)
+	})
+
+	t.Run("java form HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("java").Generate(nil, formRequest)
+		print(result)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedFormRequestJavaCode, result, result)
 	})
 
 	cookieRequest := &atest.TestCase{Request: formRequest.Request}
@@ -76,13 +89,28 @@ func TestGenerators(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, expectedCookieRequestGoCode, result, result)
 	})
+
+	t.Run("java cookie HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("java").Generate(nil, cookieRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedCookieRequestJavaCode, result, result)
+	})
 }
 
 //go:embed testdata/expected_go_code.txt
 var expectedGoCode string
 
+//go:embed testdata/expected_java_code.txt
+var expectedJavaCode string
+
 //go:embed testdata/expected_go_form_request_code.txt
 var expectedFormRequestGoCode string
 
+//go:embed testdata/expected_java_form_request_code.txt
+var expectedFormRequestJavaCode string
+
 //go:embed testdata/expected_go_cookie_request_code.txt
 var expectedCookieRequestGoCode string
+
+//go:embed testdata/expected_java_cookie_request_code.txt
+var expectedCookieRequestJavaCode string
