@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -114,6 +115,19 @@ func TestInMemoryServer(t *testing.T) {
 		resp, err = http.DefaultClient.Do(wrongMethodReq)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
+	})
+
+	t.Run("mock item", func(t *testing.T) {
+		resp, err := http.Get(api + "/v1/repos/test/prs")
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, "mock", resp.Header.Get("server"))
+		assert.NotEmpty(t, resp.Header.Get(HeaderMockServer))
+
+		data, err := io.ReadAll(resp.Body)
+		assert.NoError(t, err)
+
+		assert.True(t, strings.Contains(string(data), `"message": "gzip"`), string(data))
 	})
 
 	t.Run("not found config file", func(t *testing.T) {

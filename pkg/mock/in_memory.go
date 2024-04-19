@@ -21,6 +21,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"github.com/linuxsuren/api-testing/pkg/version"
 	"io"
 	"log"
 	"net"
@@ -55,6 +56,11 @@ func (s *inMemoryServer) Start(reader Reader) (err error) {
 	for _, obj := range server.Objects {
 		s.startObject(obj)
 		s.initObjectData(obj)
+	}
+
+	log.Println("start to run all the APIs from items")
+	for _, item := range server.Items {
+		s.startItem(item)
 	}
 
 	s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port))
@@ -199,6 +205,25 @@ func (s *inMemoryServer) startObject(obj Object) {
 		}
 	})
 	return
+}
+
+func (s *inMemoryServer) startItem(item Item) {
+	s.mux.HandleFunc(item.Request.Path, func(w http.ResponseWriter, req *http.Request) {
+		item.Response.Headers = append(item.Response.Headers, Header{
+			Key:   HeaderMockServer,
+			Value: fmt.Sprintf("api-testing: %s", version.GetVersion()),
+		})
+		for _, header := range item.Response.Headers {
+			w.Header().Set(header.Key, header.Value)
+		}
+		body, err := render.Render("start-item", item.Response.Body, req)
+		if err == nil {
+			w.Write([]byte(body))
+		} else {
+			w.Write([]byte(err.Error()))
+		}
+		w.WriteHeader(util.ZeroThenDefault(item.Response.StatusCode, http.StatusOK))
+	}).Methods(util.EmptyThenDefault(item.Request.Method, http.MethodGet))
 }
 
 func (s *inMemoryServer) initObjectData(obj Object) {

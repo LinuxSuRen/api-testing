@@ -27,6 +27,29 @@ type Field struct {
 	Kind string `yaml:"kind"`
 }
 
+type Item struct {
+	Name     string   `yaml:"name"`
+	Request  Request  `yaml:"request"`
+	Response Response `yaml:"response"`
+}
+
+type Request struct {
+	Path   string `yaml:"path"`
+	Method string `yaml:"method"`
+}
+
+type Response struct {
+	Body       string   `yaml:"body"`
+	Headers    []Header `yaml:"headers"`
+	StatusCode int      `yaml:"statusCode"`
+}
+
+type Header struct {
+	Key   string `yaml:"key"`
+	Value string `yaml:"value"`
+}
+
 type Server struct {
 	Objects []Object `yaml:"objects"`
+	Items   []Item   `yaml:"items"`
 }
