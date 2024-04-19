@@ -20,7 +20,8 @@ func NewRootCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c *cob
 	c.AddCommand(createInitCommand(execer),
 		createRunCommand(), createSampleCmd(),
 		createServerCmd(execer, httpServer), createJSONSchemaCmd(),
-		createServiceCommand(execer), createFunctionCmd(), createConvertCommand())
+		createServiceCommand(execer), createFunctionCmd(), createConvertCommand(),
+		createMockCmd())
 	return
 }
 

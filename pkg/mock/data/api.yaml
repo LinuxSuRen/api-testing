@@ -1,0 +1,52 @@
+objects:
+  - name: user
+    fields:
+      - name: username
+        kind: string
+  - name: repo
+    fields:
+      - name: name
+        kind: string
+      - name: url
+        kind: string
+  - name: team
+    sample: |
+      {
+        "name": "someone"
+      }
+  - name: projects
+    initCount: 3
+    sample: |
+      {
+        "name": "api-testing",
+        "color": "{{ randEnum "blue" "read" "pink" }}"
+      }
+items:
+  - name: repoList
+    request:
+      path: /v1/teams/{team}/repos
+      method: GET
+    response:
+      body: |
+        {
+          "status": 0,
+          "count": 1,
+          "items": [{
+            "name": "fake-name",
+            "url": "https://fake.com"
+          }]
+        }
+  - name: prList
+    request:
+      path: /v1/repos/{repo}/prs
+    response:
+      body: |
+        {
+          "count": 1,
+          "items": [{
+            "title": "fix: there is a bug on page one",
+            "number": 123,
+            "author": "someone",
+            "status": "success"
+          }]
+        }
