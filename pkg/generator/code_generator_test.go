@@ -75,7 +75,6 @@ func TestGenerators(t *testing.T) {
 
 	t.Run("java form HTTP request", func(t *testing.T) {
 		result, err := generator.GetCodeGenerator("java").Generate(nil, formRequest)
-		print(result)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedFormRequestJavaCode, result, result)
 	})
