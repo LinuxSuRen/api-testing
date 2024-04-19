@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,6 +63,12 @@ func TestGenerators(t *testing.T) {
 		assert.Equal(t, expectedJavaCode, result)
 	})
 
+	t.Run("python", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("python").Generate(nil, testcase)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedPythonCode, result)
+	})
+
 	formRequest := &atest.TestCase{Request: testcase.Request}
 	formRequest.Request.Form = map[string]string{
 		"key": "value",
@@ -77,6 +83,12 @@ func TestGenerators(t *testing.T) {
 		result, err := generator.GetCodeGenerator("java").Generate(nil, formRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedFormRequestJavaCode, result, result)
+	})
+
+	t.Run("python form HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("python").Generate(nil, formRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedFormRequestPythonCode, result, result)
 	})
 
 	cookieRequest := &atest.TestCase{Request: formRequest.Request}
@@ -102,6 +114,11 @@ func TestGenerators(t *testing.T) {
 		result, err := generator.GetCodeGenerator("golang").Generate(nil, bodyRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedBodyRequestGoCode, result, result)
+
+	t.Run("python cookie HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("python").Generate(nil, cookieRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedCookieRequestPythonCode, result, result)
 	})
 }
 
@@ -125,3 +142,12 @@ var expectedCookieRequestJavaCode string
 
 //go:embed testdata/expected_go_body_request_code.txt
 var expectedBodyRequestGoCode string
+
+//go:embed testdata/expected_python_code.txt
+var expectedPythonCode string
+
+//go:embed testdata/expected_python_form_request_code.txt
+var expectedFormRequestPythonCode string
+
+//go:embed testdata/expected_python_cookie_request_code.txt
+var expectedCookieRequestPythonCode string

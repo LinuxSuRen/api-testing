@@ -1,0 +1,21 @@
+import io
+import requests
+from urllib.parse import urlencode
+
+def main():
+    body = io.BytesIO(b"")
+    headers = {"User-Agent": "atest"}
+    try:
+        req = requests.Request("GET", "https://www.baidu.com", headers=headers, data=body)
+    except requests.RequestException as e:
+        raise e
+
+    resp = requests.Session().send(req.prepare())
+    if resp.status_code != 200:
+        raise Exception("status code is not 200")
+
+    data = resp.content
+    print(data.decode("utf-8"))
+
+if __name__ == "__main__":
+    main()
