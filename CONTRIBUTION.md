@@ -74,8 +74,6 @@ docker run -p 12800:12800 -p 9412:9412 \
 
 ## First contribution
 
-## First contribution
-
 For developers contributing code to this project for the first time, you should run the following command in your local development environment:
 
 ```shell
