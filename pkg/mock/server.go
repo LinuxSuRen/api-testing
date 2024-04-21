@@ -22,5 +22,5 @@ type DynamicServer interface {
 }
 
 const (
-	HeaderMockServer = "MockServer"
+	headerMockServer = "MockServer"
 )

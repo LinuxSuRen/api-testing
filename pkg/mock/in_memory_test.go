@@ -122,7 +122,7 @@ func TestInMemoryServer(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.Equal(t, "mock", resp.Header.Get("server"))
-		assert.NotEmpty(t, resp.Header.Get(HeaderMockServer))
+		assert.NotEmpty(t, resp.Header.Get(headerMockServer))
 
 		data, err := io.ReadAll(resp.Body)
 		assert.NoError(t, err)

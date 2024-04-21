@@ -210,7 +210,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 func (s *inMemoryServer) startItem(item Item) {
 	s.mux.HandleFunc(item.Request.Path, func(w http.ResponseWriter, req *http.Request) {
 		item.Response.Headers = append(item.Response.Headers, Header{
-			Key:   HeaderMockServer,
+			Key:   headerMockServer,
 			Value: fmt.Sprintf("api-testing: %s", version.GetVersion()),
 		})
 		for _, header := range item.Response.Headers {
