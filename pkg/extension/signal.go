@@ -2,10 +2,11 @@ package extension
 
 import (
 	"context"
-	"github.com/linuxsuren/api-testing/pkg/logging"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/linuxsuren/api-testing/pkg/logging"
 )
 
 var (

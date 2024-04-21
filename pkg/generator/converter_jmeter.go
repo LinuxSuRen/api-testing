@@ -17,9 +17,9 @@ package generator
 
 import (
 	"encoding/xml"
-	"github.com/linuxsuren/api-testing/pkg/logging"
 	"net/url"
 
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
 
