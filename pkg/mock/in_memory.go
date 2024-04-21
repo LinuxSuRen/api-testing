@@ -18,6 +18,7 @@ package mock
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/version"
 	"io"
 	"net"
 	"net/http"
@@ -63,7 +64,7 @@ func (s *inMemoryServer) Start(reader Reader) (err error) {
 		s.initObjectData(obj)
 	}
 
-	log.Println("start to run all the APIs from items")
+	memLogger.Info("start to run all the APIs from items")
 	for _, item := range server.Items {
 		s.startItem(item)
 	}
