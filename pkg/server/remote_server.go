@@ -29,9 +29,8 @@ import (
 
 	_ "embed"
 
-	"log"
-
 	"github.com/linuxsuren/api-testing/pkg/generator"
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/oauth"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/runner"
@@ -39,8 +38,13 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	"github.com/linuxsuren/api-testing/sample"
+
 	"google.golang.org/grpc/metadata"
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	remoteServerLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("remote_server")
 )
 
 type server struct {
@@ -146,7 +150,7 @@ func (s *server) getSuiteFromTestTask(task *TestTask) (suite *testing.TestSuite,
 
 		if targetTestcase != nil {
 			parentCases := findParentTestCases(targetTestcase, suite)
-			log.Printf("find %d parent cases\n", len(parentCases))
+			remoteServerLogger.Info("find %d parent cases\n", len(parentCases))
 			suite.Items = append(parentCases, *targetTestcase)
 		} else {
 			err = fmt.Errorf("cannot found testcase %s", task.CaseName)
@@ -178,7 +182,7 @@ func (s *server) getLoader(ctx context.Context) (loader testing.Writer) {
 
 			var err error
 			if loader, err = s.getLoaderByStoreName(storeName); err != nil {
-				log.Println("failed to get loader", storeName, err)
+				remoteServerLogger.Info("failed to get loader", storeName, err)
 				loader = testing.NewNonWriter()
 			}
 		}
@@ -208,8 +212,8 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		return
 	}
 
-	log.Printf("prepare to run: %s, with level: %s\n", suite.Name, task.Level)
-	log.Printf("task kind: %s, %d to run\n", task.Kind, len(suite.Items))
+	remoteServerLogger.Info("prepare to run: %s, with level: %s\n", suite.Name, task.Level)
+	remoteServerLogger.Info("task kind: %s, %d to run\n", task.Kind, len(suite.Items))
 	dataContext := map[string]interface{}{}
 
 	if err = suite.Render(dataContext); err != nil {
@@ -649,7 +653,7 @@ func (s *server) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity) (r
 		return
 	}
 
-	log.Println("Finding APIs from", in.Name, "with loader", reflect.TypeOf(loader))
+	remoteServerLogger.Info("Finding APIs from", in.Name, "with loader", reflect.TypeOf(loader))
 
 	suiteRunner := runner.GetTestSuiteRunner(suite)
 	var result []*testing.TestCase
@@ -862,7 +866,7 @@ func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (
 		findExpectNames(testcase.Request.API, expectNames)
 		findExpectNames(testcase.Request.Body.String(), expectNames)
 
-		log.Println("expect test case names", expectNames.GetAll())
+		remoteServerLogger.Info("expect test case names", expectNames.GetAll())
 		for _, item := range suite.Items {
 			if expectNames.Exist(item.Name) {
 				testcases = append(testcases, item)

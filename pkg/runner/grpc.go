@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -37,8 +36,10 @@ import (
 	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/compare"
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
+
 	"github.com/tidwall/gjson"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -52,6 +53,10 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/dynamicpb"
+)
+
+var (
+	grpcRunnerLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("memory")
 )
 
 type gRPCTestCaseRunner struct {
@@ -322,7 +327,7 @@ func getMethodDescriptor(ctx context.Context, r *gRPCTestCaseRunner, testcase *t
 
 	var dp protoreflect.Descriptor
 	// if fd, ok := r.fdCache.Load(fullname.Parent()); ok {
-	// 	log.Println("hit cache",fullname)
+	// 	grpcRunnerLogger.Info("hit cache",fullname)
 	// 	return getMdFromFd(fd.(protoreflect.FileDescriptor), fullname)
 	// }
 
@@ -376,7 +381,7 @@ func compileProto(ctx context.Context, r *gRPCTestCaseRunner) (fileLinker linker
 		return
 	}
 
-	log.Println("proto import files", importPath)
+	grpcRunnerLogger.Info("proto import files", importPath)
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(
 			&protocompile.SourceResolver{

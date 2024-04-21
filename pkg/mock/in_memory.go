@@ -18,14 +18,20 @@ package mock
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/linuxsuren/api-testing/pkg/render"
-	"github.com/linuxsuren/api-testing/pkg/util"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/logging"
+	"github.com/linuxsuren/api-testing/pkg/render"
+	"github.com/linuxsuren/api-testing/pkg/util"
+
+	"github.com/gorilla/mux"
+)
+
+var (
+	memLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("memory")
 )
 
 type inMemoryServer struct {
@@ -51,7 +57,7 @@ func (s *inMemoryServer) Start(reader Reader) (err error) {
 	s.data = make(map[string][]map[string]interface{})
 	s.mux = mux.NewRouter()
 
-	log.Println("start to run all the APIs from objects")
+	memLogger.Info("start to run all the APIs from objects")
 	for _, obj := range server.Objects {
 		s.startObject(obj)
 		s.initObjectData(obj)
@@ -109,7 +115,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 				jsonErr := json.Unmarshal(data, &objData)
 				if jsonErr != nil {
-					log.Println(jsonErr)
+					memLogger.Info(jsonErr.Error())
 					return
 				}
 
@@ -117,7 +123,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 				_, _ = w.Write(data)
 			} else {
-				log.Println("failed to read from body", err)
+				memLogger.Info("failed to read from body", err)
 			}
 		case http.MethodDelete:
 			// delete an item
@@ -126,7 +132,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 				jsonErr := json.Unmarshal(data, &objData)
 				if jsonErr != nil {
-					log.Println(jsonErr)
+					memLogger.Info(jsonErr.Error())
 					return
 				}
 
@@ -143,7 +149,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 				_, _ = w.Write(data)
 			} else {
-				log.Println("failed to read from body", err)
+				memLogger.Info("failed to read from body", err)
 			}
 		case http.MethodPut:
 			if data, err := io.ReadAll(req.Body); err == nil {
@@ -151,7 +157,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 				jsonErr := json.Unmarshal(data, &objData)
 				if jsonErr != nil {
-					log.Println(jsonErr)
+					memLogger.Info(jsonErr.Error())
 					return
 				}
 
@@ -164,7 +170,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 				_, _ = w.Write(data)
 			} else {
-				log.Println("failed to read from body", err)
+				memLogger.Info("failed to read from body", err)
 			}
 		default:
 			w.WriteHeader(http.StatusBadRequest)
@@ -216,7 +222,7 @@ func (s *inMemoryServer) initObjectData(obj Object) {
 		if jsonErr == nil {
 			s.data[obj.Name] = append(s.data[obj.Name], objData)
 		} else {
-			log.Println(jsonErr)
+			memLogger.Info(jsonErr.Error())
 		}
 	}
 }

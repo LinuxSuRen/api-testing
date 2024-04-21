@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -31,6 +30,11 @@ import (
 	"github.com/expr-lang/expr/ast"
 	"github.com/expr-lang/expr/builtin"
 	"github.com/expr-lang/expr/vm"
+	"github.com/linuxsuren/api-testing/pkg/logging"
+)
+
+var (
+	runnerLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("runner")
 )
 
 // ExprFuncSleep is an expr function for sleeping
@@ -77,7 +81,7 @@ func ExprFuncHTTPReady(params ...interface{}) (res interface{}, err error) {
 		alive := err == nil && resp != nil && resp.StatusCode == http.StatusOK
 
 		if alive && len(params) >= 3 {
-			log.Println("checking the response")
+			runnerLogger.Info("checking the response")
 			exprText := params[2].(string)
 
 			// check the response
@@ -86,20 +90,20 @@ func ExprFuncHTTPReady(params ...interface{}) (res interface{}, err error) {
 				unstruct := make(map[string]interface{})
 
 				if err = json.Unmarshal(data, &unstruct); err != nil {
-					log.Printf("failed to unmarshal the response data: %v\n", err)
+					runnerLogger.Info("failed to unmarshal the response data: %v\n", err)
 					return
 				}
 
 				unstruct["data"] = unstruct
 				var program *vm.Program
 				if program, err = expr.Compile(exprText, expr.Env(unstruct)); err != nil {
-					log.Printf("failed to compile: %s, %v\n", exprText, err)
+					runnerLogger.Info("failed to compile: %s, %v\n", exprText, err)
 					return
 				}
 
 				var result interface{}
 				if result, err = expr.Run(program, unstruct); err != nil {
-					log.Printf("failed to Run: %s, %v\n", exprText, err)
+					runnerLogger.Info("failed to Run: %s, %v\n", exprText, err)
 					return
 				}
 
@@ -116,7 +120,7 @@ func ExprFuncHTTPReady(params ...interface{}) (res interface{}, err error) {
 			return
 		}
 
-		log.Println("waiting for", api)
+		runnerLogger.Info("waiting for", api)
 		time.Sleep(1 * time.Second)
 	}
 	err = fmt.Errorf("failed to wait for the API ready in %d times", retry)

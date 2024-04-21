@@ -5,13 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/util"
+
 	unstructured "github.com/linuxsuren/unstructured/pkg"
+)
+
+var (
+	writeLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("write")
 )
 
 // Reader represents a reader interface
@@ -86,7 +91,7 @@ type defaultResourceValidator struct {
 // Exist returns true if the specific resource exist
 func (v *defaultResourceValidator) Exist() bool {
 	if v.err != nil {
-		log.Println(v.err)
+		writeLogger.Info(v.err.Error())
 		return false
 	}
 	return v.data != nil && len(v.data) > 0

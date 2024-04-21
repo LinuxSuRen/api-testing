@@ -18,16 +18,19 @@ package oauth
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"context"
-
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/util"
+
 	"golang.org/x/oauth2"
 )
 
-var accessToken = make(map[string]*UserInfo)
+var (
+	accessToken = make(map[string]*UserInfo)
+	oauthLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("oauth")
+)
 
 func GetUser(token string) *UserInfo {
 	return accessToken[token]
@@ -68,7 +71,7 @@ func (a *auth) Callback(w http.ResponseWriter, r *http.Request, pathParams map[s
 		http.Error(w, "Code not found", http.StatusBadRequest)
 		return
 	}
-	log.Println("get code", code)
+	oauthLogger.Info("get code", code)
 
 	sslcli := util.TlsAwareHTTPClient(a.skipTlsVerify)
 	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, sslcli)
@@ -87,9 +90,9 @@ func (a *auth) getUserInfo(w http.ResponseWriter, r *http.Request, token *oauth2
 	// get userInfo, save it to session
 	if userInfo, err := GetUserInfo(a.provider, token.AccessToken, a.skipTlsVerify); err == nil {
 		accessToken[token.AccessToken] = userInfo
-		log.Println(userInfo.Name, "has login")
+		oauthLogger.Info(userInfo.Name, "has login")
 	} else {
-		log.Println("failed to get userinfo", err)
+		oauthLogger.Info("failed to get userinfo", err)
 	}
 
 	http.Redirect(w, r, "/?access_token="+token.AccessToken, http.StatusFound)
@@ -112,7 +115,7 @@ var deviceAuthResponseMap = map[string]*oauth2.DeviceAuthResponse{}
 func (a *auth) RequestLocalCode(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 	response, err := a.config.DeviceAuth(context.Background())
 	if err != nil {
-		log.Println("failed to get device auth", err)
+		oauthLogger.Info("failed to get device auth", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -124,7 +127,7 @@ func (a *auth) RequestLocalCode(w http.ResponseWriter, r *http.Request, pathPara
 
 func (a *auth) RequestCode(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 	ref := r.Header.Get("Referer")
-	log.Println("callback host", r.Host)
+	oauthLogger.Info("callback host", r.Host)
 
 	if ref == "" {
 		a.config.RedirectURL = fmt.Sprintf("https://%s/oauth2/callback", r.Host)

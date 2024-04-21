@@ -19,8 +19,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -30,6 +30,10 @@ import (
 	"sync"
 
 	"github.com/linuxsuren/api-testing/pkg/util"
+)
+
+var (
+	loaderLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("loader")
 )
 
 type fileLoader struct {
@@ -132,7 +136,7 @@ func (l *fileLoader) Put(item string) (err error) {
 		if files, err = filepath.Glob(pattern); err == nil {
 			l.paths = append(l.paths, files...)
 		}
-		log.Println(pattern, "pattern", len(files))
+		loaderLogger.Info(pattern, "pattern", len(files))
 	}
 	return
 }
@@ -160,13 +164,13 @@ func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
 		var data []byte
 		var loadErr error
 		if data, loadErr = loadData(target); err != nil {
-			log.Println("failed to load data", loadErr)
+			loaderLogger.Info("failed to load data", loadErr)
 			continue
 		}
 
 		var testSuite *TestSuite
 		if testSuite, loadErr = Parse(data); loadErr != nil {
-			log.Println("failed to parse data", loadErr, "from", target)
+			loaderLogger.Info("failed to parse data", loadErr, "from", target)
 			continue
 		}
 		suites = append(suites, *testSuite)
@@ -212,7 +216,7 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 
 		newSuiteFile := path.Join(l.parent, fmt.Sprintf("%s.yaml", name))
 		if newSuiteFile, err = filepath.Abs(newSuiteFile); err == nil {
-			log.Println("new suite file:", newSuiteFile)
+			loaderLogger.Info("new suite file:", newSuiteFile)
 
 			suite := &TestSuite{
 				Name: name,

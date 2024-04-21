@@ -17,10 +17,14 @@ package generator
 
 import (
 	"encoding/xml"
-	"log"
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"net/url"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
+)
+
+var (
+	genLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("gen")
 )
 
 type jmeterConverter struct {
@@ -51,7 +55,7 @@ func (c *jmeterConverter) buildJmeterTestPlan(testSuite *testing.TestSuite) (res
 	for _, item := range testSuite.Items {
 		item.Request.RenderAPI(testSuite.API)
 		if reqRenderErr := item.Request.Render(emptyCtx, ""); reqRenderErr != nil {
-			log.Println("Error rendering request: ", reqRenderErr)
+			genLogger.Info("Error rendering request: ", reqRenderErr)
 		}
 
 		api, err := url.Parse(item.Request.API)

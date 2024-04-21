@@ -19,7 +19,6 @@ package runner
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"math/rand"
 	"net"
 	"net/http"
@@ -273,7 +272,7 @@ func runServer(t *testing.T, s *grpc.Server) net.Listener {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	assert.NoError(t, err, "Listen port")
 
-	log.Println("listening at", l.Addr().(*net.TCPAddr).Port)
+	runnerLogger.Info("listening at", l.Addr().(*net.TCPAddr).Port)
 	go s.Serve(l)
 	return l
 }

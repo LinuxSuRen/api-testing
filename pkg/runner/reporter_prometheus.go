@@ -17,11 +17,15 @@ limitations under the License.
 package runner
 
 import (
-	"log"
 	"sync"
 
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
+)
+
+var (
+	prometheusLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("prometheus")
 )
 
 type prometheusReporter struct {
@@ -82,7 +86,7 @@ func (w *prometheusReporter) PutRecord(record *ReportRecord) {
 		}
 
 		if err := pusher.Push(); err != nil {
-			log.Println("Could not push completion time to Pushgateway:", err)
+			prometheusLogger.Info("Could not push completion time to Pushgateway:", err)
 		}
 	}()
 	if w.sync {

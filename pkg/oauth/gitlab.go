@@ -15,8 +15,6 @@ limitations under the License.
 */
 package oauth
 
-import "log"
-
 type gitlabOAuthProvider struct {
 }
 
@@ -35,7 +33,7 @@ func (p *gitlabOAuthProvider) GetServer() string {
 	return "https://gitlab.com"
 }
 func (p *gitlabOAuthProvider) SetServer(_ string) {
-	log.Println("not support")
+	githubLogger.Info("not support")
 }
 func (p *gitlabOAuthProvider) GetTokenURL() string {
 	return "/oauth/token"

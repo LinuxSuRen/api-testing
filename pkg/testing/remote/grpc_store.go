@@ -19,12 +19,17 @@ package remote
 import (
 	context "context"
 	"errors"
-	"log"
 	"time"
 
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	server "github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+
 	"google.golang.org/grpc"
+)
+
+var (
+	grpcLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("grpc")
 )
 
 type gRPCLoader struct {
@@ -203,7 +208,7 @@ func (g *gRPCLoader) PProf(name string) []byte {
 		Name: name,
 	})
 	if err != nil {
-		log.Println("failed to get pprof:", err)
+		grpcLogger.Info("failed to get pprof:", err)
 	}
 	return data.Data
 }

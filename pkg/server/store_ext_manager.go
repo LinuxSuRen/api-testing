@@ -17,12 +17,16 @@ package server
 
 import (
 	"fmt"
-	"log"
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"os"
 	"strings"
 	"syscall"
 
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
+)
+
+var (
+	serverLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("server")
 )
 
 type ExtManager interface {
@@ -70,7 +74,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 			s.filesNeedToBeRemoved = append(s.filesNeedToBeRemoved, socketFile)
 			s.extStatusMap[name] = true
 			if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, s.processChan, "--socket", socketFile); err != nil {
-				log.Printf("failed to start %s, error: %v", socketURL, err)
+				serverLogger.Info("failed to start %s, error: %v", socketURL, err)
 			}
 		}(socket, binaryPath)
 	}
@@ -78,7 +82,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 }
 
 func (s *storeExtManager) StopAll() error {
-	log.Println("stop", len(s.processs), "extensions")
+	serverLogger.Info("stop", len(s.processs), "extensions")
 	for _, p := range s.processs {
 		if p != nil {
 			p.Signal(syscall.SIGTERM)

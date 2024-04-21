@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -318,7 +317,7 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseTy
 
 	verifier := NewBodyVerify(responseType, expect)
 	if verifier == nil {
-		log.Printf("no body verify support with %q\n", responseType)
+		runnerLogger.Info("no body verify support with %q\n", responseType)
 		return
 	}
 

@@ -15,7 +15,11 @@ limitations under the License.
 */
 package oauth
 
-import "log"
+import "github.com/linuxsuren/api-testing/pkg/logging"
+
+var (
+	githubLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("github")
+)
 
 type githubOAuthProvider struct {
 }
@@ -35,7 +39,7 @@ func (p *githubOAuthProvider) GetServer() string {
 	return "https://github.com/login"
 }
 func (p *githubOAuthProvider) SetServer(_ string) {
-	log.Println("not support")
+	githubLogger.Info("not support")
 }
 func (p *githubOAuthProvider) GetTokenURL() string {
 	return "/oauth/access_token"
