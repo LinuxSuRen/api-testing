@@ -33,7 +33,7 @@ func TestInMemoryServer(t *testing.T) {
 		server.Stop()
 	}()
 
-	api := "http://localhost:" + server.GetPort()
+	api := "http://localhost:" + server.GetPort() + "/mock"
 
 	_, err = http.Post(api+"/team", "", bytes.NewBufferString(`{
 		"name": "test",
