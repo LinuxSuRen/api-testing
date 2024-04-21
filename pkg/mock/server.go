@@ -20,3 +20,7 @@ type DynamicServer interface {
 	Stop() error
 	GetPort() string
 }
+
+const (
+	headerMockServer = "MockServer"
+)

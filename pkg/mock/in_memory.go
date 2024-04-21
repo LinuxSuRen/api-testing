@@ -63,6 +63,11 @@ func (s *inMemoryServer) Start(reader Reader) (err error) {
 		s.initObjectData(obj)
 	}
 
+	log.Println("start to run all the APIs from items")
+	for _, item := range server.Items {
+		s.startItem(item)
+	}
+
 	s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port))
 	go func() {
 		err = http.Serve(s.listener, s.mux)
@@ -205,6 +210,25 @@ func (s *inMemoryServer) startObject(obj Object) {
 		}
 	})
 	return
+}
+
+func (s *inMemoryServer) startItem(item Item) {
+	s.mux.HandleFunc(item.Request.Path, func(w http.ResponseWriter, req *http.Request) {
+		item.Response.Headers = append(item.Response.Headers, Header{
+			Key:   headerMockServer,
+			Value: fmt.Sprintf("api-testing: %s", version.GetVersion()),
+		})
+		for _, header := range item.Response.Headers {
+			w.Header().Set(header.Key, header.Value)
+		}
+		body, err := render.Render("start-item", item.Response.Body, req)
+		if err == nil {
+			w.Write([]byte(body))
+		} else {
+			w.Write([]byte(err.Error()))
+		}
+		w.WriteHeader(util.ZeroThenDefault(item.Response.StatusCode, http.StatusOK))
+	}).Methods(util.EmptyThenDefault(item.Request.Method, http.MethodGet))
 }
 
 func (s *inMemoryServer) initObjectData(obj Object) {
