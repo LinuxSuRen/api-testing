@@ -57,6 +57,18 @@ func TestPrintProto(t *testing.T) {
 		verify: func(t *testing.T, buf *bytes.Buffer, err error) {
 			assert.Nil(t, err)
 		},
+	}, {
+		name: "mock server, not found config",
+		args: []string{"server", "--mock-config=fake", "-p=0", "--http-port=0"},
+		verify: func(t *testing.T, buffer *bytes.Buffer, err error) {
+			assert.Error(t, err)
+		},
+	}, {
+		name: "mock server, normal",
+		args: []string{"server", "--mock-config=testdata/invalid-api.yaml", "-p=0", "--http-port=0"},
+		verify: func(t *testing.T, buffer *bytes.Buffer, err error) {
+			assert.NoError(t, err)
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -37,6 +37,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/linuxsuren/api-testing/pkg/logging"
+	"github.com/linuxsuren/api-testing/pkg/mock"
 	"github.com/linuxsuren/api-testing/pkg/oauth"
 	template "github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/server"
@@ -88,6 +89,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.StringVarP(&opt.clientID, "client-id", "", os.Getenv("OAUTH_CLIENT_ID"), "ClientID is the application's ID")
 	flags.StringVarP(&opt.clientSecret, "client-secret", "", os.Getenv("OAUTH_CLIENT_SECRET"), "ClientSecret is the application's secret")
 	flags.BoolVarP(&opt.dryRun, "dry-run", "", false, "Do not really start a gRPC server")
+	flags.StringArrayVarP(&opt.mockConfig, "mock-config", "", nil, "The mock config files")
 
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
@@ -120,6 +122,8 @@ type serverOption struct {
 	oauthServer  string
 	oauthSkipTls bool
 	oauthGroup   []string
+
+	mockConfig []string
 
 	gcPercent int
 
@@ -283,10 +287,24 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}).ServeHTTP(w, r)
 		})
 
+		combineHandlers := server.NewDefaultCombineHandler()
+		combineHandlers.PutHandler("", mux)
+
+		if len(o.mockConfig) > 0 {
+			cmd.Println("currently only one mock config is supported, will take the first one")
+			var mockServerHandler http.Handler
+			if mockServerHandler, err = mock.NewInMemoryServer(0).
+				SetupHandler(mock.NewLocalFileReader(o.mockConfig[0])); err != nil {
+				return
+			}
+			combineHandlers.PutHandler("/mock", mockServerHandler)
+		}
+
 		debugHandler(mux, remoteServer)
-		o.httpServer.WithHandler(mux)
+		o.httpServer.WithHandler(combineHandlers.GetHandler())
 		serverLogger.Info("HTTP server listening at", "addr", httplis.Addr())
 		serverLogger.Info("Server is running.")
+
 		err = o.httpServer.Serve(httplis)
 		err = util.IgnoreErrServerClosed(err)
 	}
