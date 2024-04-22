@@ -212,8 +212,8 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		return
 	}
 
-	remoteServerLogger.Info("prepare to run: %s, with level: %s\n", suite.Name, task.Level)
-	remoteServerLogger.Info("task kind: %s, %d to run\n", task.Kind, len(suite.Items))
+	remoteServerLogger.Info("prepare to run: ", suite.Name, " with level: ", task.Level)
+	remoteServerLogger.Info("task kind: ", task.Kind, len(suite.Items), "to run")
 	dataContext := map[string]interface{}{}
 
 	if err = suite.Render(dataContext); err != nil {

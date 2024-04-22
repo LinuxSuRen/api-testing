@@ -41,18 +41,17 @@ func TestZapLogLevel(t *testing.T) {
 }
 
 func TestLogger(t *testing.T) {
-
 	tmpFile, err := os.CreateTemp("", "test-log")
 	if err != nil {
 		t.Fatalf("Failed to create temporary file: %v", err)
 	}
 	defer os.Remove(tmpFile.Name())
 
-	logger := NewLogger(DefaultApiTestingLogging())
+	logger := NewLogger(DefaultAPITestingLogging())
 	logger.Info("kv msg", "key", "value")
 	logger.Sugar().Infof("template %s %d", "string", 123)
 
-	logger.WithName(string(LogComponentApiTestingTesting)).WithValues("testing", LogComponentApiTestingTesting).Info("msg", "k", "v")
+	logger.WithName(string(LogComponentAPITestingTesting)).WithValues("testing", LogComponentAPITestingTesting).Info("msg", "k", "v")
 
 	defaultLogger := DefaultLogger(LogLevelInfo)
 	assert.NotNil(t, defaultLogger.logging)
@@ -74,10 +73,10 @@ func TestLoggerWithName(t *testing.T) {
 		require.NoError(t, err)
 	}()
 
-	config := DefaultApiTestingLogging()
-	config.Level[LogComponentApiTestingTesting] = LogLevelDebug
+	config := DefaultAPITestingLogging()
+	config.Level[LogComponentAPITestingTesting] = LogLevelDebug
 
-	logger := NewLogger(config).WithName(string(LogComponentApiTestingTesting))
+	logger := NewLogger(config).WithName(string(LogComponentAPITestingTesting))
 	logger.Info("info message")
 	logger.Sugar().Debugf("debug message")
 
@@ -86,8 +85,7 @@ func TestLoggerWithName(t *testing.T) {
 	_, err := r.Read(outputBytes)
 	require.NoError(t, err)
 	capturedOutput := string(outputBytes)
-	assert.Contains(t, capturedOutput, string(LogComponentApiTestingTesting))
+	assert.Contains(t, capturedOutput, string(LogComponentAPITestingTesting))
 	assert.Contains(t, capturedOutput, "info message")
 	assert.Contains(t, capturedOutput, "debug message")
-
 }

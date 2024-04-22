@@ -233,7 +233,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			reflection.Register(gRPCServer)
 		}
 		server.RegisterRunnerServer(s, remoteServer)
-		serverLogger.Info("gRPC server listening at %v", lis.Addr())
+		serverLogger.Info("gRPC server listening at ", lis.Addr())
 		s.Serve(lis)
 	}()
 
@@ -285,7 +285,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 
 		debugHandler(mux, remoteServer)
 		o.httpServer.WithHandler(mux)
-		serverLogger.Info("HTTP server listening at %v", httplis.Addr())
+		serverLogger.Info("HTTP server listening at ", httplis.Addr())
 		serverLogger.Info("Server is running.")
 		err = o.httpServer.Serve(httplis)
 		err = util.IgnoreErrServerClosed(err)

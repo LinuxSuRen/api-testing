@@ -195,7 +195,7 @@ func (o *runOption) startMonitor() (err error) {
 	execer := fakeruntime.NewDefaultExecerWithContext(o.context)
 	go func(socketURL, plugin string) {
 		if err = execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, nil, "server", "--socket", socketURL); err != nil {
-			runLogger.Info("failed to start %s, error: %v", socketURL, err)
+			runLogger.Info("failed to start ", socketURL, " error: ", err.Error())
 		}
 	}(sockFile, monitorBin)
 
@@ -284,7 +284,7 @@ func (o *runOption) runSuiteWithDuration(loader testing.Loader) (err error) {
 				defer sem.Release(1)
 				defer wait.Done()
 				defer func() {
-					runLogger.Info("routing end with", time.Since(now))
+					runLogger.Info("routing end with ", time.Since(now))
 				}()
 
 				dataContext := getDefaultContext()

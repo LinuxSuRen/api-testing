@@ -44,34 +44,34 @@ const (
 	LogLevelError LogLevel = "error"
 )
 
-// apiTestingLog defines a make up part that supports a configured logging level.
-type apiTestingLogComponent string
+// APITestingLogComponent defines a make up part that supports a configured logging level.
+type APITestingLogComponent string
 
 const (
-	// LogComponentApiTestingDefault defines the "default"-wide logging component. When specified,
+	// LogComponentAPITestingDefault defines the "default"-wide logging component. When specified,
 	// all other logging components are ignored.
-	LogComponentApiTestingDefault apiTestingLogComponent = "default"
+	LogComponentAPITestingDefault APITestingLogComponent = "default"
 
-	// LogComponentApiTestingTesting represents the logging component for testing.
-	LogComponentApiTestingTesting apiTestingLogComponent = "testing"
+	// LogComponentAPITestingTesting represents the logging component for testing.
+	LogComponentAPITestingTesting APITestingLogComponent = "testing"
 )
 
-// ApiTestingLogging defines logging for api-testing.
-type ApiTestingLogging struct {
+// APITestingLogging defines logging for api-testing.
+type APITestingLogging struct {
 	// Level is the logging level. If unspecified, defaults to "info".
-	Level map[apiTestingLogComponent]LogLevel
+	Level map[APITestingLogComponent]LogLevel
 }
 
 // Logger represents a logger.
 type Logger struct {
 	// Embedded Logger interface
 	logr.Logger
-	logging       *ApiTestingLogging
+	logging       *APITestingLogging
 	sugaredLogger *zap.SugaredLogger
 }
 
-func NewLogger(logging *ApiTestingLogging) Logger {
-	logger := initZapLogger(os.Stdout, logging, logging.Level[LogComponentApiTestingDefault])
+func NewLogger(logging *APITestingLogging) Logger {
+	logger := initZapLogger(os.Stdout, logging, logging.Level[LogComponentAPITestingDefault])
 
 	return Logger{
 		Logger:        zapr.NewLogger(logger),
@@ -91,7 +91,7 @@ func FileLogger(file string, name string, level LogLevel) Logger {
 		panic(err)
 	}
 
-	logging := DefaultApiTestingLogging()
+	logging := DefaultAPITestingLogging()
 	logger := initZapLogger(writer, logging, level)
 
 	return Logger{
@@ -102,7 +102,7 @@ func FileLogger(file string, name string, level LogLevel) Logger {
 }
 
 func DefaultLogger(level LogLevel) Logger {
-	logging := DefaultApiTestingLogging()
+	logging := DefaultAPITestingLogging()
 	logger := initZapLogger(os.Stdout, logging, level)
 
 	return Logger{
@@ -118,7 +118,7 @@ func DefaultLogger(level LogLevel) Logger {
 // contain only letters, digits, and hyphens (see the package documentation for
 // more information).
 func (l Logger) WithName(name string) Logger {
-	logLevel := l.logging.Level[apiTestingLogComponent(name)]
+	logLevel := l.logging.Level[APITestingLogComponent(name)]
 	logger := initZapLogger(os.Stdout, l.logging, logLevel)
 
 	return Logger{
@@ -131,7 +131,6 @@ func (l Logger) WithName(name string) Logger {
 // WithValues returns a new Logger instance with additional key/value pairs.
 // See Info for documentation on how key/value pairs work.
 func (l Logger) WithValues(keysAndValues ...interface{}) Logger {
-
 	l.Logger = l.Logger.WithValues(keysAndValues...)
 	return l
 }
@@ -155,37 +154,34 @@ func (l Logger) WithValues(keysAndValues ...interface{}) Logger {
 //	Infof(string, ...any)  Printf-style logging
 //	Infoln(...any)         Println-style logging
 func (l Logger) Sugar() *zap.SugaredLogger {
-
 	return l.sugaredLogger
 }
 
-func initZapLogger(w io.Writer, logging *ApiTestingLogging, level LogLevel) *zap.Logger {
-
-	parseLevel, _ := zapcore.ParseLevel(string(logging.DefaultApiTestingLoggingLevel(level)))
+func initZapLogger(w io.Writer, logging *APITestingLogging, level LogLevel) *zap.Logger {
+	parseLevel, _ := zapcore.ParseLevel(string(logging.DefaultAPITestingLoggingLevel(level)))
 	core := zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()), zapcore.AddSync(w), zap.NewAtomicLevelAt(parseLevel))
 
 	return zap.New(core, zap.AddCaller())
 }
 
-// DefaultApiTestingLogging returns a new apiTestingLogging with default configuration parameters.
-func DefaultApiTestingLogging() *ApiTestingLogging {
-	return &ApiTestingLogging{
-		Level: map[apiTestingLogComponent]LogLevel{
-			LogComponentApiTestingDefault: LogLevelInfo,
+// DefaultAPITestingLogging returns a new APITestingLogging with default configuration parameters.
+func DefaultAPITestingLogging() *APITestingLogging {
+	return &APITestingLogging{
+		Level: map[APITestingLogComponent]LogLevel{
+			LogComponentAPITestingDefault: LogLevelInfo,
 		},
 	}
 }
 
-// DefaultApiTestingLoggingLevel returns a new ApiTestingLogging with default configuration parameters.
-// When LogComponentApiTestingDefault specified, all other logging components are ignored.
-func (logging *ApiTestingLogging) DefaultApiTestingLoggingLevel(level LogLevel) LogLevel {
-
+// DefaultAPITestingLoggingLevel returns a new APITestingLogging with default configuration parameters.
+// When LogComponentAPITestingDefault specified, all other logging components are ignored.
+func (logging *APITestingLogging) DefaultAPITestingLoggingLevel(level LogLevel) LogLevel {
 	if level != "" {
 		return level
 	}
 
-	if logging.Level[LogComponentApiTestingDefault] != "" {
-		return logging.Level[LogComponentApiTestingDefault]
+	if logging.Level[LogComponentAPITestingDefault] != "" {
+		return logging.Level[LogComponentAPITestingDefault]
 	}
 
 	return LogLevelInfo

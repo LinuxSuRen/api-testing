@@ -90,20 +90,20 @@ func ExprFuncHTTPReady(params ...interface{}) (res interface{}, err error) {
 				unstruct := make(map[string]interface{})
 
 				if err = json.Unmarshal(data, &unstruct); err != nil {
-					runnerLogger.Info("failed to unmarshal the response data: %v\n", err)
+					runnerLogger.Info("failed to unmarshal the response data ", err)
 					return
 				}
 
 				unstruct["data"] = unstruct
 				var program *vm.Program
 				if program, err = expr.Compile(exprText, expr.Env(unstruct)); err != nil {
-					runnerLogger.Info("failed to compile: %s, %v\n", exprText, err)
+					runnerLogger.Info("failed to compile ", exprText, "error: ", err)
 					return
 				}
 
 				var result interface{}
 				if result, err = expr.Run(program, unstruct); err != nil {
-					runnerLogger.Info("failed to Run: %s, %v\n", exprText, err)
+					runnerLogger.Info("failed to Run ", exprText, "error: ", err)
 					return
 				}
 
