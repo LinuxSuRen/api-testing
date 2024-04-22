@@ -2,10 +2,15 @@ package extension
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/linuxsuren/api-testing/pkg/logging"
+)
+
+var (
+	signalLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("signal")
 )
 
 type StopAble interface {
@@ -24,7 +29,7 @@ func RegisterStopSignal(ctx context.Context, callback func(), servers ...StopAbl
 			callback()
 		}
 		for _, server := range servers {
-			log.Println("Stopping the server...")
+			signalLogger.Info("Stopping the server...")
 			server.Stop()
 		}
 	}(ctx)

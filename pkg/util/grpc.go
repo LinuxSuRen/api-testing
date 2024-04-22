@@ -26,7 +26,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"log"
+	"github.com/linuxsuren/api-testing/pkg/logging"
+)
+
+var (
+	utilLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("memory")
 )
 
 func LoadProtoFiles(protoFile string) (targetProtoFile string, importPath []string, protoParentDir string, err error) {
@@ -40,7 +44,7 @@ func LoadProtoFiles(protoFile string) (targetProtoFile string, importPath []stri
 		return
 	}
 
-	log.Printf("start to download proto file %q\n", protoFile)
+	utilLogger.Info("start to download proto file", "file", protoFile)
 	resp, err := GetDefaultCachedHTTPClient().Get(protoFile)
 	if err != nil {
 		return

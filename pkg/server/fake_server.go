@@ -2,8 +2,9 @@ package server
 
 import (
 	context "context"
-	"log"
 	"net"
+
+	"github.com/linuxsuren/api-testing/pkg/logging"
 
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -15,6 +16,10 @@ type fakeServer struct {
 	version string
 	err     error
 }
+
+var (
+	fakeLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("fake_server")
+)
 
 // NewServer creates a fake server
 func NewServer(version string, err error) RunnerServer {
@@ -57,7 +62,7 @@ func NewFakeClient(ctx context.Context, version string, err error) (RunnerClient
 	RegisterRunnerServer(baseServer, NewServer(version, err))
 	go func() {
 		if err := baseServer.Serve(lis); err != nil {
-			log.Printf("error serving server: %v", err)
+			fakeLogger.Info("error serving server", "error", err)
 		}
 	}()
 
@@ -66,13 +71,13 @@ func NewFakeClient(ctx context.Context, version string, err error) (RunnerClient
 			return lis.Dial()
 		}), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Printf("error connecting to server: %v", err)
+		fakeLogger.Info("error connecting to server", "error", err)
 	}
 
 	closer := func() {
 		err := lis.Close()
 		if err != nil {
-			log.Printf("error closing listener: %v", err)
+			fakeLogger.Info("error closing listener", "error", err)
 		}
 		baseServer.Stop()
 	}

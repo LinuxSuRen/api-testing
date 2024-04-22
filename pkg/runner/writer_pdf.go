@@ -18,15 +18,19 @@ package runner
 
 import (
 	_ "embed"
+	"github.com/linuxsuren/api-testing/pkg/logging"
 
 	"fmt"
 	"io"
-	"log"
 	"strconv"
 
 	"github.com/flopp/go-findfont"
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/signintech/gopdf"
+)
+
+var (
+	writeLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("write")
 )
 
 type pdfResultWriter struct {
@@ -43,7 +47,7 @@ func (w *pdfResultWriter) Output(result []ReportResult) (err error) {
 
 	pdf := gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
-	log.Println(findfont.List()[len(findfont.List())-1])
+	writeLogger.Info(findfont.List()[len(findfont.List())-1])
 	fontPath, err := findfont.Find("DejaVuSerif.ttf")
 	if err != nil {
 		panic(err)
@@ -51,12 +55,12 @@ func (w *pdfResultWriter) Output(result []ReportResult) (err error) {
 	fmt.Printf("Found 'ttf' in '%s'\n", fontPath)
 	err = pdf.AddTTFFont("wts11", fontPath)
 	if err != nil {
-		log.Print(err.Error())
+		writeLogger.Info(err.Error())
 		return
 	}
 	err = pdf.SetFont("wts11", "", 14)
 	if err != nil {
-		log.Print(err.Error())
+		writeLogger.Info(err.Error())
 		return
 	}
 

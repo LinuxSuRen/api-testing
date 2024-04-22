@@ -22,7 +22,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -37,6 +36,7 @@ import (
 	pprof "net/http/pprof"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/oauth"
 	template "github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/server"
@@ -44,6 +44,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -53,6 +54,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
+)
+
+var (
+	serverLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("server")
 )
 
 func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c *cobra.Command) {
@@ -228,15 +233,15 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			reflection.Register(gRPCServer)
 		}
 		server.RegisterRunnerServer(s, remoteServer)
-		log.Printf("gRPC server listening at %v", lis.Addr())
+		serverLogger.Info("gRPC server listening at", "addr", lis.Addr())
 		s.Serve(lis)
 	}()
 
 	go func() {
 		<-clean
-		log.Println("stopping the extensions")
+		serverLogger.Info("stopping the extensions")
 		storeExtMgr.StopAll()
-		log.Println("stopping the server")
+		serverLogger.Info("stopping the server")
 		_ = lis.Close()
 		_ = o.httpServer.Shutdown(ctx)
 	}()
@@ -280,8 +285,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 
 		debugHandler(mux, remoteServer)
 		o.httpServer.WithHandler(mux)
-		log.Printf("HTTP server listening at %v", httplis.Addr())
-		log.Printf("Server is running.")
+		serverLogger.Info("HTTP server listening at", "addr", httplis.Addr())
+		serverLogger.Info("Server is running.")
 		err = o.httpServer.Serve(httplis)
 		err = util.IgnoreErrServerClosed(err)
 	}
@@ -354,7 +359,7 @@ func debugHandler(mux *runtime.ServeMux, remoteServer server.RunnerServer) {
 		sub := pathParams["sub"]
 		extName := r.URL.Query().Get("name")
 		if extName != "" && remoteServer != nil {
-			log.Println("get pprof of extension:", extName)
+			serverLogger.Info("get pprof of extension", "name", extName)
 
 			ctx := metadata.NewIncomingContext(r.Context(), metadata.New(map[string]string{
 				server.HeaderKeyStoreName: extName,

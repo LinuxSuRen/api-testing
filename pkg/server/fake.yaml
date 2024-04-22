@@ -1,0 +1,3 @@
+#!api-testing
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
+name: fake

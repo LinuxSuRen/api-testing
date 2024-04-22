@@ -19,11 +19,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 
+	"github.com/linuxsuren/api-testing/pkg/logging"
+
 	"github.com/linuxsuren/api-testing/pkg/util"
+)
+
+var (
+	userLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("user")
 )
 
 type OAuthProvider interface {
@@ -80,7 +85,7 @@ func GetUserInfo(server OAuthProvider, token string, skipTlsVerify bool) (userIn
 	}
 	defer resp.Body.Close()
 
-	log.Println("getting userinfo from", server.GetName())
+	userLogger.Info("getting userinfo from", "name", server.GetName())
 	if resp.StatusCode == http.StatusOK {
 		var data []byte
 		if data, err = io.ReadAll(resp.Body); err != nil {

@@ -13,7 +13,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.20.x
+          go-version: 1.22
       - name: Unit Test
         run: |
           make test-all-backend
@@ -40,7 +40,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.20.x
+          go-version: 1.22
       - name: API Test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,7 +70,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.20.x
+          go-version: 1.22
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         env:
@@ -91,7 +91,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.20.x
+          go-version: 1.22
       - name: Set output
         id: vars
         run: echo "tag=$(git describe --tags)" >> $GITHUB_OUTPUT
@@ -126,7 +126,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.20.x
+          go-version: 1.22
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:

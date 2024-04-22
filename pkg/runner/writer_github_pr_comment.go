@@ -21,13 +21,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/linuxsuren/api-testing/pkg/logging"
+
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/util"
+)
+
+var (
+	githubLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("github")
 )
 
 type githubPRCommentWriter struct {
@@ -81,7 +86,7 @@ func (w *githubPRCommentWriter) loadExistData(newData []ReportResult) (result []
 
 func (w *githubPRCommentWriter) Output(result []ReportResult) (err error) {
 	if w.PR <= 0 {
-		log.Println("skip reporting to GitHub due to without a valid PR number")
+		githubLogger.Info("skip reporting to GitHub due to without a valid PR number")
 		return
 	}
 
@@ -149,7 +154,7 @@ func (w *githubPRCommentWriter) createOrUpdate(content string, id int) (err erro
 		Body: content,
 	}
 
-	log.Println("comment id", id)
+	githubLogger.Info("comment id", "id", id)
 	var data []byte
 	if data, err = json.Marshal(co); err != nil {
 		err = fmt.Errorf("failed to marshal body when createOrupdate comment: %v", err)
