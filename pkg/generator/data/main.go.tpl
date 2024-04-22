@@ -28,7 +28,7 @@ func main() {
 	{{- end}}
 	body := strings.NewReader(data.Encode())
 	{{- else}}
-	body := bytes.NewBufferString("{{.Request.Body.String | safeString}}")
+	body := bytes.NewBufferString(`{{.Request.Body.String | safeString}}`)
 	{{- end }}
 
 	req, err := http.NewRequest("{{.Request.Method}}", "{{.Request.API}}", body)

@@ -96,7 +96,7 @@ func TestGenerators(t *testing.T) {
 	})
 
 	bodyRequest := &atest.TestCase{Request: testcase.Request}
-	bodyRequest.Request.Body.Value = `key: "value"`
+	bodyRequest.Request.Body.Value = `{"key": "value"}`
 
 	t.Run("golang body HTTP request", func(t *testing.T) {
 		result, err := generator.GetCodeGenerator("golang").Generate(nil, bodyRequest)
