@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -58,6 +59,8 @@ type runOption struct {
 	reportWriter       runner.ReportResultWriter
 	report             string
 	reportIgnore       bool
+	reportTemplate     string
+	reportDest         string
 	swaggerURL         string
 	level              string
 	caseItems          []string
@@ -106,9 +109,11 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
-	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus")
+	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus, http")
 	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
 	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
+	flags.StringVarP(&opt.reportTemplate, "report-template", "", "", "The template used to render the report")
+	flags.StringVarP(&opt.reportDest, "report-dest", "", "", "The server url where you want to send the report")
 	flags.StringVarP(&opt.swaggerURL, "swagger-url", "", "", "The URL of swagger")
 	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
 	flags.Int32VarP(&opt.qps, "qps", "", 5, "QPS")
@@ -153,6 +158,9 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	case "github":
 		o.githubReportOption.ReportFile = o.reportFile
 		o.reportWriter, err = runner.NewGithubPRCommentWriter(o.githubReportOption)
+	case "http":
+		templateOption := runner.NewTemplateOption(o.reportTemplate, "json")
+		o.reportWriter = runner.NewHTTPResultWriter(http.MethodPost, o.reportDest, nil, templateOption)
 	default:
 		err = fmt.Errorf("not supported report type: '%s'", o.report)
 	}
