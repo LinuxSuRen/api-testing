@@ -37,13 +37,17 @@ func (g *golangGenerator) Generate(testSuite *testing.TestSuite, testcase *testi
 		testcase.Request.Method = http.MethodGet
 	}
 	var tpl *template.Template
-	if tpl, err = template.New("golang template").Parse(golangTemplate); err == nil {
+	if tpl, err = template.New("golang template").Funcs(template.FuncMap{"safeString": safeString}).Parse(golangTemplate); err == nil {
 		buf := new(bytes.Buffer)
 		if err = tpl.Execute(buf, testcase); err == nil {
 			result = buf.String()
 		}
 	}
 	return
+}
+
+func safeString(str string) template.HTML {
+	return template.HTML(str)
 }
 
 func init() {

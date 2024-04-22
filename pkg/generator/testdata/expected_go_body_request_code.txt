@@ -13,12 +13,13 @@ limitations under the License.
 package main
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 )
 
 func main() {
-	body := bytes.NewBufferString(``)
+	body := bytes.NewBufferString(`{"key": "value"}`)
 
 	req, err := http.NewRequest("GET", "https://www.baidu.com", body)
 	if err != nil {
