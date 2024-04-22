@@ -1,2 +1,5 @@
 blank_issues_enabled: false
-
+contact_links:
+  - name: "Crash bug"
+    url: https://github.com/LinuxSuRen/api-testing/SECURITY.md
+    about: "Please file any crash bug with api-testing-security@googlegroups.com."
