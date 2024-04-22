@@ -208,7 +208,7 @@ func (g *gRPCLoader) PProf(name string) []byte {
 		Name: name,
 	})
 	if err != nil {
-		grpcLogger.Info("failed to get pprof:", err)
+		grpcLogger.Info("failed to get pprof:", "error", err)
 	}
 	return data.Data
 }

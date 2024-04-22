@@ -44,7 +44,7 @@ func LoadProtoFiles(protoFile string) (targetProtoFile string, importPath []stri
 		return
 	}
 
-	utilLogger.Info("start to download proto file ", protoFile)
+	utilLogger.Info("start to download proto file", "file", protoFile)
 	resp, err := GetDefaultCachedHTTPClient().Get(protoFile)
 	if err != nil {
 		return

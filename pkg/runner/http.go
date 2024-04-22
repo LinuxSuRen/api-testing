@@ -317,7 +317,7 @@ func verifyResponseBodyData(caseName string, expect testing.Response, responseTy
 
 	verifier := NewBodyVerify(responseType, expect)
 	if verifier == nil {
-		runnerLogger.Info("no body verify support with ", responseType)
+		runnerLogger.Info("no body verify support with", "response type", responseType)
 		return
 	}
 

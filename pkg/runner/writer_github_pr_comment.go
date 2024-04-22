@@ -20,11 +20,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/logging"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/logging"
 
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -153,7 +154,7 @@ func (w *githubPRCommentWriter) createOrUpdate(content string, id int) (err erro
 		Body: content,
 	}
 
-	githubLogger.Info("comment id", id)
+	githubLogger.Info("comment id", "id", id)
 	var data []byte
 	if data, err = json.Marshal(co); err != nil {
 		err = fmt.Errorf("failed to marshal body when createOrupdate comment: %v", err)

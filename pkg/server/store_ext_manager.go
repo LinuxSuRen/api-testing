@@ -17,10 +17,11 @@ package server
 
 import (
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/logging"
 	"os"
 	"strings"
 	"syscall"
+
+	"github.com/linuxsuren/api-testing/pkg/logging"
 
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 )
@@ -82,7 +83,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 }
 
 func (s *storeExtManager) StopAll() error {
-	serverLogger.Info("stop", len(s.processs), "extensions")
+	serverLogger.Info("stop", "extensions", len(s.processs))
 	for _, p := range s.processs {
 		if p != nil {
 			p.Signal(syscall.SIGTERM)

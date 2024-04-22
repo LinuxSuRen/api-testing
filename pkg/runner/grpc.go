@@ -381,7 +381,7 @@ func compileProto(ctx context.Context, r *gRPCTestCaseRunner) (fileLinker linker
 		return
 	}
 
-	grpcRunnerLogger.Info("proto import files", importPath)
+	grpcRunnerLogger.Info("proto import files", "files", importPath)
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(
 			&protocompile.SourceResolver{

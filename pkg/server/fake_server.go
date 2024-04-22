@@ -62,7 +62,7 @@ func NewFakeClient(ctx context.Context, version string, err error) (RunnerClient
 	RegisterRunnerServer(baseServer, NewServer(version, err))
 	go func() {
 		if err := baseServer.Serve(lis); err != nil {
-			fakeLogger.Info("error serving server: ", err)
+			fakeLogger.Info("error serving server", "error", err)
 		}
 	}()
 
@@ -71,13 +71,13 @@ func NewFakeClient(ctx context.Context, version string, err error) (RunnerClient
 			return lis.Dial()
 		}), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		fakeLogger.Info("error connecting to server: ", err)
+		fakeLogger.Info("error connecting to server", "error", err)
 	}
 
 	closer := func() {
 		err := lis.Close()
 		if err != nil {
-			fakeLogger.Info("error closing listener: ", err)
+			fakeLogger.Info("error closing listener", "error", err)
 		}
 		baseServer.Stop()
 	}

@@ -90,20 +90,20 @@ func ExprFuncHTTPReady(params ...interface{}) (res interface{}, err error) {
 				unstruct := make(map[string]interface{})
 
 				if err = json.Unmarshal(data, &unstruct); err != nil {
-					runnerLogger.Info("failed to unmarshal the response data ", err)
+					runnerLogger.Info("failed to unmarshal the response data ", "error", err)
 					return
 				}
 
 				unstruct["data"] = unstruct
 				var program *vm.Program
 				if program, err = expr.Compile(exprText, expr.Env(unstruct)); err != nil {
-					runnerLogger.Info("failed to compile ", exprText, "error: ", err)
+					runnerLogger.Info("failed to compile ", "text", exprText, "error: ", err)
 					return
 				}
 
 				var result interface{}
 				if result, err = expr.Run(program, unstruct); err != nil {
-					runnerLogger.Info("failed to Run ", exprText, "error: ", err)
+					runnerLogger.Info("failed to Run", "text", exprText, "error: ", err)
 					return
 				}
 
@@ -120,7 +120,7 @@ func ExprFuncHTTPReady(params ...interface{}) (res interface{}, err error) {
 			return
 		}
 
-		runnerLogger.Info("waiting for", api)
+		runnerLogger.Info("waiting for", "api", api)
 		time.Sleep(1 * time.Second)
 	}
 	err = fmt.Errorf("failed to wait for the API ready in %d times", retry)

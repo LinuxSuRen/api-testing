@@ -18,11 +18,12 @@ package mock
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/version"
 	"io"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/version"
 
 	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/render"
@@ -129,7 +130,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 				_, _ = w.Write(data)
 			} else {
-				memLogger.Info("failed to read from body", err)
+				memLogger.Info("failed to read from body", "error", err)
 			}
 		case http.MethodDelete:
 			// delete an item
@@ -155,7 +156,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 				_, _ = w.Write(data)
 			} else {
-				memLogger.Info("failed to read from body", err)
+				memLogger.Info("failed to read from body", "error", err)
 			}
 		case http.MethodPut:
 			if data, err := io.ReadAll(req.Body); err == nil {
@@ -176,7 +177,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 				_, _ = w.Write(data)
 			} else {
-				memLogger.Info("failed to read from body", err)
+				memLogger.Info("failed to read from body", "error", err)
 			}
 		default:
 			w.WriteHeader(http.StatusBadRequest)

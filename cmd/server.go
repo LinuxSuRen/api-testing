@@ -233,7 +233,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			reflection.Register(gRPCServer)
 		}
 		server.RegisterRunnerServer(s, remoteServer)
-		serverLogger.Info("gRPC server listening at ", lis.Addr())
+		serverLogger.Info("gRPC server listening at", "addr", lis.Addr())
 		s.Serve(lis)
 	}()
 
@@ -285,7 +285,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 
 		debugHandler(mux, remoteServer)
 		o.httpServer.WithHandler(mux)
-		serverLogger.Info("HTTP server listening at ", httplis.Addr())
+		serverLogger.Info("HTTP server listening at", "addr", httplis.Addr())
 		serverLogger.Info("Server is running.")
 		err = o.httpServer.Serve(httplis)
 		err = util.IgnoreErrServerClosed(err)
@@ -359,7 +359,7 @@ func debugHandler(mux *runtime.ServeMux, remoteServer server.RunnerServer) {
 		sub := pathParams["sub"]
 		extName := r.URL.Query().Get("name")
 		if extName != "" && remoteServer != nil {
-			serverLogger.Info("get pprof of extension:", extName)
+			serverLogger.Info("get pprof of extension", "name", extName)
 
 			ctx := metadata.NewIncomingContext(r.Context(), metadata.New(map[string]string{
 				server.HeaderKeyStoreName: extName,

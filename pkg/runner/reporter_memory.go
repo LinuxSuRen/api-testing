@@ -58,7 +58,7 @@ func (r *memoryTestReporter) PutRecord(record *ReportRecord) {
 		Name: r.monitorTarget,
 	})
 	if err != nil {
-		runnerLogger.Info("failed to get resource usage:", err)
+		runnerLogger.Info("failed to get resource usage", "error", err)
 	} else {
 		r.resourceUsages = append(r.resourceUsages, ResourceUsage{
 			Memory: usage.Memory,

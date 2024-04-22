@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/logging"
 	"io"
 	"net/http"
 	"net/url"
@@ -28,6 +27,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/linuxsuren/api-testing/pkg/logging"
 
 	"github.com/linuxsuren/api-testing/pkg/util"
 )
@@ -164,13 +165,13 @@ func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
 		var data []byte
 		var loadErr error
 		if data, loadErr = loadData(target); err != nil {
-			loaderLogger.Info("failed to load data", loadErr)
+			loaderLogger.Info("failed to load data", "error", loadErr)
 			continue
 		}
 
 		var testSuite *TestSuite
 		if testSuite, loadErr = Parse(data); loadErr != nil {
-			loaderLogger.Info("failed to parse data", loadErr, "from", target)
+			loaderLogger.Info("failed to parse data", "error", loadErr, "from", target)
 			continue
 		}
 		suites = append(suites, *testSuite)
@@ -216,7 +217,7 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 
 		newSuiteFile := path.Join(l.parent, fmt.Sprintf("%s.yaml", name))
 		if newSuiteFile, err = filepath.Abs(newSuiteFile); err == nil {
-			loaderLogger.Info("new suite file:", newSuiteFile)
+			loaderLogger.Info("new suite file", "file", newSuiteFile)
 
 			suite := &TestSuite{
 				Name: name,

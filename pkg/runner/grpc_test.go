@@ -272,7 +272,7 @@ func runServer(t *testing.T, s *grpc.Server) net.Listener {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	assert.NoError(t, err, "Listen port")
 
-	runnerLogger.Info("listening at", l.Addr().(*net.TCPAddr).Port)
+	runnerLogger.Info("listening at", "port", l.Addr().(*net.TCPAddr).Port)
 	go s.Serve(l)
 	return l
 }
