@@ -13,6 +13,9 @@ limitations under the License.
 package main
 
 import (
+	{{- if gt (len .Request.Body.String) 0}}
+	"bytes"
+	{{- end}}
 	"io"
 	"net/http"
 )
@@ -25,7 +28,7 @@ func main() {
 	{{- end}}
 	body := strings.NewReader(data.Encode())
 	{{- else}}
-	body := bytes.NewBufferString("{{.Request.Body.String}}")
+	body := bytes.NewBufferString(`{{.Request.Body.String | safeString}}`)
 	{{- end }}
 
 	req, err := http.NewRequest("{{.Request.Method}}", "{{.Request.API}}", body)
