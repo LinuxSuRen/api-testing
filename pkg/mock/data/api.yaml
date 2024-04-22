@@ -27,6 +27,7 @@ items:
       path: /v1/teams/{team}/repos
       method: GET
     response:
+      statusCode: 200
       body: |
         {
           "status": 0,
@@ -40,12 +41,16 @@ items:
     request:
       path: /v1/repos/{repo}/prs
     response:
+      headers:
+        - key: server
+          value: mock
       body: |
         {
           "count": 1,
           "items": [{
-            "title": "fix: there is a bug on page one",
+            "title": "fix: there is a bug on page {{ randEnum "one" }}",
             "number": 123,
+            "message": "{{index (index .Header "Accept-Encoding") 0}}",
             "author": "someone",
             "status": "success"
           }]
