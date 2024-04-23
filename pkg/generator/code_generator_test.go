@@ -107,18 +107,18 @@ func TestGenerators(t *testing.T) {
 		assert.Equal(t, expectedCookieRequestJavaCode, result, result)
 	})
 
-	bodyRequest := &atest.TestCase{Request: testcase.Request}
-	bodyRequest.Request.Body.Value = `{"key": "value"}`
-
-	t.Run("golang body HTTP request", func(t *testing.T) {
-		result, err := generator.GetCodeGenerator("golang").Generate(nil, bodyRequest)
-		assert.NoError(t, err)
-		assert.Equal(t, expectedBodyRequestGoCode, result, result)
-
 	t.Run("python cookie HTTP request", func(t *testing.T) {
 		result, err := generator.GetCodeGenerator("python").Generate(nil, cookieRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedCookieRequestPythonCode, result, result)
+	
+	bodyRequest := &atest.TestCase{Request: testcase.Request}
+	bodyRequest.Request.Body.Value = `{"key": "value"}`
+	
+	t.Run("golang body HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("golang").Generate(nil, bodyRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedBodyRequestGoCode, result, result)
 	})
 }
 
@@ -151,3 +151,6 @@ var expectedFormRequestPythonCode string
 
 //go:embed testdata/expected_python_cookie_request_code.txt
 var expectedCookieRequestPythonCode string
+
+//go:embed testdata/expected_go_body_request_code.txt
+var expectedBodyRequestGoCode string
