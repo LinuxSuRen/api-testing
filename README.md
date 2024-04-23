@@ -5,23 +5,23 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/linuxsuren/api-testing)](https://hub.docker.com/r/linuxsuren/api-testing)
 [![LinuxSuRen/open-source-best-practice](https://img.shields.io/static/v1?label=OSBP&message=%E5%BC%80%E6%BA%90%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5&color=blue)](https://github.com/LinuxSuRen/open-source-best-practice)
 
-This is a API testing tool.
+This is a API testing tool. 🚀
 
 ## Features
 
-*   Supported protocols: HTTP, gRPC, tRPC
-*   Multiple test report formats: Markdown, HTML, PDF, Stdout
-*   Mock Server in simple configuration
-*   Support converting to [JMeter](https://jmeter.apache.org/) files
-*   Response Body fields equation check or [eval](https://expr.medv.io/)
-*   Validate the response body with [JSON schema](https://json-schema.org/)
-*   Pre and post handle with the API request
-*   Run in server mode, and provide the [gRPC](pkg/server/server.proto) and HTTP endpoint
-*   [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
-*   Multiple storage backends supported(Local, ORM Database, S3, Git, Etcd, etc.)
-*   [HTTP API record](https://github.com/LinuxSuRen/atest-ext-collector)
-*   Install in multiple use cases(CLI, Container, Native-Service, Operator, Helm, etc.)
-*   Monitoring integration with Prometheus, SkyWalking
+* Supported protocols: HTTP, gRPC, tRPC
+* Multiple test report formats: Markdown, HTML, PDF, Stdout
+* Mock Server in simple configuration
+* Support converting to [JMeter](https://jmeter.apache.org/) files
+* Response Body fields equation check or [eval](https://expr.medv.io/)
+* Validate the response body with [JSON schema](https://json-schema.org/)
+* Pre and post handle with the API request
+* Run in server mode, and provide the [gRPC](pkg/server/server.proto) and HTTP endpoint
+* [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
+* Multiple storage backends supported(Local, ORM Database, S3, Git, Etcd, etc.)
+* [HTTP API record](https://github.com/LinuxSuRen/atest-ext-collector)
+* Install in multiple use cases(CLI, Container, Native-Service, Operator, Helm, etc.)
+* Monitoring integration with Prometheus, SkyWalking
 
 ## Get started
 
@@ -73,12 +73,14 @@ consume: 1m2.153686448s
 ## Use in Docker
 
 Use `atest` as server mode in Docker, then you could visit the UI from `8080`:
-```
+
+```bash
 docker run --pull always -p 8080:8080 ghcr.io/linuxsuren/api-testing:master
 ```
 
 Use `atest-collector` in Docker:
-```shell
+
+```bash
 docker run -p 1234:8080 -v /var/tmp:/var/tmp \
   ghcr.io/linuxsuren/api-testing atest-collector \
   --filter-path /api \
@@ -91,9 +93,9 @@ docker run -p 1234:8080 -v /var/tmp:/var/tmp \
 
 The following fields are templated with [sprig](http://masterminds.github.io/sprig/):
 
-*   API
-*   Request Body
-*   Request Header
+* API
+* Request Body
+* Request Header
 
 ### Functions
 
@@ -108,16 +110,28 @@ You could use all the common functions which comes from [sprig](http://mastermin
 
 It could verify any kinds of Kubernetes resources. Please set the environment variables before using it:
 
-*   `KUBERNETES_SERVER`
-*   `KUBERNETES_TOKEN`
+* `KUBERNETES_SERVER`
+* `KUBERNETES_TOKEN`
 
 See also the [example](sample/kubernetes.yaml).
 
 ## TODO
 
-*   Reduce the size of context
-*   Support customized context
+* Reduce the size of context.
+* Support customized context.
 
 ## Limit
 
-*   Only support to parse the response body when it's a map or array
+* Only support to parse the response body when it's a map or array.
+
+## Community Exchange
+
+Feel free to talk to us about any questions you may have about API Testing in the following ways.
+
+### Mailing List
+
+`api-testing-tech@googlegroups.com`, Feel free to discuss everything related to API Testing via this mailing list.
+
+### Githbu discussion
+
+[Github Discussion](https://github.com/LinuxSuRen/api-testing/discussions/new/choose)
