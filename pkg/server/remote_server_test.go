@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -593,7 +593,7 @@ func TestCodeGenerator(t *testing.T) {
 	t.Run("ListCodeGenerator", func(t *testing.T) {
 		generators, err := server.ListCodeGenerator(ctx, &Empty{})
 		assert.NoError(t, err)
-		assert.Equal(t, 4, len(generators.Data))
+		assert.Equal(t, 5, len(generators.Data))
 	})
 
 	t.Run("GenerateCode, no generator found", func(t *testing.T) {
