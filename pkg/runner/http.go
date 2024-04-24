@@ -47,6 +47,8 @@ type ReportResult struct {
 	LastErrorMessage string
 }
 
+const DefaultMaxRecvMsgSize = 4194304
+
 // ReportResultSlice is the alias type of ReportResult slice
 type ReportResultSlice []ReportResult
 
@@ -258,6 +260,11 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 
 func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (responseBodyData []byte, err error) {
 	responseBodyData, err = io.ReadAll(resp.Body)
+	if len(responseBodyData) > DefaultMaxRecvMsgSize {
+		err = fmt.Errorf("HTTP response body is too large")
+		return
+	}
+
 	r.simpleResponse = SimpleResponse{
 		StatusCode: resp.StatusCode,
 		Header:     make(map[string]string),
