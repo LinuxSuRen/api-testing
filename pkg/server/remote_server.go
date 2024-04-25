@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	reflect "reflect"
 	"regexp"
@@ -248,6 +249,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 				Id:         testCase.ID,
 				Output:     buf.String(),
 			})
+			reply.MaxRecvMsgSize = int32(resp.MaxRecvMsgSize)
 		}
 
 		if testErr == nil {
@@ -437,6 +439,18 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 		if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
 			lastIndex := len(reply.TestCaseResult) - 1
 			lastItem := reply.TestCaseResult[lastIndex]
+
+			if int32(len(lastItem.Body)) > reply.MaxRecvMsgSize {
+				e := "the HTTP response body exceeded the maximum message size limit received by the gRPC client"
+				result = &TestCaseResult{
+					Output:     reply.Message,
+					Error:      e,
+					Body:       "",
+					Header:     lastItem.Header,
+					StatusCode: http.StatusOK,
+				}
+				return
+			}
 
 			result = &TestCaseResult{
 				Output:     reply.Message,

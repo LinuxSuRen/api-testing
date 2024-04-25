@@ -44,9 +44,10 @@ type ResponseRecord interface {
 
 // SimpleResponse represents a simple response
 type SimpleResponse struct {
-	Header     map[string]string
-	Body       string
-	StatusCode int
+	Header         map[string]string
+	Body           string
+	StatusCode     int
+	MaxRecvMsgSize int
 }
 
 // NewDefaultUnimplementedRunner initializes an unimplementedRunner using the default values.

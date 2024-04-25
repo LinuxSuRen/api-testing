@@ -135,7 +135,8 @@ message TestTask {
 message TestResult {
   string message = 1;
   string error = 2;
-  repeated TestCaseResult testCaseResult = 3;
+  int32 maxRecvMsgSize=3;
+  repeated TestCaseResult testCaseResult = 4;
 }
 
 message HelloReply {

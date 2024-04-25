@@ -61,9 +61,10 @@ var (
 
 type gRPCTestCaseRunner struct {
 	UnimplementedRunner
-	host     string
-	proto    testing.RPCDesc
-	response SimpleResponse
+	host           string
+	proto          testing.RPCDesc
+	response       SimpleResponse
+	maxRecvMsgSize int
 	// fdCache sync.Map
 }
 
@@ -162,7 +163,9 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 
 func (r *gRPCTestCaseRunner) getConnection(host string) (conn *grpc.ClientConn, err error) {
 	if r.Secure == nil || r.Secure.Insecure {
-		conn, err = grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		r.maxRecvMsgSize = 4 * 1024 * 1024 //If this is not set, gRPC uses the default 4MB.
+		maxSizeOption := grpc.MaxCallRecvMsgSize(r.maxRecvMsgSize)
+		conn, err = grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultCallOptions(maxSizeOption))
 	} else {
 		var cred credentials.TransportCredentials
 		cred, err = credentials.NewClientTLSFromFile(r.Secure.CertFile, r.Secure.ServerName)
@@ -239,6 +242,7 @@ func (r *gRPCTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api stri
 }
 
 func (r *gRPCTestCaseRunner) GetResponseRecord() SimpleResponse {
+	r.response.MaxRecvMsgSize = r.maxRecvMsgSize
 	return r.response
 }
 func (s *gRPCTestCaseRunner) WithSuite(suite *testing.TestSuite) {
