@@ -18,8 +18,8 @@ package mock
 import "net/http"
 
 type DynamicServer interface {
-	Start(reader Reader) error
-	SetupHandler(reader Reader) (http.Handler, error)
+	Start(reader Reader, prefix string) error
+	SetupHandler(reader Reader, prefix string) (http.Handler, error)
 	Stop() error
 	GetPort() string
 }

@@ -90,6 +90,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.StringVarP(&opt.clientSecret, "client-secret", "", os.Getenv("OAUTH_CLIENT_SECRET"), "ClientSecret is the application's secret")
 	flags.BoolVarP(&opt.dryRun, "dry-run", "", false, "Do not really start a gRPC server")
 	flags.StringArrayVarP(&opt.mockConfig, "mock-config", "", nil, "The mock config files")
+	flags.StringVarP(&opt.mockPrefix, "mock-prefix", "", "/mock", "The mock server API prefix")
 
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
@@ -124,6 +125,7 @@ type serverOption struct {
 	oauthGroup   []string
 
 	mockConfig []string
+	mockPrefix string
 
 	gcPercent int
 
@@ -294,10 +296,10 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			cmd.Println("currently only one mock config is supported, will take the first one")
 			var mockServerHandler http.Handler
 			if mockServerHandler, err = mock.NewInMemoryServer(0).
-				SetupHandler(mock.NewLocalFileReader(o.mockConfig[0])); err != nil {
+				SetupHandler(mock.NewLocalFileReader(o.mockConfig[0]), o.mockPrefix); err != nil {
 				return
 			}
-			combineHandlers.PutHandler("/mock", mockServerHandler)
+			combineHandlers.PutHandler(o.mockPrefix, mockServerHandler)
 		}
 
 		debugHandler(mux, remoteServer)

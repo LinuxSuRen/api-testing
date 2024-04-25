@@ -49,7 +49,7 @@ func NewInMemoryServer(port int) DynamicServer {
 	}
 }
 
-func (s *inMemoryServer) SetupHandler(reader Reader) (handler http.Handler, err error) {
+func (s *inMemoryServer) SetupHandler(reader Reader, prefix string) (handler http.Handler, err error) {
 	var server *Server
 	if server, err = reader.Parse(); err != nil {
 		return
@@ -57,7 +57,7 @@ func (s *inMemoryServer) SetupHandler(reader Reader) (handler http.Handler, err 
 
 	// init the data
 	s.data = make(map[string][]map[string]interface{})
-	s.mux = mux.NewRouter().PathPrefix("/mock").Subrouter()
+	s.mux = mux.NewRouter().PathPrefix(prefix).Subrouter()
 	handler = s.mux
 
 	memLogger.Info("start to run all the APIs from objects")
@@ -73,9 +73,9 @@ func (s *inMemoryServer) SetupHandler(reader Reader) (handler http.Handler, err 
 	return
 }
 
-func (s *inMemoryServer) Start(reader Reader) (err error) {
+func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 	var handler http.Handler
-	if handler, err = s.SetupHandler(reader); err != nil {
+	if handler, err = s.SetupHandler(reader, prefix); err != nil {
 		return
 	}
 
