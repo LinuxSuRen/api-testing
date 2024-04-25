@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,19 +25,19 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
 
-type golangGenerator struct {
+type javascriptGenerator struct {
 }
 
-func NewGolangGenerator() CodeGenerator {
-	return &golangGenerator{}
+func NewJavaScriptGenerator() CodeGenerator {
+	return &javascriptGenerator{}
 }
 
-func (g *golangGenerator) Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (result string, err error) {
+func (g *javascriptGenerator) Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (result string, err error) {
 	if testcase.Request.Method == "" {
 		testcase.Request.Method = http.MethodGet
 	}
 	var tpl *template.Template
-	if tpl, err = template.New("golang template").Funcs(template.FuncMap{"safeString": safeString}).Parse(golangTemplate); err == nil {
+	if tpl, err = template.New("javascript template").Funcs(template.FuncMap{"safeString": safeString}).Parse(javascriptTemplate); err == nil {
 		buf := new(bytes.Buffer)
 		if err = tpl.Execute(buf, testcase); err == nil {
 			result = buf.String()
@@ -47,8 +47,8 @@ func (g *golangGenerator) Generate(testSuite *testing.TestSuite, testcase *testi
 }
 
 func init() {
-	RegisterCodeGenerator("golang", NewGolangGenerator())
+	RegisterCodeGenerator("JavaScript", NewJavaScriptGenerator())
 }
 
-//go:embed data/main.go.tpl
-var golangTemplate string
+//go:embed data/main.javascript.tpl
+var javascriptTemplate string
