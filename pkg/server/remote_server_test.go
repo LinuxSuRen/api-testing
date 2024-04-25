@@ -46,7 +46,7 @@ func TestRemoteServer(t *testing.T) {
 
 	loader := atest.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
-	server := NewRemoteServer(loader, nil, nil, nil, "")
+	server := NewRemoteServer(loader, nil, nil, nil, "", 1024*1024*4)
 	_, err := server.Run(ctx, &TestTask{
 		Kind: "fake",
 	})
@@ -130,7 +130,7 @@ func TestRemoteServer(t *testing.T) {
 func TestRunTestCase(t *testing.T) {
 	loader := atest.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
-	server := NewRemoteServer(loader, nil, nil, nil, "")
+	server := NewRemoteServer(loader, nil, nil, nil, "", 1024*1024*4)
 
 	defer gock.Clean()
 	gock.New(urlFoo).Get("/").MatchHeader("key", "value").
@@ -305,7 +305,7 @@ func TestUpdateTestCase(t *testing.T) {
 		assert.NoError(t, err)
 
 		ctx := context.Background()
-		server := NewRemoteServer(writer, nil, nil, nil, "")
+		server := NewRemoteServer(writer, nil, nil, nil, "", 1024*1024*4)
 		_, err = server.UpdateTestCase(ctx, &TestCaseWithSuite{
 			SuiteName: "simple",
 			Data: &TestCase{
@@ -377,7 +377,7 @@ func TestListTestCase(t *testing.T) {
 	writer := atest.NewFileWriter(os.TempDir())
 	writer.Put(tmpFile.Name())
 
-	server := NewRemoteServer(writer, nil, nil, nil, "")
+	server := NewRemoteServer(writer, nil, nil, nil, "", 1024*1024*4)
 	ctx := context.Background()
 
 	t.Run("get two testcases", func(t *testing.T) {
@@ -811,7 +811,7 @@ func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 	call = func() { os.RemoveAll(dir) }
 
 	writer := atest.NewFileWriter(dir)
-	server = NewRemoteServer(writer, newLocalloaderFromStore(), nil, nil, dir)
+	server = NewRemoteServer(writer, newLocalloaderFromStore(), nil, nil, dir, 1024*1024*4)
 	return
 }
 

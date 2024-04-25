@@ -77,6 +77,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.IntVarP(&opt.httpPort, "http-port", "", 8080, "The HTTP server port")
 	flags.BoolVarP(&opt.printProto, "print-proto", "", false, "Print the proto content and exit")
 	flags.StringArrayVarP(&opt.localStorage, "local-storage", "", []string{"*.yaml"}, "The local storage path")
+	flags.IntVarP(&opt.grpcMaxRecvMsgSize, "grpc-max-recv-msg-size", "", 4*1024*1024, "The maximum received message size for gRPC clients")
 	flags.StringVarP(&opt.consolePath, "console-path", "", "", "The path of the console")
 	flags.StringVarP(&opt.configDir, "config-dir", "", os.ExpandEnv("$HOME/.config/atest"), "The config directory")
 	flags.StringVarP(&opt.secretServer, "secret-server", "", "", "The secret server URL")
@@ -128,6 +129,8 @@ type serverOption struct {
 	gcPercent int
 
 	dryRun bool
+
+	grpcMaxRecvMsgSize int
 
 	// inner fields, not as command flags
 	provider oauth.OAuthProvider
@@ -218,7 +221,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	storeExtMgr := server.NewStoreExtManager(o.execer)
-	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir)
+	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir, o.grpcMaxRecvMsgSize)
 	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
 	if storeKindsErr != nil {
 		cmd.PrintErrf("failed to get store kinds, error: %p\n", storeKindsErr)

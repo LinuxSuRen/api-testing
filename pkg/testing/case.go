@@ -56,13 +56,14 @@ type Secure struct {
 
 // TestCase represents a test case
 type TestCase struct {
-	ID      string   `yaml:"id,omitempty" json:"id,omitempty"`
-	Name    string   `yaml:"name,omitempty" json:"name,omitempty"`
-	Group   string   `yaml:"group,omitempty" json:"group,omitempty"`
-	Before  *Job     `yaml:"before,omitempty" json:"before,omitempty"`
-	After   *Job     `yaml:"after,omitempty" json:"after,omitempty"`
-	Request Request  `yaml:"request" json:"request"`
-	Expect  Response `yaml:"expect,omitempty" json:"expect,omitempty"`
+	ID                 string   `yaml:"id,omitempty" json:"id,omitempty"`
+	Name               string   `yaml:"name,omitempty" json:"name,omitempty"`
+	Group              string   `yaml:"group,omitempty" json:"group,omitempty"`
+	Before             *Job     `yaml:"before,omitempty" json:"before,omitempty"`
+	After              *Job     `yaml:"after,omitempty" json:"after,omitempty"`
+	Request            Request  `yaml:"request" json:"request"`
+	Expect             Response `yaml:"expect,omitempty" json:"expect,omitempty"`
+	GrpcMaxRecvMsgSize int      `yaml:"grpc_max_recv_msg_size,omitempty" json:"grpc_max_recv_msg_size,omitempty"`
 }
 
 // InScope returns true if the test case is in scope with the given items.
