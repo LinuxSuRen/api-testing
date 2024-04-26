@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
       actions: write
     steps:
-      - uses: yuluo-yx/gh-retest@V1.0.0-RC1
+      - uses: yuluo-yx/gh-retest@v1.0.0-RC1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           comment-id: ${{ github.event.comment.id }}
