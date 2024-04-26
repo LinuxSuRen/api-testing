@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	reflect "reflect"
 	"regexp"
@@ -45,6 +46,7 @@ import (
 
 var (
 	remoteServerLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("remote_server")
+	GrpcMaxRecvMsgSize int
 )
 
 type server struct {
@@ -55,6 +57,8 @@ type server struct {
 	storeExtMgr        ExtManager
 
 	secretServer SecretServiceServer
+
+	grpcMaxRecvMsgSize int
 }
 
 type SecretServiceServer interface {
@@ -93,17 +97,18 @@ func (f *fakeSecretServer) UpdateSecret(ctx context.Context, in *Secret) (reply 
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, secretServer SecretServiceServer, storeExtMgr ExtManager, configDir string) RunnerServer {
+func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, secretServer SecretServiceServer, storeExtMgr ExtManager, configDir string, grpcMaxRecvMsgSize int) RunnerServer {
 	if secretServer == nil {
 		secretServer = &fakeSecretServer{}
 	}
-
+	GrpcMaxRecvMsgSize = grpcMaxRecvMsgSize
 	return &server{
 		loader:             loader,
 		storeWriterFactory: storeWriterFactory,
 		configDir:          configDir,
 		secretServer:       secretServer,
 		storeExtMgr:        storeExtMgr,
+		grpcMaxRecvMsgSize: grpcMaxRecvMsgSize,
 	}
 }
 
@@ -437,6 +442,18 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 		if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
 			lastIndex := len(reply.TestCaseResult) - 1
 			lastItem := reply.TestCaseResult[lastIndex]
+
+			if len(lastItem.Body) > GrpcMaxRecvMsgSize {
+				e := "the HTTP response body exceeded the maximum message size limit received by the gRPC client"
+				result = &TestCaseResult{
+					Output:     reply.Message,
+					Error:      e,
+					Body:       "",
+					Header:     lastItem.Header,
+					StatusCode: http.StatusOK,
+				}
+				return
+			}
 
 			result = &TestCaseResult{
 				Output:     reply.Message,

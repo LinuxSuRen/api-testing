@@ -572,7 +572,6 @@ func invokeRPC(ctx context.Context, conn grpc.ClientConnInterface, method protor
 	resp *dynamicpb.Message, err error) {
 	resp = dynamicpb.NewMessage(method.Output())
 	md, _ := metadata.FromIncomingContext(ctx)
-
 	err = conn.Invoke(ctx, getMethodName(method), request, resp, grpc.Header(&md))
 	return
 }
@@ -584,7 +583,6 @@ func invokeRPCStream(ctx context.Context, conn grpc.ClientConnInterface, method 
 		ServerStreams: method.IsStreamingServer(),
 		ClientStreams: method.IsStreamingClient(),
 	}
-
 	s, err := conn.NewStream(ctx, sd, getMethodName(method))
 	if err != nil {
 		return nil, err
