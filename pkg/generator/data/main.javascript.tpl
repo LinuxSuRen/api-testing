@@ -36,10 +36,12 @@ async function makeRequest() {
         redirect: "follow"
     };
 
-    {{- if eq .Request.Method "GET"}}
-    {{- if ne (.Request.Body.String) ""}}
-    // WARNING: JavaScript does not allow a body to be sent with GET requests.
-    {{- end}}
+    {{- if ne .Request.Body.String "" }}
+    console.log('the body is ignored because this is a GET request')
+    /*
+    {{- else if gt (len .Request.Form) 0 }}
+    console.log('the body is ignored because this is a GET request')
+    /*
     {{- end}}
     {{- if gt (len .Request.Form) 0 }}
     const formData = new URLSearchParams();
@@ -51,6 +53,11 @@ async function makeRequest() {
     {{- else if ne .Request.Body.String ""}}
     let body = `{{.Request.Body.String | safeString}}`;
     requestOptions.body = body;
+    {{- end}}
+    {{- if ne .Request.Body.String "" }}
+    */
+    {{- else if gt (len .Request.Form) 0 }}
+    */
     {{- end}}
 
     try {

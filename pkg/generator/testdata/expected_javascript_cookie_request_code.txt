@@ -24,10 +24,13 @@ async function makeRequest() {
         headers: headers,
         redirect: "follow"
     };
+    console.log('the body is ignored because this is a GET request')
+    /*
     const formData = new URLSearchParams();
     formData.append("key", "value");
     let body = formData;
     requestOptions.body = body;
+    */
 
     try {
         const response = await fetch("https://www.baidu.com", requestOptions);

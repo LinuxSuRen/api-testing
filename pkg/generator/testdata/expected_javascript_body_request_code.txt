@@ -20,9 +20,11 @@ async function makeRequest() {
         headers: headers,
         redirect: "follow"
     };
-    // WARNING: JavaScript does not allow a body to be sent with GET requests.
+    console.log('the body is ignored because this is a GET request')
+    /*
     let body = `{"key": "value"}`;
     requestOptions.body = body;
+    */
 
     try {
         const response = await fetch("https://www.baidu.com", requestOptions);
