@@ -69,6 +69,12 @@ func TestGenerators(t *testing.T) {
 		assert.Equal(t, expectedPythonCode, result)
 	})
 
+	t.Run("javascript", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("JavaScript").Generate(nil, testcase)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedJavaScriptCode, result)
+	})
+
 	formRequest := &atest.TestCase{Request: testcase.Request}
 	formRequest.Request.Form = map[string]string{
 		"key": "value",
@@ -89,6 +95,12 @@ func TestGenerators(t *testing.T) {
 		result, err := generator.GetCodeGenerator("python").Generate(nil, formRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedFormRequestPythonCode, result, result)
+	})
+
+	t.Run("javascript form HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("JavaScript").Generate(nil, formRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedFormRequestJavaScriptCode, result)
 	})
 
 	cookieRequest := &atest.TestCase{Request: formRequest.Request}
@@ -113,6 +125,12 @@ func TestGenerators(t *testing.T) {
 		assert.Equal(t, expectedCookieRequestPythonCode, result, result)
 	})
 
+	t.Run("javascript cookie HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("JavaScript").Generate(nil, cookieRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedCookieRequestJavaScriptCode, result, result)
+	})
+
 	bodyRequest := &atest.TestCase{Request: testcase.Request}
 	bodyRequest.Request.Body.Value = `{"key": "value"}`
 
@@ -120,6 +138,12 @@ func TestGenerators(t *testing.T) {
 		result, err := generator.GetCodeGenerator("golang").Generate(nil, bodyRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedBodyRequestGoCode, result, result)
+	})
+
+	t.Run("javascript body HTTP request", func(t *testing.T) {
+		result, err := generator.GetCodeGenerator("JavaScript").Generate(nil, bodyRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedBodyRequestJavaScriptCode, result, result)
 	})
 }
 
@@ -152,3 +176,15 @@ var expectedCookieRequestPythonCode string
 
 //go:embed testdata/expected_go_body_request_code.txt
 var expectedBodyRequestGoCode string
+
+//go:embed testdata/expected_javascript_code.txt
+var expectedJavaScriptCode string
+
+//go:embed testdata/expected_javascript_form_request_code.txt
+var expectedFormRequestJavaScriptCode string
+
+//go:embed testdata/expected_javascript_cookie_request_code.txt
+var expectedCookieRequestJavaScriptCode string
+
+//go:embed testdata/expected_javascript_body_request_code.txt
+var expectedBodyRequestJavaScriptCode string
