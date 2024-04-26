@@ -61,10 +61,9 @@ var (
 
 type gRPCTestCaseRunner struct {
 	UnimplementedRunner
-	host           string
-	proto          testing.RPCDesc
-	response       SimpleResponse
-	maxRecvMsgSize int
+	host     string
+	proto    testing.RPCDesc
+	response SimpleResponse
 	// fdCache sync.Map
 }
 
@@ -92,7 +91,6 @@ func init() {
 
 func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext any, ctx context.Context) (output any, err error) {
 	r.log.Info("start to run: '%s'\n", testcase.Name)
-	r.maxRecvMsgSize = testcase.GrpcMaxRecvMsgSize
 	record := NewReportRecord()
 	defer func(rr *ReportRecord) {
 		rr.EndTime = time.Now()
@@ -163,14 +161,13 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 }
 
 func (r *gRPCTestCaseRunner) getConnection(host string) (conn *grpc.ClientConn, err error) {
-	maxSizeOption := grpc.MaxCallRecvMsgSize(max(r.maxRecvMsgSize, 4*1024*1024))
 	if r.Secure == nil || r.Secure.Insecure {
-		conn, err = grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultCallOptions(maxSizeOption))
+		conn, err = grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
 		var cred credentials.TransportCredentials
 		cred, err = credentials.NewClientTLSFromFile(r.Secure.CertFile, r.Secure.ServerName)
 		if err == nil {
-			conn, err = grpc.Dial(host, grpc.WithTransportCredentials(cred), grpc.WithDefaultCallOptions(maxSizeOption))
+			conn, err = grpc.Dial(host, grpc.WithTransportCredentials(cred))
 		}
 	}
 	return
@@ -575,7 +572,6 @@ func invokeRPC(ctx context.Context, conn grpc.ClientConnInterface, method protor
 	resp *dynamicpb.Message, err error) {
 	resp = dynamicpb.NewMessage(method.Output())
 	md, _ := metadata.FromIncomingContext(ctx)
-
 	err = conn.Invoke(ctx, getMethodName(method), request, resp, grpc.Header(&md))
 	return
 }
@@ -587,7 +583,6 @@ func invokeRPCStream(ctx context.Context, conn grpc.ClientConnInterface, method 
 		ServerStreams: method.IsStreamingServer(),
 		ClientStreams: method.IsStreamingClient(),
 	}
-
 	s, err := conn.NewStream(ctx, sd, getMethodName(method))
 	if err != nil {
 		return nil, err

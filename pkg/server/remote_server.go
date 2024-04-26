@@ -46,6 +46,7 @@ import (
 
 var (
 	remoteServerLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("remote_server")
+	GrpcMaxRecvMsgSize int
 )
 
 type server struct {
@@ -100,7 +101,7 @@ func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWrit
 	if secretServer == nil {
 		secretServer = &fakeSecretServer{}
 	}
-
+	GrpcMaxRecvMsgSize = grpcMaxRecvMsgSize
 	return &server{
 		loader:             loader,
 		storeWriterFactory: storeWriterFactory,
@@ -239,7 +240,6 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		suiteRunner.WithWriteLevel(task.Level)
 		suiteRunner.WithSecure(suite.Spec.Secure)
 
-		testCase.GrpcMaxRecvMsgSize = s.grpcMaxRecvMsgSize
 		// reuse the API prefix
 		testCase.Request.RenderAPI(suite.API)
 
@@ -443,7 +443,7 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 			lastIndex := len(reply.TestCaseResult) - 1
 			lastItem := reply.TestCaseResult[lastIndex]
 
-			if len(lastItem.Body) > s.grpcMaxRecvMsgSize {
+			if len(lastItem.Body) > GrpcMaxRecvMsgSize {
 				e := "the HTTP response body exceeded the maximum message size limit received by the gRPC client"
 				result = &TestCaseResult{
 					Output:     reply.Message,
