@@ -18,13 +18,15 @@ package cmd
 
 import (
 	"errors"
+
 	"github.com/linuxsuren/api-testing/pkg/mock"
 	"github.com/spf13/cobra"
 )
 
 type mockOption struct {
-	port  int
-	files []string
+	port   int
+	prefix string
+	files  []string
 }
 
 func createMockCmd() (c *cobra.Command) {
@@ -39,6 +41,7 @@ func createMockCmd() (c *cobra.Command) {
 
 	flags := c.Flags()
 	flags.IntVarP(&opt.port, "port", "", 6060, "The mock server port")
+	flags.StringVarP(&opt.prefix, "prefix", "", "/mock", "The mock server API prefix")
 	flags.StringSliceVarP(&opt.files, "files", "", nil, "The mock config files")
 	return
 }
@@ -55,7 +58,7 @@ func (o *mockOption) runE(c *cobra.Command, args []string) (err error) {
 
 	server := mock.NewInMemoryServer(o.port)
 
-	if err = server.Start(reader); err != nil {
+	if err = server.Start(reader, o.prefix); err != nil {
 		return
 	}
 

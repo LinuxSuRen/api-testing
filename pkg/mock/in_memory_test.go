@@ -17,17 +17,18 @@ package mock
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInMemoryServer(t *testing.T) {
 	server := NewInMemoryServer(0)
 
-	err := server.Start(NewLocalFileReader("data/api.yaml"))
+	err := server.Start(NewLocalFileReader("testdata/api.yaml"), "/mock")
 	assert.NoError(t, err)
 	defer func() {
 		server.Stop()
@@ -132,7 +133,7 @@ func TestInMemoryServer(t *testing.T) {
 
 	t.Run("not found config file", func(t *testing.T) {
 		server := NewInMemoryServer(0)
-		err := server.Start(NewLocalFileReader("fake"))
+		err := server.Start(NewLocalFileReader("fake"), "/")
 		assert.Error(t, err)
 	})
 }
