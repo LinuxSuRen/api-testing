@@ -50,6 +50,16 @@ func TestInMemoryServer(t *testing.T) {
 		assert.Equal(t, `[{"name":"someone"},{"members":[],"name":"test"}]`, string(data))
 	}
 
+	t.Run("check the /api.json", func(t *testing.T) {
+		var resp *http.Response
+		resp, err = http.Get(api + "/api.json")
+		if assert.NoError(t, err) {
+			data, err := io.ReadAll(resp.Body)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, string(data))
+		}
+	})
+
 	t.Run("list with filter", func(t *testing.T) {
 		var resp *http.Response
 		resp, err = http.Get(api + "/team?name=someone")
@@ -135,5 +145,41 @@ func TestInMemoryServer(t *testing.T) {
 		server := NewInMemoryServer(0)
 		err := server.Start(NewLocalFileReader("fake"), "/")
 		assert.Error(t, err)
+	})
+
+	t.Run("invalid webhook", func(t *testing.T) {
+		server := NewInMemoryServer(0)
+		err := server.Start(NewInMemoryReader(`webhooks:
+  - timer: aa
+    name: fake`), "/")
+		assert.Error(t, err)
+	})
+
+	t.Run("missing name or timer in webhook", func(t *testing.T) {
+		server := NewInMemoryServer(0)
+		err := server.Start(NewInMemoryReader(`webhooks:
+  - timer: 1s`), "/")
+		assert.NoError(t, err)
+	})
+
+	t.Run("invalid webhook payload", func(t *testing.T) {
+		server := NewInMemoryServer(0)
+		err := server.Start(NewInMemoryReader(`webhooks:
+  - name: invalid
+    timer: 1ms
+    request:
+      body: "{{.fake"`), "/")
+		assert.NoError(t, err)
+	})
+
+	t.Run("invalid webhook api template", func(t *testing.T) {
+		server := NewInMemoryServer(0)
+		err := server.Start(NewInMemoryReader(`webhooks:
+  - name: invalid
+    timer: 1ms
+    request:
+      body: "{}"
+      path: "{{.fake"`), "/")
+		assert.NoError(t, err)
 	})
 }

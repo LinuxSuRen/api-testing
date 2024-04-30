@@ -11,7 +11,7 @@
 
 * 支持的协议: HTTP, gRPC, tRPC
 * 支持多种格式的测试结果导出: Markdown, HTML, PDF, Stdout
-* 通过简单配置模拟服务
+* 简单易用的 Mock 服务，支持 OpenAPI
 * 支持转换为 [JMeter](https://jmeter.apache.org/) 文件格式
 * 支持响应体字段检查或 [eval](https://expr.medv.io/)
 * 使用 [JSON schema] 校验响应参数(https://json-schema.org/)
@@ -133,6 +133,6 @@ docker run -p 1234:8080 -v /var/tmp:/var/tmp \
 
 `api-testing-tech@googlegroups.com`, 欢迎通过此邮件列表讨论与 API Testing 相关的任何问题。
 
-### Githbu Discussion
+### GitHub Discussion
 
-[Github Discussion](https://github.com/LinuxSuRen/api-testing/discussions/new/choose)
+[GitHub Discussion](https://github.com/LinuxSuRen/api-testing/discussions/new/choose)

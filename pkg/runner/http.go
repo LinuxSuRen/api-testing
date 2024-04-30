@@ -18,6 +18,7 @@ package runner
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -190,31 +191,32 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	}
 	if err = expectInt(testcase.Name, testcase.Expect.StatusCode, resp.StatusCode); err != nil {
 		err = fmt.Errorf("error is: %v", err)
-		return
 	}
 
 	for key, val := range testcase.Expect.Header {
 		actualVal := resp.Header.Get(key)
-		if err = expectString(testcase.Name, val, actualVal); err != nil {
-			return
-		}
+		err = errors.Join(err, expectString(testcase.Name, val, actualVal))
 	}
 
 	respType := util.GetFirstHeaderValue(resp.Header, util.ContentType)
 
-	var responseBodyData []byte
 	if isNonBinaryContent(respType) {
-		if responseBodyData, err = r.withResponseRecord(resp); err != nil {
+		var responseBodyData []byte
+		var rErr error
+		if responseBodyData, rErr = r.withResponseRecord(resp); rErr != nil {
+			err = errors.Join(err, rErr)
 			return
 		}
+
 		record.Body = string(responseBodyData)
 		r.log.Trace("response body: %s\n", record.Body)
 
-		if output, err = verifyResponseBodyData(testcase.Name, testcase.Expect, respType, responseBodyData); err != nil {
+		if output, rErr = verifyResponseBodyData(testcase.Name, testcase.Expect, respType, responseBodyData); rErr != nil {
+			err = errors.Join(err, rErr)
 			return
 		}
 
-		err = jsonSchemaValidation(testcase.Expect.Schema, responseBodyData)
+		err = errors.Join(jsonSchemaValidation(testcase.Expect.Schema, responseBodyData))
 	} else {
 		r.log.Trace(fmt.Sprintf("skip to read the body due to it is not struct content: %q\n", respType))
 	}

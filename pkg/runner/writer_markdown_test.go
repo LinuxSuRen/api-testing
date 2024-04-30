@@ -56,8 +56,7 @@ func TestMarkdownWriter(t *testing.T) {
 | Name | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
 | api | 3ns | 4ns | 2ns | 3 | 0 |
-| api | 3ns | 4ns | 2ns | 3 | 0 |
-`, buf.String())
+| api | 3ns | 4ns | 2ns | 3 | 0 |`, buf.String())
 	})
 
 	t.Run("long", func(t *testing.T) {
@@ -81,8 +80,7 @@ func TestMarkdownWriter(t *testing.T) {
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |
-</details>
-`, buf.String())
+</details>`, buf.String())
 	})
 
 	t.Run("long, there are error cases", func(t *testing.T) {
@@ -111,8 +109,7 @@ func TestMarkdownWriter(t *testing.T) {
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | foo | 3ns | 4ns | 2ns | 3 | 1 |
-</details>
-`, buf.String())
+</details>`, buf.String())
 	})
 
 	t.Run("with resource usage", func(t *testing.T) {
@@ -134,8 +131,7 @@ func TestMarkdownWriter(t *testing.T) {
 
 Resource usage:
 * CPU: 1
-* Memory: 1
-`, buf.String())
+* Memory: 1`, buf.String())
 	})
 
 	t.Run("have error message", func(t *testing.T) {
@@ -157,8 +153,7 @@ Resource usage:
   <summary><b>See the error message</b></summary>
 * error happend
 * error happend
-</details>
-`, buf.String())
+</details>`, buf.String())
 	})
 
 	t.Run("with api converage", func(t *testing.T) {
@@ -176,8 +171,7 @@ Resource usage:
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 
-API Coverage: 1/1
-`, buf.String())
+API Coverage: 1/1`, buf.String())
 	})
 }
 

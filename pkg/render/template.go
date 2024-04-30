@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,19 +47,35 @@ func SetSecretGetter(getter secret.SecretGetter) {
 
 // Render render then return the result
 func Render(name, text string, ctx interface{}) (result string, err error) {
+	var data []byte
+	if data, err = RenderAsBytes(name, text, ctx); err == nil {
+		result = string(data)
+	}
+	return
+}
+
+func RenderAsBytes(name, text string, ctx interface{}) (data []byte, err error) {
 	var tpl *template.Template
 	if tpl, err = template.New(name).
 		Funcs(FuncMap()).
 		Parse(text); err == nil {
 		buf := new(bytes.Buffer)
 		if err = tpl.Execute(buf, ctx); err == nil {
-			result = strings.TrimSpace(buf.String())
+			data = buf.Bytes()
 		}
 	}
 	return
 }
 
-// FuncMap reutrns all the supported functions
+func RenderAsReader(name, text string, ctx interface{}) (reader io.Reader, err error) {
+	var data []byte
+	if data, err = RenderAsBytes(name, text, ctx); err == nil {
+		reader = bytes.NewReader(data)
+	}
+	return
+}
+
+// FuncMap returns all the supported functions
 func FuncMap() template.FuncMap {
 	funcs := sprig.FuncMap()
 	for _, item := range GetAdvancedFuncs() {
@@ -75,7 +91,7 @@ func FuncMap() template.FuncMap {
 func RenderThenPrint(name, text string, ctx interface{}, w io.Writer) (err error) {
 	var report string
 	if report, err = Render(name, text, ctx); err == nil {
-		fmt.Fprintln(w, report)
+		_, err = fmt.Fprint(w, report)
 	}
 	return
 }

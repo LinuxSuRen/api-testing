@@ -33,7 +33,7 @@ func GetTestSuiteRunner(suite *testing.TestSuite) TestCaseRunner {
 		kind = "http"
 	}
 
-	if suite.Spec.RPC != nil && kind == "" {
+	if suite.Spec.RPC != nil {
 		kind = "grpc"
 	}
 

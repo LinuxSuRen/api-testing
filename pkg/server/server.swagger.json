@@ -10,6 +10,9 @@
     },
     {
       "name": "RunnerExtension"
+    },
+    {
+      "name": "Mock"
     }
   ],
   "consumes": [
@@ -19,6 +22,70 @@
     "application/json"
   ],
   "paths": {
+    "/server.Mock/Start": {
+      "post": {
+        "operationId": "Mock_Start",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverEmpty"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverMockConfig"
+            }
+          }
+        ],
+        "tags": [
+          "Mock"
+        ]
+      }
+    },
+    "/server.Mock/Stop": {
+      "post": {
+        "operationId": "Mock_Stop",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverEmpty"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverEmpty"
+            }
+          }
+        ],
+        "tags": [
+          "Mock"
+        ]
+      }
+    },
     "/server.Runner/ConvertTestSuite": {
       "post": {
         "operationId": "Runner_ConvertTestSuite",
@@ -1287,6 +1354,17 @@
           }
         },
         "kind": {
+          "type": "string"
+        }
+      }
+    },
+    "serverMockConfig": {
+      "type": "object",
+      "properties": {
+        "Prefix": {
+          "type": "string"
+        },
+        "Config": {
           "type": "string"
         }
       }

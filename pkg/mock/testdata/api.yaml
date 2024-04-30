@@ -55,3 +55,9 @@ items:
             "status": "success"
           }]
         }
+webhooks:
+  - timer: 1ms
+    name: baidu
+    request:
+      method: GET
+      path: http://localhost:{{.GetPort}}/projects

@@ -134,7 +134,7 @@ func (s *TestSuite) Render(dataContext map[string]interface{}) (err error) {
 	// render the API
 	var result string
 	if result, err = render.Render("base api", s.API, dataContext); err == nil {
-		s.API = result
+		s.API = strings.TrimSpace(result)
 		s.API = strings.TrimSuffix(s.API, "/")
 		// render the parameters
 		s.Param, err = renderMap(dataContext, s.Param, "parameter")
@@ -148,7 +148,7 @@ func (r *Request) Render(ctx interface{}, dataDir string) (err error) {
 	// template the API
 	var result string
 	if result, err = render.Render("api", r.API, ctx); err == nil {
-		r.API = result
+		r.API = strings.TrimSpace(result)
 	} else {
 		err = fmt.Errorf("failed render '%s', %v", r.API, err)
 		return

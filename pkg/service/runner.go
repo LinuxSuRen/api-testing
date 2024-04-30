@@ -13,22 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package mock
+package service
 
-import "net/http"
-
-type Loadable interface {
-	Load() error
-}
-
-type DynamicServer interface {
-	Start(reader Reader, prefix string) error
-	SetupHandler(reader Reader, prefix string) (http.Handler, error)
-	Stop() error
-	GetPort() string
-	Loadable
-}
-
-const (
-	headerMockServer = "MockServer"
+import (
+	"fmt"
+	"net/http"
 )
+
+// WebRunnerHandler accepts the HTTP requests and run the testSuite
+func WebRunnerHandler(w http.ResponseWriter, r *http.Request,
+	params map[string]string) {
+	testSuite := params["suite"]
+	testCase := params["case"]
+
+	fmt.Println(testSuite, testCase)
+	fmt.Println(r.URL.Query())
+}

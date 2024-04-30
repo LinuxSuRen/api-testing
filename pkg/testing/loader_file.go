@@ -164,7 +164,7 @@ func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
 	for _, target := range l.paths {
 		var data []byte
 		var loadErr error
-		if data, loadErr = loadData(target); err != nil {
+		if data, loadErr = loadData(target); loadErr != nil {
 			loaderLogger.Info("failed to load data", "error", loadErr)
 			continue
 		}
@@ -270,7 +270,6 @@ func (l *fileLoader) DeleteSuite(name string) (err error) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	found := false
 	for i := range l.paths {
 		suitePath := l.paths[i]
 		var suite *TestSuite
@@ -281,13 +280,11 @@ func (l *fileLoader) DeleteSuite(name string) (err error) {
 		if suite.Name == name {
 			err = os.Remove(suitePath)
 			l.paths = append(l.paths[:i], l.paths[i+1:]...)
-			found = true
 			return
 		}
 	}
-	if !found {
-		err = fmt.Errorf("suite %s not found", name)
-	}
+
+	err = fmt.Errorf("suite %s not found", name)
 	return
 }
 

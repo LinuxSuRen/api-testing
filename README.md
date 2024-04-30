@@ -11,7 +11,7 @@ This is a API testing tool. 🚀
 
 * Supported protocols: HTTP, gRPC, tRPC
 * Multiple test report formats: Markdown, HTML, PDF, Stdout
-* Mock Server in simple configuration
+* Mock Server in simple configuration, and Open API support
 * Support converting to [JMeter](https://jmeter.apache.org/) files
 * Response Body fields equation check or [eval](https://expr.medv.io/)
 * Validate the response body with [JSON schema](https://json-schema.org/)
@@ -132,6 +132,6 @@ Feel free to talk to us about any questions you may have about API Testing in th
 
 `api-testing-tech@googlegroups.com`, Feel free to discuss everything related to API Testing via this mailing list.
 
-### Githbu discussion
+### `GitHub` discussion
 
-[Github Discussion](https://github.com/LinuxSuRen/api-testing/discussions/new/choose)
+[GitHub Discussion](https://github.com/LinuxSuRen/api-testing/discussions/new/choose)

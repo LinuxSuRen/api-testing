@@ -9,6 +9,7 @@ import { ref, watch } from 'vue'
 import { API } from './views/net'
 import { Cache } from './views/cache'
 import TestingPanel from './views/TestingPanel.vue'
+import MockManager from './views/MockManager.vue'
 import StoreManager from './views/StoreManager.vue'
 import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
@@ -43,7 +44,6 @@ API.GetVersion((d) => {
   }
 })
 
-const panelName = ref('')
 const sideWidth = ref("width: 200px; display: flex;flex-direction: column;")
 const isCollapse = ref(false)
 watch(isCollapse, (e) => {
@@ -53,8 +53,12 @@ watch(isCollapse, (e) => {
     sideWidth.value = "width: 200px; display: flex;flex-direction: column;"
   }
 })
+const lastActiveMenu = window.localStorage.getItem('activeMenu')
+const activeMenu = ref(lastActiveMenu === '' ? 'welcome' : lastActiveMenu)
+const panelName = ref(activeMenu)
 const handleSelect = (key: string) => {
   panelName.value = key
+  window.localStorage.setItem('activeMenu', key)
 }
 </script>
 
@@ -67,7 +71,7 @@ const handleSelect = (key: string) => {
       </el-radio-group>
       <el-menu
         style="flex-grow: 1;"
-        default-active="welcome"
+        :default-active="activeMenu"
         :collapse="isCollapse"
         @select="handleSelect"
       >
@@ -78,6 +82,10 @@ const handleSelect = (key: string) => {
         <el-menu-item index="testing" test-id="testing-menu">
           <el-icon><icon-menu /></el-icon>
           <template #title>{{ t('title.testing' )}}</template>
+        </el-menu-item>
+        <el-menu-item index="mock" test-id="mock-menu">
+          <el-icon><icon-menu /></el-icon>
+          <template #title>{{ t('title.mock' )}}</template>
         </el-menu-item>
         <el-menu-item index="secret">
           <el-icon><document /></el-icon>
@@ -92,6 +100,7 @@ const handleSelect = (key: string) => {
 
     <el-main style="padding-top: 5px; padding-bottom: 5px;">
       <TestingPanel v-if="panelName === 'testing'" />
+      <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
       <SecretManager v-else-if="panelName === 'secret'" />
       <WelcomePage v-else />

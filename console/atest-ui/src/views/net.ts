@@ -499,6 +499,32 @@ function GetSuggestedAPIs(name: string,
     .then(callback)
 }
 
+function ReloadMockServer(config: string) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      Config: config
+    })
+  }
+  fetch('/server.Mock/Reload', requestOptions)
+      .then(DefaultResponseProcess)
+}
+
+function GetMockConfig(callback: (d: any) => void) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Auth': getToken()
+    }
+  }
+  fetch('/server.Mock/GetConfig', requestOptions)
+      .then(DefaultResponseProcess)
+      .then(callback)
+}
+
 function getToken() {
   const token = sessionStorage.getItem('token')
   if (!token) {
@@ -518,5 +544,6 @@ export const API = {
   FunctionsQuery,
   GetSecrets, DeleteSecret, CreateOrUpdateSecret,
   GetSuggestedAPIs,
+  ReloadMockServer, GetMockConfig,
   getToken
 }
