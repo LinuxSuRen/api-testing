@@ -34,12 +34,13 @@ import (
 )
 
 func TestTestCase(t *testing.T) {
-	fooRequst := atest.Request{
+	fooRequest := atest.Request{
 		API: urlFoo,
 	}
 	defaultForm := map[string]string{
 		"key": "value",
 	}
+	const defaultBody = `{"name":"hello"}`
 	defaultPrepare := func() {
 		gock.New(urlLocalhost).
 			Get("/foo").Reply(http.StatusOK).BodyString(`{"items":[]}`).
@@ -113,7 +114,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "normal, response is slice",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 			Expect: atest.Response{
 				StatusCode: http.StatusOK,
 				Body:       `["foo", "bar"]`,
@@ -160,7 +161,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "bad request",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 			Expect: atest.Response{
 				StatusCode: http.StatusOK,
 			},
@@ -172,7 +173,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "error with request",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 		},
 		prepare: func() {
 			gock.New(urlLocalhost).
@@ -181,7 +182,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "not match with body",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 			Expect: atest.Response{
 				Body: "bar",
 			},
@@ -194,7 +195,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "not match with header",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 			Expect: atest.Response{
 				Header: map[string]string{
 					"foo": "bar",
@@ -208,7 +209,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "not found from fields",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 			Expect: atest.Response{
 				BodyFieldsExpect: map[string]interface{}{
 					"foo": "bar",
@@ -219,7 +220,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "body filed not match",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 			Expect: atest.Response{
 				BodyFieldsExpect: map[string]interface{}{
 					"name": "bar",
@@ -230,7 +231,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "invalid filed finding",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 			Expect: atest.Response{
 				BodyFieldsExpect: map[string]interface{}{
 					"0.items": "bar",
@@ -263,7 +264,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "failed to compile",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 			Expect: atest.Response{
 				Verify: []string{
 					`println("12")`,
@@ -278,7 +279,7 @@ func TestTestCase(t *testing.T) {
 	}, {
 		name: "failed to compile",
 		testCase: &atest.TestCase{
-			Request: fooRequst,
+			Request: fooRequest,
 			Expect: atest.Response{
 				Verify: []string{
 					`1 + 1`,
@@ -356,6 +357,27 @@ func TestTestCase(t *testing.T) {
 				Reply(http.StatusOK).BodyString(`{}`)
 		},
 		verify: noError,
+	}, {
+		name: "status code not match",
+		testCase: &atest.TestCase{
+			Request: atest.Request{
+				API:    urlFoo,
+				Method: http.MethodPost,
+			},
+			Expect: atest.Response{
+				StatusCode: http.StatusBadRequest,
+			},
+		},
+		prepare: func() {
+			gock.New(urlLocalhost).
+				Post("/foo").
+				Reply(http.StatusOK).
+				SetHeader(util.ContentType, util.JSON).
+				BodyString(defaultBody)
+		},
+		verify: func(t *testing.T, _ interface{}, err error) {
+			assert.Error(t, err)
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

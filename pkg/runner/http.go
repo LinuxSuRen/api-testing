@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		return
 	}
 
-	r.log.Debug("status code: %d\n", resp.StatusCode)
+	r.log.Debug("test case %q, status code: %d\n", testcase.Name, resp.StatusCode)
 
 	if err = testcase.Expect.Render(dataContext); err != nil {
 		return
@@ -216,7 +216,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 			return
 		}
 
-		err = errors.Join(jsonSchemaValidation(testcase.Expect.Schema, responseBodyData))
+		err = errors.Join(err, jsonSchemaValidation(testcase.Expect.Schema, responseBodyData))
 	} else {
 		r.log.Trace(fmt.Sprintf("skip to read the body due to it is not struct content: %q\n", respType))
 	}
