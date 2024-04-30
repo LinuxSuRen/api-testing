@@ -36,6 +36,8 @@ type Item struct {
 type Request struct {
 	Path   string `yaml:"path"`
 	Method string `yaml:"method"`
+	Header Header `yaml:"header"`
+	Body   string `yaml:"body"`
 }
 
 type Response struct {
@@ -49,7 +51,14 @@ type Header struct {
 	Value string `yaml:"value"`
 }
 
+type Webhook struct {
+	Name    string  `yaml:"name"`
+	Timer   string  `yaml:"timer"`
+	Request Request `yaml:"request"`
+}
+
 type Server struct {
-	Objects []Object `yaml:"objects"`
-	Items   []Item   `yaml:"items"`
+	Objects  []Object  `yaml:"objects"`
+	Items    []Item    `yaml:"items"`
+	Webhooks []Webhook `yaml:"webhooks"`
 }

@@ -41,6 +41,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/oauth"
 	template "github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/server"
+	"github.com/linuxsuren/api-testing/pkg/service"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -233,6 +234,11 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
+	// create mock server controller
+	mockInMemoryReader := mock.NewInMemoryReader("")
+	dynamicMockServer := mock.NewInMemoryServer(0)
+	mockServerController := server.NewMockServerController(mockInMemoryReader, dynamicMockServer)
+
 	clean := make(chan os.Signal, 1)
 	signal.Notify(clean, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
 
@@ -242,6 +248,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			reflection.Register(gRPCServer)
 		}
 		server.RegisterRunnerServer(s, remoteServer)
+		server.RegisterMockServer(s, mockServerController)
 		serverLogger.Info("gRPC server listening at", "addr", lis.Addr())
 		s.Serve(lis)
 	}()
@@ -256,13 +263,16 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}()
 
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))
-	err = server.RegisterRunnerHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	err = errors.Join(
+		server.RegisterRunnerHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}),
+		server.RegisterMockHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}))
 	if err == nil {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/favicon.ico", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
+		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
 
 		postRequestProxyFunc := postRequestProxy(o.skyWalking)
 		mux.HandlePath(http.MethodPost, "/browser/{app}", postRequestProxyFunc)
@@ -303,6 +313,13 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 				return
 			}
 			combineHandlers.PutHandler(o.mockPrefix, mockServerHandler)
+		}
+
+		if handler, hErr := dynamicMockServer.SetupHandler(mockInMemoryReader, o.mockPrefix+"/server"); hErr != nil {
+			err = hErr
+			return
+		} else {
+			combineHandlers.PutHandler(o.mockPrefix+"/server", handler)
 		}
 
 		debugHandler(mux, remoteServer)

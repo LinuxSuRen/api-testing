@@ -286,3 +286,13 @@ message PProfData {
 
 message Empty {
 }
+
+service Mock {
+  rpc Reload(MockConfig) returns (Empty) {}
+  rpc GetConfig(Empty) returns (MockConfig) {}
+}
+
+message MockConfig {
+  string Prefix = 1;
+  string Config = 2;
+}

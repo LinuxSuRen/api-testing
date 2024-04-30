@@ -16,9 +16,11 @@ limitations under the License.
 package testing_test
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
@@ -154,22 +156,23 @@ func TestSuite(t *testing.T) {
 		assert.NotEmpty(t, absPath)
 		assert.Equal(t, urlFake, suite.API)
 
-		err = writer.CreateSuite("fake", urlFake)
+		fakeName := fmt.Sprintf("fake-%d", time.Now().Nanosecond())
+		err = writer.CreateSuite(fakeName, urlFake)
 		assert.NoError(t, err)
 
-		err = writer.CreateSuite("fake", "")
+		err = writer.CreateSuite(fakeName, "")
 		assert.Error(t, err)
 
 		assert.Equal(t, 2, writer.GetCount())
 
 		err = writer.DeleteSuite("test")
 		assert.NoError(t, err)
-		err = writer.DeleteSuite("fake")
+		err = writer.DeleteSuite(fakeName)
 		assert.NoError(t, err)
 
 		assert.Equal(t, 0, writer.GetCount())
 
-		err = writer.DeleteSuite("fake")
+		err = writer.DeleteSuite(fakeName)
 		assert.Error(t, err)
 	})
 

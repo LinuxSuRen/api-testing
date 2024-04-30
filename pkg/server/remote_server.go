@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import (
 	reflect "reflect"
 	"regexp"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/mock"
 
 	_ "embed"
 
@@ -844,6 +846,36 @@ func (s *server) PProf(ctx context.Context, in *PProfRequest) (reply *PProfData,
 	defer loader.Close()
 	reply = &PProfData{
 		Data: loader.PProf(in.Name),
+	}
+	return
+}
+
+// implement the mock server
+
+// Start starts the mock server
+type mockServerController struct {
+	UnimplementedMockServer
+	mockWriter mock.ReaderAndWriter
+	loader     mock.Loadable
+	reader     mock.Reader
+}
+
+func NewMockServerController(mockWriter mock.ReaderAndWriter, loader mock.Loadable) MockServer {
+	return &mockServerController{
+		mockWriter: mockWriter,
+		loader:     loader,
+	}
+}
+
+func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (reply *Empty, err error) {
+	s.mockWriter.Write([]byte(in.Config))
+	err = s.loader.Load()
+	return
+}
+func (s *mockServerController) GetConfig(ctx context.Context, in *Empty) (reply *MockConfig, err error) {
+	reply = &MockConfig{
+		Prefix: "/mock/server",
+		Config: string(s.mockWriter.GetData()),
 	}
 	return
 }

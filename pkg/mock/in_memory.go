@@ -16,12 +16,17 @@ limitations under the License.
 package mock
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/swaggest/openapi-go/openapi3"
+	"github.com/swaggest/rest/gorillamux"
 	"io"
 	"net"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/version"
 
@@ -37,39 +42,62 @@ var (
 )
 
 type inMemoryServer struct {
-	data     map[string][]map[string]interface{}
-	mux      *mux.Router
-	port     int
-	listener net.Listener
+	data       map[string][]map[string]interface{}
+	mux        *mux.Router
+	listener   net.Listener
+	port       int
+	wg         sync.WaitGroup
+	ctx        context.Context
+	cancelFunc context.CancelFunc
+	reader     Reader
 }
 
 func NewInMemoryServer(port int) DynamicServer {
+	ctx, cancel := context.WithCancel(context.TODO())
 	return &inMemoryServer{
-		port: port,
+		port:       port,
+		wg:         sync.WaitGroup{},
+		ctx:        ctx,
+		cancelFunc: cancel,
 	}
 }
 
 func (s *inMemoryServer) SetupHandler(reader Reader, prefix string) (handler http.Handler, err error) {
-	var server *Server
-	if server, err = reader.Parse(); err != nil {
-		return
-	}
-
+	s.reader = reader
 	// init the data
 	s.data = make(map[string][]map[string]interface{})
 	s.mux = mux.NewRouter().PathPrefix(prefix).Subrouter()
 	handler = s.mux
+	err = s.Load()
+	return
+}
 
-	memLogger.Info("start to run all the APIs from objects")
+func (s *inMemoryServer) Load() (err error) {
+	var server *Server
+	if server, err = s.reader.Parse(); err != nil {
+		return
+	}
+
+	memLogger.Info("start to run all the APIs from objects", "count", len(server.Objects))
 	for _, obj := range server.Objects {
+		memLogger.Info("start mock server from object", "name", obj.Name)
 		s.startObject(obj)
 		s.initObjectData(obj)
 	}
 
-	memLogger.Info("start to run all the APIs from items")
+	memLogger.Info("start to run all the APIs from items", "count", len(server.Items))
 	for _, item := range server.Items {
 		s.startItem(item)
 	}
+
+	memLogger.Info("start webhook servers", "count", len(server.Webhooks))
+	for _, item := range server.Webhooks {
+		if err = s.startWebhook(&item); err != nil {
+			return
+		}
+	}
+
+	s.handleOpenAPI()
 	return
 }
 
@@ -210,9 +238,9 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 					data, err := json.Marshal(obj)
 					if err == nil {
-						w.Write(data)
+						_, _ = w.Write(data)
 					} else {
-						w.Write([]byte(err.Error()))
+						_, _ = w.Write([]byte(err.Error()))
 						w.WriteHeader(http.StatusBadRequest)
 					}
 					return
@@ -262,6 +290,88 @@ func (s *inMemoryServer) initObjectData(obj Object) {
 	}
 }
 
+func (s *inMemoryServer) startWebhook(webhook *Webhook) (err error) {
+	if webhook.Timer == "" || webhook.Name == "" {
+		return
+	}
+
+	var duration time.Duration
+	duration, err = time.ParseDuration(webhook.Timer)
+	if err != nil {
+		memLogger.Error(err, "Error parsing webhook timer")
+		return
+	}
+
+	s.wg.Add(1)
+	go func(wh *Webhook) {
+		defer s.wg.Done()
+
+		memLogger.Info("start webhook server", "name", wh.Name)
+		timer := time.NewTimer(duration)
+		for {
+			timer.Reset(duration)
+			select {
+			case <-s.ctx.Done():
+				memLogger.Info("stop webhook server", "name", wh.Name)
+				return
+			case <-timer.C:
+				client := http.DefaultClient
+
+				payload, err := render.RenderAsReader("mock webhook server payload", wh.Request.Body, wh)
+				if err != nil {
+					memLogger.Error(err, "Error when render payload")
+					continue
+				}
+
+				method := util.EmptyThenDefault(wh.Request.Method, http.MethodPost)
+				api, err := render.Render("webhook request api", wh.Request.Path, s)
+				if err != nil {
+					memLogger.Error(err, "Error when render api", "raw", wh.Request.Path)
+					continue
+				}
+
+				req, err := http.NewRequestWithContext(s.ctx, method, api, payload)
+				if err != nil {
+					memLogger.Error(err, "Error when create request")
+					continue
+				}
+
+				resp, err := client.Do(req)
+				if err != nil {
+					memLogger.Error(err, "Error when sending webhook")
+				} else {
+					memLogger.Info("received from webhook", "code", resp.StatusCode)
+				}
+			}
+		}
+	}(webhook)
+	return
+}
+
+func (s *inMemoryServer) handleOpenAPI() {
+	s.mux.HandleFunc("/api.json", func(w http.ResponseWriter, req *http.Request) {
+		// Setup OpenAPI schema
+		reflector := openapi3.NewReflector()
+		reflector.SpecSchema().SetTitle("Mock Server API")
+		reflector.SpecSchema().SetVersion(version.GetVersion())
+		reflector.SpecSchema().SetDescription("Powered by https://github.com/linuxsuren/api-testing")
+
+		// Walk the router with OpenAPI collector
+		c := gorillamux.NewOpenAPICollector(reflector)
+
+		_ = s.mux.Walk(c.Walker)
+
+		// Get the resulting schema
+		if jsonData, err := reflector.Spec.MarshalJSON(); err == nil {
+			w.Header().Set(util.ContentType, util.JSON)
+			_, _ = w.Write(jsonData)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(err.Error()))
+		}
+	})
+}
+
 func jsonStrToInterface(jsonStr string) (objData map[string]interface{}, err error) {
 	if jsonStr, err = render.Render("init object", jsonStr, nil); err == nil {
 		objData = map[string]interface{}{}
@@ -280,5 +390,9 @@ func (s *inMemoryServer) Stop() (err error) {
 	if s.listener != nil {
 		err = s.listener.Close()
 	}
+	if s.cancelFunc != nil {
+		s.cancelFunc()
+	}
+	s.wg.Wait()
 	return
 }

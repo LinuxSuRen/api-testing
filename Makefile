@@ -77,7 +77,7 @@ test-ui-e2e:
 test-operator:
 	cd operator && make test # converage file path: operator/cover.out
 test-all-backend: test
-test-all: test-all-backend test-ui
+test-all: test-all-backend
 test-e2e:
 	cd e2e && ./start.sh && ./start.sh compose-k8s.yaml && ./start.sh compose-external.yaml
 fuzz:

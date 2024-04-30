@@ -30,6 +30,7 @@
         "apiRequestParameter": "API Request Parameter",
         "codeGenerator": "Code Generator",
         "testing": "Testing",
+        "mock": "Mock",
         "welcome": "Welcome",
         "secrets": "Secrets",
         "stores": "Stores",

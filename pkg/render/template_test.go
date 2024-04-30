@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package render
 import (
 	"bytes"
 	"context"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -115,13 +116,13 @@ func TestRenderThenPrint(t *testing.T) {
 		tplText: `{{max 1 2 3}}`,
 		ctx:     nil,
 		buf:     new(bytes.Buffer),
-		expect:  "3\n",
+		expect:  "3",
 	}, {
 		name:    "with a map as context",
 		tplText: `{{.name}}`,
 		ctx:     map[string]string{"name": "linuxsuren"},
 		buf:     new(bytes.Buffer),
-		expect:  "linuxsuren\n",
+		expect:  "linuxsuren",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -212,4 +213,14 @@ func TestSecret(t *testing.T) {
 	result, err = Render("", `{{secretValue "pass"}}`, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, result)
+
+	t.Run("render as reader", func(t *testing.T) {
+		reader, err := RenderAsReader("render as reader", "hello", nil)
+		assert.NoError(t, err)
+		assert.NotNil(t, reader)
+
+		data, err := io.ReadAll(reader)
+		assert.NoError(t, err)
+		assert.Equal(t, "hello", string(data))
+	})
 }

@@ -16,16 +16,23 @@ limitations under the License.
 package mock
 
 import (
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Reader interface {
 	Parse() (*Server, error)
+	GetData() []byte
+}
+
+type Writer interface {
+	Write([]byte)
 }
 
 type localFileReader struct {
 	file string
+	data []byte
 }
 
 func NewLocalFileReader(file string) Reader {
@@ -33,10 +40,42 @@ func NewLocalFileReader(file string) Reader {
 }
 
 func (r *localFileReader) Parse() (server *Server, err error) {
-	var data []byte
-	if data, err = os.ReadFile(r.file); err == nil {
+	if r.data, err = os.ReadFile(r.file); err == nil {
 		server = &Server{}
-		err = yaml.Unmarshal(data, server)
+		err = yaml.Unmarshal(r.data, server)
 	}
 	return
+}
+
+func (r *localFileReader) GetData() []byte {
+	return r.data
+}
+
+type inMemoryReader struct {
+	data []byte
+}
+
+type ReaderAndWriter interface {
+	Reader
+	Writer
+}
+
+func NewInMemoryReader(config string) ReaderAndWriter {
+	return &inMemoryReader{
+		data: []byte(config),
+	}
+}
+
+func (r *inMemoryReader) Parse() (server *Server, err error) {
+	server = &Server{}
+	err = yaml.Unmarshal(r.data, server)
+	return
+}
+
+func (r *inMemoryReader) GetData() []byte {
+	return r.data
+}
+
+func (r *inMemoryReader) Write(data []byte) {
+	r.data = data
 }

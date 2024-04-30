@@ -18,6 +18,9 @@ package cmd
 
 import (
 	"errors"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/linuxsuren/api-testing/pkg/mock"
 	"github.com/spf13/cobra"
@@ -55,14 +58,19 @@ func (o *mockOption) preRunE(c *cobra.Command, args []string) (err error) {
 
 func (o *mockOption) runE(c *cobra.Command, args []string) (err error) {
 	reader := mock.NewLocalFileReader(o.files[0])
-
 	server := mock.NewInMemoryServer(o.port)
 
 	if err = server.Start(reader, o.prefix); err != nil {
 		return
 	}
 
-	<-c.Context().Done()
-	server.Stop()
+	clean := make(chan os.Signal, 1)
+	signal.Notify(clean, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
+
+	select {
+	case <-c.Context().Done():
+	case <-clean:
+	}
+	err = server.Stop()
 	return
 }

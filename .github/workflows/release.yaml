@@ -78,11 +78,28 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GH_PUBLISH_SECRETS }}
+      - name: Log into registry ${{ env.REGISTRY_DOCKERHUB }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY_DOCKERHUB }}
+          username: linuxsuren
+          password: ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }}
+      - name: Log into registry ${{ env.REGISTRY_ALIYUN }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY_ALIYUN }}
+          username: ${{ secrets.REGISTRY_ALIYUN_USER }}
+          password: ${{ secrets.REGISTRY_ALIYUN_PUBLISH_SECRETS }}
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/linuxsuren/api-testing
+          images: |
+            ${{ env.REGISTRY }}/linuxsuren/api-testing
+            ${{ env.REGISTRY_DOCKERHUB }}/${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY_ALIYUN }}/${{ env.IMAGE_NAME }}
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
@@ -91,10 +108,21 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,darwin/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: VERSION=${{ steps.vars.outputs.tag }}
+      - name: Release Helm
+        run: |
+          echo ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }} | helm registry login docker.io -u linuxsuren --password-stdin
+          export APP_VERSION=${{ steps.vars.outputs.tag }}
+          export HELM_VERSION=${{ steps.vars.outputs.tag }}
+          if [[ ! "$line" =~ ^v ]]
+          then
+            unset APP_VERSION
+            unset HELM_VERSION
+          fi
+          make helm-package helm-push
 
   # image-operator:
   #   runs-on: ubuntu-20.04
@@ -126,90 +154,3 @@ jobs:
   #         platforms: linux/amd64,linux/arm64
   #         cache-from: type=gha
   #         cache-to: type=gha,mode=max
-
-  image-dockerhub:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-tags: true
-          fetch-depth: 0
-      - name: Set output
-        id: vars
-        run: echo "tag=$(git describe --tags)" >> $GITHUB_OUTPUT
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
-      - name: Log into registry ${{ env.REGISTRY_DOCKERHUB }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
-        with:
-          registry: ${{ env.REGISTRY_DOCKERHUB }}
-          username: linuxsuren
-          password: ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }}
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY_DOCKERHUB }}/${{ env.IMAGE_NAME }}
-      - name: Build and push Docker image
-        id: build-and-push
-        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
-        with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: VERSION=${{ steps.vars.outputs.tag }}
-      - name: Release Helm
-        run: |
-          echo ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }} | helm registry login docker.io -u linuxsuren --password-stdin
-          export APP_VERSION=${{ steps.vars.outputs.tag }}
-          export HELM_VERSION=${{ steps.vars.outputs.tag }}
-          if [[ ! "$line" =~ ^v ]]
-          then
-            unset APP_VERSION
-            unset HELM_VERSION
-          fi
-          make helm-package helm-push
-
-  image-aliyuncs:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-tags: true
-          fetch-depth: 0
-      - name: Set output
-        id: vars
-        run: echo "tag=$(git describe --tags)" >> $GITHUB_OUTPUT
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
-      - name: Log into registry ${{ env.REGISTRY_ALIYUN }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
-        with:
-          registry: ${{ env.REGISTRY_ALIYUN }}
-          username: ${{ secrets.REGISTRY_ALIYUN_USER }}
-          password: ${{ secrets.REGISTRY_ALIYUN_PUBLISH_SECRETS }}
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY_ALIYUN }}/${{ env.IMAGE_NAME }}
-      - name: Build and push Docker image
-        id: build-and-push
-        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
-        with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: VERSION=${{ steps.vars.outputs.tag }}
