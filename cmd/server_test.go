@@ -258,7 +258,7 @@ func TestOAuth(t *testing.T) {
 		hasErr: true,
 	}, {
 		name:   "oauth is ok",
-		args:   []string{"server", "--auth=oauth", "--client-id=fake", "--client-secret=fake"},
+		args:   []string{"server", "--auth=oauth", "--client-id=fake", "--client-secret=fake", "--http-port=0"},
 		hasErr: false,
 	}}
 	for i, tt := range tests {
