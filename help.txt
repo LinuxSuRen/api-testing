@@ -1,0 +1,84 @@
+make[1]: Entering directory 'D:/open_sources/apitesting'
+[0;34mAPI Testing is an open source for API testing tool.[0m
+
+Usage:
+  make [36m<Target>[0m [36m<Option>[0m
+
+Targets:
+
+[1mCommon[0m
+  [36mgenerate       [0m  Generate go code from templates and tags
+  [36mclean          [0m  Remove all files that are created during builds.
+  [36minstall-precheck[0m  Install pre-check tools,
+  [36mgoreleaser     [0m  Build the project using goreleaser
+
+[1mGolang[0m
+  [36mbuild          [0m  Build API Testing for host platform. See Option PLATFORM and BINS.
+  [36mbuild-multiarch[0m  Build API Testing for multiple platforms. See Option PLATFORMS and IMAGES.
+  [36mtest           [0m  Run all Go test of code sources.
+  [36mtestlang       [0m  Run limiter long test.
+  [36mformat         [0m  Update and check dependences with go mod tidy.
+  [36mclean          [0m  Remove all files that are created during builds.
+
+[1mImage[0m
+  [36mimage          [0m  Build docker images for host platform. See Option PLATFORM and BINS.
+  [36mrun-container  [0m  Run the docker container for the image. See Option IMAGES and TAG.
+
+[1mLint[0m
+  [36mlint           [0m  Run all linter of code sources, including golint, yamllint.
+  [36mlint-deps      [0m  Everything necessary to lint
+
+[1mDocs[0m
+  [36mclean          [0m  Remove all files that are created during builds.
+  [36mcheck-links    [0m  Check for broken links in the docs.
+
+[1mHelm[0m
+  [36mhelm-pkg       [0m  Package API Testing helm chart.
+  [36mhelm-push      [0m  Push API Testing helm chart to OCI registry.
+  [36mhelm-lint      [0m  Helm lint API Testing helm chart.
+  [36mbuf-mod-update [0m  Update buf.lock for protobuf dependency updates
+  [36mproto-test     [0m  Test the protobuf files
+  [36mgrpc-go        [0m  Generate Go gRPC code
+  [36mgrpc-gw        [0m  Generate Go gRPC Gateway code
+  [36mgrpc-java      [0m  Generate Java gRPC code
+  [36mgrpc-js        [0m  Generate JavaScript gRPC code
+  [36mgrpc-ts        [0m  Generate TypeScript gRPC code
+  [36mgrpc-decs      [0m  Generate DescriptorSet
+  [36mgrpc-all       [0m  Generate all gRPC code
+  [36mgrpc-all       [0m  Generate all gRPC code
+
+[1mUI[0m
+  [36mbuild-ui       [0m  Build APT Testing UI
+  [36mtest-ui        [0m  Test APT Testing UI
+  [36mtest-ui-e2e    [0m  Test APT Testing UI E2E
+
+[1mLocal runs[0m
+  [36mrun-server     [0m  Run the API Testing server
+  [36mrun-console    [0m  Run the API Testing console
+  [36mcopy-restart   [0m  Copy the binary to /usr/local/bin and restart the service
+
+[1mOther Test[0m
+  [36mtest-operator  [0m  Run operator tests
+  [36mtest-e2e       [0m  Run e2e tests
+  [36mtest-fuzz      [0m  Run fuzz tests
+
+Options:
+  [36mBINS[0m
+		 The binaries to build. Default is all of cmd.
+		 This option is available when using: make build|build-multiarch
+		 Example: [36mmake build BINS="API Testing"[0m
+  [36mIMAGES[0m
+		 Backend images to make. Default is all of cmds.
+		 This option is available when using: make image|image-multiarch|push|push-multiarch
+		 Example: [36mmake image-multiarch IMAGES="API Testing"[0m
+  [36mPLATFORM[0m
+		 The specified platform to build.
+		 This option is available when using: make build|image
+		 Example: [36mmake build BINS="API Testing" PLATFORM="linux_amd64""[0m
+		 Supported Platforms: linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
+  [36mPLATFORMS[0m
+		 The multiple platforms to build.
+		 This option is available when using: make build-multiarch
+		 Example: [36mmake build-multiarch BINS="API Testing" PLATFORMS="linux_amd64 linux_arm64"[0m
+		 Default is "linux_amd64 linux_arm64 darwin_amd64 darwin_arm64".
+make[1]: Leaving directory 'D:/open_sources/apitesting'
