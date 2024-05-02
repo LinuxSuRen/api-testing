@@ -1,7 +1,7 @@
 FROM docker.io/library/node:20-alpine3.17 AS ui
 
 WORKDIR /workspace
-COPY console/atest-ui .
+COPY ../../../console/atest-ui .
 RUN npm install --ignore-scripts --registry=https://registry.npmmirror.com
 RUN npm run build-only
 
@@ -10,19 +10,19 @@ FROM docker.io/golang:1.22.2 AS builder
 ARG VERSION
 ARG GOPROXY
 WORKDIR /workspace
-COPY cmd/ cmd/
-COPY pkg/ pkg/
-COPY operator/ operator/
-COPY .github/ .github/
-COPY sample/ sample/
-COPY docs/ docs/
-COPY go.mod go.mod
-COPY go.sum go.sum
-COPY go.work go.work
-COPY go.work.sum go.work.sum
-COPY main.go main.go
-COPY README.md README.md
-COPY LICENSE LICENSE
+COPY ../../../cmd cmd/
+COPY ../../../pkg pkg/
+COPY ../../../operator operator/
+COPY ../../../.github .github/
+COPY ../../../sample sample/
+COPY ../../../docs docs/
+COPY ../../../go.mod go.mod
+COPY ../../../go.sum go.sum
+COPY ../../../go.work go.work
+COPY ../../../go.work.sum go.work.sum
+COPY ../../../main.go main.go
+COPY ../../../README.md README.md
+COPY ../../../LICENSE LICENSE
 
 COPY --from=ui /workspace/dist/index.html cmd/data/index.html
 COPY --from=ui /workspace/dist/assets/*.js cmd/data/index.js

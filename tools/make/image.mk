@@ -6,7 +6,7 @@ include tools/make/env.mk
 
 
 # Determine image files by looking into ./Dockerfile
-IMAGES_DIR ?= ${ROOT_PACKAGE}/Dockerfile
+IMAGES_DIR ?= ${ROOT_PACKAGE}/tools/docker/api-testing/Dockerfile
 # Determine images names by stripping out the dir names
 IMAGES ?= atest
 
