@@ -29,7 +29,7 @@ go.build.%:
 	$(eval PLATFORM := $(word 1,$(subst ., ,$*)))
 	$(eval OS := $(word 1,$(subst _, ,$(PLATFORM))))
 	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
-	@$(call log, "Building binary $(BINARY) for $(OS) $(ARCH).")
+	@$(call log, "Building binary $(BINARY) for $(OS)-$(ARCH).")
 	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build ${TOOLEXEC} -o $(OUTPUT_DIR)/$(OS)/$(ARCH)/${BINARY} -ldflags "$(GO_FLAGS)" $(ROOT_PACKAGE)/main.go
 
 # Build the API Testing binaries in the hosted platforms.

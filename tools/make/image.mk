@@ -6,7 +6,7 @@ include tools/make/env.mk
 
 
 # Determine image files by looking into ./Dockerfile
-IMAGES_DIR ?= ${ROOT_PACKAGE}/tools/docker/api-testing/Dockerfile
+IMAGES_DIR ?= $(wildcard ${ROOT_DIR}tools/docker/*)
 # Determine images names by stripping out the dir names
 IMAGES ?= atest
 
@@ -18,14 +18,15 @@ endif
 image.build: $(addprefix image.build., $(IMAGES))
 
 .PHONY: image.build.%
-image.build.%: go.build.linux_$(GOARCH).%
+# Maybe can use: image.build.%: go.build.$(GOOS)_$(GOARCH).%
+image.build.%:
 	@$(LOG_TARGET)
-	$(eval IMAGES := $(BINARY))
-	@$(call log, "Building image $(IMAGES):$(TAG)")
-	${IMAGE_TOOL} build -t ${REGISTRY}/${IMAGES}:${TAG} . \
+	@$(call log, "Building image $(GOOS)-$(GOARCH) $(IMAGES):$(TAG)")
+	${IMAGE_TOOL} build -f $(ROOT_DIR)/tools/docker/$(IMAGES)/Dockerfile \
+			-t ${REGISTRY}/${IMAGES}:${TAG} . \
     		--build-arg GOPROXY=${GOPROXY} \
-    		--build-arg VERSION=$(shell git describe --abbrev=0 --tags)-$(TAG)
-	@$(call log, "Creating image tag $(REGISTRY)/$(IMAGES):$(TAG)")
+    		--build-arg VERSION=$(TAG)
+
 
 .PHONY: run.image
 run.image:
