@@ -16,7 +16,7 @@ inputs:
     required: true
 runs:
   using: 'docker'
-  image: 'tools/docker/api-testing/Dockerfile'
+  image: 'tools/docker/atest/Dockerfile'
   args:
     - ${{ inputs.pattern }}
     - ${{ inputs.kustomization }}

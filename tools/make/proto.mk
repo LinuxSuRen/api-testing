@@ -3,8 +3,8 @@
 # All make targets related grpc generate are defined in this file.
 
 .PHONY: grpc
-grpc:
-	${tools/buf} --proto_path=. \
+grpc: $(tools/protoc-gen-go) $(tools/protoc-gen-go-grpc) $(tools/buf)
+	$(tools/buf) --proto_path=. \
 	--go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
     pkg/server/server.proto \
@@ -65,7 +65,7 @@ grpc.testproto:
 
 ##@ Grpc Protobufs
 
-.PHONY grpc-go:
+.PHONY grpc:
 grpc-go: ## Generate Go gRPC code
 grpc-go:
 	grpc
@@ -97,7 +97,7 @@ grpc-decs:
 
 .PHONY: grpc-all
 grpc-all: ## Generate all gRPC code
-grpc-all: grpc-go grpc-gw grpc-java grpc-js grpc-ts grpc-decs ## Generate all gRPC code
+grpc-all: grpc grpc-gw grpc-java grpc-js grpc-ts grpc-decs ## Generate all gRPC code
 
 .PHONY: buf-mod-update
 buf-mod-update: $(tools/buf) ## Update buf.lock for protobuf dependency updates

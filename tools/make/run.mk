@@ -19,7 +19,7 @@ run-console:
 	cd ${ATEST_UI} && ${FRONT_RUNTIMES} run dev
 
 copy:
-	sudo cp ${OUTPUT_DIR}/atest /usr/local/bin/
+	sudo cp ${OUTPUT_DIR}/atest/$(GOOS)/$(GOARCH)/ /usr/local/bin/
 
 .PHONY: copy-restart
 copy-restart: ## Copy the binary to /usr/local/bin and restart the service
