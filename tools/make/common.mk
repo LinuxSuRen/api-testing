@@ -65,17 +65,6 @@ else
 	IMAGE_PLAT := $(PLATFORM)
 endif
 
-# List commands in cmd directory for building targets
-COMMANDS ?= $(wildcard main.go)
-BINS ?= $(foreach cmd,${COMMANDS},$(notdir ${cmd}))
-
-ifeq (${COMMANDS},)
-  $(error Could not determine COMMANDS, set ROOT_DIR or run in source dir)
-endif
-ifeq (${BINS},)
-  $(error Could not determine BINS, set ROOT_DIR or run in source dir)
-endif
-
 # ====================================================================================================
 # Includes:
 # ====================================================================================================

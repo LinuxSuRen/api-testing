@@ -20,8 +20,7 @@ image.build: $(addprefix image.build., $(IMAGES))
 .PHONY: image.build.%
 image.build.%: go.build.linux_$(GOARCH).%
 	@$(LOG_TARGET)
-	$(eval COMMAND := $(word 1,$(subst ., ,$*)))
-	$(eval IMAGES := $(COMMAND))
+	$(eval IMAGES := $(BINARY))
 	@$(call log, "Building image $(IMAGES):$(TAG)")
 	${IMG_TOOL} build -t ${REGISTRY}/${IMAGES}:${TAG} . \
     		--build-arg GOPROXY=${GOPROXY} \
@@ -36,7 +35,7 @@ run.image:
 ##@ Image
 
 .PHONY: image
-image: ## Build docker images for host platform. See Option PLATFORM and BINS.
+image: ## Build docker images for host platform. See Option PLATFORM and BINARY.
 image: image.build
 
 .PHONY: run-container

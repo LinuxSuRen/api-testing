@@ -5,8 +5,8 @@
 include tools/make/env.mk
 
 # Set the build flags
-BUILD_FLAGS += \
-	-X github.com/linuxsuren/api-testing/pkg/version.version=$(shell git describe --tags) \
+GO_FLAGS += \
+	-X github.com/linuxsuren/api-testing/pkg/version.version=$(TAG) \
 	-X github.com/linuxsuren/api-testing/pkg/version.date=$(shell date +%Y-%m-%d)
 
 # Binary file name
@@ -20,28 +20,26 @@ endif
 GO_VERSION = $(shell grep -oE "^go [[:digit:]]*\.[[:digit:]]*" go.mod | cut -d' ' -f2)
 
 # Build the target binary in target platform.
-# The pattern of build.% is `build.{Platform}.{Command}`.
+# The pattern of build.% is `build.{Platform}.{BINARY}`.
 # If we want to build API Testing in linux amd64 platform,
 # just execute `make go.build.linux_amd64.api-testing`
 .PHONY: go.build.%
 go.build.%:
 	@$(LOG_TARGET)
-	$(eval COMMAND := $(word 2,$(subst ., ,$*)))
 	$(eval PLATFORM := $(word 1,$(subst ., ,$*)))
 	$(eval OS := $(word 1,$(subst _, ,$(PLATFORM))))
 	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
-	@$(call log, "Building binary $(COMMAND) for $(OS) $(ARCH).")
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build ${TOOLEXEC} -o $(OUTPUT_DIR)/$(OS)/$(ARCH)/${BINARY} -ldflags "$(BUILD_FLAGS)" $(ROOT_PACKAGE)/main.go
-	@$(call log, "Building binary success, please see $(OUTPUT_DIR)/$(OS)/$(ARCH) dir.")
+	@$(call log, "Building binary $(BINARY) for $(OS) $(ARCH).")
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build ${TOOLEXEC} -o $(OUTPUT_DIR)/$(OS)/$(ARCH)/${BINARY} -ldflags "$(GO_FLAGS)" $(ROOT_PACKAGE)/main.go
 
 # Build the API Testing binaries in the hosted platforms.
 .PHONY: go.build
-go.build: $(addprefix go.build., $(addprefix $(PLATFORM)., $(BINS)))
+go.build: $(addprefix go.build., $(addprefix $(PLATFORM)., $(BINARY)))
 
 # Build the API Testing binaries in multi platforms
 # It will build the linux/amd64, linux/arm64, darwin/amd64, darwin/arm64 binaries out.
 .PHONY: go.build.multiarch
-go.build.multiarch: $(foreach p,$(PLATFORMS),$(addprefix go.build., $(addprefix $(p)., $(BINS))))
+go.build.multiarch: $(foreach p,$(PLATFORMS),$(addprefix go.build., $(addprefix $(p)., $(BINARY))))
 
 .PHONY: go.test.unit
 go.test.unit: ## Run go unit tests
@@ -84,7 +82,7 @@ go.mod.lint:
 ##@ Golang
 
 .PHONY: build
-build: ## Build API Testing for host platform. See Option PLATFORM and BINS.
+build: ## Build API Testing for host platform. See Option PLATFORM and BINARY.
 build: go.build
 
 .PHONY: build-multiarch
