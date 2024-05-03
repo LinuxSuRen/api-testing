@@ -22,7 +22,7 @@ image.build.%: go.build.linux_$(GOARCH).%
 	@$(LOG_TARGET)
 	$(eval IMAGES := $(BINARY))
 	@$(call log, "Building image $(IMAGES):$(TAG)")
-	${IMG_TOOL} build -t ${REGISTRY}/${IMAGES}:${TAG} . \
+	${IMAGE_TOOL} build -t ${REGISTRY}/${IMAGES}:${TAG} . \
     		--build-arg GOPROXY=${GOPROXY} \
     		--build-arg VERSION=$(shell git describe --abbrev=0 --tags)-$(TAG)
 	@$(call log, "Creating image tag $(REGISTRY)/$(IMAGES):$(TAG)")
@@ -30,7 +30,7 @@ image.build.%: go.build.linux_$(GOARCH).%
 .PHONY: run.image
 run.image:
 	@$(LOG_TARGET)
-	${IMG_TOOL} run -p 7070:7070 -p 8080:8080 ${REGISTRY}/${IMAGES}:${TAG}
+	${IMAGE_TOOL} run -p 7070:7070 -p 8080:8080 ${REGISTRY}/${IMAGES}:${TAG}
 
 ##@ Image
 

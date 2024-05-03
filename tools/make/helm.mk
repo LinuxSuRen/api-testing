@@ -24,7 +24,7 @@ helm-push: ## Push API Testing helm chart to OCI registry.
 	@$(LOG_TARGET)
 	helm push ${OUTPUT_DIR}/charts/${CHART_NAME}-${CHART_VERSION}-helm.tgz ${OCI_REGISTRY}
 
-.PHONY: helm-install
+.PHONY: helm-lint
 helm-lint: ## Helm lint API Testing helm chart.
 helm-lint: helm-dev-update
 	helm lint helm/${CHART_NAME}
