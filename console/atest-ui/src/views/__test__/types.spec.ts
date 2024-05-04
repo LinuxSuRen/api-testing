@@ -1,6 +1,6 @@
 import { describe } from 'node:test'
-import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from '../types'
-import type { Pair } from '../types'
+import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from '../../types/types'
+import type { Pair } from '../../types/types'
 
 const fakeFetch: { [key:string]:string; } = {};
 function matchFake(url: string, data: string) {
