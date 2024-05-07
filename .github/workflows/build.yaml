@@ -118,7 +118,7 @@ jobs:
           cache-dependency-path: console/atest-ui/package-lock.json
       - name: Build
         run: |
-          TOOLEXEC= make build-embed-ui copy
+          make build-embed-ui
           sudo atest service install
           sudo atest service restart
       - name: Test
