@@ -22,11 +22,10 @@ image.build: $(addprefix image.build., $(IMAGES))
 image.build.%:
 	@$(LOG_TARGET)
 	@$(call log, "Building image $(GOOS)-$(GOARCH) $(IMAGES):$(TAG)")
-	${IMAGE_TOOL} build -f $(ROOT_DIR)/tools/docker/$(IMAGES)/Dockerfile \
+	${IMAGE_TOOL} build -f $(ROOT_DIR)/Dockerfile \
 			-t ${REGISTRY}/${IMAGES}:${TAG} . \
     		--build-arg GOPROXY=${GOPROXY} \
     		--build-arg VERSION=$(TAG)
-
 
 .PHONY: run.image
 run.image:
