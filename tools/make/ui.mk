@@ -51,3 +51,7 @@ test-ui: test.ui
 .PHONY: test-ui-e2e
 test-ui-e2e: ## Test APT Testing UI E2E
 test-ui-e2e: test.ui.e2e
+
+.PHONY: build-embed-ui
+build-embed-ui:
+build-embed-ui: build.embed.ui
