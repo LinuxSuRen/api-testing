@@ -33,8 +33,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
-import { Sunny, Moon } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+// import { Sunny, Moon } from '@element-plus/icons-vue'
 import { setAsDarkTheme } from '../theme/theme'
 
 const darkOpt = ref(false)
