@@ -21,7 +21,8 @@ You might need to know the following tech before get started.
 
 ## Setup development environment
 
-> This project uses `make` as a build tool and has a very powerful make command system. You can see all the available commands by running `make help`.
+> This project uses `make` as a build tool and has a very powerful make command system. 
+> You can see all the available commands by running `make help`.
 
 It's highly recommended you to configure the git pre-commit hook. It will force to run unit tests before commit.
 Run the following command:
