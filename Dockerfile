@@ -10,12 +10,12 @@ FROM docker.io/golang:1.22.2 AS builder
 ARG VERSION
 ARG GOPROXY
 WORKDIR /workspace
-COPY cmd cmd/
-COPY pkg pkg/
-COPY operator operator/
-COPY .github .github/
-COPY sample sample/
-COPY docs docs/
+COPY cmd/ cmd/
+COPY pkg/ pkg/
+COPY operator/ operator/
+COPY .github/ .github/
+COPY sample/ sample/
+COPY docs/ docs/
 COPY go.mod go.mod
 COPY go.sum go.sum
 COPY go.work go.work

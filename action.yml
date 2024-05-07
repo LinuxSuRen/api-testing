@@ -16,7 +16,7 @@ inputs:
     required: true
 runs:
   using: 'docker'
-  image: 'tools/docker/atest/Dockerfile'
+  image: 'Dockerfile'
   args:
     - ${{ inputs.pattern }}
     - ${{ inputs.kustomization }}
