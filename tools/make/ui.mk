@@ -19,6 +19,7 @@ build.embed.ui: embed.ui
 	GOOS=${OS} go build ${TOOLEXEC} -a -ldflags ${BUILD_FLAGS} -o ${OUTPUT_DIR}/embedui/${BINARY} ${ROOT_PACKAGE}/main.go
 	make clean.embed.ui
 
+.PHONY: embed.ui
 embed.ui:
 	cd ${ATEST_UI} && ${FRONT_RUNTIMES} i && ${FRONT_RUNTIMES} run build-only
 	cp ${ATEST_UI}/dist/index.html cmd/data/index.html
@@ -55,3 +56,7 @@ test-ui-e2e: test.ui.e2e
 .PHONY: build-embed-ui
 build-embed-ui:
 build-embed-ui: build.embed.ui
+
+.PHONY: embed-ui
+embed-ui:
+embed-ui: embed.ui
