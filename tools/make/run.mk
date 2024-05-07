@@ -16,12 +16,12 @@ run-server: build-ui
 .PHONY: run-console
 run-console: ## Run the API Testing console
 run-console:
-	cd -r ${ATEST_UI} && ${FRONT_RUNTIMES} run dev
+	cd ${ATEST_UI} && ${FRONT_RUNTIMES} run dev
 
 .PHONY: copy
 copy: ## Copy the binary to /usr/local/bin
 copy:
-	sudo cp ${OUTPUT_DIR}/$(GOOS)/$(GOARCH)/ /usr/local/bin/
+	sudo cp ${OUTPUT_DIR}/$(GOOS)/$(GOARCH)/atest /usr/local/bin/
 
 .PHONY: copy-restart
 copy-restart: ## Copy the binary to /usr/local/bin and restart the service

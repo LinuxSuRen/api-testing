@@ -39,7 +39,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TOOLEXEC= make build copy
+          make build
+          make copy
           sudo atest service install
           sudo atest service restart
           sudo atest service status
