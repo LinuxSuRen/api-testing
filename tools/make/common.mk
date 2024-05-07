@@ -94,10 +94,6 @@ endef
 
 define USAGE_OPTIONS
 Options:
-  \033[36mBINS\033[0m
-		 The binaries to build. Default is all of cmd.
-		 This option is available when using: make build|build-multiarch
-		 Example: \033[36mmake build BINS="API Testing"\033[0m
   \033[36mIMAGES\033[0m
 		 Backend images to make. Default is all of cmds.
 		 This option is available when using: make image|image-multiarch|push|push-multiarch
@@ -105,12 +101,12 @@ Options:
   \033[36mPLATFORM\033[0m
 		 The specified platform to build.
 		 This option is available when using: make build|image
-		 Example: \033[36mmake build BINS="API Testing" PLATFORM="linux_amd64""\033[0m
+		 Example: \033[36mmake build PLATFORM="linux_amd64""\033[0m
 		 Supported Platforms: linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
   \033[36mPLATFORMS\033[0m
 		 The multiple platforms to build.
 		 This option is available when using: make build-multiarch
-		 Example: \033[36mmake build-multiarch BINS="API Testing" PLATFORMS="linux_amd64 linux_arm64"\033[0m
+		 Example: \033[36mmake build-multiarch PLATFORMS="linux_amd64 linux_arm64"\033[0m
 		 Default is "linux_amd64 linux_arm64 darwin_amd64 darwin_arm64".
 endef
 export USAGE_OPTIONS
