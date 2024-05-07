@@ -45,8 +45,8 @@ go.build.multiarch: $(foreach p,$(PLATFORMS),$(addprefix go.build., $(addprefix 
 go.test.unit: ## Run go unit tests
 	go test -race ./...
 
-.PHONY: go.test.lang
-go.test.lang: ## Run go limiter long test
+.PHONY: go.test.long
+go.test.long: ## Run go limiter long test
 	go test pkg/limit/limiter_long_test.go -v
 
 .PHONY: go.test.coverage
@@ -93,9 +93,9 @@ build-multiarch: go.build.multiarch
 test: ## Run all Go test of code sources.
 test: go.test.coverage
 
-.PHONY: testlang
+.PHONY: testlong
 testlang: ## Run limiter long test.
-testlang: go.test.lang
+testlang: go.test.long
 
 .PHONY: format
 format: ## Update and check dependences with go mod tidy.

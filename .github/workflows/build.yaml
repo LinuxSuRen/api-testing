@@ -91,7 +91,7 @@ jobs:
           fi
           make helm-pkg
       - name: Core Image
-        run: GOPROXY=direct IMG_TOOL=docker make build-image
+        run: GOPROXY=direct IMG_TOOL=docker make build
       - name: Run e2e
         env:
           GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
