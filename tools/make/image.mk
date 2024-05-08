@@ -8,7 +8,7 @@ include tools/make/env.mk
 # Determine image files by looking into ./Dockerfile
 IMAGES_DIR ?= $(wildcard ${ROOT_DIR}tools/docker/*)
 # Determine images names by stripping out the dir names
-IMAGES ?= atest
+IMAGES ?= api-testing
 
 ifeq (${IMAGES},)
   $(error Could not determine IMAGES, set ROOT_DIR or run in source dir)
@@ -19,6 +19,7 @@ image.build: $(addprefix image.build., $(IMAGES))
 
 .PHONY: image.build.%
 # Maybe can use: image.build.%: go.build.$(GOOS)_$(GOARCH).%
+# then to move binary file to docker context.
 image.build.%:
 	@$(LOG_TARGET)
 	@$(call log, "Building image $(GOOS)-$(GOARCH) $(IMAGES):$(TAG)")
@@ -35,7 +36,7 @@ run.image:
 ##@ Image
 
 .PHONY: image
-image: ## Build docker images for host platform. See Option PLATFORM and BINARY.
+image: ## Build docker images for host platform. See Option PLATFORM and IMAGES.
 image: image.build
 
 .PHONY: run-container

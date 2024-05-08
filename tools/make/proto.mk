@@ -91,7 +91,7 @@ grpc-decs: grpc.decs
 
 .PHONY: grpc-all
 grpc-all: ## Generate all gRPC code
-grpc-all: grpc grpc-gw grpc-java grpc-js grpc-ts grpc-decs ## Generate all gRPC code
+grpc-all: grpc grpc-gw grpc-java grpc-js grpc-ts grpc-decs
 
 .PHONY: proto-test
 proto-test: ## Test the protobuf files

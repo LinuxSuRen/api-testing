@@ -4,7 +4,7 @@
 # ====================================================================================================
 
 # An wrapper around `make` so that we can force on the,
-# --warn-undefined-variables flag.  Sure, you can set
+# --warn-undefined-variables flag. Sure, you can set
 # `MAKEFLAGS += --warn-undefined-variables` from inside of a Makefile,
 # but then it won't turn on until the second phase (recipe execution),
 # and won't actually be on during the initial phase (parsing).

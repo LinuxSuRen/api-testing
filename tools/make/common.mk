@@ -27,7 +27,7 @@ SHELL := /bin/bash
 ROOT_PACKAGE = .
 
 # Get release version from VERSION file
-RELEASE_VERSION = $(shell cat VERSION)
+RELEASE_VERSION = $(shell cat helm/api-testing/VERSION)
 
 # REV is the short git sha of latest commit.
 REV=$(shell git rev-parse --short HEAD)
@@ -95,13 +95,13 @@ endef
 define USAGE_OPTIONS
 Options:
   \033[36mIMAGES\033[0m
-		 Backend images to make. Default is all of cmds.
-		 This option is available when using: make image|image-multiarch|push|push-multiarch
-		 Example: \033[36mmake image-multiarch IMAGES="API Testing"\033[0m
+		 Backend images to make. Default image is api-testing.
+		 This option is available when using: make image
+		 Example: \033[36mmake image IMAGES="api-testing"\033[0m
   \033[36mPLATFORM\033[0m
 		 The specified platform to build.
-		 This option is available when using: make build|image
-		 Example: \033[36mmake build PLATFORM="linux_amd64""\033[0m
+		 This option is available when using: make build
+		 Example: \033[36mmake build PLATFORM="linux_amd64"\033[0m
 		 Supported Platforms: linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
   \033[36mPLATFORMS\033[0m
 		 The multiple platforms to build.
