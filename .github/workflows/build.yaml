@@ -7,22 +7,19 @@ env:
 
 jobs:
   Test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.22
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
       - name: Unit Test
         run: |
-          make test-all-backend
+          make test
       - name: Long Test
         run: |
           make testlong
       - name: Lint Helm
         run: |
-          make helm-package helm-lint
+          make helm-pkg helm-lint
       - name: Report
         if: github.actor == 'linuxsuren'
         env:
@@ -32,20 +29,18 @@ jobs:
           bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 
   APITest:
-    permissions: 
-      pull-requests: write 
-    runs-on: ubuntu-20.04
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.22
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
       - name: API Test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TOOLEXEC= make build copy
+          make build
+          make copy
           sudo atest service install
           sudo atest service restart
           sudo atest service status
@@ -64,13 +59,10 @@ jobs:
           testFilePath: sample.jmx
 
   Build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.22
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         env:
@@ -82,16 +74,10 @@ jobs:
       #   run: cd operator && make build
 
   BuildImage:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-tags: true
-          fetch-depth: 0
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.22
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
       - name: Set output
         id: vars
         run: echo "tag=$(git describe --tags)" >> $GITHUB_OUTPUT
@@ -104,9 +90,9 @@ jobs:
             unset APP_VERSION
             unset HELM_VERSION
           fi
-          make helm-package
+          make helm-pkg
       - name: Core Image
-        run: GOPROXY=direct IMG_TOOL=docker make build-image
+        run: GOPROXY=direct IMG_TOOL=docker make build
       - name: Run e2e
         env:
           GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
@@ -120,13 +106,10 @@ jobs:
       #   run: cd operator && make docker-build
 
   BuildEmbedUI:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.22
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -135,7 +118,7 @@ jobs:
           cache-dependency-path: console/atest-ui/package-lock.json
       - name: Build
         run: |
-          TOOLEXEC= make build-embed-ui copy
+          make build-embed-ui
           sudo atest service install
           sudo atest service restart
       - name: Test

@@ -17,11 +17,14 @@
 | [Docker](https://www.docker.com/get-started/)                               | The container image build                                              |
 | [Helm chart](https://helm.sh/)                                              | The [Kubernetes](https://kubernetes.io/docs/home/) application package |
 | [GitHub Actions](https://docs.github.com/en/actions)                        | The continuous integration                                             |
+| [make](https://www.gnu.org/software/make/)                                  | The automated Build Tools                                              |
 
 ## 设置开发环境
 
+> 本项目使用 `make` 作为构建工具，并设计了非常强大的 make 指令系统。您可以通过运行 `make help` 查看所有可用的命令。
+
 强烈建议您配置 `git pre-commit` 钩子。它会强制在提交前运行单元测试。
-运行以下命令
+运行以下命令：
 
 ```shell
 make install-precheck
