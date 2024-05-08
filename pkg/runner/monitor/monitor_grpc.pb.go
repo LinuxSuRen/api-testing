@@ -80,7 +80,7 @@ func _Monitor_GetResourceUsage_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/monitot/Monitor/GetResourceUsage",
+		FullMethod: "/monitor.Monitor/GetResourceUsage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MonitorServer).GetResourceUsage(ctx, req.(*Target))
