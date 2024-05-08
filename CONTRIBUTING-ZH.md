@@ -1,10 +1,12 @@
-Please join us to improve this project.
+> 中文 | [English](CONTRIBUTING.md)
 
-The backend is written by [Golang](https://go.dev/), and the front-end is written by [Vue](https://vuejs.org/).
+请加入我们，共同完善这个项目。
 
-## For beginner
+后端由 [Golang](https://go.dev/) 编写，前端由 [Vue](https://vuejs.org/) 编写。
 
-You might need to know the following tech before get started.
+### 对于初学者
+
+在开始之前，您可能需要了解以下技术:
 
 | Name                                                                        | Domain                                                                 |
 |-----------------------------------------------------------------------------|------------------------------------------------------------------------|
@@ -17,21 +19,20 @@ You might need to know the following tech before get started.
 | [Docker](https://www.docker.com/get-started/)                               | The container image build                                              |
 | [Helm chart](https://helm.sh/)                                              | The [Kubernetes](https://kubernetes.io/docs/home/) application package |
 | [GitHub Actions](https://docs.github.com/en/actions)                        | The continuous integration                                             |
-| [make](https://www.gnu.org/software/make/)                                  | The automated Build Tools    |
+| [make](https://www.gnu.org/software/make/)                                  | The automated Build Tools                                              |
 
-## Setup development environment
+## 设置开发环境
 
-> This project uses `make` as a build tool and has a very powerful make command system. 
-> You can see all the available commands by running `make help`.
+> 本项目使用 `make` 作为构建工具，并设计了非常强大的 make 指令系统。您可以通过运行 `make help` 查看所有可用的命令。
 
-It's highly recommended you to configure the git pre-commit hook. It will force to run unit tests before commit.
-Run the following command:
+强烈建议您配置 `git pre-commit` 钩子。它会强制在提交前运行单元测试。
+运行以下命令：
 
 ```shell
 make install-precheck
 ```
 
-## Print the code of lines:
+## 打印各行代码：
 
 ```shell
 git ls-files | xargs cloc
@@ -39,14 +40,15 @@ git ls-files | xargs cloc
 
 ## pprof
 
-```
+```shell
 go tool pprof -http=:9999 http://localhost:8080/debug/pprof/heap
 ```
 
-Other usage of this:
+其他用法：
+
 * `/debug/pprof/heap?gc=1`
-* `/debug/pprof/heap?seconds=10`
-* `/debug/pprof/goroutine/?debug=0`
+* `/debug/pprof/heap?seconds=10` 
+* `/debug/pprof/goroutine/?debug=0` 
 
 ## SkyWalking
 
@@ -65,7 +67,7 @@ export SW_AGENT_REPORTER_DISCARD=true
 ./bin/atest server --local-storage 'bin/*.yaml' --http-port 8082 --port 7072 --console-path console/atest-ui/dist/
 ```
 
-Run SkyWalking with BanYanDB:
+通过 BanYanDB 运行 SkyWalking：
 
 ```shell
 docker run -p 17912:17912 -p 17913:17913 apache/skywalking-banyandb:latest  standalone
@@ -76,17 +78,17 @@ docker run -p 12800:12800 -p 9412:9412 \
     docker.io/apache/skywalking-oap-server
 ```
 
-## First contribution
+## 第一次贡献
 
-For developers contributing code to this project for the first time, you should run the following command in your local development environment:
+对于第一次对此项目贡献代码的开发者，您应该在本地开发环境运行如下命令：
 
 ```shell
 make test
 ```
 
-This will help you to check for and fix any bugs that you encounter at commit time, as well as reduce the complexity of the review.
+以确保通过项目测试，这会有助于您检查并解决在提交时遇到的错误，同时减少 review 的复杂度。
 
 ## FAQ
 
 * Got sum missing match error of go.
-  * Run command: `go clean -modcache && go mod tidy`
+  * 运行命令： `go clean -modcache && go mod tidy`.
