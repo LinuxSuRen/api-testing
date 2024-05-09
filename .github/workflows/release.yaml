@@ -42,7 +42,7 @@ jobs:
       - uses: ./tools/github-actions/setup-deps
       - name: Unit Test
         run: |
-          make test-all-backend
+          make test
       - name: Report
         if: github.actor == 'linuxsuren'
         env:
@@ -115,7 +115,7 @@ jobs:
             unset APP_VERSION
             unset HELM_VERSION
           fi
-          make helm-package helm-push
+          make helm-pkg helm-push
 
   # image-operator:
   #   runs-on: ubuntu-20.04
