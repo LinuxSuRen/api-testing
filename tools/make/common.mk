@@ -26,9 +26,6 @@ SHELL := /bin/bash
 # Set the root package
 ROOT_PACKAGE = .
 
-# Get release version from VERSION file
-RELEASE_VERSION = $(shell cat helm/api-testing/VERSION)
-
 # REV is the short git sha of latest commit.
 REV=$(shell git rev-parse --short HEAD)
 
