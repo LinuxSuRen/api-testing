@@ -7,7 +7,9 @@
 HELM_VERSION ?= v0.0.3
 
 # Docker repo
-REGISTRY ?= docker.io/linuxsuren
+REGISTRY ?= docker.io
+
+REGISTRY_NAMESPACE ?= linuxsuren
 
 # Set image tools
 IMAGE_TOOL ?= docker
