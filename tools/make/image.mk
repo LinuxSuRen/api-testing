@@ -9,6 +9,7 @@ include tools/make/env.mk
 IMAGES_DIR ?= $(wildcard ${ROOT_DIR}tools/docker/*)
 # Determine images names by stripping out the dir names
 IMAGES ?= api-testing
+IMAGE_NAME ?= ${REGISTRY}/${REGISTRY_NAMESPACE}/${IMAGES}:${TAG}
 
 ifeq (${IMAGES},)
   $(error Could not determine IMAGES, set ROOT_DIR or run in source dir)
@@ -24,14 +25,14 @@ image.build.%:
 	@$(LOG_TARGET)
 	@$(call log, "Building image $(GOOS)-$(GOARCH) $(IMAGES):$(TAG)")
 	${IMAGE_TOOL} build -f $(ROOT_DIR)/Dockerfile \
-			-t ${REGISTRY}/${IMAGES}:${TAG} . \
+			-t ${IMAGE_NAME} . \
     		--build-arg GOPROXY=${GOPROXY} \
     		--build-arg VERSION=$(TAG)
 
 .PHONY: run.image
 run.image:
 	@$(LOG_TARGET)
-	${IMAGE_TOOL} run -p 7070:7070 -p 8080:8080 ${REGISTRY}/${IMAGES}:${TAG}
+	${IMAGE_TOOL} run -p 7070:7070 -p 8080:8080 ${IMAGE_NAME}
 
 ##@ Image
 
