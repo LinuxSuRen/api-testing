@@ -5,7 +5,7 @@
 include tools/make/env.mk
 
 
-OCI_REGISTRY ?= oci://${REGISTRY}
+OCI_REGISTRY ?= oci://${REGISTRY}/linuxsuren
 CHART_NAME ?= api-testing
 CHART_VERSION ?= ${HELM_VERSION}
 
