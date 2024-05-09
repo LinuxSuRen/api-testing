@@ -4,8 +4,8 @@
 
 include tools/make/env.mk
 
-
 OCI_REGISTRY ?= oci://${REGISTRY}/${REGISTRY_NAMESPACE}
+
 CHART_NAME ?= api-testing
 CHART_VERSION ?= ${HELM_VERSION}
 

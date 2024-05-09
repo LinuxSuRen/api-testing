@@ -27,7 +27,7 @@ This is a API testing tool. 🚀
 
 ## Get started
 
-[![Deployed on Zeabur](https://zeabur.com/deployed-on-zeabur-dark.svg)](https://zeabur.com?referralCode=LinuxSuRen&utm_source=LinuxSuRen&utm_campaign=oss) [![Try in PWD](https://github.com/play-with-docker/stacks/raw/cff22438cb4195ace27f9b15784bbb497047afa7/assets/images/button.png)](http://play-with-docker.com?stack=https://raw.githubusercontent.com/LinuxSuRen/api-testing/master/docs/manifests/docker-compose.yml)
+[![Try in PWD](https://github.com/play-with-docker/stacks/raw/cff22438cb4195ace27f9b15784bbb497047afa7/assets/images/button.png)](http://play-with-docker.com?stack=https://raw.githubusercontent.com/LinuxSuRen/api-testing/master/docs/manifests/docker-compose.yml)
 
 Install it via [hd](https://github.com/LinuxSuRen/http-downloader) or download from [releases](https://github.com/LinuxSuRen/api-testing/releases):
 
