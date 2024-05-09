@@ -9,7 +9,7 @@ include tools/make/env.mk
 IMAGES_DIR ?= $(wildcard ${ROOT_DIR}tools/docker/*)
 # Determine images names by stripping out the dir names
 IMAGES ?= api-testing
-IMAGE_NAME ?= ${REGISTRY}/${REGISTRY_NAMESPACE}/${IMAGES}/${TAG}
+IMAGE_NAME ?= ${REGISTRY}/${REGISTRY_NAMESPACE}/${IMAGES}:${TAG}
 
 ifeq (${IMAGES},)
   $(error Could not determine IMAGES, set ROOT_DIR or run in source dir)
