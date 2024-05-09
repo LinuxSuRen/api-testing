@@ -48,6 +48,7 @@ LABEL "com.github.actions.description"="API testing"
 LABEL "com.github.actions.icon"="home"
 LABEL "com.github.actions.color"="red"
 
+LABEL "description"="This is an API testing tool that supports HTTP, gRPC, and GraphQL." 
 LABEL "repository"="https://github.com/linuxsuren/api-testing"
 LABEL "homepage"="https://github.com/linuxsuren/api-testing"
 LABEL "maintainer"="Rick <linuxsuren@gmail.com>"
