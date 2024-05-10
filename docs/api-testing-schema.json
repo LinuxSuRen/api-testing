@@ -204,7 +204,8 @@
                         "POST",
                         "PUT",
                         "PATCH",
-                        "DELETE"
+                        "DELETE",
+                        "HEAD"
                     ]
                 },
                 "query": {

@@ -369,7 +369,7 @@ func runJob(job *testing.Job, ctx interface{}, current interface{}) (err error) 
 // isNonBinaryContent detect if the content belong to binary
 func isNonBinaryContent(contentType string) bool {
 	switch contentType {
-	case util.JSON, util.YAML, util.Plain:
+	case util.JSON, util.YAML, util.Plain, util.OCIImageIndex:
 		return true
 	default:
 		return false

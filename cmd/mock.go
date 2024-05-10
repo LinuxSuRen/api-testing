@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"os"
 	"os/signal"
 	"syscall"
@@ -29,37 +28,29 @@ import (
 type mockOption struct {
 	port   int
 	prefix string
-	files  []string
 }
 
 func createMockCmd() (c *cobra.Command) {
 	opt := &mockOption{}
 
 	c = &cobra.Command{
-		Use:     "mock",
-		Short:   "Start a mock server",
-		PreRunE: opt.preRunE,
-		RunE:    opt.runE,
+		Use:   "mock",
+		Short: "Start a mock server",
+		Args:  cobra.ExactArgs(1),
+		RunE:  opt.runE,
 	}
 
 	flags := c.Flags()
 	flags.IntVarP(&opt.port, "port", "", 6060, "The mock server port")
 	flags.StringVarP(&opt.prefix, "prefix", "", "/mock", "The mock server API prefix")
-	flags.StringSliceVarP(&opt.files, "files", "", nil, "The mock config files")
-	return
-}
-
-func (o *mockOption) preRunE(c *cobra.Command, args []string) (err error) {
-	if len(o.files) == 0 {
-		err = errors.New("at least one file is required")
-	}
 	return
 }
 
 func (o *mockOption) runE(c *cobra.Command, args []string) (err error) {
-	reader := mock.NewLocalFileReader(o.files[0])
+	reader := mock.NewLocalFileReader(args[0])
 	server := mock.NewInMemoryServer(o.port)
 
+	c.Println("start listen", o.port)
 	if err = server.Start(reader, o.prefix); err != nil {
 		return
 	}

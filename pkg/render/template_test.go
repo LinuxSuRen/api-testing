@@ -89,6 +89,15 @@ func TestRender(t *testing.T) {
 			assert.Contains(t, s, "@")
 			assert.Contains(t, s, ".com")
 		},
+	}, {
+		name: "sha256 bytes",
+		text: `{{sha256sumBytes .data}}`,
+		ctx: map[string]interface{}{
+			"data": []byte("hello"),
+		},
+		verify: func(t *testing.T, s string) {
+			assert.Equal(t, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824", s)
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
