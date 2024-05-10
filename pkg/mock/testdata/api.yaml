@@ -41,9 +41,8 @@ items:
     request:
       path: /v1/repos/{repo}/prs
     response:
-      headers:
-        - key: server
-          value: mock
+      header:
+        server: mock
       body: |
         {
           "count": 1,

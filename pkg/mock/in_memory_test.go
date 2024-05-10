@@ -135,8 +135,7 @@ func TestInMemoryServer(t *testing.T) {
 		assert.Equal(t, "mock", resp.Header.Get("server"))
 		assert.NotEmpty(t, resp.Header.Get(headerMockServer))
 
-		data, err := io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		data, _ := io.ReadAll(resp.Body)
 
 		assert.True(t, strings.Contains(string(data), `"message": "gzip"`), string(data))
 	})

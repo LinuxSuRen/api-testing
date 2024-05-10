@@ -1,3 +1,6 @@
+//go:build pin
+// +build pin
+
 /*
 Copyright 2024 API Testing Authors.
 
@@ -13,22 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package mock
 
-import "net/http"
+package ignore
 
-type Loadable interface {
-	Load() error
-}
-
-type DynamicServer interface {
-	Start(reader Reader, prefix string) error
-	SetupHandler(reader Reader, prefix string) (http.Handler, error)
-	Stop() error
-	GetPort() string
-	Loadable
-}
-
-const (
-	headerMockServer = "Mock-Server"
-)
+import _ "github.com/golangci/golangci-lint/cmd/golangci-lint"

@@ -34,21 +34,16 @@ type Item struct {
 }
 
 type Request struct {
-	Path   string `yaml:"path"`
-	Method string `yaml:"method"`
-	Header Header `yaml:"header"`
-	Body   string `yaml:"body"`
+	Path   string            `yaml:"path"`
+	Method string            `yaml:"method"`
+	Header map[string]string `yaml:"header"`
+	Body   string            `yaml:"body"`
 }
 
 type Response struct {
-	Body       string   `yaml:"body"`
-	Headers    []Header `yaml:"headers"`
-	StatusCode int      `yaml:"statusCode"`
-}
-
-type Header struct {
-	Key   string `yaml:"key"`
-	Value string `yaml:"value"`
+	Body       string            `yaml:"body"`
+	Header     map[string]string `yaml:"header"`
+	StatusCode int               `yaml:"statusCode"`
 }
 
 type Webhook struct {

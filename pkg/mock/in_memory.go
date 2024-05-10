@@ -19,14 +19,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/swaggest/openapi-go/openapi3"
-	"github.com/swaggest/rest/gorillamux"
 	"io"
 	"net"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/swaggest/openapi-go/openapi3"
+	"github.com/swaggest/rest/gorillamux"
 
 	"github.com/linuxsuren/api-testing/pkg/version"
 
@@ -149,9 +150,8 @@ func (s *inMemoryServer) startObject(obj Object) {
 				allItems = filteredItems
 			}
 
-			if data, err := json.Marshal(allItems); err == nil {
-				w.Write(data)
-			}
+			data, err := json.Marshal(allItems)
+			writeResponse(w, data, err)
 		case http.MethodPost:
 			// create an item
 			if data, err := io.ReadAll(req.Body); err == nil {
@@ -237,12 +237,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 				if obj["name"] == name {
 
 					data, err := json.Marshal(obj)
-					if err == nil {
-						_, _ = w.Write(data)
-					} else {
-						_, _ = w.Write([]byte(err.Error()))
-						w.WriteHeader(http.StatusBadRequest)
-					}
+					writeResponse(w, data, err)
 					return
 				}
 			}
@@ -253,21 +248,24 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 func (s *inMemoryServer) startItem(item Item) {
 	s.mux.HandleFunc(item.Request.Path, func(w http.ResponseWriter, req *http.Request) {
-		item.Response.Headers = append(item.Response.Headers, Header{
-			Key:   headerMockServer,
-			Value: fmt.Sprintf("api-testing: %s", version.GetVersion()),
-		})
-		for _, header := range item.Response.Headers {
-			w.Header().Set(header.Key, header.Value)
+		item.Response.Header[headerMockServer] = fmt.Sprintf("api-testing: %s", version.GetVersion())
+		item.Response.Header["content-length"] = fmt.Sprintf("%d", len(item.Response.Body))
+		for k, v := range item.Response.Header {
+			w.Header().Set(k, v)
 		}
-		body, err := render.Render("start-item", item.Response.Body, req)
-		if err == nil {
-			w.Write([]byte(body))
-		} else {
-			w.Write([]byte(err.Error()))
-		}
+		body, err := render.RenderAsBytes("start-item", item.Response.Body, req)
+		writeResponse(w, body, err)
 		w.WriteHeader(util.ZeroThenDefault(item.Response.StatusCode, http.StatusOK))
 	}).Methods(util.EmptyThenDefault(item.Request.Method, http.MethodGet))
+}
+
+func writeResponse(w http.ResponseWriter, data []byte, err error) {
+	if err == nil {
+		w.Write(data)
+	} else {
+		w.Write([]byte(err.Error()))
+		w.WriteHeader(http.StatusBadRequest)
+	}
 }
 
 func (s *inMemoryServer) initObjectData(obj Object) {
