@@ -117,19 +117,24 @@
 </template>
 
 <script setup lang="ts">
-import TestCase from './TestCase.vue'
-import TestSuite from './TestSuite.vue'
-import TemplateFunctions from '../other/TemplateFunctions.vue'
+import TestCase from '../../components/test/TestCase.vue'
+import TestSuite from '../../components/test/TestSuite.vue'
+import TemplateFunctions from '../../components/other/TemplateFunctions.vue'
 import { reactive, ref, watch } from 'vue'
 import { ElTree, ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
 import { Edit, Refresh } from '@element-plus/icons-vue'
 import { Cache } from '../../utils/cache'
 import { useI18n } from 'vue-i18n'
-import type { TestStore, Tree, Suite } from '../../types/types'
-import { ListTestCase, LoadTestSuite, CreateTestSuite, ImportTestSuite } from '@/api/test/test'
 import { ErrorTips } from '@/utils/tips'
 import { DefaultResponseProcess } from '@/api/common'
+import type { TestStore, Tree, Suite } from '../../types/types'
+import type { FormInstance, FormRules } from 'element-plus'
+import { 
+  ListTestCase, 
+  LoadTestSuite, 
+  CreateTestSuite, 
+  ImportTestSuite 
+} from '@/api/test/test'
 
 const { t } = useI18n()
 

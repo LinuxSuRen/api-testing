@@ -278,33 +278,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Edit, Delete, Search } from '@element-plus/icons-vue'
-import JsonViewer from 'vue-json-viewer'
-import type { Pair, TestResult, TestCaseWithSuite } from '../../types/types'
-import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from '../../types/types'
 import { Cache } from '../../utils/cache'
-import type { TestCaseResponse } from '../utils/cache'
 import { useI18n } from 'vue-i18n'
 import { JSONPath } from 'jsonpath-plus'
 import { Codemirror } from 'vue-codemirror'
 import { ErrorTips } from '@/utils/tips'
-import type { RunTestCaseRequest } from '@/api/common'
+import JsonViewer from 'vue-json-viewer'
+import { PopularHeaders } from '@/api/app/app'
+import { ElMessage } from 'element-plus'
+import { ref, watch, onMounted } from 'vue'
+import { Edit, Delete, Search } from '@element-plus/icons-vue'
+import type { RunTestCaseRequest, GenerateRequest, TestCase } from '@/api/common'
+import type { Pair, TestResult, TestCaseWithSuite } from '../../types/types'
+import type { TestCaseResponse } from '../../utils/cache'
+import { 
+  NewSuggestedAPIsQuery, 
+  CreateFilter, 
+  GetHTTPMethods, 
+  FlattenObject 
+} from '../../types/types'
 import {
   RunTestCase,
   GetTestSuite,
   GetTestCase,
   DeleteTestCase
 } from '../../api/test/test'
-import { 
+import {
   ListCodeGenerator,
-  GenerateCode 
+  GenerateCode
 } from '../../api/code/code'
-import { PopularHeaders } from '@/api/app/app'
 
 const { t } = useI18n()
-
 const props = defineProps({
   name: String,
   suite: String,
@@ -387,8 +391,9 @@ const responseBodyFilter = () => {
 
 const parameterDialogOpened = ref(false)
 const openParameterDialog = () => {
-  GetTestSuite({ props.suite }).then((res: any) => {
-    parameters.value = e.param
+  console.log(props)
+  GetTestSuite(String(props.suite)).then((res: any) => {
+    parameters.value = res.param
     parameterDialogOpened.value = true
   }).catch((err: any) => {
     ErrorTips
@@ -408,15 +413,15 @@ const generateCode = () => {
     suiteName: suite,
     name: name,
     generator: currentCodeGenerator.value
-  }).then((res: any) => {
+  } as GenerateRequest).then((res: any) => {
     ElMessage({
       message: 'Code generated!',
       type: 'success'
     })
     if (currentCodeGenerator.value === "gRPCPayload") {
-      currentCodeContent.value = JSON.stringify(JSON.parse(e.message), null, 4)
+      currentCodeContent.value = JSON.stringify(JSON.parse(res.message), null, 4)
     } else {
-      currentCodeContent.value = e.message
+      currentCodeContent.value = res.message
     }
   }).catch((err: any) => {
     ErrorTips
@@ -559,13 +564,6 @@ const load = () => {
 
 }
 
-load()
-
-watch(props, () => {
-
-  load()
-})
-
 const needUpdate = ref(false)
 watch(testCaseWithSuite, (after, before) => {
   if (before.data.name !== '' && after.data.name === before.data.name) {
@@ -575,16 +573,16 @@ watch(testCaseWithSuite, (after, before) => {
 
 const saveLoading = ref(false)
 
-const saveTestCase = (tip: boolean = true) => {
-  UIAPI.UpdateTestCase(testCaseWithSuite.value, (e) => {
-    if (tip) {
-      ElMessage({
-        message: 'Saved.',
-        type: 'success'
-      })
-    }
-  }, UIAPI.ErrorTip, saveLoading)
-}
+// const saveTestCase = (tip: boolean = true) => {
+//   UIAPI.UpdateTestCase(testCaseWithSuite.value, (e) => {
+//     if (tip) {
+//       ElMessage({
+//         message: 'Saved.',
+//         type: 'success'
+//       })
+//     }
+//   }, UIAPI.ErrorTip, saveLoading)
+// }
 
 const deleteTestCase = () => {
   const name = props.name
@@ -593,7 +591,7 @@ const deleteTestCase = () => {
   DeleteTestCase({
     suiteName: suite,
     name: name
-  }).then((res: any) => {
+  } as TestCase).then((res: any) => {
     emit('updated', 'hello from child')
 
     ElMessage({
@@ -806,5 +804,15 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
   })
   cb(results)
 }
+
+onMounted(() => {
+
+  load()
+})
+
+watch(props, () => {
+
+  load()
+})
 
 </script>

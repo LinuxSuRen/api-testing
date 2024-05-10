@@ -76,6 +76,7 @@ export interface TestCaseRequest {
   query: Pair[]
   form: Pair[]
   body: string
+  cookie: Pair[]
 }
 
 export interface TestCaseResponse {

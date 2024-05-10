@@ -31,7 +31,7 @@
         <div class="wall"></div>
         <div class="wall"></div>
       </div>
-    </div> 
+    </div>
   </div>
 </template>
 
