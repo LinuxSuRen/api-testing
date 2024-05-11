@@ -3,9 +3,9 @@
 #app {
   /* max-width: 1280px; */
   margin: 0 auto;
-  padding: ;
+  padding: 0 auto;
   height: 100vh;
-  font-weight: normal;
+  font-weight: normal;overflow: hidden;
 }
 
 a,

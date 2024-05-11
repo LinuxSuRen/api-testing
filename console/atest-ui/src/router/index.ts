@@ -76,7 +76,8 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  console.log(to, from)
+  // output route info for debug
+  // console.log(to, from)
   next()
 })
 

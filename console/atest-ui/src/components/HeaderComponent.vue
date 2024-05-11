@@ -1,9 +1,12 @@
 <template>
   <div class="container">
-    <div>
-      <!-- todo: add logo -->
-      <a href="#">API Testing</a>
-    </div>
+      <div class="logo_container">
+        <a href="#">
+          <img src="../assets/logo/logo.png" alt="logo">
+          &nbsp;&nbsp;
+          <p>API Testing</p>
+        </a>
+      </div>
     <div>
       <ui>
         <li>
@@ -12,7 +15,7 @@
           </a>
         </li>
         <li>
-          <a href="https://github.com/linuxsuren/api-testing.git" target="_blank"><img
+          <a href="https://github.com/linuxsuren/api-testing.git" target="_blank"><img class="github"
               src="../assets/github/github-mark.png" alt="github" /></a>
         </li>
         <!-- todo：主题样式显示有误。 -->
@@ -49,18 +52,25 @@ const setTheme = () => {
 <style scoped>
 .container {
   display: flex;
-  align-items: center;
   line-height: 40px;
-  justify-content: space-around;
-}
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
 
-ui {
-  display: flex;
-  list-style: none;
+  .logo_container {
+    display: flex;
+    align-items: center;
 
-  li {
-    line-height: 50px;
-    margin-left: 20%;
+    p {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    img {
+      width: 100px;
+      height: 50px;
+       vertical-align: middle;
+    }
   }
 }
 
@@ -70,12 +80,21 @@ a {
   color: black;
 }
 
+ui {
+  display: flex;
+  list-style: none;
+
+  li {
+    padding-right: 10%;
+  }
+}
+
 .el-switch {
   --el-switch-on-color: black;
   --el-switch-off-color: white;
 }
 
-img {
+.github {
   vertical-align: middle;
   width: 30px;
   height: 30px;

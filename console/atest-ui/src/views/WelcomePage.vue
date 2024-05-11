@@ -22,7 +22,7 @@
   </div>
 </template>
 
-<style>
+<style scoped>
 .index {
   display: flex;
   justify-content: center;

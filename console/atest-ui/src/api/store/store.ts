@@ -41,8 +41,3 @@ export const VerifyStore = (params: string) =>
   post('/api/server.Runner/VerifyStore', params, {
     'X-Auth': getToken()
   })
-
-export const LoadStores = () =>
-  post('/server.Runner/GetStores', params, {
-    'X-Auth': getToken()
-  })

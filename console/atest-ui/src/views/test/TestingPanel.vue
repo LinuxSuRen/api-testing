@@ -1,34 +1,22 @@
 <template>
-  <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
-    <el-container style="height: 100%">
-      <el-main style="padding-top: 5px; padding-bottom: 5px;">
-        <el-container style="height: 100%">
-          <el-aside>
-            <el-button type="primary" @click="openTestSuiteCreateDialog"
-              data-intro="Click here to create a new test suite" test-id="open-new-suite-dialog" :icon="Edit">{{
-                t('button.new') }}</el-button>
-            <el-button type="primary" @click="openTestSuiteImportDialog" data-intro="Click here to import from Postman"
-              test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
-            <el-button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</el-button>
-            <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" style="padding: 5px;" />
+  <div class="index" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
+    <el-card class="card" shawon="hover">
+      <el-button type="primary" @click="openTestSuiteCreateDialog" data-intro="Click here to create a new test suite"
+        test-id="open-new-suite-dialog" :icon="Edit">{{
+          t('button.new') }}</el-button>
+      <el-button type="primary" @click="openTestSuiteImportDialog" data-intro="Click here to import from Postman"
+        test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
+      <el-button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</el-button>
+      <TemplateFunctions />
+      <br>
+      <br>  
+      <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" style="padding: 5px;" />
 
-            <el-tree v-loading="storesLoading" :data=data highlight-current :check-on-click-node="true"
-              :expand-on-click-node="false" :current-node-key="currentNodekey" ref="treeRef" node-key="id"
-              :filter-node-method="filterTestCases" @node-click="handleNodeClick"
-              data-intro="This is the test suite tree. You can click the test suite to edit it." />
-            <TemplateFunctions />
-          </el-aside>
-
-          <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px;">
-            <TestCase v-if="viewName === 'testcase'" :suite="testSuite" :kindName="testSuiteKind" :name="testCaseName"
-              @updated="loadStores" style="height: 100%;"
-              data-intro="This is the test case editor. You can edit the test case here." />
-            <TestSuite v-else-if="viewName === 'testsuite'" :name="testSuite" @updated="loadStores"
-              data-intro="This is the test suite editor. You can edit the test suite here." />
-          </el-main>
-        </el-container>
-      </el-main>
-    </el-container>
+      <el-tree v-loading="storesLoading" :data=data highlight-current :check-on-click-node="true"
+        :expand-on-click-node="false" :current-node-key="currentNodekey" ref="treeRef" node-key="id"
+        :filter-node-method="filterTestCases" @node-click="handleNodeClick"
+        data-intro="This is the test suite tree. You can click the test suite to edit it." />
+    </el-card>
   </div>
 
   <el-dialog v-model="dialogVisible" :title="t('title.createTestSuite')" width="30%" draggable>
@@ -127,13 +115,14 @@ import { Cache } from '../../utils/cache'
 import { useI18n } from 'vue-i18n'
 import { ErrorTips } from '@/utils/tips'
 import { DefaultResponseProcess } from '@/api/common'
+import { GetStores } from '@/api/store/store'
 import type { TestStore, Tree, Suite } from '../../types/types'
 import type { FormInstance, FormRules } from 'element-plus'
-import { 
-  ListTestCase, 
-  LoadTestSuite, 
-  CreateTestSuite, 
-  ImportTestSuite 
+import {
+  ListTestCase,
+  LoadTestSuite,
+  CreateTestSuite,
+  ImportTestSuite
 } from '@/api/test/test'
 
 const { t } = useI18n()
@@ -220,7 +209,7 @@ const storesLoading = ref(false)
 
 const loadStores = async () => {
   storesLoading.value = true
-  await loadStores()
+  await GetStores()
     .then(DefaultResponseProcess)
     .then(async (d) => {
       stores.value = d.data
@@ -303,11 +292,11 @@ const importSuiteForm = reactive({
   store: ''
 })
 
-function openTestSuiteCreateDialog() {
+const openTestSuiteCreateDialog = () => {
   dialogVisible.value = true
 }
 
-function openTestSuiteImportDialog() {
+const openTestSuiteImportDialog = () => {
   importDialogVisible.value = true
 }
 
@@ -315,27 +304,27 @@ const rules = reactive<FormRules<Suite>>({
   name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
   store: [{ required: true, message: 'Location is required', trigger: 'blur' }]
 })
-const submitForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  await formEl.validate((valid: boolean) => {
-    if (valid) {
-      suiteCreatingLoading.value = true
-      CreateTestSuite(testSuiteForm).then((res: any) => {
-        suiteCreatingLoading.value = false
-        if (res.error !== "") {
-          ElMessage.error('Oops, ' + res.error)
-        } else {
-          loadStores()
-          dialogVisible.value = false
-          formEl.resetFields()
-        }
-      }).catch((err) => {
-        suiteCreatingLoading.value = false
-        ElMessage.error('Oops, ' + err)
-      })
-    }
-  })
-}
+// const submitForm = async (formEl: FormInstance | undefined) => {
+//   if (!formEl) return
+//   await formEl.validate((valid: boolean) => {
+//     if (valid) {
+//       suiteCreatingLoading.value = true
+//       CreateTestSuite(testSuiteForm).then((res: any) => {
+//         suiteCreatingLoading.value = false
+//         if (res.error !== "") {
+//           ElMessage.error('Oops, ' + res.error)
+//         } else {
+//           loadStores()
+//           dialogVisible.value = false
+//           formEl.resetFields()
+//         }
+//       }).catch((err) => {
+//         suiteCreatingLoading.value = false
+//         ElMessage.error('Oops, ' + err)
+//       })
+//     }
+//   })
+// }
 
 const importSuiteFormRules = reactive<FormRules<Suite>>({
   url: [
@@ -407,6 +396,17 @@ const suiteKinds = [{
 </script>
 
 <style scoped>
+.index {
+  display: flex
+}
+
+.card {
+  margin-top: 1%;
+  width: 100%; /* 使用百分比单位 */
+  max-width: 1750px; /* 设置最大宽度 */
+  height: auto;
+}
+
 header {
   line-height: 1.5;
   max-height: 100vh;

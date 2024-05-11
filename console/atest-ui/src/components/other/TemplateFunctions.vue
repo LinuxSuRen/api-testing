@@ -1,26 +1,9 @@
-<script setup lang="ts">
-import { ref } from 'vue'
-import type { Pair } from './types'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
-
-const dialogVisible = ref(false)
-const query = ref('')
-const funcs = ref([] as Pair[])
-
-function queryFuncs() {
-    API.FunctionsQuery(query.value, (d) => {
-        funcs.value = d.data
-    })
-}
-</script>
-
 <template>
-    <el-affix position="bottom" :offset="20" style="position: absolute; bottom: 5px;" >
+    <el-tooltip effect="dark" content="You can get some functions templates by click it." placement="top-start">
         <el-button type="primary" @click="dialogVisible = !dialogVisible"
-            data-intro="You can search your desired template functions.">{{ t('button.toolbox') }}</el-button>
-    </el-affix>
+            data-intro="You can search your desired template functions.">{{ t('button.toolbox') }}
+        </el-button>
+    </el-tooltip>
 
     <el-dialog v-model="dialogVisible" :title="t('title.templateQuery')" width="40%" draggable destroy-on-close>
         <template #footer>
@@ -44,4 +27,22 @@ function queryFuncs() {
         </template>
     </el-dialog>
 </template>
-../types/types
+
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { Pair } from './types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+const dialogVisible = ref(false)
+const query = ref('')
+const funcs = ref([] as Pair[])
+
+function queryFuncs() {
+    API.FunctionsQuery(query.value, (d) => {
+        funcs.value = d.data
+    })
+}
+</script>
