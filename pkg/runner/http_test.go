@@ -572,6 +572,9 @@ func TestIsStructContent(t *testing.T) {
 	}, {
 		contentType: util.OctetStream,
 		expectOk:    false,
+	}, {
+		contentType: util.OCIImageIndex,
+		expectOk:    true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.contentType, func(t *testing.T) {
