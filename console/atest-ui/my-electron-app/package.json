@@ -1,7 +1,7 @@
 {
-  "name": "api-testing",
+  "name": "atest-desktop",
   "version": "0.0.1",
-  "description": "API Testing tool",
+  "description": "API Testing Desktop Application",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -25,6 +25,7 @@
     "electron": "^30.0.4"
   },
   "dependencies": {
+    "child_process": "^1.0.2",
     "electron-squirrel-startup": "^1.0.1"
   }
 }

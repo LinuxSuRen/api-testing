@@ -4,16 +4,39 @@
 <head>
   <meta charset="UTF-8">
   <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src * self blob: data: gap:; style-src * self 'unsafe-inline' blob: data: gap:; script-src * 'self' 'unsafe-eval' 'unsafe-inline' blob: data: gap:; object-src * 'self' blob: data: gap:; img-src * self 'unsafe-inline' blob: data: gap:; connect-src self * 'unsafe-inline' blob: data: gap:; frame-src * self blob: data: gap:;">
   <title>Hello World!</title>
 </head>
 <body>
-<h1>Hello World!</h1>
-We are using Node.js <span id="node-version"></span>,
-Chromium <span id="chrome-version"></span>,
-and Electron <span id="electron-version"></span>.
+
+<button type="button" id="action">Start</button>
+<div>
+Log output
+</div>
+<button type="button" id="open-server-page">Open Server Page</button>
 
 <!-- You can also require other files to run in this process -->
 <script src="./renderer.js"></script>
+<script>
+const actionBut = document.getElementById('action');
+actionBut.addEventListener('click', (e) => {
+    const action = actionBut.innerHTML;
+    switch (action) {
+        case 'Stop':
+            stop();
+            actionBut.innerHTML = 'Start';
+            break;
+        case 'Start':
+            start();
+            actionBut.innerHTML= 'Stop';
+            break;
+    }
+})
+
+const openServerBut = document.getElementById('open-server-page');
+openServerBut.addEventListener('click', (e) => {
+  window.location = 'http://localhost:8080'
+})
+</script>
 </body>
 </html>
