@@ -140,7 +140,6 @@ jobs:
           npm i
           npm run package
           npm run make
-          tree out/make
       - name: Upload to Draft
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
