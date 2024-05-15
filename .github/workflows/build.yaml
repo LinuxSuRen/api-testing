@@ -106,7 +106,7 @@ jobs:
       #   run: cd operator && make docker-build
 
   BuildEmbedUI:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
       - uses: ./tools/github-actions/setup-deps
@@ -123,3 +123,27 @@ jobs:
           sudo atest service restart
       - name: Test
         run: make test-ui
+
+  BuildDesktop:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      # for fixing Error: Cannot find module 'appdmg'
+      - name: Install Python 3.11.4
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.4'
+      - name: Build Desktop
+        run: |
+          cd console/atest-desktop
+          npm i
+          npm run package
+          npm run make
