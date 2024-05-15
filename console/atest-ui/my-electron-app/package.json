@@ -9,7 +9,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
-  "author": "",
+  "author": "linuxsuren",
   "license": "ISC",
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
@@ -27,5 +27,8 @@
   "dependencies": {
     "child_process": "^1.0.2",
     "electron-squirrel-startup": "^1.0.1"
+  },
+  "build": {
+    "extraResources": ["./assets/atest.exe"]
   }
 }

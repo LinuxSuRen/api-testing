@@ -39,7 +39,7 @@ menu.append(new MenuItem({
     label: 'Server',
     accelerator: process.platform === 'darwin' ? 'Alt+Cmd+S' : 'Alt+Shift+S',
     click: () => {
-      BrowserWindow.getFocusedWindow().loadURL('http://localhost:8080');
+      BrowserWindow.getFocusedWindow().loadURL(server.getHomePage());
     }
   }, {
     label: 'Reload',

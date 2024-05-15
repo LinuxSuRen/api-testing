@@ -25,12 +25,10 @@ function start() {
     process.on("exit", (code) => {
         console.log(code);
     });
-    load();
 }
 
 function stop() {
     if (process) {
         process.kill();
     }
-    load();
 }
