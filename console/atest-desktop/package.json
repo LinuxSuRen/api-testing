@@ -32,6 +32,8 @@
     "electron-squirrel-startup": "^1.0.1"
   },
   "build": {
-    "extraResources": ["./assets/atest.exe"]
+    "extraResources": [
+      "./assets/atest.exe"
+    ]
   }
 }

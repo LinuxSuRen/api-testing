@@ -123,3 +123,9 @@ jobs:
           sudo atest service restart
       - name: Test
         run: make test-ui
+      - name: Build Desktop
+        run: |
+          cd console/atest-desktop
+          npm i
+          npm run package
+          npm run make
