@@ -117,6 +117,48 @@ jobs:
           fi
           make helm-pkg helm-push
 
+  BuildDesktop:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      # for fixing Error: Cannot find module 'appdmg'
+      - name: Install Python 3.11.4
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.4'
+      - name: Build Desktop
+        run: |
+          cd console/atest-desktop
+          npm i
+          npm run package
+          npm run make
+      - name: Upload to Draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref == 'refs/heads/master'
+        run: |
+          cd console/atest-desktop
+          export TAG=$(gh release list -L 1 | awk '{print $4}')
+          jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm run publish
+      - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref != 'refs/heads/master'
+        run: |
+          cd console/atest-desktop
+          export TAG=$(git describe --tags --abbrev=0)
+          jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm run publish
+
   # image-operator:
   #   runs-on: ubuntu-20.04
   #   steps:

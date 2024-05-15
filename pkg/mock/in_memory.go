@@ -17,6 +17,7 @@ package mock
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -108,7 +109,9 @@ func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 		return
 	}
 
-	s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port))
+	if s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port)); err != nil {
+		return
+	}
 	go func() {
 		err = http.Serve(s.listener, handler)
 	}()
@@ -247,24 +250,66 @@ func (s *inMemoryServer) startObject(obj Object) {
 }
 
 func (s *inMemoryServer) startItem(item Item) {
-	s.mux.HandleFunc(item.Request.Path, func(w http.ResponseWriter, req *http.Request) {
-		item.Response.Header[headerMockServer] = fmt.Sprintf("api-testing: %s", version.GetVersion())
-		item.Response.Header["content-length"] = fmt.Sprintf("%d", len(item.Response.Body))
-		for k, v := range item.Response.Header {
-			w.Header().Set(k, v)
+	method := util.EmptyThenDefault(item.Request.Method, http.MethodGet)
+	memLogger.Info("register mock service", "method", method, "path", item.Request.Path, "encoder", item.Response.Encoder)
+
+	var headerSlices []string
+	for k, v := range item.Request.Header {
+		headerSlices = append(headerSlices, k, v)
+	}
+
+	adHandler := &advanceHandler{item: &item}
+	s.mux.HandleFunc(item.Request.Path, adHandler.handle).Methods(strings.Split(method, ",")...).Headers(headerSlices...)
+}
+
+type advanceHandler struct {
+	item *Item
+}
+
+func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
+	memLogger.Info("receiving mock request", "name", h.item.Name, "method", req.Method, "path", req.URL.Path,
+		"encoder", h.item.Response.Encoder)
+
+	var err error
+	if h.item.Response.Encoder == "base64" {
+		h.item.Response.BodyData, err = base64.StdEncoding.DecodeString(h.item.Response.Body)
+	} else if h.item.Response.Encoder == "url" {
+		var resp *http.Response
+		if resp, err = http.Get(h.item.Response.Body); err == nil {
+			h.item.Response.BodyData, err = io.ReadAll(resp.Body)
 		}
-		body, err := render.RenderAsBytes("start-item", item.Response.Body, req)
-		writeResponse(w, body, err)
-		w.WriteHeader(util.ZeroThenDefault(item.Response.StatusCode, http.StatusOK))
-	}).Methods(util.EmptyThenDefault(item.Request.Method, http.MethodGet))
+	} else {
+		h.item.Response.BodyData, err = render.RenderAsBytes("start-item", h.item.Response.Body, h.item)
+	}
+
+	if err == nil {
+		h.item.Param = mux.Vars(req)
+		if h.item.Response.Header == nil {
+			h.item.Response.Header = make(map[string]string)
+		}
+		h.item.Response.Header[headerMockServer] = fmt.Sprintf("api-testing: %s", version.GetVersion())
+		h.item.Response.Header["content-length"] = fmt.Sprintf("%d", len(h.item.Response.BodyData))
+		for k, v := range h.item.Response.Header {
+			hv, hErr := render.Render("mock-server-header", v, &h.item)
+			if hErr != nil {
+				hv = v
+				memLogger.Error(hErr, "failed render mock-server-header", "value", v)
+			}
+
+			w.Header().Set(k, hv)
+		}
+		w.WriteHeader(util.ZeroThenDefault(h.item.Response.StatusCode, http.StatusOK))
+	}
+
+	writeResponse(w, h.item.Response.BodyData, err)
 }
 
 func writeResponse(w http.ResponseWriter, data []byte, err error) {
 	if err == nil {
 		w.Write(data)
 	} else {
-		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 	}
 }
 

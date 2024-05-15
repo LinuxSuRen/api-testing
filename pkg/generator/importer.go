@@ -52,8 +52,20 @@ type PostmanRequest struct {
 }
 
 type PostmanBody struct {
-	Mode string `json:"mode"`
-	Raw  string `json:"raw"`
+	Mode       string      `json:"mode"`
+	Raw        string      `json:"raw"`
+	FormData   []TypeField `json:"formdata"`
+	URLEncoded []TypeField `json:"urlencoded"`
+	Disabled   bool        `json:"disabled"`
+}
+
+type TypeField struct {
+	Key         string `json:"key"`
+	Value       string `json:"value"`
+	Disabled    bool   `json:"disabled"`
+	Type        string `json:"type"`
+	Description string `json:"description"`
+	Src         string `json:"src"`
 }
 
 type PostmanURL struct {
@@ -110,30 +122,29 @@ func (p *postmanImporter) Convert(data []byte) (suite *testing.TestSuite, err er
 
 	suite = &testing.TestSuite{}
 	suite.Name = postman.Info.Name
-	suite.Items = make([]testing.TestCase, len(postman.Item))
+	if err = p.convertItems(postman.Item, "", suite); err != nil {
+		return
+	}
 
-	for i, item := range postman.Item {
+	return
+}
+
+func (p *postmanImporter) convertItems(items []PostmanItem, prefix string, suite *testing.TestSuite) (err error) {
+	for _, item := range items {
+		itemName := prefix + item.Name
 		if len(item.Item) == 0 {
-			suite.Items[i] = testing.TestCase{
-				Name: item.Name,
+			suite.Items = append(suite.Items, testing.TestCase{
+				Name: itemName,
 				Request: testing.Request{
 					Method: item.Request.Method,
 					API:    item.Request.URL.Raw,
 					Body:   testing.NewRequestBody(item.Request.Body.Raw),
 					Header: item.Request.Header.ToMap(),
 				},
-			}
+			})
 		} else {
-			for _, sub := range item.Item {
-				suite.Items[i] = testing.TestCase{
-					Name: item.Name + " " + sub.Name,
-					Request: testing.Request{
-						Method: sub.Request.Method,
-						API:    sub.Request.URL.Raw,
-						Body:   testing.NewRequestBody(item.Request.Body.Raw),
-						Header: sub.Request.Header.ToMap(),
-					},
-				}
+			if err = p.convertItems(item.Item, itemName+" ", suite); err != nil {
+				return
 			}
 		}
 	}

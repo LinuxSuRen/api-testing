@@ -1,0 +1,41 @@
+{
+	"info": {
+		"_postman_id": "84b8940a-009e-4127-b84e-f4d6fd6b9972",
+		"name": "Sub",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19536120"
+	},
+	"item": [
+		{
+			"name": "Get",
+			"item": [
+				{
+					"name": "Sub Get",
+					"item": [
+						{
+							"name": "New Request",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "key",
+										"value": "value",
+										"description": "description",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}"
+								},
+								"url": {
+									"raw": "http://localhost?key=value"
+								}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
