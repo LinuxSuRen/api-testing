@@ -147,4 +147,3 @@ jobs:
           npm i
           npm run package
           npm run make
-          tree out/make

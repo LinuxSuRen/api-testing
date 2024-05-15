@@ -141,10 +141,22 @@ jobs:
           npm run package
           npm run make
           tree out/make
-      - name: Upload
+      - name: Upload to Draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref == 'refs/heads/master'
         run: |
-          tag=$(gh release list -L 1 | awk '{print $4}')
-          gh release upload
+          export TAG=$(gh release list -L 1 | awk '{print $4}')
+          jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm run publish
+      - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref != 'refs/heads/master'
+        run: |
+          export TAG=$(git describe --tags --abbrev=0)
+          jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm run publish
 
   # image-operator:
   #   runs-on: ubuntu-20.04
