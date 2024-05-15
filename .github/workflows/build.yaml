@@ -106,7 +106,10 @@ jobs:
       #   run: cd operator && make docker-build
 
   BuildEmbedUI:
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
       - uses: ./tools/github-actions/setup-deps
