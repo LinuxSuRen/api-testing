@@ -4,6 +4,7 @@ exports.control = function(okCallback, errorCallback) {
 }
 
 function getPort() {
+    // TODO support set this value
     return 7788
 }
 

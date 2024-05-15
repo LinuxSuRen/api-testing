@@ -4,6 +4,7 @@
 const { app, BrowserWindow, Menu, MenuItem } = require('electron')
 const path = require('node:path')
 const server = require('./api')
+const spawn = require("child_process").spawn;
 
 const createWindow = () => {
   // Create the browser window.
@@ -28,7 +29,7 @@ const createWindow = () => {
 
 const menu = new Menu()
 menu.append(new MenuItem({
-  label: 'Electron',
+  label: 'Window',
   submenu: [{
     label: 'Console',
     accelerator: process.platform === 'darwin' ? 'Alt+Cmd+C' : 'Alt+Shift+C',
@@ -43,13 +44,13 @@ menu.append(new MenuItem({
     }
   }, {
     label: 'Reload',
-    accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'Alt+Shift+R',
+    accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'F5',
     click: () => {
       BrowserWindow.getFocusedWindow().reload()
     }
   }, {
     label: 'Developer Mode',
-    accelerator: process.platform === 'darwin' ? 'Alt+Cmd+D' : 'Alt+Shift+D',
+    accelerator: process.platform === 'darwin' ? 'Alt+Cmd+D' : 'F12',
     click: () => {
       BrowserWindow.getFocusedWindow().webContents.openDevTools();
     }
@@ -64,10 +65,20 @@ menu.append(new MenuItem({
 
 Menu.setApplicationMenu(menu)
 
+let serverProcess;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // const homedir = require('os').homedir();
+
+  serverProcess = spawn("atest", [
+    "server",
+    "--http-port", server.getPort(),
+    // TODO below setting is not working
+    // "--local-storage", path.join(homedir, ".atest", "data", "*.yaml")
+  ]);
+
   createWindow()
 
   app.on('activate', () => {
@@ -81,7 +92,13 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform !== 'darwin') {
+    app.quit()
+
+    if (serverProcess) {
+      serverProcess.kill();
+    }
+  }
 })
 
 // In this file you can include the rest of your app's specific main process

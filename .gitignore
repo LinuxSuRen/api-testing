@@ -15,4 +15,5 @@ helm/*.tgz
 helm/api-testing/*.tgz
 oryxBuildBinary
 /helm/api-testing/charts/
-console/atest-ui/my-electron-app/out
+console/atest-desktop/out
+console/atest-desktop/node_modules
