@@ -23,6 +23,12 @@ module.exports = {
       config: {},
     },
     {
+      name: '@electron-forge/maker-dmg',
+      config: {
+        format: 'ULFO'
+      }
+    },
+    {
       name: '@electron-forge/maker-wix',
       config: {
         language: 1033,
@@ -47,4 +53,16 @@ module.exports = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'linuxsuren',
+          name: 'test'
+        },
+        prerelease: true
+      }
+    }
+  ]
 };
