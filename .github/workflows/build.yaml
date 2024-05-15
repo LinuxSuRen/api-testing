@@ -124,7 +124,7 @@ jobs:
       - name: Test
         run: make test-ui
 
-  BuildEmbedUI:
+  BuildDesktop:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
