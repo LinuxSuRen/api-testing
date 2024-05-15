@@ -106,10 +106,7 @@ jobs:
       #   run: cd operator && make docker-build
 
   BuildEmbedUI:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
       - uses: ./tools/github-actions/setup-deps
@@ -126,6 +123,21 @@ jobs:
           sudo atest service restart
       - name: Test
         run: make test-ui
+
+  BuildEmbedUI:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: "npm"
+          cache-dependency-path: console/atest-ui/package-lock.json
       - name: Build Desktop
         run: |
           cd console/atest-desktop
