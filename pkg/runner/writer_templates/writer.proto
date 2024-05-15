@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "github.com/linuxsuren/api-testing/pkg/runner/writer_templates";
+
+package writer_templates;
+
+service ReportWriter{
+    rpc SendReportResult(ReportResultRepeated)returns(Empty);
+}
+message ReportResultRepeated{
+  repeated ReportResult data= 1;
+}
+message ReportResult {
+  string Name = 1;
+  string API = 2;
+  int32 Count = 3;
+  int64 Average = 4;
+  int64 Max = 5;
+  int64 Min = 6;
+  int32 QPS = 7;
+  int32 Error = 8;
+  string LastErrorMessage = 9;
+}
+message Empty {
+}
