@@ -32,7 +32,7 @@ module.exports = {
       name: '@electron-forge/maker-wix',
       config: {
         language: 1033,
-        manufacturer: 'My Awesome Company'
+        manufacturer: 'API Testing Authors'
       },
     }
   ],
@@ -59,7 +59,7 @@ module.exports = {
       config: {
         repository: {
           owner: 'linuxsuren',
-          name: 'test'
+          name: 'api-testing'
         },
         prerelease: true
       }

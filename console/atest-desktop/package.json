@@ -35,5 +35,8 @@
     "extraResources": [
       "./assets/atest.exe"
     ]
+  },
+  "optionalDependencies": {
+    "appdmg": "^0.6.6"
   }
 }
