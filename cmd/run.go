@@ -167,7 +167,7 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 		templateOption := runner.NewTemplateOption(o.reportTemplate, "json")
 		o.reportWriter = runner.NewHTTPResultWriter(http.MethodPost, o.reportDest, nil, templateOption)
 	case "grpc":
-		o.reportWriter = runner.NewGPRCResultWriter(o.reportDest, nil, nil)
+		o.reportWriter = runner.NewGRPCResultWriter(o.reportDest)
 	default:
 		err = fmt.Errorf("not supported report type: '%s'", o.report)
 	}
