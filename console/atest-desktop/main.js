@@ -16,7 +16,8 @@ const createWindow = () => {
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true
-    }
+    },
+    icon: __dirname + '/api-testing.ico',
   })
 
   server.control(() => {

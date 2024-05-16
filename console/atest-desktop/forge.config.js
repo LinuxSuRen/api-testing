@@ -31,6 +31,10 @@ module.exports = {
         language: 1033,
         manufacturer: 'API Testing Authors'
       },
+      ui: {
+        "enabled": true,
+        "chooseDirectory": true
+      }
     }
   ],
   plugins: [
