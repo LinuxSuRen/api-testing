@@ -12,9 +12,6 @@ module.exports = {
       config: {},
     },
     {
-      name: '@electron-forge/maker-zip',
-    },
-    {
       name: '@electron-forge/maker-deb',
       config: {},
     },
