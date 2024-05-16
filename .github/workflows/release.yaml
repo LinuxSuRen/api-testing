@@ -144,6 +144,7 @@ jobs:
           export TAG=$(gh release list -L 1 | awk '{print $4}')
           export TAG=${TAG#"v"}
           jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm i
           npm run publish
       - name: Upload
         env:
@@ -154,6 +155,7 @@ jobs:
           export TAG=$(git describe --tags --abbrev=0)
           export TAG=${TAG#"v"}
           jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm i
           npm run publish
 
   # image-operator:
