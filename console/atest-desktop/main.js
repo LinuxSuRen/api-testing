@@ -9,14 +9,15 @@ const spawn = require("child_process").spawn;
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1000,
+    width: 1024,
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true
-    }
+    },
+    icon: path.join(__dirname, '/api-testing.ico'),
   })
 
   server.control(() => {
@@ -70,13 +71,13 @@ let serverProcess;
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // const homedir = require('os').homedir();
+  const homedir = require('os').homedir();
 
   serverProcess = spawn("atest", [
     "server",
     "--http-port", server.getPort(),
     // TODO below setting is not working
-    // "--local-storage", path.join(homedir, ".atest", "data", "*.yaml")
+    "--local-storage", path.join(homedir, ".atest", "data", "*.yaml")
   ]);
 
   createWindow()
