@@ -19,6 +19,7 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 
@@ -42,7 +43,10 @@ func NewGRPCResultWriter(url string) ReportResultWriter {
 
 // Output writes the JSON base report to target writer
 func (w *grpcResultWriter) Output(result []ReportResult) (err error) {
-	server := getHost(w.targetUrl, "127.0.0.1")
+	server, err := w.getHost()
+	if err != nil {
+		log.Fatalln(err)
+	}
 	log.Println("will send report to:" + server)
 	conn, err := getConnection(server)
 	if err != nil {
@@ -90,6 +94,13 @@ func (w *grpcResultWriter) getMethodDescriptor(ctx context.Context, conn *grpc.C
 		return md, nil
 	}
 	return nil, protoregistry.NotFound
+}
+func (w *grpcResultWriter) getHost() (host string, err error) {
+	qn := regexFullQualifiedName.FindStringSubmatch(w.targetUrl)
+	if len(qn) == 0 {
+		return _, errors.New("can not get host from url")
+	}
+	return qn[1], nil
 }
 
 // get connection with gRPC server
