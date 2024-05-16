@@ -98,7 +98,7 @@ func (w *grpcResultWriter) getMethodDescriptor(ctx context.Context, conn *grpc.C
 func (w *grpcResultWriter) getHost() (host string, err error) {
 	qn := regexFullQualifiedName.FindStringSubmatch(w.targetUrl)
 	if len(qn) == 0 {
-		return _, errors.New("can not get host from url")
+		return "", errors.New("can not get host from url")
 	}
 	return qn[1], nil
 }
