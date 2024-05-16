@@ -119,6 +119,7 @@ jobs:
 
   BuildDesktop:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
@@ -134,12 +135,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11.4'
-      - name: Build Desktop
-        run: |
-          cd console/atest-desktop
-          npm i
-          npm run package
-          npm run make
       - name: Upload to Draft
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
@@ -147,6 +142,7 @@ jobs:
         run: |
           cd console/atest-desktop
           export TAG=$(gh release list -L 1 | awk '{print $4}')
+          export TAG=${TAG#"v"}
           jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
           npm run publish
       - name: Upload
@@ -156,6 +152,7 @@ jobs:
         run: |
           cd console/atest-desktop
           export TAG=$(git describe --tags --abbrev=0)
+          export TAG=${TAG#"v"}
           jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
           npm run publish
 
