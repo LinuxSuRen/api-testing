@@ -3,34 +3,49 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
+    icon: 'api-testing.ico',
     asar: true,
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        icon: 'api-testing.ico'
+      },
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {},
+      config: {
+        options: {
+          icon: 'api-testing.ico'
+        }
+      },
     },
     {
       name: '@electron-forge/maker-rpm',
-      config: {},
+      config: {
+        icon: 'api-testing.ico'
+      },
     },
     {
       name: '@electron-forge/maker-dmg',
       config: {
-        format: 'ULFO'
+        format: 'ULFO',
+        icon: 'api-testing.ico'
       }
     },
     {
       name: '@electron-forge/maker-wix',
       config: {
         language: 1033,
-        manufacturer: 'API Testing Authors'
+        manufacturer: 'API Testing Authors',
+        icon: 'api-testing.ico'
       },
+      ui: {
+        "enabled": true,
+        "chooseDirectory": true
+      }
     }
   ],
   plugins: [
@@ -58,7 +73,8 @@ module.exports = {
           owner: 'linuxsuren',
           name: 'api-testing'
         },
-        prerelease: true
+        prerelease: true,
+        force: true
       }
     }
   ]
