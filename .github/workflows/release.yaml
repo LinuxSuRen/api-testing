@@ -119,6 +119,7 @@ jobs:
 
   BuildDesktop:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
@@ -134,29 +135,59 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11.4'
-      - name: Build Desktop
-        run: |
-          cd console/atest-desktop
-          npm i
-          npm run package
-          npm run make
       - name: Upload to Draft
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' && runner.os != 'Windows'
         run: |
           cd console/atest-desktop
           export TAG=$(gh release list -L 1 | awk '{print $4}')
+          export TAG=${TAG#"v"}
           jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm i
+          npm run publish
+      - name: Upload to Draft on Windows
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref == 'refs/heads/master' && runner.os == 'Windows'
+        run: |
+          cd console/atest-desktop
+          $TAG = (gh release list -L 1).Split(' ')[0]
+          if ($TAG -like "v*") {
+              $TAG = $TAG -replace "^v", ""
+          }
+          Set-Content -Path "env:TAG" -Value "$TAG"
+          jq '.version = env.TAG' package.json > package.json.new
+          rm package.json
+          Rename-Item -Path package.json.new -NewName package.json
+          npm i
           npm run publish
       - name: Upload
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
-        if: github.ref != 'refs/heads/master'
+        if: github.ref != 'refs/heads/master' && runner.os != 'Windows'
         run: |
           cd console/atest-desktop
           export TAG=$(git describe --tags --abbrev=0)
+          export TAG=${TAG#"v"}
           jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm i
+          npm run publish
+      - name: Upload on Windows
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref != 'refs/heads/master' && runner.os == 'Windows'
+        run: |
+          cd console/atest-desktop
+          $TAG = git describe --tags --abbrev=0
+          if ($TAG -like "v*") {
+              $TAG = $TAG -replace "^v", ""
+          }
+          Set-Content -Path "env:TAG" -Value "$TAG"
+          jq '.version = env.TAG' package.json > package.json.new
+          rm package.json
+          Rename-Item -Path package.json.new -NewName package.json
+          npm i
           npm run publish
 
   # image-operator:
