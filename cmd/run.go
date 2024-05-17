@@ -114,7 +114,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
-	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus, http")
+	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus, http, grpc")
 	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
 	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
 	flags.StringVarP(&opt.reportTemplate, "report-template", "", "", "The template used to render the report")
@@ -166,6 +166,11 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	case "http":
 		templateOption := runner.NewTemplateOption(o.reportTemplate, "json")
 		o.reportWriter = runner.NewHTTPResultWriter(http.MethodPost, o.reportDest, nil, templateOption)
+	case "grpc":
+		if o.reportDest == "" {
+			err = fmt.Errorf("report gRPC server url is required for prometheus report")
+		}
+		o.reportWriter = runner.NewGRPCResultWriter(o.context, o.reportDest)
 	default:
 		err = fmt.Errorf("not supported report type: '%s'", o.report)
 	}
