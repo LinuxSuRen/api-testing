@@ -17,6 +17,7 @@ limitations under the License.
 package apispec_test
 
 import (
+	"github.com/go-openapi/spec"
 	"net/http"
 	"testing"
 
@@ -31,18 +32,18 @@ func TestParseURLToSwagger(t *testing.T) {
 	tests := []struct {
 		name       string
 		swaggerURL string
-		verify     func(t *testing.T, swagger *apispec.Swagger, err error)
+		verify     func(t *testing.T, swagger *spec.Swagger, err error)
 	}{{
 		name:       "normal",
 		swaggerURL: urlFoo,
-		verify: func(t *testing.T, swagger *apispec.Swagger, err error) {
+		verify: func(t *testing.T, swagger *spec.Swagger, err error) {
 			assert.NoError(t, err)
 			assert.Equal(t, "2.0", swagger.Swagger)
-			assert.Equal(t, apispec.SwaggerInfo{
+			assert.Equal(t, spec.InfoProps{
 				Description: "sample",
 				Title:       "sample",
 				Version:     "1.0.0",
-			}, swagger.Info)
+			}, swagger.Info.InfoProps)
 		},
 	}}
 	for _, tt := range tests {
@@ -93,8 +94,9 @@ func TestHaveAPI(t *testing.T) {
 			defer gock.Off()
 
 			swagger, err := apispec.ParseURLToSwagger(tt.swaggerURL)
+			swaggerAPI := apispec.NewSwaggerAPI(swagger)
 			assert.NoError(t, err)
-			exist := swagger.HaveAPI(tt.path, tt.method)
+			exist := swaggerAPI.HaveAPI(tt.path, tt.method)
 			assert.Equal(t, tt.expectExist, exist)
 		})
 	}
@@ -116,8 +118,9 @@ func TestAPICount(t *testing.T) {
 			defer gock.Off()
 
 			swagger, err := apispec.ParseURLToSwagger(tt.swaggerURL)
+			swaggerAPI := apispec.NewSwaggerAPI(swagger)
 			assert.NoError(t, err)
-			count := swagger.APICount()
+			count := swaggerAPI.APICount()
 			assert.Equal(t, tt.expectCount, count)
 		})
 	}

@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-openapi/spec"
 	"io"
 	"net/http"
 	"strings"
@@ -230,13 +231,14 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 		return
 	}
 
-	var swaggerAPI *apispec.Swagger
-	if swaggerAPI, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil && swaggerAPI != nil {
+	var swagger *spec.Swagger
+	if swagger, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil && swagger != nil {
 		result = []*testing.TestCase{}
-		for api, item := range swaggerAPI.Paths {
-			for method, oper := range item {
+		swaggerAPI := apispec.NewSwaggerAPI(swagger)
+		for api, methods := range swaggerAPI.ApiMap {
+			for _, method := range methods {
 				testcase := &testing.TestCase{
-					Name: oper.OperationId,
+					Name: swagger.ID,
 					Request: testing.Request{
 						API:    api,
 						Method: strings.ToUpper(method),
@@ -244,7 +246,7 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 					},
 				}
 
-				for _, param := range oper.Parameters {
+				for _, param := range swagger.Parameters {
 					switch param.In {
 					case "query":
 						// TODO should have a better way to provide the initial value
