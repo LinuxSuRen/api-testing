@@ -40,11 +40,11 @@ module.exports = {
       config: {
         language: 1033,
         manufacturer: 'API Testing Authors',
-        icon: 'api-testing.ico'
-      },
-      ui: {
-        "enabled": true,
-        "chooseDirectory": true
+        icon: 'api-testing.ico',
+        ui: {
+          "enabled": true,
+          "chooseDirectory": true
+        }
       }
     }
   ],

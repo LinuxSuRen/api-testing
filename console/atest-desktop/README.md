@@ -21,6 +21,12 @@ You need to install tools if you want to package Windows on Linux:
 apt install wine64 zip -y
 ```
 
+## For Windows
+
+```powershell
+dotnet tool install --global wix
+```
+
 ## Publish
 
 export GITHUB_TOKEN=your-token
