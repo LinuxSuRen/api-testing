@@ -31,12 +31,14 @@ import (
 )
 
 type grpcResultWriter struct {
+	context   context.Context
 	targetUrl string
 }
 
 // NewGRPCResultWriter creates a new grpcResultWriter
-func NewGRPCResultWriter(url string) ReportResultWriter {
+func NewGRPCResultWriter(ctx context.Context, url string) ReportResultWriter {
 	return &grpcResultWriter{
+		context:   ctx,
 		targetUrl: url,
 	}
 }
@@ -54,8 +56,7 @@ func (w *grpcResultWriter) Output(result []ReportResult) (err error) {
 		return err
 	}
 	defer conn.Close()
-	ctx := context.Background()
-	md, err := w.getMethodDescriptor(ctx, conn)
+	md, err := w.getMethodDescriptor(conn)
 	if err != nil {
 		if err == protoregistry.NotFound {
 			return fmt.Errorf("api %q is not found on grpc server", w.targetUrl)
@@ -67,7 +68,7 @@ func (w *grpcResultWriter) Output(result []ReportResult) (err error) {
 			"data": result,
 		})
 	payload := string(jsonPayload)
-	resp, err := invokeRequest(ctx, md, payload, conn)
+	resp, err := invokeRequest(w.context, md, payload, conn)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -76,14 +77,14 @@ func (w *grpcResultWriter) Output(result []ReportResult) (err error) {
 }
 
 // use server reflection to get the method descriptor
-func (w *grpcResultWriter) getMethodDescriptor(ctx context.Context, conn *grpc.ClientConn) (protoreflect.MethodDescriptor, error) {
+func (w *grpcResultWriter) getMethodDescriptor(conn *grpc.ClientConn) (protoreflect.MethodDescriptor, error) {
 	fullName, err := splitFullQualifiedName(w.targetUrl)
 	if err != nil {
 		return nil, err
 	}
 	var dp protoreflect.Descriptor
 
-	dp, err = getByReflect(ctx, nil, fullName, conn)
+	dp, err = getByReflect(w.context, nil, fullName, conn)
 	if err != nil {
 		return nil, err
 	}

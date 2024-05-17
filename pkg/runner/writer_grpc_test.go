@@ -17,6 +17,7 @@ limitations under the License.
 package runner
 
 import (
+	"context"
 	"testing"
 
 	testWriter "github.com/linuxsuren/api-testing/pkg/runner/writer_templates"
@@ -32,10 +33,9 @@ func TestGRPCResultWriter(t *testing.T) {
 		testWriter.RegisterReportWriterServer(s, testServer)
 		reflection.RegisterV1(s)
 		l := runServer(t, s)
-		api := "/writer_templates.ReportWriter/SendReportResult"
-		host := l.Addr().String()
-		url := host + api
-		writer := NewGRPCResultWriter(url)
+		url := l.Addr().String() + "/writer_templates.ReportWriter/SendReportResult"
+		ctx := context.Background()
+		writer := NewGRPCResultWriter(ctx, url)
 		err := writer.Output([]ReportResult{{
 			Name:    "test",
 			API:     "/api",
@@ -52,10 +52,9 @@ func TestGRPCResultWriter(t *testing.T) {
 		testServer := &testWriter.ReportServer{}
 		testWriter.RegisterReportWriterServer(s, testServer)
 		l := runServer(t, s)
-		api := "/writer_templates.ReportWriter/SendReportResult"
-		host := l.Addr().String()
-		url := host + api
-		writer := NewGRPCResultWriter(url)
+		url := l.Addr().String() + "/writer_templates.ReportWriter/SendReportResult"
+		ctx := context.Background()
+		writer := NewGRPCResultWriter(ctx, url)
 		err := writer.Output([]ReportResult{{
 			Name:    "test",
 			API:     "/api",
