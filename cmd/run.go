@@ -20,7 +20,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-openapi/spec"
 	"io"
 	"net/http"
 	"os"
@@ -179,7 +178,6 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	if err == nil {
 		var swaggerAPI apispec.SwaggerAPI
 		if o.swaggerURL != "" {
-			swaggerAPI = *apispec.NewSwaggerAPI(&spec.Swagger{})
 			if swaggerAPI.Swagger, err = apispec.ParseURLToSwagger(o.swaggerURL); err == nil {
 				o.reportWriter.WithAPIConverage(&swaggerAPI)
 			}
