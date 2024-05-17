@@ -533,10 +533,27 @@ function getToken() {
   return token
 }
 
+const GetTestSuiteYaml = (suite: string, store: string, callback: (d: any) => void, errHandle?: (e: any) => void | null) => {
+    const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': store,
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      name: suite
+    })
+  }
+  fetch('/server.Runner/GetTestSuiteYaml', requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback)
+    .catch(errHandle)
+}
+
 export const API = {
   DefaultResponseProcess,
   GetVersion,
-  CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,
+  CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,GetTestSuiteYaml,
   CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
   GenerateCode, ListCodeGenerator,
   PopularHeaders,

@@ -388,6 +388,16 @@ func TestListTestCase(t *testing.T) {
 		}
 	})
 
+	t.Run("get testSuiteYaml", func(t *testing.T) {
+		testSuiteYaml, err := server.GetTestSuiteYaml(ctx, &TestSuiteIdentity{Name: "simple"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, testSuiteYaml) {
+			data, err := os.ReadFile(tmpFile.Name())
+			assert.NoError(t, err)
+			assert.Equal(t, data, testSuiteYaml.Data)
+		}
+	})
+
 	t.Run("get one testcase", func(t *testing.T) {
 		result, err := server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple", Testcase: "get"})
 		assert.NoError(t, err)

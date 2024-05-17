@@ -22,9 +22,41 @@
     "application/json"
   ],
   "paths": {
-    "/server.Mock/Start": {
+    "/server.Mock/GetConfig": {
       "post": {
-        "operationId": "Mock_Start",
+        "operationId": "Mock_GetConfig",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverMockConfig"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverEmpty"
+            }
+          }
+        ],
+        "tags": [
+          "Mock"
+        ]
+      }
+    },
+    "/server.Mock/Reload": {
+      "post": {
+        "operationId": "Mock_Reload",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -46,38 +78,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/serverMockConfig"
-            }
-          }
-        ],
-        "tags": [
-          "Mock"
-        ]
-      }
-    },
-    "/server.Mock/Stop": {
-      "post": {
-        "operationId": "Mock_Stop",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverEmpty"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/serverEmpty"
             }
           }
         ],
@@ -682,6 +682,38 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/serverTestSuite"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverTestSuiteIdentity"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/GetTestSuiteYaml": {
+      "post": {
+        "operationId": "Runner_GetTestSuiteYaml",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverYamlData"
             }
           },
           "default": {
@@ -1882,6 +1914,15 @@
             "type": "object",
             "$ref": "#/definitions/serverPair"
           }
+        }
+      }
+    },
+    "serverYamlData": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "format": "byte"
         }
       }
     }

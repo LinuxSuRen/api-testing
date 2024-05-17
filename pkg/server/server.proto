@@ -14,6 +14,7 @@ service Runner {
     rpc GetTestSuite(TestSuiteIdentity) returns (TestSuite) {}
     rpc UpdateTestSuite(TestSuite) returns (HelloReply) {}
     rpc DeleteTestSuite(TestSuiteIdentity) returns (HelloReply) {}
+    rpc GetTestSuiteYaml(TestSuiteIdentity) returns (YamlData) {}
 
     // test cases related
     rpc ListTestCase(TestSuiteIdentity) returns (Suite) {}
@@ -141,6 +142,10 @@ message TestResult {
 message HelloReply {
   string message = 1;
   string error = 2;
+}
+
+message YamlData {
+  bytes data = 1;
 }
 
 message Suite {

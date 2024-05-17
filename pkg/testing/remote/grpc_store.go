@@ -87,6 +87,10 @@ func (g *gRPCLoader) Reset() {
 	// nothing to do
 }
 
+func (g *gRPCLoader) GetTestSuiteYaml(suite string) (testSuiteYaml []byte, err error) {
+	return
+}
+
 func (g *gRPCLoader) ListTestCase(suite string) (testcases []testing.TestCase, err error) {
 	var testCases *server.TestCases
 	testCases, err = g.client.ListTestCases(g.ctx, &TestSuite{

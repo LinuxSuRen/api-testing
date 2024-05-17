@@ -12,6 +12,7 @@
         "toolbox": "Tool Box",
         "refresh": "Refresh",
         "newtestcase": "New TestCase",
+        "viewYaml":"View YAML",
         "verify": "Verify",
         "generateCode": "Generate Code",
         "sendWithParam": "Send With Parameter"
