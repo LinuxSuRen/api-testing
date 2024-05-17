@@ -30,6 +30,7 @@ type RunnerClient interface {
 	GetTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestSuite, error)
 	UpdateTestSuite(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
+	GetTestSuiteYaml(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*YamlData, error)
 	// test cases related
 	ListTestCase(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*Suite, error)
 	GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error)
@@ -131,6 +132,15 @@ func (c *runnerClient) UpdateTestSuite(ctx context.Context, in *TestSuite, opts 
 func (c *runnerClient) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error) {
 	out := new(HelloReply)
 	err := c.cc.Invoke(ctx, "/server.Runner/DeleteTestSuite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetTestSuiteYaml(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*YamlData, error) {
+	out := new(YamlData)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetTestSuiteYaml", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -414,6 +424,7 @@ type RunnerServer interface {
 	GetTestSuite(context.Context, *TestSuiteIdentity) (*TestSuite, error)
 	UpdateTestSuite(context.Context, *TestSuite) (*HelloReply, error)
 	DeleteTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
+	GetTestSuiteYaml(context.Context, *TestSuiteIdentity) (*YamlData, error)
 	// test cases related
 	ListTestCase(context.Context, *TestSuiteIdentity) (*Suite, error)
 	GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error)
@@ -475,6 +486,9 @@ func (UnimplementedRunnerServer) UpdateTestSuite(context.Context, *TestSuite) (*
 }
 func (UnimplementedRunnerServer) DeleteTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTestSuite not implemented")
+}
+func (UnimplementedRunnerServer) GetTestSuiteYaml(context.Context, *TestSuiteIdentity) (*YamlData, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTestSuiteYaml not implemented")
 }
 func (UnimplementedRunnerServer) ListTestCase(context.Context, *TestSuiteIdentity) (*Suite, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTestCase not implemented")
@@ -692,6 +706,24 @@ func _Runner_DeleteTestSuite_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).DeleteTestSuite(ctx, req.(*TestSuiteIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetTestSuiteYaml_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestSuiteIdentity)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetTestSuiteYaml(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetTestSuiteYaml",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetTestSuiteYaml(ctx, req.(*TestSuiteIdentity))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1224,6 +1256,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTestSuite",
 			Handler:    _Runner_DeleteTestSuite_Handler,
+		},
+		{
+			MethodName: "GetTestSuiteYaml",
+			Handler:    _Runner_GetTestSuiteYaml_Handler,
 		},
 		{
 			MethodName: "ListTestCase",

@@ -871,6 +871,53 @@ func (x *HelloReply) GetError() string {
 	return ""
 }
 
+type YamlData struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+}
+
+func (x *YamlData) Reset() {
+	*x = YamlData{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkg_server_server_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *YamlData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*YamlData) ProtoMessage() {}
+
+func (x *YamlData) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_server_server_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use YamlData.ProtoReflect.Descriptor instead.
+func (*YamlData) Descriptor() ([]byte, []int) {
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *YamlData) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
 type Suite struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -884,7 +931,7 @@ type Suite struct {
 func (x *Suite) Reset() {
 	*x = Suite{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[13]
+		mi := &file_pkg_server_server_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -897,7 +944,7 @@ func (x *Suite) String() string {
 func (*Suite) ProtoMessage() {}
 
 func (x *Suite) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[13]
+	mi := &file_pkg_server_server_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -910,7 +957,7 @@ func (x *Suite) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Suite.ProtoReflect.Descriptor instead.
 func (*Suite) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{13}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *Suite) GetName() string {
@@ -946,7 +993,7 @@ type TestCaseWithSuite struct {
 func (x *TestCaseWithSuite) Reset() {
 	*x = TestCaseWithSuite{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[14]
+		mi := &file_pkg_server_server_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -959,7 +1006,7 @@ func (x *TestCaseWithSuite) String() string {
 func (*TestCaseWithSuite) ProtoMessage() {}
 
 func (x *TestCaseWithSuite) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[14]
+	mi := &file_pkg_server_server_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -972,7 +1019,7 @@ func (x *TestCaseWithSuite) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCaseWithSuite.ProtoReflect.Descriptor instead.
 func (*TestCaseWithSuite) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{14}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *TestCaseWithSuite) GetSuiteName() string {
@@ -1000,7 +1047,7 @@ type TestCases struct {
 func (x *TestCases) Reset() {
 	*x = TestCases{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[15]
+		mi := &file_pkg_server_server_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1013,7 +1060,7 @@ func (x *TestCases) String() string {
 func (*TestCases) ProtoMessage() {}
 
 func (x *TestCases) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[15]
+	mi := &file_pkg_server_server_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1026,7 +1073,7 @@ func (x *TestCases) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCases.ProtoReflect.Descriptor instead.
 func (*TestCases) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{15}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *TestCases) GetData() []*TestCase {
@@ -1050,7 +1097,7 @@ type TestCase struct {
 func (x *TestCase) Reset() {
 	*x = TestCase{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[16]
+		mi := &file_pkg_server_server_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1063,7 +1110,7 @@ func (x *TestCase) String() string {
 func (*TestCase) ProtoMessage() {}
 
 func (x *TestCase) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[16]
+	mi := &file_pkg_server_server_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1076,7 +1123,7 @@ func (x *TestCase) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCase.ProtoReflect.Descriptor instead.
 func (*TestCase) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{16}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *TestCase) GetName() string {
@@ -1124,7 +1171,7 @@ type Request struct {
 func (x *Request) Reset() {
 	*x = Request{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[17]
+		mi := &file_pkg_server_server_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1137,7 +1184,7 @@ func (x *Request) String() string {
 func (*Request) ProtoMessage() {}
 
 func (x *Request) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[17]
+	mi := &file_pkg_server_server_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1150,7 +1197,7 @@ func (x *Request) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Request.ProtoReflect.Descriptor instead.
 func (*Request) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{17}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *Request) GetApi() string {
@@ -1219,7 +1266,7 @@ type Response struct {
 func (x *Response) Reset() {
 	*x = Response{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[18]
+		mi := &file_pkg_server_server_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1232,7 +1279,7 @@ func (x *Response) String() string {
 func (*Response) ProtoMessage() {}
 
 func (x *Response) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[18]
+	mi := &file_pkg_server_server_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1245,7 +1292,7 @@ func (x *Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Response.ProtoReflect.Descriptor instead.
 func (*Response) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{18}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *Response) GetStatusCode() int32 {
@@ -1309,7 +1356,7 @@ type ConditionalVerify struct {
 func (x *ConditionalVerify) Reset() {
 	*x = ConditionalVerify{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[19]
+		mi := &file_pkg_server_server_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1322,7 +1369,7 @@ func (x *ConditionalVerify) String() string {
 func (*ConditionalVerify) ProtoMessage() {}
 
 func (x *ConditionalVerify) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[19]
+	mi := &file_pkg_server_server_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1335,7 +1382,7 @@ func (x *ConditionalVerify) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConditionalVerify.ProtoReflect.Descriptor instead.
 func (*ConditionalVerify) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{19}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ConditionalVerify) GetCondition() []string {
@@ -1368,7 +1415,7 @@ type TestCaseResult struct {
 func (x *TestCaseResult) Reset() {
 	*x = TestCaseResult{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[20]
+		mi := &file_pkg_server_server_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1381,7 +1428,7 @@ func (x *TestCaseResult) String() string {
 func (*TestCaseResult) ProtoMessage() {}
 
 func (x *TestCaseResult) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[20]
+	mi := &file_pkg_server_server_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1394,7 +1441,7 @@ func (x *TestCaseResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCaseResult.ProtoReflect.Descriptor instead.
 func (*TestCaseResult) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{20}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *TestCaseResult) GetStatusCode() int32 {
@@ -1451,7 +1498,7 @@ type Pair struct {
 func (x *Pair) Reset() {
 	*x = Pair{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[21]
+		mi := &file_pkg_server_server_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1464,7 +1511,7 @@ func (x *Pair) String() string {
 func (*Pair) ProtoMessage() {}
 
 func (x *Pair) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[21]
+	mi := &file_pkg_server_server_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1477,7 +1524,7 @@ func (x *Pair) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pair.ProtoReflect.Descriptor instead.
 func (*Pair) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{21}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *Pair) GetKey() string {
@@ -1505,7 +1552,7 @@ type Pairs struct {
 func (x *Pairs) Reset() {
 	*x = Pairs{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[22]
+		mi := &file_pkg_server_server_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1518,7 +1565,7 @@ func (x *Pairs) String() string {
 func (*Pairs) ProtoMessage() {}
 
 func (x *Pairs) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[22]
+	mi := &file_pkg_server_server_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1531,7 +1578,7 @@ func (x *Pairs) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pairs.ProtoReflect.Descriptor instead.
 func (*Pairs) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{22}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *Pairs) GetData() []*Pair {
@@ -1552,7 +1599,7 @@ type SimpleQuery struct {
 func (x *SimpleQuery) Reset() {
 	*x = SimpleQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[23]
+		mi := &file_pkg_server_server_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1565,7 +1612,7 @@ func (x *SimpleQuery) String() string {
 func (*SimpleQuery) ProtoMessage() {}
 
 func (x *SimpleQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[23]
+	mi := &file_pkg_server_server_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1578,7 +1625,7 @@ func (x *SimpleQuery) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SimpleQuery.ProtoReflect.Descriptor instead.
 func (*SimpleQuery) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{23}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *SimpleQuery) GetName() string {
@@ -1599,7 +1646,7 @@ type Stores struct {
 func (x *Stores) Reset() {
 	*x = Stores{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[24]
+		mi := &file_pkg_server_server_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1612,7 +1659,7 @@ func (x *Stores) String() string {
 func (*Stores) ProtoMessage() {}
 
 func (x *Stores) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[24]
+	mi := &file_pkg_server_server_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1625,7 +1672,7 @@ func (x *Stores) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Stores.ProtoReflect.Descriptor instead.
 func (*Stores) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{24}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *Stores) GetData() []*Store {
@@ -1656,7 +1703,7 @@ type Store struct {
 func (x *Store) Reset() {
 	*x = Store{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[25]
+		mi := &file_pkg_server_server_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1669,7 +1716,7 @@ func (x *Store) String() string {
 func (*Store) ProtoMessage() {}
 
 func (x *Store) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[25]
+	mi := &file_pkg_server_server_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1682,7 +1729,7 @@ func (x *Store) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Store.ProtoReflect.Descriptor instead.
 func (*Store) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{25}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *Store) GetName() string {
@@ -1773,7 +1820,7 @@ type StoreKinds struct {
 func (x *StoreKinds) Reset() {
 	*x = StoreKinds{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[26]
+		mi := &file_pkg_server_server_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1786,7 +1833,7 @@ func (x *StoreKinds) String() string {
 func (*StoreKinds) ProtoMessage() {}
 
 func (x *StoreKinds) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[26]
+	mi := &file_pkg_server_server_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1799,7 +1846,7 @@ func (x *StoreKinds) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreKinds.ProtoReflect.Descriptor instead.
 func (*StoreKinds) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{26}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *StoreKinds) GetData() []*StoreKind {
@@ -1822,7 +1869,7 @@ type StoreKind struct {
 func (x *StoreKind) Reset() {
 	*x = StoreKind{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[27]
+		mi := &file_pkg_server_server_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1835,7 +1882,7 @@ func (x *StoreKind) String() string {
 func (*StoreKind) ProtoMessage() {}
 
 func (x *StoreKind) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[27]
+	mi := &file_pkg_server_server_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1848,7 +1895,7 @@ func (x *StoreKind) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreKind.ProtoReflect.Descriptor instead.
 func (*StoreKind) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{27}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *StoreKind) GetName() string {
@@ -1884,7 +1931,7 @@ type CommonResult struct {
 func (x *CommonResult) Reset() {
 	*x = CommonResult{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[28]
+		mi := &file_pkg_server_server_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1897,7 +1944,7 @@ func (x *CommonResult) String() string {
 func (*CommonResult) ProtoMessage() {}
 
 func (x *CommonResult) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[28]
+	mi := &file_pkg_server_server_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1910,7 +1957,7 @@ func (x *CommonResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommonResult.ProtoReflect.Descriptor instead.
 func (*CommonResult) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{28}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *CommonResult) GetSuccess() bool {
@@ -1938,7 +1985,7 @@ type SimpleList struct {
 func (x *SimpleList) Reset() {
 	*x = SimpleList{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[29]
+		mi := &file_pkg_server_server_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1951,7 +1998,7 @@ func (x *SimpleList) String() string {
 func (*SimpleList) ProtoMessage() {}
 
 func (x *SimpleList) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[29]
+	mi := &file_pkg_server_server_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1964,7 +2011,7 @@ func (x *SimpleList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SimpleList.ProtoReflect.Descriptor instead.
 func (*SimpleList) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{29}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *SimpleList) GetData() []*Pair {
@@ -1985,7 +2032,7 @@ type SimpleName struct {
 func (x *SimpleName) Reset() {
 	*x = SimpleName{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[30]
+		mi := &file_pkg_server_server_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1998,7 +2045,7 @@ func (x *SimpleName) String() string {
 func (*SimpleName) ProtoMessage() {}
 
 func (x *SimpleName) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[30]
+	mi := &file_pkg_server_server_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2011,7 +2058,7 @@ func (x *SimpleName) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SimpleName.ProtoReflect.Descriptor instead.
 func (*SimpleName) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{30}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *SimpleName) GetName() string {
@@ -2034,7 +2081,7 @@ type CodeGenerateRequest struct {
 func (x *CodeGenerateRequest) Reset() {
 	*x = CodeGenerateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[31]
+		mi := &file_pkg_server_server_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2047,7 +2094,7 @@ func (x *CodeGenerateRequest) String() string {
 func (*CodeGenerateRequest) ProtoMessage() {}
 
 func (x *CodeGenerateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[31]
+	mi := &file_pkg_server_server_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2060,7 +2107,7 @@ func (x *CodeGenerateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CodeGenerateRequest.ProtoReflect.Descriptor instead.
 func (*CodeGenerateRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{31}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *CodeGenerateRequest) GetTestSuite() string {
@@ -2095,7 +2142,7 @@ type Secrets struct {
 func (x *Secrets) Reset() {
 	*x = Secrets{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[32]
+		mi := &file_pkg_server_server_proto_msgTypes[33]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2108,7 +2155,7 @@ func (x *Secrets) String() string {
 func (*Secrets) ProtoMessage() {}
 
 func (x *Secrets) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[32]
+	mi := &file_pkg_server_server_proto_msgTypes[33]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2121,7 +2168,7 @@ func (x *Secrets) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Secrets.ProtoReflect.Descriptor instead.
 func (*Secrets) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{32}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *Secrets) GetData() []*Secret {
@@ -2144,7 +2191,7 @@ type Secret struct {
 func (x *Secret) Reset() {
 	*x = Secret{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[33]
+		mi := &file_pkg_server_server_proto_msgTypes[34]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2157,7 +2204,7 @@ func (x *Secret) String() string {
 func (*Secret) ProtoMessage() {}
 
 func (x *Secret) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[33]
+	mi := &file_pkg_server_server_proto_msgTypes[34]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2170,7 +2217,7 @@ func (x *Secret) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Secret.ProtoReflect.Descriptor instead.
 func (*Secret) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{33}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *Secret) GetName() string {
@@ -2208,7 +2255,7 @@ type ExtensionStatus struct {
 func (x *ExtensionStatus) Reset() {
 	*x = ExtensionStatus{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[34]
+		mi := &file_pkg_server_server_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2221,7 +2268,7 @@ func (x *ExtensionStatus) String() string {
 func (*ExtensionStatus) ProtoMessage() {}
 
 func (x *ExtensionStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[34]
+	mi := &file_pkg_server_server_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2234,7 +2281,7 @@ func (x *ExtensionStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExtensionStatus.ProtoReflect.Descriptor instead.
 func (*ExtensionStatus) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{34}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ExtensionStatus) GetReady() bool {
@@ -2276,7 +2323,7 @@ type PProfRequest struct {
 func (x *PProfRequest) Reset() {
 	*x = PProfRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[35]
+		mi := &file_pkg_server_server_proto_msgTypes[36]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2289,7 +2336,7 @@ func (x *PProfRequest) String() string {
 func (*PProfRequest) ProtoMessage() {}
 
 func (x *PProfRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[35]
+	mi := &file_pkg_server_server_proto_msgTypes[36]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2302,7 +2349,7 @@ func (x *PProfRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PProfRequest.ProtoReflect.Descriptor instead.
 func (*PProfRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{35}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *PProfRequest) GetName() string {
@@ -2323,7 +2370,7 @@ type PProfData struct {
 func (x *PProfData) Reset() {
 	*x = PProfData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[36]
+		mi := &file_pkg_server_server_proto_msgTypes[37]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2336,7 +2383,7 @@ func (x *PProfData) String() string {
 func (*PProfData) ProtoMessage() {}
 
 func (x *PProfData) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[36]
+	mi := &file_pkg_server_server_proto_msgTypes[37]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2349,7 +2396,7 @@ func (x *PProfData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PProfData.ProtoReflect.Descriptor instead.
 func (*PProfData) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{36}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *PProfData) GetData() []byte {
@@ -2368,7 +2415,7 @@ type Empty struct {
 func (x *Empty) Reset() {
 	*x = Empty{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[37]
+		mi := &file_pkg_server_server_proto_msgTypes[38]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2381,7 +2428,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[37]
+	mi := &file_pkg_server_server_proto_msgTypes[38]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2394,7 +2441,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{37}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{38}
 }
 
 type MockConfig struct {
@@ -2409,7 +2456,7 @@ type MockConfig struct {
 func (x *MockConfig) Reset() {
 	*x = MockConfig{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_server_server_proto_msgTypes[38]
+		mi := &file_pkg_server_server_proto_msgTypes[39]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2422,7 +2469,7 @@ func (x *MockConfig) String() string {
 func (*MockConfig) ProtoMessage() {}
 
 func (x *MockConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[38]
+	mi := &file_pkg_server_server_proto_msgTypes[39]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2435,7 +2482,7 @@ func (x *MockConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MockConfig.ProtoReflect.Descriptor instead.
 func (*MockConfig) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{38}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *MockConfig) GetPrefix() string {
@@ -2551,7 +2598,9 @@ var file_pkg_server_server_proto_rawDesc = []byte{
 	0x65, 0x70, 0x6c, 0x79, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x14,
 	0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65,
-	0x72, 0x72, 0x6f, 0x72, 0x22, 0x55, 0x0a, 0x05, 0x53, 0x75, 0x69, 0x74, 0x65, 0x12, 0x12, 0x0a,
+	0x72, 0x72, 0x6f, 0x72, 0x22, 0x1e, 0x0a, 0x08, 0x59, 0x61, 0x6d, 0x6c, 0x44, 0x61, 0x74, 0x61,
+	0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04,
+	0x64, 0x61, 0x74, 0x61, 0x22, 0x55, 0x0a, 0x05, 0x53, 0x75, 0x69, 0x74, 0x65, 0x12, 0x12, 0x0a,
 	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d,
 	0x65, 0x12, 0x10, 0x0a, 0x03, 0x61, 0x70, 0x69, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
 	0x61, 0x70, 0x69, 0x12, 0x26, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x03, 0x20, 0x03,
@@ -2701,7 +2750,7 @@ var file_pkg_server_server_proto_rawDesc = []byte{
 	0x4d, 0x6f, 0x63, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x16, 0x0a, 0x06, 0x50, 0x72,
 	0x65, 0x66, 0x69, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x50, 0x72, 0x65, 0x66,
 	0x69, 0x78, 0x12, 0x16, 0x0a, 0x06, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x06, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x32, 0xbd, 0x0f, 0x0a, 0x06, 0x52,
+	0x28, 0x09, 0x52, 0x06, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x32, 0x80, 0x10, 0x0a, 0x06, 0x52,
 	0x75, 0x6e, 0x6e, 0x65, 0x72, 0x12, 0x2d, 0x0a, 0x03, 0x52, 0x75, 0x6e, 0x12, 0x10, 0x2e, 0x73,
 	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x54, 0x61, 0x73, 0x6b, 0x1a, 0x12,
 	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x52, 0x65, 0x73, 0x75,
@@ -2728,119 +2777,123 @@ var file_pkg_server_server_proto_rawDesc = []byte{
 	0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x12, 0x19, 0x2e, 0x73, 0x65, 0x72, 0x76,
 	0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x49, 0x64, 0x65, 0x6e,
 	0x74, 0x69, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x48, 0x65,
-	0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x3a, 0x0a, 0x0c, 0x4c, 0x69,
-	0x73, 0x74, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12, 0x19, 0x2e, 0x73, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x49, 0x64, 0x65,
-	0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53,
-	0x75, 0x69, 0x74, 0x65, 0x22, 0x00, 0x12, 0x42, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x53, 0x75, 0x67,
-	0x67, 0x65, 0x73, 0x74, 0x65, 0x64, 0x41, 0x50, 0x49, 0x73, 0x12, 0x19, 0x2e, 0x73, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x49, 0x64, 0x65,
-	0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a, 0x11, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54,
-	0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x73, 0x22, 0x00, 0x12, 0x41, 0x0a, 0x0b, 0x52, 0x75,
-	0x6e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12, 0x18, 0x2e, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x49, 0x64, 0x65, 0x6e, 0x74,
-	0x69, 0x74, 0x79, 0x1a, 0x16, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73,
-	0x74, 0x43, 0x61, 0x73, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x3b, 0x0a,
-	0x0b, 0x47, 0x65, 0x74, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12, 0x18, 0x2e, 0x73,
+	0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x41, 0x0a, 0x10, 0x47, 0x65,
+	0x74, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x59, 0x61, 0x6d, 0x6c, 0x12, 0x19,
+	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74,
+	0x65, 0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a, 0x10, 0x2e, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x59, 0x61, 0x6d, 0x6c, 0x44, 0x61, 0x74, 0x61, 0x22, 0x00, 0x12, 0x3a, 0x0a,
+	0x0c, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12, 0x19, 0x2e,
+	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65,
+	0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x2e, 0x53, 0x75, 0x69, 0x74, 0x65, 0x22, 0x00, 0x12, 0x42, 0x0a, 0x10, 0x47, 0x65, 0x74,
+	0x53, 0x75, 0x67, 0x67, 0x65, 0x73, 0x74, 0x65, 0x64, 0x41, 0x50, 0x49, 0x73, 0x12, 0x19, 0x2e,
+	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65,
+	0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a, 0x11, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x73, 0x22, 0x00, 0x12, 0x41, 0x0a,
+	0x0b, 0x52, 0x75, 0x6e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12, 0x18, 0x2e, 0x73,
 	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x49, 0x64,
-	0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a, 0x10, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
-	0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x22, 0x00, 0x12, 0x41, 0x0a, 0x0e, 0x43, 0x72,
-	0x65, 0x61, 0x74, 0x65, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12, 0x19, 0x2e, 0x73,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x57, 0x69,
-	0x74, 0x68, 0x53, 0x75, 0x69, 0x74, 0x65, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
-	0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x41, 0x0a,
-	0x0e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12,
+	0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a, 0x16, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
+	0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00,
+	0x12, 0x3b, 0x0a, 0x0b, 0x47, 0x65, 0x74, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12,
+	0x18, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73,
+	0x65, 0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a, 0x10, 0x2e, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x22, 0x00, 0x12, 0x41, 0x0a,
+	0x0e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12,
 	0x19, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73,
 	0x65, 0x57, 0x69, 0x74, 0x68, 0x53, 0x75, 0x69, 0x74, 0x65, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72,
 	0x76, 0x65, 0x72, 0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00,
-	0x12, 0x40, 0x0a, 0x0e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61,
-	0x73, 0x65, 0x12, 0x18, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74,
-	0x43, 0x61, 0x73, 0x65, 0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79,
-	0x22, 0x00, 0x12, 0x38, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x64, 0x65, 0x47, 0x65,
-	0x6e, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
-	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
-	0x53, 0x69, 0x6d, 0x70, 0x6c, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x00, 0x12, 0x43, 0x0a, 0x0c,
-	0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x1b, 0x2e, 0x73,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x64, 0x65, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61,
-	0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22,
-	0x00, 0x12, 0x34, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x6e, 0x76, 0x65, 0x72, 0x74,
-	0x65, 0x72, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74,
-	0x79, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x69, 0x6d, 0x70, 0x6c,
-	0x65, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x00, 0x12, 0x47, 0x0a, 0x10, 0x43, 0x6f, 0x6e, 0x76, 0x65,
-	0x72, 0x74, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x12, 0x1b, 0x2e, 0x73, 0x65,
-	0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x64, 0x65, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74,
-	0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65,
-	0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00,
-	0x12, 0x30, 0x0a, 0x0e, 0x50, 0x6f, 0x70, 0x75, 0x6c, 0x61, 0x72, 0x48, 0x65, 0x61, 0x64, 0x65,
-	0x72, 0x73, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74,
-	0x79, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x50, 0x61, 0x69, 0x72, 0x73,
-	0x22, 0x00, 0x12, 0x36, 0x0a, 0x0e, 0x46, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x51,
-	0x75, 0x65, 0x72, 0x79, 0x12, 0x13, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x69,
-	0x6d, 0x70, 0x6c, 0x65, 0x51, 0x75, 0x65, 0x72, 0x79, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x2e, 0x50, 0x61, 0x69, 0x72, 0x73, 0x22, 0x00, 0x12, 0x40, 0x0a, 0x14, 0x46, 0x75,
-	0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x51, 0x75, 0x65, 0x72, 0x79, 0x53, 0x74, 0x72, 0x65,
-	0x61, 0x6d, 0x12, 0x13, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x69, 0x6d, 0x70,
-	0x6c, 0x65, 0x51, 0x75, 0x65, 0x72, 0x79, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
-	0x2e, 0x50, 0x61, 0x69, 0x72, 0x73, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x12, 0x31, 0x0a, 0x0a,
-	0x47, 0x65, 0x74, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72,
+	0x12, 0x41, 0x0a, 0x0e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61,
+	0x73, 0x65, 0x12, 0x19, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74,
+	0x43, 0x61, 0x73, 0x65, 0x57, 0x69, 0x74, 0x68, 0x53, 0x75, 0x69, 0x74, 0x65, 0x1a, 0x12, 0x2e,
+	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c,
+	0x79, 0x22, 0x00, 0x12, 0x40, 0x0a, 0x0e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x54, 0x65, 0x73,
+	0x74, 0x43, 0x61, 0x73, 0x65, 0x12, 0x18, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54,
+	0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x1a,
+	0x12, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65,
+	0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x38, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x64,
+	0x65, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72,
 	0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12,
-	0x2d, 0x0a, 0x06, 0x53, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65,
-	0x72, 0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x34,
-	0x0a, 0x0d, 0x47, 0x65, 0x74, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x4b, 0x69, 0x6e, 0x64, 0x73, 0x12,
-	0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x4b, 0x69, 0x6e,
-	0x64, 0x73, 0x22, 0x00, 0x12, 0x2c, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x53, 0x74, 0x6f, 0x72, 0x65,
-	0x73, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
-	0x1a, 0x0e, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x73,
-	0x22, 0x00, 0x12, 0x2d, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x53, 0x74, 0x6f, 0x72,
-	0x65, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65,
-	0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x22,
-	0x00, 0x12, 0x2d, 0x0a, 0x0b, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x53, 0x74, 0x6f, 0x72, 0x65,
-	0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x1a,
-	0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x22, 0x00,
-	0x12, 0x2d, 0x0a, 0x0b, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x12,
-	0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x1a, 0x0d,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x22, 0x00, 0x12,
-	0x3d, 0x0a, 0x0b, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x12, 0x13,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x69, 0x6d, 0x70, 0x6c, 0x65, 0x51, 0x75,
-	0x65, 0x72, 0x79, 0x1a, 0x17, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x78, 0x74,
-	0x65, 0x6e, 0x73, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x00, 0x12, 0x2e,
-	0x0a, 0x0a, 0x47, 0x65, 0x74, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x73, 0x12, 0x0d, 0x2e, 0x73,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0f, 0x2e, 0x73, 0x65,
-	0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x73, 0x22, 0x00, 0x12, 0x36,
-	0x0a, 0x0c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x12, 0x0e,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x1a, 0x14,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52, 0x65,
-	0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x36, 0x0a, 0x0c, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65,
-	0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x12, 0x0e, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
-	0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x1a, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
-	0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x36,
-	0x0a, 0x0c, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x12, 0x0e,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x1a, 0x14,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52, 0x65,
-	0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x32, 0x0a, 0x05, 0x50, 0x50, 0x72, 0x6f, 0x66, 0x12,
-	0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x50, 0x50, 0x72, 0x6f, 0x66, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x50,
-	0x50, 0x72, 0x6f, 0x66, 0x44, 0x61, 0x74, 0x61, 0x22, 0x00, 0x32, 0x4b, 0x0a, 0x0f, 0x52, 0x75,
-	0x6e, 0x6e, 0x65, 0x72, 0x45, 0x78, 0x74, 0x65, 0x6e, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x38, 0x0a,
-	0x03, 0x52, 0x75, 0x6e, 0x12, 0x19, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65,
-	0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x57, 0x69, 0x74, 0x68, 0x43, 0x61, 0x73, 0x65, 0x1a,
-	0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52,
-	0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x32, 0x67, 0x0a, 0x04, 0x4d, 0x6f, 0x63, 0x6b, 0x12,
-	0x2d, 0x0a, 0x06, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x12, 0x2e, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x2e, 0x4d, 0x6f, 0x63, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x1a, 0x0d, 0x2e,
-	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x30,
-	0x0a, 0x09, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x0d, 0x2e, 0x73, 0x65,
-	0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x2e, 0x4d, 0x6f, 0x63, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0x00,
-	0x42, 0x2e, 0x5a, 0x2c, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c,
-	0x69, 0x6e, 0x75, 0x78, 0x73, 0x75, 0x72, 0x65, 0x6e, 0x2f, 0x61, 0x70, 0x69, 0x2d, 0x74, 0x65,
-	0x73, 0x74, 0x69, 0x6e, 0x67, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x72, 0x2e, 0x53, 0x69, 0x6d, 0x70, 0x6c, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x00, 0x12,
+	0x43, 0x0a, 0x0c, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x64, 0x65, 0x12,
+	0x1b, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x64, 0x65, 0x47, 0x65, 0x6e,
+	0x65, 0x72, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x73,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75,
+	0x6c, 0x74, 0x22, 0x00, 0x12, 0x34, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x6e, 0x76,
+	0x65, 0x72, 0x74, 0x65, 0x72, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45,
+	0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x69,
+	0x6d, 0x70, 0x6c, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x00, 0x12, 0x47, 0x0a, 0x10, 0x43, 0x6f,
+	0x6e, 0x76, 0x65, 0x72, 0x74, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x12, 0x1b,
+	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x64, 0x65, 0x47, 0x65, 0x6e, 0x65,
+	0x72, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x73, 0x65,
+	0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c,
+	0x74, 0x22, 0x00, 0x12, 0x30, 0x0a, 0x0e, 0x50, 0x6f, 0x70, 0x75, 0x6c, 0x61, 0x72, 0x48, 0x65,
+	0x61, 0x64, 0x65, 0x72, 0x73, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45,
+	0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x50, 0x61,
+	0x69, 0x72, 0x73, 0x22, 0x00, 0x12, 0x36, 0x0a, 0x0e, 0x46, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x73, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x13, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
+	0x2e, 0x53, 0x69, 0x6d, 0x70, 0x6c, 0x65, 0x51, 0x75, 0x65, 0x72, 0x79, 0x1a, 0x0d, 0x2e, 0x73,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x50, 0x61, 0x69, 0x72, 0x73, 0x22, 0x00, 0x12, 0x40, 0x0a,
+	0x14, 0x46, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x51, 0x75, 0x65, 0x72, 0x79, 0x53,
+	0x74, 0x72, 0x65, 0x61, 0x6d, 0x12, 0x13, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53,
+	0x69, 0x6d, 0x70, 0x6c, 0x65, 0x51, 0x75, 0x65, 0x72, 0x79, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2e, 0x50, 0x61, 0x69, 0x72, 0x73, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x12,
+	0x31, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x0d, 0x2e,
+	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x22, 0x00, 0x12, 0x2d, 0x0a, 0x06, 0x53, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x12, 0x0d, 0x2e, 0x73,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73, 0x65,
+	0x72, 0x76, 0x65, 0x72, 0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22,
+	0x00, 0x12, 0x34, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x4b, 0x69, 0x6e,
+	0x64, 0x73, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74,
+	0x79, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65,
+	0x4b, 0x69, 0x6e, 0x64, 0x73, 0x22, 0x00, 0x12, 0x2c, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x53, 0x74,
+	0x6f, 0x72, 0x65, 0x73, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d,
+	0x70, 0x74, 0x79, 0x1a, 0x0e, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f,
+	0x72, 0x65, 0x73, 0x22, 0x00, 0x12, 0x2d, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x53,
+	0x74, 0x6f, 0x72, 0x65, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74,
+	0x6f, 0x72, 0x65, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f,
+	0x72, 0x65, 0x22, 0x00, 0x12, 0x2d, 0x0a, 0x0b, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x53, 0x74,
+	0x6f, 0x72, 0x65, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f,
+	0x72, 0x65, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72,
+	0x65, 0x22, 0x00, 0x12, 0x2d, 0x0a, 0x0b, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x53, 0x74, 0x6f,
+	0x72, 0x65, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72,
+	0x65, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65,
+	0x22, 0x00, 0x12, 0x3d, 0x0a, 0x0b, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x53, 0x74, 0x6f, 0x72,
+	0x65, 0x12, 0x13, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x69, 0x6d, 0x70, 0x6c,
+	0x65, 0x51, 0x75, 0x65, 0x72, 0x79, 0x1a, 0x17, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
+	0x45, 0x78, 0x74, 0x65, 0x6e, 0x73, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22,
+	0x00, 0x12, 0x2e, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x73, 0x12,
+	0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0f,
+	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x73, 0x22,
+	0x00, 0x12, 0x36, 0x0a, 0x0c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x53, 0x65, 0x63, 0x72, 0x65,
+	0x74, 0x12, 0x0e, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65,
+	0x74, 0x1a, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f,
+	0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x36, 0x0a, 0x0c, 0x44, 0x65, 0x6c,
+	0x65, 0x74, 0x65, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x12, 0x0e, 0x2e, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x1a, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22,
+	0x00, 0x12, 0x36, 0x0a, 0x0c, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x53, 0x65, 0x63, 0x72, 0x65,
+	0x74, 0x12, 0x0e, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65,
+	0x74, 0x1a, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f,
+	0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x32, 0x0a, 0x05, 0x50, 0x50, 0x72,
+	0x6f, 0x66, 0x12, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x50, 0x50, 0x72, 0x6f,
+	0x66, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x2e, 0x50, 0x50, 0x72, 0x6f, 0x66, 0x44, 0x61, 0x74, 0x61, 0x22, 0x00, 0x32, 0x4b, 0x0a,
+	0x0f, 0x52, 0x75, 0x6e, 0x6e, 0x65, 0x72, 0x45, 0x78, 0x74, 0x65, 0x6e, 0x73, 0x69, 0x6f, 0x6e,
+	0x12, 0x38, 0x0a, 0x03, 0x52, 0x75, 0x6e, 0x12, 0x19, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
+	0x2e, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x57, 0x69, 0x74, 0x68, 0x43, 0x61,
+	0x73, 0x65, 0x1a, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d,
+	0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x32, 0x67, 0x0a, 0x04, 0x4d, 0x6f,
+	0x63, 0x6b, 0x12, 0x2d, 0x0a, 0x06, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x12, 0x2e, 0x73,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x4d, 0x6f, 0x63, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
+	0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22,
+	0x00, 0x12, 0x30, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x0d,
+	0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e,
+	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x4d, 0x6f, 0x63, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69,
+	0x67, 0x22, 0x00, 0x42, 0x2e, 0x5a, 0x2c, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2f, 0x6c, 0x69, 0x6e, 0x75, 0x78, 0x73, 0x75, 0x72, 0x65, 0x6e, 0x2f, 0x61, 0x70, 0x69,
+	0x2d, 0x74, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x67, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x73, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -2855,7 +2908,7 @@ func file_pkg_server_server_proto_rawDescGZIP() []byte {
 	return file_pkg_server_server_proto_rawDescData
 }
 
-var file_pkg_server_server_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
+var file_pkg_server_server_proto_msgTypes = make([]protoimpl.MessageInfo, 42)
 var file_pkg_server_server_proto_goTypes = []interface{}{
 	(*Suites)(nil),              // 0: server.Suites
 	(*Items)(nil),               // 1: server.Items
@@ -2870,144 +2923,147 @@ var file_pkg_server_server_proto_goTypes = []interface{}{
 	(*TestTask)(nil),            // 10: server.TestTask
 	(*TestResult)(nil),          // 11: server.TestResult
 	(*HelloReply)(nil),          // 12: server.HelloReply
-	(*Suite)(nil),               // 13: server.Suite
-	(*TestCaseWithSuite)(nil),   // 14: server.TestCaseWithSuite
-	(*TestCases)(nil),           // 15: server.TestCases
-	(*TestCase)(nil),            // 16: server.TestCase
-	(*Request)(nil),             // 17: server.Request
-	(*Response)(nil),            // 18: server.Response
-	(*ConditionalVerify)(nil),   // 19: server.ConditionalVerify
-	(*TestCaseResult)(nil),      // 20: server.TestCaseResult
-	(*Pair)(nil),                // 21: server.Pair
-	(*Pairs)(nil),               // 22: server.Pairs
-	(*SimpleQuery)(nil),         // 23: server.SimpleQuery
-	(*Stores)(nil),              // 24: server.Stores
-	(*Store)(nil),               // 25: server.Store
-	(*StoreKinds)(nil),          // 26: server.StoreKinds
-	(*StoreKind)(nil),           // 27: server.StoreKind
-	(*CommonResult)(nil),        // 28: server.CommonResult
-	(*SimpleList)(nil),          // 29: server.SimpleList
-	(*SimpleName)(nil),          // 30: server.SimpleName
-	(*CodeGenerateRequest)(nil), // 31: server.CodeGenerateRequest
-	(*Secrets)(nil),             // 32: server.Secrets
-	(*Secret)(nil),              // 33: server.Secret
-	(*ExtensionStatus)(nil),     // 34: server.ExtensionStatus
-	(*PProfRequest)(nil),        // 35: server.PProfRequest
-	(*PProfData)(nil),           // 36: server.PProfData
-	(*Empty)(nil),               // 37: server.Empty
-	(*MockConfig)(nil),          // 38: server.MockConfig
-	nil,                         // 39: server.Suites.DataEntry
-	nil,                         // 40: server.TestTask.EnvEntry
+	(*YamlData)(nil),            // 13: server.YamlData
+	(*Suite)(nil),               // 14: server.Suite
+	(*TestCaseWithSuite)(nil),   // 15: server.TestCaseWithSuite
+	(*TestCases)(nil),           // 16: server.TestCases
+	(*TestCase)(nil),            // 17: server.TestCase
+	(*Request)(nil),             // 18: server.Request
+	(*Response)(nil),            // 19: server.Response
+	(*ConditionalVerify)(nil),   // 20: server.ConditionalVerify
+	(*TestCaseResult)(nil),      // 21: server.TestCaseResult
+	(*Pair)(nil),                // 22: server.Pair
+	(*Pairs)(nil),               // 23: server.Pairs
+	(*SimpleQuery)(nil),         // 24: server.SimpleQuery
+	(*Stores)(nil),              // 25: server.Stores
+	(*Store)(nil),               // 26: server.Store
+	(*StoreKinds)(nil),          // 27: server.StoreKinds
+	(*StoreKind)(nil),           // 28: server.StoreKind
+	(*CommonResult)(nil),        // 29: server.CommonResult
+	(*SimpleList)(nil),          // 30: server.SimpleList
+	(*SimpleName)(nil),          // 31: server.SimpleName
+	(*CodeGenerateRequest)(nil), // 32: server.CodeGenerateRequest
+	(*Secrets)(nil),             // 33: server.Secrets
+	(*Secret)(nil),              // 34: server.Secret
+	(*ExtensionStatus)(nil),     // 35: server.ExtensionStatus
+	(*PProfRequest)(nil),        // 36: server.PProfRequest
+	(*PProfData)(nil),           // 37: server.PProfData
+	(*Empty)(nil),               // 38: server.Empty
+	(*MockConfig)(nil),          // 39: server.MockConfig
+	nil,                         // 40: server.Suites.DataEntry
+	nil,                         // 41: server.TestTask.EnvEntry
 }
 var file_pkg_server_server_proto_depIdxs = []int32{
-	39, // 0: server.Suites.data:type_name -> server.Suites.DataEntry
-	21, // 1: server.TestCaseIdentity.parameters:type_name -> server.Pair
-	21, // 2: server.TestSuite.param:type_name -> server.Pair
+	40, // 0: server.Suites.data:type_name -> server.Suites.DataEntry
+	22, // 1: server.TestCaseIdentity.parameters:type_name -> server.Pair
+	22, // 2: server.TestSuite.param:type_name -> server.Pair
 	6,  // 3: server.TestSuite.spec:type_name -> server.APISpec
 	4,  // 4: server.TestSuiteWithCase.suite:type_name -> server.TestSuite
-	16, // 5: server.TestSuiteWithCase.case:type_name -> server.TestCase
+	17, // 5: server.TestSuiteWithCase.case:type_name -> server.TestCase
 	8,  // 6: server.APISpec.rpc:type_name -> server.RPC
 	7,  // 7: server.APISpec.secure:type_name -> server.Secure
-	40, // 8: server.TestTask.env:type_name -> server.TestTask.EnvEntry
-	21, // 9: server.TestTask.parameters:type_name -> server.Pair
-	20, // 10: server.TestResult.testCaseResult:type_name -> server.TestCaseResult
-	16, // 11: server.Suite.items:type_name -> server.TestCase
-	16, // 12: server.TestCaseWithSuite.data:type_name -> server.TestCase
-	16, // 13: server.TestCases.data:type_name -> server.TestCase
-	17, // 14: server.TestCase.request:type_name -> server.Request
-	18, // 15: server.TestCase.response:type_name -> server.Response
-	21, // 16: server.Request.header:type_name -> server.Pair
-	21, // 17: server.Request.query:type_name -> server.Pair
-	21, // 18: server.Request.cookie:type_name -> server.Pair
-	21, // 19: server.Request.form:type_name -> server.Pair
-	21, // 20: server.Response.header:type_name -> server.Pair
-	21, // 21: server.Response.bodyFieldsExpect:type_name -> server.Pair
-	19, // 22: server.Response.ConditionalVerify:type_name -> server.ConditionalVerify
-	21, // 23: server.TestCaseResult.header:type_name -> server.Pair
-	21, // 24: server.Pairs.data:type_name -> server.Pair
-	25, // 25: server.Stores.data:type_name -> server.Store
-	21, // 26: server.Store.properties:type_name -> server.Pair
-	27, // 27: server.Store.kind:type_name -> server.StoreKind
-	27, // 28: server.StoreKinds.data:type_name -> server.StoreKind
-	21, // 29: server.SimpleList.data:type_name -> server.Pair
-	33, // 30: server.Secrets.data:type_name -> server.Secret
+	41, // 8: server.TestTask.env:type_name -> server.TestTask.EnvEntry
+	22, // 9: server.TestTask.parameters:type_name -> server.Pair
+	21, // 10: server.TestResult.testCaseResult:type_name -> server.TestCaseResult
+	17, // 11: server.Suite.items:type_name -> server.TestCase
+	17, // 12: server.TestCaseWithSuite.data:type_name -> server.TestCase
+	17, // 13: server.TestCases.data:type_name -> server.TestCase
+	18, // 14: server.TestCase.request:type_name -> server.Request
+	19, // 15: server.TestCase.response:type_name -> server.Response
+	22, // 16: server.Request.header:type_name -> server.Pair
+	22, // 17: server.Request.query:type_name -> server.Pair
+	22, // 18: server.Request.cookie:type_name -> server.Pair
+	22, // 19: server.Request.form:type_name -> server.Pair
+	22, // 20: server.Response.header:type_name -> server.Pair
+	22, // 21: server.Response.bodyFieldsExpect:type_name -> server.Pair
+	20, // 22: server.Response.ConditionalVerify:type_name -> server.ConditionalVerify
+	22, // 23: server.TestCaseResult.header:type_name -> server.Pair
+	22, // 24: server.Pairs.data:type_name -> server.Pair
+	26, // 25: server.Stores.data:type_name -> server.Store
+	22, // 26: server.Store.properties:type_name -> server.Pair
+	28, // 27: server.Store.kind:type_name -> server.StoreKind
+	28, // 28: server.StoreKinds.data:type_name -> server.StoreKind
+	22, // 29: server.SimpleList.data:type_name -> server.Pair
+	34, // 30: server.Secrets.data:type_name -> server.Secret
 	1,  // 31: server.Suites.DataEntry.value:type_name -> server.Items
 	10, // 32: server.Runner.Run:input_type -> server.TestTask
-	37, // 33: server.Runner.GetSuites:input_type -> server.Empty
+	38, // 33: server.Runner.GetSuites:input_type -> server.Empty
 	9,  // 34: server.Runner.CreateTestSuite:input_type -> server.TestSuiteIdentity
 	3,  // 35: server.Runner.ImportTestSuite:input_type -> server.TestSuiteSource
 	9,  // 36: server.Runner.GetTestSuite:input_type -> server.TestSuiteIdentity
 	4,  // 37: server.Runner.UpdateTestSuite:input_type -> server.TestSuite
 	9,  // 38: server.Runner.DeleteTestSuite:input_type -> server.TestSuiteIdentity
-	9,  // 39: server.Runner.ListTestCase:input_type -> server.TestSuiteIdentity
-	9,  // 40: server.Runner.GetSuggestedAPIs:input_type -> server.TestSuiteIdentity
-	2,  // 41: server.Runner.RunTestCase:input_type -> server.TestCaseIdentity
-	2,  // 42: server.Runner.GetTestCase:input_type -> server.TestCaseIdentity
-	14, // 43: server.Runner.CreateTestCase:input_type -> server.TestCaseWithSuite
-	14, // 44: server.Runner.UpdateTestCase:input_type -> server.TestCaseWithSuite
-	2,  // 45: server.Runner.DeleteTestCase:input_type -> server.TestCaseIdentity
-	37, // 46: server.Runner.ListCodeGenerator:input_type -> server.Empty
-	31, // 47: server.Runner.GenerateCode:input_type -> server.CodeGenerateRequest
-	37, // 48: server.Runner.ListConverter:input_type -> server.Empty
-	31, // 49: server.Runner.ConvertTestSuite:input_type -> server.CodeGenerateRequest
-	37, // 50: server.Runner.PopularHeaders:input_type -> server.Empty
-	23, // 51: server.Runner.FunctionsQuery:input_type -> server.SimpleQuery
-	23, // 52: server.Runner.FunctionsQueryStream:input_type -> server.SimpleQuery
-	37, // 53: server.Runner.GetVersion:input_type -> server.Empty
-	37, // 54: server.Runner.Sample:input_type -> server.Empty
-	37, // 55: server.Runner.GetStoreKinds:input_type -> server.Empty
-	37, // 56: server.Runner.GetStores:input_type -> server.Empty
-	25, // 57: server.Runner.CreateStore:input_type -> server.Store
-	25, // 58: server.Runner.UpdateStore:input_type -> server.Store
-	25, // 59: server.Runner.DeleteStore:input_type -> server.Store
-	23, // 60: server.Runner.VerifyStore:input_type -> server.SimpleQuery
-	37, // 61: server.Runner.GetSecrets:input_type -> server.Empty
-	33, // 62: server.Runner.CreateSecret:input_type -> server.Secret
-	33, // 63: server.Runner.DeleteSecret:input_type -> server.Secret
-	33, // 64: server.Runner.UpdateSecret:input_type -> server.Secret
-	35, // 65: server.Runner.PProf:input_type -> server.PProfRequest
-	5,  // 66: server.RunnerExtension.Run:input_type -> server.TestSuiteWithCase
-	38, // 67: server.Mock.Reload:input_type -> server.MockConfig
-	37, // 68: server.Mock.GetConfig:input_type -> server.Empty
-	11, // 69: server.Runner.Run:output_type -> server.TestResult
-	0,  // 70: server.Runner.GetSuites:output_type -> server.Suites
-	12, // 71: server.Runner.CreateTestSuite:output_type -> server.HelloReply
-	28, // 72: server.Runner.ImportTestSuite:output_type -> server.CommonResult
-	4,  // 73: server.Runner.GetTestSuite:output_type -> server.TestSuite
-	12, // 74: server.Runner.UpdateTestSuite:output_type -> server.HelloReply
-	12, // 75: server.Runner.DeleteTestSuite:output_type -> server.HelloReply
-	13, // 76: server.Runner.ListTestCase:output_type -> server.Suite
-	15, // 77: server.Runner.GetSuggestedAPIs:output_type -> server.TestCases
-	20, // 78: server.Runner.RunTestCase:output_type -> server.TestCaseResult
-	16, // 79: server.Runner.GetTestCase:output_type -> server.TestCase
-	12, // 80: server.Runner.CreateTestCase:output_type -> server.HelloReply
-	12, // 81: server.Runner.UpdateTestCase:output_type -> server.HelloReply
-	12, // 82: server.Runner.DeleteTestCase:output_type -> server.HelloReply
-	29, // 83: server.Runner.ListCodeGenerator:output_type -> server.SimpleList
-	28, // 84: server.Runner.GenerateCode:output_type -> server.CommonResult
-	29, // 85: server.Runner.ListConverter:output_type -> server.SimpleList
-	28, // 86: server.Runner.ConvertTestSuite:output_type -> server.CommonResult
-	22, // 87: server.Runner.PopularHeaders:output_type -> server.Pairs
-	22, // 88: server.Runner.FunctionsQuery:output_type -> server.Pairs
-	22, // 89: server.Runner.FunctionsQueryStream:output_type -> server.Pairs
-	12, // 90: server.Runner.GetVersion:output_type -> server.HelloReply
-	12, // 91: server.Runner.Sample:output_type -> server.HelloReply
-	26, // 92: server.Runner.GetStoreKinds:output_type -> server.StoreKinds
-	24, // 93: server.Runner.GetStores:output_type -> server.Stores
-	25, // 94: server.Runner.CreateStore:output_type -> server.Store
-	25, // 95: server.Runner.UpdateStore:output_type -> server.Store
-	25, // 96: server.Runner.DeleteStore:output_type -> server.Store
-	34, // 97: server.Runner.VerifyStore:output_type -> server.ExtensionStatus
-	32, // 98: server.Runner.GetSecrets:output_type -> server.Secrets
-	28, // 99: server.Runner.CreateSecret:output_type -> server.CommonResult
-	28, // 100: server.Runner.DeleteSecret:output_type -> server.CommonResult
-	28, // 101: server.Runner.UpdateSecret:output_type -> server.CommonResult
-	36, // 102: server.Runner.PProf:output_type -> server.PProfData
-	28, // 103: server.RunnerExtension.Run:output_type -> server.CommonResult
-	37, // 104: server.Mock.Reload:output_type -> server.Empty
-	38, // 105: server.Mock.GetConfig:output_type -> server.MockConfig
-	69, // [69:106] is the sub-list for method output_type
-	32, // [32:69] is the sub-list for method input_type
+	9,  // 39: server.Runner.GetTestSuiteYaml:input_type -> server.TestSuiteIdentity
+	9,  // 40: server.Runner.ListTestCase:input_type -> server.TestSuiteIdentity
+	9,  // 41: server.Runner.GetSuggestedAPIs:input_type -> server.TestSuiteIdentity
+	2,  // 42: server.Runner.RunTestCase:input_type -> server.TestCaseIdentity
+	2,  // 43: server.Runner.GetTestCase:input_type -> server.TestCaseIdentity
+	15, // 44: server.Runner.CreateTestCase:input_type -> server.TestCaseWithSuite
+	15, // 45: server.Runner.UpdateTestCase:input_type -> server.TestCaseWithSuite
+	2,  // 46: server.Runner.DeleteTestCase:input_type -> server.TestCaseIdentity
+	38, // 47: server.Runner.ListCodeGenerator:input_type -> server.Empty
+	32, // 48: server.Runner.GenerateCode:input_type -> server.CodeGenerateRequest
+	38, // 49: server.Runner.ListConverter:input_type -> server.Empty
+	32, // 50: server.Runner.ConvertTestSuite:input_type -> server.CodeGenerateRequest
+	38, // 51: server.Runner.PopularHeaders:input_type -> server.Empty
+	24, // 52: server.Runner.FunctionsQuery:input_type -> server.SimpleQuery
+	24, // 53: server.Runner.FunctionsQueryStream:input_type -> server.SimpleQuery
+	38, // 54: server.Runner.GetVersion:input_type -> server.Empty
+	38, // 55: server.Runner.Sample:input_type -> server.Empty
+	38, // 56: server.Runner.GetStoreKinds:input_type -> server.Empty
+	38, // 57: server.Runner.GetStores:input_type -> server.Empty
+	26, // 58: server.Runner.CreateStore:input_type -> server.Store
+	26, // 59: server.Runner.UpdateStore:input_type -> server.Store
+	26, // 60: server.Runner.DeleteStore:input_type -> server.Store
+	24, // 61: server.Runner.VerifyStore:input_type -> server.SimpleQuery
+	38, // 62: server.Runner.GetSecrets:input_type -> server.Empty
+	34, // 63: server.Runner.CreateSecret:input_type -> server.Secret
+	34, // 64: server.Runner.DeleteSecret:input_type -> server.Secret
+	34, // 65: server.Runner.UpdateSecret:input_type -> server.Secret
+	36, // 66: server.Runner.PProf:input_type -> server.PProfRequest
+	5,  // 67: server.RunnerExtension.Run:input_type -> server.TestSuiteWithCase
+	39, // 68: server.Mock.Reload:input_type -> server.MockConfig
+	38, // 69: server.Mock.GetConfig:input_type -> server.Empty
+	11, // 70: server.Runner.Run:output_type -> server.TestResult
+	0,  // 71: server.Runner.GetSuites:output_type -> server.Suites
+	12, // 72: server.Runner.CreateTestSuite:output_type -> server.HelloReply
+	29, // 73: server.Runner.ImportTestSuite:output_type -> server.CommonResult
+	4,  // 74: server.Runner.GetTestSuite:output_type -> server.TestSuite
+	12, // 75: server.Runner.UpdateTestSuite:output_type -> server.HelloReply
+	12, // 76: server.Runner.DeleteTestSuite:output_type -> server.HelloReply
+	13, // 77: server.Runner.GetTestSuiteYaml:output_type -> server.YamlData
+	14, // 78: server.Runner.ListTestCase:output_type -> server.Suite
+	16, // 79: server.Runner.GetSuggestedAPIs:output_type -> server.TestCases
+	21, // 80: server.Runner.RunTestCase:output_type -> server.TestCaseResult
+	17, // 81: server.Runner.GetTestCase:output_type -> server.TestCase
+	12, // 82: server.Runner.CreateTestCase:output_type -> server.HelloReply
+	12, // 83: server.Runner.UpdateTestCase:output_type -> server.HelloReply
+	12, // 84: server.Runner.DeleteTestCase:output_type -> server.HelloReply
+	30, // 85: server.Runner.ListCodeGenerator:output_type -> server.SimpleList
+	29, // 86: server.Runner.GenerateCode:output_type -> server.CommonResult
+	30, // 87: server.Runner.ListConverter:output_type -> server.SimpleList
+	29, // 88: server.Runner.ConvertTestSuite:output_type -> server.CommonResult
+	23, // 89: server.Runner.PopularHeaders:output_type -> server.Pairs
+	23, // 90: server.Runner.FunctionsQuery:output_type -> server.Pairs
+	23, // 91: server.Runner.FunctionsQueryStream:output_type -> server.Pairs
+	12, // 92: server.Runner.GetVersion:output_type -> server.HelloReply
+	12, // 93: server.Runner.Sample:output_type -> server.HelloReply
+	27, // 94: server.Runner.GetStoreKinds:output_type -> server.StoreKinds
+	25, // 95: server.Runner.GetStores:output_type -> server.Stores
+	26, // 96: server.Runner.CreateStore:output_type -> server.Store
+	26, // 97: server.Runner.UpdateStore:output_type -> server.Store
+	26, // 98: server.Runner.DeleteStore:output_type -> server.Store
+	35, // 99: server.Runner.VerifyStore:output_type -> server.ExtensionStatus
+	33, // 100: server.Runner.GetSecrets:output_type -> server.Secrets
+	29, // 101: server.Runner.CreateSecret:output_type -> server.CommonResult
+	29, // 102: server.Runner.DeleteSecret:output_type -> server.CommonResult
+	29, // 103: server.Runner.UpdateSecret:output_type -> server.CommonResult
+	37, // 104: server.Runner.PProf:output_type -> server.PProfData
+	29, // 105: server.RunnerExtension.Run:output_type -> server.CommonResult
+	38, // 106: server.Mock.Reload:output_type -> server.Empty
+	39, // 107: server.Mock.GetConfig:output_type -> server.MockConfig
+	70, // [70:108] is the sub-list for method output_type
+	32, // [32:70] is the sub-list for method input_type
 	32, // [32:32] is the sub-list for extension type_name
 	32, // [32:32] is the sub-list for extension extendee
 	0,  // [0:32] is the sub-list for field type_name
@@ -3176,7 +3232,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Suite); i {
+			switch v := v.(*YamlData); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3188,7 +3244,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TestCaseWithSuite); i {
+			switch v := v.(*Suite); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3200,7 +3256,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TestCases); i {
+			switch v := v.(*TestCaseWithSuite); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3212,7 +3268,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TestCase); i {
+			switch v := v.(*TestCases); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3224,7 +3280,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Request); i {
+			switch v := v.(*TestCase); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3236,7 +3292,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Response); i {
+			switch v := v.(*Request); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3248,7 +3304,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ConditionalVerify); i {
+			switch v := v.(*Response); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3260,7 +3316,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TestCaseResult); i {
+			switch v := v.(*ConditionalVerify); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3272,7 +3328,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Pair); i {
+			switch v := v.(*TestCaseResult); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3284,7 +3340,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Pairs); i {
+			switch v := v.(*Pair); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3296,7 +3352,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SimpleQuery); i {
+			switch v := v.(*Pairs); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3308,7 +3364,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Stores); i {
+			switch v := v.(*SimpleQuery); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3320,7 +3376,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Store); i {
+			switch v := v.(*Stores); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3332,7 +3388,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StoreKinds); i {
+			switch v := v.(*Store); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3344,7 +3400,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StoreKind); i {
+			switch v := v.(*StoreKinds); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3356,7 +3412,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CommonResult); i {
+			switch v := v.(*StoreKind); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3368,7 +3424,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SimpleList); i {
+			switch v := v.(*CommonResult); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3380,7 +3436,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SimpleName); i {
+			switch v := v.(*SimpleList); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3392,7 +3448,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CodeGenerateRequest); i {
+			switch v := v.(*SimpleName); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3404,7 +3460,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Secrets); i {
+			switch v := v.(*CodeGenerateRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3416,7 +3472,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Secret); i {
+			switch v := v.(*Secrets); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3428,7 +3484,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ExtensionStatus); i {
+			switch v := v.(*Secret); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3440,7 +3496,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PProfRequest); i {
+			switch v := v.(*ExtensionStatus); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3452,7 +3508,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PProfData); i {
+			switch v := v.(*PProfRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3464,7 +3520,7 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Empty); i {
+			switch v := v.(*PProfData); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3476,6 +3532,18 @@ func file_pkg_server_server_proto_init() {
 			}
 		}
 		file_pkg_server_server_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Empty); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkg_server_server_proto_msgTypes[39].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*MockConfig); i {
 			case 0:
 				return &v.state
@@ -3494,7 +3562,7 @@ func file_pkg_server_server_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_pkg_server_server_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   41,
+			NumMessages:   42,
 			NumExtensions: 0,
 			NumServices:   3,
 		},

@@ -406,6 +406,18 @@ func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (resul
 	return
 }
 
+func (s *server) GetTestSuiteYaml(ctx context.Context, in *TestSuiteIdentity) (reply *YamlData, err error) {
+	var data []byte
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	if data, err = loader.GetTestSuiteYaml(in.Name); err == nil {
+		reply = &YamlData{
+			Data: data,
+		}
+	}
+	return
+}
+
 func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *TestCase, err error) {
 	var result testing.TestCase
 	loader := s.getLoader(ctx)

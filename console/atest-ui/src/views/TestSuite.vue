@@ -8,6 +8,8 @@ import { NewSuggestedAPIsQuery, GetHTTPMethods } from './types'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 import { API } from './net'
+import { Codemirror } from 'vue-codemirror'
+import  yaml  from 'js-yaml';
 
 const { t } = useI18n()
 
@@ -189,6 +191,16 @@ function paramChange() {
     } as Pair)
   }
 }
+
+const yamlFormat = ref('');
+const yamlDialogVisible = ref(false)
+
+function viewYaml(){
+  yamlDialogVisible.value = true
+  API.GetTestSuiteYaml(props.name, "local", (d) => {
+      yamlFormat.value = yaml.dump(yaml.load(atob(d.data)));
+  })
+}
 </script>
 
 <template>
@@ -269,6 +281,7 @@ function paramChange() {
     <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
     <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
     <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
+    <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{ t('button.viewYaml') }}</el-button>
   </div>
 
   <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
@@ -327,5 +340,11 @@ function paramChange() {
         </el-form>
       </span>
     </template>
+  </el-dialog>
+
+  <el-dialog v-model="yamlDialogVisible" :title="t('button.viewYaml')" width="40%" draggable>
+    <el-scrollbar>
+      <Codemirror v-model="yamlFormat"/>
+    </el-scrollbar>
   </el-dialog>
 </template>

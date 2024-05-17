@@ -12,6 +12,7 @@
         "toolbox": "工具箱",
         "refresh": "刷新",
         "newtestcase": "新建测试用例",
+        "viewYaml":"查看 YAML",
         "verify": "检查",
         "generateCode": "生成代码",
         "sendWithParam": "参数化"
