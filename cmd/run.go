@@ -176,10 +176,10 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	if err == nil {
-		var swaggerAPI apispec.APIConverage
+		var swaggerAPI apispec.SwaggerAPI
 		if o.swaggerURL != "" {
-			if swaggerAPI, err = apispec.ParseURLToSwagger(o.swaggerURL); err == nil {
-				o.reportWriter.WithAPIConverage(swaggerAPI)
+			if swaggerAPI.Swagger, err = apispec.ParseURLToSwagger(o.swaggerURL); err == nil {
+				o.reportWriter.WithAPIConverage(&swaggerAPI)
 			}
 		}
 	}
