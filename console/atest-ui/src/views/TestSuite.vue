@@ -87,6 +87,7 @@ function save() {
     })
 }
 
+const isFullScreen = ref(false)
 const dialogVisible = ref(false)
 const testcaseFormRef = ref<FormInstance>()
 const testCaseForm = reactive({
@@ -276,12 +277,15 @@ function viewYaml(){
       <el-divider />
     </div>
 
-    <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
-    <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
-    <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
-    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
-    <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
-    <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{ t('button.viewYaml') }}</el-button>
+    <div class="button-container">
+      <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
+      <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
+      <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
+      <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
+      <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
+      <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{ t('button.viewYaml') }}</el-button>
+    </div>
+
   </div>
 
   <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
@@ -342,9 +346,24 @@ function viewYaml(){
     </template>
   </el-dialog>
 
-  <el-dialog v-model="yamlDialogVisible" :title="t('button.viewYaml')" width="40%" draggable>
+  <el-dialog v-model="yamlDialogVisible" :title="t('button.viewYaml')" :fullscreen="isFullScreen" width="40%" draggable>
+    <el-button type="primary" @click="isFullScreen = !isFullScreen" style="margin-bottom: 10px;">
+      <p>{{ isFullScreen ? t('button.cancelFullScreen') : t('button.fullScreen') }}</p>
+    </el-button>
     <el-scrollbar>
       <Codemirror v-model="yamlFormat"/>
     </el-scrollbar>
   </el-dialog>
 </template>
+
+<style scoped>
+.button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.button-container > .el-button + .el-button {
+    margin-left:0px;
+}
+</style>
