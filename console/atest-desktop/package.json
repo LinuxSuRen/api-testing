@@ -29,11 +29,12 @@
   },
   "dependencies": {
     "child_process": "^1.0.2",
+    "electron-log": "^5.1.4",
     "electron-squirrel-startup": "^1.0.1"
   },
   "build": {
     "extraResources": [
-      "./assets/atest.exe"
+      "./assets/*"
     ]
   },
   "optionalDependencies": {
