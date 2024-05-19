@@ -21,7 +21,7 @@ run-console:
 .PHONY: copy
 copy: ## Copy the binary to /usr/local/bin
 copy:
-	sudo cp ${OUTPUT_DIR}/$(GOOS)/$(GOARCH)/atest /usr/local/bin/
+	sudo cp $(OUTPUT_DIR)/$(OS)/$(ARCH)/${BINARY} /usr/local/bin/
 
 .PHONY: copy-restart
 copy-restart: ## Copy the binary to /usr/local/bin and restart the service
