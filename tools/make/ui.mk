@@ -16,8 +16,7 @@ build.ui:
 
 .PHONY: build.embed.ui
 build.embed.ui: embed.ui
-	GOOS=${GOOS} go build -a -ldflags "${BUILD_FLAGS}" -o ${OUTPUT_DIR}/embedui/${BINARY} ${ROOT_PACKAGE}/main.go
-	cp ${OUTPUT_DIR}/embedui/${BINARY} /usr/local/bin/
+	GOOS=${GOOS} go build -a -ldflags "${BUILD_FLAGS}" -o $(OUTPUT_DIR)/$(OS)/$(ARCH)/${BINARY} ${ROOT_PACKAGE}/main.go
 	make clean.embed.ui
 
 .PHONY: embed.ui

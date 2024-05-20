@@ -39,8 +39,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          make build
-          make copy
+          make build copy
           sudo atest service install
           sudo atest service restart
           sudo atest service status
@@ -118,7 +117,7 @@ jobs:
           cache-dependency-path: console/atest-ui/package-lock.json
       - name: Build
         run: |
-          make build-embed-ui
+          make build-embed-ui copy
           sudo atest service install
           sudo atest service restart
       - name: Test

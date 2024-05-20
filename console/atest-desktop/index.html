@@ -17,6 +17,7 @@ Log output
 
 <!-- You can also require other files to run in this process -->
 <script src="./renderer.js"></script>
+<script src="./api.js"></script>
 <script>
 const actionBut = document.getElementById('action');
 actionBut.addEventListener('click', (e) => {
@@ -35,7 +36,7 @@ actionBut.addEventListener('click', (e) => {
 
 const openServerBut = document.getElementById('open-server-page');
 openServerBut.addEventListener('click', (e) => {
-  window.location = 'http://localhost:8080'
+  window.location = getHomePage()
 })
 </script>
 </body>

@@ -1,10 +1,11 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+const path = require('node:path');
 
 module.exports = {
   packagerConfig: {
-    icon: 'api-testing.ico',
-    asar: true,
+    icon: path.join(__dirname, 'api-testing'),
+    asar: true
   },
   rebuildConfig: {},
   makers: [
@@ -32,7 +33,7 @@ module.exports = {
       name: '@electron-forge/maker-dmg',
       config: {
         format: 'ULFO',
-        icon: 'api-testing.ico'
+        icon: path.join(__dirname, 'api-testing.png')
       }
     },
     {

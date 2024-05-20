@@ -2,10 +2,20 @@
 
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, Menu, MenuItem } = require('electron')
+const log = require('electron-log/main');
 const path = require('node:path')
+const fs = require('node:fs')
 const server = require('./api')
 const spawn = require("child_process").spawn;
+const homedir = require('os').homedir();
+const atestHome = path.join(homedir, ".config", 'atest')
 
+// setup log output
+log.initialize();
+log.transports.file.level = 'info';
+log.transports.file.resolvePathFn = () => path.join(atestHome, 'log.log');
+
+app.dock.setIcon(path.join(__dirname, "api-testing.png"))
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -20,12 +30,17 @@ const createWindow = () => {
     icon: path.join(__dirname, '/api-testing.ico'),
   })
 
-  server.control(() => {
+  if (!isNaN(serverProcess.pid)) {
+    // server process started by app
     mainWindow.loadURL(server.getHomePage())
-  }, () => {
-    // and load the index.html of the app.
-    mainWindow.loadFile('index.html')
-  })
+  } else {
+    server.control(() => {
+      mainWindow.loadURL(server.getHomePage())
+    }, () => {
+      // and load the index.html of the app.
+      mainWindow.loadFile('index.html')
+    })
+  }
 }
 
 const menu = new Menu()
@@ -71,14 +86,55 @@ let serverProcess;
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  const homedir = require('os').homedir();
+  const homeData = path.join(atestHome, 'data')
+  const homeBin = path.join(atestHome, 'bin')
 
-  serverProcess = spawn("atest", [
+  fs.mkdirSync(homeData, {
+    recursive: true
+  })
+  fs.mkdirSync(homeBin, {
+    recursive: true
+  })
+
+  // try to find the atest file first
+  const serverFile = process.platform === "win32" ? "atest.exe" : "atest"
+  const atestFromHome = path.join(homeBin, serverFile)
+  const atestFromPkg = path.join(__dirname, serverFile)
+  
+  if (!fs.existsSync(atestFromHome)) {
+    log.info('cannot find from %s', atestFromHome)
+
+    const data = fs.readFileSync(atestFromPkg)
+    log.info('start to write file with length %d', data.length)
+    
+    try { 
+      fs.writeFileSync(atestFromHome, data);
+    } 
+    catch (e) { 
+      log.error('Error Code: %s', e.code); 
+    }
+  }
+  fs.chmodSync(atestFromHome, 0o755); 
+
+  serverProcess = spawn(atestFromHome, [
     "server",
     "--http-port", server.getPort(),
-    // TODO below setting is not working
-    "--local-storage", path.join(homedir, ".atest", "data", "*.yaml")
+    "--local-storage", path.join(homeData, "*.yaml")
   ]);
+  serverProcess.stdout.on('data', (data) => {
+    log.info(data.toString())
+    if (data.toString().indexOf('Server is running') != -1) {
+      BrowserWindow.getFocusedWindow().loadURL(server.getHomePage())
+    }
+  });
+  serverProcess.stderr.on('data', (data) => {
+    log.error(data.toString())
+  });
+  serverProcess.on('close', (code) => {
+    log.log(`child process exited with code ${code}`);
+  });
+  log.info('start atest server as pid:', serverProcess.pid)
+  log.info(serverProcess.spawnargs)
 
   createWindow()
 
@@ -99,6 +155,11 @@ app.on('window-all-closed', () => {
     if (serverProcess) {
       serverProcess.kill();
     }
+  }
+})
+app.on('before-quit', () => {
+  if (serverProcess) {
+    serverProcess.kill();
   }
 })
 
