@@ -18,10 +18,31 @@ run-console: ## Run the API Testing console
 run-console:
 	cd ${ATEST_UI} && ${FRONT_RUNTIMES} run dev
 
+.PHONY: copy.%
+copy.%:
+	@$(LOG_TARGET)
+	$(eval PLATFORM := $(word 1,$(subst ., ,$*)))
+	$(eval OS := $(word 1,$(subst _, ,$(PLATFORM))))
+	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
+	@$(call log, "Building binary $(BINARY) for $(OS)-$(ARCH).")
+	sudo cp $(OUTPUT_DIR)/$(OS)/$(ARCH)/${BINARY} /usr/local/bin/
+
 .PHONY: copy
 copy: ## Copy the binary to /usr/local/bin
-copy:
-	sudo cp $(OUTPUT_DIR)/$(OS)/$(ARCH)/${BINARY} /usr/local/bin/
+copy: $(addprefix copy., $(addprefix $(PLATFORM)., $(BINARY)))
+
+.PHONY: copy-to-desktop.%
+copy-to-desktop.%:
+	$(eval PLATFORM := $(word 1,$(subst ., ,$*)))
+	$(eval OS := $(word 1,$(subst _, ,$(PLATFORM))))
+	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
+	@$(call log, "Building binary $(BINARY) for $(OS)-$(ARCH).")
+	cp $(OUTPUT_DIR)/$(OS)/$(ARCH)/${BINARY} console/atest-desktop
+
+
+.PHONY: copy-to-desktop
+copy-to-desktop: ## Copy the binary to console/atest-desktop
+copy-to-desktop: $(addprefix copy-to-desktop., $(addprefix $(PLATFORM)., $(BINARY)))
 
 .PHONY: copy-restart
 copy-restart: ## Copy the binary to /usr/local/bin and restart the service

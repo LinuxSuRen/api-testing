@@ -10,6 +10,11 @@ desktop-start:
 	cd console/atest-desktop && npm run start
 
 desktop-package: ## Package Electron Desktop
-desktop-package: build.embed.ui
-	cp ${OUTPUT_DIR}/${BINARY} console/atest-desktop
-	cd console/atest-desktop && npm run package
+desktop-package: build.embed.ui copy-to-desktop
+	cd console/atest-desktop && npm i && npm run package
+
+desktop-make: build.embed.ui ## Make an Electron Desktop
+	cd console/atest-desktop && npm i && npm run make
+
+desktop-publish: build.embed.ui ## Publish the Electron Desktop
+	cd console/atest-desktop && npm i && npm run publish
