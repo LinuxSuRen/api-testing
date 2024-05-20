@@ -121,6 +121,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # see https://github.com/actions/runner-images
         os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
     runs-on: ${{ matrix.os }}
     steps:
@@ -130,6 +131,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
+      - name: Build Server on Windows
+        if: runner.os == 'Windows'
+        env:
+          BINARY: atest.exe
+        run: |
+          make desktop-package
+      - name: Build Server
+        if: runner.os != 'Windows'
+        run: |
+          make desktop-package
       # for fixing Error: Cannot find module 'appdmg'
       - name: Install Python 3.11.4
         uses: actions/setup-python@v4
