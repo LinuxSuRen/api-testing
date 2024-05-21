@@ -10,10 +10,12 @@
 <body>
 
 <button type="button" id="action">Start</button>
-<div>
-Log output
-</div>
 <button type="button" id="open-server-page">Open Server Page</button>
+
+<div>
+  <div>Log</div>
+  <button type="button" id="open-log-file">Open Log File</button>
+</div>
 
 <!-- You can also require other files to run in this process -->
 <script src="./renderer.js"></script>
@@ -24,11 +26,11 @@ actionBut.addEventListener('click', (e) => {
     const action = actionBut.innerHTML;
     switch (action) {
         case 'Stop':
-            stop();
+            window.electronAPI.stopServer()
             actionBut.innerHTML = 'Start';
             break;
         case 'Start':
-            start();
+            window.electronAPI.startServer()
             actionBut.innerHTML= 'Stop';
             break;
     }
@@ -37,6 +39,11 @@ actionBut.addEventListener('click', (e) => {
 const openServerBut = document.getElementById('open-server-page');
 openServerBut.addEventListener('click', (e) => {
   window.location = getHomePage()
+})
+
+const openLogfileBut = document.getElementById('open-log-file')
+openLogfileBut.addEventListener('click', () => {
+  window.electronAPI.openLogDir()
 })
 </script>
 </body>
