@@ -23,21 +23,21 @@ export const CreateStore = (params: any) =>
   })
 
 export const UpdateStore = (params: any) =>
-  post('/api/server.Runner/UpdateStore', params, {
+  post('/server.Runner/UpdateStore', params, {
     'X-Auth': getToken()
   })
 
 export const GetStores = () =>
-  post('/api/server.Runner/GetStores', null, {
+  post('/server.Runner/GetStores', null, {
     'X-Auth': getToken()
   })
 
 export const DeleteStore = (params: string) =>
-  post('/api/server.Runner/DeleteStore', params, {
+  post('/server.Runner/DeleteStore', params, {
     'X-Auth': getToken()
   })
 
 export const VerifyStore = (params: string) =>
-  post('/api/server.Runner/VerifyStore', params, {
+  post('/server.Runner/VerifyStore', params, {
     'X-Auth': getToken()
   })

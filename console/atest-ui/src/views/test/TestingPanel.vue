@@ -8,10 +8,9 @@
         test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
       <el-button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</el-button>
       <TemplateFunctions />
-      <br>
-      <br>  
-      <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" style="padding: 5px;" />
-
+      <div class="filter-input">
+        <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" />
+      </div>
       <el-tree v-loading="storesLoading" :data=data highlight-current :check-on-click-node="true"
         :expand-on-click-node="false" :current-node-key="currentNodekey" ref="treeRef" node-key="id"
         :filter-node-method="filterTestCases" @node-click="handleNodeClick"
@@ -108,7 +107,7 @@
 import TestCase from '../../components/test/TestCase.vue'
 import TestSuite from '../../components/test/TestSuite.vue'
 import TemplateFunctions from '../../components/other/TemplateFunctions.vue'
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watch, onMounted } from 'vue'
 import { ElTree, ElMessage } from 'element-plus'
 import { Edit, Refresh } from '@element-plus/icons-vue'
 import { Cache } from '../../utils/cache'
@@ -172,6 +171,13 @@ const data = ref([] as Tree[])
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const currentNodekey = ref('')
 
+// page init runtime.
+onMounted(() => {
+  // load save stores.
+  loadStores()
+
+})
+
 const loadTestSuites = async (sn: string) => {
   await LoadTestSuite(sn)
     .then(DefaultResponseProcess)
@@ -210,13 +216,12 @@ const storesLoading = ref(false)
 const loadStores = async () => {
   storesLoading.value = true
   await GetStores()
-    .then(DefaultResponseProcess)
-    .then(async (d) => {
-      stores.value = d.data
+    .then(async (res: any) => {
+      stores.value = res.data
       data.value = [] as Tree[]
-      Cache.SetStores(d.data)
+      Cache.SetStores(res.data)
 
-      for (const item of d.data) {
+      for (const item of res.data) {
         if (item.ready && !item.disabled) {
           await loadTestSuites(item.name)
         }
@@ -270,11 +275,7 @@ const loadStores = async () => {
     }).finally(() => {
       storesLoading.value = false
     })
-
 }
-
-// run loadStores.
-loadStores()
 
 const dialogVisible = ref(false)
 const importDialogVisible = ref(false)
@@ -401,10 +402,21 @@ const suiteKinds = [{
 }
 
 .card {
+  display: flex;
   margin-top: 1%;
-  width: 100%; /* 使用百分比单位 */
-  max-width: 1750px; /* 设置最大宽度 */
+  width: 100%;
+  /* 使用百分比单位 */
+  max-width: 1750px;
+  /* 设置最大宽度 */
   height: auto;
+  vertical-align:middle;
+
+  .filter-input {
+    vertical-align:middle;
+    float: right;
+    padding-left: 1vh;
+    width: 50vh;
+  }
 }
 
 header {
