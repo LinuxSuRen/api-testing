@@ -4,6 +4,7 @@ import {
   Menu as IconMenu,
   Location,
   Share,
+  ArrowDown
 } from '@element-plus/icons-vue'
 import { ref, watch } from 'vue'
 import { API } from './views/net'
@@ -15,7 +16,7 @@ import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, locale: i18nLocale } = useI18n()
 
 import setAsDarkTheme from './theme'
 
@@ -60,6 +61,26 @@ const handleSelect = (key: string) => {
   panelName.value = key
   window.localStorage.setItem('activeMenu', key)
 }
+
+const locale = ref(Cache.GetPreference().language)
+i18nLocale.value = locale.value
+
+watch(locale, (value) =>{
+  Cache.WatchLocale(value)
+  i18nLocale.value = locale.value
+})
+
+const handleChangeLan = (command: string) => {
+  switch (command) {
+    case "chinese":
+      locale.value = "zh-CN"
+      break;
+    case "english":
+      locale.value = "en-US"
+      break;
+  }
+};
+
 </script>
 
 <template>
@@ -99,6 +120,20 @@ const handleSelect = (key: string) => {
     </el-aside>
 
     <el-main style="padding-top: 5px; padding-bottom: 5px;">
+      <div style="position: absolute; top: 10px; right: 20px;">
+        <el-col style="display: flex; align-items: center;">
+          <el-tag style="font-size: 18px;">{{ t('language') }}</el-tag>
+          <el-dropdown trigger="click" @command="(command: string) => handleChangeLan(command)">
+            <el-icon><arrow-down /></el-icon>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="chinese">中文</el-dropdown-item>
+                <el-dropdown-item command="english">English</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </el-col>
+      </div>
       <TestingPanel v-if="panelName === 'testing'" />
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
