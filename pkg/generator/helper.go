@@ -15,9 +15,7 @@ limitations under the License.
 */
 package generator
 
-import (
-	"html/template"
-)
+import "html/template"
 
 func safeString(str string) template.HTML {
 	return template.HTML(str)
