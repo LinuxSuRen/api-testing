@@ -393,6 +393,30 @@ func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (re
 	return
 }
 
+func (s *server) DuplicateTestSuite(ctx context.Context, in *TestSuiteDuplicate) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	if in.SourceSuiteName == in.TargetSuiteName {
+		reply.Error = "source and target suite name should be different"
+		return
+	}
+
+	var suite testing.TestSuite
+	if suite, err = loader.GetTestSuite(in.SourceSuiteName, true); err == nil {
+		suite.Name = in.TargetSuiteName
+		if err = loader.CreateSuite(suite.Name, suite.API); err == nil {
+			for _, testCase := range suite.Items {
+				if err = loader.CreateTestCase(suite.Name, testCase); err != nil {
+					break
+				}
+			}
+		}
+	}
+	return
+}
+
 func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (result *Suite, err error) {
 	var items []testing.TestCase
 	loader := s.getLoader(ctx)
@@ -577,6 +601,24 @@ func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (repl
 	defer loader.Close()
 	reply = &HelloReply{}
 	err = loader.DeleteTestCase(in.Suite, in.Testcase)
+	return
+}
+
+func (s *server) DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate) (reply *HelloReply, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	reply = &HelloReply{}
+
+	if in.SourceCaseName == in.TargetCaseName {
+		reply.Error = "source and target case name should be different"
+		return
+	}
+
+	var testcase testing.TestCase
+	if testcase, err = loader.GetTestCase(in.SourceSuiteName, in.SourceCaseName); err == nil {
+		testcase.Name = in.TargetCaseName
+		err = loader.CreateTestCase(in.TargetSuiteName, testcase)
+	}
 	return
 }
 

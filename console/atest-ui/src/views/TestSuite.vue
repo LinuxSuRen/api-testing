@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { Edit } from '@element-plus/icons-vue'
+import { Edit, CopyDocument, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery, GetHTTPMethods } from './types'
@@ -202,6 +202,23 @@ function viewYaml(){
       yamlFormat.value = yaml.dump(yaml.load(atob(d.data)));
   })
 }
+
+const openDuplicateDialog = () => {
+    testSuiteDuplicateDialog.value = true
+    targetSuiteDuplicateName.value = props.name + '-copy'
+}
+const duplicateTestSuite = () => {
+    API.DuplicateTestSuite(props.name, targetSuiteDuplicateName.value, (d) => {
+        testSuiteDuplicateDialog.value = false
+        ElMessage({
+          message: 'Duplicated.',
+          type: 'success'
+        })
+        emit('updated')
+    })
+}
+const testSuiteDuplicateDialog = ref(false)
+const targetSuiteDuplicateName = ref('')
 </script>
 
 <template>
@@ -278,14 +295,16 @@ function viewYaml(){
     </div>
 
     <div class="button-container">
-      <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
-      <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
-      <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
-      <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
-      <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
-      <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{ t('button.viewYaml') }}</el-button>
+        <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
+        <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
+        <el-button type="primary" @click="del" :icon="Delete" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
+        <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
+        <el-button type="primary" @click="openDuplicateDialog" :icon="CopyDocument" test-id="duplicate">{{ t('button.duplicate') }}</el-button>
+        <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{ t('button.viewYaml') }}</el-button>
     </div>
-
+    <div class="button-container">
+        <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
+    </div>
   </div>
 
   <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
@@ -354,6 +373,14 @@ function viewYaml(){
       <Codemirror v-model="yamlFormat"/>
     </el-scrollbar>
   </el-dialog>
+
+    <el-drawer v-model="testSuiteDuplicateDialog">
+        <template #default>
+            New Test Suite Name:<el-input v-model="targetSuiteDuplicateName" />
+
+            <el-button type="primary" @click="duplicateTestSuite">{{ t('button.ok') }}</el-button>
+        </template>
+    </el-drawer>
 </template>
 
 <style scoped>
@@ -361,9 +388,10 @@ function viewYaml(){
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    margin-bottom: 8px;
 }
 
 .button-container > .el-button + .el-button {
-    margin-left:0px;
+    margin-left: 0px;
 }
 </style>
