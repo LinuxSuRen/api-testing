@@ -120,13 +120,7 @@ app.whenReady().then(() => {
 	} 
     catch (e) { 
       log.error('Error Code: %s', e.code); 
-	  log.error('Error writing atest.exe to %s: %s', atestFromHome, e.message);
     }
-	if (fs.existsSync(atestFromHome)) {
-		log.info('atest.exe file exists at ${atestFromHome}')
-	} else {
-		log.error('Failed to write atest.exe to ${atestFromHome}')
-	}
 	}
   
   fs.chmodSync(atestFromHome, 0o755); 
