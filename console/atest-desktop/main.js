@@ -15,7 +15,9 @@ log.initialize();
 log.transports.file.level = 'info';
 log.transports.file.resolvePathFn = () => path.join(atestHome, 'log.log');
 
-app.dock.setIcon(path.join(__dirname, "api-testing.png"))
+if (process.platform === 'darwin'){
+		app.dock.setIcon(path.join(__dirname, "api-testing.png"))
+}
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -108,12 +110,25 @@ app.whenReady().then(() => {
     log.info('start to write file with length %d', data.length)
     
     try { 
-      fs.writeFileSync(atestFromHome, data);
-    } 
+	if (process.platform === "win32") {
+		const file = fs.openSync(atestFromHome, 'w');
+		fs.writeSync(file, data, 0, data.length, 0);
+		fs.closeSync(file);
+	}else{
+		fs.writeFileSync(atestFromHome, data);
+	}
+	} 
     catch (e) { 
       log.error('Error Code: %s', e.code); 
+	  log.error('Error writing atest.exe to %s: %s', atestFromHome, e.message);
     }
-  }
+	if (fs.existsSync(atestFromHome)) {
+		log.info('atest.exe file exists at ${atestFromHome}')
+	} else {
+		log.error('Failed to write atest.exe to ${atestFromHome}')
+	}
+	}
+  
   fs.chmodSync(atestFromHome, 0o755); 
 
   serverProcess = spawn(atestFromHome, [
