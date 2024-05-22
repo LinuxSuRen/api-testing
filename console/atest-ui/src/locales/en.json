@@ -15,9 +15,7 @@
         "viewYaml":"View YAML",
         "verify": "Verify",
         "generateCode": "Generate Code",
-        "sendWithParam": "Send With Parameter",
-        "fullScreen": "Full Screen",
-        "cancelFullScreen": "Cancel Full Screen"
+        "sendWithParam": "Send With Parameter"
     },
     "title": {
         "createTestSuite": "Create Test Suite",
