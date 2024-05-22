@@ -14,8 +14,9 @@ const atestHome = path.join(homedir, ".config", 'atest')
 log.initialize();
 log.transports.file.level = 'info';
 log.transports.file.resolvePathFn = () => path.join(atestHome, 'log.log');
-
-app.dock.setIcon(path.join(__dirname, "api-testing.png"))
+if (process.platform === 'darwin'){
+	app.dock.setIcon(path.join(__dirname, "api-testing.png"))
+}
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -107,8 +108,14 @@ app.whenReady().then(() => {
     const data = fs.readFileSync(atestFromPkg)
     log.info('start to write file with length %d', data.length)
     
-    try { 
-      fs.writeFileSync(atestFromHome, data);
+    try {
+		if (process.platform === "win32") {
+			const file = fs.openSync(atestFromHome, 'w');
+			fs.writeSync(file, data, 0, data.length, 0);
+			fs.closeSync(file);
+		}else{
+			fs.writeFileSync(atestFromHome, data);
+		}
     } 
     catch (e) { 
       log.error('Error Code: %s', e.code); 
