@@ -110,24 +110,24 @@ app.whenReady().then(() => {
     log.info('start to write file with length %d', data.length)
     
     try { 
-	 if (process.platform === "win32") {
-      const file = fs.openSync(atestFromHome, 'w');
-      fs.writeSync(file, data, 0, data.length, 0);
-      fs.closeSync(file);
-	 }else{
-      fs.writeFileSync(atestFromHome, data);
-	 }
-    } 
+	if (process.platform === "win32") {
+		const file = fs.openSync(atestFromHome, 'w');
+		fs.writeSync(file, data, 0, data.length, 0);
+		fs.closeSync(file);
+	}else{
+		fs.writeFileSync(atestFromHome, data);
+	}
+	} 
     catch (e) { 
       log.error('Error Code: %s', e.code); 
 	  log.error('Error writing atest.exe to %s: %s', atestFromHome, e.message);
     }
 	if (fs.existsSync(atestFromHome)) {
-    log.info('atest.exe file exists at ${atestFromHome}')
-  } else {
-    log.error('Failed to write atest.exe to ${atestFromHome}')
-  }
-  }
+		log.info('atest.exe file exists at ${atestFromHome}')
+	} else {
+		log.error('Failed to write atest.exe to ${atestFromHome}')
+	}
+	}
   
   fs.chmodSync(atestFromHome, 0o755); 
 
