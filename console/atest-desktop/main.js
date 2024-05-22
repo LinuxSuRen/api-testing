@@ -121,7 +121,7 @@ app.whenReady().then(() => {
     catch (e) { 
       log.error('Error Code: %s', e.code); 
     }
-	}
+}
   
   fs.chmodSync(atestFromHome, 0o755); 
 
