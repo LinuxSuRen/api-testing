@@ -72,8 +72,10 @@ export function GetPreference() {
     if (val && val !== '') {
         return JSON.parse(val)
     } else {
+        const navLanguage = navigator.language != null ? navigator.language : 'zh-CN';
         return {
             darkTheme: false,
+            language: navLanguage,
             requestActiveTab: "body",
             responseActiveTab: "body"
         } as Preference
@@ -135,6 +137,12 @@ function SetStores(stores: Stores | Store[]) {
     return
 }
 
+function WatchLocale(locale: string) {
+    const preference = GetPreference()
+    preference.language = locale
+    SetPreference(preference)
+}
+
 export const Cache = {
     GetTestCaseResponseCache,
     SetTestCaseResponseCache,
@@ -144,5 +152,6 @@ export const Cache = {
     WatchRequestActiveTab,
     WatchResponseActiveTab,
     WatchDarkTheme,
+    WatchLocale,
     GetCurrentStore, SetStores, SetCurrentStore
 }
