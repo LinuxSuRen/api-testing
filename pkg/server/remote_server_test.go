@@ -31,6 +31,7 @@ import (
 
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/linuxsuren/api-testing/sample"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/metadata"
@@ -127,22 +128,49 @@ func TestRemoteServer(t *testing.T) {
 	assert.Error(t, err)
 }
 
+const sampleBody = `{"message": "hello"}`
+
 func TestRunTestCase(t *testing.T) {
 	loader := atest.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
 	server := NewRemoteServer(loader, nil, nil, nil, "", 1024*1024*4)
 
-	defer gock.Clean()
-	gock.New(urlFoo).Get("/").MatchHeader("key", "value").
-		Reply(http.StatusOK).
-		BodyString(`{"message": "hello"}`)
+	t.Run("json response", func(t *testing.T) {
+		defer gock.Clean()
+		gock.New(urlFoo).Get("/").MatchHeader("key", "value").
+			Reply(http.StatusOK).SetHeader(util.ContentType, util.JSON).
+			BodyString(sampleBody)
 
-	result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
-		Suite:    "simple",
-		Testcase: "get",
+		result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
+			Suite:    "simple",
+			Testcase: "get",
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, sampleBody, result.Body)
+		assert.Contains(t, result.Output, "start to run: 'get'\nstart to send request to http://foo\ntest case \"get\", status code: 200\n")
 	})
-	assert.NoError(t, err)
-	assert.Contains(t, result.Output, "start to run: 'get'\nstart to send request to http://foo\ntest case \"get\", status code: 200\n")
+
+	t.Run("text response", func(t *testing.T) {
+		defer gock.Clean()
+		gock.New(urlFoo).Get("/").MatchHeader("key", "value").
+			Reply(http.StatusOK).SetHeader(util.ContentType, util.Plain).
+			BodyString(sampleBody)
+
+		result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
+			Suite:    "simple",
+			Testcase: "get",
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, sampleBody, result.Body)
+	})
+
+	t.Run("not suite found", func(t *testing.T) {
+		result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
+			Suite: "not-found",
+		})
+		assert.NoError(t, err)
+		assert.NotEmpty(t, result.Error)
+	})
 }
 
 func TestFindParentTestCases(t *testing.T) {
