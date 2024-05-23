@@ -149,4 +149,4 @@ jobs:
       - name: Build Desktop
         if: runner.os != 'Windows'
         run: |
-          make desktop-package desktop-make
+          make desktop-package desktop-make desktop-test

@@ -18,3 +18,6 @@ desktop-make: build.embed.ui ## Make an Electron Desktop
 
 desktop-publish: build.embed.ui ## Publish the Electron Desktop
 	cd console/atest-desktop && npm i && npm run publish
+
+desktop-test: ## Run unit tests of the Electron Desktop
+	cd console/atest-desktop && npm i && npm test

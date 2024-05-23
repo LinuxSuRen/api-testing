@@ -1,13 +1,28 @@
-// main.js
+/*
+Copyright 2024 API Testing Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 // Modules to control application life and create native browser window
-const { app, shell, BrowserWindow, Menu, MenuItem, ipcMain } = require('electron')
+const { app, shell, BrowserWindow, Menu, MenuItem, ipcMain, contextBridge } = require('electron')
 const log = require('electron-log/main');
 const path = require('node:path')
 const fs = require('node:fs')
 const server = require('./api')
 const spawn = require("child_process").spawn;
 const atestHome = server.getHomeDir()
+const storage = require('electron-json-storage')
 
 // setup log output
 log.initialize();
@@ -18,19 +33,31 @@ if (process.platform === 'darwin'){
 	app.dock.setIcon(path.join(__dirname, "api-testing.png"))
 }
 
+const windowOptions = {
+  width: 1024,
+  height: 600,
+  frame: true,
+  webPreferences: {
+    preload: path.join(__dirname, 'preload.js'),
+    nodeIntegration: true,
+    contextIsolation: true,
+    enableRemoteModule: true
+  },
+  icon: path.join(__dirname, '/api-testing.ico'),
+}
+
 const createWindow = () => {
+  var width = storage.getSync('window.width')
+  if (!isNaN(width)) {
+    windowOptions.width = width
+  }
+  var height = storage.getSync('window.height')
+  if (!isNaN(height)) {
+    windowOptions.height = height
+  }
+
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 600,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      contextIsolation: true,
-      enableRemoteModule: true
-    },
-    icon: path.join(__dirname, '/api-testing.ico'),
-  })
+  const mainWindow = new BrowserWindow(windowOptions)
 
   if (!isNaN(serverProcess.pid)) {
     // server process started by app
@@ -43,6 +70,12 @@ const createWindow = () => {
       mainWindow.loadFile('index.html')
     })
   }
+
+  mainWindow.on('resize', () => {
+    const size = mainWindow.getSize();
+    storage.set('window.width', size[0])
+    storage.set('window.height', size[1])
+  })
 }
 
 const menu = new Menu()
@@ -88,6 +121,21 @@ let serverProcess;
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  ipcMain.on('openLogDir', () => {
+    shell.openExternal('file://' + server.getLogfile())
+  })
+  ipcMain.on('startServer', startServer)
+  ipcMain.on('stopServer', stopServer)
+  ipcMain.on('control', (e, okCallback, errCallback) => {
+    console.log(e + "==" + okCallback + "==" + errCallback)
+    server.control(okCallback, errCallback)
+  })
+  ipcMain.handle('getHomePage', server.getHomePage)
+  ipcMain.handle('getPort', () => {
+    return server.getPort()
+  })
+  ipcMain.handle('getHealthzUrl', server.getHealthzUrl)
+
   startServer()
   createWindow()
 
@@ -96,12 +144,6 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
-
-  ipcMain.on('openLogDir', () => {
-    shell.openExternal('file://' + server.getLogfile())
-  })
-  ipcMain.on('startServer', startServer)
-  ipcMain.on('stopServer', stopServer)
 })
 
 const startServer = () => {
@@ -127,15 +169,14 @@ const startServer = () => {
     log.info('start to write file with length %d', data.length)
     
     try {
-		if (process.platform === "win32") {
-			const file = fs.openSync(atestFromHome, 'w');
-			fs.writeSync(file, data, 0, data.length, 0);
-			fs.closeSync(file);
-		}else{
-			fs.writeFileSync(atestFromHome, data);
-		}
-    } 
-    catch (e) { 
+      if (process.platform === "win32") {
+        const file = fs.openSync(atestFromHome, 'w');
+        fs.writeSync(file, data, 0, data.length, 0);
+        fs.closeSync(file);
+      }else{
+        fs.writeFileSync(atestFromHome, data);
+      }
+    } catch (e) { 
       log.error('Error Code: %s', e.code); 
     }
   }
