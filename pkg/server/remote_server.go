@@ -431,14 +431,13 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
 	var targetTestSuite testing.TestSuite
 
+	result = &TestCaseResult{}
 	loader := s.getLoader(ctx)
 	defer loader.Close()
 	targetTestSuite, err = loader.GetTestSuite(in.Suite, true)
-	if err != nil {
+	if err != nil || targetTestSuite.Name == "" {
 		err = nil
-		result = &TestCaseResult{
-			Error: fmt.Sprintf("not found suite: %s", in.Suite),
-		}
+		result.Error = fmt.Sprintf("not found suite: %s", in.Suite)
 		return
 	}
 
@@ -453,9 +452,10 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 		}
 
 		var reply *TestResult
+		var lastItem *TestCaseResult
 		if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
 			lastIndex := len(reply.TestCaseResult) - 1
-			lastItem := reply.TestCaseResult[lastIndex]
+			lastItem = reply.TestCaseResult[lastIndex]
 
 			if len(lastItem.Body) > GrpcMaxRecvMsgSize {
 				e := "the HTTP response body exceeded the maximum message size limit received by the gRPC client"
@@ -468,23 +468,18 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 				}
 				return
 			}
-
-			result = &TestCaseResult{
-				Output:     reply.Message,
-				Error:      reply.Error,
-				Body:       lastItem.Body,
-				Header:     lastItem.Header,
-				StatusCode: lastItem.StatusCode,
-			}
 		} else if err != nil {
-			result = &TestCaseResult{
-				Error: err.Error(),
-			}
-		} else {
-			result = &TestCaseResult{
-				Output: reply.Message,
-				Error:  reply.Error,
-			}
+			result.Error = err.Error()
+		}
+
+		if reply != nil {
+			result.Output = reply.Message
+			result.Error = reply.Error
+		}
+		if lastItem != nil {
+			result.Body = lastItem.Body
+			result.Header = lastItem.Header
+			result.StatusCode = lastItem.StatusCode
 		}
 	}
 	return

@@ -57,10 +57,7 @@ const sendRequest = async () => {
         type: 'success'
       })
     }
-    if (e.body !== '') {
-      testResult.value.bodyObject = JSON.parse(e.body)
-      testResult.value.originBodyObject = JSON.parse(e.body)
-    }
+    parseResponseBody(e.body)
 
     Cache.SetTestCaseResponseCache(suite + '-' + name, {
       body: testResult.value.bodyObject,
@@ -74,9 +71,22 @@ const sendRequest = async () => {
 
     requestLoading.value = false
     UIAPI.ErrorTip(e)
-    testResult.value.bodyObject = JSON.parse(e.body)
-    testResult.value.originBodyObject = JSON.parse(e.body)
+
+    parseResponseBody(e.body)
   })
+}
+
+const parseResponseBody = (body) => {
+  if (body === '') {
+    return
+  }
+
+  try {
+    testResult.value.bodyObject = JSON.parse(body)
+    testResult.value.originBodyObject = JSON.parse(body)
+  } catch {
+    testResult.value.bodyText = body
+  }
 }
 
 const responseBodyFilterText = ref('')
@@ -803,9 +813,14 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
           <Codemirror v-model="testResult.output"/>
         </el-tab-pane>
         <el-tab-pane label="Body" name="body">
-          <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
-            clearable label="dddd" placeholder="$.key" />
-          <JsonViewer :value="testResult.bodyObject" :expand-depth="5" copyable boxed sort />
+          <div v-if="testResult.bodyObject">
+            <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
+              clearable placeholder="$.key" />
+            <JsonViewer :value="testResult.bodyObject" :expand-depth="2" copyable boxed sort />
+          </div>
+          <div v-else>
+            <Codemirror v-model="testResult.bodyText"/>
+          </div>
         </el-tab-pane>
         <el-tab-pane name="response-header">
           <template #label>
