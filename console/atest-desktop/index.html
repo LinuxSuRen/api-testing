@@ -9,35 +9,63 @@
 </head>
 <body>
 
-<button type="button" id="action">Start</button>
-<div>
-Log output
-</div>
-<button type="button" id="open-server-page">Open Server Page</button>
+<div style="margin: 5px">
+  <div>
+    <div>Server Status</div>
+    <button type="button" id="action">Start</button>
+    <button type="button" id="open-server-page">Open Server Page</button>
+    <div>
+      <span>Port:</span><input name="port" id="port" type="text"/>
+    </div>
+  </div>
 
-<!-- You can also require other files to run in this process -->
-<script src="./renderer.js"></script>
-<script src="./api.js"></script>
+  <div>
+    <div>Log</div>
+    <button type="button" id="open-log-file">Open Log File</button>
+  </div>
+</div>
+
 <script>
 const actionBut = document.getElementById('action');
 actionBut.addEventListener('click', (e) => {
     const action = actionBut.innerHTML;
     switch (action) {
         case 'Stop':
-            stop();
-            actionBut.innerHTML = 'Start';
+            window.electronAPI.stopServer()
             break;
         case 'Start':
-            start();
-            actionBut.innerHTML= 'Stop';
+            window.electronAPI.startServer()
             break;
     }
 })
 
 const openServerBut = document.getElementById('open-server-page');
-openServerBut.addEventListener('click', (e) => {
-  window.location = getHomePage()
+openServerBut.addEventListener('click', async (e) => {
+  window.location = await window.electronAPI.getHomePage()
 })
+
+const openLogfileBut = document.getElementById('open-log-file')
+openLogfileBut.addEventListener('click', () => {
+  window.electronAPI.openLogDir()
+})
+
+const loadServerStatus = async () => {
+  const healthzUrl = await window.electronAPI.getHealthzUrl()
+
+  fetch(healthzUrl).then(res => {
+    actionBut.innerHTML = 'Stop';
+  }).catch(err => {
+    actionBut.innerHTML = 'Start';
+  })
+}
+
+loadServerStatus()
+window.setInterval(loadServerStatus, 2000)
+
+const portInput = document.getElementById('port');
+(async function() {
+  portInput.value = await window.electronAPI.getPort()
+})();
 </script>
 </body>
 </html>

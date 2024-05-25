@@ -19,3 +19,4 @@ console/atest-desktop/out
 console/atest-desktop/node_modules
 console/atest-desktop/atest
 console/atest-desktop/atest.exe
+console/atest-desktop/coverage
