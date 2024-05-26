@@ -11,6 +11,8 @@
         "send": "Send",
         "copy": "Copy",
         "ok": "OK",
+        "reload": "Reload",
+        "insertSample": "Insert Sample",
         "toolbox": "Tool Box",
         "refresh": "Refresh",
         "newtestcase": "New TestCase",

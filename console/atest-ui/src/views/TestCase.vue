@@ -852,7 +852,8 @@ const duplicateTestCase = () => {
     <el-drawer v-model="duplicateTestCaseDialog">
         <template #default>
             New Test Case Name:<el-input v-model="targetTestCaseName" />
-
+        </template>
+        <template #footer>
             <el-button type="primary" @click="duplicateTestCase">{{ t('button.ok') }}</el-button>
         </template>
     </el-drawer>
