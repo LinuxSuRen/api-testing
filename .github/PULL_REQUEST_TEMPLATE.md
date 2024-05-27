@@ -2,10 +2,11 @@
 Make sure you run the `make test` command before committing the pr. 
 Making sure that your local build is OK before committing will help you reduce debugging time 
 and make it easier for maintainers to review. 
-
-If you are committing pr for the first time, 
-please read the contributor's documentation: https://github.com/LinuxSuRen/api-testing/blob/master/CONTRIBUTION.md
 -->
+
+> We highly recommend you read [the contributor's documentation](https://github.com/LinuxSuRen/api-testing/blob/master/CONTRIBUTION.md) before starting the review process especially since this is your first contribution to this project.
+>
+> It was updated on 2024/5/27
 
 **What type of PR is this?**
 <!--
