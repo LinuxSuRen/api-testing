@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Edit, Delete, Search } from '@element-plus/icons-vue'
+import { Edit, Delete, Search, CopyDocument } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
 import type { Pair, TestResult, TestCaseWithSuite } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
@@ -433,7 +433,7 @@ function bodyTypeChange(e: number) {
   }
 }
 
-function jsonForamt() {
+function jsonFormat() {
   if (bodyType.value !== 5) {
     return
   }
@@ -500,6 +500,23 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
   })
   cb(results)
 }
+
+const duplicateTestCaseDialog = ref(false)
+const targetTestCaseName = ref('')
+const openDuplicateTestCaseDialog = () => {
+    duplicateTestCaseDialog.value = true
+    targetTestCaseName.value = props.name + '-copy'
+}
+const duplicateTestCase = () => {
+    API.DuplicateTestCase(props.suite, props.suite, props.name, targetTestCaseName.value,(d) => {
+        duplicateTestCaseDialog.value = false
+        ElMessage({
+            message: 'Duplicated.',
+            type: 'success'
+        })
+        emit('updated')
+    })
+}
 </script>
 
 <template>
@@ -513,6 +530,7 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
           v-if="!Cache.GetCurrentStore().readOnly"
           >{{ t('button.save') }}</el-button>
         <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
+        <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument">{{ t('button.duplicate') }}</el-button>
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
       </div>
       <div style="display: flex;">
@@ -649,7 +667,7 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
 
           <div style="flex-grow: 1;">
             <Codemirror v-if="bodyType === 3 || bodyType === 5"
-              @change="jsonForamt"
+              @change="jsonFormat"
               v-model="testCaseWithSuite.data.request.body"/>
             <el-table :data="testCaseWithSuite.data.request.form" style="width: 100%" v-if="bodyType === 4">
               <el-table-column label="Key" width="180">
@@ -845,4 +863,13 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
       </el-tabs>
     </el-footer>
   </el-container>
+
+    <el-drawer v-model="duplicateTestCaseDialog">
+        <template #default>
+            New Test Case Name:<el-input v-model="targetTestCaseName" />
+        </template>
+        <template #footer>
+            <el-button type="primary" @click="duplicateTestCase">{{ t('button.ok') }}</el-button>
+        </template>
+    </el-drawer>
 </template>

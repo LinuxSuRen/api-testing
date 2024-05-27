@@ -396,16 +396,21 @@ func TestUpdateTestCase(t *testing.T) {
 	})
 }
 
-func TestListTestCase(t *testing.T) {
-	tmpFile, err := os.CreateTemp(os.TempDir(), "test")
+func setupSimpleServer(t *testing.T, name string) (string, RunnerServer) {
+	tmpFile, err := os.CreateTemp(os.TempDir(), name)
 	assert.NoError(t, err)
-	defer os.Remove(tmpFile.Name())
 
 	fmt.Fprint(tmpFile, simpleSuite)
 	writer := atest.NewFileWriter(os.TempDir())
 	writer.Put(tmpFile.Name())
 
 	server := NewRemoteServer(writer, nil, nil, nil, "", 1024*1024*4)
+	return tmpFile.Name(), server
+}
+
+func TestListTestCase(t *testing.T) {
+	tmpFile, server := setupSimpleServer(t, "test")
+	defer os.Remove(tmpFile)
 	ctx := context.Background()
 
 	t.Run("get two testcases", func(t *testing.T) {
@@ -420,7 +425,7 @@ func TestListTestCase(t *testing.T) {
 		testSuiteYaml, err := server.GetTestSuiteYaml(ctx, &TestSuiteIdentity{Name: "simple"})
 		assert.NoError(t, err)
 		if assert.NotNil(t, testSuiteYaml) {
-			data, err := os.ReadFile(tmpFile.Name())
+			data, err := os.ReadFile(tmpFile)
 			assert.NoError(t, err)
 			assert.Equal(t, data, testSuiteYaml.Data)
 		}
@@ -469,6 +474,74 @@ func TestListTestCase(t *testing.T) {
 			Condition: []string{"1 == 1"},
 			Verify:    []string{"1 == 1"},
 		}}))
+	})
+}
+
+func TestDuplicate(t *testing.T) {
+	tmpFile, server := setupSimpleServer(t, "duplicate")
+	defer os.Remove(tmpFile)
+	ctx := context.Background()
+
+	t.Run("duplicate test suite", func(t *testing.T) {
+		_, err := server.DuplicateTestSuite(ctx, &TestSuiteDuplicate{
+			SourceSuiteName: "simple",
+			TargetSuiteName: "simple2",
+		})
+		assert.NoError(t, err)
+
+		// find the new test suite
+		suite, err := server.GetTestSuite(ctx, &TestSuiteIdentity{Name: "simple2"})
+		assert.NoError(t, err)
+		assert.NotNil(t, suite)
+
+		// check the test case of the new suite
+		testcase, err := server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple2", Testcase: "get"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, testcase) {
+			assert.Equal(t, "http://foo", testcase.Request.Api)
+		}
+
+		defer func() {
+			_, err := server.DeleteTestSuite(ctx, &TestSuiteIdentity{Name: "simple2"})
+			assert.NoError(t, err)
+		}()
+	})
+
+	t.Run("duplicate test suite with same name", func(t *testing.T) {
+		reply, err := server.DuplicateTestSuite(ctx, &TestSuiteDuplicate{
+			SourceSuiteName: "simple",
+			TargetSuiteName: "simple",
+		})
+		assert.NoError(t, err)
+		assert.NotEmpty(t, reply.Error)
+	})
+
+	t.Run("duplicate test case", func(t *testing.T) {
+		_, err := server.DuplicateTestCase(ctx, &TestCaseDuplicate{
+			SourceSuiteName: "simple",
+			TargetSuiteName: "simple",
+			SourceCaseName:  "get",
+			TargetCaseName:  "get2",
+		})
+		assert.NoError(t, err)
+
+		// find the new test case
+		testcase, err := server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple", Testcase: "get2"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, testcase) {
+			assert.Equal(t, "http://foo", testcase.Request.Api)
+		}
+	})
+
+	t.Run("test duplicate test case with same name", func(t *testing.T) {
+		reply, err := server.DuplicateTestCase(ctx, &TestCaseDuplicate{
+			SourceSuiteName: "simple",
+			TargetSuiteName: "simple",
+			SourceCaseName:  "get",
+			TargetCaseName:  "get",
+		})
+		assert.NoError(t, err)
+		assert.NotEmpty(t, reply.Error)
 	})
 }
 

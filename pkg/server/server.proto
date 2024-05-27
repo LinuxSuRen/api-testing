@@ -8,12 +8,14 @@ service Runner {
     // belong to a specific store
     rpc Run (TestTask) returns (TestResult) {}
 
+    // test suites related
     rpc GetSuites(Empty) returns (Suites) {}
     rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {}
     rpc ImportTestSuite(TestSuiteSource) returns (CommonResult) {}
     rpc GetTestSuite(TestSuiteIdentity) returns (TestSuite) {}
     rpc UpdateTestSuite(TestSuite) returns (HelloReply) {}
     rpc DeleteTestSuite(TestSuiteIdentity) returns (HelloReply) {}
+    rpc DuplicateTestSuite(TestSuiteDuplicate) returns (HelloReply) {}
     rpc GetTestSuiteYaml(TestSuiteIdentity) returns (YamlData) {}
 
     // test cases related
@@ -24,6 +26,7 @@ service Runner {
     rpc CreateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
+    rpc DuplicateTestCase(TestCaseDuplicate) returns (HelloReply) {}
 
     // code generator
     rpc ListCodeGenerator(Empty) returns (SimpleList) {}
@@ -78,16 +81,16 @@ message TestCaseIdentity {
 }
 
 message TestSuiteSource {
-  string kind = 1;
-  string url = 2;
-  string data = 3;
+    string kind = 1;
+    string url = 2;
+    string data = 3;
 }
 
 message TestSuite {
-  string name = 1;
-  string api = 2;
-  repeated Pair param = 3;
-  APISpec spec = 4;
+    string name = 1;
+    string api = 2;
+    repeated Pair param = 3;
+    APISpec spec = 4;
 }
 
 message TestSuiteWithCase {
@@ -122,6 +125,18 @@ message TestSuiteIdentity {
   string name = 1;
   string api = 2;
   string kind = 3;
+}
+
+message TestSuiteDuplicate {
+  string sourceSuiteName = 1;
+  string targetSuiteName = 2;
+}
+
+message TestCaseDuplicate {
+  string sourceSuiteName = 1;
+  string sourceCaseName = 2;
+  string targetSuiteName = 3;
+  string targetCaseName = 4;
 }
 
 message TestTask {

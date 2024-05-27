@@ -20,11 +20,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-openapi/spec"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/go-openapi/spec"
 
 	"github.com/andreyvit/diff"
 	"github.com/expr-lang/expr"
@@ -356,12 +357,12 @@ func runJob(job *testing.Job, ctx interface{}, current interface{}) (err error) 
 		}
 
 		if program, err = expr.Compile(exprText, expr.Env(env)); err != nil {
-			fmt.Printf("failed to compile: %s, %v\n", item, err)
+			fmt.Printf("failed to compile: %q, %v\n", exprText, err)
 			return
 		}
 
 		if _, err = expr.Run(program, env); err != nil {
-			fmt.Printf("failed to Run: %s, %v\n", item, err)
+			fmt.Printf("failed to Run: %q, %v\n", exprText, err)
 			return
 		}
 	}
