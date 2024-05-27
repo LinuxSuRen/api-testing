@@ -17,10 +17,10 @@ package generator
 
 import (
 	"bytes"
-	"html/template"
-	"net/http"
-
 	_ "embed"
+	"net/http"
+	"strings"
+	"text/template"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
@@ -32,6 +32,9 @@ func NewGolangGenerator() CodeGenerator {
 	return &golangGenerator{}
 }
 
+//go:embed data/main.go.tpl
+var golangTemplate string
+
 func (g *golangGenerator) Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (result string, err error) {
 	if testcase.Request.Method == "" {
 		testcase.Request.Method = http.MethodGet
@@ -41,6 +44,9 @@ func (g *golangGenerator) Generate(testSuite *testing.TestSuite, testcase *testi
 		buf := new(bytes.Buffer)
 		if err = tpl.Execute(buf, testcase); err == nil {
 			result = buf.String()
+			if strings.Contains(result, "bytes.") {
+				result = strings.Replace(result, "import (", "import (\n\t\"bytes\"", 1)
+			}
 		}
 	}
 	return
@@ -49,6 +55,3 @@ func (g *golangGenerator) Generate(testSuite *testing.TestSuite, testcase *testi
 func init() {
 	RegisterCodeGenerator("golang", NewGolangGenerator())
 }
-
-//go:embed data/main.go.tpl
-var golangTemplate string
