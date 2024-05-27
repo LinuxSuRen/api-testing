@@ -4,7 +4,7 @@ Making sure that your local build is OK before committing will help you reduce d
 and make it easier for maintainers to review. 
 -->
 
-> We highly recommend you read the contributor's documentation before starting the review process especially since this is your first contribution to this project.
+> We highly recommend you read [the contributor's documentation](https://github.com/LinuxSuRen/api-testing/blob/master/CONTRIBUTION.md) before starting the review process especially since this is your first contribution to this project.
 >
 > It was updated on 2024/5/27
 
