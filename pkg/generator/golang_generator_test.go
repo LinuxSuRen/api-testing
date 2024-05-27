@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package generator
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -33,14 +34,31 @@ func TestGolangGenerator_Generate(t *testing.T) {
 	testcase := &atest.TestCase{
 		Name: "Test Case Example",
 		Request: atest.Request{
-			Method: "POST",
-			API:    "http://127.0.0.1:8082/metrics",
+			Method: http.MethodGet,
+			API:    urlFoo,
 			Header: map[string]string{
 				"Content-Type": "application/json",
 			},
 			Body: atest.RequestBody{Value: ""},
 		},
 	}
+
+	// Create a fake HTTP server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check the request method and path
+		if r.Method != "POST" || r.URL.Path != urlFoo {
+			http.Error(w, "Unexpected request", http.StatusBadRequest)
+			return
+		}
+
+		// Write a response
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	}))
+	defer server.Close()
+
+	// Replace the API URL with the fake server's URL
+	testcase.Request.API = server.URL + testcase.Request.API
 
 	result, err := generator.Generate(testSuite, testcase)
 	if err != nil {
