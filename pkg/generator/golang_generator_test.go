@@ -35,7 +35,7 @@ func TestGolangGenerator_Generate(t *testing.T) {
 		Name: "Test Case Example",
 		Request: atest.Request{
 			Method: http.MethodGet,
-			API:    urlFoo,
+			API:    urlTest,
 			Header: map[string]string{
 				"Content-Type": "application/json",
 			},
@@ -46,7 +46,7 @@ func TestGolangGenerator_Generate(t *testing.T) {
 	// Create a fake HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check the request method and path
-		if r.Method != "POST" || r.URL.Path != urlFoo {
+		if r.Method != "POST" || r.URL.Path != urlTest {
 			http.Error(w, "Unexpected request", http.StatusBadRequest)
 			return
 		}
@@ -75,3 +75,5 @@ func TestGolangGenerator_Generate(t *testing.T) {
 		t.Errorf("Expected result to contain %q when method is POST, got %q", expectedImport, result)
 	}
 }
+
+const urlTest = "http://foo"
