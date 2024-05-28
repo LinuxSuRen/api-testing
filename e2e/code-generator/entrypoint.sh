@@ -12,11 +12,11 @@ fi
 mkdir -p /root/.config/atest
 mkdir -p /var/data
 
-nohup atest server --local-storage 'data/*.yaml'&
-atest run -p test-suite.yaml
+nohup atest server --local-storage '/workspace/test-suites/*.yaml'&
+sleep 1
 
 curl http://localhost:8080/server.Runner/GenerateCode -X POST \
-    -d '{"TestSuite": "test", "TestCase": "test", "Generator": "'"$lang"'"}' > code.json
+    -d '{"TestSuite": "test", "TestCase": "requestWithHeader", "Generator": "'"$lang"'"}' > code.json
 
 cat code.json | jq .message -r | sed 's/\\n/\n/g' | sed 's/\\t/\t/g' | sed 's/\\\"/"/g' > code.txt
 cat code.txt

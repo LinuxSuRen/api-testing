@@ -10,5 +10,4 @@ then
 fi
 
 mv ${sourcefile} Main.java
-javac Main.java
-java Main
+java Main.java
