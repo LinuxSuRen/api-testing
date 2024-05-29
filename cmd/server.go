@@ -56,6 +56,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var (
@@ -262,7 +263,16 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		_ = o.httpServer.Shutdown(ctx)
 	}()
 
-	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))
+	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc),
+		runtime.WithMarshalerOption("application/json+pretty", &runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{
+				Indent:    "  ",
+				Multiline: true, // Optional, implied by presence of "Indent".
+			},
+			UnmarshalOptions: protojson.UnmarshalOptions{
+				DiscardUnknown: true,
+			},
+		}))
 	err = errors.Join(
 		server.RegisterRunnerHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}),
 		server.RegisterMockHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}))

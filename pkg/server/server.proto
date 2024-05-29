@@ -4,19 +4,56 @@ option go_package = "github.com/linuxsuren/api-testing/pkg/server";
 
 package server;
 
+import "google/api/annotations.proto";
+
 service Runner {
     // belong to a specific store
     rpc Run (TestTask) returns (TestResult) {}
 
     // test suites related
-    rpc GetSuites(Empty) returns (Suites) {}
-    rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {}
-    rpc ImportTestSuite(TestSuiteSource) returns (CommonResult) {}
-    rpc GetTestSuite(TestSuiteIdentity) returns (TestSuite) {}
-    rpc UpdateTestSuite(TestSuite) returns (HelloReply) {}
-    rpc DeleteTestSuite(TestSuiteIdentity) returns (HelloReply) {}
-    rpc DuplicateTestSuite(TestSuiteDuplicate) returns (HelloReply) {}
-    rpc GetTestSuiteYaml(TestSuiteIdentity) returns (YamlData) {}
+    rpc GetSuites(Empty) returns (Suites) {
+      option (google.api.http) = {
+        get: "/v1/suites"
+      };
+    }
+    rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {
+      option (google.api.http) = {
+        post: "/v1/suites"
+        body: "*"
+      };
+    }
+    rpc ImportTestSuite(TestSuiteSource) returns (CommonResult) {
+      option (google.api.http) = {
+        post: "/v1/suites/import"
+      };
+    }
+    rpc GetTestSuite(TestSuiteIdentity) returns (TestSuite) {
+      option (google.api.http) = {
+        get: "/v1/suites/{name}"
+      };
+    }
+    rpc UpdateTestSuite(TestSuite) returns (HelloReply) {
+      option (google.api.http) = {
+        put: "/v1/suites/{name}"
+        body: "*"
+      };
+    }
+    rpc DeleteTestSuite(TestSuiteIdentity) returns (HelloReply) {
+      option (google.api.http) = {
+        delete: "/v1/suites/{name}"
+      };
+    }
+    rpc DuplicateTestSuite(TestSuiteDuplicate) returns (HelloReply) {
+      option (google.api.http) = {
+        post: "/v1/suites/{name}/duplicate"
+        body: "*"
+      };
+    }
+    rpc GetTestSuiteYaml(TestSuiteIdentity) returns (YamlData) {
+      option (google.api.http) = {
+        get: "/v1/suites/{name}/yaml"
+      };
+    }
 
     // test cases related
     rpc ListTestCase(TestSuiteIdentity) returns (Suite) {}
@@ -39,7 +76,11 @@ service Runner {
     // common services
     rpc PopularHeaders(Empty) returns (Pairs) {}
     rpc FunctionsQuery(SimpleQuery) returns (Pairs) {}
-    rpc FunctionsQueryStream(stream SimpleQuery) returns (stream Pairs) {}
+    rpc FunctionsQueryStream(stream SimpleQuery) returns (stream Pairs) {
+      option (google.api.http) = {
+        get: "/v1/functionsQuery"
+      };
+    }
     rpc GetVersion(Empty) returns (HelloReply) {}
     rpc Sample(Empty) returns (HelloReply) {}
 
