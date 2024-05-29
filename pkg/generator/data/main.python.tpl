@@ -10,47 +10,47 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import io
 import requests
 from urllib.parse import urlencode
 
 def main():
-    {{- if gt (len .Request.Form) 0 }}
-    data = {}
-    {{- range $key, $val := .Request.Form}}
-    data["{{$key}}"] = "{{$val}}"
-    encoded_data = urlencode(data)
-    {{- end}}
-    body = io.BytesIO(encoded_data.encode("utf-8"))
-    {{- else}}
-    body = io.BytesIO(b"{{.Request.Body.String}}")
-    {{- end}}
-    {{- range $key, $val := .Request.Header}}
-    headers = {"{{$key}}": "{{$val}}"}
-    {{- end}}
-    {{- if gt (len .Request.Cookie) 0 }}
-    {{- range $key, $val := .Request.Cookie}}
-    cookies = {"{{$key}}": "{{$val}}"}
-    {{- end}}
-    {{- end}}
-    {{- if gt (len .Request.Cookie) 0 }}
-    try:
-        req = requests.Request("{{.Request.Method}}", "{{.Request.API}}", headers=headers, cookies=cookies, data=body)
-    except requests.RequestException as e:
-        raise e
-    {{- else}}
-    try:
-        req = requests.Request("{{.Request.Method}}", "{{.Request.API}}", headers=headers, data=body)
-    except requests.RequestException as e:
-        raise e
-    {{- end}}
+    url = "{{.Request.API}}"
+    method = "{{.Request.Method}}"
 
-    resp = requests.Session().send(req.prepare())
-    if resp.status_code != 200:
-        raise Exception("status code is not 200")
+    headers = {
+        {{- range $key, $val := .Request.Header}}
+        "{{$key}}": "{{$val}}",
+        {{- end}}
+    }
 
-    data = resp.content
-    print(data.decode("utf-8"))
+    cookies = {
+        {{- range $key, $val := .Request.Cookie}}
+        "{{$key}}": "{{$val}}",
+        {{- end}}
+    }
+
+    data = None
+    if method in ["POST", "PUT", "PATCH"]:
+        {{- if gt (len .Request.Form) 0 }}
+        data = {
+            {{- range $key, $val := .Request.Form}}
+            "{{$key}}": "{{$val}}",
+            {{- end}}
+        }
+        data = urlencode(data)
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+        {{- else}}
+        data = "{{.Request.Body.String}}"
+        {{- end}}
+
+    try:
+        response = requests.request(method, url, headers=headers, cookies=cookies, data=data)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"An error occurred: {e}")
+        return
+
+    print(response.text)
 
 if __name__ == "__main__":
     main()
