@@ -577,7 +577,7 @@ const duplicateTestCase = () => {
         <el-tab-pane name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <template #label>
             <el-badge :value="testCaseWithSuite.data.request.query.length - 1"
-              :hidden="testCaseWithSuite.data.request.query.length === 1" class="item">Query</el-badge>
+              :hidden="testCaseWithSuite.data.request.query.length <=1 " class="item">Query</el-badge>
           </template>
           <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
             <el-table-column label="Key" width="180">
@@ -602,7 +602,7 @@ const duplicateTestCase = () => {
         <el-tab-pane name="header">
           <template #label>
             <el-badge :value="testCaseWithSuite.data.request.header.length - 1"
-              :hidden="testCaseWithSuite.data.request.header.length === 1" class="item">Header</el-badge>
+              :hidden="testCaseWithSuite.data.request.header.length <= 1" class="item">Header</el-badge>
           </template>
           <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
             <el-table-column label="Key" width="180">
@@ -633,7 +633,7 @@ const duplicateTestCase = () => {
         <el-tab-pane name="cookie">
           <template #label>
             <el-badge :value="testCaseWithSuite.data.request.cookie.length - 1"
-              :hidden="testCaseWithSuite.data.request.cookie.length === 1" class="item">Cookie</el-badge>
+              :hidden="testCaseWithSuite.data.request.cookie.length <= 1" class="item">Cookie</el-badge>
           </template>
           <el-table :data="testCaseWithSuite.data.request.cookie" style="width: 100%">
             <el-table-column label="Key">
