@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,10 +17,14 @@ package cmd
 
 import (
 	"bytes"
+	_ "embed"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -29,6 +33,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -167,8 +172,6 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 		defer listen.Close()
 
 		for _, name := range apis {
-			// gock.Off()
-
 			resp, err := http.Get(fmt.Sprintf("http://localhost:%s/debug/pprof/%s?seconds=1", port, name))
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -275,6 +278,28 @@ func TestOAuth(t *testing.T) {
 	}
 }
 
+func TestStartPlugins(t *testing.T) {
+	dir, err := os.MkdirTemp(os.TempDir(), "atest")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	err = os.WriteFile(filepath.Join(dir, "stores.yaml"), []byte(sampleStores), 0644)
+	assert.NoError(t, err)
+
+	rootCmd := &cobra.Command{
+		Use: "atest",
+	}
+	rootCmd.SetOut(io.Discard)
+	rootCmd.AddCommand(createServerCmd(
+		fakeruntime.FakeExecer{ExpectOS: "linux", ExpectLookPathError: errors.New("not-found")},
+		server.NewFakeHTTPServer(),
+	))
+
+	rootCmd.SetArgs([]string{"server", "--config-dir", dir, "--dry-run", "--port=0", "--http-port=0"})
+	err = rootCmd.Execute()
+	assert.NoError(t, err)
+}
+
 type fakeResponseWriter struct {
 	buf    *bytes.Buffer
 	header http.Header
@@ -299,3 +324,6 @@ func (w *fakeResponseWriter) WriteHeader(int) {
 func (w *fakeResponseWriter) GetBody() *bytes.Buffer {
 	return w.buf
 }
+
+//go:embed testdata/stores.yaml
+var sampleStores string

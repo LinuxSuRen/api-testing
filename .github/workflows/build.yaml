@@ -105,8 +105,8 @@ jobs:
           sudo curl -L https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
           sudo chmod u+x /usr/local/bin/docker-compose
           make test-e2e
-      # - name: Operator Image
-      #   run: cd operator && make docker-build
+      - name: Code Generator Test
+        run: cd e2e/code-generator && ./start.sh
 
   BuildEmbedUI:
     runs-on: ubuntu-latest

@@ -649,13 +649,14 @@ func TestGetSuggestedAPIs(t *testing.T) {
 
 	t.Run("normal", func(t *testing.T) {
 		gock.Off()
+		randomName := fmt.Sprintf("fake-%d", time.Now().Nanosecond())
 		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{
-			Name: "fake-1",
+			Name: randomName,
 		})
 		assert.NoError(t, err)
 
 		_, err = server.UpdateTestSuite(ctx, &TestSuite{
-			Name: "fake-1",
+			Name: randomName,
 			Spec: &APISpec{
 				Kind: "swagger",
 				Url:  urlFoo + "/v1",
@@ -666,7 +667,7 @@ func TestGetSuggestedAPIs(t *testing.T) {
 		gock.New(urlFoo).Get("/v1").Reply(200).File("testdata/swagger.json")
 
 		var testcases *TestCases
-		testcases, err = server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: "fake-1"})
+		testcases, err = server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: randomName})
 		assert.NoError(t, err)
 		if assert.NotNil(t, testcases) {
 			assert.Equal(t, 5, len(testcases.Data))
