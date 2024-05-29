@@ -15,12 +15,19 @@ mkdir -p /var/data
 nohup atest server --local-storage '/workspace/test-suites/*.yaml'&
 sleep 1
 
-curl http://localhost:8080/server.Runner/GenerateCode -X POST \
-    -d '{"TestSuite": "test", "TestCase": "requestWithHeader", "Generator": "'"$lang"'"}' > code.json
+# Array of test cases
+test_cases=("requestWithHeader" "requestWithoutHeader")
 
-cat code.json | jq .message -r | sed 's/\\n/\n/g' | sed 's/\\t/\t/g' | sed 's/\\\"/"/g' > code.txt
-cat code.txt
+for test_case in "${test_cases[@]}"
+do
+  echo "Generating code for test case: $test_case"
+  curl http://localhost:8080/server.Runner/GenerateCode -X POST \
+      -d '{"TestSuite": "test", "TestCase": "'"$test_case"'", "Generator": "'"$lang"'"}' > code.json
 
-sh /workspace/${lang}.sh code.txt
+  cat code.json | jq .message -r | sed 's/\\n/\n/g' | sed 's/\\t/\t/g' | sed 's/\\\"/"/g' > code.txt
+  cat code.txt
+
+  sh /workspace/${lang}.sh code.txt
+done
 
 exit 0
