@@ -1,88 +1,211 @@
 <template>
+  <!-- Index -->
   <div class="index" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
     <el-card class="card" shawon="hover">
-      <el-button type="primary" @click="openTestSuiteCreateDialog" data-intro="Click here to create a new test suite"
-        test-id="open-new-suite-dialog" :icon="Edit">{{
-          t('button.new') }}</el-button>
-      <el-button type="primary" @click="openTestSuiteImportDialog" data-intro="Click here to import from Postman"
-        test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
-      <el-button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</el-button>
+      <el-button
+        type="primary"
+        @click="openTestSuiteCreateDialog"
+        data-intro="Click here to create a new test suite"
+        test-id="open-new-suite-dialog"
+        :icon="Edit"
+        >{{ t('button.new') }}</el-button
+      >
+      <el-button
+        type="primary"
+        @click="openTestSuiteImportDialog"
+        data-intro="Click here to import from Postman"
+        test-id="open-import-suite-dialog"
+        >{{ t('button.import') }}</el-button
+      >
+      <el-button type="primary" @click="loadStores" :icon="Refresh">{{
+        t('button.refresh')
+      }}</el-button>
       <TemplateFunctions />
       <div class="filter-input">
         <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" />
       </div>
-      <el-tree v-loading="storesLoading" :data=data highlight-current :check-on-click-node="true"
-        :expand-on-click-node="false" :current-node-key="currentNodekey" ref="treeRef" node-key="id"
-        :filter-node-method="filterTestCases" @node-click="handleNodeClick"
-        data-intro="This is the test suite tree. You can click the test suite to edit it." />
+
+      <div class="test-container">
+        <!-- Test suite tree containers -->
+        <el-tree
+          v-loading="storesLoading"
+          :data="data"
+          highlight-current
+          :check-on-click-node="true"
+          :expand-on-click-node="false"
+          :current-node-key="currentNodekey"
+          ref="treeRef"
+          node-key="id"
+          :filter-node-method="filterTestCases"
+          @node-click="handleNodeClick"
+          data-intro="This is the test suite tree. You can click the test suite to edit it."
+        >
+          <template #default="{ node, data }">
+            <span>
+              <i :class="getColorClass(data.kind)">{{ data.kind }}</i>
+              <i class="test-suite">{{ node.label }}</i>
+            </span>
+          </template>
+        </el-tree>
+        <!-- Test suite and case containers. -->
+        <el-card shadow="hover">
+          <TestCase
+            v-if="viewName === 'testcase'"
+            :suite="testSuite"
+            :kindName="testSuiteKind"
+            :name="testCaseName"
+            @updated="loadStores"
+            style="height: 100%"
+            data-intro="This is the test case editor. You can edit the test case here."
+          />
+          <TestSuite
+            v-else-if="viewName === 'testsuite'"
+            :name="testSuite"
+            @updated="loadStores"
+            data-intro="This is the test suite editor. You can edit the test suite here."
+          />
+        </el-card>
+      </div>
     </el-card>
   </div>
 
+  <!-- New Create Btn Dialog -->
   <el-dialog v-model="dialogVisible" :title="t('title.createTestSuite')" width="30%" draggable>
     <template #footer>
       <span class="dialog-footer">
-        <el-form :rules="rules" :model="testSuiteForm" ref="suiteFormRef" status-icon label-width="120px">
+        <el-form
+          :rules="rules"
+          :model="testSuiteForm"
+          ref="suiteFormRef"
+          status-icon
+          label-width="120px"
+        >
           <el-form-item :label="t('field.storageLocation')" prop="store">
-            <el-select v-model="testSuiteForm.store" class="m-2" test-id="suite-form-store" filterable=true
-              default-first-option=true placeholder="Storage Location" size="middle">
-              <el-option v-for="item in stores" :key="item.name" :label="item.name" :value="item.name" />
+            <el-select
+              v-model="testSuiteForm.store"
+              class="m-2"
+              test-id="suite-form-store"
+              filterable="true"
+              default-first-option="true"
+              placeholder="Storage Location"
+              size="middle"
+            >
+              <el-option
+                v-for="item in stores"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
+              />
             </el-select>
           </el-form-item>
           <el-form-item :label="t('field.suiteKind')" prop="kind">
-            <el-select v-model="testSuiteForm.kind" class="m-2" filterable=true test-id="suite-form-kind"
-              default-first-option=true size="middle">
-              <el-option v-for="item in suiteKinds" :key="item.name" :label="item.name" :value="item.name" />
+            <el-select
+              v-model="testSuiteForm.kind"
+              class="m-2"
+              filterable="true"
+              test-id="suite-form-kind"
+              default-first-option="true"
+              size="middle"
+            >
+              <el-option
+                v-for="item in suiteKinds"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
+              />
             </el-select>
           </el-form-item>
           <el-form-item :label="t('field.name')" prop="name">
             <el-input v-model="testSuiteForm.name" test-id="suite-form-name" />
           </el-form-item>
           <el-form-item label="API" prop="api">
-            <el-input v-model="testSuiteForm.api" placeholder="http://foo" test-id="suite-form-api" />
+            <el-input
+              v-model="testSuiteForm.api"
+              placeholder="http://foo"
+              test-id="suite-form-api"
+            />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm(suiteFormRef)" :loading="suiteCreatingLoading"
-              test-id="suite-form-submit">{{ t('button.submit') }}</el-button>
+            <el-button
+              type="primary"
+              @click="submitForm(suiteFormRef)"
+              :loading="suiteCreatingLoading"
+              test-id="suite-form-submit"
+              >{{ t('button.submit') }}</el-button
+            >
           </el-form-item>
         </el-form>
       </span>
     </template>
   </el-dialog>
 
+  <!-- Import Btn Dialog -->
   <el-dialog v-model="importDialogVisible" title="Import Test Suite" width="30%" draggable>
     <span>Supported source URL: Postman collection share link</span>
     <template #footer>
       <span class="dialog-footer">
-        <el-form :rules="importSuiteFormRules" :model="importSuiteForm" ref="importSuiteFormRef" status-icon
-          label-width="120px">
+        <el-form
+          :rules="importSuiteFormRules"
+          :model="importSuiteForm"
+          ref="importSuiteFormRef"
+          status-icon
+          label-width="120px"
+        >
           <el-form-item label="Location" prop="store">
-            <el-select v-model="importSuiteForm.store" class="m-2" test-id="suite-import-form-store" filterable=true
-              default-first-option=true placeholder="Storage Location" size="middle">
-              <el-option v-for="item in stores" :key="item.name" :label="item.name" :value="item.name" />
+            <el-select
+              v-model="importSuiteForm.store"
+              class="m-2"
+              test-id="suite-import-form-store"
+              filterable="true"
+              default-first-option="true"
+              placeholder="Storage Location"
+              size="middle"
+            >
+              <el-option
+                v-for="item in stores"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="URL" prop="url">
-            <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api"
-              placeholder="https://api.postman.com/collections/xxx" />
+            <el-input
+              v-model="importSuiteForm.url"
+              test-id="suite-import-form-api"
+              placeholder="https://api.postman.com/collections/xxx"
+            />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="importSuiteFormSubmit(importSuiteFormRef)" test-id="suite-import-submit">{{
-              t('button.import') }}</el-button>
+            <el-button
+              type="primary"
+              @click="importSuiteFormSubmit(importSuiteFormRef)"
+              test-id="suite-import-submit"
+              >{{ t('button.import') }}</el-button
+            >
           </el-form-item>
         </el-form>
       </span>
     </template>
   </el-dialog>
 
+  <!--Login Dialog-->
   <el-dialog v-model="loginDialogVisible" title="You need to login first." width="30%">
     <el-collapse accordion="true">
       <el-collapse-item title="Server in cloud" name="1">
         <a href="/oauth2/token" target="_blank">
-          <svg height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true"
-            class="octicon octicon-mark-github v-align-middle color-fg-default">
+          <svg
+            height="32"
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            version="1.1"
+            width="32"
+            data-view-component="true"
+            class="octicon octicon-mark-github v-align-middle color-fg-default"
+          >
             <path
-              d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z">
-            </path>
+              d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"
+            ></path>
           </svg>
         </a>
       </el-collapse-item>
@@ -94,8 +217,9 @@
         </el-steps>
 
         <div v-if="deviceAuthActive === 1">
-          Open <a :href="deviceAuthResponse.verification_uri" target="_blank">this link</a>, and type the code: <span>{{
-            deviceAuthResponse.user_code }}. Then click the next step button.</span>
+          Open <a :href="deviceAuthResponse.verification_uri" target="_blank">this link</a>, and
+          type the code:
+          <span>{{ deviceAuthResponse.user_code }}. Then click the next step button.</span>
         </div>
         <el-button style="margin-top: 12px" @click="deviceAuthNext">Next step</el-button>
       </el-collapse-item>
@@ -117,12 +241,8 @@ import { DefaultResponseProcess } from '@/api/common'
 import { GetStores } from '@/api/store/store'
 import type { TestStore, Tree, Suite } from '../../types/types'
 import type { FormInstance, FormRules } from 'element-plus'
-import {
-  ListTestCase,
-  LoadTestSuite,
-  CreateTestSuite,
-  ImportTestSuite
-} from '@/api/test/test'
+import { ListTestCase, LoadTestSuite, CreateTestSuite, ImportTestSuite } from '@/api/test/test'
+import { test } from 'node:test'
 
 const { t } = useI18n()
 
@@ -139,8 +259,7 @@ const handleNodeClick = (data: Tree) => {
     Cache.SetCurrentStore(data.store)
 
     ListTestCase(data.label, data.store)
-      .then(DefaultResponseProcess)
-      .then((res) => {
+      .then((res: any) => {
         if (res.items && res.items.length > 0) {
           data.children = []
           res.items.forEach((item: any) => {
@@ -154,8 +273,9 @@ const handleNodeClick = (data: Tree) => {
             } as Tree)
           })
         }
-      }).catch((err) => {
-        ErrorTips(err || "Unknown error when fetching test case data!")
+      })
+      .catch((err: any) => {
+        ErrorTips(err || 'Unknown error when fetching test case data!')
       })
   } else {
     Cache.SetCurrentStore(data.store)
@@ -175,16 +295,11 @@ const currentNodekey = ref('')
 onMounted(() => {
   // load save stores.
   loadStores()
-
 })
 
 const loadTestSuites = async (sn: string) => {
   await LoadTestSuite(sn)
-    .then(DefaultResponseProcess)
-    .then((res) => {
-      if (!res.data) {
-        return
-      }
+    .then((res: any) => {
       Object.keys(res.data).map((k) => {
         let suite = {
           id: k,
@@ -206,6 +321,10 @@ const loadTestSuites = async (sn: string) => {
         })
         data.value.push(suite)
       })
+    })
+    .catch((err: any) => {
+      console.log('err', err)
+      ElMessage.error('Oops, ' + err)
     })
 }
 
@@ -264,15 +383,17 @@ const loadStores = async () => {
         Cache.SetCurrentStore(targetSuite.store)
         testSuiteKind.value = targetChild.kind
       } else {
-        viewName.value = ""
+        viewName.value = ''
       }
-    }).catch((e) => {
-      if (e.message === "Unauthenticated") {
+    })
+    .catch((e) => {
+      if (e.message === 'Unauthenticated') {
         loginDialogVisible.value = true
       } else {
         ElMessage.error('Oops, ' + e)
       }
-    }).finally(() => {
+    })
+    .finally(() => {
       storesLoading.value = false
     })
 }
@@ -305,27 +426,33 @@ const rules = reactive<FormRules<Suite>>({
   name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
   store: [{ required: true, message: 'Location is required', trigger: 'blur' }]
 })
-// const submitForm = async (formEl: FormInstance | undefined) => {
-//   if (!formEl) return
-//   await formEl.validate((valid: boolean) => {
-//     if (valid) {
-//       suiteCreatingLoading.value = true
-//       CreateTestSuite(testSuiteForm).then((res: any) => {
-//         suiteCreatingLoading.value = false
-//         if (res.error !== "") {
-//           ElMessage.error('Oops, ' + res.error)
-//         } else {
-//           loadStores()
-//           dialogVisible.value = false
-//           formEl.resetFields()
-//         }
-//       }).catch((err) => {
-//         suiteCreatingLoading.value = false
-//         ElMessage.error('Oops, ' + err)
-//       })
-//     }
-//   })
-// }
+
+// submit new test case.
+const submitForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) {
+    // formEl is undefined or null
+    return
+  }
+
+  await formEl.validate((valid: boolean) => {
+    if (valid) {
+      suiteCreatingLoading.value = true
+      CreateTestSuite(testSuiteForm)
+        .then((res: any) => {
+          suiteCreatingLoading.value = false
+          loadStores()
+          dialogVisible.value = false
+          formEl.resetFields()
+        })
+        .catch((err: any) => {
+          console.log('err', err)
+
+          suiteCreatingLoading.value = false
+          ElMessage.error('Oops, ' + err.message)
+        })
+    }
+  })
+}
 
 const importSuiteFormRules = reactive<FormRules<Suite>>({
   url: [
@@ -340,15 +467,17 @@ const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
     if (valid) {
       suiteCreatingLoading.value = true
 
-      ImportTestSuite(importSuiteForm).then((res: any) => {
-        if (res.code === 200) {
-          loadStores()
-          importDialogVisible.value = false
-          formEl.resetFields()
-        }
-      }).catch((err) => {
-        ErrorTips(err)
-      })
+      ImportTestSuite(importSuiteForm)
+        .then((res: any) => {
+          if (res.code === 200) {
+            loadStores()
+            importDialogVisible.value = false
+            formEl.resetFields()
+          }
+        })
+        .catch((err) => {
+          ErrorTips(err)
+        })
     }
   })
 }
@@ -382,37 +511,71 @@ const deviceAuthNext = () => {
         deviceAuthResponse.value = d
       })
   } else if (deviceAuthActive.value === 2) {
-    window.location.href = '/oauth2/getUserInfoFromLocalCode?device_code=' + deviceAuthResponse.value.device_code
+    window.location.href =
+      '/oauth2/getUserInfoFromLocalCode?device_code=' + deviceAuthResponse.value.device_code
   }
 }
 
-const suiteKinds = [{
-  "name": "HTTP",
-}, {
-  "name": "gRPC",
-}, {
-  "name": "tRPC",
-}]
+const suiteKinds = [
+  {
+    name: 'HTTP',
+    color: 'blue-text'
+  },
+  {
+    name: 'gRPC',
+    color: 'green-text'
+  },
+  {
+    name: 'tRPC',
+    color: 'orange-text'
+  }
+]
 
+const getColorClass = (kind: string) => {
+  const suiteKind = suiteKinds.find((suite) => suite.name.toLowerCase() === kind.toLowerCase())
+  return suiteKind ? suiteKind.color : 'other-text'
+}
 </script>
 
 <style scoped>
 .index {
-  display: flex
+  display: flex;
+}
+
+.blue-text {
+  font-size: small;
+  font-style: normal;
+  color: blue;
+}
+
+.other-text {
+  font-size: small;
+  font-style: normal;
+  color: black;
+}
+
+.green-text {
+  font-size: small;
+  font-style: normal;
+  color: green;
+}
+
+.orange-text {
+  font-size: small;
+  font-style: normal;
+  color: orange;
 }
 
 .card {
   display: flex;
   margin-top: 1%;
   width: 100%;
-  /* 使用百分比单位 */
   max-width: 1750px;
-  /* 设置最大宽度 */
   height: auto;
-  vertical-align:middle;
+  vertical-align: middle;
 
   .filter-input {
-    vertical-align:middle;
+    vertical-align: middle;
     float: right;
     padding-left: 1vh;
     width: 50vh;
@@ -485,10 +648,58 @@ nav a:first-of-type {
   }
 }
 
-.demo-tabs>.el-tabs__content {
+.demo-tabs > .el-tabs__content {
   padding: 32px;
   color: #6b778c;
   font-size: 32px;
   font-weight: 600;
+}
+
+.test-container {
+  display: flex;
+  flex-direction: row;
+  margin-top: 2%;
+  justify-content: space-around;
+  width: 100%;
+
+  .el-tree {
+    width: 30vh;
+  }
+
+  span {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+
+    i {
+      padding-left: 10%;
+    }
+  }
+}
+
+.test-suite {
+  padding-left: 10%;
+  font-style: normal;
+  font-size: large;
+  font-weight: 700;
+  font-family: '黑体';
+}
+
+/* Adjust el-tree style */
+::v-deep .el-tree-node__expand-icon {
+  color: rgb(64, 158, 255);
+  font-size: 20px;
+  margin-right: 10px;
+  content: '▶';
+  transform: rotate(0deg);
+}
+
+::v-deep .el-tree-node__expand-icon.is-leaf {
+  color: transparent;
+  content: '';
+}
+
+::v-deep .is-expanded .el-tree-node__expand-icon {
+  transform: rotate(90deg);
 }
 </style>

@@ -33,10 +33,12 @@ export const get = (url: string, params: any, header: any) => {
 export const del = (url: string, params: any, header: any) => {
 
     return new Promise((resolve, reject) => {
-        service.delete(url, {
-            params: params,
-            headers: header,
-        }).then(res => {
+        service.delete(
+            url, 
+            {
+                headers: header,
+            }
+        ).then(res => {
             resolve(res.data);
         }).catch(err => {
             reject(err.data);
@@ -47,10 +49,13 @@ export const del = (url: string, params: any, header: any) => {
 export const put = (url: string, data: any, header: any) => {
 
     return new Promise((resolve, reject) => {
-        service.put(url, {
-            data: data,
-            headers: header,
-        }).then(res => {
+        service.put(
+            url, 
+            data, 
+            {
+                headers: header,
+            }
+        ).then(res => {
             resolve(res.data);
         }).catch(err => {
             reject(err.data);
@@ -61,10 +66,12 @@ export const put = (url: string, data: any, header: any) => {
 export const post = (url: string, params: any, header: any) => {
 
     return new Promise((resolve, reject) => {
-        service.post(url, {
-            params: params,
-            header: header
-        }
+        service.post(
+            url, 
+            params, 
+            {
+                headers: header,
+            }
         ).then(res => {
             resolve(res.data);
         }).catch(err => {

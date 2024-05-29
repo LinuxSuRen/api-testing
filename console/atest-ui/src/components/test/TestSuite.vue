@@ -1,3 +1,174 @@
+<template>
+  {{ t('tip.testsuite') }}<el-text class="mx-1" type="primary">{{ suite.name }}</el-text>
+  <div class="test-suite-container">
+    <div class="item-1">
+      <table style="width: 100%">
+        <tr>
+          <td style="width: 30%">
+            {{ t('tip.apiAddress') }}
+          </td>
+          <td style="width: 80%">
+            <el-input
+              class="w-50 m-2"
+              v-model="suite.api"
+              placeholder="API"
+              test-id="suite-editor-api"
+            ></el-input>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <el-select
+              v-model="suite.spec.kind"
+              class="m-2"
+              placeholder="API Spec Kind"
+              size="middle"
+            >
+              <el-option
+                v-for="item in apiSpecKinds"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </td>
+          <td>
+            <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
+          </td>
+        </tr>
+      </table>
+
+      <div style="margin-top: 10px">
+        <el-text class="mx-1" type="primary">{{ t('title.parameter') }}</el-text>
+        <el-table :data="suite.param" style="width: 100%">
+          <el-table-column label="Key" width="180">
+            <template #default="scope">
+              <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange" />
+            </template>
+          </el-table-column>
+          <el-table-column label="Value">
+            <template #default="scope">
+              <div style="display: flex; align-items: center">
+                <el-input v-model="scope.row.value" placeholder="Value" />
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-divider />
+      </div>
+    </div>
+
+    <!-- If suite spec is rpc, show it. -->
+    <div class="item-2" v-if="suite.spec.rpc">
+      <div>
+        <span>{{ t('title.refelction') }}</span>
+        <el-switch v-model="suite.spec.rpc.serverReflection" />
+      </div>
+      <div>
+        <span>{{ t('title.protoContent') }}</span>
+        <el-input
+          v-model="suite.spec.rpc.raw"
+          :autosize="{ minRows: 4, maxRows: 8 }"
+          type="textarea"
+        />
+      </div>
+      <div>
+        <span>{{ t('title.protoImport') }}</span>
+        <el-input class="mx-1" v-model="suite.spec.rpc.import"></el-input>
+      </div>
+      <div>
+        <span>{{ t('title.protoFile') }}</span>
+        <el-input class="mx-1" v-model="suite.spec.rpc.protofile"></el-input>
+      </div>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <el-divider />
+
+  <!-- Btn function containers -->
+  <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{
+    t('button.save')
+  }}</el-button>
+  <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{
+    t('button.save')
+  }}</el-button>
+  <el-button type="primary" @click="del" test-id="suite-del-but">{{
+    t('button.delete')
+  }}</el-button>
+  <el-button
+    type="primary"
+    @click="openNewTestCaseDialog"
+    :icon="Edit"
+    test-id="open-new-case-dialog"
+    >{{ t('button.newtestcase') }}</el-button
+  >
+  <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
+
+  <!-- Create Test Case Dialog-->
+  <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-form
+          :rules="rules"
+          :model="testCaseForm"
+          ref="testcaseFormRef"
+          status-icon
+          label-width="60px"
+        >
+          <el-form-item :label="t('field.name')" prop="name">
+            <el-input v-model="testCaseForm.name" test-id="case-form-name" />
+          </el-form-item>
+          <el-form-item
+            label="Method"
+            prop="method"
+            v-if="suite.spec.kind !== 'tRPC' && suite.spec.kind !== 'gRPC'"
+          >
+            <el-select
+              v-model="testCaseForm.method"
+              class="m-2"
+              placeholder="Method"
+              size="middle"
+              test-id="case-form-method"
+            >
+              <el-option
+                v-for="item in GetHTTPMethods()"
+                :key="item.value"
+                :label="item.key"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="API" prop="api">
+            <el-autocomplete
+              v-model="testCaseForm.api"
+              :fetch-suggestions="querySuggestedAPIs"
+              @select="handleAPISelect"
+              placeholder="API Address"
+              style="width: 100%; margin-left: 5px; margin-right: 5px"
+              test-id="case-form-api"
+            >
+              <template #default="{ item }">
+                <div class="value">{{ item.request.method }}</div>
+                <span class="link">{{ item.request.api }}</span>
+              </template>
+            </el-autocomplete>
+          </el-form-item>
+          <el-form-item>
+            <el-button
+              type="primary"
+              @click="submitForm(testcaseFormRef)"
+              :loading="suiteCreatingLoading"
+              test-id="case-form-submit"
+              >{{ t('button.submit') }}</el-button
+            >
+          </el-form-item>
+        </el-form>
+      </span>
+    </template>
+  </el-dialog>
+</template>
+
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
@@ -7,9 +178,9 @@ import type { Suite, TestCase, Pair } from '../../types/types'
 import { NewSuggestedAPIsQuery, GetHTTPMethods } from '../../types/types'
 import { Cache } from '../../utils/cache'
 import { useI18n } from 'vue-i18n'
-import { 
-  UpdateTestSuite, 
-  CreateTestCase, 
+import {
+  UpdateTestSuite,
+  CreateTestCase,
   GetTestSuite,
   ConvertTestSuite,
   DeleteTestSuite
@@ -18,7 +189,7 @@ import {
 const { t } = useI18n()
 
 const props = defineProps({
-  name: String,
+  name: String
 })
 
 const emit = defineEmits(['updated'])
@@ -41,19 +212,21 @@ const suite = ref({
 
 const load = () => {
   const store = Cache.GetCurrentStore()
-  if (!props.name || store.name === "") return
+  if (!props.name || store.name === '') return
 
-  GetTestSuite(props.name).then((e: any) => {
-    suite.value = e
-    if (suite.value.param.length === 0) {
-      suite.value.param.push({
-        key: '',
-        value: ''
-      } as Pair)
-    }
-  }).catch((e: any) => {
-    ElMessage.error('Oops, ' + e)
-  })
+  GetTestSuite(props.name)
+    .then((res: any) => {
+      suite.value = res
+      if (suite.value.param.length === 0) {
+        suite.value.param.push({
+          key: '',
+          value: ''
+        } as Pair)
+      }
+    })
+    .catch((err: any) => {
+      ElMessage.error('Oops, ' + err)
+    })
 }
 
 load()
@@ -62,7 +235,7 @@ watch(props, () => {
 })
 
 const save = () => {
-  let oldImportPath = ""
+  let oldImportPath = ''
   let hasImport = false
   if (suite.value.spec && suite.value.spec.rpc) {
     oldImportPath = suite.value.spec.rpc.import
@@ -78,8 +251,9 @@ const save = () => {
       if (hasImport) {
         suite.value.spec.rpc.import = oldImportPath
       }
-    }).catch((err: any) => {
-      if (err.error === "") {
+    })
+    .catch((err: any) => {
+      if (err.error === '') {
         ElMessage({
           message: 'Updated.',
           type: 'success'
@@ -115,9 +289,13 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
       CreateTestCase({
         suiteName: props.name,
-        name: testCaseForm.name,
-        api: testCaseForm.api,
-        method: testCaseForm.method
+        data: {
+          name: testCaseForm.name,
+          request: {
+            api: testCaseForm.api,
+            method: testCaseForm.method
+          }
+        }
       }).then(() => {
         suiteCreatingLoading.value = false
         emit('updated', 'hello from child')
@@ -129,43 +307,46 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 }
 
 const del = () => {
-  DeleteTestSuite(props.name).then(() => {
-    ElMessage({
-      message: 'Deleted.',
-      type: 'success'
+  DeleteTestSuite({ name: props.name })
+    .then(() => {
+      ElMessage({
+        message: 'Deleted.',
+        type: 'success'
+      })
+      emit('updated')
     })
-    emit('updated')
-  }).catch((e: any) => {
-    ElMessage.error('Oops, ' + e)
-  })
+    .catch((e: any) => {
+      ElMessage.error('Oops, ' + e)
+    })
 }
 
 const convert = () => {
-
-  ConvertTestSuite((
-    props.name,
-    'jmeter'
-  )).then((res: any) => {
-    const blob = new Blob([res.message], { type: `text/xml;charset=utf-8;` });
-    const link = document.createElement('a');
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `jmeter.jmx`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    ElMessage({
-      message: 'Converted.',
-      type: 'success'
-    })
-    emit('updated')
-  }).catch((err: any) => {
-    ElMessage.error('Oops, ' + err)
+  ConvertTestSuite({
+    Generator: 'jmeter',
+    TestSuite: props.name
   })
+    .then((res: any) => {
+      const blob = new Blob([res.message], { type: `text/xml;charset=utf-8;` })
+      const link = document.createElement('a')
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob)
+        link.setAttribute('href', url)
+        link.setAttribute('download', `jmeter.jmx`)
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+
+      ElMessage({
+        message: 'Converted.',
+        type: 'success'
+      })
+      emit('updated')
+    })
+    .catch((err: any) => {
+      ElMessage.error('Oops, ' + err)
+    })
 }
 
 const suiteCreatingLoading = ref(false)
@@ -200,107 +381,18 @@ const paramChange = () => {
 }
 </script>
 
-<template>
-  <div class="common-layout">
-    {{ t('tip.testsuite') }}<el-text class="mx-1" type="primary">{{ suite.name }}</el-text>
+<style scoped>
+.test-suite-container {
+  display: flex;
+  flex-shrink: 0;
 
-    <table style="width: 100%;">
-      <tr>
-        <td style="width: 20%;">
-          {{ t('tip.apiAddress') }}
-        </td>
-        <td style="width: 80%;">
-          <el-input class="w-50 m-2" v-model="suite.api" placeholder="API" test-id="suite-editor-api"></el-input>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <el-select v-model="suite.spec.kind" class="m-2" placeholder="API Spec Kind" size="middle">
-            <el-option v-for="item in apiSpecKinds" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </td>
-        <td>
-          <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
-        </td>
-      </tr>
-    </table>
+  .item-1 {
+    flex: 1;
+    margin-right: 16px;
+  }
 
-    <div style="margin-top: 10px;">
-      <el-text class="mx-1" type="primary">{{ t('title.parameter') }}</el-text>
-      <el-table :data="suite.param" style="width: 100%">
-        <el-table-column label="Key" width="180">
-          <template #default="scope">
-            <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange" />
-          </template>
-        </el-table-column>
-        <el-table-column label="Value">
-          <template #default="scope">
-            <div style="display: flex; align-items: center">
-              <el-input v-model="scope.row.value" placeholder="Value" />
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-divider />
-    </div>
-
-    <div v-if="suite.spec.rpc">
-      <div>
-        <span>{{ t('title.refelction') }}</span>
-        <el-switch v-model="suite.spec.rpc.serverReflection" />
-      </div>
-      <div>
-        <span>{{ t('title.protoContent') }}</span>
-        <el-input v-model="suite.spec.rpc.raw" :autosize="{ minRows: 4, maxRows: 8 }" type="textarea" />
-      </div>
-      <div>
-        <span>{{ t('title.protoImport') }}</span>
-        <el-input class="mx-1" v-model="suite.spec.rpc.import"></el-input>
-      </div>
-      <div>
-        <span>{{ t('title.protoFile') }}</span>
-        <el-input class="mx-1" v-model="suite.spec.rpc.protofile"></el-input>
-      </div>
-      <el-divider />
-    </div>
-
-    <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
-    <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{ t('button.save')
-    }}</el-button>
-    <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
-    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{
-      t('button.newtestcase') }}</el-button>
-    <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
-  </div>
-
-  <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-form :rules="rules" :model="testCaseForm" ref="testcaseFormRef" status-icon label-width="60px">
-          <el-form-item :label="t('field.name')" prop="name">
-            <el-input v-model="testCaseForm.name" test-id="case-form-name" />
-          </el-form-item>
-          <el-form-item label="Method" prop="method" v-if="suite.spec.kind !== 'tRPC' && suite.spec.kind !== 'gRPC'">
-            <el-select v-model="testCaseForm.method" class="m-2" placeholder="Method" size="middle"
-              test-id="case-form-method">
-              <el-option v-for="item in GetHTTPMethods()" :key="item.value" :label="item.key" :value="item.value" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="API" prop="api">
-            <el-autocomplete v-model="testCaseForm.api" :fetch-suggestions="querySuggestedAPIs" @select="handleAPISelect"
-              placeholder="API Address" style="width: 100%; margin-left: 5px; margin-right: 5px" test-id="case-form-api">
-              <template #default="{ item }">
-                <div class="value">{{ item.request.method }}</div>
-                <span class="link">{{ item.request.api }}</span>
-              </template>
-            </el-autocomplete>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="submitForm(testcaseFormRef)" :loading="suiteCreatingLoading"
-              test-id="case-form-submit">{{ t('button.submit') }}</el-button>
-          </el-form-item>
-        </el-form>
-      </span>
-    </template>
-  </el-dialog>
-</template>
+  .item-2 {
+    margin-right: 0px;
+  }
+}
+</style>
