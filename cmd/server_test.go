@@ -104,14 +104,14 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/assets/index.js", nil)
 		assert.NoError(t, err)
 		defer func() {
-			uiResourceJS = ""
+			uiResourceJS = []byte("")
 		}()
 
 		resp := newFakeResponseWriter()
 
-		uiResourceJS = "js"
+		uiResourceJS = []byte("js")
 		handler(resp, req, map[string]string{})
-		assert.Equal(t, uiResourceJS, resp.GetBody().String())
+		assert.Equal(t, uiResourceJS, resp.GetBody().Bytes())
 
 		assert.Equal(t, "text/javascript; charset=utf-8", resp.Header().Get(util.ContentType))
 	})

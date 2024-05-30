@@ -214,38 +214,6 @@
         ]
       }
     },
-    "/server.Runner/CreateTestSuite": {
-      "post": {
-        "operationId": "Runner_CreateTestSuite",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverHelloReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/serverTestSuiteIdentity"
-            }
-          }
-        ],
-        "tags": [
-          "Runner"
-        ]
-      }
-    },
     "/server.Runner/DeleteSecret": {
       "post": {
         "operationId": "Runner_DeleteSecret",
@@ -342,9 +310,9 @@
         ]
       }
     },
-    "/server.Runner/DeleteTestSuite": {
+    "/server.Runner/DuplicateTestCase": {
       "post": {
-        "operationId": "Runner_DeleteTestSuite",
+        "operationId": "Runner_DuplicateTestCase",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -365,7 +333,40 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/serverTestSuiteIdentity"
+              "$ref": "#/definitions/serverTestCaseDuplicate"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/DuplicateTestSuite": {
+      "post": {
+        "summary": "option (google.api.http) = {\n        post: \"/v1/suites/{name}/duplicate\"\n        body: \"*\"\n      };",
+        "operationId": "Runner_DuplicateTestSuite",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverTestSuiteDuplicate"
             }
           }
         ],
@@ -394,48 +395,6 @@
         "parameters": [
           {
             "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/serverSimpleQuery"
-            }
-          }
-        ],
-        "tags": [
-          "Runner"
-        ]
-      }
-    },
-    "/server.Runner/FunctionsQueryStream": {
-      "post": {
-        "operationId": "Runner_FunctionsQueryStream",
-        "responses": {
-          "200": {
-            "description": "A successful response.(streaming responses)",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "result": {
-                  "$ref": "#/definitions/serverPairs"
-                },
-                "error": {
-                  "$ref": "#/definitions/rpcStatus"
-                }
-              },
-              "title": "Stream result of serverPairs"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "description": " (streaming inputs)",
             "in": "body",
             "required": true,
             "schema": {
@@ -610,38 +569,6 @@
         ]
       }
     },
-    "/server.Runner/GetSuites": {
-      "post": {
-        "operationId": "Runner_GetSuites",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverSuites"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/serverEmpty"
-            }
-          }
-        ],
-        "tags": [
-          "Runner"
-        ]
-      }
-    },
     "/server.Runner/GetTestCase": {
       "post": {
         "operationId": "Runner_GetTestCase",
@@ -674,70 +601,6 @@
         ]
       }
     },
-    "/server.Runner/GetTestSuite": {
-      "post": {
-        "operationId": "Runner_GetTestSuite",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverTestSuite"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/serverTestSuiteIdentity"
-            }
-          }
-        ],
-        "tags": [
-          "Runner"
-        ]
-      }
-    },
-    "/server.Runner/GetTestSuiteYaml": {
-      "post": {
-        "operationId": "Runner_GetTestSuiteYaml",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverYamlData"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/serverTestSuiteIdentity"
-            }
-          }
-        ],
-        "tags": [
-          "Runner"
-        ]
-      }
-    },
     "/server.Runner/GetVersion": {
       "post": {
         "operationId": "Runner_GetVersion",
@@ -762,38 +625,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/serverEmpty"
-            }
-          }
-        ],
-        "tags": [
-          "Runner"
-        ]
-      }
-    },
-    "/server.Runner/ImportTestSuite": {
-      "post": {
-        "operationId": "Runner_ImportTestSuite",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverCommonResult"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/serverTestSuiteSource"
             }
           }
         ],
@@ -1160,38 +991,6 @@
         ]
       }
     },
-    "/server.Runner/UpdateTestSuite": {
-      "post": {
-        "operationId": "Runner_UpdateTestSuite",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverHelloReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/serverTestSuite"
-            }
-          }
-        ],
-        "tags": [
-          "Runner"
-        ]
-      }
-    },
     "/server.Runner/VerifyStore": {
       "post": {
         "operationId": "Runner_VerifyStore",
@@ -1253,6 +1052,315 @@
         ],
         "tags": [
           "RunnerExtension"
+        ]
+      }
+    },
+    "/v1/functionsQuery": {
+      "get": {
+        "operationId": "Runner_FunctionsQueryStream",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/serverPairs"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of serverPairs"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/v1/suites": {
+      "get": {
+        "summary": "test suites related",
+        "operationId": "Runner_GetSuites",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverSuites"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Runner"
+        ]
+      },
+      "post": {
+        "operationId": "Runner_CreateTestSuite",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverTestSuiteIdentity"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/v1/suites/import": {
+      "post": {
+        "operationId": "Runner_ImportTestSuite",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "data",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/v1/suites/{name}": {
+      "get": {
+        "operationId": "Runner_GetTestSuite",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverTestSuite"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      },
+      "delete": {
+        "operationId": "Runner_DeleteTestSuite",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      },
+      "put": {
+        "operationId": "Runner_UpdateTestSuite",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "api": {
+                  "type": "string"
+                },
+                "param": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/serverPair"
+                  }
+                },
+                "spec": {
+                  "$ref": "#/definitions/serverAPISpec"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/v1/suites/{name}/yaml": {
+      "get": {
+        "operationId": "Runner_GetTestSuiteYaml",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverYamlData"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
         ]
       }
     }
@@ -1740,6 +1848,23 @@
         }
       }
     },
+    "serverTestCaseDuplicate": {
+      "type": "object",
+      "properties": {
+        "sourceSuiteName": {
+          "type": "string"
+        },
+        "sourceCaseName": {
+          "type": "string"
+        },
+        "targetSuiteName": {
+          "type": "string"
+        },
+        "targetCaseName": {
+          "type": "string"
+        }
+      }
+    },
     "serverTestCaseIdentity": {
       "type": "object",
       "properties": {
@@ -1848,6 +1973,17 @@
         }
       }
     },
+    "serverTestSuiteDuplicate": {
+      "type": "object",
+      "properties": {
+        "sourceSuiteName": {
+          "type": "string"
+        },
+        "targetSuiteName": {
+          "type": "string"
+        }
+      }
+    },
     "serverTestSuiteIdentity": {
       "type": "object",
       "properties": {
@@ -1858,20 +1994,6 @@
           "type": "string"
         },
         "kind": {
-          "type": "string"
-        }
-      }
-    },
-    "serverTestSuiteSource": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        },
-        "data": {
           "type": "string"
         }
       }

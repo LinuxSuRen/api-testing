@@ -11,13 +11,14 @@ grpc:
 	pkg/testing/remote/loader.proto \
     pkg/runner/monitor/monitor.proto
 
+# Read https://grpc-ecosystem.github.io/grpc-gateway/docs/mapping/customizing_openapi_output/
 .PHONY: grpc.gw
 grpc.gw:
-	protoc -I . --grpc-gateway_out . \
+	protoc -I . -I pkg/apispec/data/proto --grpc-gateway_out . \
     --grpc-gateway_opt logtostderr=true \
     --grpc-gateway_opt paths=source_relative \
     --grpc-gateway_opt generate_unbound_methods=true \
-	--openapiv2_out cmd/data \
+	--openapiv2_out . \
 	--openapiv2_opt logtostderr=true \
 	--openapiv2_opt generate_unbound_methods=true \
     pkg/server/server.proto

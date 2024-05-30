@@ -13,14 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+package util
 
-package server
-
-import _ "embed"
-
-const (
-	HeaderKeyStoreName = "X-Store-Name"
+import (
+	"net"
+	"strings"
 )
 
-//go:embed server.swagger.json
-var SwaggerJSON []byte
+// GetPort returns the port of the listener
+func GetPort(listener net.Listener) string {
+	addr := listener.Addr().String()
+	items := strings.Split(addr, ":")
+	return items[len(items)-1]
+}

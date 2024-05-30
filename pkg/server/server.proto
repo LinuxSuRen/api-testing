@@ -13,61 +13,86 @@ service Runner {
     // test suites related
     rpc GetSuites(Empty) returns (Suites) {
       option (google.api.http) = {
-        get: "/v1/suites"
+        get: "/api/v1/suites"
       };
     }
     rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {
       option (google.api.http) = {
-        post: "/v1/suites"
+        post: "/api/v1/suites"
         body: "*"
       };
     }
     rpc ImportTestSuite(TestSuiteSource) returns (CommonResult) {
       option (google.api.http) = {
-        post: "/v1/suites/import"
+        post: "/api/v1/suites/import"
       };
     }
     rpc GetTestSuite(TestSuiteIdentity) returns (TestSuite) {
       option (google.api.http) = {
-        get: "/v1/suites/{name}"
+        get: "/api/v1/suites/{name}"
       };
     }
     rpc UpdateTestSuite(TestSuite) returns (HelloReply) {
       option (google.api.http) = {
-        put: "/v1/suites/{name}"
+        put: "/api/v1/suites/{name}"
         body: "*"
       };
     }
     rpc DeleteTestSuite(TestSuiteIdentity) returns (HelloReply) {
       option (google.api.http) = {
-        delete: "/v1/suites/{name}"
+        delete: "/api/v1/suites/{name}"
       };
     }
     rpc DuplicateTestSuite(TestSuiteDuplicate) returns (HelloReply) {
-      option (google.api.http) = {
-        post: "/v1/suites/{name}/duplicate"
-        body: "*"
-      };
+//      option (google.api.http) = {
+//        post: "/api/v1/suites/{name}/duplicate"
+//        body: "*"
+//      };
     }
     rpc GetTestSuiteYaml(TestSuiteIdentity) returns (YamlData) {
       option (google.api.http) = {
-        get: "/v1/suites/{name}/yaml"
+        get: "/api/v1/suites/{name}/yaml"
       };
     }
 
     // test cases related
-    rpc ListTestCase(TestSuiteIdentity) returns (Suite) {}
-    rpc GetSuggestedAPIs(TestSuiteIdentity) returns (TestCases) {}
-    rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {}
-    rpc GetTestCase(TestCaseIdentity) returns (TestCase) {}
+    rpc ListTestCase(TestSuiteIdentity) returns (Suite) {
+        option (google.api.http) = {
+            get: "/api/v1/suites/{name}/cases"
+        };
+    }
+    // run target test case of a specific test suite
+    rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {
+        option (google.api.http) = {
+            post: "/api/v1/suites/{suite}/cases/{testcase}/run"
+        };
+    }
+    rpc GetTestCase(TestCaseIdentity) returns (TestCase) {
+        option (google.api.http) = {
+            get: "/api/v1/suites/{suite}/cases/{testcase}"
+        };
+    }
     rpc CreateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
     rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
     rpc DuplicateTestCase(TestCaseDuplicate) returns (HelloReply) {}
+    rpc GetSuggestedAPIs(TestSuiteIdentity) returns (TestCases) {
+        option (google.api.http) = {
+            get: "/api/v1/suggested-apis"
+        };
+    }
 
     // code generator
-    rpc ListCodeGenerator(Empty) returns (SimpleList) {}
-    rpc GenerateCode(CodeGenerateRequest)  returns (CommonResult) {}
+    rpc ListCodeGenerator(Empty) returns (SimpleList) {
+        option (google.api.http) = {
+            get: "/api/v1/code-generators"
+        };
+    }
+    rpc GenerateCode(CodeGenerateRequest)  returns (CommonResult) {
+        option (google.api.http) = {
+            post: "/api/v1/code-generators/generate"
+        };
+    }
 
     // converter
     rpc ListConverter(Empty) returns (SimpleList) {}
@@ -78,7 +103,7 @@ service Runner {
     rpc FunctionsQuery(SimpleQuery) returns (Pairs) {}
     rpc FunctionsQueryStream(stream SimpleQuery) returns (stream Pairs) {
       option (google.api.http) = {
-        get: "/v1/functionsQuery"
+        get: "/api/v1/functionsQuery"
       };
     }
     rpc GetVersion(Empty) returns (HelloReply) {}
