@@ -545,7 +545,7 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	assert.Empty(t, result)
 
 	// swagger
-	gock.Off()
+	defer gock.Off()
 	gock.New(urlFoo).Get("swagger.json").Reply(http.StatusOK).File("testdata/swagger.json")
 	result, err = runner.GetSuggestedAPIs(&atest.TestSuite{
 		Spec: atest.APISpec{
