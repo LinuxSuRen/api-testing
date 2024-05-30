@@ -18,26 +18,26 @@ import { post } from '../axios'
 import { getToken } from '../../utils/auth/token'
 
 export const GetSecrets = () =>
-  post('/api/server.Runner/GetSecrets', null, {
+  post('/server.Runner/GetSecrets', null, {
     'X-Auth': getToken()
   })
 
 export const FunctionsQuery = (params: string) =>
-  post('/api/server.Runner/FunctionsQuery', params, {
+  post('/server.Runner/FunctionsQuery', params, {
     'X-Auth': getToken()
   })
 
-export const DeleteSecret = (name: string) =>
-  post('/api/server.Runner/DeleteSecret', name, {
+export const DeleteSecret = (name: any) =>
+  post('/server.Runner/DeleteSecret', name, {
     'X-Auth': getToken()
   })
 
 export const CreateSecret = (params: any) =>
-  post('/api/server.Runner/CreateSecret', params, {
+  post('/server.Runner/CreateSecret', params, {
     'X-Auth': getToken()
   })
 
 export const UpdateSecret = (params: any) =>
-  post('/api/server.Runner/UpdateSecret', params, {
+  post('/server.Runner/UpdateSecret', params, {
     'X-Auth': getToken()
   })

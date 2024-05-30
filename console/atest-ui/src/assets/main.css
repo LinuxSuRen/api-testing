@@ -5,7 +5,9 @@
   margin: 0 auto;
   padding: 0 auto;
   height: 100vh;
-  font-weight: normal;overflow: hidden;
+  font-weight: normal;
+  /* 溢出时，显示屏幕滚动条 */
+  overflow: hidden;
 }
 
 a,

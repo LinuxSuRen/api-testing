@@ -22,6 +22,7 @@
         "createStore": "Create Store",
         "createSecret": "Create Secret",
         "secretManager": "Secret Manager",
+        "storeManager": "Store Manager",
         "protoContent": "Proto Content",
         "protoFile": "Proto File",
         "protoImport": "Proto Import",

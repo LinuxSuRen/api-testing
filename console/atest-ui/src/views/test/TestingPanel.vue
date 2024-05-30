@@ -236,13 +236,11 @@ import { ElTree, ElMessage } from 'element-plus'
 import { Edit, Refresh } from '@element-plus/icons-vue'
 import { Cache } from '../../utils/cache'
 import { useI18n } from 'vue-i18n'
-import { ErrorTips } from '@/utils/tips'
 import { DefaultResponseProcess } from '@/api/common'
 import { GetStores } from '@/api/store/store'
 import type { TestStore, Tree, Suite } from '../../types/types'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ListTestCase, LoadTestSuite, CreateTestSuite, ImportTestSuite } from '@/api/test/test'
-import { test } from 'node:test'
 
 const { t } = useI18n()
 
@@ -275,7 +273,11 @@ const handleNodeClick = (data: Tree) => {
         }
       })
       .catch((err: any) => {
-        ErrorTips(err || 'Unknown error when fetching test case data!')
+        ElMessage({
+          type: 'error',
+          showClose: true,
+          message: 'Oops, ' + err.message || 'Unknown error when fetching test case!'
+        })
       })
   } else {
     Cache.SetCurrentStore(data.store)
@@ -323,8 +325,11 @@ const loadTestSuites = async (sn: string) => {
       })
     })
     .catch((err: any) => {
-      console.log('err', err)
-      ElMessage.error('Oops, ' + err)
+      ElMessage({
+        type: 'error',
+        showClose: true,
+        message: 'Oops, ' + err.message || 'Unknown error when fetching test suite!'
+      })
     })
 }
 
@@ -390,7 +395,11 @@ const loadStores = async () => {
       if (e.message === 'Unauthenticated') {
         loginDialogVisible.value = true
       } else {
-        ElMessage.error('Oops, ' + e)
+        ElMessage({
+          type: 'error',
+          showClose: true,
+          message: 'Oops, ' + e.message || 'Unknown error when fetching test suite!'
+        })
       }
     })
     .finally(() => {
@@ -448,7 +457,11 @@ const submitForm = async (formEl: FormInstance | undefined) => {
           console.log('err', err)
 
           suiteCreatingLoading.value = false
-          ElMessage.error('Oops, ' + err.message)
+          ElMessage({
+            type: 'error',
+            showClose: true,
+            message: 'Oops, ' + err.message || 'Unknown error creating test suite!'
+          })
         })
     }
   })
@@ -476,7 +489,11 @@ const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
           }
         })
         .catch((err) => {
-          ErrorTips(err)
+          ElMessage({
+            type: 'error',
+            showClose: true,
+            message: 'Oops, ' + err.message || 'Unknown error importing test suite!'
+          })
         })
     }
   })

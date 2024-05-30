@@ -25,5 +25,6 @@ const router = useRouter()
   height: calc(100vh - 59px);
   background-color: rgb(243, 244, 246);
   --el-menu-active-color: #409EFF;
+  overflow-y: auto; /* 启用垂直滚动条 */
 }
 </style>

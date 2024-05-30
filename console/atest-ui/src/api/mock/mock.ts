@@ -17,12 +17,12 @@ limitations under the License.
 import { post } from '../axios'
 import { getToken } from '../../utils/auth/token'
 
-export const ReloadMockServer = (params: string) =>
-  post('/api/server.Mock/Reload', params, {
+export const ReloadMockServer = (params: any) =>
+  post('/server.Mock/Reload', params, {
     'X-Auth': getToken()
   })
 
 export const GetMockConfig = () =>
-  post('/api/server.Mock/GetConfig', null, {
+  post('/server.Mock/GetConfig', null, {
     'X-Auth': getToken()
   })

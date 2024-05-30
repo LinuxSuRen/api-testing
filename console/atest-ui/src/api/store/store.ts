@@ -18,7 +18,7 @@ import { post } from '../axios'
 import { getToken } from '../../utils/auth/token'
 
 export const CreateStore = (params: any) =>
-  post('/api/server.Runner/CreateStore', params, {
+  post('/server.Runner/CreateStore', params, {
     'X-Auth': getToken()
   })
 

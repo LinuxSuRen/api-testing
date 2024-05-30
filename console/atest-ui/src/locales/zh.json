@@ -22,6 +22,7 @@
         "createStore": "创建存储",
         "createSecret": "创建凭据",
         "secretManager": "凭据管理",
+        "storeManager": "存储管理",
         "apiRequestParameter": "API 请求参数",
         "codeGenerator": "代码生成",
         "testing": "测试",

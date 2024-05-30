@@ -87,7 +87,7 @@ export const UpdateTestCase = (params: any) =>
     'X-Auth': getToken()
   })
 
-export const GetTestCase = (params: TestCase) =>
+export const GetTestCase = (params: any) =>
   post('/server.Runner/GetTestCase', params, {
     'X-Store-Name': Cache.GetCurrentStore().name,
     'X-Auth': getToken()
