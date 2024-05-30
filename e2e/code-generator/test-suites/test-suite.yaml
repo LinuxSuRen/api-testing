@@ -15,5 +15,5 @@ items:
         auth: fake
   - name: requestWithoutHeader
     request:
-      api: localhost:8080/server.Runner/GetSuites
+      api: /GetSuites
       method: POST
