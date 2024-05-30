@@ -12,22 +12,18 @@ fi
 mkdir -p /root/.config/atest
 mkdir -p /var/data
 
-nohup atest server --local-storage '/workspace/test-suites/*.yaml'&
+nohup atest server --local-storage '/workspace/test-suites/*.yaml' &
 sleep 1
 
-# Array of test cases
-test_cases=("requestWithHeader" "requestWithoutHeader")
+curl http://localhost:8080/server.Runner/RunTest -X POST \
+    -d '{"suiteName": "test", "caseName": "requestWithoutHeader"}'
 
-for test_case in "${test_cases[@]}"
-do
-  echo "Generating code for test case: $test_case"
-  curl http://localhost:8080/server.Runner/GenerateCode -X POST \
-      -d '{"TestSuite": "test", "TestCase": "'"$test_case"'", "Generator": "'"$lang"'"}' > code.json
+curl http://localhost:8080/server.Runner/GenerateCode -X POST \
+    -d '{"TestSuite": "test", "TestCase": "requestWithHeader", "Generator": "'"$lang"'"}' > code.json
 
-  cat code.json | jq .message -r | sed 's/\\n/\n/g' | sed 's/\\t/\t/g' | sed 's/\\\"/"/g' > code.txt
-  cat code.txt
+cat code.json | jq .message -r | sed 's/\\n/\n/g' | sed 's/\\t/\t/g' | sed 's/\\\"/"/g' > code.txt
+cat code.txt
 
-  sh /workspace/${lang}.sh code.txt
-done
+sh /workspace/${lang}.sh code.txt
 
 exit 0

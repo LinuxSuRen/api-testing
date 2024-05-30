@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	reflect "reflect"
 	"regexp"
@@ -203,7 +204,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
 
 	var suite *testing.TestSuite
-
+	var normalizedAPI string
 	// TODO may not safe in multiple threads
 	oldEnv := map[string]string{}
 	for key, val := range task.Env {
@@ -241,7 +242,12 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		suiteRunner.WithOutputWriter(buf)
 		suiteRunner.WithWriteLevel(task.Level)
 		suiteRunner.WithSecure(suite.Spec.Secure)
-
+		normalizedAPI, err = normalizeAPI(testCase.Request.API)
+		if err != nil {
+			return
+		} else {
+			testCase.Request.API = normalizedAPI
+		}
 		// reuse the API prefix
 		testCase.Request.RenderAPI(suite.API)
 
@@ -632,7 +638,6 @@ func (s *server) ListCodeGenerator(ctx context.Context, in *Empty) (reply *Simpl
 
 func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
 	reply = &CommonResult{}
-
 	instance := generator.GetCodeGenerator(in.Generator)
 	if instance == nil {
 		reply.Success = false
@@ -640,6 +645,7 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 	} else {
 		var result testing.TestCase
 		var suite testing.TestSuite
+		var normalizedAPI string
 
 		loader := s.getLoader(ctx)
 		if suite, err = loader.GetTestSuite(in.TestSuite, true); err != nil {
@@ -652,6 +658,12 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 		}
 
 		if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
+			normalizedAPI, err = normalizeAPI(result.Request.API)
+			if err != nil {
+				return
+			} else {
+				result.Request.API = normalizedAPI
+			}
 			result.Request.RenderAPI(suite.API)
 
 			output, genErr := instance.Generate(&suite, &result)
@@ -1025,6 +1037,27 @@ func (s *UniqueSlice[T]) Exist(item T) bool {
 // GetAll returns all the items
 func (s *UniqueSlice[T]) GetAll() []T {
 	return s.data
+}
+
+// normalizeAPI function normalizes the provided API address
+func normalizeAPI(api string) (string, error) {
+	if api == "" {
+		return "", nil
+	}
+
+	// 检查是否包含 "://"，如果不包含，则添加默认的协议头（例如 http://）
+	if !strings.Contains(api, "://") {
+		api = "http://" + api
+	}
+
+	u, err := url.Parse(api)
+	if err != nil {
+		return "", err
+	}
+	if u.Host == "" {
+		return "", fmt.Errorf("API address is invalid: %s", api)
+	}
+	return u.String(), nil
 }
 
 var errNoTestSuiteFound = errors.New("no test suite found")
