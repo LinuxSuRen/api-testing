@@ -1,71 +1,78 @@
 <template>
   <!-- Index -->
   <div class="index" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
-    <el-card class="card" shawon="hover">
-      <el-button
-        type="primary"
-        @click="openTestSuiteCreateDialog"
-        data-intro="Click here to create a new test suite"
-        test-id="open-new-suite-dialog"
-        :icon="Edit"
-        >{{ t('button.new') }}</el-button
-      >
-      <el-button
-        type="primary"
-        @click="openTestSuiteImportDialog"
-        data-intro="Click here to import from Postman"
-        test-id="open-import-suite-dialog"
-        >{{ t('button.import') }}</el-button
-      >
-      <el-button type="primary" @click="loadStores" :icon="Refresh">{{
-        t('button.refresh')
-      }}</el-button>
-      <TemplateFunctions />
-      <div class="filter-input">
-        <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" />
-      </div>
-
-      <div class="test-container">
-        <!-- Test suite tree containers -->
-        <el-tree
-          v-loading="storesLoading"
-          :data="data"
-          highlight-current
-          :check-on-click-node="true"
-          :expand-on-click-node="false"
-          :current-node-key="currentNodekey"
-          ref="treeRef"
-          node-key="id"
-          :filter-node-method="filterTestCases"
-          @node-click="handleNodeClick"
-          data-intro="This is the test suite tree. You can click the test suite to edit it."
-        >
-          <template #default="{ node, data }">
-            <span>
-              <i :class="getColorClass(data.kind)">{{ data.kind }}</i>
-              <i class="test-suite">{{ node.label }}</i>
-            </span>
-          </template>
-        </el-tree>
-        <!-- Test suite and case containers. -->
-        <el-card shadow="hover">
-          <TestCase
-            v-if="viewName === 'testcase'"
-            :suite="testSuite"
-            :kindName="testSuiteKind"
-            :name="testCaseName"
-            @updated="loadStores"
-            style="height: 100%"
-            data-intro="This is the test case editor. You can edit the test case here."
-          />
-          <TestSuite
-            v-else-if="viewName === 'testsuite'"
-            :name="testSuite"
-            @updated="loadStores"
-            data-intro="This is the test suite editor. You can edit the test suite here."
-          />
-        </el-card>
-      </div>
+    <el-card class="card" shawon="hover" :body-style="{ width: '100%' }">
+      <el-container style="height: 100%">
+        <el-main style="padding-top: 5px; padding-bottom: 5px;">
+          <el-container style="height: 100%;">
+            <el-aside>
+              <el-button
+                type="primary"
+                @click="openTestSuiteCreateDialog"
+                data-intro="Click here to create a new test suite"
+                test-id="open-new-suite-dialog"
+                :icon="Edit"
+                >{{ t('button.new') }}</el-button
+              >
+              <el-button
+                type="primary"
+                @click="openTestSuiteImportDialog"
+                data-intro="Click here to import from Postman"
+                test-id="open-import-suite-dialog"
+                >{{ t('button.import') }}</el-button
+              >
+              <el-button type="primary" @click="loadStores" :icon="Refresh">{{
+                t('button.refresh')
+              }}</el-button>
+              <div class="filter-input">
+                <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" />
+              </div>
+              <!-- Test suite tree containers -->
+              <el-tree
+                v-loading="storesLoading"
+                :data="data"
+                highlight-current
+                :check-on-click-node="true"
+                :expand-on-click-node="false"
+                :current-node-key="currentNodekey"
+                ref="treeRef"
+                node-key="id"
+                :filter-node-method="filterTestCases"
+                @node-click="handleNodeClick"
+                data-intro="This is the test suite tree. You can click the test suite to edit it."
+              >
+                <template #default="{ node, data }">
+                    <span>
+                      <i :class="getColorClass(data.kind)">{{ data.kind }}</i>
+                      <i class="test-suite">{{ node.label }}</i>
+                    </span>
+                </template>
+              </el-tree>
+              <TemplateFunctions />
+            </el-aside>
+            <!-- Test suite and case containers. -->
+            <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px;">
+              <el-card shadow="hover">
+                <TestCase
+                  v-if="viewName === 'testcase'"
+                  :suite="testSuite"
+                  :kindName="testSuiteKind"
+                  :name="testCaseName"
+                  @updated="loadStores"
+                  style="height: 100%"
+                  data-intro="This is the test case editor. You can edit the test case here."
+                />
+                <TestSuite
+                  v-else-if="viewName === 'testsuite'"
+                  :name="testSuite"
+                  @updated="loadStores"
+                  data-intro="This is the test suite editor. You can edit the test suite here."
+                />
+              </el-card>
+            </el-main>
+          </el-container>
+        </el-main>
+      </el-container>
     </el-card>
   </div>
 
@@ -593,9 +600,8 @@ const getColorClass = (kind: string) => {
 
   .filter-input {
     vertical-align: middle;
-    float: right;
-    padding-left: 1vh;
-    width: 50vh;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
   }
 }
 
@@ -670,28 +676,6 @@ nav a:first-of-type {
   color: #6b778c;
   font-size: 32px;
   font-weight: 600;
-}
-
-.test-container {
-  display: flex;
-  flex-direction: row;
-  margin-top: 2%;
-  justify-content: space-around;
-  width: 100%;
-
-  .el-tree {
-    width: 30vh;
-  }
-
-  span {
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-
-    i {
-      padding-left: 10%;
-    }
-  }
 }
 
 .test-suite {
