@@ -1045,7 +1045,10 @@ func normalizeAPI(api string) (string, error) {
 		return "", nil
 	}
 
-	// 检查是否包含 "://"，如果不包含，则添加默认的协议头（例如 http://）
+	if api == "/" {
+		return "", nil
+	}
+
 	if !strings.Contains(api, "://") {
 		api = "http://" + api
 	}
@@ -1054,9 +1057,15 @@ func normalizeAPI(api string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	if u.Host == "" {
 		return "", fmt.Errorf("API address is invalid: %s", api)
 	}
+
+	if !strings.HasPrefix(u.Path, "/") && u.Path != "" {
+		u.Path = "/" + u.Path
+	}
+
 	return u.String(), nil
 }
 
