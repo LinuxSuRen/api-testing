@@ -80,6 +80,10 @@ func (l *nonLoader) ListTestCase(suite string) (testcases []TestCase, err error)
 	return
 }
 
+func (l *nonLoader) GetTestSuiteYaml(suite string) (testSuiteYaml []byte, err error) {
+	return
+}
+
 func (l *nonLoader) GetTestCase(suite, name string) (testcase TestCase, err error) {
 	return
 }

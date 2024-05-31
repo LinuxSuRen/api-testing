@@ -11,6 +11,7 @@ env:
   REGISTRY: ghcr.io
   REGISTRY_DOCKERHUB: docker.io
   REGISTRY_ALIYUN: registry.aliyuncs.com
+  REGISTRY_TENCENT: ccr.ccs.tencentyun.com
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -85,6 +86,13 @@ jobs:
           registry: ${{ env.REGISTRY_ALIYUN }}
           username: ${{ secrets.REGISTRY_ALIYUN_USER }}
           password: ${{ secrets.REGISTRY_ALIYUN_PUBLISH_SECRETS }}
+      - name: Log into registry ${{ env.REGISTRY_TENCENT }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY_TENCENT }}
+          username: 100002400732
+          password: ${{ secrets.REGISTRY_TENCENT_PUBLISH_SECRETS }}
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
@@ -93,6 +101,7 @@ jobs:
             ${{ env.REGISTRY }}/linuxsuren/api-testing
             ${{ env.REGISTRY_DOCKERHUB }}/${{ env.IMAGE_NAME }}
             ${{ env.REGISTRY_ALIYUN }}/${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY_TENCENT }}/${{ env.IMAGE_NAME }}
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
@@ -116,6 +125,90 @@ jobs:
             unset HELM_VERSION
           fi
           make helm-pkg helm-push
+
+  BuildDesktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        # see https://github.com/actions/runner-images
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - name: Build Server on Windows
+        if: runner.os == 'Windows'
+        env:
+          BINARY: atest.exe
+        run: |
+          make desktop-package
+      - name: Build Server
+        if: runner.os != 'Windows'
+        run: |
+          make desktop-package
+      # for fixing Error: Cannot find module 'appdmg'
+      - name: Install Python 3.11.4
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.4'
+      - name: Upload to Draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref == 'refs/heads/master' && runner.os != 'Windows'
+        run: |
+          cd console/atest-desktop
+          export TAG=$(gh release list -L 1 | awk '{print $4}')
+          export TAG=${TAG#"v"}
+          jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm i
+          npm run publish
+      - name: Upload to Draft on Windows
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref == 'refs/heads/master' && runner.os == 'Windows'
+        run: |
+          cd console/atest-desktop
+          $TAG = (gh release list -L 1).Split(' ')[0]
+          if ($TAG -like "v*") {
+              $TAG = $TAG -replace "^v", ""
+          }
+          Set-Content -Path "env:TAG" -Value "$TAG"
+          jq '.version = env.TAG' package.json > package.json.new
+          rm package.json
+          Rename-Item -Path package.json.new -NewName package.json
+          npm i
+          npm run publish
+      - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref != 'refs/heads/master' && runner.os != 'Windows'
+        run: |
+          cd console/atest-desktop
+          export TAG=$(git describe --tags --abbrev=0)
+          export TAG=${TAG#"v"}
+          jq '.version = env.TAG' package.json > package.json.new && mv package.json.new package.json
+          npm i
+          npm run publish
+      - name: Upload on Windows
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
+        if: github.ref != 'refs/heads/master' && runner.os == 'Windows'
+        run: |
+          cd console/atest-desktop
+          $TAG = git describe --tags --abbrev=0
+          if ($TAG -like "v*") {
+              $TAG = $TAG -replace "^v", ""
+          }
+          Set-Content -Path "env:TAG" -Value "$TAG"
+          jq '.version = env.TAG' package.json > package.json.new
+          rm package.json
+          Rename-Item -Path package.json.new -NewName package.json
+          npm i
+          npm run publish
 
   # image-operator:
   #   runs-on: ubuntu-20.04

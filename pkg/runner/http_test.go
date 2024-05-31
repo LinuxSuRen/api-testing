@@ -545,7 +545,7 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	assert.Empty(t, result)
 
 	// swagger
-	gock.Off()
+	defer gock.Off()
 	gock.New(urlFoo).Get("swagger.json").Reply(http.StatusOK).File("testdata/swagger.json")
 	result, err = runner.GetSuggestedAPIs(&atest.TestSuite{
 		Spec: atest.APISpec{
@@ -572,6 +572,9 @@ func TestIsStructContent(t *testing.T) {
 	}, {
 		contentType: util.OctetStream,
 		expectOk:    false,
+	}, {
+		contentType: util.OCIImageIndex,
+		expectOk:    true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.contentType, func(t *testing.T) {

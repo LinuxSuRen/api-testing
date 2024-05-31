@@ -1,0 +1,9 @@
+name: Sub
+items:
+    - name: Get Sub Get New Request
+      request:
+        api: http://localhost?key=value
+        method: GET
+        header:
+            key: value
+        body: '{}'

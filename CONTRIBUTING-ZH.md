@@ -20,6 +20,7 @@
 | [Helm chart](https://helm.sh/)                                              | The [Kubernetes](https://kubernetes.io/docs/home/) application package |
 | [GitHub Actions](https://docs.github.com/en/actions)                        | The continuous integration                                             |
 | [make](https://www.gnu.org/software/make/)                                  | The automated Build Tools                                              |
+| [Docs Guide](https://github.com/LinuxSuRen/api-testing.git) | 文档编写指南 |
 
 ## 设置开发环境
 

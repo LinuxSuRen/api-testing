@@ -288,7 +288,7 @@ func (l *fileLoader) DeleteSuite(name string) (err error) {
 	return
 }
 
-func (l *fileLoader) ListTestCase(suite string) (testcases []TestCase, err error) {
+func (l *fileLoader) LoadAndParse(suite string, mode string) (testcases []TestCase, testSuiteYaml []byte, err error) {
 	defer func() {
 		l.Reset()
 	}()
@@ -308,9 +308,25 @@ func (l *fileLoader) ListTestCase(suite string) (testcases []TestCase, err error
 			continue
 		}
 
-		testcases = testSuite.Items
+		switch mode {
+		case "yaml":
+			testSuiteYaml = data
+		default:
+			testcases = testSuite.Items
+		}
+
 		break
 	}
+	return
+}
+
+func (l *fileLoader) ListTestCase(suite string) (testcases []TestCase, err error) {
+	testcases, _, err = l.LoadAndParse(suite, "testcases")
+	return
+}
+
+func (l *fileLoader) GetTestSuiteYaml(suite string) (testSuiteYaml []byte, err error) {
+	_, testSuiteYaml, err = l.LoadAndParse(suite, "yaml")
 	return
 }
 

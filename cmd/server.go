@@ -227,10 +227,10 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir, o.grpcMaxRecvMsgSize)
 	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
 	if storeKindsErr != nil {
-		cmd.PrintErrf("failed to get store kinds, error: %p\n", storeKindsErr)
+		cmd.PrintErrf("failed to get store kinds, error: %v\n", storeKindsErr)
 	} else {
-		if err = startPlugins(storeExtMgr, kinds); err != nil {
-			return
+		if runPluginErr := startPlugins(storeExtMgr, kinds); runPluginErr != nil {
+			cmd.PrintErrf("error occurred during starting plugins, error: %v\n", runPluginErr)
 		}
 	}
 
@@ -262,10 +262,13 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		_ = o.httpServer.Shutdown(ctx)
 	}()
 
+	gRPCServerPort := util.GetPort(lis)
+	gRPCServerAddr := fmt.Sprintf("127.0.0.1:%s", gRPCServerPort)
+
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))
 	err = errors.Join(
-		server.RegisterRunnerHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}),
-		server.RegisterMockHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}))
+		server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}),
+		server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}))
 	if err == nil {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
@@ -349,9 +352,7 @@ func startPlugins(storeExtMgr server.ExtManager, kinds *server.StoreKinds) (err 
 
 	for _, kind := range kinds.Data {
 		if kind.Enabled && strings.HasPrefix(kind.Url, socketPrefix) {
-			if err = storeExtMgr.Start(kind.Name, kind.Url); err != nil {
-				break
-			}
+			err = errors.Join(err, storeExtMgr.Start(kind.Name, kind.Url))
 		}
 	}
 	return

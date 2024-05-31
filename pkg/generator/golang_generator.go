@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"html/template"
 	"net/http"
+	"strings"
 
 	_ "embed"
 
@@ -41,6 +42,13 @@ func (g *golangGenerator) Generate(testSuite *testing.TestSuite, testcase *testi
 		buf := new(bytes.Buffer)
 		if err = tpl.Execute(buf, testcase); err == nil {
 			result = buf.String()
+			// Check if "bytes." is used in the generated code
+			if strings.Contains(result, "bytes.") {
+				// Only insert "bytes" import if it's not already included
+				if !strings.Contains(result, "\"bytes\"") {
+					result = strings.Replace(result, "import (", "import (\n\t\"bytes\"", 1)
+				}
+			}
 		}
 	}
 	return

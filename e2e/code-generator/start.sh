@@ -1,0 +1,10 @@
+#!/bin/bash
+
+docker-compose version
+
+targets=(golang java python javascript curl)
+for target in "${targets[@]}"
+do
+    docker-compose down
+    docker-compose up --build $target
+done

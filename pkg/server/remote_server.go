@@ -393,6 +393,30 @@ func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (re
 	return
 }
 
+func (s *server) DuplicateTestSuite(ctx context.Context, in *TestSuiteDuplicate) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	if in.SourceSuiteName == in.TargetSuiteName {
+		reply.Error = "source and target suite name should be different"
+		return
+	}
+
+	var suite testing.TestSuite
+	if suite, err = loader.GetTestSuite(in.SourceSuiteName, true); err == nil {
+		suite.Name = in.TargetSuiteName
+		if err = loader.CreateSuite(suite.Name, suite.API); err == nil {
+			for _, testCase := range suite.Items {
+				if err = loader.CreateTestCase(suite.Name, testCase); err != nil {
+					break
+				}
+			}
+		}
+	}
+	return
+}
+
 func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (result *Suite, err error) {
 	var items []testing.TestCase
 	loader := s.getLoader(ctx)
@@ -401,6 +425,18 @@ func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (resul
 		result = &Suite{}
 		for _, item := range items {
 			result.Items = append(result.Items, ToGRPCTestCase(item))
+		}
+	}
+	return
+}
+
+func (s *server) GetTestSuiteYaml(ctx context.Context, in *TestSuiteIdentity) (reply *YamlData, err error) {
+	var data []byte
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	if data, err = loader.GetTestSuiteYaml(in.Name); err == nil {
+		reply = &YamlData{
+			Data: data,
 		}
 	}
 	return
@@ -419,14 +455,13 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
 	var targetTestSuite testing.TestSuite
 
+	result = &TestCaseResult{}
 	loader := s.getLoader(ctx)
 	defer loader.Close()
 	targetTestSuite, err = loader.GetTestSuite(in.Suite, true)
-	if err != nil {
+	if err != nil || targetTestSuite.Name == "" {
 		err = nil
-		result = &TestCaseResult{
-			Error: fmt.Sprintf("not found suite: %s", in.Suite),
-		}
+		result.Error = fmt.Sprintf("not found suite: %s", in.Suite)
 		return
 	}
 
@@ -441,9 +476,10 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 		}
 
 		var reply *TestResult
+		var lastItem *TestCaseResult
 		if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
 			lastIndex := len(reply.TestCaseResult) - 1
-			lastItem := reply.TestCaseResult[lastIndex]
+			lastItem = reply.TestCaseResult[lastIndex]
 
 			if len(lastItem.Body) > GrpcMaxRecvMsgSize {
 				e := "the HTTP response body exceeded the maximum message size limit received by the gRPC client"
@@ -456,23 +492,18 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 				}
 				return
 			}
-
-			result = &TestCaseResult{
-				Output:     reply.Message,
-				Error:      reply.Error,
-				Body:       lastItem.Body,
-				Header:     lastItem.Header,
-				StatusCode: lastItem.StatusCode,
-			}
 		} else if err != nil {
-			result = &TestCaseResult{
-				Error: err.Error(),
-			}
-		} else {
-			result = &TestCaseResult{
-				Output: reply.Message,
-				Error:  reply.Error,
-			}
+			result.Error = err.Error()
+		}
+
+		if reply != nil {
+			result.Output = reply.Message
+			result.Error = reply.Error
+		}
+		if lastItem != nil {
+			result.Body = lastItem.Body
+			result.Header = lastItem.Header
+			result.StatusCode = lastItem.StatusCode
 		}
 	}
 	return
@@ -565,6 +596,24 @@ func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (repl
 	defer loader.Close()
 	reply = &HelloReply{}
 	err = loader.DeleteTestCase(in.Suite, in.Testcase)
+	return
+}
+
+func (s *server) DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate) (reply *HelloReply, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	reply = &HelloReply{}
+
+	if in.SourceCaseName == in.TargetCaseName {
+		reply.Error = "source and target case name should be different"
+		return
+	}
+
+	var testcase testing.TestCase
+	if testcase, err = loader.GetTestCase(in.SourceSuiteName, in.SourceCaseName); err == nil {
+		testcase.Name = in.TargetCaseName
+		err = loader.CreateTestCase(in.TargetSuiteName, testcase)
+	}
 	return
 }
 

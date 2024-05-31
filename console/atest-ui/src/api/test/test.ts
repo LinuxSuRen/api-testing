@@ -116,3 +116,15 @@ export const RunTestCase = (params: RunTestCaseRequest) =>
     'X-Store-Name': stroeName,
     'X-Auth': getToken()
   })
+
+export const GetTestSuiteYaml = (params: any, store: string) =>
+post(
+  '/server.Runner/GetTestSuiteYaml',
+  {
+    name: params.name
+  },
+  {
+    'X-Store-Name': store,
+    'X-Auth': getToken()
+  }
+)

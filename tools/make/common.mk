@@ -75,6 +75,7 @@ include tools/make/ui.mk
 include tools/make/run.mk
 include tools/make/proto.mk
 include tools/make/test.mk
+include tools/make/desktop.mk
 
 # Log the running target
 # \033[0;32m -> green

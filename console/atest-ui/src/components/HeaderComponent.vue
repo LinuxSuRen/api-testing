@@ -10,6 +10,9 @@
     <div>
       <ui>
         <li>
+          <LanguageSwitch />
+        </li>
+        <li>
           <a href="https://linuxsuren.github.io/api-testing/" target="_blank">
             <p>Document</p>
           </a>
@@ -39,6 +42,7 @@
 import { ref } from 'vue'
 // import { Sunny, Moon } from '@element-plus/icons-vue'
 import { setAsDarkTheme } from '../theme/theme'
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
 
 const darkOpt = ref(false)
 
@@ -85,7 +89,10 @@ ui {
   list-style: none;
 
   li {
-    padding-right: 10%;
+    display: flex;
+    padding-right: 1em;
+    vertical-align: middle;
+    align-items: center;
   }
 }
 

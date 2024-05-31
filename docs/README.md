@@ -324,11 +324,13 @@ atest server --auth oauth --client-id your-id --client-secret your-secret
 Developers can have storage, secret extensions. Implementing a gRPC server according to [loader.proto](../pkg/testing/remote/loader.proto) is required.
 
 ## Official Images
-You can find the official images from both [Docker Hub](https://hub.docker.com/r/linuxsuren/api-testing) and [GitHub Images](https://github.com/users/LinuxSuRen/packages/container/package/api-testing). See the image path:
+You can find the official images from both [Docker Hub](https://hub.docker.com/r/linuxsuren/api-testing) and others. See the image path:
 
-* `ghcr.io/linuxsuren/api-testing:latest`
-* `linuxsuren/api-testing:latest`
-* `docker.m.daocloud.io/linuxsuren/api-testing` (mirror)
+* `ghcr.io/linuxsuren/api-testing:master`
+* `docker.io/linuxsuren/api-testing:master`
+* `registry.aliyuncs.com/linuxsuren/api-testing:master`
+* `ccr.ccs.tencentyun.com/linuxsuren/api-testing:master`
+* `docker.m.daocloud.io/linuxsuren/api-testing:master` (mirror)
 
 The tag `latest` represents the latest release version. The tag `master` represents the image of the latest master branch. We highly recommend you to use a fixed version instead of those in a production environment.
 

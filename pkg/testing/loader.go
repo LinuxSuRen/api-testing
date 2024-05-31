@@ -39,6 +39,7 @@ type Writer interface {
 
 	ListTestSuite() (suites []TestSuite, err error)
 	GetTestSuite(name string, full bool) (suite TestSuite, err error)
+	GetTestSuiteYaml(name string) (testSuiteYaml []byte, err error)
 	CreateSuite(name, api string) (err error)
 	GetSuite(name string) (*TestSuite, string, error)
 	UpdateSuite(TestSuite) (err error)

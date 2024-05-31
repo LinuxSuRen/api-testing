@@ -211,6 +211,19 @@ func TestSuite(t *testing.T) {
 			assert.Equal(t, urlTestLogin, testcase.Request.API)
 		}
 
+		var data []byte
+		writer.Put("test")
+		assert.True(t, writer.HasMore())
+		data, err = writer.Load()
+		assert.NoError(t, err)
+		writer.Reset()
+
+		var testSuiteYaml []byte
+		testSuiteYaml, err = writer.GetTestSuiteYaml("test")
+		if assert.NoError(t, err) {
+			assert.Equal(t, data, testSuiteYaml)
+		}
+
 		err = writer.DeleteTestCase("test", "login")
 		assert.NoError(t, err)
 

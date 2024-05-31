@@ -31,6 +31,7 @@ type Item struct {
 	Name     string   `yaml:"name"`
 	Request  Request  `yaml:"request"`
 	Response Response `yaml:"response"`
+	Param    map[string]string
 }
 
 type Request struct {
@@ -41,9 +42,11 @@ type Request struct {
 }
 
 type Response struct {
+	Encoder    string            `yaml:"encoder"`
 	Body       string            `yaml:"body"`
 	Header     map[string]string `yaml:"header"`
 	StatusCode int               `yaml:"statusCode"`
+	BodyData   []byte
 }
 
 type Webhook struct {

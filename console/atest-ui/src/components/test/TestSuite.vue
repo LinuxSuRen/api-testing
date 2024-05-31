@@ -104,6 +104,7 @@
     >{{ t('button.newtestcase') }}</el-button
   >
   <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
+  <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{ t('button.viewYaml') }}</el-button>
 
   <!-- Create Test Case Dialog-->
   <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
@@ -167,6 +168,24 @@
       </span>
     </template>
   </el-dialog>
+
+  <el-dialog v-model="yamlDialogVisible" :title="t('button.viewYaml')" :fullscreen="isFullScreen" width="40%" draggable>
+    <el-button type="primary" @click="isFullScreen = !isFullScreen" style="margin-bottom: 10px;">
+      <p>{{ isFullScreen ? t('button.cancelFullScreen') : t('button.fullScreen') }}</p>
+    </el-button>
+    <el-scrollbar>
+      <Codemirror v-model="yamlFormat"/>
+    </el-scrollbar>
+  </el-dialog>
+
+  <el-drawer v-model="testSuiteDuplicateDialog">
+    <template #default>
+      New Test Suite Name:<el-input v-model="targetSuiteDuplicateName" />
+    </template>
+    <template #footer>
+      <el-button type="primary" @click="duplicateTestSuite">{{ t('button.ok') }}</el-button>
+    </template>
+  </el-drawer>
 </template>
 
 <script setup lang="ts">
@@ -183,8 +202,11 @@ import {
   CreateTestCase,
   GetTestSuite,
   ConvertTestSuite,
-  DeleteTestSuite
+  DeleteTestSuite,
+  GetTestSuiteYaml
 } from '../../api/test/test'
+import { Codemirror } from 'vue-codemirror'
+import  yaml  from 'js-yaml';
 
 const { t } = useI18n()
 
@@ -264,6 +286,7 @@ const save = () => {
     })
 }
 
+const isFullScreen = ref(false)
 const dialogVisible = ref(false)
 const testcaseFormRef = ref<FormInstance>()
 const testCaseForm = reactive({
@@ -379,6 +402,21 @@ const paramChange = () => {
     } as Pair)
   }
 }
+
+const yamlFormat = ref('');
+const yamlDialogVisible = ref(false)
+
+const viewYaml = () => {
+  yamlDialogVisible.value = true
+
+  GetTestSuiteYaml({ name: props.name },"local")
+    .then((res: any) => {
+      yamlFormat.value = yaml.dump(yaml.load(atob(res.data)));
+    })
+    .catch((e: any) => {
+      ElMessage.error('Oops, ' + e)
+    })
+}
 </script>
 
 <style scoped>
@@ -394,5 +432,15 @@ const paramChange = () => {
   .item-2 {
     margin-right: 0px;
   }
+}
+
+.button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.button-container > .el-button + .el-button {
+    margin-left:0px;
 }
 </style>

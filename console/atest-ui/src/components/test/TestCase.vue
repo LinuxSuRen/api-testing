@@ -70,7 +70,7 @@
         <template #label>
           <el-badge
             :value="testCaseWithSuite.data.request.query.length - 1"
-            :hidden="testCaseWithSuite.data.request.query.length === 1"
+            :hidden="testCaseWithSuite.data.request.query.length <= 1"
             class="item"
             >Query</el-badge
           >
@@ -95,7 +95,7 @@
         <template #label>
           <el-badge
             :value="testCaseWithSuite.data.request.header.length - 1"
-            :hidden="testCaseWithSuite.data.request.header.length === 1"
+            :hidden="testCaseWithSuite.data.request.header.length <= 1"
             class="item"
             >Header</el-badge
           >
@@ -130,7 +130,7 @@
         <template #label>
           <el-badge
             :value="testCaseWithSuite.data.request.cookie.length - 1"
-            :hidden="testCaseWithSuite.data.request.cookie.length === 1"
+            :hidden="testCaseWithSuite.data.request.cookie.length <= 1"
             class="item"
             >Cookie</el-badge
           >
