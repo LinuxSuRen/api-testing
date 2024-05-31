@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option go_package = "github.com/linuxsuren/api-testing/pkg/testing/remote";
+
+package remote;
+
+import "pkg/server/server.proto";
+
+service Loader {
+    rpc ListTestSuite(server.Empty) returns (TestSuites) {}
+    rpc CreateTestSuite(TestSuite) returns (server.Empty) {}
+    rpc GetTestSuite(TestSuite) returns (TestSuite) {}
+    rpc UpdateTestSuite(TestSuite) returns (TestSuite) {}
+    rpc DeleteTestSuite(TestSuite) returns (server.Empty) {}
+
+    rpc ListTestCases(TestSuite) returns (server.TestCases) {}
+    rpc CreateTestCase(server.TestCase) returns (server.Empty) {}
+    rpc GetTestCase(server.TestCase) returns (server.TestCase) {}
+    rpc UpdateTestCase(server.TestCase) returns (server.TestCase) {}
+    rpc DeleteTestCase(server.TestCase) returns (server.Empty) {}
+
+    rpc Verify(server.Empty) returns (server.ExtensionStatus) {}
+    rpc PProf(server.PProfRequest) returns (server.PProfData) {}
+}
+
+message TestSuites {
+    repeated TestSuite data = 1;
+}
+
+message TestSuite {
+    string name = 1;
+    string api = 2;
+    repeated server.Pair param = 3;
+    server.APISpec spec = 4;
+    repeated server.TestCase items = 5;
+    bool full = 6;
+}
+
+service SecretService {
+    rpc GetSecret(server.Secret) returns (server.Secret) {}
+    rpc GetSecrets(server.Empty) returns (server.Secrets) {}
+    rpc CreateSecret(server.Secret) returns (server.CommonResult) {}
+    rpc DeleteSecret(server.Secret) returns (server.CommonResult) {}
+    rpc UpdateSecret(server.Secret) returns (server.CommonResult) {}
+}

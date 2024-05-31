@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/linuxsuren/api-testing/pkg/downloader"
 	"os"
 
 	"github.com/linuxsuren/api-testing/pkg/server"
@@ -21,7 +22,7 @@ func NewRootCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c *cob
 		createRunCommand(), createSampleCmd(),
 		createServerCmd(execer, httpServer), createJSONSchemaCmd(),
 		createServiceCommand(execer), createFunctionCmd(), createConvertCommand(),
-		createMockCmd())
+		createMockCmd(), createExtensionCommand(downloader.NewDefaultOCIDownloader()))
 	return
 }
 
