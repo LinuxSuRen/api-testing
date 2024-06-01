@@ -626,7 +626,7 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	})
 
 	t.Run("with swagger URL, not accessed", func(t *testing.T) {
-		gock.Off()
+		defer gock.Off()
 		name := fmt.Sprintf("fake-%d", time.Now().Second())
 		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{
 			Name: name,
@@ -648,7 +648,7 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	})
 
 	t.Run("normal", func(t *testing.T) {
-		gock.Off()
+		defer gock.Off()
 		randomName := fmt.Sprintf("fake-%d", time.Now().Nanosecond())
 		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{
 			Name: randomName,

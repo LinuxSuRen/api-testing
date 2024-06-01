@@ -424,9 +424,7 @@ func jsonStrToInterface(jsonStr string) (objData map[string]interface{}, err err
 }
 
 func (s *inMemoryServer) GetPort() string {
-	addr := s.listener.Addr().String()
-	items := strings.Split(addr, ":")
-	return items[len(items)-1]
+	return util.GetPort(s.listener)
 }
 
 func (s *inMemoryServer) Stop() (err error) {
