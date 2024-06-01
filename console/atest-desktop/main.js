@@ -185,6 +185,7 @@ const startServer = () => {
   serverProcess = spawn(atestFromHome, [
     "server",
     "--http-port", server.getPort(),
+    "--port=0",
     "--local-storage", path.join(homeData, "*.yaml")
   ])
   serverProcess.stdout.on('data', (data) => {

@@ -20,6 +20,8 @@ import (
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/util"
 )
 
 // HTTPServer is an interface for serving HTTP requests
@@ -27,6 +29,7 @@ type HTTPServer interface {
 	Serve(lis net.Listener) error
 	WithHandler(handler http.Handler)
 	Shutdown(ctx context.Context) error
+	GetPort() string
 }
 
 type CombineHandler interface {
@@ -35,8 +38,9 @@ type CombineHandler interface {
 }
 
 type defaultHTTPServer struct {
-	server  *http.Server
-	handler http.Handler
+	listener net.Listener
+	server   *http.Server
+	handler  http.Handler
 }
 
 // NewDefaultHTTPServer creates a default HTTP server
@@ -45,6 +49,7 @@ func NewDefaultHTTPServer() HTTPServer {
 }
 
 func (s *defaultHTTPServer) Serve(lis net.Listener) (err error) {
+	s.listener = lis
 	s.server = &http.Server{Handler: s.handler}
 	err = s.server.Serve(lis)
 	return
@@ -56,6 +61,10 @@ func (s *defaultHTTPServer) WithHandler(h http.Handler) {
 
 func (s *defaultHTTPServer) Shutdown(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
+}
+
+func (s *defaultHTTPServer) GetPort() string {
+	return util.GetPort(s.listener)
 }
 
 type defaultCombineHandler struct {
@@ -113,4 +122,9 @@ func (s *fakeHandler) WithHandler(h http.Handler) {
 func (s *fakeHandler) Shutdown(ctx context.Context) error {
 	// do nothing due to this is a fake method
 	return nil
+}
+
+func (s *fakeHandler) GetPort() string {
+	// do nothing due to this is a fake method
+	return ""
 }
