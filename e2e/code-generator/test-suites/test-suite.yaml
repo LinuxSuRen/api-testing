@@ -7,9 +7,13 @@ param:
   suiteName: test
   caseName: test
 items:
-- name: requestWithHeader
-  request:
-    api: /GetSuites
-    method: POST
-    header:
-      auth: fake
+  - name: requestWithHeader
+    request:
+      api: /GetSuites
+      method: POST
+      header:
+        auth: fake
+  - name: requestWithoutHeader
+    request:
+      api: /GetSuites
+      method: POST

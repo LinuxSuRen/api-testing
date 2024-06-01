@@ -25,9 +25,13 @@ def main():
     {{- else}}
     body = io.BytesIO(b"{{.Request.Body.String}}")
     {{- end}}
+    {{- if gt (len .Request.Header) 0 }}
     {{- range $key, $val := .Request.Header}}
     headers = {"{{$key}}": "{{$val}}"}
     {{- end}}
+    {{- else }}
+    headers = {}
+    {{- end }}
     {{- if gt (len .Request.Cookie) 0 }}
     {{- range $key, $val := .Request.Cookie}}
     cookies = {"{{$key}}": "{{$val}}"}
