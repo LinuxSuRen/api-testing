@@ -203,7 +203,6 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
 
 	var suite *testing.TestSuite
-
 	// TODO may not safe in multiple threads
 	oldEnv := map[string]string{}
 	for key, val := range task.Env {
@@ -632,7 +631,6 @@ func (s *server) ListCodeGenerator(ctx context.Context, in *Empty) (reply *Simpl
 
 func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
 	reply = &CommonResult{}
-
 	instance := generator.GetCodeGenerator(in.Generator)
 	if instance == nil {
 		reply.Success = false
@@ -652,6 +650,7 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 		}
 
 		if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
+
 			result.Request.RenderAPI(suite.API)
 
 			output, genErr := instance.Generate(&suite, &result)
