@@ -6,7 +6,7 @@
           <el-icon>
             <component :is="value.meta?.icon"></component>
           </el-icon>
-          <span>{{ value.meta?.title }}</span>
+          <span>{{ t(value.meta?.title) }}</span>
         </el-menu-item>
       </template>
     </el-menu>
@@ -15,7 +15,9 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const router = useRouter()
 </script>
 
