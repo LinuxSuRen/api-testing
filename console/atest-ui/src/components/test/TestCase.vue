@@ -452,10 +452,10 @@ const sendRequest = async () => {
   const suite = props.suite
 
   RunTestCase({
-    suiteName: suite,
-    name: name,
+    suite: suite,
+    testcase: name,
     parameters: parameters.value
-  } as RunTestCaseRequest)
+  })
     .then((res: any) => {
       testResult.value = res
       requestLoading.value = false
@@ -638,8 +638,8 @@ const load = () => {
   testResult.value.originBodyObject = testResult.value.bodyObject
 
   GetTestCase({
-    suiteName: suite,
-    name: name
+    suite: suite,
+    testcase: name
   })
     .then((res: any) => {
       if (res.request.method === '') {

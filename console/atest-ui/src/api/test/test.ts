@@ -111,7 +111,7 @@ export const DeleteTestCase = (params: TestCase) =>
     'X-Auth': getToken()
   })
 
-export const RunTestCase = (params: RunTestCaseRequest) =>
+export const RunTestCase = (params: any) =>
   post('/server.Runner/RunTestCase', params, {
     'X-Store-Name': stroeName,
     'X-Auth': getToken()
