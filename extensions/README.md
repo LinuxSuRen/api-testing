@@ -15,7 +15,7 @@ Ports in extensions:
 
 * First, create a repository. And please keep the same naming convertion.
 * Second, implement the `Loader` gRPC service which defined by [this proto](../pkg/testing/remote/loader.proto).
-* Finally, add the extension's name into function [SupportedExtensions](../console/atest-ui/src/views/types/store.ts).
+* Finally, add the extension's name into function [SupportedExtensions](../console/atest-ui/src/types/store.ts).
 
 ## Naming conventions
 Please follow the following conventions if you want to add a new store extension:
