@@ -688,9 +688,7 @@ nav a:first-of-type {
 .test-suite {
   padding-left: 10%;
   font-style: normal;
-  font-size: large;
-  font-weight: 700;
-  font-family: '黑体';
+  font-size: medium;
 }
 
 /* Adjust el-tree style */

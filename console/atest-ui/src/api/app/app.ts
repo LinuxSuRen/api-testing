@@ -21,13 +21,13 @@ import { Cache } from '../../utils/cache'
 export const GetVersion = () => post('/server.Runner/GetVersion', null, null)
 
 export const PopularHeaders = () =>
-  post('/api/server.Runner/PopularHeaders', null, {
+  post('/server.Runner/PopularHeaders', null, {
     'X-Store-Name': Cache.GetCurrentStore().name,
     'X-Auth': getToken()
   })
 
-export const GetSuggestedAPIs = (name: string) =>
-  post('/api/server.Runner/GetSuggestedAPIs', name, {
+export const GetSuggestedAPIs = (params: any) =>
+  post('/server.Runner/GetSuggestedAPIs', params, {
     'X-Store-Name': Cache.GetCurrentStore().name,
     'X-Auth': getToken()
   })
