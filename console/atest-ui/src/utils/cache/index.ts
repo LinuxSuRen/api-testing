@@ -35,7 +35,7 @@ export interface Preference {
     responseActiveTab: string
 }
 
-export function GetTestCaseResponseCache(id: string) {
+export const GetTestCaseResponseCache = (id: string) => {
     const val = sessionStorage.getItem(id)
     if (val && val !== '') {
         return JSON.parse(val)
@@ -44,12 +44,12 @@ export function GetTestCaseResponseCache(id: string) {
     }
 }
 
-export function SetTestCaseResponseCache(id: string, resp: TestCaseResponse) {
+export const SetTestCaseResponseCache = (id: string, resp: TestCaseResponse) => {
     sessionStorage.setItem(id, JSON.stringify(resp))
 }
 
 const lastTestCaseLocationKey = "api-testing-case-location"
-export function GetLastTestCaseLocation() {
+export const GetLastTestCaseLocation = () => {
     const val = localStorage.getItem(lastTestCaseLocationKey)
     if (val && val !== '') {
         return JSON.parse(val)
@@ -58,7 +58,7 @@ export function GetLastTestCaseLocation() {
     }
 }
 
-export function SetLastTestCaseLocation(suite: string, testcase: string) {
+export const SetLastTestCaseLocation = (suite: string, testcase: string) => {
     localStorage.setItem(lastTestCaseLocationKey, JSON.stringify({
         suite: suite,
         testcase: testcase
@@ -67,7 +67,7 @@ export function SetLastTestCaseLocation(suite: string, testcase: string) {
 }
 
 const preferenceKey = "api-testing-preference"
-export function GetPreference() {
+export const GetPreference = () => {
     const val = localStorage.getItem(preferenceKey)
     if (val && val !== '') {
         return JSON.parse(val)

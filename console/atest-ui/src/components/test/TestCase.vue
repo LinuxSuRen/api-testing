@@ -423,7 +423,7 @@ import {
   GetHTTPMethods,
   FlattenObject
 } from '../../types/types'
-import { RunTestCase, GetTestSuite, GetTestCase, DeleteTestCase } from '../../api/test/test'
+import { RunTestCase, GetTestSuite, GetTestCase, UpdateTestCase, DeleteTestCase } from '../../api/test/test'
 import { ListCodeGenerator, GenerateCode } from '../../api/code/code'
 
 const { t } = useI18n()
@@ -493,8 +493,8 @@ const sendRequest = async () => {
         showClose: true,
         message: 'Oops, ' + err.message
       })
-      testResult.value.bodyObject = JSON.parse(e.body)
-      testResult.value.originBodyObject = JSON.parse(e.body)
+      testResult.value.bodyObject = JSON.parse(err.body)
+      testResult.value.originBodyObject = JSON.parse(err.body)
     })
 }
 
@@ -715,16 +715,30 @@ watch(
 
 const saveLoading = ref(false)
 
-// const saveTestCase = (tip: boolean = true) => {
-//   UIAPI.UpdateTestCase(testCaseWithSuite.value, (e) => {
-//     if (tip) {
-//       ElMessage({
-//         message: 'Saved.',
-//         type: 'success'
-//       })
-//     }
-//   }, UIAPI.ErrorTip, saveLoading)
-// }
+const saveTestCase = (tip: boolean = true) => {
+  UpdateTestCase({
+    suiteName: props.suite,
+    name: props.name,
+    data: testCaseWithSuite.value.data
+  })
+    .then((_: any) => {
+      if (tip) {
+        ElMessage({
+          message: 'Saved.',
+          type: 'success'
+        })
+      }
+      needUpdate.value = false
+    })
+    .catch((err: any) => {
+      ElMessage({
+        type: 'error',
+        showClose: true,
+        message: 'Oops, ' + err.message
+      })
+    })
+    saveLoading
+}
 
 const deleteTestCase = () => {
   const name = props.name
@@ -734,7 +748,7 @@ const deleteTestCase = () => {
     suiteName: suite,
     name: name
   } as TestCase)
-    .then((res: any) => {
+    .then((_: any) => {
       emit('updated', 'hello from child')
 
       ElMessage({
