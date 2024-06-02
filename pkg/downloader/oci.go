@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+
+	"github.com/blang/semver/v4"
 )
 
 type OCIDownloader interface {
@@ -26,6 +29,13 @@ func (d *defaultOCIDownloader) WithBasicAuth(username string, password string) {
 
 func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Reader, err error) {
 	authStr := auth(image)
+
+	var latestTag string
+	latestTag, err = getLatestTag(image, authStr)
+	if err != nil {
+		return
+	}
+	fmt.Println(latestTag)
 
 	var req *http.Request
 	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("https://index.docker.io/v2/%s/manifests/%s", image, tag), nil); err != nil {
@@ -60,6 +70,51 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 
 	err = fmt.Errorf("not found %s", file)
 	return
+}
+
+// getLatestTag returns the latest artifact tag
+// we assume the artifact tags do not have the prefix `v`
+func getLatestTag(image, authToken string) (tag string, err error) {
+	var req *http.Request
+	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("https://registry-1.docker.io/v2/%s/tags/list", image), nil); err != nil {
+		return
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
+	var resp *http.Response
+	if resp, err = http.DefaultClient.Do(req); err != nil || resp.StatusCode != http.StatusOK {
+		return
+	} else {
+		defer resp.Body.Close()
+
+		var data []byte
+		if data, err = io.ReadAll(resp.Body); err != nil {
+			return
+		}
+
+		imageTagList := &ImageTagList{}
+		if err = json.NewDecoder(bytes.NewBuffer(data)).Decode(imageTagList); err == nil {
+			var latestVer semver.Version
+			for _, t := range imageTagList.Tags {
+				if strings.HasPrefix(t, "v") {
+					continue
+				}
+
+				if ver, verErr := semver.ParseTolerant(t); verErr == nil {
+					if ver.GT(latestVer) {
+						tag = t
+						latestVer = ver
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
+type ImageTagList struct {
+	Name string   `json:"name"`
+	Tags []string `json:"tags"`
 }
 
 func downloadLayer(image, digest, authToken string) io.Reader {
