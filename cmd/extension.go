@@ -18,23 +18,23 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/downloader"
-	"github.com/spf13/cobra"
 	"io"
-	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/linuxsuren/api-testing/pkg/downloader"
+	"github.com/spf13/cobra"
 )
 
 type extensionOption struct {
-	ociDownloader downloader.OCIDownloader
-	image         string
+	ociDownloader downloader.PlatformAwareOCIDownloader
+	output        string
 	tag           string
 	os            string
 	arch          string
 }
 
-func createExtensionCommand(ociDownloader downloader.OCIDownloader) (c *cobra.Command) {
+func createExtensionCommand(ociDownloader downloader.PlatformAwareOCIDownloader) (c *cobra.Command) {
 	opt := &extensionOption{
 		ociDownloader: ociDownloader,
 	}
@@ -46,40 +46,30 @@ func createExtensionCommand(ociDownloader downloader.OCIDownloader) (c *cobra.Co
 		RunE:  opt.runE,
 	}
 	flags := c.Flags()
-	flags.StringVarP(&opt.image, "image", "", "linuxsuren/atest-ext-store", "The image name")
-	flags.StringVarP(&opt.tag, "tag", "", "0.0.2", "The image tag")
+	flags.StringVarP(&opt.output, "output", "", ".", "The target directory")
+	flags.StringVarP(&opt.tag, "tag", "", "", "The extension image tag, try to find the latest one if this is empty")
 	flags.StringVarP(&opt.os, "os", "", runtime.GOOS, "The OS")
 	flags.StringVarP(&opt.arch, "arch", "", runtime.GOARCH, "The architecture")
 	return
 }
 
 func (o *extensionOption) runE(cmd *cobra.Command, args []string) (err error) {
-	if o.arch == "amd64" {
-		o.arch = "amd64_v1"
-	}
+	o.ociDownloader.WithOS(o.os)
+	o.ociDownloader.WithArch(o.arch)
 
 	for _, arg := range args {
-		extFile := fmt.Sprintf("atest-store-%s_%s_%s/atest-store-%s", arg, o.os, o.arch, arg)
-		image := fmt.Sprintf("linuxsuren/atest-ext-store-%s", arg)
-
 		var reader io.Reader
-		if reader, err = o.ociDownloader.Download(image, o.tag, extFile); err != nil {
+		if reader, err = o.ociDownloader.Download(arg, o.tag, ""); err != nil {
 			return
-		}
-		cmd.Println("found target file")
-
-		if reader == nil {
+		} else if reader == nil {
 			err = fmt.Errorf("cannot find %s", arg)
 			return
 		}
-
-		var data []byte
-		if data, err = io.ReadAll(reader); err != nil {
-			return
-		}
+		extFile := o.ociDownloader.GetTargetFile()
+		cmd.Println("found target file", extFile)
 
 		targetFile := filepath.Base(extFile)
-		if err = os.WriteFile(targetFile, data, 0755); err != nil {
+		if err = downloader.WriteTo(reader, o.output, targetFile); err == nil {
 			return
 		}
 

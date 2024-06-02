@@ -32,10 +32,6 @@ COPY --from=ui /workspace/dist/assets/*.css cmd/data/index.css
 RUN CGO_ENABLED=0 go build -v -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}\
     -X github.com/linuxsuren/api-testing/pkg/version.date=$(date +%Y-%m-%d)" -o atest .
 
-FROM ghcr.io/linuxsuren/atest-ext-monitor-docker:master as docker
-FROM ghcr.io/linuxsuren/atest-ext-collector:master as collector
-FROM ghcr.io/linuxsuren/api-testing-vault-extension:v0.0.1 as vault
-
 FROM docker.io/library/ubuntu:23.10
 
 LABEL "com.github.actions.name"="API testing"
@@ -51,16 +47,14 @@ LABEL "maintainer"="Rick <linuxsuren@gmail.com>"
 LABEL "Name"="API testing"
 
 COPY --from=builder /workspace/atest /usr/local/bin/atest
-COPY --from=collector /usr/local/bin/atest-collector /usr/local/bin/atest-collector
-COPY --from=docker /usr/local/bin/atest-monitor-docker /usr/local/bin/atest-monitor-docker
-COPY --from=vault /usr/local/bin/atest-vault-ext /usr/local/bin
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
 RUN apt update -y && \
     # required for atest-store-git
     apt install -y --no-install-recommends ssh-client ca-certificates && \
-    apt install -y curl
+    apt install -y curl && \
+    rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8080
 CMD ["atest", "server", "--local-storage=/var/data/api-testing/*.yaml"]

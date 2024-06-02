@@ -16,11 +16,15 @@ limitations under the License.
 package server
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
 
+	"github.com/linuxsuren/api-testing/pkg/downloader"
 	"github.com/linuxsuren/api-testing/pkg/logging"
 
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
@@ -33,10 +37,12 @@ var (
 type ExtManager interface {
 	Start(name, socket string) (err error)
 	StopAll() (err error)
+	WithDownloader(downloader.PlatformAwareOCIDownloader)
 }
 
 type storeExtManager struct {
 	execer               fakeruntime.Execer
+	ociDownloader        downloader.PlatformAwareOCIDownloader
 	socketPrefix         string
 	filesNeedToBeRemoved []string
 	extStatusMap         map[string]bool
@@ -50,13 +56,14 @@ var s *storeExtManager
 func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
 	if s == nil {
 		s = &storeExtManager{
-			processChan: make(chan fakeruntime.Process, 0),
+			processChan: make(chan fakeruntime.Process),
 			stopSingal:  make(chan struct{}, 1),
 		}
 		s.execer = execer
 		s.socketPrefix = "unix://"
 		s.extStatusMap = map[string]bool{}
 		s.processCollect()
+		s.WithDownloader(&nonDownloader{})
 	}
 	return s
 }
@@ -68,16 +75,35 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 
 	binaryPath, lookErr := s.execer.LookPath(name)
 	if lookErr != nil {
-		err = fmt.Errorf("failed to find %s, error: %v", name, lookErr)
-	} else {
-		go func(socketURL, plugin string) {
-			socketFile := strings.TrimPrefix(socketURL, s.socketPrefix)
-			s.filesNeedToBeRemoved = append(s.filesNeedToBeRemoved, socketFile)
-			s.extStatusMap[name] = true
-			if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, s.processChan, "--socket", socketFile); err != nil {
-				serverLogger.Info("failed to start: ", socketURL, "error: ", err.Error())
+		reader, dErr := s.ociDownloader.Download(name, "", "")
+		if dErr != nil {
+			if dErr == DownloadNotSupportErr {
+				err = fmt.Errorf("failed to find %s, error: %v", name, lookErr)
+			} else {
+				err = dErr
 			}
-		}(socket, binaryPath)
+		} else {
+			extFile := s.ociDownloader.GetTargetFile()
+
+			targetDir := os.ExpandEnv("$HOME/.config/atest/bin")
+			targetFile := filepath.Base(extFile)
+			err = downloader.WriteTo(reader, targetDir, targetFile)
+			binaryPath = filepath.Join(targetDir, targetFile)
+		}
+	}
+
+	if err == nil {
+		go s.startPlugin(socket, binaryPath, name)
+	}
+	return
+}
+
+func (s *storeExtManager) startPlugin(socketURL, plugin, pluginName string) (err error) {
+	socketFile := strings.TrimPrefix(socketURL, s.socketPrefix)
+	s.filesNeedToBeRemoved = append(s.filesNeedToBeRemoved, socketFile)
+	s.extStatusMap[pluginName] = true
+	if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, s.processChan, "--socket", socketFile); err != nil {
+		serverLogger.Info("failed to start: ", socketURL, "error: ", err.Error())
 	}
 	return
 }
@@ -93,6 +119,10 @@ func (s *storeExtManager) StopAll() error {
 	return nil
 }
 
+func (s *storeExtManager) WithDownloader(ociDownloader downloader.PlatformAwareOCIDownloader) {
+	s.ociDownloader = ociDownloader
+}
+
 func (s *storeExtManager) processCollect() {
 	go func() {
 		for {
@@ -104,4 +134,20 @@ func (s *storeExtManager) processCollect() {
 			}
 		}
 	}()
+}
+
+var DownloadNotSupportErr = errors.New("no support")
+
+type nonDownloader struct{}
+
+func (n *nonDownloader) WithBasicAuth(username string, password string) {}
+func (n *nonDownloader) Download(image, tag, file string) (reader io.Reader, err error) {
+	err = DownloadNotSupportErr
+	return
+}
+
+func (n *nonDownloader) WithOS(string)   {}
+func (n *nonDownloader) WithArch(string) {}
+func (n *nonDownloader) GetTargetFile() string {
+	return ""
 }
