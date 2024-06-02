@@ -1,40 +1,55 @@
 <template>
-    <el-affix position="bottom" :offset="20" style="position: absolute; bottom: 5px;">
-        <el-tooltip effect="dark" content="You can get some functions templates by click it." placement="top-start">
-            <el-button type="primary" @click="dialogVisible = !dialogVisible"
-                data-intro="You can search your desired template functions.">{{ t('button.toolbox') }}
-            </el-button>
-        </el-tooltip>
-    </el-affix>
+  <el-affix position="bottom" :offset="20" style="position: absolute; bottom: 5px">
+    <el-tooltip
+      effect="dark"
+      content="You can get some functions templates by click it."
+      placement="top-start"
+    >
+      <el-button
+        type="primary"
+        @click="dialogVisible = !dialogVisible"
+        data-intro="You can search your desired template functions."
+        >{{ t('button.toolbox') }}
+      </el-button>
+    </el-tooltip>
+  </el-affix>
 
-    <el-dialog v-model="dialogVisible" :title="t('title.templateQuery')" width="40%" draggable destroy-on-close>
-        <template #footer>
-            <el-input v-model="query" placeholder="Query after enter" v-on:keyup.enter="queryFuncs" />
-            <span class="dialog-footer">
-                <el-table :data="funcs" style="width: 100%">
-                    <el-table-column label="Key" width="250">
-                        <template #default="scope">
-                            <el-input v-model="scope.row.key" placeholder="Value" />
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="Value">
-                        <template #default="scope">
-                            <div style="display: flex; align-items: center">
-                                <el-input v-model="scope.row.value" placeholder="Value" />
-                            </div>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </span>
-        </template>
-    </el-dialog>
+  <el-dialog
+    v-model="dialogVisible"
+    :title="t('title.templateQuery')"
+    width="40%"
+    draggable
+    destroy-on-close
+  >
+    <template #footer>
+      <el-input v-model="query" placeholder="Query after enter" v-on:keyup.enter="queryFuncs" />
+      <span class="dialog-footer">
+        <el-table :data="funcs" style="width: 100%">
+          <el-table-column label="Key" width="250">
+            <template #default="scope">
+              <el-input v-model="scope.row.key" placeholder="Value" />
+            </template>
+          </el-table-column>
+          <el-table-column label="Value">
+            <template #default="scope">
+              <div style="display: flex; align-items: center">
+                <el-input v-model="scope.row.value" placeholder="Value" />
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Pair } from './types'
+import type { Pair } from '../../types/types'
 import { useI18n } from 'vue-i18n'
+import { FunctionsQuery } from '@/api/cert/cert'
+import { ElMessage } from 'element-plus'
 
 const { t } = useI18n()
 
@@ -42,9 +57,17 @@ const dialogVisible = ref(false)
 const query = ref('')
 const funcs = ref([] as Pair[])
 
-function queryFuncs() {
-    API.FunctionsQuery(query.value, (d) => {
-        funcs.value = d.data
+const queryFuncs = () => {
+  FunctionsQuery(query.value)
+    .then((res: any) => {
+      funcs.value = res.data
+    })
+    .catch((err: any) => {
+      ElMessage({
+        showClose: true,
+        message: err.message,
+        type: 'error'
+      })
     })
 }
 </script>

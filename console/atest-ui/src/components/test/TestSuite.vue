@@ -104,7 +104,9 @@
     >{{ t('button.newtestcase') }}</el-button
   >
   <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
-  <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{ t('button.viewYaml') }}</el-button>
+  <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{
+    t('button.viewYaml')
+  }}</el-button>
 
   <!-- Create Test Case Dialog-->
   <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
@@ -169,12 +171,18 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="yamlDialogVisible" :title="t('button.viewYaml')" :fullscreen="isFullScreen" width="40%" draggable>
-    <el-button type="primary" @click="isFullScreen = !isFullScreen" style="margin-bottom: 10px;">
+  <el-dialog
+    v-model="yamlDialogVisible"
+    :title="t('button.viewYaml')"
+    :fullscreen="isFullScreen"
+    width="40%"
+    draggable
+  >
+    <el-button type="primary" @click="isFullScreen = !isFullScreen" style="margin-bottom: 10px">
       <p>{{ isFullScreen ? t('button.cancelFullScreen') : t('button.fullScreen') }}</p>
     </el-button>
     <el-scrollbar>
-      <Codemirror v-model="yamlFormat"/>
+      <Codemirror v-model="yamlFormat" />
     </el-scrollbar>
   </el-dialog>
 
@@ -206,7 +214,7 @@ import {
   GetTestSuiteYaml
 } from '../../api/test/test'
 import { Codemirror } from 'vue-codemirror'
-import  yaml  from 'js-yaml';
+import yaml from 'js-yaml'
 
 const { t } = useI18n()
 
@@ -403,15 +411,15 @@ const paramChange = () => {
   }
 }
 
-const yamlFormat = ref('');
+const yamlFormat = ref('')
 const yamlDialogVisible = ref(false)
 
 const viewYaml = () => {
   yamlDialogVisible.value = true
 
-  GetTestSuiteYaml({ name: props.name },"local")
+  GetTestSuiteYaml({ name: props.name }, 'local')
     .then((res: any) => {
-      yamlFormat.value = yaml.dump(yaml.load(atob(res.data)));
+      yamlFormat.value = yaml.dump(yaml.load(atob(res.data)))
     })
     .catch((e: any) => {
       ElMessage.error('Oops, ' + e)
@@ -423,24 +431,24 @@ const viewYaml = () => {
 .test-suite-container {
   display: flex;
   flex-shrink: 0;
+}
 
-  .item-1 {
-    flex: 1;
-    margin-right: 16px;
-  }
+.item-1 {
+  flex: 1;
+  margin-right: 16px;
+}
 
-  .item-2 {
-    margin-right: 0px;
-  }
+.item-2 {
+  margin-right: 0px;
 }
 
 .button-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .button-container > .el-button + .el-button {
-    margin-left:0px;
+  margin-left: 0px;
 }
 </style>

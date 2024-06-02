@@ -151,8 +151,7 @@ import { Edit, Delete } from '@element-plus/icons-vue'
 import { SupportedExtensions } from '../../types/store'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from '../../types/types'
-import { GetStores, CreateStore, UpdateStore } from '@/api/store/store'
-import { read } from 'fs'
+import { GetStores, CreateStore, UpdateStore, DeleteStore, VerifyStore } from '@/api/store/store'
 
 const { t } = useI18n()
 
@@ -221,19 +220,22 @@ const loadStores = () => {
 }
 
 const deleteStore = (name: string) => {
-  // API.DeleteStore(
-  //   name,
-  //   (e) => {
-  //     ElMessage({
-  //       message: 'Deleted.',
-  //       type: 'success'
-  //     })
-  //     loadStores()
-  //   },
-  //   (e) => {
-  //     ElMessage.error('Oops, ' + e)
-  //   }
-  // )
+  DeleteStore({ name: name })
+    .then((_: any) => {
+      ElMessage({
+        showClose: true,
+        message: 'Deleted!',
+        type: 'success'
+      })
+      loadStores()
+    })
+    .catch((err: any) => {
+      ElMessage({
+        showClose: true,
+        message: 'Oops, ' + err.message || 'Unknown error when deleting store!',
+        type: 'error'
+      })
+    })
 }
 
 const editStore = (name: string) => {
@@ -273,6 +275,7 @@ const rules = reactive<FormRules<Store>>({
   url: [{ required: true, message: 'URL is required', trigger: 'blur' }],
   'kind.name': [{ required: true, message: 'Plugin is required', trigger: 'blur' }]
 })
+
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid: boolean) => {
@@ -291,18 +294,20 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         readonly: storeForm.readonly,
         url: storeForm.url,
         username: storeForm.username
-      }).then((res :any) => {
-        loadStores()
-        dialogVisible.value = false
-        formEl.resetFields()
-      }).catch((err: any) => {
-        ElMessage({
-          showClose: true,
-          message: 'Oops, ' + err.message || 'Unknown error when creating store!',
-          type: 'error'
-        })
-        creatingLoading
       })
+        .then((res: any) => {
+          loadStores()
+          dialogVisible.value = false
+          formEl.resetFields()
+        })
+        .catch((err: any) => {
+          ElMessage({
+            showClose: true,
+            message: 'Oops, ' + err.message || 'Unknown error when creating store!',
+            type: 'error'
+          })
+          creatingLoading
+        })
     }
   })
 }
@@ -320,22 +325,21 @@ const storeVerify = (formEl: FormInstance | undefined) => {
     return
   }
 
-  // API.VerifyStore(
-  //   storeForm.name,
-  //   (e) => {
-  //     if (e.ready) {
-  //       ElMessage({
-  //         message: 'Verified!',
-  //         type: 'success'
-  //       })
-  //     } else {
-  //       ElMessage.error(e.message)
-  //     }
-  //   },
-  //   (e) => {
-  //     ElMessage.error('Oops, ' + e)
-  //   }
-  // )
+  VerifyStore({ name: storeForm.name })
+    .then((_: any) => {
+      ElMessage({
+        showClose: true,
+        message: 'Verified!',
+        type: 'success'
+      })
+    })
+    .catch((err: any) => {
+      ElMessage({
+        showClose: true,
+        message: 'Oops, ' + err.message || 'Unknown error when verifying store!',
+        type: 'error'
+      })
+    })
 }
 
 const updateKeys = () => {

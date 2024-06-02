@@ -1,12 +1,12 @@
 <template>
   <div class="container">
-      <div class="logo_container">
-        <a href="#">
-          <img src="../assets/logo/logo.png" alt="logo">
-          &nbsp;&nbsp;
-          <p>API Testing</p>
-        </a>
-      </div>
+    <div class="logo_container">
+      <a href="#">
+        <img class="logo_container_img" src="../assets/logo/logo.png" alt="logo" />
+        &nbsp;&nbsp;
+        <p class="pro_name">API Testing</p>
+      </a>
+    </div>
     <div>
       <ui>
         <li>
@@ -18,8 +18,9 @@
           </a>
         </li>
         <li>
-          <a href="https://github.com/linuxsuren/api-testing.git" target="_blank"><img class="github"
-              src="../assets/github/github-mark.png" alt="github" /></a>
+          <a href="https://github.com/linuxsuren/api-testing.git" target="_blank"
+            ><img class="github" src="../assets/github/github-mark.png" alt="github"
+          /></a>
         </li>
         <!-- todo：主题样式显示有误。 -->
         <!-- <li>
@@ -42,7 +43,7 @@
 import { ref } from 'vue'
 // import { Sunny, Moon } from '@element-plus/icons-vue'
 import { setAsDarkTheme } from '../theme/theme'
-import LanguageSwitch from "@/components/LanguageSwitch.vue";
+import LanguageSwitch from '@/components/LanguageSwitch.vue'
 
 const darkOpt = ref(false)
 
@@ -60,22 +61,22 @@ const setTheme = () => {
   justify-content: space-between;
   flex-direction: row;
   align-items: center;
+}
 
-  .logo_container {
-    display: flex;
-    align-items: center;
+.logo_container {
+  display: flex;
+  align-items: center;
+}
 
-    p {
-      display: inline-block;
-      vertical-align: middle;
-    }
+.logo_container_img {
+  width: 100px;
+  height: 50px;
+  vertical-align: middle;
+}
 
-    img {
-      width: 100px;
-      height: 50px;
-       vertical-align: middle;
-    }
-  }
+.pro_name {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 p,
@@ -87,13 +88,13 @@ a {
 ui {
   display: flex;
   list-style: none;
+}
 
-  li {
-    display: flex;
-    padding-right: 1em;
-    vertical-align: middle;
-    align-items: center;
-  }
+li {
+  display: flex;
+  padding-right: 1em;
+  vertical-align: middle;
+  align-items: center;
 }
 
 .el-switch {

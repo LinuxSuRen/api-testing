@@ -961,7 +961,9 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
   cb(results)
 }
 
-load()
+onMounted(() => {
+  load()
+})
 
 watch(props, () => {
   load()

@@ -3,8 +3,8 @@
   <div class="index" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
     <el-card class="card" shawon="hover" :body-style="{ width: '100%' }">
       <el-container style="height: 100%">
-        <el-main style="padding-top: 5px; padding-bottom: 5px;">
-          <el-container style="height: 100%;">
+        <el-main style="padding-top: 5px; padding-bottom: 5px">
+          <el-container style="height: 100%">
             <el-aside>
               <el-button
                 type="primary"
@@ -42,16 +42,16 @@
                 data-intro="This is the test suite tree. You can click the test suite to edit it."
               >
                 <template #default="{ node, data }">
-                    <span>
-                      <i :class="getColorClass(data.kind)">{{ data.kind }}</i>
-                      <i class="test-suite">{{ node.label }}</i>
-                    </span>
+                  <span>
+                    <i :class="getColorClass(data.kind)">{{ data.kind }}</i>
+                    <i class="test-suite">{{ node.label }}</i>
+                  </span>
                 </template>
               </el-tree>
               <TemplateFunctions />
             </el-aside>
             <!-- Test suite and case containers. -->
-            <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px;">
+            <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px">
               <el-card shadow="hover">
                 <TestCase
                   v-if="viewName === 'testcase'"
@@ -597,12 +597,12 @@ const getColorClass = (kind: string) => {
   max-width: 1750px;
   height: auto;
   vertical-align: middle;
+}
 
-  .filter-input {
-    vertical-align: middle;
-    padding-top: 1vh;
-    padding-bottom: 1vh;
-  }
+.filter-input {
+  vertical-align: middle;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
 }
 
 header {

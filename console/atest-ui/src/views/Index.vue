@@ -5,17 +5,17 @@
         <Header></Header>
       </el-header>
       <el-container>
-        <LeftSideBar/>
+        <LeftSideBar />
         <el-container>
-            <el-main>
-              <div class="mbx">
-               <el-icon><Fold /></el-icon>
-               <Mbx/>
-              </div>
-               <router-view/>
-             </el-main>
+          <el-main>
+            <div class="mbx">
+              <el-icon><Fold /></el-icon>
+              <Mbx />
+            </div>
+            <router-view />
+          </el-main>
           <el-footer>
-            <Footer/>
+            <Footer />
           </el-footer>
         </el-container>
       </el-container>
@@ -27,18 +27,18 @@
 import Header from '@/components/HeaderComponent.vue'
 import LeftSideBar from '@/components/LeftSideComponent.vue'
 import Footer from '@/components/FooterComponent.vue'
-import Mbx from "@/components/MianBaoXie.vue";
+import Mbx from '@/components/MianBaoXie.vue'
 import { Fold } from '@element-plus/icons-vue'
 </script>
 
 <style>
 .mbx {
   display: flex;
+}
 
-  .el-icon {
-    margin-right: 3px;
-    cursor: pointer;
-  }
+.el-icon {
+  margin-right: 3px;
+  cursor: pointer;
 }
 
 .common-layout {

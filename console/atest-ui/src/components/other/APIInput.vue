@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { NewSuggestedAPIsQuery } from './types'
-import type { TestCase } from './types'
+import { NewSuggestedAPIsQuery } from '../../types/types'
+import type { TestCase } from '../../api/common'
 
 const props = defineProps({
   suite: String,
@@ -33,4 +33,3 @@ const handleSelect = (item: TestCase) => {
     </template>
   </el-autocomplete>
 </template>
-../types/types../types/types

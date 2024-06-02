@@ -207,6 +207,7 @@ h3 {
   justify-content: space-between;
   align-items: center;
 }
+
 .link {
   color: #409eff;
   font-style: italic;

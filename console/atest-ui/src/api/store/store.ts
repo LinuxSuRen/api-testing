@@ -32,12 +32,12 @@ export const GetStores = () =>
     'X-Auth': getToken()
   })
 
-export const DeleteStore = (params: string) =>
+export const DeleteStore = (params: any) =>
   post('/server.Runner/DeleteStore', params, {
     'X-Auth': getToken()
   })
 
-export const VerifyStore = (params: string) =>
+export const VerifyStore = (params: any) =>
   post('/server.Runner/VerifyStore', params, {
     'X-Auth': getToken()
   })
