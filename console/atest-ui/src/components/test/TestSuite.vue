@@ -198,7 +198,7 @@
 
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { reactive, ref, watch } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from '../../types/types'
@@ -242,8 +242,10 @@ const suite = ref({
 
 const load = () => {
   const store = Cache.GetCurrentStore()
-  if (!props.name || store.name === '') return
-
+  if (!props.name || store.name === '') {
+    return
+  }
+  
   GetTestSuite(props.name)
     .then((res: any) => {
       suite.value = res
@@ -259,7 +261,10 @@ const load = () => {
     })
 }
 
-load()
+onMounted(() => {  
+  load()
+})
+
 watch(props, () => {
   load()
 })

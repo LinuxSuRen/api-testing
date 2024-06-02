@@ -248,12 +248,14 @@ import { GetStores } from '@/api/store/store'
 import type { TestStore, Tree, Suite } from '../../types/types'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ListTestCase, LoadTestSuite, CreateTestSuite, ImportTestSuite } from '@/api/test/test'
+import { da } from 'element-plus/es/locale'
 
 const { t } = useI18n()
 
 const testCaseName = ref('')
 const testSuite = ref('')
 const testSuiteKind = ref('')
+const viewName = ref('')
 
 const handleNodeClick = (data: Tree) => {
   if (data.children) {
@@ -300,13 +302,6 @@ const data = ref([] as Tree[])
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const currentNodekey = ref('')
 
-// page init runtime.
-onMounted(() => {
-  // load save stores.
-  loadStores()
-  loadTestSuites()
-})
-
 const loadTestSuites = async (sn: string) => {
   await LoadTestSuite(sn)
     .then((res: any) => {
@@ -348,18 +343,19 @@ const storesLoading = ref(false)
 const loadStores = async () => {
   storesLoading.value = true
   await GetStores()
-    .then(async (res: any) => {
+    .then((res: any) => {
       stores.value = res.data
       data.value = [] as Tree[]
+      data.value = res.data
       Cache.SetStores(res.data)
 
       for (const item of res.data) {
         if (item.ready && !item.disabled) {
-          await loadTestSuites(item.name)
+          loadTestSuites(item.name)
         }
       }
 
-      if (data.value.length > 0) {
+      if (data.value.length > 0) { 
         const key = Cache.GetLastTestCaseLocation()
 
         let targetSuite = {} as Tree
@@ -386,7 +382,7 @@ const loadStores = async () => {
           if (targetSuite.children && targetSuite.children.length > 0) {
             targetChild = targetSuite.children[0]
           }
-        }
+        }   
 
         viewName.value = 'testsuite'
         currentNodekey.value = targetChild.id
@@ -455,15 +451,13 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     if (valid) {
       suiteCreatingLoading.value = true
       CreateTestSuite(testSuiteForm)
-        .then((res: any) => {
+        .then((_: any) => {
           suiteCreatingLoading.value = false
           loadStores()
           dialogVisible.value = false
           formEl.resetFields()
         })
         .catch((err: any) => {
-          console.log('err', err)
-
           suiteCreatingLoading.value = false
           ElMessage({
             type: 'error',
@@ -474,6 +468,10 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     }
   })
 }
+
+onMounted(() => {
+  loadStores()
+})
 
 const importSuiteFormRules = reactive<FormRules<Suite>>({
   url: [
@@ -515,8 +513,6 @@ const filterTestCases = (value: string, data: Tree) => {
   if (!value) return true
   return data.label.includes(value)
 }
-
-const viewName = ref('')
 
 const deviceAuthActive = ref(0)
 const deviceAuthResponse = ref({
@@ -569,9 +565,9 @@ const getColorClass = (kind: string) => {
 }
 
 @media (max-width: 768px) {
-    .index {
-        height: 50vh;
-    }
+  .index {
+    height: 50vh;
+  }
 }
 
 .blue-text {

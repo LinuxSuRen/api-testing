@@ -413,9 +413,8 @@ import JsonViewer from 'vue-json-viewer'
 import { PopularHeaders } from '@/api/app/app'
 import { ElMessage } from 'element-plus'
 import { ref, watch, onMounted } from 'vue'
-import { Edit, Delete, Search } from '@element-plus/icons-vue'
-import type { RunTestCaseRequest, GenerateRequest, TestCase } from '@/api/common'
-import type { Pair, TestResult, TestCaseWithSuite } from '../../types/types'
+import type { GenerateRequest, TestCase } from '@/api/common'
+import type { Pair, TestCaseWithSuite } from '../../types/types'
 import type { TestCaseResponse } from '../../utils/cache'
 import {
   NewSuggestedAPIsQuery,
@@ -472,8 +471,8 @@ const sendRequest = async () => {
         })
       }
       if (res.body !== '') {
-        testResult.value.bodyObject = JSON.parse(e.body)
-        testResult.value.originBodyObject = JSON.parse(e.body)
+        testResult.value.bodyObject = JSON.parse(res.body)
+        testResult.value.originBodyObject = JSON.parse(res.body)
       }
 
       Cache.SetTestCaseResponseCache(suite + '-' + name, {
