@@ -564,6 +564,13 @@ const getColorClass = (kind: string) => {
 <style scoped>
 .index {
   display: flex;
+  height: 75vh;
+}
+
+@media (max-width: 768px) {
+    .index {
+        height: 50vh;
+    }
 }
 
 .blue-text {
