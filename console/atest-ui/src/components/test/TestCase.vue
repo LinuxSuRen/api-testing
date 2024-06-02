@@ -539,9 +539,9 @@ const generateCode = () => {
   const suite = props.suite
 
   GenerateCode({
-    suiteName: suite,
-    name: name,
-    generator: currentCodeGenerator.value
+    TestSuite: suite,
+    TestCase: name,
+    Generator: currentCodeGenerator.value
   } as GenerateRequest)
     .then((res: any) => {
       ElMessage({

@@ -22,12 +22,12 @@ import { Cache } from '../../utils/cache'
 const stroeName = Cache.GetCurrentStore().name
 
 export const GenerateCode = (params: GenerateRequest) =>
-  post('/api/server.Runner/GenerateCode', params, {
+  post('/server.Runner/GenerateCode', params, {
     'X-Store-Name': stroeName,
     'X-Auth': getToken()
   })
 
 export const ListCodeGenerator = () =>
-  post('/api/server.Runner/ListCodeGenerator', null, {
+  post('/server.Runner/ListCodeGenerator', null, {
     'X-Auth': getToken()
   })

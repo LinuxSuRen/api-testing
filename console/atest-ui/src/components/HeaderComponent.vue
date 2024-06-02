@@ -4,7 +4,8 @@
       <a href="#">
         <img class="logo_container_img" src="../assets/logo/logo.png" alt="logo" />
         &nbsp;&nbsp;
-        <p class="pro_name">API Testing</p>
+        <!-- todo -->
+        <!-- <p class="pro_name">API Testing</p> -->
       </a>
     </div>
     <div>
@@ -69,7 +70,7 @@ const setTheme = () => {
 }
 
 .logo_container_img {
-  width: 100px;
+  /* 保持图片等比例缩放 */
   height: 50px;
   vertical-align: middle;
 }

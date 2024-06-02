@@ -304,6 +304,7 @@ const currentNodekey = ref('')
 onMounted(() => {
   // load save stores.
   loadStores()
+  loadTestSuites()
 })
 
 const loadTestSuites = async (sn: string) => {
@@ -575,25 +576,25 @@ const getColorClass = (kind: string) => {
 
 .blue-text {
   font-size: small;
-  font-style: normal;
+  font-style: small;
   color: blue;
 }
 
 .other-text {
   font-size: small;
-  font-style: normal;
+  font-style: small;
   color: black;
 }
 
 .green-text {
   font-size: small;
-  font-style: normal;
+  font-style: small;
   color: green;
 }
 
 .orange-text {
   font-size: small;
-  font-style: normal;
+  font-style: small;
   color: orange;
 }
 
@@ -688,7 +689,7 @@ nav a:first-of-type {
 .test-suite {
   padding-left: 10%;
   font-style: normal;
-  font-size: medium;
+  font-size: small;
 }
 
 /* Adjust el-tree style */
