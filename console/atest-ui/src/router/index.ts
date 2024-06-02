@@ -17,7 +17,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           isShow: true,
           icon: Share,
-          title: '欢迎'
+          title: 'title.welcome'
         }
       },
       {
@@ -27,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           isShow: true,
           icon: Promotion,
-          title: '测试'
+          title: 'title.testing'
         }
       },
       {
@@ -47,7 +47,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           isShow: true,
           icon: Document,
-          title: '凭据'
+          title: 'title.secrets'
         }
       },
       {
@@ -57,7 +57,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           isShow: true,
           icon: Location,
-          title: '存储'
+          title: 'title.stores'
         }
       }
     ]
