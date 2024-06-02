@@ -398,14 +398,14 @@ const loadStores = async () => {
         viewName.value = ''
       }
     })
-    .catch((e) => {
-      if (e.message === 'Unauthenticated') {
+    .catch((err: any) => {
+      if (err.message === 'Unauthenticated') {
         loginDialogVisible.value = true
       } else {
         ElMessage({
           type: 'error',
           showClose: true,
-          message: 'Oops, ' + e.message || 'Unknown error when fetching test suite!'
+          message: 'Oops, ' + err.message || 'Unknown error when fetching test suite!'
         })
       }
     })
@@ -495,7 +495,7 @@ const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
             formEl.resetFields()
           }
         })
-        .catch((err) => {
+        .catch((err: any) => {
           ElMessage({
             type: 'error',
             showClose: true,
