@@ -17,7 +17,7 @@ limitations under the License.
 import axios from "axios";
 
 const service = axios.create({
-    baseURL: '/api',
+    baseURL: '',
     timeout: 5000
 })
 
