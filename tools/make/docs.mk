@@ -6,6 +6,12 @@ DOCS_OUTPUT_DIR := site/public
 
 ##@ Docs
 
+.PHONY: docs
+docs: docs.clean 
+	@$(LOG_TARGET)
+	cd $(ROOT_DIR)/docs/site && npm install
+	cd $(ROOT_DIR)/docs/site && npm run build:production
+
 .PHONY: check-links
 check-links: ## Check for broken links in the docs.
 check-links: docs-check-links
@@ -23,7 +29,7 @@ docs-check-links:
 .PHONY: docs-serve
 docs-serve: ## Start API Testing Site Locally.
 	@$(LOG_TARGET)
-	cd $(ROOT_DIR)/site && npm run serve
+	cd $(ROOT_DIR)/docs/site && npm run serve
 
 .PHONY: docs-clean
 docs-clean: ## Remove all files that are created during builds.
@@ -33,7 +39,7 @@ docs-clean: docs.clean
 docs.clean:
 	@$(LOG_TARGET)
 	rm -rf $(DOCS_OUTPUT_DIR)
-	rm -rf site/node_modules
-	rm -rf site/resources
-	rm -f site/package-lock.json
-	rm -f site/.hugo_build.lock
+	rm -rf docs/site/node_modules
+	rm -rf docs/site/resources
+	rm -f docs/site/package-lock.json
+	rm -f docs/site/.hugo_build.lock
