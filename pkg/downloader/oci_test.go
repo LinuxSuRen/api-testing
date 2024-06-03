@@ -17,8 +17,36 @@ limitations under the License.
 package downloader
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestDownload(t *testing.T) {
+func TestGetRegistry(t *testing.T) {
+	assert.Equal(t, "registry-1.docker.io", getRegistry("alpine"))
+	assert.Equal(t, "registry-1.docker.io", getRegistry("library/alpine"))
+	assert.Equal(t, "registry-1.docker.io", getRegistry("docker.io/library/alpine"))
+	assert.Equal(t, "ghcr.io", getRegistry("ghcr.io/library/alpine"))
+}
+
+func TestDetectAuthURL(t *testing.T) {
+	t.Run("without registry", func(t *testing.T) {
+		authURL, service, err := detectAuthURL("linuxsuren/api-testing")
+		assert.NoError(t, err)
+		assert.Equal(t, "https://auth.docker.io/token", authURL)
+		assert.Equal(t, "registry.docker.io", service)
+	})
+
+	t.Run("without docker.io", func(t *testing.T) {
+		authURL, service, err := detectAuthURL("docker.io/linuxsuren/api-testing")
+		assert.NoError(t, err)
+		assert.Equal(t, "https://auth.docker.io/token", authURL)
+		assert.Equal(t, "registry.docker.io", service)
+	})
+
+	t.Run("without ghcr.io", func(t *testing.T) {
+		authURL, service, err := detectAuthURL("ghcr.io/linuxsuren/api-testing")
+		assert.NoError(t, err)
+		assert.Equal(t, "https://ghcr.io/token", authURL)
+		assert.Equal(t, "ghcr.io", service)
+	})
 }

@@ -26,13 +26,15 @@ import (
 )
 
 type storeDownloader struct {
-	*defaultOCIDownloader
+	OCIDownloader
 	os, arch string
 	extFile  string
 }
 
 func NewStoreDownloader() PlatformAwareOCIDownloader {
-	ociDownloader := &storeDownloader{}
+	ociDownloader := &storeDownloader{
+		OCIDownloader: NewDefaultOCIDownloader(),
+	}
 	ociDownloader.WithOS(runtime.GOOS)
 	ociDownloader.WithArch(runtime.GOARCH)
 	return ociDownloader
@@ -42,7 +44,7 @@ func (d *storeDownloader) Download(name, tag, _ string) (reader io.Reader, err e
 	name = strings.TrimPrefix(name, "atest-store-")
 	d.extFile = fmt.Sprintf("atest-store-%s_%s_%s/atest-store-%s", name, d.os, d.arch, name)
 	image := fmt.Sprintf("linuxsuren/atest-ext-store-%s", name)
-	reader, err = d.defaultOCIDownloader.Download(image, tag, d.extFile)
+	reader, err = d.OCIDownloader.Download(image, tag, d.extFile)
 	return
 }
 

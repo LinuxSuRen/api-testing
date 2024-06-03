@@ -29,6 +29,7 @@ import (
 type extensionOption struct {
 	ociDownloader downloader.PlatformAwareOCIDownloader
 	output        string
+	registry      string
 	tag           string
 	os            string
 	arch          string
@@ -48,6 +49,7 @@ func createExtensionCommand(ociDownloader downloader.PlatformAwareOCIDownloader)
 	flags := c.Flags()
 	flags.StringVarP(&opt.output, "output", "", ".", "The target directory")
 	flags.StringVarP(&opt.tag, "tag", "", "", "The extension image tag, try to find the latest one if this is empty")
+	flags.StringVarP(&opt.registry, "registry", "", "", "The target extension image registry, supported: docker.io, ghcr.io")
 	flags.StringVarP(&opt.os, "os", "", runtime.GOOS, "The OS")
 	flags.StringVarP(&opt.arch, "arch", "", runtime.GOARCH, "The architecture")
 	return

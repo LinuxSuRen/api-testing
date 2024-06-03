@@ -29,6 +29,8 @@ import (
 
 type OCIDownloader interface {
 	WithBasicAuth(username string, password string)
+	WithRegistry(string)
+	WithRoundTripper(http.RoundTripper)
 	Download(image, tag, file string) (reader io.Reader, err error)
 }
 
@@ -40,6 +42,10 @@ type PlatformAwareOCIDownloader interface {
 }
 
 type defaultOCIDownloader struct {
+	serviceURL   string
+	registry     string
+	rawImage     string
+	roundTripper http.RoundTripper
 }
 
 func NewDefaultOCIDownloader() OCIDownloader {
@@ -51,17 +57,26 @@ func (d *defaultOCIDownloader) WithBasicAuth(username string, password string) {
 }
 
 func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Reader, err error) {
-	authStr := auth(image)
+	d.registry = getRegistry(image)
+	d.rawImage = strings.TrimPrefix(image, d.registry)
+	var authStr string
+	if authStr, err = d.auth(d.rawImage); err != nil {
+		err = fmt.Errorf("failed to get auth token: %w", err)
+		return
+	}
+
 	latestTag := tag
 	if tag == "" {
-		latestTag, err = getLatestTag(image, authStr)
+		latestTag, err = d.getLatestTag(d.rawImage, authStr)
 		if err != nil {
+			err = fmt.Errorf("failed to get latest tag: %w", err)
 			return
 		}
 	}
 
 	var req *http.Request
-	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("https://index.docker.io/v2/%s/manifests/%s", image, latestTag), nil); err != nil {
+	api := fmt.Sprintf("https://%s/v2/%s/manifests/%s", d.registry, d.rawImage, latestTag)
+	if req, err = http.NewRequest(http.MethodGet, api, nil); err != nil {
 		return
 	}
 
@@ -70,7 +85,10 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 
 	var resp *http.Response
 	if resp, err = http.DefaultClient.Do(req); err != nil {
+		err = fmt.Errorf("failed to get manifest from %q, status code: %d", api, resp.StatusCode)
 		return
+	} else if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("failed to get manifest from %q, status code: %d", api, resp.StatusCode)
 	} else {
 		var data []byte
 		data, err = io.ReadAll(resp.Body)
@@ -85,7 +103,7 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 
 		for _, layer := range manifest.Layers {
 			if v, ok := layer.Annotations["org.opencontainers.image.title"]; ok && v == file {
-				reader = downloadLayer(image, layer.Digest, authStr)
+				reader, err = d.downloadLayer(d.rawImage, layer.Digest, authStr)
 				return
 			}
 		}
@@ -95,17 +113,29 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 	return
 }
 
+func (d *defaultOCIDownloader) WithRegistry(registry string) {
+	d.registry = registry
+}
+
+func (d *defaultOCIDownloader) WithRoundTripper(rt http.RoundTripper) {
+	d.roundTripper = rt
+}
+
 // getLatestTag returns the latest artifact tag
 // we assume the artifact tags do not have the prefix `v`
-func getLatestTag(image, authToken string) (tag string, err error) {
+func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string, err error) {
 	var req *http.Request
-	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("https://registry-1.docker.io/v2/%s/tags/list", image), nil); err != nil {
+	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("https://%s/v2/%s/tags/list", d.registry, image), nil); err != nil {
 		return
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
 	var resp *http.Response
-	if resp, err = http.DefaultClient.Do(req); err != nil || resp.StatusCode != http.StatusOK {
+	if resp, err = http.DefaultClient.Do(req); err != nil {
+		err = fmt.Errorf("failed to get image tags from %q, error: %v", req.URL, err)
+		return
+	} else if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("failed to get image tags from %q, status code: %d", req.URL, resp.StatusCode)
 		return
 	} else {
 		defer resp.Body.Close()
@@ -140,44 +170,97 @@ type ImageTagList struct {
 	Tags []string `json:"tags"`
 }
 
-func downloadLayer(image, digest, authToken string) io.Reader {
+func (d *defaultOCIDownloader) downloadLayer(image, digest, authToken string) (reader io.Reader, err error) {
 	var req *http.Request
-	var err error
-	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("https://registry-1.docker.io/v2/%s/blobs/%s", image, digest), nil); err != nil {
-		panic(err)
+	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("https://%s/v2/%s/blobs/%s", d.registry, image, digest), nil); err != nil {
+		return
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
-	if resp, err := http.DefaultClient.Do(req); err != nil {
-		panic(err)
+	var resp *http.Response
+	if resp, err = http.DefaultClient.Do(req); err != nil {
+		err = fmt.Errorf("failed to get layer from %q, error: %v", req.URL.String(), err)
+		return
 	} else {
 		var data []byte
 		if data, err = io.ReadAll(resp.Body); err != nil {
-			panic(err)
+			return
 		}
 
 		defer resp.Body.Close()
-		return bytes.NewBuffer(data)
+		reader = bytes.NewBuffer(data)
 	}
+	return
 }
 
-func auth(image string) string {
-	resp, err := http.Get(fmt.Sprintf("https://auth.docker.io/token?scope=repository:%s:pull&service=registry.docker.io", image))
+// getRegistry returns the registry of the image
+// e.g. registry-1.docker.io, ghcr.io, quay.io
+func getRegistry(image string) string {
+	segs := strings.Split(image, "/")
+	if len(segs) == 1 || len(segs) == 2 || segs[0] == "docker.io" {
+		return "registry-1.docker.io"
+	}
+	return segs[0]
+}
+
+func detectAuthURL(image string) (authURL string, service string, err error) {
+	registry := getRegistry(image)
+	detectURL := fmt.Sprintf("https://%s/v2/", registry)
+
+	var resp *http.Response
+	resp, err = http.Get(detectURL)
 	if err != nil {
-		panic(err)
+		return
 	}
 
-	data, err := io.ReadAll(resp.Body)
+	authHeader := resp.Header.Get(HeaderWWWAuthenticate)
+	authHeader = strings.ReplaceAll(authHeader, "Bearer ", "")
+	for _, v := range strings.Split(authHeader, ",") {
+		if strings.HasPrefix(v, "realm=") {
+			v = strings.ReplaceAll(v, "realm=", "")
+			v = strings.TrimPrefix(v, `"`)
+			v = strings.TrimSuffix(v, `"`)
+			authURL = v
+		} else if strings.HasPrefix(v, "service=") {
+			v = strings.ReplaceAll(v, "service=", "")
+			v = strings.TrimPrefix(v, `"`)
+			v = strings.TrimSuffix(v, `"`)
+			service = v
+		}
+	}
+	return
+}
+
+const (
+	HeaderWWWAuthenticate = "www-authenticate"
+)
+
+func (d *defaultOCIDownloader) auth(image string) (authToken string, err error) {
+	var authURL string
+	if authURL, d.serviceURL, err = detectAuthURL(fmt.Sprintf("%s/%s", d.registry, d.rawImage)); err != nil {
+		return
+	}
+
+	var resp *http.Response
+	resp, err = http.Get(fmt.Sprintf("%s?scope=repository:%s:pull&service=%s", authURL, image, d.serviceURL))
 	if err != nil {
-		panic(err)
+		err = fmt.Errorf("failed to get auth token from %q, error: %v", authURL, err)
+		return
+	}
+
+	var data []byte
+	data, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return
 	}
 
 	regAuth := &RegistryAuth{}
-	if err := json.Unmarshal(data, regAuth); err != nil {
-		panic(err)
+	if err = json.Unmarshal(data, regAuth); err != nil {
+		return
 	}
 
-	return regAuth.Token
+	authToken = regAuth.Token
+	return
 }
 
 type RegistryAuth struct {

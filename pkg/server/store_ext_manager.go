@@ -166,8 +166,9 @@ func (n *nonDownloader) Download(image, tag, file string) (reader io.Reader, err
 	return
 }
 
-func (n *nonDownloader) WithOS(string)   {}
-func (n *nonDownloader) WithArch(string) {}
+func (n *nonDownloader) WithOS(string)       {}
+func (n *nonDownloader) WithArch(string)     {}
+func (n *nonDownloader) WithRegistry(string) {}
 func (n *nonDownloader) GetTargetFile() string {
 	return ""
 }
