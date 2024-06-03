@@ -40,8 +40,8 @@ func createExtensionCommand(ociDownloader downloader.PlatformAwareOCIDownloader)
 	}
 	c = &cobra.Command{
 		Use:   "extension",
-		Short: "Manage extension",
-		Long:  "Download the store extension file",
+		Short: "Download extension binary files",
+		Long:  "Download the store extension files",
 		Args:  cobra.MinimumNArgs(1),
 		RunE:  opt.runE,
 	}

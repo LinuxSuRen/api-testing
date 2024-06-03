@@ -127,7 +127,6 @@ app.whenReady().then(() => {
   ipcMain.on('startServer', startServer)
   ipcMain.on('stopServer', stopServer)
   ipcMain.on('control', (e, okCallback, errCallback) => {
-    console.log(e + "==" + okCallback + "==" + errCallback)
     server.control(okCallback, errCallback)
   })
   ipcMain.handle('getHomePage', server.getHomePage)
@@ -161,24 +160,20 @@ const startServer = () => {
   const serverFile = process.platform === "win32" ? "atest.exe" : "atest"
   const atestFromHome = path.join(homeBin, serverFile)
   const atestFromPkg = path.join(__dirname, serverFile)
-  
-  if (!fs.existsSync(atestFromHome)) {
-    log.info('cannot find from %s', atestFromHome)
 
-    const data = fs.readFileSync(atestFromPkg)
-    log.info('start to write file with length %d', data.length)
-    
-    try {
-      if (process.platform === "win32") {
-        const file = fs.openSync(atestFromHome, 'w');
-        fs.writeSync(file, data, 0, data.length, 0);
-        fs.closeSync(file);
-      }else{
-        fs.writeFileSync(atestFromHome, data);
-      }
-    } catch (e) { 
-      log.error('Error Code: %s', e.code); 
+  const data = fs.readFileSync(atestFromPkg)
+  log.info('start to write file with length', data.length)
+  
+  try {
+    if (process.platform === "win32") {
+      const file = fs.openSync(atestFromHome, 'w');
+      fs.writeSync(file, data, 0, data.length, 0);
+      fs.closeSync(file);
+    }else{
+      fs.writeFileSync(atestFromHome, data);
     }
+  } catch (e) { 
+    log.error('Error Code:', e.code); 
   }
   fs.chmodSync(atestFromHome, 0o755); 
 

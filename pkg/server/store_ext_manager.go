@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -51,44 +51,64 @@ type storeExtManager struct {
 	stopSingal           chan struct{}
 }
 
-var s *storeExtManager
+var ss *storeExtManager
 
 func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
-	if s == nil {
-		s = &storeExtManager{
+	if ss == nil {
+		ss = &storeExtManager{
 			processChan: make(chan fakeruntime.Process),
 			stopSingal:  make(chan struct{}, 1),
 		}
-		s.execer = execer
-		s.socketPrefix = "unix://"
-		s.extStatusMap = map[string]bool{}
-		s.processCollect()
-		s.WithDownloader(&nonDownloader{})
+		ss.execer = execer
+		ss.socketPrefix = "unix://"
+		ss.extStatusMap = map[string]bool{}
+		ss.processCollect()
+		ss.WithDownloader(&nonDownloader{})
 	}
-	return s
+	return ss
+}
+
+func NewStoreExtManagerInstance(execer fakeruntime.Execer) ExtManager {
+	ss = &storeExtManager{
+		processChan: make(chan fakeruntime.Process),
+		stopSingal:  make(chan struct{}, 1),
+	}
+	ss.execer = execer
+	ss.socketPrefix = "unix://"
+	ss.extStatusMap = map[string]bool{}
+	ss.processCollect()
+	ss.WithDownloader(&nonDownloader{})
+	return ss
 }
 
 func (s *storeExtManager) Start(name, socket string) (err error) {
 	if v, ok := s.extStatusMap[name]; ok && v {
 		return
 	}
+	targetDir := os.ExpandEnv("$HOME/.config/atest/bin")
+	targetBinaryFile := filepath.Join(targetDir, name)
 
-	binaryPath, lookErr := s.execer.LookPath(name)
-	if lookErr != nil {
-		reader, dErr := s.ociDownloader.Download(name, "", "")
-		if dErr != nil {
-			if dErr == DownloadNotSupportErr {
-				err = fmt.Errorf("failed to find %s, error: %v", name, lookErr)
+	var binaryPath string
+	if _, statErr := os.Stat(targetBinaryFile); statErr == nil {
+		binaryPath = targetBinaryFile
+	} else {
+		var lookErr error
+		binaryPath, lookErr = s.execer.LookPath(name)
+		if lookErr != nil {
+			reader, dErr := s.ociDownloader.Download(name, "", "")
+			if dErr != nil {
+				if dErr == ErrDownloadNotSupport {
+					err = fmt.Errorf("failed to find %s, error: %v", name, lookErr)
+				} else {
+					err = dErr
+				}
 			} else {
-				err = dErr
-			}
-		} else {
-			extFile := s.ociDownloader.GetTargetFile()
+				extFile := s.ociDownloader.GetTargetFile()
 
-			targetDir := os.ExpandEnv("$HOME/.config/atest/bin")
-			targetFile := filepath.Base(extFile)
-			err = downloader.WriteTo(reader, targetDir, targetFile)
-			binaryPath = filepath.Join(targetDir, targetFile)
+				targetFile := filepath.Base(extFile)
+				err = downloader.WriteTo(reader, targetDir, targetFile)
+				binaryPath = filepath.Join(targetDir, targetFile)
+			}
 		}
 	}
 
@@ -136,13 +156,13 @@ func (s *storeExtManager) processCollect() {
 	}()
 }
 
-var DownloadNotSupportErr = errors.New("no support")
+var ErrDownloadNotSupport = errors.New("no support")
 
 type nonDownloader struct{}
 
 func (n *nonDownloader) WithBasicAuth(username string, password string) {}
 func (n *nonDownloader) Download(image, tag, file string) (reader io.Reader, err error) {
-	err = DownloadNotSupportErr
+	err = ErrDownloadNotSupport
 	return
 }
 
