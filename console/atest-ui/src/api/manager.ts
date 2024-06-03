@@ -37,4 +37,4 @@ service.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-export default servicea
+export default service
