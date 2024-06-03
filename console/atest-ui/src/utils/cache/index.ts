@@ -115,7 +115,7 @@ function GetCurrentStore() {
                 return stores.items[i]
             }
         }
-    }
+    }    
     return {}
 }
 function SetCurrentStore(name: string) {

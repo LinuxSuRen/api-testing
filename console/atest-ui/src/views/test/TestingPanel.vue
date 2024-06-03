@@ -343,17 +343,23 @@ const storesLoading = ref(false)
 const loadStores = async () => {
   storesLoading.value = true
   await GetStores()
-    .then((res: any) => {
+    .then(async (res: any) => {
+      
       stores.value = res.data
       data.value = [] as Tree[]
-      data.value = res.data
+      data.value = res.data.slice(1)
       Cache.SetStores(res.data)
 
       for (const item of res.data) {
         if (item.ready && !item.disabled) {
-          loadTestSuites(item.name)
+          await loadTestSuites(item.name)
         }
       }
+
+      console.log(res.data);
+      console.log(data.value);
+      
+      
 
       if (data.value.length > 0) { 
         const key = Cache.GetLastTestCaseLocation()
@@ -376,7 +382,7 @@ const loadStores = async () => {
             }
           }
         }
-
+        
         if (!targetChild.id || targetChild.id === '') {
           targetSuite = data.value[0]
           if (targetSuite.children && targetSuite.children.length > 0) {

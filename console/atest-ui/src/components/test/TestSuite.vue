@@ -242,7 +242,8 @@ const suite = ref({
 
 const load = () => {
   const store = Cache.GetCurrentStore()
-  if (!props.name || store.name === '') {
+  
+  if (!props.name || store.name === '') {    
     return
   }
   
