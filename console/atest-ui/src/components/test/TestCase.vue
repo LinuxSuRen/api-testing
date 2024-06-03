@@ -513,7 +513,6 @@ const responseBodyFilter = () => {
 
 const parameterDialogOpened = ref(false)
 const openParameterDialog = () => {
-  console.log(props)
   GetTestSuite(String(props.suite))
     .then((res: any) => {
       parameters.value = res.param

@@ -354,12 +354,7 @@ const loadStores = async () => {
         if (item.ready && !item.disabled) {
           await loadTestSuites(item.name)
         }
-      }
-
-      console.log(res.data);
-      console.log(data.value);
-      
-      
+      }     
 
       if (data.value.length > 0) { 
         const key = Cache.GetLastTestCaseLocation()
