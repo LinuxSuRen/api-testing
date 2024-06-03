@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -169,6 +170,10 @@ func (n *nonDownloader) Download(image, tag, file string) (reader io.Reader, err
 func (n *nonDownloader) WithOS(string)       {}
 func (n *nonDownloader) WithArch(string)     {}
 func (n *nonDownloader) WithRegistry(string) {}
+
+func (d *nonDownloader) WithRoundTripper(rt http.RoundTripper) {}
+
+func (d *nonDownloader) WithInsecure(bool) {}
 func (n *nonDownloader) GetTargetFile() string {
 	return ""
 }

@@ -284,6 +284,10 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
 
 	if err == nil {
 		h.item.Param = mux.Vars(req)
+		if h.item.Param == nil {
+			h.item.Param = make(map[string]string)
+		}
+		h.item.Param["Host"] = req.Host
 		if h.item.Response.Header == nil {
 			h.item.Response.Header = make(map[string]string)
 		}

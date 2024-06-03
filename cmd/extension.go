@@ -72,10 +72,8 @@ func (o *extensionOption) runE(cmd *cobra.Command, args []string) (err error) {
 
 		targetFile := filepath.Base(extFile)
 		if err = downloader.WriteTo(reader, o.output, targetFile); err == nil {
-			return
+			cmd.Println("downloaded", targetFile)
 		}
-
-		cmd.Println("downloaded", targetFile)
 	}
 	return
 }

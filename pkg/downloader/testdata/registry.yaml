@@ -1,87 +1,43 @@
 items:
-  - name: config
+  - name: detect
     request:
-      path: /v2/{repo}/{name}/blobs/sha256:4e53321e14aaf87b17329102a21d4388fd9bea986277a78a8aa13bd300c9e3f9
+      path: /
     response:
       header:
-        Accept-Ranges: bytes
-        Content-Type: application/octet-stream
-        Docker-Content-Digest: "sha256:{{ sha256sum .Response.Body }}"
-        Docker-Distribution-Api-Version: registry/2.0
-      body: |
-        {"architecture":"amd64","config":{"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"],"Cmd":["/bin/sh"],"OnBuild":null},"created":"2024-01-27T00:30:48.743965523Z","history":[{"created":"2024-01-27T00:30:48.624602109Z","created_by":"/bin/sh -c #(nop) ADD file:37a76ec18f9887751cd8473744917d08b7431fc4085097bb6a09d81b41775473 in / "},{"created":"2024-01-27T00:30:48.743965523Z","created_by":"/bin/sh -c #(nop)  CMD [\"/bin/sh\"]","empty_layer":true}],"os":"linux","rootfs":{"type":"layers","diff_ids":["sha256:d4fc045c9e3a848011de66f34b81f052d4f2c15a17bb196d637e526349601820"]}}
-  - name: digest
+        www-authenticate: Bearer realm="http://{{.Param.Host}}/v2/auth/token",service="{{.Param.Host}}"
+  - name: auth
     request:
-      path: /v2/{repo}/{name}/manifests/sha256:43b13813161da7f0ded631e38111c4210167109c4d87bda0cae4f5e974e93f83
+      path: /auth/token
     response:
-      header:
-        Content-Type: application/vnd.oci.image.manifest.v1+json
-        Docker-Content-Digest: "sha256:{{ sha256sum .Response.Body }}"
-        Docker-Distribution-Api-Version: registry/2.0
       body: |
         {
-          "schemaVersion": 2,
-          "mediaType": "application/vnd.oci.image.manifest.v1+json",
-          "config": {
-            "mediaType": "application/vnd.oci.image.config.v1+json",
-            "digest": "sha256:4e53321e14aaf87b17329102a21d4388fd9bea986277a78a8aa13bd300c9e3f9",
-            "size": 600
-          },
-          "layers": [
-            {
-              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
-              "digest": "sha256:4abcf20661432fb2d719aaf90656f55c287f8ca915dc1c92ec14ff61e67fbaf8",
-              "size": 3408729
-            }
-          ]
+          "token": "fake-token"
+        }
+  - name: tags
+    request:
+      path: /{repo}/{name}/tags/list
+      method: GET
+    response:
+      body: |
+        {
+          "name": "2",
+          "tags": ["0.0.1", "0.0.2"]
         }
   - name: manifests
     request:
-      path: /v2/{repo}/{name}/manifests/{digest}
-      method: GET,HEAD
+      path: /{repo}/{name}/manifests/{tag}
     response:
-      header:
-        Content-Type: application/vnd.oci.image.index.v1+json
-        Docker-Distribution-Api-Version: registry/2.0
-        Docker-Content-Digest: "sha256:{{ sha256sum .Response.Body }}"
       body: |
         {
-          "schemaVersion": 2,
-          "mediaType": "application/vnd.oci.image.index.v1+json",
-          "manifests": [
-            {
-              "mediaType": "application/vnd.oci.image.manifest.v1+json",
-              "digest": "sha256:43b13813161da7f0ded631e38111c4210167109c4d87bda0cae4f5e974e93f83",
-              "size": 480,
-              "platform": {
-                "architecture": "amd64",
-                "os": "linux"
-              }
+          "layers": [{
+            "annotations": {
+              "org.opencontainers.image.title": "atest-store-git_darwin_amd64_v1/atest-store-git"
             },
-            {
-              "mediaType": "application/vnd.oci.image.manifest.v1+json",
-              "digest": "sha256:d19bf9196ad6eb527acdbabfd664954ccb7a0752f218312b6c910b8590d170e2",
-              "size": 566,
-              "annotations": {
-                "vnd.docker.reference.digest": "sha256:43b13813161da7f0ded631e38111c4210167109c4d87bda0cae4f5e974e93f83",
-                "vnd.docker.reference.type": "attestation-manifest"
-              },
-              "platform": {
-                "architecture": "unknown",
-                "os": "unknown"
-              }
-            }
-          ]
+            "digest": "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7"
+          }]
         }
-  - name: layer
+  - name: blobs
     request:
-      path: /v2/{repo}/{name}/blobs/{digest}
+      path: /{repo}/{name}/blobs/{digest}
     response:
-      header:
-        Accept-Ranges: bytes
-        Cache-Control: max-age=31536000
-        Content-Type: application/octet-stream
-        Docker-Content-Digest: "sha256:{{ sha256sumBytes .Response.BodyData }}"
-        Docker-Distribution-Api-Version: registry/2.0
-      body: https://gitee.com/linuxsuren/api-testing-hub/raw/master/data/alpine-3.19.1.tar.gz
-      encoder: url
+      body: fake

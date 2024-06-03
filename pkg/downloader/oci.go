@@ -31,6 +31,7 @@ type OCIDownloader interface {
 	WithBasicAuth(username string, password string)
 	WithRegistry(string)
 	WithRoundTripper(http.RoundTripper)
+	WithInsecure(bool)
 	Download(image, tag, file string) (reader io.Reader, err error)
 }
 
@@ -45,11 +46,14 @@ type defaultOCIDownloader struct {
 	serviceURL   string
 	registry     string
 	rawImage     string
+	protocol     string
 	roundTripper http.RoundTripper
 }
 
 func NewDefaultOCIDownloader() OCIDownloader {
-	return &defaultOCIDownloader{}
+	return &defaultOCIDownloader{
+		protocol: "https",
+	}
 }
 
 func (d *defaultOCIDownloader) WithBasicAuth(username string, password string) {
@@ -57,7 +61,9 @@ func (d *defaultOCIDownloader) WithBasicAuth(username string, password string) {
 }
 
 func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Reader, err error) {
-	d.registry = getRegistry(image)
+	if d.registry == "" {
+		d.registry = getRegistry(image)
+	}
 	d.rawImage = strings.TrimPrefix(image, d.registry)
 	var authStr string
 	if authStr, err = d.auth(d.rawImage); err != nil {
@@ -75,7 +81,7 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 	}
 
 	var req *http.Request
-	api := fmt.Sprintf("https://%s/v2/%s/manifests/%s", d.registry, d.rawImage, latestTag)
+	api := fmt.Sprintf("%s://%s/v2/%s/manifests/%s", d.protocol, d.registry, d.rawImage, latestTag)
 	if req, err = http.NewRequest(http.MethodGet, api, nil); err != nil {
 		return
 	}
@@ -85,10 +91,11 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 
 	var resp *http.Response
 	if resp, err = http.DefaultClient.Do(req); err != nil {
-		err = fmt.Errorf("failed to get manifest from %q, status code: %d", api, resp.StatusCode)
+		err = fmt.Errorf("failed to get manifest from %q, error: %v", api, err)
 		return
 	} else if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf("failed to get manifest from %q, status code: %d", api, resp.StatusCode)
+		return
 	} else {
 		var data []byte
 		data, err = io.ReadAll(resp.Body)
@@ -117,6 +124,14 @@ func (d *defaultOCIDownloader) WithRegistry(registry string) {
 	d.registry = registry
 }
 
+func (d *defaultOCIDownloader) WithInsecure(insecure bool) {
+	if insecure {
+		d.protocol = "http"
+	} else {
+		d.protocol = "https"
+	}
+}
+
 func (d *defaultOCIDownloader) WithRoundTripper(rt http.RoundTripper) {
 	d.roundTripper = rt
 }
@@ -125,7 +140,7 @@ func (d *defaultOCIDownloader) WithRoundTripper(rt http.RoundTripper) {
 // we assume the artifact tags do not have the prefix `v`
 func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string, err error) {
 	var req *http.Request
-	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("https://%s/v2/%s/tags/list", d.registry, image), nil); err != nil {
+	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s/v2/%s/tags/list", d.protocol, d.registry, image), nil); err != nil {
 		return
 	}
 
@@ -133,10 +148,8 @@ func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string
 	var resp *http.Response
 	if resp, err = http.DefaultClient.Do(req); err != nil {
 		err = fmt.Errorf("failed to get image tags from %q, error: %v", req.URL, err)
-		return
 	} else if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf("failed to get image tags from %q, status code: %d", req.URL, resp.StatusCode)
-		return
 	} else {
 		defer resp.Body.Close()
 
@@ -172,7 +185,7 @@ type ImageTagList struct {
 
 func (d *defaultOCIDownloader) downloadLayer(image, digest, authToken string) (reader io.Reader, err error) {
 	var req *http.Request
-	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("https://%s/v2/%s/blobs/%s", d.registry, image, digest), nil); err != nil {
+	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s/v2/%s/blobs/%s", d.protocol, d.registry, image, digest), nil); err != nil {
 		return
 	}
 
@@ -180,7 +193,6 @@ func (d *defaultOCIDownloader) downloadLayer(image, digest, authToken string) (r
 	var resp *http.Response
 	if resp, err = http.DefaultClient.Do(req); err != nil {
 		err = fmt.Errorf("failed to get layer from %q, error: %v", req.URL.String(), err)
-		return
 	} else {
 		var data []byte
 		if data, err = io.ReadAll(resp.Body); err != nil {
@@ -203,9 +215,9 @@ func getRegistry(image string) string {
 	return segs[0]
 }
 
-func detectAuthURL(image string) (authURL string, service string, err error) {
+func detectAuthURL(protocol, image string) (authURL string, service string, err error) {
 	registry := getRegistry(image)
-	detectURL := fmt.Sprintf("https://%s/v2/", registry)
+	detectURL := fmt.Sprintf("%s://%s/v2/", protocol, registry)
 
 	var resp *http.Response
 	resp, err = http.Get(detectURL)
@@ -237,7 +249,7 @@ const (
 
 func (d *defaultOCIDownloader) auth(image string) (authToken string, err error) {
 	var authURL string
-	if authURL, d.serviceURL, err = detectAuthURL(fmt.Sprintf("%s/%s", d.registry, d.rawImage)); err != nil {
+	if authURL, d.serviceURL, err = detectAuthURL(d.protocol, fmt.Sprintf("%s/%s", d.registry, d.rawImage)); err != nil {
 		return
 	}
 

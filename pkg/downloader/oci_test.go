@@ -17,8 +17,14 @@ limitations under the License.
 package downloader
 
 import (
-	"github.com/stretchr/testify/assert"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/linuxsuren/api-testing/pkg/mock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetRegistry(t *testing.T) {
@@ -30,23 +36,65 @@ func TestGetRegistry(t *testing.T) {
 
 func TestDetectAuthURL(t *testing.T) {
 	t.Run("without registry", func(t *testing.T) {
-		authURL, service, err := detectAuthURL("linuxsuren/api-testing")
+		authURL, service, err := detectAuthURL("https", "linuxsuren/api-testing")
 		assert.NoError(t, err)
 		assert.Equal(t, "https://auth.docker.io/token", authURL)
 		assert.Equal(t, "registry.docker.io", service)
 	})
 
 	t.Run("without docker.io", func(t *testing.T) {
-		authURL, service, err := detectAuthURL("docker.io/linuxsuren/api-testing")
+		authURL, service, err := detectAuthURL("https", "docker.io/linuxsuren/api-testing")
 		assert.NoError(t, err)
 		assert.Equal(t, "https://auth.docker.io/token", authURL)
 		assert.Equal(t, "registry.docker.io", service)
 	})
 
 	t.Run("without ghcr.io", func(t *testing.T) {
-		authURL, service, err := detectAuthURL("ghcr.io/linuxsuren/api-testing")
+		authURL, service, err := detectAuthURL("https", "ghcr.io/linuxsuren/api-testing")
 		assert.NoError(t, err)
 		assert.Equal(t, "https://ghcr.io/token", authURL)
 		assert.Equal(t, "ghcr.io", service)
+	})
+}
+
+func TestDownload(t *testing.T) {
+	d := NewStoreDownloader()
+	server := mock.NewInMemoryServer(0)
+
+	err := server.Start(mock.NewLocalFileReader("testdata/registry.yaml"), "/v2")
+	assert.NoError(t, err)
+	defer func() {
+		server.Stop()
+	}()
+
+	d.WithRegistry(fmt.Sprintf("127.0.0.1:%s", server.GetPort()))
+	d.WithInsecure(true)
+	d.WithBasicAuth("", "")
+	d.WithRoundTripper(nil)
+
+	var reader io.Reader
+	reader, err = d.Download("git", "", "")
+	assert.NoError(t, err)
+	assert.NotNil(t, reader)
+
+	// download and verify it
+	var tmpDownloadDir string
+	tmpDownloadDir, err = os.MkdirTemp(os.TempDir(), "download")
+	defer os.RemoveAll(tmpDownloadDir)
+	assert.NoError(t, err)
+
+	err = WriteTo(reader, tmpDownloadDir, "fake.txt")
+	assert.NoError(t, err)
+
+	var data []byte
+	data, err = os.ReadFile(filepath.Join(tmpDownloadDir, "fake.txt"))
+	assert.NoError(t, err)
+	assert.Equal(t, "fake", string(data))
+
+	assert.NotEmpty(t, d.GetTargetFile())
+
+	t.Run("not found", func(t *testing.T) {
+		_, err = d.Download("orm", "", "")
+		assert.Error(t, err)
 	})
 }
