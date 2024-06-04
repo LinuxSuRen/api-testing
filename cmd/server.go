@@ -36,6 +36,7 @@ import (
 	pprof "net/http/pprof"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/linuxsuren/api-testing/pkg/downloader"
 	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/mock"
 	"github.com/linuxsuren/api-testing/pkg/oauth"
@@ -224,6 +225,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	storeExtMgr := server.NewStoreExtManager(o.execer)
+	storeExtMgr.WithDownloader(downloader.NewStoreDownloader())
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir, o.grpcMaxRecvMsgSize)
 	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
 	if storeKindsErr != nil {

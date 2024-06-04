@@ -1,0 +1,43 @@
+items:
+  - name: detect
+    request:
+      path: /
+    response:
+      header:
+        www-authenticate: Bearer realm="http://{{.Param.Host}}/v2/auth/token",service="{{.Param.Host}}"
+  - name: auth
+    request:
+      path: /auth/token
+    response:
+      body: |
+        {
+          "token": "fake-token"
+        }
+  - name: tags
+    request:
+      path: /{repo}/{name}/tags/list
+      method: GET
+    response:
+      body: |
+        {
+          "name": "2",
+          "tags": ["0.0.1", "0.0.2"]
+        }
+  - name: manifests
+    request:
+      path: /{repo}/{name}/manifests/{tag}
+    response:
+      body: |
+        {
+          "layers": [{
+            "annotations": {
+              "org.opencontainers.image.title": "atest-store-git_linux_amd64_v1/atest-store-git"
+            },
+            "digest": "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7"
+          }]
+        }
+  - name: blobs
+    request:
+      path: /{repo}/{name}/blobs/{digest}
+    response:
+      body: fake
