@@ -154,3 +154,6 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           make desktop-package desktop-make desktop-test
+      - name: Test extension cmd
+        run: |
+          ./console/atest-desktop/atest extension git

@@ -210,10 +210,12 @@ func (d *defaultOCIDownloader) downloadLayer(image, digest, authToken string) (r
 func getRegistry(image string) string {
 	segs := strings.Split(image, "/")
 	if len(segs) == 1 || len(segs) == 2 || segs[0] == "docker.io" {
-		return "registry-1.docker.io"
+		return DockerHubRegistry
 	}
 	return segs[0]
 }
+
+const DockerHubRegistry = "registry-1.docker.io"
 
 func detectAuthURL(protocol, image string) (authURL string, service string, err error) {
 	registry := getRegistry(image)
