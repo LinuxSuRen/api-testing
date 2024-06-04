@@ -52,8 +52,7 @@ COPY --from=builder /workspace/README.md /README.md
 
 RUN apt update -y && \
     # required for atest-store-git
-    apt install -y --no-install-recommends ssh-client ca-certificates && \
-    apt install -y curl && \
+    apt install -y --no-install-recommends ssh-client ca-certificates curl && \
     rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8080
