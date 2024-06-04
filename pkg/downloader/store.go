@@ -43,6 +43,9 @@ func NewStoreDownloader() PlatformAwareOCIDownloader {
 func (d *storeDownloader) Download(name, tag, _ string) (reader io.Reader, err error) {
 	name = strings.TrimPrefix(name, "atest-store-")
 	d.extFile = fmt.Sprintf("atest-store-%s_%s_%s/atest-store-%s", name, d.os, d.arch, name)
+	if d.os == "windows" {
+		d.extFile = fmt.Sprintf("%s.exe", d.extFile)
+	}
 	image := fmt.Sprintf("linuxsuren/atest-ext-store-%s", name)
 	reader, err = d.OCIDownloader.Download(image, tag, d.extFile)
 	return

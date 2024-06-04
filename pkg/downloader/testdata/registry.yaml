@@ -34,6 +34,16 @@ items:
               "org.opencontainers.image.title": "atest-store-git_linux_amd64_v1/atest-store-git"
             },
             "digest": "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7"
+          }, {
+            "annotations": {
+              "org.opencontainers.image.title": "atest-store-git_windows_amd64_v1/atest-store-git.exe"
+            },
+            "digest": "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7"
+          }, {
+            "annotations": {
+              "org.opencontainers.image.title": "atest-store-git_darwin_amd64_v1/atest-store-git"
+            },
+            "digest": "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7"
           }]
         }
   - name: blobs

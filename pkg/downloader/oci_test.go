@@ -28,9 +28,9 @@ import (
 )
 
 func TestGetRegistry(t *testing.T) {
-	assert.Equal(t, "registry-1.docker.io", getRegistry("alpine"))
-	assert.Equal(t, "registry-1.docker.io", getRegistry("library/alpine"))
-	assert.Equal(t, "registry-1.docker.io", getRegistry("docker.io/library/alpine"))
+	assert.Equal(t, DockerHubRegistry, getRegistry("alpine"))
+	assert.Equal(t, DockerHubRegistry, getRegistry("library/alpine"))
+	assert.Equal(t, DockerHubRegistry, getRegistry("docker.io/library/alpine"))
 	assert.Equal(t, "ghcr.io", getRegistry("ghcr.io/library/alpine"))
 }
 
@@ -58,43 +58,51 @@ func TestDetectAuthURL(t *testing.T) {
 }
 
 func TestDownload(t *testing.T) {
-	d := NewStoreDownloader()
 	server := mock.NewInMemoryServer(0)
-
 	err := server.Start(mock.NewLocalFileReader("testdata/registry.yaml"), "/v2")
 	assert.NoError(t, err)
 	defer func() {
 		server.Stop()
 	}()
 
-	d.WithRegistry(fmt.Sprintf("127.0.0.1:%s", server.GetPort()))
-	d.WithInsecure(true)
-	d.WithBasicAuth("", "")
-	d.WithRoundTripper(nil)
+	platforms := []string{
+		"windows", "linux", "darwin",
+	}
+	for _, platform := range platforms {
+		t.Run(fmt.Sprintf("on %s", platform), func(t *testing.T) {
+			d := NewStoreDownloader()
+			d.WithRegistry(fmt.Sprintf("127.0.0.1:%s", server.GetPort()))
+			d.WithInsecure(true)
+			d.WithOS(platform)
+			d.WithArch("amd64")
+			d.WithBasicAuth("", "")
+			d.WithRoundTripper(nil)
 
-	var reader io.Reader
-	reader, err = d.Download("git", "", "")
-	assert.NoError(t, err)
-	assert.NotNil(t, reader)
+			var reader io.Reader
+			reader, err = d.Download("git", "", "")
+			assert.NoError(t, err)
+			assert.NotNil(t, reader)
 
-	// download and verify it
-	var tmpDownloadDir string
-	tmpDownloadDir, err = os.MkdirTemp(os.TempDir(), "download")
-	defer os.RemoveAll(tmpDownloadDir)
-	assert.NoError(t, err)
+			// download and verify it
+			var tmpDownloadDir string
+			tmpDownloadDir, err = os.MkdirTemp(os.TempDir(), "download")
+			defer os.RemoveAll(tmpDownloadDir)
+			assert.NoError(t, err)
 
-	err = WriteTo(reader, tmpDownloadDir, "fake.txt")
-	assert.NoError(t, err)
+			err = WriteTo(reader, tmpDownloadDir, "fake.txt")
+			assert.NoError(t, err)
 
-	var data []byte
-	data, err = os.ReadFile(filepath.Join(tmpDownloadDir, "fake.txt"))
-	assert.NoError(t, err)
-	assert.Equal(t, "fake", string(data))
+			var data []byte
+			data, err = os.ReadFile(filepath.Join(tmpDownloadDir, "fake.txt"))
+			assert.NoError(t, err)
+			assert.Equal(t, "fake", string(data))
 
-	assert.NotEmpty(t, d.GetTargetFile())
+			assert.NotEmpty(t, d.GetTargetFile())
 
-	t.Run("not found", func(t *testing.T) {
-		_, err = d.Download("orm", "", "")
-		assert.Error(t, err)
-	})
+			t.Run("not found", func(t *testing.T) {
+				_, err = d.Download("orm", "", "")
+				assert.Error(t, err)
+			})
+		})
+	}
 }
