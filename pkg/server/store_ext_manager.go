@@ -161,19 +161,35 @@ var ErrDownloadNotSupport = errors.New("no support")
 
 type nonDownloader struct{}
 
-func (n *nonDownloader) WithBasicAuth(username string, password string) {}
+func (n *nonDownloader) WithBasicAuth(username string, password string) {
+	// Do nothing because this is an empty implementation
+}
+
 func (n *nonDownloader) Download(image, tag, file string) (reader io.Reader, err error) {
 	err = ErrDownloadNotSupport
 	return
 }
 
-func (n *nonDownloader) WithOS(string)       {}
-func (n *nonDownloader) WithArch(string)     {}
-func (n *nonDownloader) WithRegistry(string) {}
+func (n *nonDownloader) WithOS(string) {
+	// Do nothing because this is an empty implementation
+}
 
-func (d *nonDownloader) WithRoundTripper(rt http.RoundTripper) {}
+func (n *nonDownloader) WithArch(string) {
+	// Do nothing because this is an empty implementation
+}
 
-func (d *nonDownloader) WithInsecure(bool) {}
+func (n *nonDownloader) WithRegistry(string) {
+	// Do nothing because this is an empty implementation
+}
+
+func (d *nonDownloader) WithRoundTripper(rt http.RoundTripper) {
+	// Do nothing because this is an empty implementation
+}
+
+func (d *nonDownloader) WithInsecure(bool) {
+	// Do nothing because this is an empty implementation
+}
+
 func (n *nonDownloader) GetTargetFile() string {
 	return ""
 }
