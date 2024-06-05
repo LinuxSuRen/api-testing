@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ func (l *fileLoader) Put(item string) (err error) {
 	defer l.lock.Unlock()
 
 	if l.parent == "" {
-		l.parent = path.Dir(item)
+		l.parent = filepath.Dir(item)
 	}
 
 	if strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
@@ -144,7 +144,7 @@ func (l *fileLoader) Put(item string) (err error) {
 
 // GetContext returns the context of current test case
 func (l *fileLoader) GetContext() string {
-	return path.Dir(l.paths[l.index])
+	return filepath.Dir(l.paths[l.index])
 }
 
 // GetCount returns the count of test cases
@@ -207,7 +207,7 @@ func (l *fileLoader) CreateSuite(name, api string) (err error) {
 		err = fmt.Errorf("suite %s already exists", name)
 	} else {
 		if l.parent == "" {
-			l.parent = path.Dir(absPath)
+			l.parent = filepath.Dir(absPath)
 		}
 
 		if err = os.MkdirAll(l.parent, 0755); err != nil {
