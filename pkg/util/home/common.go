@@ -34,7 +34,7 @@ func GetUserBinDir() string {
 }
 
 func GetExtensionSocketPath(name string) string {
-	return filepath.Join(Dir(), fmt.Sprintf("config/atest/%s.sock", name))
+	return filepath.Join(GetUserConfigDir(), fmt.Sprintf("%s.sock", name))
 }
 
 func getCommonHomeDir() string {
