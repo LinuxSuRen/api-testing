@@ -43,6 +43,7 @@ import (
 	"github.com/spf13/pflag"
 	"golang.org/x/sync/semaphore"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type runOption struct {
@@ -225,7 +226,11 @@ func (o *runOption) startMonitor() (err error) {
 
 	var conn *grpc.ClientConn
 	monitorServer := fmt.Sprintf("unix://%s", sockFile)
-	if conn, err = grpc.Dial(monitorServer, grpc.WithInsecure()); err == nil {
+	creds,err:=credentials.NewClientTLSFromFile("certs/test.pem","localhost")   
+    if err!=nil{
+        return
+    }
+	if conn, err = grpc.Dial(monitorServer, grpc.WithTransportCredentials(creds)); err == nil {
 		o.reporter = runner.NewMemoryTestReporter(monitor.NewMonitorClient(conn), o.monitorDocker)
 	}
 	return

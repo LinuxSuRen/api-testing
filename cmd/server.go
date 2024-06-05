@@ -55,7 +55,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
@@ -95,7 +95,9 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.BoolVarP(&opt.dryRun, "dry-run", "", false, "Do not really start a gRPC server")
 	flags.StringArrayVarP(&opt.mockConfig, "mock-config", "", nil, "The mock config files")
 	flags.StringVarP(&opt.mockPrefix, "mock-prefix", "", "/mock", "The mock server API prefix")
-
+	//tls
+	flags.StringVarP(&opt.cert, "cert-file", "", "certs/test.pem", "The path to the certificate file")
+	flags.StringVarP(&opt.key, "key-file", "", "certs/test.key", "The path to the key file")  
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
 
@@ -139,6 +141,8 @@ type serverOption struct {
 
 	// inner fields, not as command flags
 	provider oauth.OAuthProvider
+	cert string
+	key string
 }
 
 func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
@@ -170,7 +174,14 @@ func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 
 		grpcOpts = append(grpcOpts, oauth.NewAuthInterceptor(o.oauthGroup))
 	}
-
+	if o.cert != "" && o.key != "" {
+		creds, err := credentials.NewServerTLSFromFile(o.cert, o.key)
+		if err != nil {
+			return fmt.Errorf("failed to load credentials: %v", err)
+		}
+		grpcOpts = append(grpcOpts, grpc.Creds(creds))
+	}		
+	
 	if o.dryRun {
 		o.gRPCServer = &fakeGRPCServer{}
 	} else {
@@ -269,9 +280,13 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	gRPCServerAddr := fmt.Sprintf("127.0.0.1:%s", gRPCServerPort)
 
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))
+	creds,err:=credentials.NewClientTLSFromFile("certs/test.pem","localhost")
+    if err!=nil{
+        return fmt.Errorf("failed to load credentials: %v", err)
+    }
 	err = errors.Join(
-		server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}),
-		server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}))
+		server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}),
+		server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}))
 	if err == nil {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
