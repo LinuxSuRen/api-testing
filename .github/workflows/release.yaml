@@ -29,10 +29,10 @@ jobs:
           cache: "npm"
           cache-dependency-path: console/atest-ui/package-lock.json
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.9.1
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
-          args: release --rm-dist
+          version: '~> v2'
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
 
