@@ -18,6 +18,12 @@ limitations under the License.
 
 package home
 
+import (
+	"bytes"
+	"os/exec"
+	"strings"
+)
+
 func Dir() string {
 	// First prefer the HOME environmental variable
 	if home := getCommonHomeDir(); home != "" {
