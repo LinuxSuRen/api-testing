@@ -1,4 +1,4 @@
-//go:build windows
+//go:build linux
 
 /*
 Copyright 2024 API Testing Authors.
@@ -19,7 +19,12 @@ limitations under the License.
 package home
 
 import (
+	"bytes"
+	"errors"
 	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 func Dir() string {
@@ -28,17 +33,23 @@ func Dir() string {
 		return home
 	}
 
-	// Prefer standard environment variable USERPROFILE
-	if home := os.Getenv("USERPROFILE"); home != "" {
-		return home
+	var stdout bytes.Buffer
+	cmd := exec.Command("getent", "passwd", strconv.Itoa(os.Getuid()))
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		// If the error is ErrNotFound, we ignore it. Otherwise, return it.
+		if !errors.Is(err, exec.ErrNotFound) {
+			return ""
+		}
+	} else {
+		if passwd := strings.TrimSpace(stdout.String()); passwd != "" {
+			// username:password:uid:gid:gecos:home:shell
+			passwdParts := strings.SplitN(passwd, ":", 7)
+			if len(passwdParts) > 5 {
+				return passwdParts[5]
+			}
+		}
 	}
 
-	drive := os.Getenv("HOMEDRIVE")
-	path := os.Getenv("HOMEPATH")
-	home := drive + path
-	if drive == "" || path == "" {
-		return ""
-	}
-
-	return home
+	return getHomeDirViaShell()
 }

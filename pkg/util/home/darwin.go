@@ -1,4 +1,4 @@
-//go:build windows
+//go:build darwin
 
 /*
 Copyright 2024 API Testing Authors.
@@ -18,27 +18,21 @@ limitations under the License.
 
 package home
 
-import (
-	"os"
-)
-
 func Dir() string {
 	// First prefer the HOME environmental variable
 	if home := getCommonHomeDir(); home != "" {
 		return home
 	}
 
-	// Prefer standard environment variable USERPROFILE
-	if home := os.Getenv("USERPROFILE"); home != "" {
-		return home
+	var stdout bytes.Buffer
+	cmd := exec.Command("sh", "-c", `dscl -q . -read /Users/"$(whoami)" NFSHomeDirectory | sed 's/^[^ ]*: //'`)
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err == nil {
+		result := strings.TrimSpace(stdout.String())
+		if result != "" {
+			return result
+		}
 	}
 
-	drive := os.Getenv("HOMEDRIVE")
-	path := os.Getenv("HOMEPATH")
-	home := drive + path
-	if drive == "" || path == "" {
-		return ""
-	}
-
-	return home
+	return getHomeDirViaShell()
 }

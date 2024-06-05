@@ -1,5 +1,3 @@
-// package home provides a way to get the home directory of OS
-
 /*
 Copyright 2024 API Testing Authors.
 
@@ -16,5 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package home provides a way to get the home directory of OS
 // Copied from https://github.com/mitchellh/go-homedir
 package home
