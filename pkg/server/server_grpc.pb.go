@@ -25,6 +25,7 @@ type RunnerClient interface {
 	// belong to a specific store
 	Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*TestResult, error)
 	// test suites related
+	RunTestSuite(ctx context.Context, opts ...grpc.CallOption) (Runner_RunTestSuiteClient, error)
 	GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error)
 	CreateTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 	ImportTestSuite(ctx context.Context, in *TestSuiteSource, opts ...grpc.CallOption) (*CommonResult, error)
@@ -85,6 +86,37 @@ func (c *runnerClient) Run(ctx context.Context, in *TestTask, opts ...grpc.CallO
 		return nil, err
 	}
 	return out, nil
+}
+
+func (c *runnerClient) RunTestSuite(ctx context.Context, opts ...grpc.CallOption) (Runner_RunTestSuiteClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Runner_ServiceDesc.Streams[0], "/server.Runner/RunTestSuite", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &runnerRunTestSuiteClient{stream}
+	return x, nil
+}
+
+type Runner_RunTestSuiteClient interface {
+	Send(*TestSuiteIdentity) error
+	Recv() (*TestResult, error)
+	grpc.ClientStream
+}
+
+type runnerRunTestSuiteClient struct {
+	grpc.ClientStream
+}
+
+func (x *runnerRunTestSuiteClient) Send(m *TestSuiteIdentity) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *runnerRunTestSuiteClient) Recv() (*TestResult, error) {
+	m := new(TestResult)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *runnerClient) GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error) {
@@ -286,7 +318,7 @@ func (c *runnerClient) FunctionsQuery(ctx context.Context, in *SimpleQuery, opts
 }
 
 func (c *runnerClient) FunctionsQueryStream(ctx context.Context, opts ...grpc.CallOption) (Runner_FunctionsQueryStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Runner_ServiceDesc.Streams[0], "/server.Runner/FunctionsQueryStream", opts...)
+	stream, err := c.cc.NewStream(ctx, &Runner_ServiceDesc.Streams[1], "/server.Runner/FunctionsQueryStream", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -440,6 +472,7 @@ type RunnerServer interface {
 	// belong to a specific store
 	Run(context.Context, *TestTask) (*TestResult, error)
 	// test suites related
+	RunTestSuite(Runner_RunTestSuiteServer) error
 	GetSuites(context.Context, *Empty) (*Suites, error)
 	CreateTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
 	ImportTestSuite(context.Context, *TestSuiteSource) (*CommonResult, error)
@@ -492,6 +525,9 @@ type UnimplementedRunnerServer struct {
 
 func (UnimplementedRunnerServer) Run(context.Context, *TestTask) (*TestResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Run not implemented")
+}
+func (UnimplementedRunnerServer) RunTestSuite(Runner_RunTestSuiteServer) error {
+	return status.Errorf(codes.Unimplemented, "method RunTestSuite not implemented")
 }
 func (UnimplementedRunnerServer) GetSuites(context.Context, *Empty) (*Suites, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSuites not implemented")
@@ -630,6 +666,32 @@ func _Runner_Run_Handler(srv interface{}, ctx context.Context, dec func(interfac
 		return srv.(RunnerServer).Run(ctx, req.(*TestTask))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_RunTestSuite_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(RunnerServer).RunTestSuite(&runnerRunTestSuiteServer{stream})
+}
+
+type Runner_RunTestSuiteServer interface {
+	Send(*TestResult) error
+	Recv() (*TestSuiteIdentity, error)
+	grpc.ServerStream
+}
+
+type runnerRunTestSuiteServer struct {
+	grpc.ServerStream
+}
+
+func (x *runnerRunTestSuiteServer) Send(m *TestResult) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *runnerRunTestSuiteServer) Recv() (*TestSuiteIdentity, error) {
+	m := new(TestSuiteIdentity)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func _Runner_GetSuites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -1441,6 +1503,12 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "RunTestSuite",
+			Handler:       _Runner_RunTestSuite_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
 		{
 			StreamName:    "FunctionsQueryStream",
 			Handler:       _Runner_FunctionsQueryStream_Handler,

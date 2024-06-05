@@ -9,6 +9,7 @@ service Runner {
     rpc Run (TestTask) returns (TestResult) {}
 
     // test suites related
+    rpc RunTestSuite(stream TestSuiteIdentity) returns (stream TestResult) {}
     rpc GetSuites(Empty) returns (Suites) {}
     rpc CreateTestSuite(TestSuiteIdentity) returns (HelloReply) {}
     rpc ImportTestSuite(TestSuiteSource) returns (CommonResult) {}
