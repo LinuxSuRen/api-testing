@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"net"
 	"net/http"
 	"os"
@@ -81,7 +82,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.StringArrayVarP(&opt.localStorage, "local-storage", "", []string{"*.yaml"}, "The local storage path")
 	flags.IntVarP(&opt.grpcMaxRecvMsgSize, "grpc-max-recv-msg-size", "", 4*1024*1024, "The maximum received message size for gRPC clients")
 	flags.StringVarP(&opt.consolePath, "console-path", "", "", "The path of the console")
-	flags.StringVarP(&opt.configDir, "config-dir", "", os.ExpandEnv("$HOME/.config/atest"), "The config directory")
+	flags.StringVarP(&opt.configDir, "config-dir", "", home.GetUserConfigDir(), "The config directory")
 	flags.StringVarP(&opt.secretServer, "secret-server", "", "", "The secret server URL")
 	flags.StringVarP(&opt.skyWalking, "skywalking", "", "", "Push the browser tracing data to the Apache SkyWalking HTTP URL")
 	flags.StringVarP(&opt.auth, "auth", "", os.Getenv("AUTH_MODE"), "The auth mode, supported: oauth. Keep it empty to disable auth")

@@ -67,12 +67,12 @@ jobs:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
       - uses: ./tools/github-actions/setup-deps
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
         with:
-          version: latest
-          args: release --skip-publish --rm-dist --snapshot
+          version: '~> v2'
+          args: release --clean --snapshot
       # - name: Operator
       #   run: cd operator && make build
 

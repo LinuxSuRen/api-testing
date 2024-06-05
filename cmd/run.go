@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"os"
@@ -192,17 +193,19 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
+const extensionMonitor = "atest-monitor-docker"
+
 func (o *runOption) startMonitor() (err error) {
 	if o.monitorDocker == "" {
 		return
 	}
 
 	var monitorBin string
-	if monitorBin, err = exec.LookPath("atest-monitor-docker"); err != nil {
+	if monitorBin, err = exec.LookPath(extensionMonitor); err != nil {
 		return
 	}
 
-	sockFile := os.ExpandEnv(fmt.Sprintf("$HOME/.config/atest/%s.sock", "atest-monitor-docker"))
+	sockFile := home.GetExtensionSocketPath(extensionMonitor)
 	os.MkdirAll(filepath.Dir(sockFile), 0755)
 
 	execer := fakeruntime.NewDefaultExecerWithContext(o.context)

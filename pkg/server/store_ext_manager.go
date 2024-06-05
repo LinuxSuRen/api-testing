@@ -18,6 +18,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"os"
@@ -86,7 +87,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 	if v, ok := s.extStatusMap[name]; ok && v {
 		return
 	}
-	targetDir := os.ExpandEnv("$HOME/.config/atest/bin")
+	targetDir := home.GetUserBinDir()
 	targetBinaryFile := filepath.Join(targetDir, name)
 
 	var binaryPath string
@@ -98,7 +99,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 		if lookErr != nil {
 			reader, dErr := s.ociDownloader.Download(name, "", "")
 			if dErr != nil {
-				if dErr == ErrDownloadNotSupport {
+				if errors.Is(dErr, ErrDownloadNotSupport) {
 					err = fmt.Errorf("failed to find %s, error: %v", name, lookErr)
 				} else {
 					err = dErr
