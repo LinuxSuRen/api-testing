@@ -32,7 +32,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-	"path/filepath"
 
 	_ "embed"
 	pprof "net/http/pprof"
@@ -101,7 +100,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
 	//grpc_tls
-	flags.StringVarP(&opt.tls,"tls-grpc","",os.Getenv("TLS_MODE"),"The tls mode, supported: tlsup. Keep it empty to disable tls")
+	flags.BoolVarP(&opt.tls, "tls-grpc", "", false, "Enable TLS mode. Set to true to enable TLS.")
 	flags.StringVarP(&opt.tlsCert, "cert-file", "", "","The path to the certificate file")
 	flags.StringVarP(&opt.tlsKey, "key-file", "", "", "The path to the key file")  
 
@@ -286,7 +285,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	gRPCServerAddr := fmt.Sprintf("127.0.0.1:%s", gRPCServerPort)
 
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))
-	if o.tls=="tlsup"{ 
+	if o.tls { 
 		creds,err:=credentials.NewClientTLSFromFile(o.tlsCert,"localhost")
 		if err!=nil{
 				return fmt.Errorf("failed to load credentials: %v", err)
