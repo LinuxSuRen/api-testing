@@ -101,11 +101,9 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
 	//grpc_tls
-	dir,_:=os.Getwd()
-	cwd:=filepath.Dir(dir)
 	flags.StringVarP(&opt.tls,"tls-grpc","",os.Getenv("TLS_MODE"),"The tls mode, supported: tlsup. Keep it empty to disable tls")
-	flags.StringVarP(&opt.tlsCert, "cert-file", "", filepath.Join(cwd, "certs",""), "The path to the certificate file")
-	flags.StringVarP(&opt.tlsKey, "key-file", "", filepath.Join(cwd,"certs",""), "The path to the key file")  
+	flags.StringVarP(&opt.tlsCert, "cert-file", "", "","The path to the certificate file")
+	flags.StringVarP(&opt.tlsKey, "key-file", "", "", "The path to the key file")  
 
 	c.Flags().MarkHidden("dry-run")
 	c.Flags().MarkHidden("gc-percent")
@@ -147,7 +145,7 @@ type serverOption struct {
 
 	// inner fields, not as command flags
 	provider oauth.OAuthProvider
-	tls string
+	tls bool
 	tlsCert string
 	tlsKey string
 }
@@ -181,7 +179,7 @@ func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 
 		grpcOpts = append(grpcOpts, oauth.NewAuthInterceptor(o.oauthGroup))
 	}
-	if o.tls=="tlsup"{
+	if o.tls {
 		if o.tlsCert != "" && o.tlsKey != "" {
 			creds, err := credentials.NewServerTLSFromFile(o.tlsCert, o.tlsKey)
 			if err != nil {
