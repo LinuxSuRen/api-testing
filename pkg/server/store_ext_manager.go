@@ -16,8 +16,8 @@ limitations under the License.
 package server
 
 import (
+	"context"
 	"errors"
-	"fmt"
 	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/downloader"
 	"github.com/linuxsuren/api-testing/pkg/logging"
@@ -91,26 +92,27 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 	targetBinaryFile := filepath.Join(targetDir, name)
 
 	var binaryPath string
-	if _, statErr := os.Stat(targetBinaryFile); statErr == nil {
+	if _, err = os.Stat(targetBinaryFile); err == nil {
 		binaryPath = targetBinaryFile
 	} else {
-		var lookErr error
-		binaryPath, lookErr = s.execer.LookPath(name)
-		if lookErr != nil {
-			reader, dErr := s.ociDownloader.Download(name, "", "")
-			if dErr != nil {
-				if errors.Is(dErr, ErrDownloadNotSupport) {
-					err = fmt.Errorf("failed to find %s, error: %v", name, lookErr)
+		binaryPath, err = s.execer.LookPath(name)
+		if err != nil {
+			go func() {
+				reader, dErr := s.ociDownloader.Download(name, "", "")
+				if dErr != nil {
+					serverLogger.Error(dErr, "failed to download extension", "name", name)
 				} else {
-					err = dErr
-				}
-			} else {
-				extFile := s.ociDownloader.GetTargetFile()
+					extFile := s.ociDownloader.GetTargetFile()
 
-				targetFile := filepath.Base(extFile)
-				err = downloader.WriteTo(reader, targetDir, targetFile)
-				binaryPath = filepath.Join(targetDir, targetFile)
-			}
+					targetFile := filepath.Base(extFile)
+					if dErr = downloader.WriteTo(reader, targetDir, targetFile); dErr == nil {
+						binaryPath = filepath.Join(targetDir, targetFile)
+						s.startPlugin(socket, binaryPath, name)
+					} else {
+						serverLogger.Error(dErr, "failed to save extension", "targetFile", targetFile)
+					}
+				}
+			}()
 		}
 	}
 
@@ -190,6 +192,9 @@ func (d *nonDownloader) WithRoundTripper(rt http.RoundTripper) {
 func (d *nonDownloader) WithInsecure(bool) {
 	// Do nothing because this is an empty implementation
 }
+
+func (d *nonDownloader) WithTimeout(time.Duration)   {}
+func (d *nonDownloader) WithContext(context.Context) {}
 
 func (n *nonDownloader) GetTargetFile() string {
 	return ""

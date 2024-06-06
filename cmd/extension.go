@@ -21,6 +21,7 @@ import (
 	"io"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/downloader"
 	"github.com/spf13/cobra"
@@ -33,6 +34,7 @@ type extensionOption struct {
 	tag           string
 	os            string
 	arch          string
+	timeout       time.Duration
 }
 
 func createExtensionCommand(ociDownloader downloader.PlatformAwareOCIDownloader) (c *cobra.Command) {
@@ -52,12 +54,16 @@ func createExtensionCommand(ociDownloader downloader.PlatformAwareOCIDownloader)
 	flags.StringVarP(&opt.registry, "registry", "", "", "The target extension image registry, supported: docker.io, ghcr.io")
 	flags.StringVarP(&opt.os, "os", "", runtime.GOOS, "The OS")
 	flags.StringVarP(&opt.arch, "arch", "", runtime.GOARCH, "The architecture")
+	flags.DurationVarP(&opt.timeout, "timeout", "", time.Minute, "The timeout of downloading")
 	return
 }
 
 func (o *extensionOption) runE(cmd *cobra.Command, args []string) (err error) {
 	o.ociDownloader.WithOS(o.os)
 	o.ociDownloader.WithArch(o.arch)
+	o.ociDownloader.WithRegistry(o.registry)
+	o.ociDownloader.WithTimeout(o.timeout)
+	o.ociDownloader.WithContext(cmd.Context())
 
 	for _, arg := range args {
 		var reader io.Reader

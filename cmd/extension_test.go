@@ -43,7 +43,8 @@ func TestExtensionCmd(t *testing.T) {
 			server.Stop()
 		}()
 
-		d.WithRegistry(fmt.Sprintf("127.0.0.1:%s", server.GetPort()))
+		registry := fmt.Sprintf("127.0.0.1:%s", server.GetPort())
+		d.WithRegistry(registry)
 		d.WithInsecure(true)
 		d.WithBasicAuth("", "")
 		d.WithOS("linux")
@@ -56,12 +57,12 @@ func TestExtensionCmd(t *testing.T) {
 		assert.NoError(t, err)
 
 		command := createExtensionCommand(d)
-		command.SetArgs([]string{"git", "--output", tmpDownloadDir})
+		command.SetArgs([]string{"git", "--output", tmpDownloadDir, "--registry", registry})
 		err = command.Execute()
 		assert.NoError(t, err)
 
 		// not found
-		command.SetArgs([]string{"orm", "--output", tmpDownloadDir})
+		command.SetArgs([]string{"orm", "--output", tmpDownloadDir, "--registry", registry})
 		err = command.Execute()
 		assert.Error(t, err)
 	})
