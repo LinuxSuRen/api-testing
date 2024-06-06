@@ -32,6 +32,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"path/filepath"
 
 	_ "embed"
 	pprof "net/http/pprof"
@@ -181,7 +182,7 @@ func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 		grpcOpts = append(grpcOpts, oauth.NewAuthInterceptor(o.oauthGroup))
 	}
 	if o.tls=="tlsup"{
-		if o.cert != "" && o.key != "" {
+		if o.tlsCert != "" && o.tlsKey != "" {
 			creds, err := credentials.NewServerTLSFromFile(o.tlsCert, o.tlsKey)
 			if err != nil {
 				return fmt.Errorf("failed to load credentials: %v", err)
@@ -287,9 +288,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	gRPCServerAddr := fmt.Sprintf("127.0.0.1:%s", gRPCServerPort)
 
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))
-	if o.tls=="tlsup"{
-		dir,_:=os.Getwd()
-		cwd:=filepath.Dir(dir)    
+	if o.tls=="tlsup"{ 
 		creds,err:=credentials.NewClientTLSFromFile(o.tlsCert,"localhost")
 		if err!=nil{
 				return fmt.Errorf("failed to load credentials: %v", err)
