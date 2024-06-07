@@ -37,13 +37,12 @@ openssl req -new -key server.key -out server.csr
 **4.配置openssl.cfg**
 
 ```shell
-1) 查找openssl在服务器的安装目录并且找到openssl.cnf并将其所在的目录
-2) 编辑[ CA_default ] ，打开 copy_extensions = copy
-3) 找到[ req ]，打开 req_extensions = v3.req # The extensions to add to a
-certificate request
+1) 查找openssl在服务器的安装目录并且找到openssl.cnf
+2) 编辑[ CA_default ] ，打开 copy_extensions = copy #取消注释
+3) 找到[ req ]，打开 req_extensions = v3.req 
 4) 找到[ v3_req ]，添加 subjectAltName = @alt_names
-5) 找到最底部的 [ alt_names ]，修改名字和
-DNS.1 = *.your.com
+5) 添加新的标签在最底部 [ alt_names ]和标签字段
+DNS.1 = localhost
 ```
 
 **5.生成本地私钥test.key**
@@ -56,8 +55,8 @@ openssl genpkey -algorithm RSA -out test.key
 
 ```shell
 openssl req -new -nodes -key test.key -out test.csr -days 3650 \
--subj "/C=cn/O=myorg/OU=mycomp/CN=myname" \
--config ./openssl.cnf -extensions v3.req
+-subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com" \
+-config ./openssl.cnf -extensions v3_req
 ```
 
 **7.生成ca证书 pem**
@@ -65,6 +64,6 @@ openssl req -new -nodes -key test.key -out test.csr -days 3650 \
 ```shell
 openssl x509 -req -days 365 -in test.csr \
 -out test.pem -CA server.crt -CAkey server.key \
--CAcreateserial -extfile ./openssl.cnf -extensions v3.req
+-CAcreateserial -extfile ./openssl.cnf -extensions v3_req
 ```
 
