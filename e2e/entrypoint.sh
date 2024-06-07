@@ -31,7 +31,7 @@ atest extension --output /usr/local/bin --registry ghcr.io etcd
 atest extension --output /usr/local/bin --registry ghcr.io mongodb
 
 echo "start to run server"
-nohup atest server --tls-grpc --cert-file /var/data/test.pem --key-file /var/data/test.key&
+nohup atest server --tls-grpc --cert-file test.pem --key-file test.key&
 cmd="atest run -p test-suite-common.yaml"
 
 echo "start to run testing: $cmd"
