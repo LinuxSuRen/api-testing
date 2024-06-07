@@ -39,8 +39,8 @@ openssl req -new -key server.key -out server.csr
 ```shell
 1) 查找openssl在服务器的安装目录并且找到openssl.cnf
 2) 编辑[ CA_default ] ，打开 copy_extensions = copy #取消注释
-3) 找到[ req ]，打开 req_extensions = v3.req 
-4) 找到[ v3_req ]，添加 subjectAltName = @alt_names
+3) 找到[ req ]，打开 req_extensions = v3.req
+4) 找到[ v3_req ]，添加字段 subjectAltName = @alt_names
 5) 添加新的标签在最底部 [ alt_names ]和标签字段
 DNS.1 = localhost
 ```
