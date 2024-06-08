@@ -24,7 +24,7 @@ openssl x509 -req -days 365 -in test.csr \
 -out test.pem -CA server.crt -CAkey server.key \
 -CAcreateserial -extfile "$SCRIPT_DIR/openssl.cnf" -extensions v3_req
 
-nohup atest server --tls-grpc --tls-cert /var/data/test.pem --tls-key /var/data/test.key&
+nohup atest server --tls-grpc --cert-file /var/data/test.pem --key-file /var/data/test.key&
 cmd="atest run -p test-suite-common.yaml --report github --report-github-identity e2e-testing --report-file /var/data/report.json --report-github-repo linuxsuren/api-testing --report-github-pr ${PULL_REQUEST:-0}"
 
 echo "start to run testing: $cmd"
