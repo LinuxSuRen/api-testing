@@ -100,9 +100,9 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
 	//grpc_tls
-	flags.BoolVarP(&opt.tls, "tls-grpc", "", false, "Enable TLS mode. Set to true to enable TLS.")
-	flags.StringVarP(&opt.tlsCert, "cert-file", "", "","The path to the certificate file")
-	flags.StringVarP(&opt.tlsKey, "key-file", "", "", "The path to the key file")  
+	flags.BoolVarP(&opt.tls, "tls-grpc", "", false, "Enable TLS mode. Set to true to enable TLS. Alow SAN certificates")
+	flags.StringVarP(&opt.tlsCert, "cert-file", "", "","The path to the certificate file, Alow SAN certificates")
+	flags.StringVarP(&opt.tlsKey, "key-file", "", "", "The path to the key file, Alow SAN certificates")  
 
 	c.Flags().MarkHidden("dry-run")
 	c.Flags().MarkHidden("gc-percent")

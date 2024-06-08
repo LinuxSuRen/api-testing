@@ -1,6 +1,6 @@
 # gRPC TLS verification
 
-If you want to enable gRPC TLS, you need to generate your certificates in the cmd directory, or you can use an absolute path
+If you want to enable gRPC TLS, you need to generate your certificates in the workspace, or you can use an absolute path
 
 **1. 生成私钥**
 
