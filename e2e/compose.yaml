@@ -24,7 +24,7 @@ services:
     volumes:
       - type: volume
         source: cache
-        target: /var/data   
+        target: /var/data
     links:
       - etcd
       - mysql
