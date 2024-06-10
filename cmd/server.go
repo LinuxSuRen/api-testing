@@ -96,6 +96,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.BoolVarP(&opt.dryRun, "dry-run", "", false, "Do not really start a gRPC server")
 	flags.StringArrayVarP(&opt.mockConfig, "mock-config", "", nil, "The mock config files")
 	flags.StringVarP(&opt.mockPrefix, "mock-prefix", "", "/mock", "The mock server API prefix")
+	flags.StringVarP(&opt.extensionRegistry, "extension-registry", "", "docker.io", "The extension registry URL")
 
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
@@ -114,14 +115,15 @@ type serverOption struct {
 	httpServer server.HTTPServer
 	execer     fakeruntime.Execer
 
-	port         int
-	httpPort     int
-	printProto   bool
-	localStorage []string
-	consolePath  string
-	secretServer string
-	configDir    string
-	skyWalking   string
+	port              int
+	httpPort          int
+	printProto        bool
+	localStorage      []string
+	consolePath       string
+	secretServer      string
+	configDir         string
+	skyWalking        string
+	extensionRegistry string
 
 	auth          string
 	oauthProvider string
@@ -241,8 +243,10 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		template.SetSecretGetter(remote.NewGRPCSecretGetter(secretServer))
 	}
 
+	extDownloader := downloader.NewStoreDownloader()
+	extDownloader.WithRegistry(o.extensionRegistry)
 	storeExtMgr := server.NewStoreExtManager(o.execer)
-	storeExtMgr.WithDownloader(downloader.NewStoreDownloader())
+	storeExtMgr.WithDownloader(extDownloader)
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir, o.grpcMaxRecvMsgSize)
 	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
 	if storeKindsErr != nil {

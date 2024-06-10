@@ -275,6 +275,16 @@ items:
         "suite": "{{.param.gRPCSuiteName}}",
         "testcase": "{{.param.gRPCCaseName}}"
       }
+- name: runTestSuite
+  request:
+    api: /RunTestSuite
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "name": "{{.param.gRPCSuiteName}}"
+      }
 - name: version
   request:
     api: /GetVersion

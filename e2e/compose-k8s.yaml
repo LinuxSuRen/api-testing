@@ -35,8 +35,8 @@ services:
     - k8s:/output
     # This is just so that we get the kubeconfig file out
     # - .:/output
-    ports:
-    - 30000:30000
+    # ports:
+    # - 30000:30000
     # - 6443:6443  # Kubernetes API Server
     # - 80:80      # Ingress controller port 80
     # - 443:443    # Ingress controller port 443

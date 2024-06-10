@@ -18,11 +18,13 @@ package downloader
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/blang/semver/v4"
 )
@@ -32,6 +34,8 @@ type OCIDownloader interface {
 	WithRegistry(string)
 	WithRoundTripper(http.RoundTripper)
 	WithInsecure(bool)
+	WithTimeout(time.Duration)
+	WithContext(context.Context)
 	Download(image, tag, file string) (reader io.Reader, err error)
 }
 
@@ -43,6 +47,8 @@ type PlatformAwareOCIDownloader interface {
 }
 
 type defaultOCIDownloader struct {
+	ctx          context.Context
+	timeout      time.Duration
 	serviceURL   string
 	registry     string
 	rawImage     string
@@ -53,6 +59,8 @@ type defaultOCIDownloader struct {
 func NewDefaultOCIDownloader() OCIDownloader {
 	return &defaultOCIDownloader{
 		protocol: "https",
+		timeout:  time.Minute,
+		ctx:      context.Background(),
 	}
 }
 
@@ -82,7 +90,7 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 
 	var req *http.Request
 	api := fmt.Sprintf("%s://%s/v2/%s/manifests/%s", d.protocol, d.registry, d.rawImage, latestTag)
-	if req, err = http.NewRequest(http.MethodGet, api, nil); err != nil {
+	if req, err = http.NewRequestWithContext(d.ctx, http.MethodGet, api, nil); err != nil {
 		return
 	}
 
@@ -90,7 +98,7 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 	req.Header.Set("Accept", "application/vnd.oci.image.manifest.v1+json")
 
 	var resp *http.Response
-	if resp, err = http.DefaultClient.Do(req); err != nil {
+	if resp, err = d.getHTTPClient().Do(req); err != nil {
 		err = fmt.Errorf("failed to get manifest from %q, error: %v", api, err)
 		return
 	} else if resp.StatusCode != http.StatusOK {
@@ -132,6 +140,14 @@ func (d *defaultOCIDownloader) WithInsecure(insecure bool) {
 	}
 }
 
+func (d *defaultOCIDownloader) WithTimeout(timeout time.Duration) {
+	d.timeout = timeout
+}
+
+func (d *defaultOCIDownloader) WithContext(ctx context.Context) {
+	d.ctx = ctx
+}
+
 func (d *defaultOCIDownloader) WithRoundTripper(rt http.RoundTripper) {
 	d.roundTripper = rt
 }
@@ -146,7 +162,7 @@ func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
 	var resp *http.Response
-	if resp, err = http.DefaultClient.Do(req); err != nil {
+	if resp, err = d.getHTTPClient().Do(req); err != nil {
 		err = fmt.Errorf("failed to get image tags from %q, error: %v", req.URL, err)
 	} else if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf("failed to get image tags from %q, status code: %d", req.URL, resp.StatusCode)
@@ -178,6 +194,14 @@ func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string
 	return
 }
 
+func (d *defaultOCIDownloader) getHTTPClient() (client *http.Client) {
+	client = &http.Client{
+		Timeout:   d.timeout,
+		Transport: d.roundTripper,
+	}
+	return
+}
+
 type ImageTagList struct {
 	Name string   `json:"name"`
 	Tags []string `json:"tags"`
@@ -191,7 +215,7 @@ func (d *defaultOCIDownloader) downloadLayer(image, digest, authToken string) (r
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
 	var resp *http.Response
-	if resp, err = http.DefaultClient.Do(req); err != nil {
+	if resp, err = d.getHTTPClient().Do(req); err != nil {
 		err = fmt.Errorf("failed to get layer from %q, error: %v", req.URL.String(), err)
 	} else {
 		var data []byte

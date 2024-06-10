@@ -21,13 +21,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"os"
 	reflect "reflect"
 	"regexp"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/mock"
 
@@ -270,6 +271,47 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 	}
 	reply.Message = buf.String()
 	return
+}
+
+func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
+	ctx := srv.Context()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			var in *TestSuiteIdentity
+			in, err = srv.Recv()
+			if err != nil {
+				if err == io.EOF {
+					return nil
+				}
+				return err
+			}
+
+			var suite *Suite
+			if suite, err = s.ListTestCase(ctx, in); err != nil {
+				return
+			}
+
+			for _, item := range suite.Items {
+				var reply *TestCaseResult
+				if reply, err = s.RunTestCase(ctx, &TestCaseIdentity{
+					Suite:    in.Name,
+					Testcase: item.Name,
+				}); err != nil {
+					return
+				}
+
+				if err = srv.Send(&TestResult{
+					TestCaseResult: []*TestCaseResult{reply},
+					Error:          reply.Error,
+				}); err != nil {
+					return err
+				}
+			}
+		}
+	}
 }
 
 // GetVersion returns the version
