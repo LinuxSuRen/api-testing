@@ -15,7 +15,22 @@ limitations under the License.
 */
 import { ref } from 'vue'
 import _ from 'lodash'
-import { API } from './net'
+import { GetSuggestedAPIs } from '../api/app/app'
+
+export interface TestStore {
+  name: string
+  description: string
+}
+
+export interface Tree {
+  id: string
+  label: string
+  parent: string
+  parentID: string
+  store: string
+  kind: string
+  children?: Tree[]
+}
 
 export interface Suite {
   name: string
@@ -37,7 +52,7 @@ export interface TestResult {
   header: Pair[]
 
   // inner fields
-  originBodyObject:{}
+  originBodyObject: {}
 }
 
 export interface Pair {
@@ -63,6 +78,7 @@ export interface TestCaseRequest {
   query: Pair[]
   form: Pair[]
   body: string
+  cookie: Pair[]
 }
 
 export interface TestCaseResponse {
@@ -74,9 +90,12 @@ export interface TestCaseResponse {
   schema: string
 }
 
+interface TestCaseWithValue extends TestCase, Pair {}
+
 // Suggested APIs query
 const localCache = ref({} as TestCaseWithValue[])
-export function NewSuggestedAPIsQuery(store: string, suite: string) {
+
+export const NewSuggestedAPIsQuery = (store: string, suite: string) => {
   return function (queryString: string, cb: (arg: any) => void) {
     loadCache(store, suite, function () {
       const results = queryString
@@ -87,12 +106,14 @@ export function NewSuggestedAPIsQuery(store: string, suite: string) {
     })
   }
 }
-export function CreateFilter(queryString: string) {
+
+export const CreateFilter = (queryString: string) => {
   return (v: Pair) => {
     return v.value.toLowerCase().indexOf(queryString.toLowerCase()) !== -1
   }
 }
-function loadCache(store: string, suite: string, callback: Function) {
+
+const loadCache = (store: string, suite: string, callback: Function) => {
   if (localCache.value.length > 0) {
     callback()
     return
@@ -102,18 +123,20 @@ function loadCache(store: string, suite: string, callback: Function) {
     return
   }
 
-  API.GetSuggestedAPIs(suite, (e) => {
-    localCache.value = e.data
-    localCache.value.forEach((v: TestCaseWithValue) => {
-      v.value = v.request.api
+  GetSuggestedAPIs({name: suite})
+    .then((res: any) => {
+      localCache.value = res.data
+      localCache.value.forEach((v: TestCaseWithValue) => {
+        v.value = v.request.api
+      })
     })
-    callback()
-  })
+    .catch((e: any) => {
+      console.log(e)
+      alert(e)
+    })
 }
 
-interface TestCaseWithValue extends TestCase, Pair {}
-
-export function GetHTTPMethods() {
+export const GetHTTPMethods = () => {
   return [
     {
       value: 'GET',
@@ -146,7 +169,7 @@ export function GetHTTPMethods() {
   ] as Pair[]
 }
 
-export function FlattenObject(obj: any): any {
+export const FlattenObject = (obj: any): any => {
   function _flattenPairs(obj: any, prefix: string): [string, any][] {
     if (!_.isObject(obj)) {
       return [prefix, obj]

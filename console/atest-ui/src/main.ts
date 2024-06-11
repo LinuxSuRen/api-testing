@@ -13,6 +13,7 @@ import en from './locales/en.json'
 import zh from './locales/zh.json'
 import ClientMonitor from 'skywalking-client-js'
 import { name, version } from '../package'
+import router from "./router"
 
 const app = createApp(App)
 
@@ -45,6 +46,7 @@ app.config.errorHandler = (error) => {
 app.use(ElementPlus, {
   locale: lang === 'zh' ? zhCn : enUS
 })
+app.use(router)
 app.use(i18n)
 
 app.mount('#app')

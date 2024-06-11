@@ -43,7 +43,7 @@ linters-settings:
       # Contains all imports that could not be matched to another section type.
       - default
       # Groups all imports with the specified Prefix.
-      - prefix(github.com/envoyproxy/gateway)
+      - prefix(github.com/LinuxSuRen/api-testing)
   gofmt:
     simplify: true
   goheader:
@@ -58,7 +58,7 @@ linters-settings:
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
-    local-prefixes: github.com/envoyproxy/gateway/
+    local-prefixes: github.com/LinuxSuRen/api-testing/
   govet:
     enable-all: true
     disable:

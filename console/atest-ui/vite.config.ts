@@ -32,6 +32,10 @@ export default defineConfig({
     }
   },
   server: {
+
+    port: 7890,
+    open: true,
+
     proxy: {
       '/server.Runner': {
         target: 'http://127.0.0.1:8080',
