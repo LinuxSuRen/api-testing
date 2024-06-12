@@ -8,7 +8,7 @@ on:
     - 'tools/make/docs.mk'
   pull_request:
     branches:
-    - "main"
+    - "master"
     paths:
     - 'docs/site/**'
     - 'tools/make/docs.mk'

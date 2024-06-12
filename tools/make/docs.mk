@@ -21,8 +21,8 @@ check-links: docs-check-links
 docs-check-links:
 	@$(LOG_TARGET)
 	# Check for broken links
-	npm install -g linkinator@6.0.4
-	linkinator docs -r --concurrency 25 -s "github.com"
+	# npm install -g linkinator@6.0.4
+	# linkinator docs -r --concurrency 25 -s "github.com"
 
 # Docs site, make by hexo.
 

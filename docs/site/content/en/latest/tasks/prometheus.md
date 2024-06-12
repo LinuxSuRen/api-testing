@@ -13,6 +13,7 @@ It will push the test results data into Prometheus [PushGateway](https://github.
 Then Prometheus could get the metrics from it.
 
 Skip the following instructions if you are familiar with Prometheus:
+
 ```shell
 docker run \
     -p 9090:9090 \
