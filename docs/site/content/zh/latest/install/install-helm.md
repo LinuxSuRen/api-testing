@@ -1,3 +1,8 @@
++++
+title = "通过 Helm 安装的方式使用 API Testing"
+weight = -98
++++
+
 You could install `api-testing` via Helm chart:
 
 ```shell

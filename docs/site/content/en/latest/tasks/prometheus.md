@@ -1,4 +1,6 @@
-## Pushing the test results into Prometheus
++++
+title = "Pushing the test results into Prometheus"
++++
 
 You can use the following command to do it:
 

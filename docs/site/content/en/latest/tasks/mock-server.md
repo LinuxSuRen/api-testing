@@ -1,3 +1,8 @@
++++
+title = "Mock server get started"
+weight = -99
++++
+
 ## Get started
 
 You can start a mock server of [container registry](https://distribution.github.io/distribution/) with below command:
