@@ -1,15 +1,14 @@
 +++
 title = "gRPC testsuite writing manual"
-weight = -99
 +++
 
 This document will introduce how to write testsuite for the gRPC API of `api-testing`.
 
-Before reading this document, you need to install and configure `api-testing`. For specific operations, please refer to [Official Document](./README.md). If you have completed these steps, you can continue reading the rest of this document.
+Before reading this document, you need to install and configure `api-testing`. For specific operations, please refer to [Install Document](../install/_index.md). If you have completed these steps, you can continue reading the rest of this document.
 
-##  Create testsuite
+## Create testsuite
 
-To create a gRPC testsuite based on service reflection, just add the following content to the `spec` path of the yaml file: 
+To create a gRPC testsuite based on service reflection, just add the following content to the `spec` path of the yaml file:
 
 ```yaml
 spec:
