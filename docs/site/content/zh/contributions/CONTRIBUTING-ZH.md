@@ -4,8 +4,6 @@ weight: -1
 description: "API Testing 贡献指南."
 ---
 
-> 中文 | [English](CONTRIBUTING.md)
-
 请加入我们，共同完善这个项目。
 
 后端由 [Golang](https://go.dev/) 编写，前端由 [Vue](https://vuejs.org/) 编写。

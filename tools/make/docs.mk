@@ -22,7 +22,8 @@ docs-check-links:
 	@$(LOG_TARGET)
 	# Check for broken links
 	npm install -g linkinator@6.0.4
-	linkinator docs -r --concurrency 25 -s "github.com"
+	# https://github.com/JustinBeckwith/linkinator?tab=readme-ov-file#command-usage
+	linkinator docs/site/public -r --concurrency 25 -s "github.com _print v0.0.1"
 
 # Docs site, make by hexo.
 
