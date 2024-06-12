@@ -4,8 +4,6 @@ weight: -1
 description: "This section contributing of API Testing."
 ---
 
-> English | [中文](CONTRIBUTING-ZH.md)
-
 Please join us to improve this project.
 
 The backend is written by [Golang](https://go.dev/), and the front-end is written by [Vue](https://vuejs.org/).
