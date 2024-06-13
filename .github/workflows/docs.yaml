@@ -3,9 +3,6 @@ on:
   push:
     branches:
     - "master"
-    paths:
-    - 'docs/site/**'
-    - 'tools/make/docs.mk'
   pull_request:
     branches:
     - "master"
