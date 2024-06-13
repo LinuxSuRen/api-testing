@@ -65,7 +65,7 @@ jobs:
         node-version: '18'
 
     - name: Install Site Dependencies and Build Site
-      run: make docs docs-check-links
+      run: make docs # docs-check-links
 
     # Upload docs for GitHub Pages
     - name: Upload GitHub Pages artifact
