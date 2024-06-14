@@ -3,7 +3,7 @@ title = "API Testing"
 
 # Language settings
 contentDir = "content"
-defaultContentLanguage = "zh"
+defaultContentLanguage = "en"
 defaultContentLanguageInSubdir = false
 # Useful when translating.
 enableMissingTranslationPlaceholders = true
@@ -63,7 +63,7 @@ id = "UA-00000000-0"
     contentDir = "content/zh"
     languageName = "中文"
     # Weight used for sorting.
-    weight = 1
+    weight = 2
   [languages.zh.params]
     title = "API Testing"
     description = "开源的接口调试 & 测试工具"
@@ -72,7 +72,7 @@ id = "UA-00000000-0"
     contentDir = "content/en"
     languageName ="English"
     # Weight used for sorting.
-    weight = 2
+    weight = 1
   [languages.en.params]
     title = "API Testing"
     description = "YAML based API testing tool. Open source interface debug and test tools."
@@ -254,7 +254,7 @@ enable = true
   [[menu.main]]
     name = "Documentation"
     weight = -102
-    url = "/v0.0.1"
+    url = "/latest"
 
   # i18n for Chinese
   [[languages.zh.menu.main]]
@@ -278,7 +278,8 @@ enable = true
   version = "latest"
   url = "/latest"
 
-[[params.versions]]
-  version = "v0.0.1"
-  url = "/v0.0.1"
+# version explain menu
+# [[params.versions]]
+#  version = "v0.0.1"
+#  url = "/v0.0.1"
   
