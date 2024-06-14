@@ -371,7 +371,7 @@ items:
     api: /metrics
   expect:
     verify:
-      - contains(data, "atest_execution_count")
-      - contains(data, "atest_execution_fail")
-      - contains(data, "atest_execution_success")
-      - contains(data, "atest_runners_count")
+      - indexOf(data, "atest_execution_count") != -1
+      - indexOf(data, "atest_execution_fail") != -1
+      - indexOf(data, "atest_execution_success") != -1
+      - indexOf(data, "atest_runners_count") != -1
