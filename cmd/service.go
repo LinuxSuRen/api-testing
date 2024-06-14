@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"os"
 	"strings"
@@ -91,7 +92,7 @@ func (o *serviceOption) preRunE(c *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	local := os.ExpandEnv("$HOME/.config/atest")
+	local := home.GetUserConfigDir()
 	if err = o.Execer.MkdirAll(local, os.ModePerm); err == nil {
 		err = o.Execer.MkdirAll(o.LocalStorage, os.ModePerm)
 	}

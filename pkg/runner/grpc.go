@@ -245,7 +245,7 @@ func (s *gRPCTestCaseRunner) WithSuite(suite *testing.TestSuite) {
 	// not need this parameter
 }
 
-func invokeRequest(ctx context.Context, md protoreflect.MethodDescriptor, payload string, conn *grpc.ClientConn) (respones []string, err error) {
+func invokeRequest(ctx context.Context, md protoreflect.MethodDescriptor, payload string, conn *grpc.ClientConn) (response []string, err error) {
 	resps := make([]*dynamicpb.Message, 0)
 	if md.IsStreamingClient() || md.IsStreamingServer() {
 		reqs, err := getStreamMessagepb(md.Input(), payload)
@@ -483,7 +483,6 @@ func getByReflect(ctx context.Context, r *gRPCTestCaseRunner, fullName protorefl
 	if err != nil {
 		return nil, err
 	}
-
 	req := &grpc_reflection_v1.ServerReflectionRequest{
 		Host: "",
 		MessageRequest: &grpc_reflection_v1.ServerReflectionRequest_FileContainingSymbol{

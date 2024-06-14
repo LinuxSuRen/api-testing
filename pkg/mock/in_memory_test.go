@@ -129,16 +129,36 @@ func TestInMemoryServer(t *testing.T) {
 	})
 
 	t.Run("mock item", func(t *testing.T) {
-		resp, err := http.Get(api + "/v1/repos/test/prs")
+		req, err := http.NewRequest(http.MethodGet, api+"/v1/repos/test/prs", nil)
 		assert.NoError(t, err)
+		req.Header.Set("name", "rick")
+
+		resp, err = http.DefaultClient.Do(req)
+		assert.NoError(t, err)
+
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		assert.Equal(t, "mock", resp.Header.Get("server"))
+		assert.Equal(t, "176", resp.Header.Get("Content-Length"))
+		assert.Equal(t, "mock", resp.Header.Get("Server"))
 		assert.NotEmpty(t, resp.Header.Get(headerMockServer))
 
-		data, err := io.ReadAll(resp.Body)
+		data, _ := io.ReadAll(resp.Body)
+		assert.True(t, strings.Contains(string(data), `"message": "mock"`), string(data))
+	})
+
+	t.Run("miss match header", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, api+"/v1/repos/test/prs", nil)
 		assert.NoError(t, err)
 
-		assert.True(t, strings.Contains(string(data), `"message": "gzip"`), string(data))
+		resp, err = http.DefaultClient.Do(req)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("base64 encoder", func(t *testing.T) {
+		resp, err = http.Get(api + "/v1/base64")
+		assert.NoError(t, err)
+		data, _ := io.ReadAll(resp.Body)
+		assert.Equal(t, "hello", string(data))
 	})
 
 	t.Run("not found config file", func(t *testing.T) {

@@ -5,6 +5,10 @@ on:
 env:
   IMG_TOOL: docker
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   Test:
     runs-on: ubuntu-22.04
@@ -39,8 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          make build
-          make copy
+          make build copy
           sudo atest service install
           sudo atest service restart
           sudo atest service status
@@ -64,16 +67,16 @@ jobs:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
       - uses: ./tools/github-actions/setup-deps
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PUBLISH_SECRETS }}
         with:
-          version: latest
-          args: release --skip-publish --rm-dist --snapshot
+          version: '~> v2'
+          args: release --clean --snapshot
       # - name: Operator
       #   run: cd operator && make build
 
-  BuildImage:
+  E2E:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
@@ -92,7 +95,7 @@ jobs:
           fi
           make helm-pkg
       - name: Core Image
-        run: GOPROXY=direct IMG_TOOL=docker make build
+        run: GOPROXY=direct IMG_TOOL=docker TAG=master REGISTRY=ghcr.io make image
       - name: Run e2e
         env:
           GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
@@ -102,11 +105,11 @@ jobs:
           sudo curl -L https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
           sudo chmod u+x /usr/local/bin/docker-compose
           make test-e2e
-      # - name: Operator Image
-      #   run: cd operator && make docker-build
+      - name: Code Generator Test
+        run: cd e2e/code-generator && ./start.sh
 
   BuildEmbedUI:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
       - uses: ./tools/github-actions/setup-deps
@@ -118,8 +121,39 @@ jobs:
           cache-dependency-path: console/atest-ui/package-lock.json
       - name: Build
         run: |
-          make build-embed-ui
+          make build-embed-ui copy
           sudo atest service install
           sudo atest service restart
       - name: Test
         run: make test-ui
+
+  BuildDesktop:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: ./tools/github-actions/setup-deps
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      # for fixing Error: Cannot find module 'appdmg'
+      - name: Install Python 3.11.4
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.4'
+      - name: Build Desktop on Windows
+        if: runner.os == 'Windows'
+        env:
+          BINARY: atest.exe
+        run: |
+          make desktop-package desktop-make
+      - name: Build Desktop
+        if: runner.os != 'Windows'
+        run: |
+          make desktop-package desktop-make desktop-test
+      - name: Test extension cmd
+        run: |
+          ./console/atest-desktop/atest extension git

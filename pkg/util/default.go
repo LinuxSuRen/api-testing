@@ -73,6 +73,7 @@ const (
 	MultiPartFormData  = "multipart/form-data"
 	Form               = "application/x-www-form-urlencoded"
 	JSON               = "application/json"
+	OCIImageIndex      = "application/vnd.oci.image.index.v1+json"
 	YAML               = "application/yaml"
 	ZIP                = "application/zip"
 	OctetStream        = "application/octet-stream"

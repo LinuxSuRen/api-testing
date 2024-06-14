@@ -4,10 +4,10 @@
 
 include tools/make/env.mk
 
+OCI_REGISTRY ?= oci://${REGISTRY}/${REGISTRY_NAMESPACE}
 
-OCI_REGISTRY ?= oci://${REGISTRY}
 CHART_NAME ?= api-testing
-CHART_VERSION ?= ${RELEASE_VERSION}
+CHART_VERSION ?= ${HELM_VERSION}
 
 ##@ Helm
 
@@ -16,7 +16,7 @@ helm-pkg: ## Package API Testing helm chart.
 helm-pkg: helm-dev-update
 	@$(LOG_TARGET)
 	# e.g. api-testing-v0.0.3-helm.tgz
-	helm package helm/${CHART_NAME} --version ${HELM_VERSION}-helm --app-version ${CHART_VERSION} --destination ${OUTPUT_DIR}/charts/
+	helm package helm/${CHART_NAME} --version ${CHART_VERSION}-helm --app-version ${CHART_VERSION} --destination ${OUTPUT_DIR}/charts/
 
 .PHONY: helm-push
 helm-push:

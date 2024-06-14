@@ -1,0 +1,12 @@
+stores:
+    - name: git
+      kind:
+        name: atest-store-git
+        enabled: true
+      url: xxx
+      readonly: false
+      disabled: false
+plugins:
+    - name: atest-store-git
+      url: unix:///tmp/atest-store-git.sock
+      enabled: true

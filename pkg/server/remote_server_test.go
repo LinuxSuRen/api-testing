@@ -31,6 +31,7 @@ import (
 
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/linuxsuren/api-testing/sample"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/metadata"
@@ -127,22 +128,49 @@ func TestRemoteServer(t *testing.T) {
 	assert.Error(t, err)
 }
 
+const sampleBody = `{"message": "hello"}`
+
 func TestRunTestCase(t *testing.T) {
 	loader := atest.NewFileWriter("")
 	loader.Put("testdata/simple.yaml")
 	server := NewRemoteServer(loader, nil, nil, nil, "", 1024*1024*4)
 
-	defer gock.Clean()
-	gock.New(urlFoo).Get("/").MatchHeader("key", "value").
-		Reply(http.StatusOK).
-		BodyString(`{"message": "hello"}`)
+	t.Run("json response", func(t *testing.T) {
+		defer gock.Clean()
+		gock.New(urlFoo).Get("/").MatchHeader("key", "value").
+			Reply(http.StatusOK).SetHeader(util.ContentType, util.JSON).
+			BodyString(sampleBody)
 
-	result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
-		Suite:    "simple",
-		Testcase: "get",
+		result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
+			Suite:    "simple",
+			Testcase: "get",
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, sampleBody, result.Body)
+		assert.Contains(t, result.Output, "start to run: 'get'\nstart to send request to http://foo\ntest case \"get\", status code: 200\n")
 	})
-	assert.NoError(t, err)
-	assert.Contains(t, result.Output, "start to run: 'get'\nstart to send request to http://foo\ntest case \"get\", status code: 200\n")
+
+	t.Run("text response", func(t *testing.T) {
+		defer gock.Clean()
+		gock.New(urlFoo).Get("/").MatchHeader("key", "value").
+			Reply(http.StatusOK).SetHeader(util.ContentType, util.Plain).
+			BodyString(sampleBody)
+
+		result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
+			Suite:    "simple",
+			Testcase: "get",
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, sampleBody, result.Body)
+	})
+
+	t.Run("not suite found", func(t *testing.T) {
+		result, err := server.RunTestCase(context.TODO(), &TestCaseIdentity{
+			Suite: "not-found",
+		})
+		assert.NoError(t, err)
+		assert.NotEmpty(t, result.Error)
+	})
 }
 
 func TestFindParentTestCases(t *testing.T) {
@@ -368,16 +396,21 @@ func TestUpdateTestCase(t *testing.T) {
 	})
 }
 
-func TestListTestCase(t *testing.T) {
-	tmpFile, err := os.CreateTemp(os.TempDir(), "test")
+func setupSimpleServer(t *testing.T, name string) (string, RunnerServer) {
+	tmpFile, err := os.CreateTemp(os.TempDir(), name)
 	assert.NoError(t, err)
-	defer os.Remove(tmpFile.Name())
 
 	fmt.Fprint(tmpFile, simpleSuite)
 	writer := atest.NewFileWriter(os.TempDir())
 	writer.Put(tmpFile.Name())
 
 	server := NewRemoteServer(writer, nil, nil, nil, "", 1024*1024*4)
+	return tmpFile.Name(), server
+}
+
+func TestListTestCase(t *testing.T) {
+	tmpFile, server := setupSimpleServer(t, "test")
+	defer os.Remove(tmpFile)
 	ctx := context.Background()
 
 	t.Run("get two testcases", func(t *testing.T) {
@@ -385,6 +418,16 @@ func TestListTestCase(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.NotNil(t, suite) {
 			assert.Equal(t, 2, len(suite.Items))
+		}
+	})
+
+	t.Run("get testSuiteYaml", func(t *testing.T) {
+		testSuiteYaml, err := server.GetTestSuiteYaml(ctx, &TestSuiteIdentity{Name: "simple"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, testSuiteYaml) {
+			data, err := os.ReadFile(tmpFile)
+			assert.NoError(t, err)
+			assert.Equal(t, data, testSuiteYaml.Data)
 		}
 	})
 
@@ -431,6 +474,74 @@ func TestListTestCase(t *testing.T) {
 			Condition: []string{"1 == 1"},
 			Verify:    []string{"1 == 1"},
 		}}))
+	})
+}
+
+func TestDuplicate(t *testing.T) {
+	tmpFile, server := setupSimpleServer(t, "duplicate")
+	defer os.Remove(tmpFile)
+	ctx := context.Background()
+
+	t.Run("duplicate test suite", func(t *testing.T) {
+		_, err := server.DuplicateTestSuite(ctx, &TestSuiteDuplicate{
+			SourceSuiteName: "simple",
+			TargetSuiteName: "simple2",
+		})
+		assert.NoError(t, err)
+
+		// find the new test suite
+		suite, err := server.GetTestSuite(ctx, &TestSuiteIdentity{Name: "simple2"})
+		assert.NoError(t, err)
+		assert.NotNil(t, suite)
+
+		// check the test case of the new suite
+		testcase, err := server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple2", Testcase: "get"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, testcase) {
+			assert.Equal(t, "http://foo", testcase.Request.Api)
+		}
+
+		defer func() {
+			_, err := server.DeleteTestSuite(ctx, &TestSuiteIdentity{Name: "simple2"})
+			assert.NoError(t, err)
+		}()
+	})
+
+	t.Run("duplicate test suite with same name", func(t *testing.T) {
+		reply, err := server.DuplicateTestSuite(ctx, &TestSuiteDuplicate{
+			SourceSuiteName: "simple",
+			TargetSuiteName: "simple",
+		})
+		assert.NoError(t, err)
+		assert.NotEmpty(t, reply.Error)
+	})
+
+	t.Run("duplicate test case", func(t *testing.T) {
+		_, err := server.DuplicateTestCase(ctx, &TestCaseDuplicate{
+			SourceSuiteName: "simple",
+			TargetSuiteName: "simple",
+			SourceCaseName:  "get",
+			TargetCaseName:  "get2",
+		})
+		assert.NoError(t, err)
+
+		// find the new test case
+		testcase, err := server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple", Testcase: "get2"})
+		assert.NoError(t, err)
+		if assert.NotNil(t, testcase) {
+			assert.Equal(t, "http://foo", testcase.Request.Api)
+		}
+	})
+
+	t.Run("test duplicate test case with same name", func(t *testing.T) {
+		reply, err := server.DuplicateTestCase(ctx, &TestCaseDuplicate{
+			SourceSuiteName: "simple",
+			TargetSuiteName: "simple",
+			SourceCaseName:  "get",
+			TargetCaseName:  "get",
+		})
+		assert.NoError(t, err)
+		assert.NotEmpty(t, reply.Error)
 	})
 }
 
@@ -515,7 +626,7 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	})
 
 	t.Run("with swagger URL, not accessed", func(t *testing.T) {
-		gock.Off()
+		defer gock.Off()
 		name := fmt.Sprintf("fake-%d", time.Now().Second())
 		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{
 			Name: name,
@@ -537,14 +648,15 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	})
 
 	t.Run("normal", func(t *testing.T) {
-		gock.Off()
+		defer gock.Off()
+		randomName := fmt.Sprintf("fake-%d", time.Now().Nanosecond())
 		_, err := server.CreateTestSuite(ctx, &TestSuiteIdentity{
-			Name: "fake-1",
+			Name: randomName,
 		})
 		assert.NoError(t, err)
 
 		_, err = server.UpdateTestSuite(ctx, &TestSuite{
-			Name: "fake-1",
+			Name: randomName,
 			Spec: &APISpec{
 				Kind: "swagger",
 				Url:  urlFoo + "/v1",
@@ -555,7 +667,7 @@ func TestGetSuggestedAPIs(t *testing.T) {
 		gock.New(urlFoo).Get("/v1").Reply(200).File("testdata/swagger.json")
 
 		var testcases *TestCases
-		testcases, err = server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: "fake-1"})
+		testcases, err = server.GetSuggestedAPIs(ctx, &TestSuiteIdentity{Name: randomName})
 		assert.NoError(t, err)
 		if assert.NotNil(t, testcases) {
 			assert.Equal(t, 5, len(testcases.Data))

@@ -147,6 +147,24 @@ function ConvertTestSuite(suiteName: string, genertor: string,
   .then(callback).catch(errHandle)
 }
 
+function DuplicateTestSuite(sourceSuiteName: string, targetSuiteName: string,
+    callback: (d: any) => void, errHandle?: ((reason: any) => PromiseLike<never>) | undefined | null ) {
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'X-Store-Name': Cache.GetCurrentStore().name,
+        'X-Auth': getToken()
+      },
+      body: JSON.stringify({
+          sourceSuiteName: sourceSuiteName,
+          targetSuiteName: targetSuiteName,
+      })
+    }
+    fetch('/server.Runner/DuplicateTestSuite', requestOptions)
+        .then(DefaultResponseProcess)
+        .then(callback).catch(errHandle)
+}
+
 function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
   const requestOptions = {
     method: 'POST',
@@ -291,6 +309,27 @@ function RunTestCase(request: RunTestCaseRequest,
   fetch('/server.Runner/RunTestCase', requestOptions)
   .then(DefaultResponseProcess)
   .then(callback).catch(errHandle)
+}
+
+function DuplicateTestCase(sourceSuiteName: string, targetSuiteName: string,
+                            sourceTestCaseName: string, targetTestCaseName: string,
+                            callback: (d: any) => void, errHandle?: ((reason: any) => PromiseLike<never>) | undefined | null ) {
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'X-Store-Name': Cache.GetCurrentStore().name,
+            'X-Auth': getToken()
+        },
+        body: JSON.stringify({
+            sourceSuiteName: sourceSuiteName,
+            targetSuiteName: targetSuiteName,
+            sourceCaseName: sourceTestCaseName,
+            targetCaseName: targetTestCaseName,
+        })
+    }
+    fetch('/server.Runner/DuplicateTestCase', requestOptions)
+        .then(DefaultResponseProcess)
+        .then(callback).catch(errHandle)
 }
 
 interface GenerateRequest {
@@ -533,17 +572,35 @@ function getToken() {
   return token
 }
 
+const GetTestSuiteYaml = (suite: string, store: string, callback: (d: any) => void, errHandle?: (e: any) => void | null) => {
+    const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': store,
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      name: suite
+    })
+  }
+  fetch('/server.Runner/GetTestSuiteYaml', requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback)
+    .catch(errHandle)
+}
+
 export const API = {
-  DefaultResponseProcess,
-  GetVersion,
-  CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,
-  CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
-  GenerateCode, ListCodeGenerator,
-  PopularHeaders,
-  CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
-  FunctionsQuery,
-  GetSecrets, DeleteSecret, CreateOrUpdateSecret,
-  GetSuggestedAPIs,
-  ReloadMockServer, GetMockConfig,
-  getToken
+    DefaultResponseProcess,
+    GetVersion,
+    CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, GetTestSuiteYaml,
+    DuplicateTestSuite,
+    CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase, DuplicateTestCase,
+    GenerateCode, ListCodeGenerator,
+    PopularHeaders,
+    CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
+    FunctionsQuery,
+    GetSecrets, DeleteSecret, CreateOrUpdateSecret,
+    GetSuggestedAPIs,
+    ReloadMockServer, GetMockConfig,
+    getToken
 }

@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"os"
@@ -114,7 +115,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
-	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus, http")
+	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus, http, grpc")
 	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
 	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
 	flags.StringVarP(&opt.reportTemplate, "report-template", "", "", "The template used to render the report")
@@ -166,15 +167,20 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	case "http":
 		templateOption := runner.NewTemplateOption(o.reportTemplate, "json")
 		o.reportWriter = runner.NewHTTPResultWriter(http.MethodPost, o.reportDest, nil, templateOption)
+	case "grpc":
+		if o.reportDest == "" {
+			err = fmt.Errorf("report gRPC server url is required for prometheus report")
+		}
+		o.reportWriter = runner.NewGRPCResultWriter(o.context, o.reportDest)
 	default:
 		err = fmt.Errorf("not supported report type: '%s'", o.report)
 	}
 
 	if err == nil {
-		var swaggerAPI apispec.APIConverage
+		var swaggerAPI apispec.SwaggerAPI
 		if o.swaggerURL != "" {
-			if swaggerAPI, err = apispec.ParseURLToSwagger(o.swaggerURL); err == nil {
-				o.reportWriter.WithAPIConverage(swaggerAPI)
+			if swaggerAPI.Swagger, err = apispec.ParseURLToSwagger(o.swaggerURL); err == nil {
+				o.reportWriter.WithAPIConverage(&swaggerAPI)
 			}
 		}
 	}
@@ -187,17 +193,19 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
+const extensionMonitor = "atest-monitor-docker"
+
 func (o *runOption) startMonitor() (err error) {
 	if o.monitorDocker == "" {
 		return
 	}
 
 	var monitorBin string
-	if monitorBin, err = exec.LookPath("atest-monitor-docker"); err != nil {
+	if monitorBin, err = exec.LookPath(extensionMonitor); err != nil {
 		return
 	}
 
-	sockFile := os.ExpandEnv(fmt.Sprintf("$HOME/.config/atest/%s.sock", "atest-monitor-docker"))
+	sockFile := home.GetExtensionSocketPath(extensionMonitor)
 	os.MkdirAll(filepath.Dir(sockFile), 0755)
 
 	execer := fakeruntime.NewDefaultExecerWithContext(o.context)

@@ -91,6 +91,30 @@ items:
   expect:
     bodyFieldsExpect:
       api: http://localhost:8080/server.Runner
+- name: duplicateSuite
+  request:
+    api: /DuplicateTestSuite
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "sourceSuiteName": "{{.param.suiteName}}",
+        "targetSuiteName": "{{.param.suiteName}}-copy"
+      }
+- name: getDuplicatedSuite
+  request:
+    api: /GetTestSuite
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "name": "{{.param.suiteName}}-copy"
+      }
+  expect:
+    bodyFieldsExpect:
+      api: http://localhost:8080/server.Runner
 - name: GetSuggestedAPIs
   request:
     api: /GetSuggestedAPIs
@@ -152,6 +176,33 @@ items:
       {
         "suite": "{{.param.suiteName}}",
         "testcase": "{{.param.caseName}}"
+      }
+  expect:
+    bodyFieldsExpect:
+      request.body: good
+- name: duplicateTestCase
+  request:
+    api: /DuplicateTestCase
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "sourceSuiteName": "{{.param.suiteName}}",
+        "sourceCaseName": "{{.param.caseName}}",
+        "targetSuiteName": "{{.param.suiteName}}",
+        "targetCaseName": "{{.param.caseName}}-copy"
+      }
+- name: getDuplicatedTestCase
+  request:
+    api: /GetTestCase
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "suite": "{{.param.suiteName}}",
+        "testcase": "{{.param.caseName}}-copy"
       }
   expect:
     bodyFieldsExpect:
@@ -223,6 +274,16 @@ items:
       {
         "suite": "{{.param.gRPCSuiteName}}",
         "testcase": "{{.param.gRPCCaseName}}"
+      }
+- name: runTestSuite
+  request:
+    api: /RunTestSuite
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "name": "{{.param.gRPCSuiteName}}"
       }
 - name: version
   request:

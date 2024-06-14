@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/md5"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -146,6 +147,13 @@ var advancedFuncs = []AdvancedFunc{{
 		} else {
 			return err.Error()
 		}
+	},
+}, {
+	FuncName: "sha256sumBytes",
+	Func: func(data []byte) string {
+		h := sha256.New()
+		h.Write(data)
+		return hex.EncodeToString(h.Sum(nil))
 	},
 }, {
 	FuncName: "randEnum",

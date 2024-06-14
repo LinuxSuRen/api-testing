@@ -22,35 +22,27 @@ objects:
         "color": "{{ randEnum "blue" "read" "pink" }}"
       }
 items:
-  - name: repoList
+  - name: base64
     request:
-      path: /v1/teams/{team}/repos
-      method: GET
+      path: /v1/base64
     response:
-      statusCode: 200
-      body: |
-        {
-          "status": 0,
-          "count": 1,
-          "items": [{
-            "name": "fake-name",
-            "url": "https://fake.com"
-          }]
-        }
+      body: aGVsbG8=
+      encoder: base64
   - name: prList
     request:
       path: /v1/repos/{repo}/prs
+      header:
+        name: rick
     response:
-      headers:
-        - key: server
-          value: mock
+      header:
+        server: mock
       body: |
         {
           "count": 1,
           "items": [{
             "title": "fix: there is a bug on page {{ randEnum "one" }}",
             "number": 123,
-            "message": "{{index (index .Header "Accept-Encoding") 0}}",
+            "message": "{{.Response.Header.server}}",
             "author": "someone",
             "status": "success"
           }]

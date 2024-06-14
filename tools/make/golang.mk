@@ -10,7 +10,11 @@ GO_FLAGS += \
 	-X github.com/linuxsuren/api-testing/pkg/version.date=$(shell date +%Y-%m-%d)
 
 # Binary file name
-BINARY ?= atest
+ifeq ($(PLATFORM),windows)
+  BINARY ?= atest.exe
+else
+  BINARY ?= atest
+endif
 
 GOPATH := $(shell go env GOPATH)
 ifeq ($(origin GOBIN), undefined)

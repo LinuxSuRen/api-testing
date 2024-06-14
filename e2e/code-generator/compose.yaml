@@ -1,0 +1,46 @@
+services:
+  golang:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - LAN_ENV=docker.io/library/golang:1.21
+    command:
+      - /workspace/entrypoint.sh
+      - golang
+  java:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - LAN_ENV=docker.io/library/openjdk:23
+    command:
+      - /workspace/entrypoint.sh
+      - java
+  python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - LAN_ENV=docker.io/library/python:3.8
+    command:
+      - /workspace/entrypoint.sh
+      - python
+  javascript:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - LAN_ENV=docker.io/library/node:22
+    command:
+      - /workspace/entrypoint.sh
+      - JavaScript
+  curl:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - LAN_ENV=docker.io/library/openjdk:23
+    command:
+      - /workspace/entrypoint.sh
+      - curl

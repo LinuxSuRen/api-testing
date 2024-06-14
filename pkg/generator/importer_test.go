@@ -64,6 +64,16 @@ func TestPostmanImport(t *testing.T) {
 		assert.Equal(t, expectedSuiteFromPostman, strings.TrimSpace(result), result)
 	})
 
+	t.Run("sub postman, from file", func(t *testing.T) {
+		suite, err := importer.ConvertFromFile("testdata/postman-sub.json")
+		assert.NoError(t, err)
+
+		var result string
+		result, err = converter.Convert(suite)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedSuiteFromSubPostman, strings.TrimSpace(result), result)
+	})
+
 	t.Run("simple postman, from URl", func(t *testing.T) {
 		defer gock.Off()
 		gock.New(urlFoo).Get("/").Reply(http.StatusOK).BodyString(simplePostman)
@@ -96,3 +106,6 @@ var simplePostman string
 
 //go:embed testdata/expected_suite_from_postman.yaml
 var expectedSuiteFromPostman string
+
+//go:embed testdata/expected_suite_from_sub_postman.yaml
+var expectedSuiteFromSubPostman string

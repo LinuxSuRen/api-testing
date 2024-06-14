@@ -25,6 +25,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-openapi/spec"
+
 	"github.com/andreyvit/diff"
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/vm"
@@ -230,13 +232,14 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 		return
 	}
 
-	var swaggerAPI *apispec.Swagger
-	if swaggerAPI, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil && swaggerAPI != nil {
+	var swagger *spec.Swagger
+	if swagger, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil && swagger != nil {
 		result = []*testing.TestCase{}
-		for api, item := range swaggerAPI.Paths {
-			for method, oper := range item {
+		swaggerAPI := apispec.NewSwaggerAPI(swagger)
+		for api, methods := range swaggerAPI.ApiMap {
+			for _, method := range methods {
 				testcase := &testing.TestCase{
-					Name: oper.OperationId,
+					Name: swagger.ID,
 					Request: testing.Request{
 						API:    api,
 						Method: strings.ToUpper(method),
@@ -244,7 +247,7 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 					},
 				}
 
-				for _, param := range oper.Parameters {
+				for _, param := range swagger.Parameters {
 					switch param.In {
 					case "query":
 						// TODO should have a better way to provide the initial value
@@ -354,12 +357,12 @@ func runJob(job *testing.Job, ctx interface{}, current interface{}) (err error) 
 		}
 
 		if program, err = expr.Compile(exprText, expr.Env(env)); err != nil {
-			fmt.Printf("failed to compile: %s, %v\n", item, err)
+			fmt.Printf("failed to compile: %q, %v\n", exprText, err)
 			return
 		}
 
 		if _, err = expr.Run(program, env); err != nil {
-			fmt.Printf("failed to Run: %s, %v\n", item, err)
+			fmt.Printf("failed to Run: %q, %v\n", exprText, err)
 			return
 		}
 	}
@@ -369,7 +372,7 @@ func runJob(job *testing.Job, ctx interface{}, current interface{}) (err error) 
 // isNonBinaryContent detect if the content belong to binary
 func isNonBinaryContent(contentType string) bool {
 	switch contentType {
-	case util.JSON, util.YAML, util.Plain:
+	case util.JSON, util.YAML, util.Plain, util.OCIImageIndex:
 		return true
 	default:
 		return false

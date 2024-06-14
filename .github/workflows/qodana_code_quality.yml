@@ -5,11 +5,11 @@ on:
   push:
     branches:
       - master
-      - feat/mock-timer
 
 jobs:
   qodana:
     runs-on: ubuntu-latest
+    if: github.actor == 'linuxsuren'
     steps:
       - uses: actions/checkout@v3
         with:

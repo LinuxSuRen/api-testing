@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,12 +30,13 @@ export interface Suite {
 export interface TestResult {
   body: string
   bodyObject: {}
+  bodyText: string
   output: string
   error: string
   statusCode: number
   header: Pair[]
 
-  // inner fileds
+  // inner fields
   originBodyObject:{}
 }
 

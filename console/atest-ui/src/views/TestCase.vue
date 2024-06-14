@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Edit, Delete, Search } from '@element-plus/icons-vue'
+import { Edit, Delete, Search, CopyDocument } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
 import type { Pair, TestResult, TestCaseWithSuite } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
@@ -57,10 +57,7 @@ const sendRequest = async () => {
         type: 'success'
       })
     }
-    if (e.body !== '') {
-      testResult.value.bodyObject = JSON.parse(e.body)
-      testResult.value.originBodyObject = JSON.parse(e.body)
-    }
+    parseResponseBody(e.body)
 
     Cache.SetTestCaseResponseCache(suite + '-' + name, {
       body: testResult.value.bodyObject,
@@ -74,9 +71,22 @@ const sendRequest = async () => {
 
     requestLoading.value = false
     UIAPI.ErrorTip(e)
-    testResult.value.bodyObject = JSON.parse(e.body)
-    testResult.value.originBodyObject = JSON.parse(e.body)
+
+    parseResponseBody(e.body)
   })
+}
+
+const parseResponseBody = (body) => {
+  if (body === '') {
+    return
+  }
+
+  try {
+    testResult.value.bodyObject = JSON.parse(body)
+    testResult.value.originBodyObject = JSON.parse(body)
+  } catch {
+    testResult.value.bodyText = body
+  }
 }
 
 const responseBodyFilterText = ref('')
@@ -423,7 +433,7 @@ function bodyTypeChange(e: number) {
   }
 }
 
-function jsonForamt() {
+function jsonFormat() {
   if (bodyType.value !== 5) {
     return
   }
@@ -490,6 +500,23 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
   })
   cb(results)
 }
+
+const duplicateTestCaseDialog = ref(false)
+const targetTestCaseName = ref('')
+const openDuplicateTestCaseDialog = () => {
+    duplicateTestCaseDialog.value = true
+    targetTestCaseName.value = props.name + '-copy'
+}
+const duplicateTestCase = () => {
+    API.DuplicateTestCase(props.suite, props.suite, props.name, targetTestCaseName.value,(d) => {
+        duplicateTestCaseDialog.value = false
+        ElMessage({
+            message: 'Duplicated.',
+            type: 'success'
+        })
+        emit('updated')
+    })
+}
 </script>
 
 <template>
@@ -503,6 +530,7 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
           v-if="!Cache.GetCurrentStore().readOnly"
           >{{ t('button.save') }}</el-button>
         <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
+        <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument">{{ t('button.duplicate') }}</el-button>
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
       </div>
       <div style="display: flex;">
@@ -549,7 +577,7 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
         <el-tab-pane name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <template #label>
             <el-badge :value="testCaseWithSuite.data.request.query.length - 1"
-              :hidden="testCaseWithSuite.data.request.query.length === 1" class="item">Query</el-badge>
+              :hidden="testCaseWithSuite.data.request.query.length <=1 " class="item">Query</el-badge>
           </template>
           <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
             <el-table-column label="Key" width="180">
@@ -574,7 +602,7 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
         <el-tab-pane name="header">
           <template #label>
             <el-badge :value="testCaseWithSuite.data.request.header.length - 1"
-              :hidden="testCaseWithSuite.data.request.header.length === 1" class="item">Header</el-badge>
+              :hidden="testCaseWithSuite.data.request.header.length <= 1" class="item">Header</el-badge>
           </template>
           <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
             <el-table-column label="Key" width="180">
@@ -605,7 +633,7 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
         <el-tab-pane name="cookie">
           <template #label>
             <el-badge :value="testCaseWithSuite.data.request.cookie.length - 1"
-              :hidden="testCaseWithSuite.data.request.cookie.length === 1" class="item">Cookie</el-badge>
+              :hidden="testCaseWithSuite.data.request.cookie.length <= 1" class="item">Cookie</el-badge>
           </template>
           <el-table :data="testCaseWithSuite.data.request.cookie" style="width: 100%">
             <el-table-column label="Key">
@@ -639,7 +667,7 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
 
           <div style="flex-grow: 1;">
             <Codemirror v-if="bodyType === 3 || bodyType === 5"
-              @change="jsonForamt"
+              @change="jsonFormat"
               v-model="testCaseWithSuite.data.request.body"/>
             <el-table :data="testCaseWithSuite.data.request.form" style="width: 100%" v-if="bodyType === 4">
               <el-table-column label="Key" width="180">
@@ -803,9 +831,14 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
           <Codemirror v-model="testResult.output"/>
         </el-tab-pane>
         <el-tab-pane label="Body" name="body">
-          <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
-            clearable label="dddd" placeholder="$.key" />
-          <JsonViewer :value="testResult.bodyObject" :expand-depth="5" copyable boxed sort />
+          <div v-if="testResult.bodyObject">
+            <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
+              clearable placeholder="$.key" />
+            <JsonViewer :value="testResult.bodyObject" :expand-depth="2" copyable boxed sort />
+          </div>
+          <div v-else>
+            <Codemirror v-model="testResult.bodyText"/>
+          </div>
         </el-tab-pane>
         <el-tab-pane name="response-header">
           <template #label>
@@ -830,4 +863,13 @@ const queryHeaderValues = (queryString: string, cb: (arg: any) => void) => {
       </el-tabs>
     </el-footer>
   </el-container>
+
+    <el-drawer v-model="duplicateTestCaseDialog">
+        <template #default>
+            New Test Case Name:<el-input v-model="targetTestCaseName" />
+        </template>
+        <template #footer>
+            <el-button type="primary" @click="duplicateTestCase">{{ t('button.ok') }}</el-button>
+        </template>
+    </el-drawer>
 </template>

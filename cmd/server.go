@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linuxsuren/api-testing/pkg/runner"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"net"
 	"net/http"
 	"os"
@@ -37,6 +38,7 @@ import (
 	pprof "net/http/pprof"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/linuxsuren/api-testing/pkg/downloader"
 	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/mock"
 	"github.com/linuxsuren/api-testing/pkg/oauth"
@@ -54,6 +56,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
@@ -81,7 +84,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.StringArrayVarP(&opt.localStorage, "local-storage", "", []string{"*.yaml"}, "The local storage path")
 	flags.IntVarP(&opt.grpcMaxRecvMsgSize, "grpc-max-recv-msg-size", "", 4*1024*1024, "The maximum received message size for gRPC clients")
 	flags.StringVarP(&opt.consolePath, "console-path", "", "", "The path of the console")
-	flags.StringVarP(&opt.configDir, "config-dir", "", os.ExpandEnv("$HOME/.config/atest"), "The config directory")
+	flags.StringVarP(&opt.configDir, "config-dir", "", home.GetUserConfigDir(), "The config directory")
 	flags.StringVarP(&opt.secretServer, "secret-server", "", "", "The secret server URL")
 	flags.StringVarP(&opt.skyWalking, "skywalking", "", "", "Push the browser tracing data to the Apache SkyWalking HTTP URL")
 	flags.StringVarP(&opt.auth, "auth", "", os.Getenv("AUTH_MODE"), "The auth mode, supported: oauth. Keep it empty to disable auth")
@@ -94,9 +97,14 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.BoolVarP(&opt.dryRun, "dry-run", "", false, "Do not really start a gRPC server")
 	flags.StringArrayVarP(&opt.mockConfig, "mock-config", "", nil, "The mock config files")
 	flags.StringVarP(&opt.mockPrefix, "mock-prefix", "", "/mock", "The mock server API prefix")
+	flags.StringVarP(&opt.extensionRegistry, "extension-registry", "", "docker.io", "The extension registry URL")
 
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
+	//grpc_tls
+	flags.BoolVarP(&opt.tls, "tls-grpc", "", false, "Enable TLS mode. Set to true to enable TLS. Alow SAN certificates")
+	flags.StringVarP(&opt.tlsCert, "cert-file", "", "", "The path to the certificate file, Alow SAN certificates")
+	flags.StringVarP(&opt.tlsKey, "key-file", "", "", "The path to the key file, Alow SAN certificates")
 
 	c.Flags().MarkHidden("dry-run")
 	c.Flags().MarkHidden("gc-percent")
@@ -108,14 +116,15 @@ type serverOption struct {
 	httpServer server.HTTPServer
 	execer     fakeruntime.Execer
 
-	port         int
-	httpPort     int
-	printProto   bool
-	localStorage []string
-	consolePath  string
-	secretServer string
-	configDir    string
-	skyWalking   string
+	port              int
+	httpPort          int
+	printProto        bool
+	localStorage      []string
+	consolePath       string
+	secretServer      string
+	configDir         string
+	skyWalking        string
+	extensionRegistry string
 
 	auth          string
 	oauthProvider string
@@ -138,6 +147,9 @@ type serverOption struct {
 
 	// inner fields, not as command flags
 	provider oauth.OAuthProvider
+	tls      bool
+	tlsCert  string
+	tlsKey   string
 }
 
 func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
@@ -169,7 +181,15 @@ func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 
 		grpcOpts = append(grpcOpts, oauth.NewAuthInterceptor(o.oauthGroup))
 	}
-
+	if o.tls {
+		if o.tlsCert != "" && o.tlsKey != "" {
+			creds, err := credentials.NewServerTLSFromFile(o.tlsCert, o.tlsKey)
+			if err != nil {
+				return fmt.Errorf("failed to load credentials: %v", err)
+			}
+			grpcOpts = append(grpcOpts, grpc.Creds(creds))
+		}
+	}
 	if o.dryRun {
 		o.gRPCServer = &fakeGRPCServer{}
 	} else {
@@ -224,14 +244,17 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		template.SetSecretGetter(remote.NewGRPCSecretGetter(secretServer))
 	}
 
+	extDownloader := downloader.NewStoreDownloader()
+	extDownloader.WithRegistry(o.extensionRegistry)
 	storeExtMgr := server.NewStoreExtManager(o.execer)
+	storeExtMgr.WithDownloader(extDownloader)
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir, o.grpcMaxRecvMsgSize)
 	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
 	if storeKindsErr != nil {
-		cmd.PrintErrf("failed to get store kinds, error: %p\n", storeKindsErr)
+		cmd.PrintErrf("failed to get store kinds, error: %v\n", storeKindsErr)
 	} else {
-		if err = startPlugins(storeExtMgr, kinds); err != nil {
-			return
+		if runPluginErr := startPlugins(storeExtMgr, kinds); runPluginErr != nil {
+			cmd.PrintErrf("error occurred during starting plugins, error: %v\n", runPluginErr)
 		}
 	}
 
@@ -263,10 +286,23 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		_ = o.httpServer.Shutdown(ctx)
 	}()
 
+	gRPCServerPort := util.GetPort(lis)
+	gRPCServerAddr := fmt.Sprintf("127.0.0.1:%s", gRPCServerPort)
+
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))
-	err = errors.Join(
-		server.RegisterRunnerHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}),
-		server.RegisterMockHandlerFromEndpoint(ctx, mux, "127.0.0.1:7070", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}))
+	if o.tls {
+		creds, err := credentials.NewClientTLSFromFile(o.tlsCert, "localhost")
+		if err != nil {
+			return fmt.Errorf("failed to load credentials: %v", err)
+		}
+		err = errors.Join(
+			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}),
+			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}))
+	} else {
+		err = errors.Join(
+			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}),
+			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}))
+	}
 	if err == nil {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
@@ -353,9 +389,7 @@ func startPlugins(storeExtMgr server.ExtManager, kinds *server.StoreKinds) (err 
 
 	for _, kind := range kinds.Data {
 		if kind.Enabled && strings.HasPrefix(kind.Url, socketPrefix) {
-			if err = storeExtMgr.Start(kind.Name, kind.Url); err != nil {
-				break
-			}
+			err = errors.Join(err, storeExtMgr.Start(kind.Name, kind.Url))
 		}
 	}
 	return

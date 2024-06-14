@@ -1,0 +1,19 @@
+#!api-testing
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
+# https://docs.gitlab.com/ee/api/api_resources.html
+name: test
+api: http://localhost:8080/server.Runner
+param:
+  suiteName: test
+  caseName: test
+items:
+  - name: requestWithHeader
+    request:
+      api: /GetSuites
+      method: POST
+      header:
+        auth: fake
+  - name: requestWithoutHeader
+    request:
+      api: /GetSuites
+      method: POST

@@ -1,4 +1,5 @@
 {
+    "language": "English",
     "button": {
         "import": "Import",
         "export": "Export",
@@ -9,12 +10,19 @@
         "delete": "Delete",
         "send": "Send",
         "copy": "Copy",
+        "ok": "OK",
+        "reload": "Reload",
+        "insertSample": "Insert Sample",
         "toolbox": "Tool Box",
         "refresh": "Refresh",
         "newtestcase": "New TestCase",
+        "viewYaml":"View YAML",
         "verify": "Verify",
+        "duplicate": "Duplicate",
         "generateCode": "Generate Code",
-        "sendWithParam": "Send With Parameter"
+        "sendWithParam": "Send With Parameter",
+        "fullScreen": "Full Screen",
+        "cancelFullScreen": "Cancel Full Screen"
     },
     "title": {
         "createTestSuite": "Create Test Suite",

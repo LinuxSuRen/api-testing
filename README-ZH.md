@@ -5,6 +5,8 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/linuxsuren/api-testing)](https://hub.docker.com/r/linuxsuren/api-testing)
 [![LinuxSuRen/open-source-best-practice](https://img.shields.io/static/v1?label=OSBP&message=%E5%BC%80%E6%BA%90%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5&color=blue)](https://github.com/LinuxSuRen/open-source-best-practice)
 
+> 中文 | [English](README.md)
+
 一个开源的 API 测试工具。🚀
 
 ## 功能特性
@@ -26,7 +28,7 @@
 
 ## 快速开始
 
-[![Deployed on Zeabur](https://zeabur.com/deployed-on-zeabur-dark.svg)](https://zeabur.com?referralCode=LinuxSuRen&utm_source=LinuxSuRen&utm_campaign=oss) [![Try in PWD](https://github.com/play-with-docker/stacks/raw/cff22438cb4195ace27f9b15784bbb497047afa7/assets/images/button.png)](http://play-with-docker.com?stack=https://raw.githubusercontent.com/LinuxSuRen/api-testing/master/docs/manifests/docker-compose.yml)
+[![Try in PWD](https://github.com/play-with-docker/stacks/raw/cff22438cb4195ace27f9b15784bbb497047afa7/assets/images/button.png)](http://play-with-docker.com?stack=https://raw.githubusercontent.com/LinuxSuRen/api-testing/master/docs/manifests/docker-compose.yml)
 
 通过 [hd](https://github.com/LinuxSuRen/http-downloader) 安装，或从 [releases](https://github.com/LinuxSuRen/api-testing/releases) 下载安装:
 

@@ -24,12 +24,16 @@ const _ = grpc.SupportPackageIsVersion7
 type RunnerClient interface {
 	// belong to a specific store
 	Run(ctx context.Context, in *TestTask, opts ...grpc.CallOption) (*TestResult, error)
+	// test suites related
+	RunTestSuite(ctx context.Context, opts ...grpc.CallOption) (Runner_RunTestSuiteClient, error)
 	GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error)
 	CreateTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 	ImportTestSuite(ctx context.Context, in *TestSuiteSource, opts ...grpc.CallOption) (*CommonResult, error)
 	GetTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestSuite, error)
 	UpdateTestSuite(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
+	DuplicateTestSuite(ctx context.Context, in *TestSuiteDuplicate, opts ...grpc.CallOption) (*HelloReply, error)
+	GetTestSuiteYaml(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*YamlData, error)
 	// test cases related
 	ListTestCase(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*Suite, error)
 	GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error)
@@ -38,6 +42,7 @@ type RunnerClient interface {
 	CreateTestCase(ctx context.Context, in *TestCaseWithSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	UpdateTestCase(ctx context.Context, in *TestCaseWithSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*HelloReply, error)
+	DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate, opts ...grpc.CallOption) (*HelloReply, error)
 	// code generator
 	ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
@@ -81,6 +86,37 @@ func (c *runnerClient) Run(ctx context.Context, in *TestTask, opts ...grpc.CallO
 		return nil, err
 	}
 	return out, nil
+}
+
+func (c *runnerClient) RunTestSuite(ctx context.Context, opts ...grpc.CallOption) (Runner_RunTestSuiteClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Runner_ServiceDesc.Streams[0], "/server.Runner/RunTestSuite", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &runnerRunTestSuiteClient{stream}
+	return x, nil
+}
+
+type Runner_RunTestSuiteClient interface {
+	Send(*TestSuiteIdentity) error
+	Recv() (*TestResult, error)
+	grpc.ClientStream
+}
+
+type runnerRunTestSuiteClient struct {
+	grpc.ClientStream
+}
+
+func (x *runnerRunTestSuiteClient) Send(m *TestSuiteIdentity) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *runnerRunTestSuiteClient) Recv() (*TestResult, error) {
+	m := new(TestResult)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *runnerClient) GetSuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Suites, error) {
@@ -131,6 +167,24 @@ func (c *runnerClient) UpdateTestSuite(ctx context.Context, in *TestSuite, opts 
 func (c *runnerClient) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error) {
 	out := new(HelloReply)
 	err := c.cc.Invoke(ctx, "/server.Runner/DeleteTestSuite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) DuplicateTestSuite(ctx context.Context, in *TestSuiteDuplicate, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/DuplicateTestSuite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetTestSuiteYaml(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*YamlData, error) {
+	out := new(YamlData)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetTestSuiteYaml", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -200,6 +254,15 @@ func (c *runnerClient) DeleteTestCase(ctx context.Context, in *TestCaseIdentity,
 	return out, nil
 }
 
+func (c *runnerClient) DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/DuplicateTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error) {
 	out := new(SimpleList)
 	err := c.cc.Invoke(ctx, "/server.Runner/ListCodeGenerator", in, out, opts...)
@@ -255,7 +318,7 @@ func (c *runnerClient) FunctionsQuery(ctx context.Context, in *SimpleQuery, opts
 }
 
 func (c *runnerClient) FunctionsQueryStream(ctx context.Context, opts ...grpc.CallOption) (Runner_FunctionsQueryStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Runner_ServiceDesc.Streams[0], "/server.Runner/FunctionsQueryStream", opts...)
+	stream, err := c.cc.NewStream(ctx, &Runner_ServiceDesc.Streams[1], "/server.Runner/FunctionsQueryStream", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -408,12 +471,16 @@ func (c *runnerClient) PProf(ctx context.Context, in *PProfRequest, opts ...grpc
 type RunnerServer interface {
 	// belong to a specific store
 	Run(context.Context, *TestTask) (*TestResult, error)
+	// test suites related
+	RunTestSuite(Runner_RunTestSuiteServer) error
 	GetSuites(context.Context, *Empty) (*Suites, error)
 	CreateTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
 	ImportTestSuite(context.Context, *TestSuiteSource) (*CommonResult, error)
 	GetTestSuite(context.Context, *TestSuiteIdentity) (*TestSuite, error)
 	UpdateTestSuite(context.Context, *TestSuite) (*HelloReply, error)
 	DeleteTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
+	DuplicateTestSuite(context.Context, *TestSuiteDuplicate) (*HelloReply, error)
+	GetTestSuiteYaml(context.Context, *TestSuiteIdentity) (*YamlData, error)
 	// test cases related
 	ListTestCase(context.Context, *TestSuiteIdentity) (*Suite, error)
 	GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error)
@@ -422,6 +489,7 @@ type RunnerServer interface {
 	CreateTestCase(context.Context, *TestCaseWithSuite) (*HelloReply, error)
 	UpdateTestCase(context.Context, *TestCaseWithSuite) (*HelloReply, error)
 	DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error)
+	DuplicateTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error)
 	// code generator
 	ListCodeGenerator(context.Context, *Empty) (*SimpleList, error)
 	GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error)
@@ -458,6 +526,9 @@ type UnimplementedRunnerServer struct {
 func (UnimplementedRunnerServer) Run(context.Context, *TestTask) (*TestResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Run not implemented")
 }
+func (UnimplementedRunnerServer) RunTestSuite(Runner_RunTestSuiteServer) error {
+	return status.Errorf(codes.Unimplemented, "method RunTestSuite not implemented")
+}
 func (UnimplementedRunnerServer) GetSuites(context.Context, *Empty) (*Suites, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSuites not implemented")
 }
@@ -475,6 +546,12 @@ func (UnimplementedRunnerServer) UpdateTestSuite(context.Context, *TestSuite) (*
 }
 func (UnimplementedRunnerServer) DeleteTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTestSuite not implemented")
+}
+func (UnimplementedRunnerServer) DuplicateTestSuite(context.Context, *TestSuiteDuplicate) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DuplicateTestSuite not implemented")
+}
+func (UnimplementedRunnerServer) GetTestSuiteYaml(context.Context, *TestSuiteIdentity) (*YamlData, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTestSuiteYaml not implemented")
 }
 func (UnimplementedRunnerServer) ListTestCase(context.Context, *TestSuiteIdentity) (*Suite, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTestCase not implemented")
@@ -496,6 +573,9 @@ func (UnimplementedRunnerServer) UpdateTestCase(context.Context, *TestCaseWithSu
 }
 func (UnimplementedRunnerServer) DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTestCase not implemented")
+}
+func (UnimplementedRunnerServer) DuplicateTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DuplicateTestCase not implemented")
 }
 func (UnimplementedRunnerServer) ListCodeGenerator(context.Context, *Empty) (*SimpleList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCodeGenerator not implemented")
@@ -586,6 +666,32 @@ func _Runner_Run_Handler(srv interface{}, ctx context.Context, dec func(interfac
 		return srv.(RunnerServer).Run(ctx, req.(*TestTask))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_RunTestSuite_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(RunnerServer).RunTestSuite(&runnerRunTestSuiteServer{stream})
+}
+
+type Runner_RunTestSuiteServer interface {
+	Send(*TestResult) error
+	Recv() (*TestSuiteIdentity, error)
+	grpc.ServerStream
+}
+
+type runnerRunTestSuiteServer struct {
+	grpc.ServerStream
+}
+
+func (x *runnerRunTestSuiteServer) Send(m *TestResult) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *runnerRunTestSuiteServer) Recv() (*TestSuiteIdentity, error) {
+	m := new(TestSuiteIdentity)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func _Runner_GetSuites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -692,6 +798,42 @@ func _Runner_DeleteTestSuite_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).DeleteTestSuite(ctx, req.(*TestSuiteIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_DuplicateTestSuite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestSuiteDuplicate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).DuplicateTestSuite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/DuplicateTestSuite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).DuplicateTestSuite(ctx, req.(*TestSuiteDuplicate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetTestSuiteYaml_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestSuiteIdentity)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetTestSuiteYaml(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetTestSuiteYaml",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetTestSuiteYaml(ctx, req.(*TestSuiteIdentity))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -818,6 +960,24 @@ func _Runner_DeleteTestCase_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).DeleteTestCase(ctx, req.(*TestCaseIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_DuplicateTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestCaseDuplicate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).DuplicateTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/DuplicateTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).DuplicateTestCase(ctx, req.(*TestCaseDuplicate))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1226,6 +1386,14 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_DeleteTestSuite_Handler,
 		},
 		{
+			MethodName: "DuplicateTestSuite",
+			Handler:    _Runner_DuplicateTestSuite_Handler,
+		},
+		{
+			MethodName: "GetTestSuiteYaml",
+			Handler:    _Runner_GetTestSuiteYaml_Handler,
+		},
+		{
 			MethodName: "ListTestCase",
 			Handler:    _Runner_ListTestCase_Handler,
 		},
@@ -1252,6 +1420,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTestCase",
 			Handler:    _Runner_DeleteTestCase_Handler,
+		},
+		{
+			MethodName: "DuplicateTestCase",
+			Handler:    _Runner_DuplicateTestCase_Handler,
 		},
 		{
 			MethodName: "ListCodeGenerator",
@@ -1331,6 +1503,12 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "RunTestSuite",
+			Handler:       _Runner_RunTestSuite_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
 		{
 			StreamName:    "FunctionsQueryStream",
 			Handler:       _Runner_FunctionsQueryStream_Handler,

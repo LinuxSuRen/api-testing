@@ -93,6 +93,9 @@ persistence:
       size: 500Mi
       volumeMode: Filesystem
 
+extension:
+  registry: docker.io
+
 skywalking:
   endpoint:
     http: "" # http://skywalking-skywalking-helm-oap.skywalking.svc:12800
@@ -106,3 +109,7 @@ affinity: {}
 
 mongodb:
   enabled: false
+
+serviceMonitor:
+  enabled: false
+  interval: 15s

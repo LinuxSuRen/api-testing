@@ -263,7 +263,7 @@ func renderMap(ctx interface{}, data map[string]string, title string) (result ma
 	var tmpVal string
 	for key, val := range data {
 		if tmpVal, err = render.Render(title, val, ctx); err == nil {
-			data[key] = tmpVal
+			data[key] = strings.TrimSpace(tmpVal)
 		} else {
 			break
 		}

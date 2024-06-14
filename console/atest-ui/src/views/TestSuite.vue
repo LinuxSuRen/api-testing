@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { Edit } from '@element-plus/icons-vue'
+import { Edit, CopyDocument, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery, GetHTTPMethods } from './types'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 import { API } from './net'
+import { Codemirror } from 'vue-codemirror'
+import yaml from 'js-yaml'
 
 const { t } = useI18n()
 
 const props = defineProps({
-  name: String,
+  name: String
 })
 const emit = defineEmits(['updated'])
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name, props.name!)
@@ -33,9 +35,11 @@ const suite = ref({
 } as Suite)
 function load() {
   const store = Cache.GetCurrentStore()
-  if (!props.name || store.name === "") return
+  if (!props.name || store.name === '') return
 
-  API.GetTestSuite(props.name, (e) => {
+  API.GetTestSuite(
+    props.name,
+    (e) => {
       suite.value = e
       if (suite.value.param.length === 0) {
         suite.value.param.push({
@@ -43,9 +47,11 @@ function load() {
           value: ''
         } as Pair)
       }
-    }, (e) => {
+    },
+    (e) => {
       ElMessage.error('Oops, ' + e)
-    })
+    }
+  )
 }
 load()
 watch(props, () => {
@@ -53,7 +59,7 @@ watch(props, () => {
 })
 
 function save() {
-  let oldImportPath = ""
+  let oldImportPath = ''
   let hasImport = false
   if (suite.value.spec && suite.value.spec.rpc) {
     oldImportPath = suite.value.spec.rpc.import
@@ -64,8 +70,10 @@ function save() {
     }
   }
 
-  API.UpdateTestSuite(suite.value, (e) => {
-      if (e.error === "") {
+  API.UpdateTestSuite(
+    suite.value,
+    (e) => {
+      if (e.error === '') {
         ElMessage({
           message: 'Updated.',
           type: 'success'
@@ -77,14 +85,17 @@ function save() {
       if (hasImport) {
         suite.value.spec.rpc.import = oldImportPath
       }
-    }, (e) => {
+    },
+    (e) => {
       if (hasImport) {
         suite.value.spec.rpc.import = oldImportPath
       }
       ElMessage.error('Oops, ' + e)
-    })
+    }
+  )
 }
 
+const isFullScreen = ref(false)
 const dialogVisible = ref(false)
 const testcaseFormRef = ref<FormInstance>()
 const testCaseForm = reactive({
@@ -108,15 +119,18 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     if (valid) {
       suiteCreatingLoading.value = true
 
-      API.CreateTestCase({
-        suiteName: props.name,
-        name: testCaseForm.name,
-        api: testCaseForm.api,
-        method: testCaseForm.method
-      }, () => {
-        suiteCreatingLoading.value = false
-        emit('updated', 'hello from child')
-      })
+      API.CreateTestCase(
+        {
+          suiteName: props.name,
+          name: testCaseForm.name,
+          api: testCaseForm.api,
+          method: testCaseForm.method
+        },
+        () => {
+          suiteCreatingLoading.value = false
+          emit('updated', 'hello from child')
+        }
+      )
 
       dialogVisible.value = false
     }
@@ -124,29 +138,36 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 }
 
 function del() {
-  API.DeleteTestSuite(props.name, () => {
+  API.DeleteTestSuite(
+    props.name,
+    () => {
       ElMessage({
         message: 'Deleted.',
         type: 'success'
       })
       emit('updated')
-    }, (e) => {
+    },
+    (e) => {
       ElMessage.error('Oops, ' + e)
-    })
+    }
+  )
 }
 
 function convert() {
-  API.ConvertTestSuite(props.name, 'jmeter', (e) => {
-      const blob = new Blob([e.message], { type: `text/xml;charset=utf-8;` });
-      const link = document.createElement('a');
+  API.ConvertTestSuite(
+    props.name,
+    'jmeter',
+    (e) => {
+      const blob = new Blob([e.message], { type: `text/xml;charset=utf-8;` })
+      const link = document.createElement('a')
       if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `jmeter.jmx`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const url = URL.createObjectURL(blob)
+        link.setAttribute('href', url)
+        link.setAttribute('download', `jmeter.jmx`)
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
       }
 
       ElMessage({
@@ -154,9 +175,11 @@ function convert() {
         type: 'success'
       })
       emit('updated')
-    }, (e) => {
+    },
+    (e) => {
       ElMessage.error('Oops, ' + e)
-    })
+    }
+  )
 }
 
 const suiteCreatingLoading = ref(false)
@@ -173,10 +196,10 @@ const apiSpecKinds = [
 ]
 
 const handleAPISelect = (item: TestCase) => {
-  testCaseForm.method = item.request.method
-  if (testCaseForm.name === '') {
-    testCaseForm.name = item.name
-  }
+    testCaseForm.method = item.request.method
+    if (testCaseForm.name === '') {
+        testCaseForm.name = item.name
+    }
 }
 
 function paramChange() {
@@ -189,24 +212,61 @@ function paramChange() {
     } as Pair)
   }
 }
+
+const yamlFormat = ref('')
+const yamlDialogVisible = ref(false)
+
+function viewYaml() {
+  yamlDialogVisible.value = true
+  API.GetTestSuiteYaml(props.name, 'local', (d) => {
+    yamlFormat.value = yaml.dump(yaml.load(atob(d.data)))
+  })
+}
+
+const openDuplicateDialog = () => {
+  testSuiteDuplicateDialog.value = true
+  targetSuiteDuplicateName.value = props.name + '-copy'
+}
+const duplicateTestSuite = () => {
+  API.DuplicateTestSuite(props.name, targetSuiteDuplicateName.value, (d) => {
+    testSuiteDuplicateDialog.value = false
+    ElMessage({
+      message: 'Duplicated.',
+      type: 'success'
+    })
+    emit('updated')
+  })
+}
+const testSuiteDuplicateDialog = ref(false)
+const targetSuiteDuplicateName = ref('')
 </script>
 
 <template>
   <div class="common-layout">
     {{ t('tip.testsuite') }}<el-text class="mx-1" type="primary">{{ suite.name }}</el-text>
 
-    <table style="width: 100%;">
+    <table style="width: 100%">
       <tr>
-        <td style="width: 20%;">
+        <td style="width: 20%">
           {{ t('tip.apiAddress') }}
         </td>
-        <td style="width: 80%;">
-          <el-input class="w-50 m-2" v-model="suite.api" placeholder="API" test-id="suite-editor-api"></el-input>
+        <td style="width: 80%">
+          <el-input
+            class="w-50 m-2"
+            v-model="suite.api"
+            placeholder="API"
+            test-id="suite-editor-api"
+          ></el-input>
         </td>
       </tr>
       <tr>
         <td>
-          <el-select v-model="suite.spec.kind" class="m-2" placeholder="API Spec Kind" size="middle">
+          <el-select
+            v-model="suite.spec.kind"
+            class="m-2"
+            placeholder="API Spec Kind"
+            size="default"
+          >
             <el-option
               v-for="item in apiSpecKinds"
               :key="item.value"
@@ -221,18 +281,18 @@ function paramChange() {
       </tr>
     </table>
 
-    <div style="margin-top: 10px;">
+    <div style="margin-top: 10px">
       <el-text class="mx-1" type="primary">{{ t('title.parameter') }}</el-text>
       <el-table :data="suite.param" style="width: 100%">
-        <el-table-column label="Key" width="180">
+        <el-table-column :label="t('field.key')" width="180">
           <template #default="scope">
-            <el-input v-model="scope.row.key" placeholder="Key" @change="paramChange"/>
+            <el-input v-model="scope.row.key" :placeholder="t('field.key')" @change="paramChange" />
           </template>
         </el-table-column>
-        <el-table-column label="Value">
+        <el-table-column :label="t('field.value')">
           <template #default="scope">
             <div style="display: flex; align-items: center">
-              <el-input v-model="scope.row.value" placeholder="Value" />
+              <el-input v-model="scope.row.value" :placeholder="t('field.value')" />
             </div>
           </template>
         </el-table-column>
@@ -251,7 +311,7 @@ function paramChange() {
           v-model="suite.spec.rpc.raw"
           :autosize="{ minRows: 4, maxRows: 8 }"
           type="textarea"
-          />
+        />
       </div>
       <div>
         <span>{{ t('title.protoImport') }}</span>
@@ -264,11 +324,39 @@ function paramChange() {
       <el-divider />
     </div>
 
-    <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
-    <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{ t('button.save') }}</el-button>
-    <el-button type="primary" @click="del" test-id="suite-del-but">{{ t('button.delete') }}</el-button>
-    <el-button type="primary" @click="openNewTestCaseDialog" :icon="Edit" test-id="open-new-case-dialog">{{ t('button.newtestcase') }}</el-button>
-    <el-button type="primary" @click="convert" test-id="convert">{{ t('button.export') }}</el-button>
+    <div class="button-container">
+      <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{
+        t('button.save')
+      }}</el-button>
+      <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{
+        t('button.save')
+      }}</el-button>
+      <el-button type="primary" @click="del" :icon="Delete" test-id="suite-del-but">{{
+        t('button.delete')
+      }}</el-button>
+      <el-button type="primary" @click="convert" test-id="convert">{{
+        t('button.export')
+      }}</el-button>
+      <el-button
+        type="primary"
+        @click="openDuplicateDialog"
+        :icon="CopyDocument"
+        test-id="duplicate"
+        >{{ t('button.duplicate') }}</el-button
+      >
+      <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{
+        t('button.viewYaml')
+      }}</el-button>
+    </div>
+    <div class="button-container">
+      <el-button
+        type="primary"
+        @click="openNewTestCaseDialog"
+        :icon="Edit"
+        test-id="open-new-case-dialog"
+        >{{ t('button.newtestcase') }}</el-button
+      >
+    </div>
   </div>
 
   <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
@@ -282,9 +370,13 @@ function paramChange() {
           label-width="60px"
         >
           <el-form-item :label="t('field.name')" prop="name">
-            <el-input v-model="testCaseForm.name" test-id="case-form-name"/>
+            <el-input v-model="testCaseForm.name" test-id="case-form-name" />
           </el-form-item>
-          <el-form-item label="Method" prop="method" v-if="suite.spec.kind !== 'tRPC' && suite.spec.kind !== 'gRPC'">
+          <el-form-item
+            label="Method"
+            prop="method"
+            v-if="suite.spec.kind !== 'tRPC' && suite.spec.kind !== 'gRPC'"
+          >
             <el-select
               v-model="testCaseForm.method"
               class="m-2"
@@ -328,4 +420,41 @@ function paramChange() {
       </span>
     </template>
   </el-dialog>
+
+  <el-dialog
+    v-model="yamlDialogVisible"
+    :title="t('button.viewYaml')"
+    :fullscreen="isFullScreen"
+    width="40%"
+    draggable
+  >
+    <el-button type="primary" @click="isFullScreen = !isFullScreen" style="margin-bottom: 10px">
+      <p>{{ isFullScreen ? t('button.cancelFullScreen') : t('button.fullScreen') }}</p>
+    </el-button>
+    <el-scrollbar>
+      <Codemirror v-model="yamlFormat" />
+    </el-scrollbar>
+  </el-dialog>
+
+  <el-drawer v-model="testSuiteDuplicateDialog">
+    <template #default>
+      New Test Suite Name:<el-input v-model="targetSuiteDuplicateName" />
+    </template>
+    <template #footer>
+      <el-button type="primary" @click="duplicateTestSuite">{{ t('button.ok') }}</el-button>
+    </template>
+  </el-drawer>
 </template>
+
+<style scoped>
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.button-container > .el-button + .el-button {
+  margin-left: 0px;
+}
+</style>
