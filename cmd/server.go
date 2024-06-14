@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/runner"
 	"net"
 	"net/http"
 	"os"
@@ -298,7 +299,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			collectors.NewGoCollector(),
 			collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 			collectors.NewBuildInfoCollector(),
-			server.ExecutionNum,
+			server.ExecutionCountNum, server.ExecutionSuccessNum, server.ExecutionFailNum,
+			runner.RunnersNum,
 		)
 		mux.HandlePath(http.MethodGet, "/metrics", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 			promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}).ServeHTTP(w, r)

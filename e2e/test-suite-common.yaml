@@ -303,3 +303,14 @@ items:
   expect:
     header:
       Content-Type: image/x-icon
+
+## metrics
+- name: metrics
+  request:
+    api: /metrics
+  expect:
+    verify:
+      - contains(data, "atest_execution_count")
+      - contains(data, "atest_execution_fail")
+      - contains(data, "atest_execution_success")
+      - contains(data, "atest_runners_count")

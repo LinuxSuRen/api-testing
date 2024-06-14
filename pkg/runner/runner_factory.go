@@ -49,14 +49,12 @@ func GetTestSuiteRunner(suite *testing.TestSuite) TestCaseRunner {
 
 type RunnerCreator func(suite *testing.TestSuite) TestCaseRunner
 
-var runners map[string]RunnerCreator = make(map[string]RunnerCreator, 4)
+var runners = make(map[string]RunnerCreator, 4)
 
-var (
-	runnersNum = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "atest_runners_total",
-		Help: "The total number of runners",
-	})
-)
+var RunnersNum = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "atest_runners_count",
+	Help: "The total number of runners",
+})
 
 func RegisterRunner(kind string, runner RunnerCreator) error {
 	if _, ok := runners[kind]; ok {
@@ -64,6 +62,6 @@ func RegisterRunner(kind string, runner RunnerCreator) error {
 	}
 
 	runners[kind] = runner
-	runnersNum.Inc()
+	RunnersNum.Inc()
 	return nil
 }

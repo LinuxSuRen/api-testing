@@ -199,16 +199,10 @@ func (s *server) getLoader(ctx context.Context) (loader testing.Writer) {
 	return
 }
 
-var ExecutionNum = promauto.NewCounter(prometheus.CounterOpts{
-	Name: "atest_execution_total",
-	Help: "The total number of request execution",
-})
-
 // Run start to run the test task
 func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, err error) {
 	task.Level = withDefaultValue(task.Level, "info").(string)
 	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
-	ExecutionNum.Inc()
 
 	var suite *testing.TestSuite
 
@@ -424,8 +418,31 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	return
 }
 
+var ExecutionCountNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_count",
+	Help: "The total number of request execution",
+})
+var ExecutionSuccessNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_success",
+	Help: "The total number of request execution success",
+})
+var ExecutionFailNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_fail",
+	Help: "The total number of request execution fail",
+})
+
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
 	var targetTestSuite testing.TestSuite
+	ExecutionCountNum.Inc()
+	defer func() {
+		if result.Error == "" {
+			ExecutionGuage.Set(0)
+			ExecutionFailNum.Inc()
+		} else {
+			ExecutionGuage.Set(1)
+			ExecutionSuccessNum.Inc()
+		}
+	}()
 
 	loader := s.getLoader(ctx)
 	defer loader.Close()
