@@ -368,7 +368,8 @@ items:
 ## metrics
 - name: metrics
   request:
-    api: /metrics
+    api: |
+      {{.param.server}}/metrics
   expect:
     verify:
       - indexOf(data, "atest_execution_count") != -1
