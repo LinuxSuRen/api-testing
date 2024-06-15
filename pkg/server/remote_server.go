@@ -514,9 +514,9 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 	ExecutionCountNum.Inc()
 	defer func() {
 		if result.Error == "" {
-			ExecutionFailNum.Inc()
-		} else {
 			ExecutionSuccessNum.Inc()
+		} else {
+            ExecutionFailNum.Inc()
 		}
 	}()
 
