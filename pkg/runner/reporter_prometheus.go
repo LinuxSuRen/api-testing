@@ -17,11 +17,14 @@ limitations under the License.
 package runner
 
 import (
+	"fmt"
+	"os"
 	"sync"
 
 	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
+	"github.com/prometheus/common/expfmt"
 )
 
 var (
@@ -96,6 +99,23 @@ func (w *prometheusReporter) PutRecord(record *ReportRecord) {
 }
 
 func (r *prometheusReporter) GetResourceUsage() []ResourceUsage {
+	reader, err := os.Open("path")
+	if err != nil {
+		return nil
+	}
+
+	var parser expfmt.TextParser
+	mf, err := parser.TextToMetricFamilies(reader)
+	if err != nil {
+		return nil
+	}
+	for k, v := range mf {
+		fmt.Println("KEY: ", k)
+		fmt.Println("VAL: ", v)
+	}
+
+	// mf["jvm_memory_used_bytes"].Metric[0].Value
+
 	return nil
 }
 
