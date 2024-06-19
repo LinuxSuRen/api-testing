@@ -1,0 +1,8 @@
+bin/
+extensions/
+dist/
+console/atest-desktop/
+console/atest-ui/node_modules/
+docs/site/node_modules/
+docs/site/public/
+docs/site/resources/

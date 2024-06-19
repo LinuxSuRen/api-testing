@@ -17,6 +17,8 @@ package server
 
 import (
 	context "context"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"net"
 	"net/http"
 	"strings"
@@ -93,7 +95,18 @@ func (s *defaultCombineHandler) GetHandler() http.Handler {
 	return s
 }
 
+var RequestCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+	Name: "http_requests_total",
+	Help: "The total number of HTTP requests",
+}, []string{"method", "source", "path"})
+
 func (s *defaultCombineHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	sourceIP := r.RemoteAddr
+	if len(strings.Split(sourceIP, ":")) > 1 {
+		sourceIP = strings.Split(sourceIP, ":")[0]
+	}
+	RequestCounter.WithLabelValues(r.Method, sourceIP, r.RequestURI).Inc()
+
 	for prefix, handler := range s.handlerMapping {
 		if strings.HasPrefix(r.URL.Path, prefix) {
 			handler.ServeHTTP(w, r)

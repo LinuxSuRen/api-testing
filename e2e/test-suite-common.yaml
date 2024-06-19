@@ -376,3 +376,4 @@ items:
       - indexOf(data, "atest_execution_fail") != -1
       - indexOf(data, "atest_execution_success") != -1
       - indexOf(data, "atest_runners_count") != -1
+      - indexOf(data, "http_requests_total") != -1
