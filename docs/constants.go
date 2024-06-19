@@ -2,5 +2,5 @@ package docs
 
 import _ "embed"
 
-//go:embed api-testing-schema.json
+//go:embed site/static/api-testing-schema.json
 var Schema string
