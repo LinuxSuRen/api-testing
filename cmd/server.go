@@ -336,6 +336,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 			collectors.NewBuildInfoCollector(),
 			server.ExecutionCountNum, server.ExecutionSuccessNum, server.ExecutionFailNum,
+			server.RequestCounter,
 			runner.RunnersNum,
 		)
 		mux.HandlePath(http.MethodGet, "/metrics", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
