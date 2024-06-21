@@ -89,6 +89,10 @@ type BodyGetter interface {
 }
 
 func NewBodyVerify(contentType string, body BodyGetter) BodyVerifier {
+	if IsJSONCompatileType(contentType) {
+		contentType = util.JSON
+	}
+
 	switch contentType {
 	case util.JSON:
 		return &jsonBodyVerifier{body: body}
@@ -126,6 +130,9 @@ func (v *jsonBodyVerifier) Parse(data []byte) (obj interface{}, err error) {
 }
 
 func (v *jsonBodyVerifier) Verify(data []byte) (err error) {
+	if v.body == nil {
+		return
+	}
 	for key, expectVal := range v.body.GetBodyFieldsExpect() {
 		result := gjson.Get(string(data), key)
 		if result.Exists() {

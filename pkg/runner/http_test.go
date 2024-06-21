@@ -575,6 +575,9 @@ func TestIsStructContent(t *testing.T) {
 	}, {
 		contentType: util.OCIImageIndex,
 		expectOk:    true,
+	}, {
+		contentType: "application/problem+json",
+		expectOk:    true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.contentType, func(t *testing.T) {

@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,14 +49,36 @@ func TestVerify(t *testing.T) {
 
 	t.Run("verify YAML contentType", func(t *testing.T) {
 		assert.Nil(t, runner.NewBodyVerify("fake", nil))
-		verfier := runner.NewBodyVerify(util.YAML, nil)
-		assert.NotNil(t, verfier)
+		verifer := runner.NewBodyVerify(util.YAML, nil)
+		assert.NotNil(t, verifer)
 
-		obj, err := verfier.Parse([]byte(`name: linuxsuren`))
+		obj, err := verifer.Parse([]byte(`name: linuxsuren`))
 		assert.NoError(t, err)
-		assert.Equal(t, map[string]interface{}{
-			"name": "linuxsuren",
-		}, obj)
-		assert.NoError(t, verfier.Verify(nil))
+		assert.Equal(t, expectJSONObj, obj)
+		assert.NoError(t, verifer.Verify(nil))
 	})
+
+	t.Run("verify JSON compatible type", func(t *testing.T) {
+		verifer := runner.NewBodyVerify("application/problem+json", nil)
+		assert.NotNil(t, verifer)
+
+		obj, err := verifer.Parse([]byte(`{"name":"linuxsuren"}`))
+		assert.NoError(t, err)
+		assert.Equal(t, expectJSONObj, obj)
+		assert.NoError(t, verifer.Verify(nil))
+	})
+
+	t.Run("verify plain type", func(t *testing.T) {
+		verifer := runner.NewBodyVerify(util.Plain, nil)
+		assert.NotNil(t, verifer)
+
+		obj, err := verifer.Parse([]byte("hello"))
+		assert.NoError(t, err)
+		assert.Equal(t, "hello", obj)
+		assert.NoError(t, verifer.Verify(nil))
+	})
+}
+
+var expectJSONObj = map[string]interface{}{
+	"name": "linuxsuren",
 }
