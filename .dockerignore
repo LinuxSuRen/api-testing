@@ -1,6 +1,8 @@
-console/atest-ui/node_modules
-console/atest-ui/dist
-.git/
 bin/
+extensions/
 dist/
-.vscode/
+console/atest-desktop/
+console/atest-ui/node_modules/
+docs/site/node_modules/
+docs/site/public/
+docs/site/resources/

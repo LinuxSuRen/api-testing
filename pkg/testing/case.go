@@ -36,6 +36,7 @@ type APISpec struct {
 	URL    string   `yaml:"url,omitempty" json:"url,omitempty"`
 	RPC    *RPCDesc `yaml:"rpc,omitempty" json:"rpc,omitempty"`
 	Secure *Secure  `yaml:"secure,omitempty" json:"secure,omitempty"`
+	Metric *Metric  `yaml:"metric,omitempty" json:"metric,omitempty"`
 }
 
 type RPCDesc struct {
@@ -52,6 +53,11 @@ type Secure struct {
 	CAFile     string `yaml:"ca,omitempty" json:"ca,omitempty"`
 	KeyFile    string `yaml:"key,omitempty" json:"key,omitempty"`
 	ServerName string `yaml:"serverName,omitempty" json:"serverName,omitempty"`
+}
+
+type Metric struct {
+	Type string `yaml:"type,omitempty" json:"type,omitempty"`
+	URL  string `yaml:"url,omitempty" json:"url,omitempty"`
 }
 
 // TestCase represents a test case

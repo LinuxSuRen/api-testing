@@ -1,0 +1,6 @@
+console/atest-ui/node_modules
+console/atest-ui/dist
+.git/
+bin/
+dist/
+.vscode/

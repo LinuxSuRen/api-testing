@@ -141,7 +141,7 @@ func (r *reverseHTTPRunner) RunTestCase(testcase *testing.TestCase, dataContext 
 		mutationCase := mutator.Render(testcase)
 		_, reverseErr := r.TestCaseRunner.RunTestCase(mutationCase, dataContext, ctx)
 		if reverseErr == nil {
-			err = fmt.Errorf("failed when: %q", mutator.Message())
+			err = fmt.Errorf("testcase %q failed when: %q", testcase.Name, mutator.Message())
 			return
 		}
 	}

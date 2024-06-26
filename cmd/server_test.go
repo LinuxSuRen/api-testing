@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	_ "embed"
 	"errors"
 	"fmt"
@@ -27,6 +28,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/h2non/gock"
@@ -214,7 +216,7 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 
 func TestProxy(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
-		gock.Off()
+		defer gock.Off()
 
 		gock.New("http://localhost:8080").Post("/api/v1/echo").Reply(http.StatusOK)
 		gock.New("http://localhost:9090").Post("/api/v1/echo").Reply(http.StatusOK)
@@ -228,7 +230,7 @@ func TestProxy(t *testing.T) {
 	})
 
 	t.Run("no proxy", func(t *testing.T) {
-		gock.Off()
+		defer gock.Off()
 
 		gock.New("http://localhost:8080").Post("/api/v1/echo").Reply(http.StatusOK)
 
@@ -286,18 +288,55 @@ func TestStartPlugins(t *testing.T) {
 	err = os.WriteFile(filepath.Join(dir, "stores.yaml"), []byte(sampleStores), 0644)
 	assert.NoError(t, err)
 
-	rootCmd := &cobra.Command{
-		Use: "atest",
-	}
-	rootCmd.SetOut(io.Discard)
-	rootCmd.AddCommand(createServerCmd(
-		fakeruntime.FakeExecer{ExpectOS: "linux", ExpectLookPathError: errors.New("not-found")},
-		server.NewFakeHTTPServer(),
-	))
+	t.Run("dry-run", func(t *testing.T) {
+		rootCmd := &cobra.Command{
+			Use: "atest",
+		}
+		rootCmd.SetOut(io.Discard)
+		rootCmd.AddCommand(createServerCmd(
+			fakeruntime.FakeExecer{ExpectOS: "linux", ExpectLookPathError: errors.New("not-found")},
+			server.NewFakeHTTPServer(),
+		))
 
-	rootCmd.SetArgs([]string{"server", "--config-dir", dir, "--dry-run", "--port=0", "--http-port=0"})
-	err = rootCmd.Execute()
-	assert.NoError(t, err)
+		rootCmd.SetArgs([]string{"server", "--config-dir", dir, "--dry-run", "--port=0", "--http-port=0"})
+		err = rootCmd.Execute()
+		assert.NoError(t, err)
+	})
+
+	t.Run("normal", func(t *testing.T) {
+		httpServer := server.NewDefaultHTTPServer()
+		rootCmd := &cobra.Command{
+			Use: "atest",
+		}
+		rootCmd.SetOut(io.Discard)
+		rootCmd.AddCommand(createServerCmd(
+			fakeruntime.FakeExecer{ExpectOS: "linux", ExpectLookPathError: errors.New("not-found")},
+			httpServer,
+		))
+
+		rootCmd.SetArgs([]string{"server", "--config-dir", dir, "--port=0", "--http-port=0"})
+		go func() {
+			err = rootCmd.Execute()
+			assert.NoError(t, err)
+		}()
+
+		for httpServer.GetPort() == "" {
+			time.Sleep(time.Second)
+		}
+
+		defer func() {
+			httpServer.Shutdown(context.Background())
+		}()
+		resp, err := http.Post(fmt.Sprintf("http://localhost:%s/server.Runner/GetSuites", httpServer.GetPort()), util.JSON, nil)
+		if assert.NoError(t, err) {
+			assert.Equal(t, http.StatusOK, resp.StatusCode)
+		}
+
+		resp, err = http.Get(fmt.Sprintf("http://localhost:%s/metrics", httpServer.GetPort()))
+		if assert.NoError(t, err) {
+			assert.Equal(t, http.StatusOK, resp.StatusCode)
+		}
+	})
 }
 
 type fakeResponseWriter struct {

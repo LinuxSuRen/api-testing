@@ -22,6 +22,12 @@ import (
 
 // GetPort returns the port of the listener
 func GetPort(listener net.Listener) string {
+<<<<<<< HEAD
+=======
+	if listener == nil {
+		return ""
+	}
+>>>>>>> origin/master
 	addr := listener.Addr().String()
 	items := strings.Split(addr, ":")
 	return items[len(items)-1]

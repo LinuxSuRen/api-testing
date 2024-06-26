@@ -21,12 +21,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"io"
 	"net/http"
 	"os"
 	reflect "reflect"
 	"regexp"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/mock"
 
@@ -203,7 +207,6 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
 
 	var suite *testing.TestSuite
-
 	// TODO may not safe in multiple threads
 	oldEnv := map[string]string{}
 	for key, val := range task.Env {
@@ -270,6 +273,47 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 	}
 	reply.Message = buf.String()
 	return
+}
+
+func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
+	ctx := srv.Context()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			var in *TestSuiteIdentity
+			in, err = srv.Recv()
+			if err != nil {
+				if err == io.EOF {
+					return nil
+				}
+				return err
+			}
+
+			var suite *Suite
+			if suite, err = s.ListTestCase(ctx, in); err != nil {
+				return
+			}
+
+			for _, item := range suite.Items {
+				var reply *TestCaseResult
+				if reply, err = s.RunTestCase(ctx, &TestCaseIdentity{
+					Suite:    in.Name,
+					Testcase: item.Name,
+				}); err != nil {
+					return
+				}
+
+				if err = srv.Send(&TestResult{
+					TestCaseResult: []*TestCaseResult{reply},
+					Error:          reply.Error,
+				}); err != nil {
+					return err
+				}
+			}
+		}
+	}
 }
 
 // GetVersion returns the version
@@ -452,8 +496,29 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	return
 }
 
+var ExecutionCountNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_count",
+	Help: "The total number of request execution",
+})
+var ExecutionSuccessNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_success",
+	Help: "The total number of request execution success",
+})
+var ExecutionFailNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_fail",
+	Help: "The total number of request execution fail",
+})
+
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
 	var targetTestSuite testing.TestSuite
+	ExecutionCountNum.Inc()
+	defer func() {
+		if result.Error == "" {
+			ExecutionSuccessNum.Inc()
+		} else {
+            ExecutionFailNum.Inc()
+		}
+	}()
 
 	result = &TestCaseResult{}
 	loader := s.getLoader(ctx)
@@ -632,7 +697,6 @@ func (s *server) ListCodeGenerator(ctx context.Context, in *Empty) (reply *Simpl
 
 func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
 	reply = &CommonResult{}
-
 	instance := generator.GetCodeGenerator(in.Generator)
 	if instance == nil {
 		reply.Success = false
@@ -652,6 +716,7 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 		}
 
 		if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
+
 			result.Request.RenderAPI(suite.API)
 
 			output, genErr := instance.Generate(&suite, &result)
@@ -841,7 +906,7 @@ func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err 
 	store := ToNormalStore(in)
 
 	if store.Kind.URL == "" {
-		store.Kind.URL = fmt.Sprintf("unix://%s", os.ExpandEnv(fmt.Sprintf("$HOME/.config/atest/%s.sock", store.Kind.Name)))
+		store.Kind.URL = fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(store.Kind.Name))
 	}
 
 	if err = storeFactory.CreateStore(store); err == nil && s.storeExtMgr != nil {

@@ -275,6 +275,16 @@ items:
         "suite": "{{.param.gRPCSuiteName}}",
         "testcase": "{{.param.gRPCCaseName}}"
       }
+- name: runTestSuite
+  request:
+    api: /RunTestSuite
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "name": "{{.param.gRPCSuiteName}}"
+      }
 - name: version
   request:
     api: /GetVersion
@@ -354,3 +364,16 @@ items:
   expect:
     header:
       Content-Type: image/x-icon
+
+## metrics
+- name: metrics
+  request:
+    api: |
+      {{.param.server}}/metrics
+  expect:
+    verify:
+      - indexOf(data, "atest_execution_count") != -1
+      - indexOf(data, "atest_execution_fail") != -1
+      - indexOf(data, "atest_execution_success") != -1
+      - indexOf(data, "atest_runners_count") != -1
+      - indexOf(data, "http_requests_total") != -1

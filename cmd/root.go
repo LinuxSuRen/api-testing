@@ -3,6 +3,8 @@ package cmd
 import (
 	"os"
 
+	"github.com/linuxsuren/api-testing/pkg/downloader"
+
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/version"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
@@ -21,7 +23,7 @@ func NewRootCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c *cob
 		createRunCommand(), createSampleCmd(),
 		createServerCmd(execer, httpServer), createJSONSchemaCmd(),
 		createServiceCommand(execer), createFunctionCmd(), createConvertCommand(),
-		createMockCmd())
+		createMockCmd(), createExtensionCommand(downloader.NewStoreDownloader()))
 	return
 }
 

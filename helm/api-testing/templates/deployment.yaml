@@ -37,6 +37,7 @@ spec:
           command:
           - atest
           - server
+          - --extension-registry={{ .Values.extension.registry }}
           - --local-storage=/root/.atest/data/*.yaml
           {{- if .Values.skywalking.endpoint.http }}
           - --skywalking={{ .Values.skywalking.endpoint.http }}

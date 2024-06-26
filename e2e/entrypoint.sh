@@ -1,11 +1,38 @@
 #!/bin/bash
 set -e
 
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 mkdir -p /root/.config/atest
 mkdir -p /var/data
 
-nohup atest server&
-cmd="atest run -p test-suite-common.yaml --report github --report-github-identity e2e-testing --report-file /var/data/report.json --report-github-repo linuxsuren/api-testing --report-github-pr ${PULL_REQUEST:-0}"
+# Generate private key
+openssl genrsa -out server.key 2048
+# Generate self-signed certificate
+openssl req -new -x509 -key server.key -out server.crt -days 36500 \
+    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com"
+# Generate Certificate Signing Request (CSR)
+openssl req -new -key server.key -out server.csr \
+    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com"
+# Generate a new private key
+openssl genpkey -algorithm RSA -out test.key
+# Generate a new CSR
+openssl req -new -nodes -key test.key -out test.csr -days 3650 \
+    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com" \
+    -config "openssl.cnf" -extensions v3_req
+# Sign the new CSR with the self-signed certificate
+openssl x509 -req -days 365 -in test.csr \
+    -out test.pem -CA server.crt -CAkey server.key \
+    -CAcreateserial -extfile "openssl.cnf" -extensions v3_req
+
+echo "start to download extenions"
+atest extension --output /usr/local/bin --registry ghcr.io git
+atest extension --output /usr/local/bin --registry ghcr.io orm
+atest extension --output /usr/local/bin --registry ghcr.io etcd
+atest extension --output /usr/local/bin --registry ghcr.io mongodb
+
+echo "start to run server"
+nohup atest server --tls-grpc --cert-file test.pem --key-file test.key&
+cmd="atest run -p test-suite-common.yaml"
 
 echo "start to run testing: $cmd"
 kind=orm target=mysql:3306 driver=mysql $cmd
@@ -27,4 +54,3 @@ kind=orm target=postgres:5432 driver=postgres $cmd
 # kind=s3 target=minio:9000 atest run -p test-suite-common.yaml
 
 cat /root/.config/atest/stores.yaml
-exit 0

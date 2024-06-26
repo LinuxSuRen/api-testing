@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -89,11 +89,17 @@ type BodyGetter interface {
 }
 
 func NewBodyVerify(contentType string, body BodyGetter) BodyVerifier {
+	if IsJSONCompatileType(contentType) {
+		contentType = util.JSON
+	}
+
 	switch contentType {
 	case util.JSON:
 		return &jsonBodyVerifier{body: body}
 	case util.YAML:
 		return &yamlBodyVerifier{body: body}
+	case util.Plain:
+		return &plainTextBodyVerify{body: body}
 	default:
 		return nil
 	}
@@ -124,6 +130,9 @@ func (v *jsonBodyVerifier) Parse(data []byte) (obj interface{}, err error) {
 }
 
 func (v *jsonBodyVerifier) Verify(data []byte) (err error) {
+	if v.body == nil {
+		return
+	}
 	for key, expectVal := range v.body.GetBodyFieldsExpect() {
 		result := gjson.Get(string(data), key)
 		if result.Exists() {
@@ -151,6 +160,20 @@ func (v *yamlBodyVerifier) Parse(data []byte) (obj interface{}, err error) {
 
 func (v *yamlBodyVerifier) Verify(data []byte) (err error) {
 	// TODO need to implement
+	return
+}
+
+type plainTextBodyVerify struct {
+	body BodyGetter
+}
+
+func (v *plainTextBodyVerify) Parse(data []byte) (obj interface{}, err error) {
+	obj = string(data)
+	return
+}
+
+func (v *plainTextBodyVerify) Verify(data []byte) (err error) {
+	// no need to do anything
 	return
 }
 
