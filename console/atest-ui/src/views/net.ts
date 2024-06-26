@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -82,14 +82,14 @@ interface ImportSource {
 function UpdateTestSuite(suite: any,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'X-Store-Name': Cache.GetCurrentStore().name,
       'X-Auth': getToken()
     },
     body: JSON.stringify(suite)
   }
-  fetch('/server.Runner/UpdateTestSuite', requestOptions)
+  fetch(`/api/v1/suites/${suite.name}`, requestOptions)
   .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -111,16 +111,13 @@ function GetTestSuite(name: string,
 function DeleteTestSuite(name: string,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
+    method: 'DELETE',
     headers: {
       'X-Store-Name': Cache.GetCurrentStore().name,
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      name: name
-    })
+    }
   }
-  fetch('/server.Runner/DeleteTestSuite', requestOptions)
+  fetch(`/api/v1/suites/${name}`, requestOptions)
   .then(DefaultResponseProcess)
   .then(callback).catch(errHandle)
 }
@@ -156,7 +153,7 @@ function DuplicateTestSuite(sourceSuiteName: string, targetSuiteName: string,
           targetSuiteName: targetSuiteName,
       })
     }
-    fetch('/server.Runner/DuplicateTestSuite', requestOptions)
+    fetch(`/api/v1/suites/${sourceSuiteName}/duplicate`, requestOptions)
         .then(DefaultResponseProcess)
         .then(callback).catch(errHandle)
 }
@@ -214,7 +211,7 @@ function UpdateTestCase(testcase: any,
   callback: (d: any) => void, errHandle?: (e: any) => void | null,
   toggle?: (e: boolean) => void) {
     const requestOptions = {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'X-Store-Name': Cache.GetCurrentStore().name,
         'X-Auth': getToken()
@@ -222,7 +219,7 @@ function UpdateTestCase(testcase: any,
       body: JSON.stringify(testcase)
     }
     safeToggleFunc(toggle)(true)
-    fetch('/server.Runner/UpdateTestCase', requestOptions)
+    fetch(`/api/v1/suites/${testcase.suiteName}/cases/${testcase.data.name}`, requestOptions)
       .then(DefaultResponseProcess)
       .then(callback).catch(errHandle)
       .finally(() => {
@@ -259,7 +256,7 @@ function ListTestCase(suite: string, store: string,
 function DeleteTestCase(testcase: TestCase,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
     const requestOptions = {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         'X-Store-Name': Cache.GetCurrentStore().name,
         'X-Auth': getToken()
@@ -269,7 +266,7 @@ function DeleteTestCase(testcase: TestCase,
         testcase: testcase.name
       })
     }
-    fetch('/server.Runner/DeleteTestCase', requestOptions)
+    fetch(`/api/v1/suites/${testcase.suiteName}/cases/${testcase.name}`, requestOptions)
       .then(callback).catch(errHandle)
 }
 
@@ -293,7 +290,7 @@ function RunTestCase(request: RunTestCaseRequest,
       parameters: request.parameters
     })
   }
-  fetch('/server.Runner/RunTestCase', requestOptions)
+  fetch(`/api/v1/suites/${request.suiteName}/cases/${request.name}/run`, requestOptions)
   .then(DefaultResponseProcess)
   .then(callback).catch(errHandle)
 }
@@ -314,7 +311,7 @@ function DuplicateTestCase(sourceSuiteName: string, targetSuiteName: string,
             targetCaseName: targetTestCaseName,
         })
     }
-    fetch('/server.Runner/DuplicateTestCase', requestOptions)
+    fetch(`/api/v1/suites/${sourceSuiteName}/cases/${sourceTestCaseName}/duplicate`, requestOptions)
         .then(DefaultResponseProcess)
         .then(callback).catch(errHandle)
 }
@@ -339,14 +336,13 @@ function GenerateCode(request: GenerateRequest,
       Generator: request.generator
     })
   }
-  fetch('/server.Runner/GenerateCode', requestOptions)
+  fetch(`/api/v1/code-generators/generate`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
 
 function ListCodeGenerator(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
-  fetch('/server.Runner/ListCodeGenerator', {
-    method: 'POST',
+  fetch('/api/v1/code-generators', {
     headers: {
       'X-Auth': getToken()
     },
@@ -377,9 +373,10 @@ function CreateOrUpdateStore(payload: any, create: boolean,
     body: JSON.stringify(payload)
   }
   
-  let api = '/server.Runner/CreateStore'
+  let api = '/api/v1/stores'
   if (!create) {
-    api = '/server.Runner/UpdateStore'
+    api = `/api/v1/stores/${payload.name}`
+    requestOptions.method = "PUT"
   }
 
   safeToggleFunc(toggle)(true)
@@ -405,15 +402,12 @@ function GetStores(callback: (d: any) => void,
 function DeleteStore(name: string,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
+    method: 'DELETE',
     headers: {
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      name: name
-    })
+    }
   }
-  fetch('/server.Runner/DeleteStore', requestOptions)
+  fetch(`/api/v1/stores/${name}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -438,12 +432,11 @@ function VerifyStore(name: string,
 
 function GetSecrets(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Auth': getToken()
     },
   }
-  fetch('/server.Runner/GetSecrets', requestOptions)
+  fetch(`/api/v1/secrets`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback)
     .catch(errHandle)
@@ -452,15 +445,11 @@ function GetSecrets(callback: (d: any) => void, errHandle?: (e: any) => void | n
 function FunctionsQuery(filter: string,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      name: filter
-    })
+    }
   }
-  fetch('/server.Runner/FunctionsQuery', requestOptions)
+  fetch(`/api/v1/functions?name=${filter}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -509,16 +498,12 @@ function CreateOrUpdateSecret(payload: any, create: boolean,
 function GetSuggestedAPIs(name: string,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Store-Name': Cache.GetCurrentStore().name,
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      name: name
-    })
+    }
   }
-  fetch('/server.Runner/GetSuggestedAPIs', requestOptions)
+  fetch(`/api/v1/suggested-apis?name=${name}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback)
 }

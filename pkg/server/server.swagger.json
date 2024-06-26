@@ -64,22 +64,12 @@
         },
         "parameters": [
           {
-            "name": "TestSuite",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "TestCase",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "Generator",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverCodeGenerateRequest"
+            }
           }
         ],
         "tags": [
