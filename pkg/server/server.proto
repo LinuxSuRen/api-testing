@@ -8,7 +8,12 @@ import "google/api/annotations.proto";
 
 service Runner {
     // belong to a specific store
-    rpc Run (TestTask) returns (TestResult) {}
+    rpc Run (TestTask) returns (TestResult) {
+      option (google.api.http) = {
+        post: "/api/v1/run"
+        body: "*"
+      };
+    }
 
     // test suites related
     rpc GetSuites(Empty) returns (Suites) {
@@ -44,10 +49,10 @@ service Runner {
       };
     }
     rpc DuplicateTestSuite(TestSuiteDuplicate) returns (HelloReply) {
-//      option (google.api.http) = {
-//        post: "/api/v1/suites/{name}/duplicate"
-//        body: "*"
-//      };
+      option (google.api.http) = {
+        post: "/api/v1/suites/{sourceSuiteName}/duplicate"
+        body: "*"
+      };
     }
     rpc GetTestSuiteYaml(TestSuiteIdentity) returns (YamlData) {
       option (google.api.http) = {
@@ -72,10 +77,29 @@ service Runner {
             get: "/api/v1/suites/{suite}/cases/{testcase}"
         };
     }
-    rpc CreateTestCase(TestCaseWithSuite) returns (HelloReply) {}
-    rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {}
-    rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {}
-    rpc DuplicateTestCase(TestCaseDuplicate) returns (HelloReply) {}
+    rpc CreateTestCase(TestCaseWithSuite) returns (HelloReply) {
+      option (google.api.http) = {
+          post: "/api/v1/suites/{suiteName}/cases"
+          body: "*"
+      };
+    }
+    rpc UpdateTestCase(TestCaseWithSuite) returns (HelloReply) {
+      option (google.api.http) = {
+          put: "/api/v1/suites/{suiteName}/cases/{data.name}"
+          body: "*"
+      };
+    }
+    rpc DeleteTestCase(TestCaseIdentity) returns (HelloReply) {
+      option (google.api.http) = {
+          delete: "/api/v1/suites/{suite}/cases/{testcase}"
+      };
+    }
+    rpc DuplicateTestCase(TestCaseDuplicate) returns (HelloReply) {
+      option (google.api.http) = {
+          post: "/api/v1/suites/{sourceSuiteName}/cases/{sourceCaseName}/duplicate"
+          body: "*"
+      };
+    }
     rpc GetSuggestedAPIs(TestSuiteIdentity) returns (TestCases) {
         option (google.api.http) = {
             get: "/api/v1/suggested-apis"
@@ -95,40 +119,115 @@ service Runner {
     }
 
     // converter
-    rpc ListConverter(Empty) returns (SimpleList) {}
-    rpc ConvertTestSuite(CodeGenerateRequest) returns (CommonResult) {}
+    rpc ListConverter(Empty) returns (SimpleList) {
+      option (google.api.http) = {
+        get: "/api/v1/converters"
+      };
+    }
+    rpc ConvertTestSuite(CodeGenerateRequest) returns (CommonResult) {
+      option (google.api.http) = {
+        post: "/api/v1/converters/convert"
+        body: "*"
+      };
+    }
 
     // common services
-    rpc PopularHeaders(Empty) returns (Pairs) {}
-    rpc FunctionsQuery(SimpleQuery) returns (Pairs) {}
+    rpc PopularHeaders(Empty) returns (Pairs) {
+      option (google.api.http) = {
+        get: "/api/v1/popularHeaders"
+      };
+    }
+    rpc FunctionsQuery(SimpleQuery) returns (Pairs) {
+      option (google.api.http) = {
+        get: "/api/v1/functions"
+      };
+    }
     rpc FunctionsQueryStream(stream SimpleQuery) returns (stream Pairs) {
       option (google.api.http) = {
         get: "/api/v1/functionsQuery"
       };
     }
-    rpc GetVersion(Empty) returns (HelloReply) {}
-    rpc Sample(Empty) returns (HelloReply) {}
+    rpc GetVersion(Empty) returns (HelloReply) {
+      option (google.api.http) = {
+        get: "/api/v1/version"
+      };
+    }
+    rpc Sample(Empty) returns (HelloReply) {
+      option (google.api.http) = {
+        get: "/api/v1/sample"
+      };
+    }
 
     // stores related interfaces
-    rpc GetStoreKinds(Empty) returns (StoreKinds) {}
-    rpc GetStores(Empty) returns (Stores) {}
-    rpc CreateStore(Store) returns (Store) {}
-    rpc UpdateStore(Store) returns (Store) {}
-    rpc DeleteStore(Store) returns (Store) {}
-    rpc VerifyStore(SimpleQuery) returns (ExtensionStatus) {}
+    rpc GetStoreKinds(Empty) returns (StoreKinds) {
+      option (google.api.http) = {
+        get: "/api/v1/stores/kinds"
+      };
+    }
+    rpc GetStores(Empty) returns (Stores) {
+      option (google.api.http) = {
+        get: "/api/v1/stores"
+      };
+    }
+    rpc CreateStore(Store) returns (Store) {
+      option (google.api.http) = {
+        post: "/api/v1/stores"
+        body: "*"
+      };
+    }
+    rpc UpdateStore(Store) returns (Store) {
+      option (google.api.http) = {
+        put: "/api/v1/stores/{name}"
+        body: "*"
+      };
+    }
+    rpc DeleteStore(Store) returns (Store) {
+      option (google.api.http) = {
+        delete: "/api/v1/stores/{name}"
+      };
+    }
+    rpc VerifyStore(SimpleQuery) returns (ExtensionStatus) {
+      option (google.api.http) = {
+        post: "/api/v1/stores/verify"
+        body: "*"
+      };
+    }
 
     // secret related interfaces
-    rpc GetSecrets(Empty) returns (Secrets) {}
-    rpc CreateSecret(Secret) returns (CommonResult) {}
-    rpc DeleteSecret(Secret) returns (CommonResult) {}
-    rpc UpdateSecret(Secret) returns (CommonResult) {}
+    rpc GetSecrets(Empty) returns (Secrets) {
+      option (google.api.http) = {
+        get: "/api/v1/secrets"
+      };
+    }
+    rpc CreateSecret(Secret) returns (CommonResult) {
+      option (google.api.http) = {
+        post: "/api/v1/secrets"
+        body: "*"
+      };
+    }
+    rpc DeleteSecret(Secret) returns (CommonResult) {
+      option (google.api.http) = {
+        delete: "/api/v1/secrets/{Name}"
+      };
+    }
+    rpc UpdateSecret(Secret) returns (CommonResult) {
+      option (google.api.http) = {
+        put: "/api/v1/secrets/{Name}"
+        body: "*"
+      };
+    }
 
     // extension
     rpc PProf(PProfRequest) returns (PProfData) {}
 }
 
 service RunnerExtension {
-    rpc Run(TestSuiteWithCase) returns (CommonResult) {}
+    rpc Run(TestSuiteWithCase) returns (CommonResult) {
+      option (google.api.http) = {
+        post: "/api/v1/extension/run"
+        body: "*"
+      };
+    }
 }
 
 message Suites {
@@ -374,8 +473,17 @@ message Empty {
 }
 
 service Mock {
-  rpc Reload(MockConfig) returns (Empty) {}
-  rpc GetConfig(Empty) returns (MockConfig) {}
+  rpc Reload(MockConfig) returns (Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/mock/reload"
+      body: "*"
+    };
+  }
+  rpc GetConfig(Empty) returns (MockConfig) {
+    option (google.api.http) = {
+      get: "/api/v1/mock/config"
+    };
+  }
 }
 
 message MockConfig {

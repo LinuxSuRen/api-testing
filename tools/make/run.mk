@@ -61,7 +61,7 @@ install-tool: hd
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 	hd i protoc-gen-grpc-web@1.5.0
-	hd i protoc-gen-grpc-gateway@2.19.1
+	hd i protoc-gen-grpc-gateway@v2.19.1
 	hd get protocolbuffers/protobuf@v25.1 -o protobuf.zip
 	unzip protobuf.zip bin/protoc
 	rm -rf protobuf.zip

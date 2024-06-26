@@ -345,6 +345,23 @@ func request_Runner_DuplicateTestSuite_0(ctx context.Context, marshaler runtime.
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["sourceSuiteName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "sourceSuiteName")
+	}
+
+	protoReq.SourceSuiteName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "sourceSuiteName", err)
+	}
+
 	msg, err := client.DuplicateTestSuite(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -356,6 +373,23 @@ func local_request_Runner_DuplicateTestSuite_0(ctx context.Context, marshaler ru
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["sourceSuiteName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "sourceSuiteName")
+	}
+
+	protoReq.SourceSuiteName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "sourceSuiteName", err)
 	}
 
 	msg, err := server.DuplicateTestSuite(ctx, &protoReq)
@@ -433,11 +467,35 @@ func local_request_Runner_GetTestSuiteYaml_0(ctx context.Context, marshaler runt
 
 }
 
+var (
+	filter_Runner_ListTestCase_0 = &utilities.DoubleArray{Encoding: map[string]int{"name": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+)
+
 func request_Runner_ListTestCase_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq TestSuiteIdentity
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_ListTestCase_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -450,7 +508,27 @@ func local_request_Runner_ListTestCase_0(ctx context.Context, marshaler runtime.
 	var protoReq TestSuiteIdentity
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_ListTestCase_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -459,37 +537,45 @@ func local_request_Runner_ListTestCase_0(ctx context.Context, marshaler runtime.
 
 }
 
-func request_Runner_GetSuggestedAPIs_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TestSuiteIdentity
-	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.GetSuggestedAPIs(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Runner_GetSuggestedAPIs_0(ctx context.Context, marshaler runtime.Marshaler, server RunnerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TestSuiteIdentity
-	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := server.GetSuggestedAPIs(ctx, &protoReq)
-	return msg, metadata, err
-
-}
+var (
+	filter_Runner_RunTestCase_0 = &utilities.DoubleArray{Encoding: map[string]int{"suite": 0, "testcase": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
+)
 
 func request_Runner_RunTestCase_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq TestCaseIdentity
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suite"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suite")
+	}
+
+	protoReq.Suite, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suite", err)
+	}
+
+	val, ok = pathParams["testcase"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "testcase")
+	}
+
+	protoReq.Testcase, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "testcase", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_RunTestCase_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -502,7 +588,37 @@ func local_request_Runner_RunTestCase_0(ctx context.Context, marshaler runtime.M
 	var protoReq TestCaseIdentity
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suite"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suite")
+	}
+
+	protoReq.Suite, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suite", err)
+	}
+
+	val, ok = pathParams["testcase"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "testcase")
+	}
+
+	protoReq.Testcase, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "testcase", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_RunTestCase_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -511,11 +627,45 @@ func local_request_Runner_RunTestCase_0(ctx context.Context, marshaler runtime.M
 
 }
 
+var (
+	filter_Runner_GetTestCase_0 = &utilities.DoubleArray{Encoding: map[string]int{"suite": 0, "testcase": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
+)
+
 func request_Runner_GetTestCase_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq TestCaseIdentity
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suite"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suite")
+	}
+
+	protoReq.Suite, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suite", err)
+	}
+
+	val, ok = pathParams["testcase"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "testcase")
+	}
+
+	protoReq.Testcase, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "testcase", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_GetTestCase_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -528,7 +678,37 @@ func local_request_Runner_GetTestCase_0(ctx context.Context, marshaler runtime.M
 	var protoReq TestCaseIdentity
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suite"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suite")
+	}
+
+	protoReq.Suite, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suite", err)
+	}
+
+	val, ok = pathParams["testcase"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "testcase")
+	}
+
+	protoReq.Testcase, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "testcase", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_GetTestCase_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -545,6 +725,23 @@ func request_Runner_CreateTestCase_0(ctx context.Context, marshaler runtime.Mars
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suiteName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suiteName")
+	}
+
+	protoReq.SuiteName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suiteName", err)
+	}
+
 	msg, err := client.CreateTestCase(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -556,6 +753,23 @@ func local_request_Runner_CreateTestCase_0(ctx context.Context, marshaler runtim
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suiteName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suiteName")
+	}
+
+	protoReq.SuiteName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suiteName", err)
 	}
 
 	msg, err := server.CreateTestCase(ctx, &protoReq)
@@ -571,6 +785,33 @@ func request_Runner_UpdateTestCase_0(ctx context.Context, marshaler runtime.Mars
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suiteName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suiteName")
+	}
+
+	protoReq.SuiteName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suiteName", err)
+	}
+
+	val, ok = pathParams["data.name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data.name")
+	}
+
+	err = runtime.PopulateFieldFromPath(&protoReq, "data.name", val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data.name", err)
+	}
+
 	msg, err := client.UpdateTestCase(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -584,16 +825,77 @@ func local_request_Runner_UpdateTestCase_0(ctx context.Context, marshaler runtim
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suiteName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suiteName")
+	}
+
+	protoReq.SuiteName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suiteName", err)
+	}
+
+	val, ok = pathParams["data.name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data.name")
+	}
+
+	err = runtime.PopulateFieldFromPath(&protoReq, "data.name", val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data.name", err)
+	}
+
 	msg, err := server.UpdateTestCase(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
+var (
+	filter_Runner_DeleteTestCase_0 = &utilities.DoubleArray{Encoding: map[string]int{"suite": 0, "testcase": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
+)
+
 func request_Runner_DeleteTestCase_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq TestCaseIdentity
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suite"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suite")
+	}
+
+	protoReq.Suite, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suite", err)
+	}
+
+	val, ok = pathParams["testcase"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "testcase")
+	}
+
+	protoReq.Testcase, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "testcase", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_DeleteTestCase_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -606,7 +908,37 @@ func local_request_Runner_DeleteTestCase_0(ctx context.Context, marshaler runtim
 	var protoReq TestCaseIdentity
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["suite"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "suite")
+	}
+
+	protoReq.Suite, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "suite", err)
+	}
+
+	val, ok = pathParams["testcase"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "testcase")
+	}
+
+	protoReq.Testcase, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "testcase", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_DeleteTestCase_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -623,6 +955,33 @@ func request_Runner_DuplicateTestCase_0(ctx context.Context, marshaler runtime.M
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["sourceSuiteName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "sourceSuiteName")
+	}
+
+	protoReq.SourceSuiteName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "sourceSuiteName", err)
+	}
+
+	val, ok = pathParams["sourceCaseName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "sourceCaseName")
+	}
+
+	protoReq.SourceCaseName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "sourceCaseName", err)
+	}
+
 	msg, err := client.DuplicateTestCase(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -636,7 +995,70 @@ func local_request_Runner_DuplicateTestCase_0(ctx context.Context, marshaler run
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["sourceSuiteName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "sourceSuiteName")
+	}
+
+	protoReq.SourceSuiteName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "sourceSuiteName", err)
+	}
+
+	val, ok = pathParams["sourceCaseName"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "sourceCaseName")
+	}
+
+	protoReq.SourceCaseName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "sourceCaseName", err)
+	}
+
 	msg, err := server.DuplicateTestCase(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+var (
+	filter_Runner_GetSuggestedAPIs_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+)
+
+func request_Runner_GetSuggestedAPIs_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq TestSuiteIdentity
+	var metadata runtime.ServerMetadata
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_GetSuggestedAPIs_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.GetSuggestedAPIs(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_Runner_GetSuggestedAPIs_0(ctx context.Context, marshaler runtime.Marshaler, server RunnerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq TestSuiteIdentity
+	var metadata runtime.ServerMetadata
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_GetSuggestedAPIs_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.GetSuggestedAPIs(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -644,10 +1066,6 @@ func local_request_Runner_DuplicateTestCase_0(ctx context.Context, marshaler run
 func request_Runner_ListCodeGenerator_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := client.ListCodeGenerator(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -658,20 +1076,23 @@ func local_request_Runner_ListCodeGenerator_0(ctx context.Context, marshaler run
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := server.ListCodeGenerator(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
+var (
+	filter_Runner_GenerateCode_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+)
+
 func request_Runner_GenerateCode_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CodeGenerateRequest
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_GenerateCode_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -684,7 +1105,10 @@ func local_request_Runner_GenerateCode_0(ctx context.Context, marshaler runtime.
 	var protoReq CodeGenerateRequest
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_GenerateCode_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -697,10 +1121,6 @@ func request_Runner_ListConverter_0(ctx context.Context, marshaler runtime.Marsh
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := client.ListConverter(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -709,10 +1129,6 @@ func request_Runner_ListConverter_0(ctx context.Context, marshaler runtime.Marsh
 func local_request_Runner_ListConverter_0(ctx context.Context, marshaler runtime.Marshaler, server RunnerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := server.ListConverter(ctx, &protoReq)
 	return msg, metadata, err
@@ -749,10 +1165,6 @@ func request_Runner_PopularHeaders_0(ctx context.Context, marshaler runtime.Mars
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := client.PopularHeaders(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -762,20 +1174,23 @@ func local_request_Runner_PopularHeaders_0(ctx context.Context, marshaler runtim
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := server.PopularHeaders(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
+var (
+	filter_Runner_FunctionsQuery_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+)
+
 func request_Runner_FunctionsQuery_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq SimpleQuery
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_FunctionsQuery_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -788,7 +1203,10 @@ func local_request_Runner_FunctionsQuery_0(ctx context.Context, marshaler runtim
 	var protoReq SimpleQuery
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_FunctionsQuery_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -844,10 +1262,6 @@ func request_Runner_GetVersion_0(ctx context.Context, marshaler runtime.Marshale
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := client.GetVersion(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -856,10 +1270,6 @@ func request_Runner_GetVersion_0(ctx context.Context, marshaler runtime.Marshale
 func local_request_Runner_GetVersion_0(ctx context.Context, marshaler runtime.Marshaler, server RunnerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := server.GetVersion(ctx, &protoReq)
 	return msg, metadata, err
@@ -870,10 +1280,6 @@ func request_Runner_Sample_0(ctx context.Context, marshaler runtime.Marshaler, c
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := client.Sample(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -882,10 +1288,6 @@ func request_Runner_Sample_0(ctx context.Context, marshaler runtime.Marshaler, c
 func local_request_Runner_Sample_0(ctx context.Context, marshaler runtime.Marshaler, server RunnerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := server.Sample(ctx, &protoReq)
 	return msg, metadata, err
@@ -896,10 +1298,6 @@ func request_Runner_GetStoreKinds_0(ctx context.Context, marshaler runtime.Marsh
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := client.GetStoreKinds(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -908,10 +1306,6 @@ func request_Runner_GetStoreKinds_0(ctx context.Context, marshaler runtime.Marsh
 func local_request_Runner_GetStoreKinds_0(ctx context.Context, marshaler runtime.Marshaler, server RunnerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := server.GetStoreKinds(ctx, &protoReq)
 	return msg, metadata, err
@@ -922,10 +1316,6 @@ func request_Runner_GetStores_0(ctx context.Context, marshaler runtime.Marshaler
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := client.GetStores(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -934,10 +1324,6 @@ func request_Runner_GetStores_0(ctx context.Context, marshaler runtime.Marshaler
 func local_request_Runner_GetStores_0(ctx context.Context, marshaler runtime.Marshaler, server RunnerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := server.GetStores(ctx, &protoReq)
 	return msg, metadata, err
@@ -978,6 +1364,23 @@ func request_Runner_UpdateStore_0(ctx context.Context, marshaler runtime.Marshal
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
 	msg, err := client.UpdateStore(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -991,16 +1394,57 @@ func local_request_Runner_UpdateStore_0(ctx context.Context, marshaler runtime.M
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
 	msg, err := server.UpdateStore(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
+var (
+	filter_Runner_DeleteStore_0 = &utilities.DoubleArray{Encoding: map[string]int{"name": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+)
+
 func request_Runner_DeleteStore_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Store
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_DeleteStore_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1013,7 +1457,27 @@ func local_request_Runner_DeleteStore_0(ctx context.Context, marshaler runtime.M
 	var protoReq Store
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_DeleteStore_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1052,10 +1516,6 @@ func request_Runner_GetSecrets_0(ctx context.Context, marshaler runtime.Marshale
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := client.GetSecrets(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -1064,10 +1524,6 @@ func request_Runner_GetSecrets_0(ctx context.Context, marshaler runtime.Marshale
 func local_request_Runner_GetSecrets_0(ctx context.Context, marshaler runtime.Marshaler, server RunnerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := server.GetSecrets(ctx, &protoReq)
 	return msg, metadata, err
@@ -1100,11 +1556,35 @@ func local_request_Runner_CreateSecret_0(ctx context.Context, marshaler runtime.
 
 }
 
+var (
+	filter_Runner_DeleteSecret_0 = &utilities.DoubleArray{Encoding: map[string]int{"Name": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+)
+
 func request_Runner_DeleteSecret_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Secret
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["Name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Name", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_DeleteSecret_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1117,7 +1597,27 @@ func local_request_Runner_DeleteSecret_0(ctx context.Context, marshaler runtime.
 	var protoReq Secret
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["Name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Name", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_DeleteSecret_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1134,6 +1634,23 @@ func request_Runner_UpdateSecret_0(ctx context.Context, marshaler runtime.Marsha
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["Name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Name", err)
+	}
+
 	msg, err := client.UpdateSecret(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -1145,6 +1662,23 @@ func local_request_Runner_UpdateSecret_0(ctx context.Context, marshaler runtime.
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["Name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Name", err)
 	}
 
 	msg, err := server.UpdateSecret(ctx, &protoReq)
@@ -1234,10 +1768,6 @@ func request_Mock_GetConfig_0(ctx context.Context, marshaler runtime.Marshaler, 
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := client.GetConfig(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -1246,10 +1776,6 @@ func request_Mock_GetConfig_0(ctx context.Context, marshaler runtime.Marshaler, 
 func local_request_Mock_GetConfig_0(ctx context.Context, marshaler runtime.Marshaler, server MockServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq Empty
 	var metadata runtime.ServerMetadata
-
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := server.GetConfig(ctx, &protoReq)
 	return msg, metadata, err
@@ -1270,7 +1796,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/Run", runtime.WithHTTPPathPattern("/server.Runner/Run"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/Run", runtime.WithHTTPPathPattern("/api/v1/run"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1295,7 +1821,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetSuites", runtime.WithHTTPPathPattern("/v1/suites"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetSuites", runtime.WithHTTPPathPattern("/api/v1/suites"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1320,7 +1846,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/CreateTestSuite", runtime.WithHTTPPathPattern("/v1/suites"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/CreateTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1345,7 +1871,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ImportTestSuite", runtime.WithHTTPPathPattern("/v1/suites/import"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ImportTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/import"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1370,7 +1896,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetTestSuite", runtime.WithHTTPPathPattern("/v1/suites/{name}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1395,7 +1921,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/UpdateTestSuite", runtime.WithHTTPPathPattern("/v1/suites/{name}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/UpdateTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1420,7 +1946,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DeleteTestSuite", runtime.WithHTTPPathPattern("/v1/suites/{name}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DeleteTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1445,7 +1971,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DuplicateTestSuite", runtime.WithHTTPPathPattern("/server.Runner/DuplicateTestSuite"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DuplicateTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/{sourceSuiteName}/duplicate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1470,7 +1996,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetTestSuiteYaml", runtime.WithHTTPPathPattern("/v1/suites/{name}/yaml"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetTestSuiteYaml", runtime.WithHTTPPathPattern("/api/v1/suites/{name}/yaml"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1487,7 +2013,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_ListTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_ListTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1495,7 +2021,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ListTestCase", runtime.WithHTTPPathPattern("/server.Runner/ListTestCase"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ListTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{name}/cases"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1512,31 +2038,6 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetSuggestedAPIs_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetSuggestedAPIs", runtime.WithHTTPPathPattern("/server.Runner/GetSuggestedAPIs"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Runner_GetSuggestedAPIs_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Runner_GetSuggestedAPIs_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
 	mux.Handle("POST", pattern_Runner_RunTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -1545,7 +2046,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/RunTestCase", runtime.WithHTTPPathPattern("/server.Runner/RunTestCase"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/RunTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suite}/cases/{testcase}/run"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1562,7 +2063,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1570,7 +2071,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetTestCase", runtime.WithHTTPPathPattern("/server.Runner/GetTestCase"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suite}/cases/{testcase}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1595,7 +2096,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/CreateTestCase", runtime.WithHTTPPathPattern("/server.Runner/CreateTestCase"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/CreateTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suiteName}/cases"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1612,7 +2113,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_UpdateTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Runner_UpdateTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1620,7 +2121,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/UpdateTestCase", runtime.WithHTTPPathPattern("/server.Runner/UpdateTestCase"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/UpdateTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suiteName}/cases/{data.name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1637,7 +2138,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_DeleteTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Runner_DeleteTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1645,7 +2146,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DeleteTestCase", runtime.WithHTTPPathPattern("/server.Runner/DeleteTestCase"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DeleteTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suite}/cases/{testcase}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1670,7 +2171,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DuplicateTestCase", runtime.WithHTTPPathPattern("/server.Runner/DuplicateTestCase"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DuplicateTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{sourceSuiteName}/cases/{sourceCaseName}/duplicate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1687,7 +2188,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_ListCodeGenerator_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetSuggestedAPIs_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1695,7 +2196,32 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ListCodeGenerator", runtime.WithHTTPPathPattern("/server.Runner/ListCodeGenerator"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetSuggestedAPIs", runtime.WithHTTPPathPattern("/api/v1/suggested-apis"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Runner_GetSuggestedAPIs_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Runner_GetSuggestedAPIs_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_Runner_ListCodeGenerator_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ListCodeGenerator", runtime.WithHTTPPathPattern("/api/v1/code-generators"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1720,7 +2246,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GenerateCode", runtime.WithHTTPPathPattern("/server.Runner/GenerateCode"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GenerateCode", runtime.WithHTTPPathPattern("/api/v1/code-generators/generate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1737,7 +2263,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_ListConverter_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_ListConverter_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1745,7 +2271,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ListConverter", runtime.WithHTTPPathPattern("/server.Runner/ListConverter"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ListConverter", runtime.WithHTTPPathPattern("/api/v1/converters"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1770,7 +2296,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ConvertTestSuite", runtime.WithHTTPPathPattern("/server.Runner/ConvertTestSuite"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/ConvertTestSuite", runtime.WithHTTPPathPattern("/api/v1/converters/convert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1787,7 +2313,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_PopularHeaders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_PopularHeaders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1795,7 +2321,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/PopularHeaders", runtime.WithHTTPPathPattern("/server.Runner/PopularHeaders"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/PopularHeaders", runtime.WithHTTPPathPattern("/api/v1/popularHeaders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1812,7 +2338,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_FunctionsQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_FunctionsQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1820,7 +2346,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/FunctionsQuery", runtime.WithHTTPPathPattern("/server.Runner/FunctionsQuery"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/FunctionsQuery", runtime.WithHTTPPathPattern("/api/v1/functions"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1844,7 +2370,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		return
 	})
 
-	mux.Handle("POST", pattern_Runner_GetVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1852,7 +2378,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetVersion", runtime.WithHTTPPathPattern("/server.Runner/GetVersion"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetVersion", runtime.WithHTTPPathPattern("/api/v1/version"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1869,7 +2395,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_Sample_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_Sample_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1877,7 +2403,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/Sample", runtime.WithHTTPPathPattern("/server.Runner/Sample"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/Sample", runtime.WithHTTPPathPattern("/api/v1/sample"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1894,7 +2420,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetStoreKinds_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetStoreKinds_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1902,7 +2428,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetStoreKinds", runtime.WithHTTPPathPattern("/server.Runner/GetStoreKinds"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetStoreKinds", runtime.WithHTTPPathPattern("/api/v1/stores/kinds"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1919,7 +2445,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetStores_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetStores_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1927,7 +2453,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetStores", runtime.WithHTTPPathPattern("/server.Runner/GetStores"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetStores", runtime.WithHTTPPathPattern("/api/v1/stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1952,7 +2478,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/CreateStore", runtime.WithHTTPPathPattern("/server.Runner/CreateStore"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/CreateStore", runtime.WithHTTPPathPattern("/api/v1/stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1969,7 +2495,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_UpdateStore_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Runner_UpdateStore_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1977,7 +2503,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/UpdateStore", runtime.WithHTTPPathPattern("/server.Runner/UpdateStore"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/UpdateStore", runtime.WithHTTPPathPattern("/api/v1/stores/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1994,7 +2520,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_DeleteStore_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Runner_DeleteStore_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -2002,7 +2528,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DeleteStore", runtime.WithHTTPPathPattern("/server.Runner/DeleteStore"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DeleteStore", runtime.WithHTTPPathPattern("/api/v1/stores/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2027,7 +2553,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/VerifyStore", runtime.WithHTTPPathPattern("/server.Runner/VerifyStore"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/VerifyStore", runtime.WithHTTPPathPattern("/api/v1/stores/verify"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2044,7 +2570,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetSecrets_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetSecrets_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -2052,7 +2578,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetSecrets", runtime.WithHTTPPathPattern("/server.Runner/GetSecrets"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetSecrets", runtime.WithHTTPPathPattern("/api/v1/secrets"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2077,7 +2603,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/CreateSecret", runtime.WithHTTPPathPattern("/server.Runner/CreateSecret"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/CreateSecret", runtime.WithHTTPPathPattern("/api/v1/secrets"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2094,7 +2620,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_DeleteSecret_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Runner_DeleteSecret_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -2102,7 +2628,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DeleteSecret", runtime.WithHTTPPathPattern("/server.Runner/DeleteSecret"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/DeleteSecret", runtime.WithHTTPPathPattern("/api/v1/secrets/{Name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2119,7 +2645,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Runner_UpdateSecret_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Runner_UpdateSecret_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -2127,7 +2653,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/UpdateSecret", runtime.WithHTTPPathPattern("/server.Runner/UpdateSecret"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/UpdateSecret", runtime.WithHTTPPathPattern("/api/v1/secrets/{Name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2186,7 +2712,7 @@ func RegisterRunnerExtensionHandlerServer(ctx context.Context, mux *runtime.Serv
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.RunnerExtension/Run", runtime.WithHTTPPathPattern("/server.RunnerExtension/Run"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.RunnerExtension/Run", runtime.WithHTTPPathPattern("/api/v1/extension/run"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2220,7 +2746,7 @@ func RegisterMockHandlerServer(ctx context.Context, mux *runtime.ServeMux, serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Mock/Reload", runtime.WithHTTPPathPattern("/server.Mock/Reload"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Mock/Reload", runtime.WithHTTPPathPattern("/api/v1/mock/reload"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2237,7 +2763,7 @@ func RegisterMockHandlerServer(ctx context.Context, mux *runtime.ServeMux, serve
 
 	})
 
-	mux.Handle("POST", pattern_Mock_GetConfig_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Mock_GetConfig_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -2245,7 +2771,7 @@ func RegisterMockHandlerServer(ctx context.Context, mux *runtime.ServeMux, serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Mock/GetConfig", runtime.WithHTTPPathPattern("/server.Mock/GetConfig"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Mock/GetConfig", runtime.WithHTTPPathPattern("/api/v1/mock/config"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2309,7 +2835,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/Run", runtime.WithHTTPPathPattern("/server.Runner/Run"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/Run", runtime.WithHTTPPathPattern("/api/v1/run"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2331,7 +2857,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetSuites", runtime.WithHTTPPathPattern("/v1/suites"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetSuites", runtime.WithHTTPPathPattern("/api/v1/suites"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2353,7 +2879,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/CreateTestSuite", runtime.WithHTTPPathPattern("/v1/suites"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/CreateTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2375,7 +2901,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ImportTestSuite", runtime.WithHTTPPathPattern("/v1/suites/import"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ImportTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/import"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2397,7 +2923,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetTestSuite", runtime.WithHTTPPathPattern("/v1/suites/{name}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2419,7 +2945,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/UpdateTestSuite", runtime.WithHTTPPathPattern("/v1/suites/{name}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/UpdateTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2441,7 +2967,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DeleteTestSuite", runtime.WithHTTPPathPattern("/v1/suites/{name}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DeleteTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2463,7 +2989,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DuplicateTestSuite", runtime.WithHTTPPathPattern("/server.Runner/DuplicateTestSuite"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DuplicateTestSuite", runtime.WithHTTPPathPattern("/api/v1/suites/{sourceSuiteName}/duplicate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2485,7 +3011,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetTestSuiteYaml", runtime.WithHTTPPathPattern("/v1/suites/{name}/yaml"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetTestSuiteYaml", runtime.WithHTTPPathPattern("/api/v1/suites/{name}/yaml"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2501,13 +3027,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_ListTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_ListTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ListTestCase", runtime.WithHTTPPathPattern("/server.Runner/ListTestCase"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ListTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{name}/cases"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2523,35 +3049,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetSuggestedAPIs_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetSuggestedAPIs", runtime.WithHTTPPathPattern("/server.Runner/GetSuggestedAPIs"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Runner_GetSuggestedAPIs_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Runner_GetSuggestedAPIs_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
 	mux.Handle("POST", pattern_Runner_RunTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/RunTestCase", runtime.WithHTTPPathPattern("/server.Runner/RunTestCase"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/RunTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suite}/cases/{testcase}/run"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2567,13 +3071,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetTestCase", runtime.WithHTTPPathPattern("/server.Runner/GetTestCase"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suite}/cases/{testcase}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2595,7 +3099,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/CreateTestCase", runtime.WithHTTPPathPattern("/server.Runner/CreateTestCase"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/CreateTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suiteName}/cases"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2611,13 +3115,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_UpdateTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Runner_UpdateTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/UpdateTestCase", runtime.WithHTTPPathPattern("/server.Runner/UpdateTestCase"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/UpdateTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suiteName}/cases/{data.name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2633,13 +3137,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_DeleteTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Runner_DeleteTestCase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DeleteTestCase", runtime.WithHTTPPathPattern("/server.Runner/DeleteTestCase"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DeleteTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{suite}/cases/{testcase}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2661,7 +3165,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DuplicateTestCase", runtime.WithHTTPPathPattern("/server.Runner/DuplicateTestCase"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DuplicateTestCase", runtime.WithHTTPPathPattern("/api/v1/suites/{sourceSuiteName}/cases/{sourceCaseName}/duplicate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2677,13 +3181,35 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_ListCodeGenerator_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetSuggestedAPIs_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ListCodeGenerator", runtime.WithHTTPPathPattern("/server.Runner/ListCodeGenerator"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetSuggestedAPIs", runtime.WithHTTPPathPattern("/api/v1/suggested-apis"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Runner_GetSuggestedAPIs_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Runner_GetSuggestedAPIs_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_Runner_ListCodeGenerator_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ListCodeGenerator", runtime.WithHTTPPathPattern("/api/v1/code-generators"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2705,7 +3231,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GenerateCode", runtime.WithHTTPPathPattern("/server.Runner/GenerateCode"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GenerateCode", runtime.WithHTTPPathPattern("/api/v1/code-generators/generate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2721,13 +3247,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_ListConverter_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_ListConverter_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ListConverter", runtime.WithHTTPPathPattern("/server.Runner/ListConverter"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ListConverter", runtime.WithHTTPPathPattern("/api/v1/converters"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2749,7 +3275,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ConvertTestSuite", runtime.WithHTTPPathPattern("/server.Runner/ConvertTestSuite"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/ConvertTestSuite", runtime.WithHTTPPathPattern("/api/v1/converters/convert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2765,13 +3291,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_PopularHeaders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_PopularHeaders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/PopularHeaders", runtime.WithHTTPPathPattern("/server.Runner/PopularHeaders"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/PopularHeaders", runtime.WithHTTPPathPattern("/api/v1/popularHeaders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2787,13 +3313,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_FunctionsQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_FunctionsQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/FunctionsQuery", runtime.WithHTTPPathPattern("/server.Runner/FunctionsQuery"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/FunctionsQuery", runtime.WithHTTPPathPattern("/api/v1/functions"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2815,7 +3341,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/FunctionsQueryStream", runtime.WithHTTPPathPattern("/v1/functionsQuery"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/FunctionsQueryStream", runtime.WithHTTPPathPattern("/api/v1/functionsQuery"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2831,13 +3357,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetVersion", runtime.WithHTTPPathPattern("/server.Runner/GetVersion"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetVersion", runtime.WithHTTPPathPattern("/api/v1/version"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2853,13 +3379,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_Sample_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_Sample_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/Sample", runtime.WithHTTPPathPattern("/server.Runner/Sample"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/Sample", runtime.WithHTTPPathPattern("/api/v1/sample"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2875,13 +3401,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetStoreKinds_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetStoreKinds_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetStoreKinds", runtime.WithHTTPPathPattern("/server.Runner/GetStoreKinds"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetStoreKinds", runtime.WithHTTPPathPattern("/api/v1/stores/kinds"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2897,13 +3423,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetStores_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetStores_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetStores", runtime.WithHTTPPathPattern("/server.Runner/GetStores"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetStores", runtime.WithHTTPPathPattern("/api/v1/stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2925,7 +3451,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/CreateStore", runtime.WithHTTPPathPattern("/server.Runner/CreateStore"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/CreateStore", runtime.WithHTTPPathPattern("/api/v1/stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2941,13 +3467,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_UpdateStore_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Runner_UpdateStore_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/UpdateStore", runtime.WithHTTPPathPattern("/server.Runner/UpdateStore"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/UpdateStore", runtime.WithHTTPPathPattern("/api/v1/stores/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2963,13 +3489,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_DeleteStore_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Runner_DeleteStore_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DeleteStore", runtime.WithHTTPPathPattern("/server.Runner/DeleteStore"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DeleteStore", runtime.WithHTTPPathPattern("/api/v1/stores/{name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2991,7 +3517,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/VerifyStore", runtime.WithHTTPPathPattern("/server.Runner/VerifyStore"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/VerifyStore", runtime.WithHTTPPathPattern("/api/v1/stores/verify"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3007,13 +3533,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_GetSecrets_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Runner_GetSecrets_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetSecrets", runtime.WithHTTPPathPattern("/server.Runner/GetSecrets"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetSecrets", runtime.WithHTTPPathPattern("/api/v1/secrets"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3035,7 +3561,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/CreateSecret", runtime.WithHTTPPathPattern("/server.Runner/CreateSecret"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/CreateSecret", runtime.WithHTTPPathPattern("/api/v1/secrets"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3051,13 +3577,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_DeleteSecret_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Runner_DeleteSecret_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DeleteSecret", runtime.WithHTTPPathPattern("/server.Runner/DeleteSecret"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/DeleteSecret", runtime.WithHTTPPathPattern("/api/v1/secrets/{Name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3073,13 +3599,13 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Runner_UpdateSecret_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Runner_UpdateSecret_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/UpdateSecret", runtime.WithHTTPPathPattern("/server.Runner/UpdateSecret"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/UpdateSecret", runtime.WithHTTPPathPattern("/api/v1/secrets/{Name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3121,77 +3647,77 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 }
 
 var (
-	pattern_Runner_Run_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "Run"}, ""))
+	pattern_Runner_Run_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "run"}, ""))
 
-	pattern_Runner_GetSuites_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "suites"}, ""))
+	pattern_Runner_GetSuites_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "suites"}, ""))
 
-	pattern_Runner_CreateTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "suites"}, ""))
+	pattern_Runner_CreateTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "suites"}, ""))
 
-	pattern_Runner_ImportTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "suites", "import"}, ""))
+	pattern_Runner_ImportTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "suites", "import"}, ""))
 
-	pattern_Runner_GetTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "suites", "name"}, ""))
+	pattern_Runner_GetTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "suites", "name"}, ""))
 
-	pattern_Runner_UpdateTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "suites", "name"}, ""))
+	pattern_Runner_UpdateTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "suites", "name"}, ""))
 
-	pattern_Runner_DeleteTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "suites", "name"}, ""))
+	pattern_Runner_DeleteTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "suites", "name"}, ""))
 
-	pattern_Runner_DuplicateTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "DuplicateTestSuite"}, ""))
+	pattern_Runner_DuplicateTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "suites", "sourceSuiteName", "duplicate"}, ""))
 
-	pattern_Runner_GetTestSuiteYaml_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "suites", "name", "yaml"}, ""))
+	pattern_Runner_GetTestSuiteYaml_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "suites", "name", "yaml"}, ""))
 
-	pattern_Runner_ListTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "ListTestCase"}, ""))
+	pattern_Runner_ListTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "suites", "name", "cases"}, ""))
 
-	pattern_Runner_GetSuggestedAPIs_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "GetSuggestedAPIs"}, ""))
+	pattern_Runner_RunTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "suites", "suite", "cases", "testcase", "run"}, ""))
 
-	pattern_Runner_RunTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "RunTestCase"}, ""))
+	pattern_Runner_GetTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "suites", "suite", "cases", "testcase"}, ""))
 
-	pattern_Runner_GetTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "GetTestCase"}, ""))
+	pattern_Runner_CreateTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "suites", "suiteName", "cases"}, ""))
 
-	pattern_Runner_CreateTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "CreateTestCase"}, ""))
+	pattern_Runner_UpdateTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "suites", "suiteName", "cases", "data.name"}, ""))
 
-	pattern_Runner_UpdateTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "UpdateTestCase"}, ""))
+	pattern_Runner_DeleteTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "suites", "suite", "cases", "testcase"}, ""))
 
-	pattern_Runner_DeleteTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "DeleteTestCase"}, ""))
+	pattern_Runner_DuplicateTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "suites", "sourceSuiteName", "cases", "sourceCaseName", "duplicate"}, ""))
 
-	pattern_Runner_DuplicateTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "DuplicateTestCase"}, ""))
+	pattern_Runner_GetSuggestedAPIs_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "suggested-apis"}, ""))
 
-	pattern_Runner_ListCodeGenerator_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "ListCodeGenerator"}, ""))
+	pattern_Runner_ListCodeGenerator_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "code-generators"}, ""))
 
-	pattern_Runner_GenerateCode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "GenerateCode"}, ""))
+	pattern_Runner_GenerateCode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "code-generators", "generate"}, ""))
 
-	pattern_Runner_ListConverter_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "ListConverter"}, ""))
+	pattern_Runner_ListConverter_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "converters"}, ""))
 
-	pattern_Runner_ConvertTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "ConvertTestSuite"}, ""))
+	pattern_Runner_ConvertTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "converters", "convert"}, ""))
 
-	pattern_Runner_PopularHeaders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "PopularHeaders"}, ""))
+	pattern_Runner_PopularHeaders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "popularHeaders"}, ""))
 
-	pattern_Runner_FunctionsQuery_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "FunctionsQuery"}, ""))
+	pattern_Runner_FunctionsQuery_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "functions"}, ""))
 
-	pattern_Runner_FunctionsQueryStream_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "functionsQuery"}, ""))
+	pattern_Runner_FunctionsQueryStream_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "functionsQuery"}, ""))
 
-	pattern_Runner_GetVersion_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "GetVersion"}, ""))
+	pattern_Runner_GetVersion_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "version"}, ""))
 
-	pattern_Runner_Sample_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "Sample"}, ""))
+	pattern_Runner_Sample_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "sample"}, ""))
 
-	pattern_Runner_GetStoreKinds_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "GetStoreKinds"}, ""))
+	pattern_Runner_GetStoreKinds_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "stores", "kinds"}, ""))
 
-	pattern_Runner_GetStores_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "GetStores"}, ""))
+	pattern_Runner_GetStores_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "stores"}, ""))
 
-	pattern_Runner_CreateStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "CreateStore"}, ""))
+	pattern_Runner_CreateStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "stores"}, ""))
 
-	pattern_Runner_UpdateStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "UpdateStore"}, ""))
+	pattern_Runner_UpdateStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "stores", "name"}, ""))
 
-	pattern_Runner_DeleteStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "DeleteStore"}, ""))
+	pattern_Runner_DeleteStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "stores", "name"}, ""))
 
-	pattern_Runner_VerifyStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "VerifyStore"}, ""))
+	pattern_Runner_VerifyStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "stores", "verify"}, ""))
 
-	pattern_Runner_GetSecrets_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "GetSecrets"}, ""))
+	pattern_Runner_GetSecrets_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "secrets"}, ""))
 
-	pattern_Runner_CreateSecret_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "CreateSecret"}, ""))
+	pattern_Runner_CreateSecret_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "secrets"}, ""))
 
-	pattern_Runner_DeleteSecret_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "DeleteSecret"}, ""))
+	pattern_Runner_DeleteSecret_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "secrets", "Name"}, ""))
 
-	pattern_Runner_UpdateSecret_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "UpdateSecret"}, ""))
+	pattern_Runner_UpdateSecret_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "secrets", "Name"}, ""))
 
 	pattern_Runner_PProf_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "PProf"}, ""))
 )
@@ -3217,8 +3743,6 @@ var (
 
 	forward_Runner_ListTestCase_0 = runtime.ForwardResponseMessage
 
-	forward_Runner_GetSuggestedAPIs_0 = runtime.ForwardResponseMessage
-
 	forward_Runner_RunTestCase_0 = runtime.ForwardResponseMessage
 
 	forward_Runner_GetTestCase_0 = runtime.ForwardResponseMessage
@@ -3230,6 +3754,8 @@ var (
 	forward_Runner_DeleteTestCase_0 = runtime.ForwardResponseMessage
 
 	forward_Runner_DuplicateTestCase_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_GetSuggestedAPIs_0 = runtime.ForwardResponseMessage
 
 	forward_Runner_ListCodeGenerator_0 = runtime.ForwardResponseMessage
 
@@ -3316,7 +3842,7 @@ func RegisterRunnerExtensionHandlerClient(ctx context.Context, mux *runtime.Serv
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.RunnerExtension/Run", runtime.WithHTTPPathPattern("/server.RunnerExtension/Run"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.RunnerExtension/Run", runtime.WithHTTPPathPattern("/api/v1/extension/run"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3336,7 +3862,7 @@ func RegisterRunnerExtensionHandlerClient(ctx context.Context, mux *runtime.Serv
 }
 
 var (
-	pattern_RunnerExtension_Run_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.RunnerExtension", "Run"}, ""))
+	pattern_RunnerExtension_Run_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "extension", "run"}, ""))
 )
 
 var (
@@ -3387,7 +3913,7 @@ func RegisterMockHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Mock/Reload", runtime.WithHTTPPathPattern("/server.Mock/Reload"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Mock/Reload", runtime.WithHTTPPathPattern("/api/v1/mock/reload"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3403,13 +3929,13 @@ func RegisterMockHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 
 	})
 
-	mux.Handle("POST", pattern_Mock_GetConfig_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Mock_GetConfig_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Mock/GetConfig", runtime.WithHTTPPathPattern("/server.Mock/GetConfig"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Mock/GetConfig", runtime.WithHTTPPathPattern("/api/v1/mock/config"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3429,9 +3955,9 @@ func RegisterMockHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 }
 
 var (
-	pattern_Mock_Reload_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Mock", "Reload"}, ""))
+	pattern_Mock_Reload_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "mock", "reload"}, ""))
 
-	pattern_Mock_GetConfig_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Mock", "GetConfig"}, ""))
+	pattern_Mock_GetConfig_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "mock", "config"}, ""))
 )
 
 var (
