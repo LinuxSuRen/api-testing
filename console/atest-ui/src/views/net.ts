@@ -40,9 +40,9 @@ function safeToggleFunc(toggle?: (e: boolean) => void) {
 
 function GetVersion(callback: (v: AppVersion) => void) {
   const requestOptions = {
-    method: 'POST',
+    method: 'GET',
   }
-  fetch('/server.Runner/GetVersion', requestOptions)
+  fetch('/api/v1/version', requestOptions)
   .then(DefaultResponseProcess)
     .then(callback)
 }
@@ -69,7 +69,7 @@ function CreateTestSuite(suite: TestSuite,
     })
   }
 
-  fetch('/server.Runner/CreateTestSuite', requestOptions)
+  fetch('/api/v1/suites', requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -98,16 +98,12 @@ function GetTestSuite(name: string,
   callback: (d: any) => void, errHandle: (e: any) => void) {
   const store = Cache.GetCurrentStore()
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Store-Name': store.name,
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      name: name
-    })
+    }
   }
-  fetch('/server.Runner/GetTestSuite', requestOptions)
+  fetch(`/api/v1/suites/${name}`, requestOptions)
   .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -209,7 +205,7 @@ function CreateTestCase(testcase: TestCase,
     })
   }
 
-  fetch('/server.Runner/CreateTestCase', requestOptions)
+  fetch(`/api/v1/suites/${testcase.suiteName}/cases`, requestOptions)
   .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -237,17 +233,12 @@ function UpdateTestCase(testcase: any,
 function GetTestCase(req: TestCase,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Store-Name': Cache.GetCurrentStore().name,
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      suite: req.suiteName,
-      testcase: req.name
-    })
+    }
   }
-  fetch('/server.Runner/GetTestCase', requestOptions)
+  fetch(`/api/v1/suites/${req.suiteName}/cases/${req.name}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -255,16 +246,12 @@ function GetTestCase(req: TestCase,
 function ListTestCase(suite: string, store: string,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Store-Name': store,
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      name: suite
-    })
+    }
   }
-  fetch('/server.Runner/ListTestCase', requestOptions)
+  fetch(`/api/v1/suites/${suite}/cases`, requestOptions)
   .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -369,13 +356,12 @@ function ListCodeGenerator(callback: (d: any) => void, errHandle?: (e: any) => v
 
 function PopularHeaders(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Store-Name': Cache.GetCurrentStore().name,
       'X-Auth': getToken()
     },
   }
-  fetch('/server.Runner/PopularHeaders', requestOptions)
+  fetch(`/api/v1/popularHeaders`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -407,12 +393,11 @@ function CreateOrUpdateStore(payload: any, create: boolean,
 function GetStores(callback: (d: any) => void,
   errHandle?: (e: any) => void | null, final?: () => void | null) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Auth': getToken()
     },
   }
-  fetch('/server.Runner/GetStores', requestOptions)
+  fetch('/api/v1/stores', requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle).finally(final)
 }
