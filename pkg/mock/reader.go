@@ -82,7 +82,9 @@ func (r *inMemoryReader) Write(data []byte) {
 
 func validateAndParse(data []byte) (server *Server, err error) {
 	server = &Server{}
-	err = yaml.Unmarshal(data, server)
-	err = errors.Join(err, docs.Validate(data, docs.MockSchema))
+	if len(data) > 0 {
+		err = yaml.Unmarshal(data, server)
+		err = errors.Join(err, docs.Validate(data, docs.MockSchema))
+	}
 	return
 }
