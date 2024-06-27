@@ -179,7 +179,7 @@ func TestInMemoryServer(t *testing.T) {
 		server := NewInMemoryServer(0)
 		err := server.Start(NewInMemoryReader(`webhooks:
   - timer: 1s`), "/")
-		assert.NoError(t, err)
+		assert.Error(t, err)
 	})
 
 	t.Run("invalid webhook payload", func(t *testing.T) {
@@ -189,7 +189,7 @@ func TestInMemoryServer(t *testing.T) {
     timer: 1ms
     request:
       body: "{{.fake"`), "/")
-		assert.NoError(t, err)
+		assert.Error(t, err)
 	})
 
 	t.Run("invalid webhook api template", func(t *testing.T) {

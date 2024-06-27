@@ -23,7 +23,7 @@
             }
           }
         },
-        "required": ["name", "fields"]
+        "required": ["name"]
       }
     },
     "items": {
@@ -56,8 +56,7 @@
               },
               "statusCode": {"type": "integer"},
               "bodyData": {"type": "string", "contentEncoding": "base64"}
-            },
-            "required": ["body"]
+            }
           },
           "param": {
             "type": "object",
@@ -91,6 +90,5 @@
         "required": ["name", "timer", "request"]
       }
     }
-  },
-  "required": ["objects", "items", "webhooks"]
+  }
 }
