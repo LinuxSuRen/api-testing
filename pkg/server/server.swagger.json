@@ -343,6 +343,48 @@
         ]
       }
     },
+    "/api/v1/run/suite": {
+      "post": {
+        "operationId": "Runner_RunTestSuite",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/serverTestResult"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of serverTestResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverTestSuiteIdentity"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
     "/api/v1/sample": {
       "get": {
         "operationId": "Runner_Sample",

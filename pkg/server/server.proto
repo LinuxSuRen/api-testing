@@ -15,6 +15,12 @@ service Runner {
       };
     }
 
+    rpc RunTestSuite(stream TestSuiteIdentity) returns (stream TestResult) {
+      option (google.api.http) = {
+        post: "/api/v1/run/suite"
+        body: "*"
+      };
+    }
     // test suites related
     rpc GetSuites(Empty) returns (Suites) {
       option (google.api.http) = {

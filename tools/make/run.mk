@@ -11,7 +11,7 @@ ATEST_UI = console/atest-ui
 .PHONY: run-server
 run-server: ## Run the API Testing server
 run-server: build-ui
-	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist
+	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist --extension-registry ghcr.io
 
 .PHONY: run-console
 run-console: ## Run the API Testing console

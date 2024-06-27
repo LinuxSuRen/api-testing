@@ -135,7 +135,7 @@ function ConvertTestSuite(suiteName: string, genertor: string,
       TestSuite: suiteName
     })
   }
-  fetch('/server.Runner/ConvertTestSuite', requestOptions)
+  fetch(`/api/v1/converters/convert`, requestOptions)
   .then(DefaultResponseProcess)
   .then(callback).catch(errHandle)
 }
@@ -170,7 +170,7 @@ function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
     })
   }
 
-  fetch('/server.Runner/ImportTestSuite', requestOptions)
+  fetch(`/api/v1/suites/import`, requestOptions)
   .then(DefaultResponseProcess)
     .then(callback)
 }
@@ -424,7 +424,7 @@ function VerifyStore(name: string,
     })
   }
   
-  let api = '/server.Runner/VerifyStore'
+  let api = `/api/v1/stores/verify`
   fetch(api, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
@@ -457,15 +457,12 @@ function FunctionsQuery(filter: string,
 function DeleteSecret(name: string,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
+    method: "DELETE",
     headers: {
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      name: name
-    })
+    }
   }
-  fetch('/server.Runner/DeleteSecret', requestOptions)
+  fetch(`/api/v1/secrets/${name}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback)
     .catch(errHandle)
@@ -482,9 +479,10 @@ function CreateOrUpdateSecret(payload: any, create: boolean,
     body: JSON.stringify(payload)
   }
   
-  let api = '/server.Runner/CreateSecret'
+  let api = `/api/v1/secrets`
   if (!create) {
-    api = '/server.Runner/UpdateSecret'
+    api = `/api/v1/secrets/${payload.name}`
+    requestOptions.method = "PUT"
   }
 
   safeToggleFunc(toggle)(true)
@@ -518,18 +516,17 @@ function ReloadMockServer(config: string) {
       Config: config
     })
   }
-  fetch('/server.Mock/Reload', requestOptions)
+  fetch(`/api/v1/mock/reload`, requestOptions)
       .then(DefaultResponseProcess)
 }
 
 function GetMockConfig(callback: (d: any) => void) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Auth': getToken()
     }
   }
-  fetch('/server.Mock/GetConfig', requestOptions)
+  fetch(`/api/v1/mock/config`, requestOptions)
       .then(DefaultResponseProcess)
       .then(callback)
 }
@@ -542,18 +539,14 @@ function getToken() {
   return token
 }
 
-const GetTestSuiteYaml = (suite: string, store: string, callback: (d: any) => void, errHandle?: (e: any) => void | null) => {
-    const requestOptions = {
-    method: 'POST',
+const GetTestSuiteYaml = (suite: string, callback: (d: any) => void, errHandle?: (e: any) => void | null) => {
+  const requestOptions = {
     headers: {
-      'X-Store-Name': store,
+      'X-Store-Name': Cache.GetCurrentStore().name,
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      name: suite
-    })
+    }
   }
-  fetch('/server.Runner/GetTestSuiteYaml', requestOptions)
+  fetch(`/api/v1/suites/${suite}/yaml`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback)
     .catch(errHandle)
