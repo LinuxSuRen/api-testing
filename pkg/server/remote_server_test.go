@@ -599,7 +599,7 @@ func TestPopularHeaders(t *testing.T) {
 
 	pairs, err := server.PopularHeaders(ctx, &Empty{})
 	if assert.NoError(t, err) {
-		assert.Equal(t, 6, len(pairs.Data))
+		assert.Equal(t, 9, len(pairs.Data))
 	}
 }
 
