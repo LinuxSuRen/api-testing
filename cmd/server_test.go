@@ -74,7 +74,7 @@ func TestPrintProto(t *testing.T) {
 		name: "mock server, normal",
 		args: []string{"server", "--mock-config=testdata/invalid-api.yaml", "-p=0", "--http-port=0"},
 		verify: func(t *testing.T, buffer *bytes.Buffer, err error) {
-			assert.NoError(t, err)
+			assert.Error(t, err)
 		},
 	}}
 	for _, tt := range tests {

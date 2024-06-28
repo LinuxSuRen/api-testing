@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mock Server Schema",
+  "type": "object",
+  "properties": {
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "initCount": {"type": "integer"},
+          "sample": {"type": "string"},
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "kind": {"type": "string"}
+              },
+              "required": ["name", "kind"]
+            }
+          }
+        },
+        "required": ["name"]
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "request": {
+            "type": "object",
+            "properties": {
+              "path": {"type": "string"},
+              "method": {"type": "string"},
+              "header": {
+                "type": "object",
+                "additionalProperties": {"type": "string"}
+              },
+              "body": {"type": "string"}
+            },
+            "required": ["path"]
+          },
+          "response": {
+            "type": "object",
+            "properties": {
+              "encoder": {"type": "string"},
+              "body": {"type": "string"},
+              "header": {
+                "type": "object",
+                "additionalProperties": {"type": "string"}
+              },
+              "statusCode": {"type": "integer"},
+              "bodyData": {"type": "string", "contentEncoding": "base64"}
+            }
+          },
+          "param": {
+            "type": "object",
+            "additionalProperties": {"type": "string"}
+          }
+        },
+        "required": ["name", "request", "response"]
+      }
+    },
+    "webhooks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "timer": {"type": "string"},
+          "request": {
+            "type": "object",
+            "properties": {
+              "path": {"type": "string"},
+              "method": {"type": "string"},
+              "header": {
+                "type": "object",
+                "additionalProperties": {"type": "string"}
+              },
+              "body": {"type": "string"}
+            },
+            "required": ["path"]
+          }
+        },
+        "required": ["name", "timer", "request"]
+      }
+    }
+  }
+}
