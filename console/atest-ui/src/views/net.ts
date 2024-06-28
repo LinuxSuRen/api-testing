@@ -342,7 +342,7 @@ function GenerateCode(request: GenerateRequest,
 }
 
 function ListCodeGenerator(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
-  fetch('/api/v1/code-generators', {
+  fetch('/api/v1/codeGenerators', {
     headers: {
       'X-Auth': getToken()
     },
@@ -501,7 +501,7 @@ function GetSuggestedAPIs(name: string,
       'X-Auth': getToken()
     }
   }
-  fetch(`/api/v1/suggested-apis?name=${name}`, requestOptions)
+  fetch(`/api/v1/suggestedAPIs?name=${name}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback)
 }

@@ -108,14 +108,14 @@ service Runner {
     }
     rpc GetSuggestedAPIs(TestSuiteIdentity) returns (TestCases) {
         option (google.api.http) = {
-            get: "/api/v1/suggested-apis"
+            get: "/api/v1/suggestedAPIs"
         };
     }
 
     // code generator
     rpc ListCodeGenerator(Empty) returns (SimpleList) {
         option (google.api.http) = {
-            get: "/api/v1/code-generators"
+            get: "/api/v1/codeGenerators"
         };
     }
     rpc GenerateCode(CodeGenerateRequest)  returns (CommonResult) {
