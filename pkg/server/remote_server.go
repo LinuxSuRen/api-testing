@@ -771,7 +771,7 @@ func (s *server) PopularHeaders(ctx context.Context, in *Empty) (pairs *Pairs, e
 		Data: []*Pair{},
 	}
 
-	err = yaml.Unmarshal([]byte(popularHeaders), &pairs.Data)
+	err = yaml.Unmarshal(popularHeaders, &pairs.Data)
 	return
 }
 
@@ -1009,7 +1009,7 @@ func (s *server) getLoaderByStoreName(storeName string) (loader testing.Writer, 
 }
 
 //go:embed data/headers.yaml
-var popularHeaders string
+var popularHeaders []byte
 
 func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (testcases []testing.TestCase) {
 	reg, matchErr := regexp.Compile(`(.*?\{\{.*\.\w*.*?\}\})`)
