@@ -424,7 +424,7 @@ function VerifyStore(name: string,
     })
   }
   
-  let api = `/api/v1/stores/verify`
+  const api = `/api/v1/stores/verify`
   fetch(api, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
