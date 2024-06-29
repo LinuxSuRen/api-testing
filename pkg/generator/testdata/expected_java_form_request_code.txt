@@ -31,7 +31,6 @@ public class Main {
         conn.setRequestProperty("User-Agent", "atest");
 
         conn.setDoOutput(true);
-        conn.getOutputStream().write(postDataBytes);
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
         StringBuilder response = new StringBuilder();

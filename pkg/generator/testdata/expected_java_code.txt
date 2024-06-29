@@ -18,7 +18,8 @@ import java.net.URLEncoder;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String body = "";
+        String body = """
+        """;
         byte[] postDataBytes = body.getBytes("UTF-8");
 
         URL url = new URL("https://www.baidu.com");
@@ -27,7 +28,6 @@ public class Main {
         conn.setRequestProperty("User-Agent", "atest");
 
         conn.setDoOutput(true);
-        conn.getOutputStream().write(postDataBytes);
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
         StringBuilder response = new StringBuilder();
