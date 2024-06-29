@@ -28,7 +28,8 @@ public class Main {
         {{- end}}
         byte[] postDataBytes = postData.toString().getBytes("UTF-8");
         {{- else}}
-        String body = "{{.Request.Body.String}}";
+        String body = """
+        {{.Request.Body.String}}""";
         byte[] postDataBytes = body.getBytes("UTF-8");
         {{- end }}
 
@@ -47,7 +48,9 @@ public class Main {
         {{- end}}
 
         conn.setDoOutput(true);
+        {{- if ne .Request.Method "GET" }}
         conn.getOutputStream().write(postDataBytes);
+        {{- end}}
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
         StringBuilder response = new StringBuilder();

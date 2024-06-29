@@ -15,6 +15,7 @@ mkdir -p /var/data
 nohup atest server --local-storage '/workspace/test-suites/*.yaml'&
 sleep 1
 
+# test_cases=("postRequest" "requestWithHeader" "requestWithoutHeader")
 test_cases=("requestWithHeader" "requestWithoutHeader")
 
 for test_case in "${test_cases[@]}"
