@@ -19,7 +19,7 @@ test_cases=("requestWithHeader" "requestWithoutHeader")
 
 for test_case in "${test_cases[@]}"
 do
-    curl http://localhost:8080/server.Runner/GenerateCode -X POST \
+    curl http://localhost:8080/api/v1/codeGenerators/generate -X POST \
         -d '{"TestSuite": "test", "TestCase": "'"${test_case}"'", "Generator": "'"$lang"'"}' > code.json
 
     cat code.json | jq .message -r | sed 's/\\n/\n/g' | sed 's/\\t/\t/g' | sed 's/\\\"/"/g' > code.txt

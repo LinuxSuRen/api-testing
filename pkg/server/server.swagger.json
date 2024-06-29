@@ -22,7 +22,30 @@
     "application/json"
   ],
   "paths": {
-    "/api/v1/code-generators/generate": {
+    "/api/v1/codeGenerators": {
+      "get": {
+        "summary": "code generator",
+        "operationId": "Runner_ListCodeGenerator",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverSimpleList"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/api/v1/codeGenerators/generate": {
       "post": {
         "operationId": "Runner_GenerateCode",
         "responses": {
@@ -49,29 +72,6 @@
             }
           }
         ],
-        "tags": [
-          "Runner"
-        ]
-      }
-    },
-    "/api/v1/codeGenerators": {
-      "get": {
-        "summary": "code generator",
-        "operationId": "Runner_ListCodeGenerator",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverSimpleList"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
         "tags": [
           "Runner"
         ]

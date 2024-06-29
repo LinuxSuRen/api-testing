@@ -2286,7 +2286,7 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GenerateCode", runtime.WithHTTPPathPattern("/api/v1/code-generators/generate"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GenerateCode", runtime.WithHTTPPathPattern("/api/v1/codeGenerators/generate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3293,7 +3293,7 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GenerateCode", runtime.WithHTTPPathPattern("/api/v1/code-generators/generate"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GenerateCode", runtime.WithHTTPPathPattern("/api/v1/codeGenerators/generate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3747,7 +3747,7 @@ var (
 
 	pattern_Runner_ListCodeGenerator_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "codeGenerators"}, ""))
 
-	pattern_Runner_GenerateCode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "code-generators", "generate"}, ""))
+	pattern_Runner_GenerateCode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "codeGenerators", "generate"}, ""))
 
 	pattern_Runner_ListConverter_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "converters"}, ""))
 

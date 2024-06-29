@@ -120,7 +120,7 @@ service Runner {
     }
     rpc GenerateCode(CodeGenerateRequest)  returns (CommonResult) {
         option (google.api.http) = {
-            post: "/api/v1/code-generators/generate"
+            post: "/api/v1/codeGenerators/generate"
             body: "*"
         };
     }

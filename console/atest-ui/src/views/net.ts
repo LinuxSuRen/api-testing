@@ -336,7 +336,7 @@ function GenerateCode(request: GenerateRequest,
       Generator: request.generator
     })
   }
-  fetch(`/api/v1/code-generators/generate`, requestOptions)
+  fetch(`/api/v1/codeGenerators/generate`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
