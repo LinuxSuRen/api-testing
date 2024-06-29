@@ -1,0 +1,14 @@
+#!api-testing
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
+name: atest
+api: |
+  {{default "http://localhost:8080/api/v1" (env "SERVER")}}
+param:
+  name: "{{randAlpha 6}}"
+items:
+- name: createSuite
+  request:
+    api: /suites
+    method: POST
+    body: |
+      {"name": "{{.param.name}}"}
