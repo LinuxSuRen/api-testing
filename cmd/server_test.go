@@ -327,7 +327,7 @@ func TestStartPlugins(t *testing.T) {
 		defer func() {
 			httpServer.Shutdown(context.Background())
 		}()
-		resp, err := http.Post(fmt.Sprintf("http://localhost:%s/server.Runner/GetSuites", httpServer.GetPort()), util.JSON, nil)
+		resp, err := http.Get(fmt.Sprintf("http://localhost:%s/api/v1/suites", httpServer.GetPort()))
 		if assert.NoError(t, err) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 		}
