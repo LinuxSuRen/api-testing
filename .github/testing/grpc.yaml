@@ -8,6 +8,7 @@ spec:
   rpc:
     import:
       - ./pkg/server
+      - ./pkg/apispec/data/proto
     protofile: server.proto
 items:
   - name: GetVersion
