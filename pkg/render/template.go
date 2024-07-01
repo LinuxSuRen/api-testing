@@ -32,6 +32,10 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/linuxsuren/api-testing/pkg/secret"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 )
 
 var secretGetter secret.SecretGetter
@@ -85,6 +89,7 @@ func FuncMap() template.FuncMap {
 		}
 		funcs[item.FuncName] = item.Func
 	}
+	funcs["rasEncryptWithPublicKey"] = rasEncryptWithPublicKey
 	return funcs
 }
 
@@ -216,4 +221,29 @@ type AdvancedFunc struct {
 	Func       interface{}
 	GoDogExper string
 	Generator  func(ctx context.Context, fields string) (err error)
+}
+
+// rasEncryptWithPublicKey encrypts the given content with the provided public key
+func rasEncryptWithPublicKey(content, key string) (string, error) {
+	block, _ := pem.Decode([]byte(key))
+	if block == nil {
+		return "", errors.New("failed to parse PEM block containing the public key")
+	}
+
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse DER encoded public key: %s", err)
+	}
+
+	rsaPub, ok := pub.(*rsa.PublicKey)
+	if !ok {
+		return "", errors.New("key type is not RSA")
+	}
+
+	encryptedData, err := rsa.EncryptPKCS1v15(rand.Reader, rsaPub, []byte(content))
+	if err != nil {
+		return "", fmt.Errorf("failed to encrypt with RSA public key: %s", err)
+	}
+
+	return base64.StdEncoding.EncodeToString(encryptedData), nil
 }
