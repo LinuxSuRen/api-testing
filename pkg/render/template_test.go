@@ -18,6 +18,11 @@ package render
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/pem"
 	"io"
 	"testing"
 
@@ -232,4 +237,46 @@ func TestSecret(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "hello", string(data))
 	})
+}
+
+func TestRasEncryptWithPublicKey(t *testing.T) {
+	// Generate a new RSA key pair
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("Failed to generate private key: %v", err)
+	}
+	publicKey := &privateKey.PublicKey
+
+	// Encode the public key to PEM format
+	pubASN1, err := x509.MarshalPKIXPublicKey(publicKey)
+	if err != nil {
+		t.Fatalf("Failed to marshal public key: %v", err)
+	}
+	pubBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PUBLIC KEY",
+		Bytes: pubASN1,
+	})
+
+	// Encrypt a message using the public key
+	message := "hello world"
+	encryptedMessage, err := rasEncryptWithPublicKey(message, string(pubBytes))
+	if err != nil {
+		t.Fatalf("Failed to encrypt message: %v", err)
+	}
+
+	// Decrypt the message using the private key
+	decodedMessage, err := base64.StdEncoding.DecodeString(encryptedMessage)
+	if err != nil {
+		t.Fatalf("Failed to decode message: %v", err)
+	}
+	decryptedBytes, err := rsa.DecryptPKCS1v15(rand.Reader, privateKey, decodedMessage)
+	if err != nil {
+		t.Fatalf("Failed to decrypt message: %v", err)
+	}
+
+	// Verify the decrypted message
+	decryptedMessage := string(decryptedBytes)
+	if decryptedMessage != message {
+		t.Fatalf("Decrypted message does not match original. Got: %s, want: %s", decryptedMessage, message)
+	}
 }
