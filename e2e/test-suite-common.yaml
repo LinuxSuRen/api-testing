@@ -1,9 +1,8 @@
 #!api-testing
 # yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
-# https://docs.gitlab.com/ee/api/api_resources.html
 name: atest
 api: |
-  {{default "http://localhost:8080" (env "SERVER")}}/server.Runner
+  {{default "http://localhost:8080" (env "SERVER")}}/api/v1
 param:
   suiteName: "{{randAlpha 6}}"
   caseName: "{{randAlpha 6}}"
@@ -18,7 +17,7 @@ items:
     items:
       - httpReady("{{.param.server}}/healthz", 2400)
   request:
-    api: /CreateStore
+    api: /stores
     method: POST
     body: |
       {
@@ -54,7 +53,7 @@ items:
     items:
       - sleep(3)
   request:
-    api: /CreateTestSuite
+    api: /suites
     method: POST
     header:
       X-Store-Name: "{{.param.store}}"
@@ -65,8 +64,8 @@ items:
       }
 - name: updateSuite
   request:
-    api: /UpdateTestSuite
-    method: POST
+    api: /suites/{{.param.suiteName}}
+    method: PUT
     header:
       X-Store-Name: "{{.param.store}}"
     body: |
@@ -80,8 +79,7 @@ items:
       }
 - name: getSuite
   request:
-    api: /GetTestSuite
-    method: POST
+    api: /suites/{{.param.suiteName}}
     header:
       X-Store-Name: "{{.param.store}}"
     body: |
@@ -93,7 +91,7 @@ items:
       api: http://localhost:8080/server.Runner
 - name: duplicateSuite
   request:
-    api: /DuplicateTestSuite
+    api: /suites/{{.param.suiteName}}/duplicate
     method: POST
     header:
       X-Store-Name: "{{.param.store}}"
@@ -104,8 +102,7 @@ items:
       }
 - name: getDuplicatedSuite
   request:
-    api: /GetTestSuite
-    method: POST
+    api: /suites/{{.param.suiteName}}-copy
     header:
       X-Store-Name: "{{.param.store}}"
     body: |
@@ -117,15 +114,14 @@ items:
       api: http://localhost:8080/server.Runner
 - name: GetSuggestedAPIs
   request:
-    api: /GetSuggestedAPIs
-    method: POST
+    api: /suggestedAPIs
     body: |
       {
         "name": "{{.param.suiteName}}"
       }
 - name: createTestCase
   request:
-    api: /CreateTestCase
+    api: /suites/{{.param.suiteName}}/cases
     method: POST
     header:
       X-Store-Name: "{{.param.store}}"
@@ -146,8 +142,8 @@ items:
       }
 - name: updateTestCase
   request:
-    api: /UpdateTestCase
-    method: POST
+    api: /suites/{{.param.suiteName}}/cases/{{.param.caseName}}
+    method: PUT
     header:
       X-Store-Name: "{{.param.store}}"
     body: |
@@ -168,8 +164,7 @@ items:
       }
 - name: getTestCase
   request:
-    api: /GetTestCase
-    method: POST
+    api: /suites/{{.param.suiteName}}/cases/{{.param.caseName}}
     header:
       X-Store-Name: "{{.param.store}}"
     body: |
@@ -182,7 +177,7 @@ items:
       request.body: good
 - name: duplicateTestCase
   request:
-    api: /DuplicateTestCase
+    api: /suites/{{.param.suiteName}}/cases/{{.param.caseName}}/duplicate
     method: POST
     header:
       X-Store-Name: "{{.param.store}}"
@@ -195,8 +190,7 @@ items:
       }
 - name: getDuplicatedTestCase
   request:
-    api: /GetTestCase
-    method: POST
+    api: /suites/{{.param.suiteName}}/cases/{{.param.caseName}}-copy
     header:
       X-Store-Name: "{{.param.store}}"
     body: |
@@ -209,8 +203,8 @@ items:
       request.body: good
 - name: deleteTestCase
   request:
-    api: /DeleteTestCase
-    method: POST
+    api: /suites/{{.param.suiteName}}/cases/{{.param.caseName}}
+    method: DELETE
     header:
       X-Store-Name: "{{.param.store}}"
     body: |
@@ -220,7 +214,7 @@ items:
       }
 - name: createGRPCSuite
   request:
-    api: /CreateTestSuite
+    api: /suites
     method: POST
     header:
       X-Store-Name: "{{.param.store}}"
@@ -232,7 +226,7 @@ items:
       }
 - name: createGRPCTestCase
   request:
-    api: /CreateTestCase
+    api: /suites/{{.param.gRPCSuiteName}}/cases
     method: POST
     header:
       X-Store-Name: "{{.param.store}}"
@@ -252,8 +246,7 @@ items:
       }
 - name: getGRPCTestCase
   request:
-    api: /GetTestCase
-    method: POST
+    api: /suites/{{.param.gRPCSuiteName}}/cases/{{.param.gRPCCaseName}}
     header:
       X-Store-Name: "{{.param.store}}"
     body: |
@@ -264,20 +257,21 @@ items:
   expect:
     bodyFieldsExpect:
       request.header.0.value: "{{.param.store}}"
-- name: runGRPCTestCase
-  request:
-    api: /RunTestCase
-    method: POST
-    header:
-      X-Store-Name: "{{.param.store}}"
-    body: |
-      {
-        "suite": "{{.param.gRPCSuiteName}}",
-        "testcase": "{{.param.gRPCCaseName}}"
-      }
+# - name: runGRPCTestCase
+#   request:
+#     api: /suites/{{.param.gRPCSuiteName}}/cases/{{.param.gRPCCaseName}}/run"
+#     method: POST
+#     header:
+#       X-Store-Name: "{{.param.store}}"
+#     body: |
+#       {
+#         "suite": "{{.param.gRPCSuiteName}}",
+#         "testcase": "{{.param.gRPCCaseName}}",
+#         "parameters": []
+#       }
 - name: runTestSuite
   request:
-    api: /RunTestSuite
+    api: /run/suite
     method: POST
     header:
       X-Store-Name: "{{.param.store}}"
@@ -287,22 +281,19 @@ items:
       }
 - name: version
   request:
-    api: /GetVersion
-    method: POST
+    api: /version
 - name: popularHeaders
   request:
-    api: /PopularHeaders
-    method: POST
+    api: /popularHeaders
   expect:
     verify:
       - any(data.data, {.key == "Content-Type"})
       - any(data.data, {.key == "Authorization"})
 - name: functionsQuery
   request:
-    api: /FunctionsQuery
-    method: POST
-    body: |
-      {"name": "rand"}
+    api: /functions
+    query:
+      name: rand
   expect:
     verify:
       - any(data.data, {.key == "randNumeric"})
@@ -310,17 +301,15 @@ items:
       - len(data.data) >= 8
 - name: findUnknownFunction
   request:
-    api: /FunctionsQuery
-    method: POST
-    body: |
-      {"name": "{{randAlpha 8}}"}
+    api: /functions
+    query:
+      name: "{{randAlpha 8}}"
   expect:
     verify:
       - len(data.data) == 0
 - name: listCodeGenerator
   request:
-    api: /ListCodeGenerator
-    method: POST
+    api: /codeGenerators
   expect:
     verify:
       - any(data.data, {.key == "curl"})

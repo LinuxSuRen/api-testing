@@ -22,8 +22,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/runner"
-	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"net"
 	"net/http"
 	"os"
@@ -33,6 +31,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/linuxsuren/api-testing/pkg/runner"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	_ "embed"
 	pprof "net/http/pprof"
@@ -60,6 +61,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var (
@@ -286,10 +288,20 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		_ = o.httpServer.Shutdown(ctx)
 	}()
 
+	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc),
+		runtime.WithMarshalerOption("application/json+pretty", &runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{
+				Indent:    "  ",
+				Multiline: true, // Optional, implied by presence of "Indent".
+			},
+			UnmarshalOptions: protojson.UnmarshalOptions{
+				DiscardUnknown: true,
+			},
+		}))
+
 	gRPCServerPort := util.GetPort(lis)
 	gRPCServerAddr := fmt.Sprintf("127.0.0.1:%s", gRPCServerPort)
 
-	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc))
 	if o.tls {
 		creds, err := credentials.NewClientTLSFromFile(o.tlsCert, "localhost")
 		if err != nil {
@@ -303,11 +315,13 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}),
 			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}))
 	}
+
 	if err == nil {
 		mux.HandlePath(http.MethodGet, "/", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/assets/{asset}", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/favicon.ico", frontEndHandlerWithLocation(o.consolePath))
+		mux.HandlePath(http.MethodGet, "/swagger.json", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
 
@@ -365,7 +379,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 
 		debugHandler(mux, remoteServer)
 		o.httpServer.WithHandler(combineHandlers.GetHandler())
-		serverLogger.Info("HTTP server listening at", "addr", httplis.Addr())
+		serverLogger.Info("HTTP server started", "addr", httplis.Addr())
+		serverLogger.Info("gRPC server started", "addr", lis.Addr())
 		serverLogger.Info("Server is running.")
 
 		err = o.httpServer.Serve(httplis)
@@ -404,9 +419,12 @@ func frontEndHandlerWithLocation(consolePath string) func(w http.ResponseWriter,
 		} else if target == "/healthz" {
 			w.Write([]byte("ok"))
 			return
+		} else if target == "/swagger.json" {
+			w.Write(server.SwaggerJSON)
+			return
 		}
 
-		var content string
+		var content []byte
 		customHeader := map[string]string{}
 		switch {
 		case strings.HasSuffix(target, ".html"):
@@ -422,11 +440,11 @@ func frontEndHandlerWithLocation(consolePath string) func(w http.ResponseWriter,
 			customHeader[util.ContentType] = "image/x-icon"
 		}
 
-		if content != "" {
+		if len(content) > 0 {
 			for k, v := range customHeader {
 				w.Header().Set(k, v)
 			}
-			http.ServeContent(w, r, "", time.Now(), bytes.NewReader([]byte(content)))
+			http.ServeContent(w, r, "", time.Now(), bytes.NewReader(content))
 		} else {
 			http.ServeFile(w, r, path.Join(consolePath, target))
 		}
@@ -520,13 +538,13 @@ func (s *fakeGRPCServer) RegisterService(desc *grpc.ServiceDesc, impl interface{
 }
 
 //go:embed data/index.js
-var uiResourceJS string
+var uiResourceJS []byte
 
 //go:embed data/index.css
-var uiResourceCSS string
+var uiResourceCSS []byte
 
 //go:embed data/index.html
-var uiResourceIndex string
+var uiResourceIndex []byte
 
 //go:embed data/favicon.ico
-var uiResourceIcon string
+var uiResourceIcon []byte

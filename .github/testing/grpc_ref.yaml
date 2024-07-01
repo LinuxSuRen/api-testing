@@ -6,6 +6,8 @@ api: 127.0.0.1:7070
 spec:
   kind: grpc
   rpc:
+    import:
+      - ./pkg/apispec/data/proto
     serverReflection: true
 items:
   - name: GetVersion

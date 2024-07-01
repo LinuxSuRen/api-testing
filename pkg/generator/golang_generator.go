@@ -17,9 +17,9 @@ package generator
 
 import (
 	"bytes"
-	"html/template"
 	"net/http"
 	"strings"
+	"text/template"
 
 	_ "embed"
 

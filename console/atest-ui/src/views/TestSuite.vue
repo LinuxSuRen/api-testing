@@ -218,7 +218,7 @@ const yamlDialogVisible = ref(false)
 
 function viewYaml() {
   yamlDialogVisible.value = true
-  API.GetTestSuiteYaml(props.name, 'local', (d) => {
+  API.GetTestSuiteYaml(props.name, (d) => {
     yamlFormat.value = yaml.dump(yaml.load(atob(d.data)))
   })
 }

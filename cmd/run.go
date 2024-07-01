@@ -20,7 +20,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"os"
@@ -29,6 +28,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/limit"
@@ -332,6 +333,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 		return
 	}
 
+	runLogger.Info("render test suite", "name", testSuite.Name)
 	if err = testSuite.Render(dataContext); err != nil {
 		return
 	}
@@ -343,6 +345,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 	suiteRunner.WithOutputWriter(os.Stdout)
 	suiteRunner.WithWriteLevel(o.level)
 	suiteRunner.WithSuite(testSuite)
+	runLogger.Info("run test suite", "name", testSuite.Name)
 	for _, testCase := range testSuite.Items {
 		if !testCase.InScope(o.caseItems) {
 			continue

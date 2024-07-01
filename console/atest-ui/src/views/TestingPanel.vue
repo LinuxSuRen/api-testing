@@ -65,14 +65,14 @@ const currentNodekey = ref('')
 
 function loadTestSuites(storeName: string) {
   const requestOptions = {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'X-Store-Name': storeName,
       'X-Auth': API.getToken()
     },
   }
   return async () => {
-    await fetch('/server.Runner/GetSuites', requestOptions)
+    await fetch('/api/v1/suites', requestOptions)
       .then((response) => response.json())
       .then((d) => {
         if (!d.data) {
@@ -114,12 +114,11 @@ const storesLoading = ref(false)
 function loadStores() {
   storesLoading.value = true
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Auth': API.getToken()
     }
   }
-  fetch('/server.Runner/GetStores', requestOptions)
+  fetch('/api/v1/stores', requestOptions)
     .then(API.DefaultResponseProcess)
     .then(async (d) => {
       stores.value = d.data
