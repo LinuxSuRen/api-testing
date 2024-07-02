@@ -26,7 +26,7 @@ interface Tree {
 const testCaseName = ref('')
 const testSuite = ref('')
 const testSuiteKind = ref('')
-const handleNodeClick = (data: Tree) => {
+const handleTreeClick = (data: Tree) => {
   if (data.children) {
     Cache.SetCurrentStore(data.store)
     viewName.value = 'testsuite'
@@ -59,7 +59,7 @@ const handleNodeClick = (data: Tree) => {
   }
 }
 
-const data = ref([] as Tree[])
+const treeData = ref([] as Tree[])
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const currentNodekey = ref('')
 
@@ -97,7 +97,7 @@ function loadTestSuites(storeName: string) {
               parentID: suite.id
             } as Tree)
           })
-          data.value.push(suite)
+          treeData.value.push(suite)
         })
       })
   }
@@ -122,7 +122,7 @@ function loadStores() {
     .then(API.DefaultResponseProcess)
     .then(async (d) => {
       stores.value = d.data
-      data.value = [] as Tree[]
+      treeData.value = [] as Tree[]
       Cache.SetStores(d.data)
 
       for (const item of d.data) {
@@ -131,14 +131,14 @@ function loadStores() {
         }
       }
 
-      if (data.value.length > 0) {
+      if (treeData.value.length > 0) {
         const key = Cache.GetLastTestCaseLocation()
 
         let targetSuite = {} as Tree
         let targetChild = {} as Tree
         if (key.suite !== '' && key.testcase !== '') {
-          for (var i = 0; i < data.value.length; i++) {
-            const item = data.value[i]
+          for (var i = 0; i < treeData.value.length; i++) {
+            const item = treeData.value[i]
             if (item.id === key.suite && item.children) {
               for (var j = 0; j < item.children.length; j++) {
                 const child = item.children[j]
@@ -154,7 +154,7 @@ function loadStores() {
         }
         
         if (!targetChild.id || targetChild.id === '') {
-          targetSuite = data.value[0]
+          targetSuite = treeData.value[0]
           if (targetSuite.children && targetSuite.children.length > 0) {
             targetChild = targetSuite.children[0]
           }
@@ -162,8 +162,10 @@ function loadStores() {
 
         viewName.value = 'testsuite'
         currentNodekey.value = targetChild.id
+
         treeRef.value!.setCurrentKey(targetChild.id)
         treeRef.value!.setCheckedKeys([targetChild.id], false)
+
         testSuite.value = targetSuite.label
         Cache.SetCurrentStore(targetSuite.store )
         testSuiteKind.value = targetChild.kind
@@ -261,7 +263,7 @@ watch(filterText, (val) => {
 })
 const filterTestCases = (value: string, data: Tree) => {
   if (!value) return true
-  return data.label.includes(value)
+  return data.label.toLocaleLowerCase().includes(value.toLocaleLowerCase())
 }
 
 const viewName = ref('')
@@ -315,7 +317,7 @@ const suiteKinds = [{
 
             <el-tree
               v-loading="storesLoading"
-              :data=data
+              :data=treeData
               highlight-current
               :check-on-click-node="true"
               :expand-on-click-node="false"
@@ -323,7 +325,8 @@ const suiteKinds = [{
               ref="treeRef"
               node-key="id"
               :filter-node-method="filterTestCases"
-              @node-click="handleNodeClick"
+              @node-click="handleTreeClick"
+              @current-change="handleTreeClick"
               data-intro="This is the test suite tree. You can click the test suite to edit it."
             />
             <TemplateFunctions/>
