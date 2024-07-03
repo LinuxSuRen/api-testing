@@ -331,7 +331,7 @@ const targetSuiteDuplicateName = ref('')
       <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{
         t('button.save')
       }}</el-button>
-      <el-button type="primary" @click="del" :icon="Delete" test-id="suite-del-but">{{
+      <el-button type="danger" @click="del" :icon="Delete" test-id="suite-del-but">{{
         t('button.delete')
       }}</el-button>
       <el-button type="primary" @click="convert" test-id="convert">{{
