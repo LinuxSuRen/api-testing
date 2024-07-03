@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
+See the License for the specific language 24 permissions and
 limitations under the License.
 */
 package render
@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/md5"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -26,16 +27,17 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"math/rand"
+	mathrand "math/rand"
 	"strings"
 
-	"github.com/Masterminds/sprig/v3"
-	"github.com/linuxsuren/api-testing/pkg/secret"
-	"github.com/linuxsuren/api-testing/pkg/util"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+
+	"github.com/Masterminds/sprig/v3"
+	"github.com/linuxsuren/api-testing/pkg/secret"
+	"github.com/linuxsuren/api-testing/pkg/util"
 )
 
 var secretGetter secret.SecretGetter
@@ -163,7 +165,7 @@ var advancedFuncs = []AdvancedFunc{{
 }, {
 	FuncName: "randEnum",
 	Func: func(items ...string) string {
-		return items[rand.Intn(len(items))]
+		return items[mathrand.Intn(len(items))]
 	},
 }, {
 	FuncName: "randEmail",
