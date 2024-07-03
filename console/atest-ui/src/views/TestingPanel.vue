@@ -16,6 +16,7 @@ const { t } = useI18n()
 interface Tree {
   id: string
   label: string
+  method: string
   parent: string
   parentID: string
   store: string
@@ -41,6 +42,7 @@ const handleTreeClick = (data: Tree) => {
             data.children?.push({
               id: data.label,
               label: item.name,
+              method: item.request.method,
               kind: data.kind,
               store: data.store,
               parent: data.label,
@@ -328,7 +330,16 @@ const suiteKinds = [{
               @node-click="handleTreeClick"
               @current-change="handleTreeClick"
               data-intro="This is the test suite tree. You can click the test suite to edit it."
-            />
+            >
+              <template #default="{ node, data }">
+                <span class="custom-tree-node">
+                  <el-text class="mx-1" v-if="data.method === 'POST'" type="success">{{ node.label }}</el-text>
+                  <el-text class="mx-1" v-else-if="data.method === 'PUT'" type="warning">{{ node.label }}</el-text>
+                  <el-text class="mx-1" v-else-if="data.method === 'DELETE'" type="danger">{{ node.label }}</el-text>
+                  <el-text class="mx-1" v-else>{{ node.label }}</el-text>
+                </span>
+              </template>
+            </el-tree>
             <TemplateFunctions/>
           </el-aside>
 

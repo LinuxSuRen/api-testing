@@ -529,7 +529,7 @@ const duplicateTestCase = () => {
         <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
           v-if="!Cache.GetCurrentStore().readOnly"
           >{{ t('button.save') }}</el-button>
-        <el-button type="primary" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
+        <el-button type="danger" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
         <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument">{{ t('button.duplicate') }}</el-button>
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
       </div>
