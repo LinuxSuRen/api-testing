@@ -12,6 +12,7 @@ import type { TestCaseResponse } from './cache'
 import { useI18n } from 'vue-i18n'
 import { JSONPath } from 'jsonpath-plus'
 import { Codemirror } from 'vue-codemirror'
+import jsonlint from 'jsonlint-mod'
 
 const { t } = useI18n()
 
@@ -433,15 +434,18 @@ function bodyTypeChange(e: number) {
   }
 }
 
+const lintingError = ref('')
 function jsonFormat() {
   if (bodyType.value !== 5) {
     return
   }
 
   try {
+    jsonlint.parse(testCaseWithSuite.value.data.request.body)
     testCaseWithSuite.value.data.request.body = JSON.stringify(JSON.parse(testCaseWithSuite.value.data.request.body), null, 4)
+    lintingError.value = ''
   } catch (e) {
-    console.log(e)
+    lintingError.value = e.message
   }
 }
 
@@ -683,6 +687,9 @@ const duplicateTestCase = () => {
                 </template>
               </el-table-column>
             </el-table>
+          </div>
+          <div v-if="lintingError" style="color: red; margin-top: 10px;">
+            {{ lintingError }}
           </div>
         </el-tab-pane>
 
