@@ -9,14 +9,12 @@ import { Cache } from './cache'
 import { API } from './net'
 import { UIAPI } from './net-vue'
 import type { TestCaseResponse } from './cache'
+import { Magic } from './magicKeys'
 import { useI18n } from 'vue-i18n'
 import { JSONPath } from 'jsonpath-plus'
 import { Codemirror } from 'vue-codemirror'
 import jsonlint from 'jsonlint-mod'
-import { useMagicKeys } from '@vueuse/core'
 
-const keys = useMagicKeys()
-const keyAltS = keys['Alt+S']
 const { t } = useI18n()
 
 const props = defineProps({
@@ -30,12 +28,6 @@ let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, pr
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
 watch(testResultActiveTab, Cache.WatchResponseActiveTab)
 
-watch(keyAltS, (v) => {
-  if (v) {
-    sendRequest()
-  }
-})
-
 const parameters = ref([] as Pair[])
 const requestLoading = ref(false)
 const testResult = ref({ header: [] as Pair[] } as TestResult)
@@ -47,6 +39,7 @@ const sendRequest = async () => {
     runTestCase()
   }
 }
+Magic.Keys(sendRequest, ['Alt+S', 'Alt+ß'])
 
 const runTestCase = () => {
   requestLoading.value = true
