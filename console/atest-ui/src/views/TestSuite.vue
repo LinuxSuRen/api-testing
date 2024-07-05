@@ -8,6 +8,7 @@ import { NewSuggestedAPIsQuery, GetHTTPMethods } from './types'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 import { API } from './net'
+import { Magic } from './magicKeys'
 import { Codemirror } from 'vue-codemirror'
 import yaml from 'js-yaml'
 
@@ -58,7 +59,7 @@ watch(props, () => {
   load()
 })
 
-function save() {
+const save = () => {
   let oldImportPath = ''
   let hasImport = false
   if (suite.value.spec && suite.value.spec.rpc) {
@@ -94,6 +95,7 @@ function save() {
     }
   )
 }
+Magic.Keys(save, ['Alt+S', 'Alt+ß'])
 
 const isFullScreen = ref(false)
 const dialogVisible = ref(false)
@@ -112,6 +114,7 @@ function openNewTestCaseDialog() {
   dialogVisible.value = true
   querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.name!)
 }
+Magic.Keys(openNewTestCaseDialog, ['Alt+N', 'Alt+dead'])
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
