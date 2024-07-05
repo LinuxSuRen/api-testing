@@ -6,6 +6,6 @@ then
     file=compose.yaml
 fi
 
-docker-compose version
-docker-compose -f "$file" down
-docker-compose -f "$file" up --build testing --exit-code-from testing --remove-orphans
+docker compose version
+docker compose -f "$file" down
+docker compose -f "$file" up --build testing --exit-code-from testing --remove-orphans
