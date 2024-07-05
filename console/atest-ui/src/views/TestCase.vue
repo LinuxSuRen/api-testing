@@ -13,7 +13,10 @@ import { useI18n } from 'vue-i18n'
 import { JSONPath } from 'jsonpath-plus'
 import { Codemirror } from 'vue-codemirror'
 import jsonlint from 'jsonlint-mod'
+import { useMagicKeys } from '@vueuse/core'
 
+const keys = useMagicKeys()
+const keyAltS = keys['Alt+S']
 const { t } = useI18n()
 
 const props = defineProps({
@@ -26,6 +29,12 @@ const emit = defineEmits(['updated'])
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.suite!)
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
 watch(testResultActiveTab, Cache.WatchResponseActiveTab)
+
+watch(keyAltS, (v) => {
+  if (v) {
+    sendRequest()
+  }
+})
 
 const parameters = ref([] as Pair[])
 const requestLoading = ref(false)

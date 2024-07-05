@@ -16,6 +16,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@vueuse/core": "^10.11.0",
     "element-plus": "^2.3.7",
     "intro.js": "^7.0.1",
     "jsonlint-mod": "^1.7.6",
