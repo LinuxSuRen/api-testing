@@ -32,9 +32,14 @@ const requestLoading = ref(false)
 const testResult = ref({ header: [] as Pair[] } as TestResult)
 const sendRequest = async () => {
   if (needUpdate.value) {
-    await saveTestCase(false)
+    await saveTestCase(false, runTestCase)
+    needUpdate.value = false
+  } else {
+    runTestCase()
   }
+}
 
+const runTestCase = () => {
   requestLoading.value = true
   const name = props.name
   const suite = props.suite
@@ -281,13 +286,17 @@ watch(testCaseWithSuite, (after, before) => {
 }, { deep: true })
 
 const saveLoading = ref(false)
-function saveTestCase(tip: boolean = true) {
+function saveTestCase(tip: boolean = true, callback: (c: any) => void) {
   UIAPI.UpdateTestCase(testCaseWithSuite.value, (e) => {
     if (tip) {
       ElMessage({
         message: 'Saved.',
         type: 'success'
       })
+    }
+
+    if (callback) {
+      callback()
     }
   }, UIAPI.ErrorTip, saveLoading)
 }
@@ -435,14 +444,17 @@ function bodyTypeChange(e: number) {
 }
 
 const lintingError = ref('')
-function jsonFormat() {
-  if (bodyType.value !== 5) {
+function jsonFormat(space) {
+  const jsonText = testCaseWithSuite.value.data.request.body
+  if (bodyType.value !== 5 || jsonText === '') {
     return
   }
 
   try {
-    jsonlint.parse(testCaseWithSuite.value.data.request.body)
-    testCaseWithSuite.value.data.request.body = JSON.stringify(JSON.parse(testCaseWithSuite.value.data.request.body), null, 4)
+    const jsonObj = jsonlint.parse(jsonText)
+    if (space >= 0) {
+      testCaseWithSuite.value.data.request.body = JSON.stringify(jsonObj, null, space)
+    }
     lintingError.value = ''
   } catch (e) {
     lintingError.value = e.message
@@ -543,7 +555,7 @@ const duplicateTestCase = () => {
           v-model="testCaseWithSuite.data.request.method"
           class="m-2"
           placeholder="Method"
-          size="middle"
+          size="default"
           test-id="case-editor-method"
         >
           <el-option
@@ -658,6 +670,11 @@ const duplicateTestCase = () => {
         </el-tab-pane>
 
         <el-tab-pane name="body">
+          <span style="margin-right: 10px; padding-right: 5px;">
+            <el-button type="primary" @click="jsonFormat(4)">Beautify</el-button>
+            <el-button type="primary" @click="jsonFormat(0)">Minify</el-button>
+            <el-text class="mx-1">Choose the body format</el-text>
+          </span>
           <template #label>
             <el-badge :is-dot="testCaseWithSuite.data.request.body !== ''" class="item">Body</el-badge>
           </template>
@@ -671,7 +688,7 @@ const duplicateTestCase = () => {
 
           <div style="flex-grow: 1;">
             <Codemirror v-if="bodyType === 3 || bodyType === 5"
-              @change="jsonFormat"
+              @blur="jsonFormat(-1)"
               v-model="testCaseWithSuite.data.request.body"/>
             <el-table :data="testCaseWithSuite.data.request.form" style="width: 100%" v-if="bodyType === 4">
               <el-table-column label="Key" width="180">
@@ -784,7 +801,7 @@ const duplicateTestCase = () => {
               v-model="currentCodeGenerator"
               class="m-2"
               style="padding-right: 10px;"
-              size="middle"
+              size="default"
             >
               <el-option
                 v-for="item in codeGenerators"
