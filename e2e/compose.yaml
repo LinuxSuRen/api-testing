@@ -33,7 +33,7 @@ services:
       # - minio
       - postgres
   etcd:
-    image: "bitnami/etcd:3.5.10"
+    image: "ghcr.io/linuxsuren/bitnami/etcd:3.5.10"
     expose:
       - "2379"
     environment:
@@ -45,7 +45,7 @@ services:
       retries: 10
       start_period: 3s
   mysql:
-    image: mysql:8.2.0
+    image: ghcr.io/linuxsuren/library/mysql:8.2.0
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -57,7 +57,7 @@ services:
       retries: 10
       start_period: 3s
   mariadb:
-    image: mariadb:11.0
+    image: ghcr.io/linuxsuren/library/mariadb:11.0
     environment:
       MARIADB_ROOT_PASSWORD: root
       MARIADB_DATABASE: atest
@@ -68,14 +68,14 @@ services:
       retries: 10
       start_period: 3s
   minio:
-    image: bitnami/minio:2023.11.6
+    image: ghcr.io/linuxsuren/bitnami/minio:2023.11.6
     environment:
       MINIO_ROOT_USER: root
       MINIO_ROOT_PASSWORD: root
       MINIO_SERVER_HOST: minio
       MINIO_DEFAULT_BUCKETS: bucket
   mongo:
-    image: mongo
+    image: ghcr.io/linuxsuren/library/mongo:7.0.12
     healthcheck:
       test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/27017"]
       interval: 3s
@@ -86,7 +86,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
   postgres:
-    image: postgres:16.0
+    image: ghcr.io/linuxsuren/library/postgres:16.0
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
