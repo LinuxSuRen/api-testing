@@ -27,6 +27,9 @@ const emit = defineEmits(['updated'])
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.suite!)
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
 watch(testResultActiveTab, Cache.WatchResponseActiveTab)
+Magic.Keys(() => {
+  testResultActiveTab.value = 'output'
+}, ['Alt+KeyO'])
 
 const parameters = ref([] as Pair[])
 const requestLoading = ref(false)
@@ -349,6 +352,15 @@ watch(currentCodeGenerator, () => {
 const options = GetHTTPMethods()
 const requestActiveTab = ref(Cache.GetPreference().requestActiveTab)
 watch(requestActiveTab, Cache.WatchRequestActiveTab)
+Magic.Keys(() => {
+  requestActiveTab.value = 'query'
+}, ['Alt+KeyQ'])
+Magic.Keys(() => {
+  requestActiveTab.value = 'header'
+}, ['Alt+KeyH'])
+Magic.Keys(() => {
+  requestActiveTab.value = 'body'
+}, ['Alt+KeyB'])
 
 function bodyFiledExpectChange() {
   const data = testCaseWithSuite.value.data.response.bodyFieldsExpect
@@ -525,6 +537,7 @@ const openDuplicateTestCaseDialog = () => {
     duplicateTestCaseDialog.value = true
     targetTestCaseName.value = props.name + '-copy'
 }
+Magic.Keys(openDuplicateTestCaseDialog, ['Alt+KeyD'])
 const duplicateTestCase = () => {
     API.DuplicateTestCase(props.suite, props.suite, props.name, targetTestCaseName.value,(d) => {
         duplicateTestCaseDialog.value = false
@@ -535,6 +548,11 @@ const duplicateTestCase = () => {
         emit('updated')
     })
 }
+Magic.Keys(() => {
+  if (duplicateTestCaseDialog.value) {
+    duplicateTestCase()
+  }
+}, ['Alt+KeyO'])
 </script>
 
 <template>
