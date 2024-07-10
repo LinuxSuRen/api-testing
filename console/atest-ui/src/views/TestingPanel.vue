@@ -10,6 +10,7 @@ import type { Suite } from './types'
 import { API } from './net'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
+import { Magic } from './magicKeys'
 
 const { t } = useI18n()
 
@@ -60,6 +61,39 @@ const handleTreeClick = (data: Tree) => {
     viewName.value = 'testcase'
   }
 }
+
+Magic.Keys((k) => {
+  const currentKey = currentNodekey.value
+
+  if (treeRef.value) {
+    treeRef.value.data.forEach((n) => {
+      if (n.children) {
+        n.children.forEach((c, index) => {
+          if (c.id === currentKey) {
+            var nextIndex = -1
+            if (k.endsWith('Up')) {
+              if (index > 0) {
+                nextIndex = index - 1
+              }
+            } else {
+              if (index < n.children.length - 1) {
+                nextIndex = index + 1
+              }
+            }
+
+            if (nextIndex >= 0 < n.children.length) {
+              const next = n.children[nextIndex]
+              currentNodekey.value = next.id
+              treeRef.value!.setCurrentKey(next.id)
+              treeRef.value!.setCheckedKeys([next.id], false)
+            }
+            return
+          }
+        })
+      }
+    })
+  }
+}, ['Alt+ArrowUp', 'Alt+ArrowDown'])
 
 const treeData = ref([] as Tree[])
 const treeRef = ref<InstanceType<typeof ElTree>>()
@@ -327,7 +361,6 @@ const suiteKinds = [{
               ref="treeRef"
               node-key="id"
               :filter-node-method="filterTestCases"
-              @node-click="handleTreeClick"
               @current-change="handleTreeClick"
               data-intro="This is the test suite tree. You can click the test suite to edit it."
             >

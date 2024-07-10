@@ -17,11 +17,11 @@ limitations under the License.
 import { watch } from 'vue'
 import { useMagicKeys } from '@vueuse/core'
 
-function Keys(func: () => void, keys: string[]) {
+function Keys(func: (() => void) | ((k: string) => void), keys: string[]) {
     const magicKeys = useMagicKeys()
     keys.forEach(k => {
         watch(magicKeys[k], (v) => {
-            if (v) func()
+            if (v) func(k)
         })
     })
 }
