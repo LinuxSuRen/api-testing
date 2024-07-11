@@ -212,6 +212,12 @@ items:
         "suite": "{{.param.suiteName}}",
         "testcase": "{{.param.caseName}}"
       }
+- name: deleteTestSuite
+  request:
+    api: /suites/{{.param.suiteName}}
+    method: DELETE
+    header:
+      X-Store-Name: "{{.param.store}}"
 - name: createGRPCSuite
   request:
     api: /suites

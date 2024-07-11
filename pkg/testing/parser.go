@@ -16,21 +16,21 @@ limitations under the License.
 package testing
 
 import (
-    "bytes"
-    "errors"
-    "fmt"
-    "io"
-    "mime/multipart"
-    "net/http"
-    "net/url"
-    "os"
-    "path"
-    "strings"
+	"bytes"
+	"errors"
+	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"net/url"
+	"os"
+	"path"
+	"strings"
 
-    "github.com/linuxsuren/api-testing/docs"
-    "github.com/linuxsuren/api-testing/pkg/render"
-    "github.com/linuxsuren/api-testing/pkg/util"
-    "gopkg.in/yaml.v3"
+	"github.com/linuxsuren/api-testing/docs"
+	"github.com/linuxsuren/api-testing/pkg/render"
+	"github.com/linuxsuren/api-testing/pkg/util"
+	"gopkg.in/yaml.v3"
 )
 
 const (

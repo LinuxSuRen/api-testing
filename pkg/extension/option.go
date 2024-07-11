@@ -27,6 +27,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 // Extension is the default command option of the extension
@@ -79,6 +80,7 @@ func CreateRunner(ext *Extension, c *cobra.Command, remoteServer remote.LoaderSe
 
 	gRPCServer := grpc.NewServer()
 	remote.RegisterLoaderServer(gRPCServer, remoteServer)
+	reflection.Register(gRPCServer)
 	c.Printf("%s@%s is running at %s\n", ext.GetFullName(), version.GetVersion(), address)
 
 	RegisterStopSignal(c.Context(), func() {
