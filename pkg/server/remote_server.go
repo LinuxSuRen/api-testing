@@ -516,7 +516,7 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 		if result.Error == "" {
 			ExecutionSuccessNum.Inc()
 		} else {
-            ExecutionFailNum.Inc()
+			ExecutionFailNum.Inc()
 		}
 	}()
 
