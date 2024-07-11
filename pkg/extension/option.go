@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -71,6 +71,10 @@ func (o *Extension) GetFullName() string {
 
 func CreateRunner(ext *Extension, c *cobra.Command, remoteServer remote.LoaderServer) (err error) {
 	protocol, address := ext.GetListenAddress()
+	// remove the exist socket file
+	if ext.Socket != "" {
+		_ = os.Remove(ext.Socket)
+	}
 
 	var lis net.Listener
 	lis, err = net.Listen(protocol, address)
@@ -85,6 +89,7 @@ func CreateRunner(ext *Extension, c *cobra.Command, remoteServer remote.LoaderSe
 
 	RegisterStopSignal(c.Context(), func() {
 		_ = os.Remove(ext.Socket)
+		_ = lis.Close()
 	}, gRPCServer)
 
 	err = gRPCServer.Serve(lis)
@@ -93,6 +98,10 @@ func CreateRunner(ext *Extension, c *cobra.Command, remoteServer remote.LoaderSe
 
 func CreateMonitor(ext *Extension, c *cobra.Command, remoteServer monitor.MonitorServer) (err error) {
 	protocol, address := ext.GetListenAddress()
+	// remove the exist socket file
+	if ext.Socket != "" {
+		_ = os.Remove(ext.Socket)
+	}
 
 	var lis net.Listener
 	lis, err = net.Listen(protocol, address)
@@ -106,6 +115,7 @@ func CreateMonitor(ext *Extension, c *cobra.Command, remoteServer monitor.Monito
 
 	RegisterStopSignal(c.Context(), func() {
 		_ = os.Remove(ext.Socket)
+		_ = lis.Close()
 	}, gRPCServer)
 
 	err = gRPCServer.Serve(lis)
@@ -114,6 +124,10 @@ func CreateMonitor(ext *Extension, c *cobra.Command, remoteServer monitor.Monito
 
 func CreateExtensionRunner(ext *Extension, c *cobra.Command, remoteServer server.RunnerExtensionServer) (err error) {
 	protocol, address := ext.GetListenAddress()
+	// remove the exist socket file
+	if ext.Socket != "" {
+		_ = os.Remove(ext.Socket)
+	}
 
 	var lis net.Listener
 	lis, err = net.Listen(protocol, address)
@@ -127,6 +141,7 @@ func CreateExtensionRunner(ext *Extension, c *cobra.Command, remoteServer server
 
 	RegisterStopSignal(c.Context(), func() {
 		_ = os.Remove(ext.Socket)
+		_ = lis.Close()
 	}, gRPCServer)
 
 	err = gRPCServer.Serve(lis)
