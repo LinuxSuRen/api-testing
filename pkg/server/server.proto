@@ -154,7 +154,7 @@ service Runner {
         get: "/api/v1/functionsQuery"
       };
     }
-    rpc GetVersion(Empty) returns (HelloReply) {
+    rpc GetVersion(Empty) returns (Version) {
       option (google.api.http) = {
         get: "/api/v1/version"
       };
@@ -496,4 +496,10 @@ service Mock {
 message MockConfig {
   string Prefix = 1;
   string Config = 2;
+}
+
+message Version {
+  string version = 1;
+  string commit = 2;
+  string date = 3;
 }

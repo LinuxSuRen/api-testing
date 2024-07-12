@@ -36,9 +36,9 @@ func (s *fakeServer) Run(ctx context.Context, in *TestTask) (*TestResult, error)
 }
 
 // GetVersion returns the version
-func (s *fakeServer) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
-	reply = &HelloReply{
-		Message: s.version,
+func (s *fakeServer) GetVersion(ctx context.Context, in *Empty) (reply *Version, err error) {
+	reply = &Version{
+		Version: s.version,
 	}
 	err = s.err
 	return

@@ -23,6 +23,7 @@ const UnknownVersion = "unknown"
 // should be injected during the build process
 var version string
 var date string
+var commit string
 
 // GetVersion returns the version
 func GetVersion() string {
@@ -30,6 +31,14 @@ func GetVersion() string {
 		return UnknownVersion
 	}
 	return version
+}
+
+func GetDate() string {
+	return date
+}
+
+func GetCommit() string {
+	return commit
 }
 
 func GetDetailedVersion() string {
