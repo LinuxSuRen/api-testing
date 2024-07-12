@@ -19,6 +19,7 @@ service Loader {
     rpc UpdateTestCase(server.TestCase) returns (server.TestCase) {}
     rpc DeleteTestCase(server.TestCase) returns (server.Empty) {}
 
+    rpc GetVersion(server.Empty) returns (server.Version) {}
     rpc Verify(server.Empty) returns (server.ExtensionStatus) {}
     rpc PProf(server.PProfRequest) returns (server.PProfData) {}
 }

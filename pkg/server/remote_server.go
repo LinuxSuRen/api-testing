@@ -21,14 +21,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"io"
 	"net/http"
 	"os"
 	reflect "reflect"
 	"regexp"
 	"strings"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/linuxsuren/api-testing/pkg/util/home"
 
@@ -317,8 +318,12 @@ func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
 }
 
 // GetVersion returns the version
-func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
-	reply = &HelloReply{Message: version.GetVersion()}
+func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *Version, err error) {
+	reply = &Version{
+		Version: version.GetVersion(),
+		Date:    version.GetDate(),
+		Commit:  version.GetCommit(),
+	}
 	return
 }
 
