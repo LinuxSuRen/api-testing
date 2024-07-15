@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -539,6 +539,7 @@ func TestBodyFiledsVerify(t *testing.T) {
 
 func TestGetSuggestedAPIs(t *testing.T) {
 	runner := NewSimpleTestCaseRunner()
+	runner.WithSuite(nil)
 	// not a swagger
 	result, err := runner.GetSuggestedAPIs(&atest.TestSuite{}, "")
 	assert.NoError(t, err, err)
@@ -557,6 +558,7 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	assert.NotEmpty(t, result)
 	method := result[0].Request.Method
 	assert.Equal(t, strings.ToUpper(method), method)
+	assert.Equal(t, "todo", result[0].Request.Query["text"])
 }
 
 func TestIsStructContent(t *testing.T) {
