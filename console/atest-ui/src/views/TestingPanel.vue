@@ -125,7 +125,7 @@ function loadTestSuites(storeName: string) {
 
           d.data[k].data.forEach((item: any) => {
             suite.children?.push({
-              id: k + item,
+              id: generateTestCaseID(k, item),
               label: item,
               store: storeName,
               kind: suite.kind,
@@ -139,6 +139,10 @@ function loadTestSuites(storeName: string) {
   }
 }
 
+function generateTestCaseID(suiteName: string, caseName: string) {
+  return suiteName + caseName
+}
+
 interface Store {
   name: string,
   description: string,
@@ -147,7 +151,12 @@ interface Store {
 const loginDialogVisible = ref(false)
 const stores = ref([] as Store[])
 const storesLoading = ref(false)
-function loadStores() {
+function loadStores(lastSuitName?: string, lastCaseName?: string) {
+  if (lastSuitName && lastCaseName && lastSuitName !== '' && lastCaseName !== '') {
+    // get data from emit event
+    Cache.SetLastTestCaseLocation(lastSuitName, generateTestCaseID(lastSuitName, lastCaseName))
+  }
+
   storesLoading.value = true
   const requestOptions = {
     headers: {
@@ -203,7 +212,7 @@ function loadStores() {
         treeRef.value!.setCheckedKeys([targetChild.id], false)
 
         testSuite.value = targetSuite.label
-        Cache.SetCurrentStore(targetSuite.store )
+        Cache.SetCurrentStore(targetSuite.store)
         testSuiteKind.value = targetChild.kind
       } else {
         viewName.value = ""

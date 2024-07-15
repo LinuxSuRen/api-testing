@@ -56,6 +56,10 @@
             "put": {
                 "summary": "summary",
                 "operationId": "updateUser"
+            },
+            "patch": {
+                "summary": "summary",
+                "operationId": "patchUser"
             }
         }
     },

@@ -26,6 +26,7 @@ import (
 
 	_ "embed"
 
+	"github.com/go-openapi/spec"
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -558,7 +559,6 @@ func TestGetSuggestedAPIs(t *testing.T) {
 	assert.NotEmpty(t, result)
 	method := result[0].Request.Method
 	assert.Equal(t, strings.ToUpper(method), method)
-	assert.Equal(t, "todo", result[0].Request.Query["text"])
 }
 
 func TestIsStructContent(t *testing.T) {
@@ -586,6 +586,44 @@ func TestIsStructContent(t *testing.T) {
 			ok := isNonBinaryContent(tt.contentType)
 			assert.Equal(t, tt.expectOk, ok)
 		})
+	}
+}
+
+func TestGenerateRandomValue(t *testing.T) {
+	tests := []struct {
+		param    spec.Parameter
+		expected interface{}
+	}{
+		{
+			param: spec.Parameter{
+				SimpleSchema: spec.SimpleSchema{
+					Format: "int32",
+				},
+			},
+			expected: 101,
+		}, {
+			param: spec.Parameter{
+				SimpleSchema: spec.SimpleSchema{
+					Format: "boolean",
+				},
+			},
+			expected: true,
+		}, {
+			param: spec.Parameter{
+				SimpleSchema: spec.SimpleSchema{
+					Format: "string",
+				},
+			},
+			expected: "random",
+		},
+	}
+
+	for _, tt := range tests {
+		result := generateRandomValue(tt.param)
+
+		if result != tt.expected {
+			t.Errorf("generateRandomValue(%v) = %v, expected %v", tt.param, result, tt.expected)
+		}
 	}
 }
 

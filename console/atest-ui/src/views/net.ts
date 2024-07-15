@@ -178,8 +178,7 @@ function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
 interface TestCase {
   suiteName: string
   name: string
-  api: string
-  method: string
+  request: any
 }
 
 function CreateTestCase(testcase: TestCase,
@@ -194,10 +193,7 @@ function CreateTestCase(testcase: TestCase,
       suiteName: testcase.suiteName,
       data: {
         name: testcase.name,
-        request: {
-          api: testcase.api,
-          method: testcase.method
-        }
+        request: testcase.request
       }
     })
   }
