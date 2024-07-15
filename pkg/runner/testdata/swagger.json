@@ -32,7 +32,16 @@
             },
             "post": {
                 "summary": "summary",
-                "operationId": "createUser"
+                "operationId": "createUser",
+                "requestBody": {
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                }
             }
         },
         "/api/v1/users/{user}": {
@@ -48,6 +57,24 @@
                 "summary": "summary",
                 "operationId": "updateUser"
             }
+        }
+    },
+    "components": {
+        "schemas": {
+          "User": {
+            "title": "User",
+            "type": "object",
+            "properties": {
+              "username": {
+                "type": "string",
+                "description": "username"
+              },
+              "age": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
         }
     }
 }
