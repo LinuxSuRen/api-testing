@@ -104,7 +104,8 @@ const testCaseForm = reactive({
   suiteName: '',
   name: '',
   api: '',
-  method: 'GET'
+  method: 'GET',
+  request: {}
 })
 const rules = reactive<FormRules<Suite>>({
   name: [{ required: true, message: 'Please input TestCase name', trigger: 'blur' }]
@@ -118,20 +119,17 @@ Magic.Keys(openNewTestCaseDialog, ['Alt+N', 'Alt+dead'])
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  await formEl.validate((valid: boolean, fields) => {
+  await formEl.validate((valid: boolean) => {
     if (valid) {
       suiteCreatingLoading.value = true
 
-      API.CreateTestCase(
-        {
+      API.CreateTestCase({
           suiteName: props.name,
           name: testCaseForm.name,
-          api: testCaseForm.api,
-          method: testCaseForm.method
-        },
-        () => {
+          request: testCaseForm.request
+        }, () => {
           suiteCreatingLoading.value = false
-          emit('updated', 'hello from child')
+          emit('updated', props.name, testCaseForm.name)
         }
       )
 
@@ -203,6 +201,7 @@ const handleAPISelect = (item: TestCase) => {
     if (testCaseForm.name === '') {
         testCaseForm.name = item.name
     }
+    testCaseForm.request = item.request
 }
 
 function paramChange() {

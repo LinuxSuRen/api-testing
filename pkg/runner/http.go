@@ -253,15 +253,37 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 						switch param.In {
 						case "query":
 							// TODO should have a better way to provide the initial value
-							(&(testcase.Request)).Query[param.Name] = "todo"
+							(&(testcase.Request)).Query[param.Name] = generateRandomValue(param)
 						}
 					}
+					testcase.Name = swagger.Paths.Paths[api].Get.ID
+				case http.MethodPost:
+					testcase.Name = swagger.Paths.Paths[api].Post.ID
+				case http.MethodPut:
+					testcase.Name = swagger.Paths.Paths[api].Put.ID
+				case http.MethodDelete:
+					testcase.Name = swagger.Paths.Paths[api].Delete.ID
+				case http.MethodPatch:
+					testcase.Name = swagger.Paths.Paths[api].Patch.ID
 				}
 				result = append(result, testcase)
 			}
 		}
 	}
 	return
+}
+
+func generateRandomValue(param spec.Parameter) interface{} {
+	switch param.Format {
+	case "int32", "int64":
+		return 101
+	case "boolean":
+		return true
+	case "string":
+		return "random"
+	default:
+		return "random"
+	}
 }
 
 func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (responseBodyData []byte, err error) {
