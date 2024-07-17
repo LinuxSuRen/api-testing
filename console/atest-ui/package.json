@@ -3,7 +3,7 @@
   "version": "v0.0.14",
   "private": false,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "run-p type-check build-only",
     "preview": "vite preview",
     "test:unit": "jest --collect-coverage",

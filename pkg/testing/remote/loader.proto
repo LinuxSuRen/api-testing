@@ -44,3 +44,21 @@ service SecretService {
     rpc DeleteSecret(server.Secret) returns (server.CommonResult) {}
     rpc UpdateSecret(server.Secret) returns (server.CommonResult) {}
 }
+
+service ConfigService {
+    rpc GetConfigs(server.Empty) returns (Configs) {}
+    rpc GetConfig(server.SimpleName) returns (Config) {}
+    rpc CreateConfig(Config) returns (server.CommonResult) {}
+    rpc UpdateConfig(Config) returns (server.CommonResult) {}
+    rpc DeleteConfig(server.SimpleName) returns (server.CommonResult) {}
+}
+
+message Configs {
+    repeated Config data = 1;
+}
+
+message Config {
+    string name = 1;
+    string value = 2;
+    string description = 3;
+}
