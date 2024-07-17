@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import type { Pair } from './types'
 import { API } from './net'
 import { useI18n } from 'vue-i18n'
+import { Magic } from './magicKeys'
 
 const { t } = useI18n()
 
@@ -15,6 +16,10 @@ function queryFuncs() {
         funcs.value = d.data
     })
 }
+
+Magic.Keys(() => {
+    dialogVisible.value = true
+}, ['Alt+KeyT'])
 </script>
 
 <template>

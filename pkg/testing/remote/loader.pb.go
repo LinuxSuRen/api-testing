@@ -177,7 +177,7 @@ var file_pkg_testing_remote_loader_proto_rawDesc = []byte{
 	0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73,
 	0x74, 0x43, 0x61, 0x73, 0x65, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x12, 0x12, 0x0a, 0x04,
 	0x66, 0x75, 0x6c, 0x6c, 0x18, 0x06, 0x20, 0x01, 0x28, 0x08, 0x52, 0x04, 0x66, 0x75, 0x6c, 0x6c,
-	0x32, 0x97, 0x05, 0x0a, 0x06, 0x4c, 0x6f, 0x61, 0x64, 0x65, 0x72, 0x12, 0x34, 0x0a, 0x0d, 0x4c,
+	0x32, 0xc7, 0x05, 0x0a, 0x06, 0x4c, 0x6f, 0x61, 0x64, 0x65, 0x72, 0x12, 0x34, 0x0a, 0x0d, 0x4c,
 	0x69, 0x73, 0x74, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x12, 0x0d, 0x2e, 0x73,
 	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x72, 0x65,
 	0x6d, 0x6f, 0x74, 0x65, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x53, 0x75, 0x69, 0x74, 0x65, 0x73, 0x22,
@@ -212,6 +212,9 @@ var file_pkg_testing_remote_loader_proto_rawDesc = []byte{
 	0x0e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73, 0x65, 0x12,
 	0x10, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x54, 0x65, 0x73, 0x74, 0x43, 0x61, 0x73,
 	0x65, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
+	0x22, 0x00, 0x12, 0x2e, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e,
+	0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a,
+	0x0f, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e,
 	0x22, 0x00, 0x12, 0x32, 0x0a, 0x06, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x12, 0x0d, 0x2e, 0x73,
 	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x17, 0x2e, 0x73, 0x65,
 	0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x78, 0x74, 0x65, 0x6e, 0x73, 0x69, 0x6f, 0x6e, 0x53, 0x74,
@@ -266,10 +269,11 @@ var file_pkg_testing_remote_loader_proto_goTypes = []interface{}{
 	(*server.PProfRequest)(nil),    // 6: server.PProfRequest
 	(*server.Secret)(nil),          // 7: server.Secret
 	(*server.TestCases)(nil),       // 8: server.TestCases
-	(*server.ExtensionStatus)(nil), // 9: server.ExtensionStatus
-	(*server.PProfData)(nil),       // 10: server.PProfData
-	(*server.Secrets)(nil),         // 11: server.Secrets
-	(*server.CommonResult)(nil),    // 12: server.CommonResult
+	(*server.Version)(nil),         // 9: server.Version
+	(*server.ExtensionStatus)(nil), // 10: server.ExtensionStatus
+	(*server.PProfData)(nil),       // 11: server.PProfData
+	(*server.Secrets)(nil),         // 12: server.Secrets
+	(*server.CommonResult)(nil),    // 13: server.CommonResult
 }
 var file_pkg_testing_remote_loader_proto_depIdxs = []int32{
 	1,  // 0: remote.TestSuites.data:type_name -> remote.TestSuite
@@ -286,32 +290,34 @@ var file_pkg_testing_remote_loader_proto_depIdxs = []int32{
 	4,  // 11: remote.Loader.GetTestCase:input_type -> server.TestCase
 	4,  // 12: remote.Loader.UpdateTestCase:input_type -> server.TestCase
 	4,  // 13: remote.Loader.DeleteTestCase:input_type -> server.TestCase
-	5,  // 14: remote.Loader.Verify:input_type -> server.Empty
-	6,  // 15: remote.Loader.PProf:input_type -> server.PProfRequest
-	7,  // 16: remote.SecretService.GetSecret:input_type -> server.Secret
-	5,  // 17: remote.SecretService.GetSecrets:input_type -> server.Empty
-	7,  // 18: remote.SecretService.CreateSecret:input_type -> server.Secret
-	7,  // 19: remote.SecretService.DeleteSecret:input_type -> server.Secret
-	7,  // 20: remote.SecretService.UpdateSecret:input_type -> server.Secret
-	0,  // 21: remote.Loader.ListTestSuite:output_type -> remote.TestSuites
-	5,  // 22: remote.Loader.CreateTestSuite:output_type -> server.Empty
-	1,  // 23: remote.Loader.GetTestSuite:output_type -> remote.TestSuite
-	1,  // 24: remote.Loader.UpdateTestSuite:output_type -> remote.TestSuite
-	5,  // 25: remote.Loader.DeleteTestSuite:output_type -> server.Empty
-	8,  // 26: remote.Loader.ListTestCases:output_type -> server.TestCases
-	5,  // 27: remote.Loader.CreateTestCase:output_type -> server.Empty
-	4,  // 28: remote.Loader.GetTestCase:output_type -> server.TestCase
-	4,  // 29: remote.Loader.UpdateTestCase:output_type -> server.TestCase
-	5,  // 30: remote.Loader.DeleteTestCase:output_type -> server.Empty
-	9,  // 31: remote.Loader.Verify:output_type -> server.ExtensionStatus
-	10, // 32: remote.Loader.PProf:output_type -> server.PProfData
-	7,  // 33: remote.SecretService.GetSecret:output_type -> server.Secret
-	11, // 34: remote.SecretService.GetSecrets:output_type -> server.Secrets
-	12, // 35: remote.SecretService.CreateSecret:output_type -> server.CommonResult
-	12, // 36: remote.SecretService.DeleteSecret:output_type -> server.CommonResult
-	12, // 37: remote.SecretService.UpdateSecret:output_type -> server.CommonResult
-	21, // [21:38] is the sub-list for method output_type
-	4,  // [4:21] is the sub-list for method input_type
+	5,  // 14: remote.Loader.GetVersion:input_type -> server.Empty
+	5,  // 15: remote.Loader.Verify:input_type -> server.Empty
+	6,  // 16: remote.Loader.PProf:input_type -> server.PProfRequest
+	7,  // 17: remote.SecretService.GetSecret:input_type -> server.Secret
+	5,  // 18: remote.SecretService.GetSecrets:input_type -> server.Empty
+	7,  // 19: remote.SecretService.CreateSecret:input_type -> server.Secret
+	7,  // 20: remote.SecretService.DeleteSecret:input_type -> server.Secret
+	7,  // 21: remote.SecretService.UpdateSecret:input_type -> server.Secret
+	0,  // 22: remote.Loader.ListTestSuite:output_type -> remote.TestSuites
+	5,  // 23: remote.Loader.CreateTestSuite:output_type -> server.Empty
+	1,  // 24: remote.Loader.GetTestSuite:output_type -> remote.TestSuite
+	1,  // 25: remote.Loader.UpdateTestSuite:output_type -> remote.TestSuite
+	5,  // 26: remote.Loader.DeleteTestSuite:output_type -> server.Empty
+	8,  // 27: remote.Loader.ListTestCases:output_type -> server.TestCases
+	5,  // 28: remote.Loader.CreateTestCase:output_type -> server.Empty
+	4,  // 29: remote.Loader.GetTestCase:output_type -> server.TestCase
+	4,  // 30: remote.Loader.UpdateTestCase:output_type -> server.TestCase
+	5,  // 31: remote.Loader.DeleteTestCase:output_type -> server.Empty
+	9,  // 32: remote.Loader.GetVersion:output_type -> server.Version
+	10, // 33: remote.Loader.Verify:output_type -> server.ExtensionStatus
+	11, // 34: remote.Loader.PProf:output_type -> server.PProfData
+	7,  // 35: remote.SecretService.GetSecret:output_type -> server.Secret
+	12, // 36: remote.SecretService.GetSecrets:output_type -> server.Secrets
+	13, // 37: remote.SecretService.CreateSecret:output_type -> server.CommonResult
+	13, // 38: remote.SecretService.DeleteSecret:output_type -> server.CommonResult
+	13, // 39: remote.SecretService.UpdateSecret:output_type -> server.CommonResult
+	22, // [22:40] is the sub-list for method output_type
+	4,  // [4:22] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name
 	4,  // [4:4] is the sub-list for extension extendee
 	0,  // [0:4] is the sub-list for field type_name

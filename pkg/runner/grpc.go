@@ -129,7 +129,7 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 		if err == protoregistry.NotFound {
 			return nil, fmt.Errorf("api %q is not found", testcase.Request.API)
 		}
-		return nil, err
+		return nil, fmt.Errorf("failed to get method descriptor: %v", err)
 	}
 
 	// pass the headers into gRPC request metadata
@@ -424,6 +424,7 @@ func getByProto(ctx context.Context, r *gRPCTestCaseRunner, fullName protoreflec
 
 	linker, err := compileProto(ctx, r)
 	if err != nil {
+		err = fmt.Errorf("failed to compile proto: %v", err)
 		return nil, err
 	}
 

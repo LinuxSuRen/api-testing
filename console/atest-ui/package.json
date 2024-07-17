@@ -16,8 +16,10 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@vueuse/core": "^10.11.0",
     "element-plus": "^2.3.7",
     "intro.js": "^7.0.1",
+    "jsonlint-mod": "^1.7.6",
     "jsonpath-plus": "^7.2.0",
     "skywalking-client-js": "^0.10.0",
     "vue": "^3.3.4",

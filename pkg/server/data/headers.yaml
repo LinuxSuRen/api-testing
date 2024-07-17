@@ -3,6 +3,12 @@
 - key: Content-Type
   value: application/json
 - key: Content-Type
+  value: application/json-patch+json
+- key: Content-Type
+  value: application/merge-patch+json
+- key: Content-Type
+  value: application/apply-patch+yaml
+- key: Content-Type
   value: application/x-www-form-urlencoded
 - key: Accept-Language
   value: en-US,en;q=0.5

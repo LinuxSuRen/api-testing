@@ -74,7 +74,7 @@ func TestPrintProto(t *testing.T) {
 		name: "mock server, normal",
 		args: []string{"server", "--mock-config=testdata/invalid-api.yaml", "-p=0", "--http-port=0"},
 		verify: func(t *testing.T, buffer *bytes.Buffer, err error) {
-			assert.NoError(t, err)
+			assert.Error(t, err)
 		},
 	}}
 	for _, tt := range tests {
@@ -106,14 +106,14 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/assets/index.js", nil)
 		assert.NoError(t, err)
 		defer func() {
-			uiResourceJS = ""
+			uiResourceJS = []byte("")
 		}()
 
 		resp := newFakeResponseWriter()
 
-		uiResourceJS = "js"
+		uiResourceJS = []byte("js")
 		handler(resp, req, map[string]string{})
-		assert.Equal(t, uiResourceJS, resp.GetBody().String())
+		assert.Equal(t, uiResourceJS, resp.GetBody().Bytes())
 
 		assert.Equal(t, "text/javascript; charset=utf-8", resp.Header().Get(util.ContentType))
 	})
@@ -327,7 +327,7 @@ func TestStartPlugins(t *testing.T) {
 		defer func() {
 			httpServer.Shutdown(context.Background())
 		}()
-		resp, err := http.Post(fmt.Sprintf("http://localhost:%s/server.Runner/GetSuites", httpServer.GetPort()), util.JSON, nil)
+		resp, err := http.Get(fmt.Sprintf("http://localhost:%s/api/v1/suites", httpServer.GetPort()))
 		if assert.NoError(t, err) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 		}

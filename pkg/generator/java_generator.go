@@ -18,8 +18,8 @@ package generator
 import (
 	"bytes"
 	_ "embed"
-	"html/template"
 	"net/http"
+	"text/template"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )

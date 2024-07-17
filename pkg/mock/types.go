@@ -16,47 +16,47 @@ limitations under the License.
 package mock
 
 type Object struct {
-	Name      string  `yaml:"name"`
-	InitCount *int    `yaml:"initCount"`
-	Sample    string  `yaml:"sample"`
-	Fields    []Field `yaml:"fields"`
+	Name      string  `yaml:"name" json:"name"`
+	InitCount *int    `yaml:"initCount" json:"initCount"`
+	Sample    string  `yaml:"sample" json:"sample"`
+	Fields    []Field `yaml:"fields" json:"fields"`
 }
 
 type Field struct {
-	Name string `yaml:"name"`
-	Kind string `yaml:"kind"`
+	Name string `yaml:"name" json:"name"`
+	Kind string `yaml:"kind" json:"kind"`
 }
 
 type Item struct {
-	Name     string   `yaml:"name"`
-	Request  Request  `yaml:"request"`
-	Response Response `yaml:"response"`
+	Name     string   `yaml:"name" json:"name"`
+	Request  Request  `yaml:"request" json:"request"`
+	Response Response `yaml:"response" json:"response"`
 	Param    map[string]string
 }
 
 type Request struct {
-	Path   string            `yaml:"path"`
-	Method string            `yaml:"method"`
-	Header map[string]string `yaml:"header"`
-	Body   string            `yaml:"body"`
+	Path   string            `yaml:"path" json:"path"`
+	Method string            `yaml:"method" json:"method"`
+	Header map[string]string `yaml:"header" json:"header"`
+	Body   string            `yaml:"body" json:"body"`
 }
 
 type Response struct {
-	Encoder    string            `yaml:"encoder"`
-	Body       string            `yaml:"body"`
-	Header     map[string]string `yaml:"header"`
-	StatusCode int               `yaml:"statusCode"`
+	Encoder    string            `yaml:"encoder" json:"encoder"`
+	Body       string            `yaml:"body" json:"body"`
+	Header     map[string]string `yaml:"header" json:"header"`
+	StatusCode int               `yaml:"statusCode" json:"statusCode"`
 	BodyData   []byte
 }
 
 type Webhook struct {
-	Name    string  `yaml:"name"`
-	Timer   string  `yaml:"timer"`
-	Request Request `yaml:"request"`
+	Name    string  `yaml:"name" json:"name"`
+	Timer   string  `yaml:"timer" json:"timer"`
+	Request Request `yaml:"request" json:"request"`
 }
 
 type Server struct {
-	Objects  []Object  `yaml:"objects"`
-	Items    []Item    `yaml:"items"`
-	Webhooks []Webhook `yaml:"webhooks"`
+	Objects  []Object  `yaml:"objects" json:"objects"`
+	Items    []Item    `yaml:"items" json:"items"`
+	Webhooks []Webhook `yaml:"webhooks" json:"webhooks"`
 }

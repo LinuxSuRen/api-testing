@@ -60,10 +60,9 @@ func TestUnimplement(t *testing.T) {
 
 func TestServer(t *testing.T) {
 	client, _ := server.NewFakeClient(context.Background(), "version", nil)
-	reply, err := client.GetVersion(context.Background(), &server.Empty{})
-	assert.NotNil(t, reply)
-	assert.Equal(t, "version", reply.GetMessage())
-	assert.Empty(t, reply.GetError())
+	ver, err := client.GetVersion(context.Background(), &server.Empty{})
+	assert.NotNil(t, ver)
+	assert.Equal(t, "version", ver.GetVersion())
 	assert.Nil(t, err)
 
 	var testResult *server.TestResult
@@ -71,14 +70,15 @@ func TestServer(t *testing.T) {
 	assert.NotNil(t, testResult)
 	assert.Nil(t, err)
 
+	var reply *server.HelloReply
 	reply, err = client.Sample(context.Background(), &server.Empty{})
 	assert.Nil(t, err)
 	assert.Empty(t, reply.GetMessage())
 
 	clientWithErr, _ := server.NewFakeClient(context.Background(), "version", errors.New("fake"))
-	reply, err = clientWithErr.GetVersion(context.Background(), &server.Empty{})
+	ver, err = clientWithErr.GetVersion(context.Background(), &server.Empty{})
 	assert.NotNil(t, err)
-	assert.Nil(t, reply)
+	assert.Nil(t, ver)
 
 	testResult, err = clientWithErr.Run(context.Background(), &server.TestTask{})
 	assert.NotNil(t, err)

@@ -87,14 +87,15 @@ func TestRemoteServer(t *testing.T) {
 	})
 	assert.NotNil(t, err)
 
-	var ver *HelloReply
+	var ver *Version
 	ver, err = server.GetVersion(ctx, &Empty{})
-	assert.Equal(t, "unknown", ver.Message)
+	assert.Equal(t, "unknown", ver.Version)
 	assert.Nil(t, err)
 
-	ver, err = server.Sample(ctx, &Empty{})
+	var sampleData *HelloReply
+	sampleData, err = server.Sample(ctx, &Empty{})
 	assert.Nil(t, err)
-	assert.Equal(t, sample.TestSuiteGitLab, ver.Message)
+	assert.Equal(t, sample.TestSuiteGitLab, sampleData.Message)
 
 	var suites *Suites
 	suites, err = server.GetSuites(ctx, &Empty{})
@@ -599,7 +600,7 @@ func TestPopularHeaders(t *testing.T) {
 
 	pairs, err := server.PopularHeaders(ctx, &Empty{})
 	if assert.NoError(t, err) {
-		assert.Equal(t, 6, len(pairs.Data))
+		assert.Equal(t, 9, len(pairs.Data))
 	}
 }
 

@@ -16,6 +16,8 @@ limitations under the License.
 package mock
 
 import (
+	"errors"
+	"github.com/linuxsuren/api-testing/docs"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -41,8 +43,7 @@ func NewLocalFileReader(file string) Reader {
 
 func (r *localFileReader) Parse() (server *Server, err error) {
 	if r.data, err = os.ReadFile(r.file); err == nil {
-		server = &Server{}
-		err = yaml.Unmarshal(r.data, server)
+		server, err = validateAndParse(r.data)
 	}
 	return
 }
@@ -67,8 +68,7 @@ func NewInMemoryReader(config string) ReaderAndWriter {
 }
 
 func (r *inMemoryReader) Parse() (server *Server, err error) {
-	server = &Server{}
-	err = yaml.Unmarshal(r.data, server)
+	server, err = validateAndParse(r.data)
 	return
 }
 
@@ -78,4 +78,13 @@ func (r *inMemoryReader) GetData() []byte {
 
 func (r *inMemoryReader) Write(data []byte) {
 	r.data = data
+}
+
+func validateAndParse(data []byte) (server *Server, err error) {
+	server = &Server{}
+	if len(data) > 0 {
+		err = yaml.Unmarshal(data, server)
+		err = errors.Join(err, docs.Validate(data, docs.MockSchema))
+	}
+	return
 }

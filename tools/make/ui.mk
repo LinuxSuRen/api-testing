@@ -13,6 +13,8 @@ BUILD_FLAGS += \
 .PHONY: build.ui
 build.ui:
 	cd ${ATEST_UI} && ${FRONT_RUNTIMES} i && ${FRONT_RUNTIMES} run build-only
+run-ui:
+	cd ${ATEST_UI} && ${FRONT_RUNTIMES} i && ${FRONT_RUNTIMES} run dev
 
 .PHONY: build.embed.ui
 build.embed.ui: embed.ui

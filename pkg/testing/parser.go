@@ -17,6 +17,7 @@ package testing
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -26,11 +27,9 @@ import (
 	"path"
 	"strings"
 
-	yamlconv "github.com/ghodss/yaml"
 	"github.com/linuxsuren/api-testing/docs"
 	"github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/util"
-	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v3"
 )
 
@@ -41,23 +40,8 @@ const (
 // Parse parses a file and returns the test suite
 func Parse(data []byte) (testSuite *TestSuite, err error) {
 	testSuite, err = ParseFromData(data)
-
 	// schema validation
-	if err == nil {
-		// convert YAML to JSON
-		var jsonData []byte
-		if jsonData, err = yamlconv.YAMLToJSON(data); err == nil {
-			schemaLoader := gojsonschema.NewStringLoader(docs.Schema)
-			documentLoader := gojsonschema.NewBytesLoader(jsonData)
-
-			var result *gojsonschema.Result
-			if result, err = gojsonschema.Validate(schemaLoader, documentLoader); err == nil {
-				if !result.Valid() {
-					err = fmt.Errorf("%v", result.Errors())
-				}
-			}
-		}
-	}
+	err = errors.Join(err, docs.Validate(data, docs.Schema))
 	return
 }
 

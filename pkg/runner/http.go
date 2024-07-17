@@ -247,18 +247,43 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 					},
 				}
 
-				for _, param := range swagger.Parameters {
-					switch param.In {
-					case "query":
-						// TODO should have a better way to provide the initial value
-						testcase.Request.Query[param.Name] = "todo"
+				switch testcase.Request.Method {
+				case http.MethodGet:
+					for _, param := range swagger.Paths.Paths[api].Get.Parameters {
+						switch param.In {
+						case "query":
+							// TODO should have a better way to provide the initial value
+							(&(testcase.Request)).Query[param.Name] = generateRandomValue(param)
+						}
 					}
+					testcase.Name = swagger.Paths.Paths[api].Get.ID
+				case http.MethodPost:
+					testcase.Name = swagger.Paths.Paths[api].Post.ID
+				case http.MethodPut:
+					testcase.Name = swagger.Paths.Paths[api].Put.ID
+				case http.MethodDelete:
+					testcase.Name = swagger.Paths.Paths[api].Delete.ID
+				case http.MethodPatch:
+					testcase.Name = swagger.Paths.Paths[api].Patch.ID
 				}
 				result = append(result, testcase)
 			}
 		}
 	}
 	return
+}
+
+func generateRandomValue(param spec.Parameter) interface{} {
+	switch param.Format {
+	case "int32", "int64":
+		return 101
+	case "boolean":
+		return true
+	case "string":
+		return "random"
+	default:
+		return "random"
+	}
 }
 
 func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (responseBodyData []byte, err error) {
@@ -371,10 +396,18 @@ func runJob(job *testing.Job, ctx interface{}, current interface{}) (err error) 
 
 // isNonBinaryContent detect if the content belong to binary
 func isNonBinaryContent(contentType string) bool {
+	if IsJSONCompatileType(contentType) {
+		return true
+	}
+
 	switch contentType {
 	case util.JSON, util.YAML, util.Plain, util.OCIImageIndex:
 		return true
 	default:
 		return false
 	}
+}
+
+func IsJSONCompatileType(contentType string) bool {
+	return strings.HasSuffix(contentType, "+json")
 }

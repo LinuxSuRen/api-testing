@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
+See the License for the specific language 24 permissions and
 limitations under the License.
 */
 package render
@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/md5"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -26,8 +27,13 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"math/rand"
+	mathrand "math/rand"
 	"strings"
+
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/linuxsuren/api-testing/pkg/secret"
@@ -85,6 +91,7 @@ func FuncMap() template.FuncMap {
 		}
 		funcs[item.FuncName] = item.Func
 	}
+	funcs["rasEncryptWithPublicKey"] = rasEncryptWithPublicKey
 	return funcs
 }
 
@@ -158,7 +165,7 @@ var advancedFuncs = []AdvancedFunc{{
 }, {
 	FuncName: "randEnum",
 	Func: func(items ...string) string {
-		return items[rand.Intn(len(items))]
+		return items[mathrand.Intn(len(items))]
 	},
 }, {
 	FuncName: "randEmail",
@@ -216,4 +223,29 @@ type AdvancedFunc struct {
 	Func       interface{}
 	GoDogExper string
 	Generator  func(ctx context.Context, fields string) (err error)
+}
+
+// rasEncryptWithPublicKey encrypts the given content with the provided public key
+func rasEncryptWithPublicKey(content, key string) (string, error) {
+	block, _ := pem.Decode([]byte(key))
+	if block == nil {
+		return "", errors.New("failed to parse PEM block containing the public key")
+	}
+
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse DER encoded public key: %s", err)
+	}
+
+	rsaPub, ok := pub.(*rsa.PublicKey)
+	if !ok {
+		return "", errors.New("key type is not RSA")
+	}
+
+	encryptedData, err := rsa.EncryptPKCS1v15(rand.Reader, rsaPub, []byte(content))
+	if err != nil {
+		return "", fmt.Errorf("failed to encrypt with RSA public key: %s", err)
+	}
+
+	return base64.StdEncoding.EncodeToString(encryptedData), nil
 }

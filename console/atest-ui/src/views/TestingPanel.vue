@@ -10,12 +10,14 @@ import type { Suite } from './types'
 import { API } from './net'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
+import { Magic } from './magicKeys'
 
 const { t } = useI18n()
 
 interface Tree {
   id: string
   label: string
+  method: string
   parent: string
   parentID: string
   store: string
@@ -26,7 +28,7 @@ interface Tree {
 const testCaseName = ref('')
 const testSuite = ref('')
 const testSuiteKind = ref('')
-const handleNodeClick = (data: Tree) => {
+const handleTreeClick = (data: Tree) => {
   if (data.children) {
     Cache.SetCurrentStore(data.store)
     viewName.value = 'testsuite'
@@ -41,6 +43,7 @@ const handleNodeClick = (data: Tree) => {
             data.children?.push({
               id: data.label,
               label: item.name,
+              method: item.request.method,
               kind: data.kind,
               store: data.store,
               parent: data.label,
@@ -59,20 +62,53 @@ const handleNodeClick = (data: Tree) => {
   }
 }
 
-const data = ref([] as Tree[])
+Magic.Keys((k) => {
+  const currentKey = currentNodekey.value
+
+  if (treeRef.value) {
+    treeRef.value.data.forEach((n) => {
+      if (n.children) {
+        n.children.forEach((c, index) => {
+          if (c.id === currentKey) {
+            var nextIndex = -1
+            if (k.endsWith('Up')) {
+              if (index > 0) {
+                nextIndex = index - 1
+              }
+            } else {
+              if (index < n.children.length - 1) {
+                nextIndex = index + 1
+              }
+            }
+
+            if (nextIndex >= 0 < n.children.length) {
+              const next = n.children[nextIndex]
+              currentNodekey.value = next.id
+              treeRef.value!.setCurrentKey(next.id)
+              treeRef.value!.setCheckedKeys([next.id], false)
+            }
+            return
+          }
+        })
+      }
+    })
+  }
+}, ['Alt+ArrowUp', 'Alt+ArrowDown'])
+
+const treeData = ref([] as Tree[])
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const currentNodekey = ref('')
 
 function loadTestSuites(storeName: string) {
   const requestOptions = {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'X-Store-Name': storeName,
       'X-Auth': API.getToken()
     },
   }
   return async () => {
-    await fetch('/server.Runner/GetSuites', requestOptions)
+    await fetch('/api/v1/suites', requestOptions)
       .then((response) => response.json())
       .then((d) => {
         if (!d.data) {
@@ -89,7 +125,7 @@ function loadTestSuites(storeName: string) {
 
           d.data[k].data.forEach((item: any) => {
             suite.children?.push({
-              id: k + item,
+              id: generateTestCaseID(k, item),
               label: item,
               store: storeName,
               kind: suite.kind,
@@ -97,10 +133,14 @@ function loadTestSuites(storeName: string) {
               parentID: suite.id
             } as Tree)
           })
-          data.value.push(suite)
+          treeData.value.push(suite)
         })
       })
   }
+}
+
+function generateTestCaseID(suiteName: string, caseName: string) {
+  return suiteName + caseName
 }
 
 interface Store {
@@ -111,19 +151,23 @@ interface Store {
 const loginDialogVisible = ref(false)
 const stores = ref([] as Store[])
 const storesLoading = ref(false)
-function loadStores() {
+function loadStores(lastSuitName?: string, lastCaseName?: string) {
+  if (lastSuitName && lastCaseName && lastSuitName !== '' && lastCaseName !== '') {
+    // get data from emit event
+    Cache.SetLastTestCaseLocation(lastSuitName, generateTestCaseID(lastSuitName, lastCaseName))
+  }
+
   storesLoading.value = true
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Auth': API.getToken()
     }
   }
-  fetch('/server.Runner/GetStores', requestOptions)
+  fetch('/api/v1/stores', requestOptions)
     .then(API.DefaultResponseProcess)
     .then(async (d) => {
       stores.value = d.data
-      data.value = [] as Tree[]
+      treeData.value = [] as Tree[]
       Cache.SetStores(d.data)
 
       for (const item of d.data) {
@@ -132,14 +176,14 @@ function loadStores() {
         }
       }
 
-      if (data.value.length > 0) {
+      if (treeData.value.length > 0) {
         const key = Cache.GetLastTestCaseLocation()
 
         let targetSuite = {} as Tree
         let targetChild = {} as Tree
         if (key.suite !== '' && key.testcase !== '') {
-          for (var i = 0; i < data.value.length; i++) {
-            const item = data.value[i]
+          for (var i = 0; i < treeData.value.length; i++) {
+            const item = treeData.value[i]
             if (item.id === key.suite && item.children) {
               for (var j = 0; j < item.children.length; j++) {
                 const child = item.children[j]
@@ -155,7 +199,7 @@ function loadStores() {
         }
         
         if (!targetChild.id || targetChild.id === '') {
-          targetSuite = data.value[0]
+          targetSuite = treeData.value[0]
           if (targetSuite.children && targetSuite.children.length > 0) {
             targetChild = targetSuite.children[0]
           }
@@ -163,10 +207,12 @@ function loadStores() {
 
         viewName.value = 'testsuite'
         currentNodekey.value = targetChild.id
+
         treeRef.value!.setCurrentKey(targetChild.id)
         treeRef.value!.setCheckedKeys([targetChild.id], false)
+
         testSuite.value = targetSuite.label
-        Cache.SetCurrentStore(targetSuite.store )
+        Cache.SetCurrentStore(targetSuite.store)
         testSuiteKind.value = targetChild.kind
       } else {
         viewName.value = ""
@@ -262,7 +308,7 @@ watch(filterText, (val) => {
 })
 const filterTestCases = (value: string, data: Tree) => {
   if (!value) return true
-  return data.label.includes(value)
+  return data.label.toLocaleLowerCase().includes(value.toLocaleLowerCase())
 }
 
 const viewName = ref('')
@@ -316,7 +362,7 @@ const suiteKinds = [{
 
             <el-tree
               v-loading="storesLoading"
-              :data=data
+              :data=treeData
               highlight-current
               :check-on-click-node="true"
               :expand-on-click-node="false"
@@ -324,9 +370,18 @@ const suiteKinds = [{
               ref="treeRef"
               node-key="id"
               :filter-node-method="filterTestCases"
-              @node-click="handleNodeClick"
+              @current-change="handleTreeClick"
               data-intro="This is the test suite tree. You can click the test suite to edit it."
-            />
+            >
+              <template #default="{ node, data }">
+                <span class="custom-tree-node">
+                  <el-text class="mx-1" v-if="data.method === 'POST'" type="success">{{ node.label }}</el-text>
+                  <el-text class="mx-1" v-else-if="data.method === 'PUT'" type="warning">{{ node.label }}</el-text>
+                  <el-text class="mx-1" v-else-if="data.method === 'DELETE'" type="danger">{{ node.label }}</el-text>
+                  <el-text class="mx-1" v-else>{{ node.label }}</el-text>
+                </span>
+              </template>
+            </el-tree>
             <TemplateFunctions/>
           </el-aside>
 

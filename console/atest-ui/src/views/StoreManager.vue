@@ -8,6 +8,7 @@ import { API } from './net'
 import { UIAPI } from './net-vue'
 import { SupportedExtensions } from './store'
 import { useI18n } from 'vue-i18n'
+import { Magic } from './magicKeys'
 
 const { t } = useI18n()
 
@@ -64,6 +65,7 @@ function loadStores() {
   })
 }
 loadStores()
+Magic.Keys(loadStores, ['Alt+KeyR'])
 
 function deleteStore(name: string) {
   API.DeleteStore(name, (e) => {
@@ -108,6 +110,7 @@ function addStore() {
     dialogVisible.value = true
     createAction.value = true
 }
+Magic.Keys(addStore, ['Alt+KeyN'])
 
 const rules = reactive<FormRules<Store>>({
   name: [{ required: true, message: 'Name is required', trigger: 'blur' }],

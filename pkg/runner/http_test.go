@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import (
 
 	_ "embed"
 
+	"github.com/go-openapi/spec"
 	"github.com/h2non/gock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -539,6 +540,7 @@ func TestBodyFiledsVerify(t *testing.T) {
 
 func TestGetSuggestedAPIs(t *testing.T) {
 	runner := NewSimpleTestCaseRunner()
+	runner.WithSuite(nil)
 	// not a swagger
 	result, err := runner.GetSuggestedAPIs(&atest.TestSuite{}, "")
 	assert.NoError(t, err, err)
@@ -575,12 +577,53 @@ func TestIsStructContent(t *testing.T) {
 	}, {
 		contentType: util.OCIImageIndex,
 		expectOk:    true,
+	}, {
+		contentType: "application/problem+json",
+		expectOk:    true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.contentType, func(t *testing.T) {
 			ok := isNonBinaryContent(tt.contentType)
 			assert.Equal(t, tt.expectOk, ok)
 		})
+	}
+}
+
+func TestGenerateRandomValue(t *testing.T) {
+	tests := []struct {
+		param    spec.Parameter
+		expected interface{}
+	}{
+		{
+			param: spec.Parameter{
+				SimpleSchema: spec.SimpleSchema{
+					Format: "int32",
+				},
+			},
+			expected: 101,
+		}, {
+			param: spec.Parameter{
+				SimpleSchema: spec.SimpleSchema{
+					Format: "boolean",
+				},
+			},
+			expected: true,
+		}, {
+			param: spec.Parameter{
+				SimpleSchema: spec.SimpleSchema{
+					Format: "string",
+				},
+			},
+			expected: "random",
+		},
+	}
+
+	for _, tt := range tests {
+		result := generateRandomValue(tt.param)
+
+		if result != tt.expected {
+			t.Errorf("generateRandomValue(%v) = %v, expected %v", tt.param, result, tt.expected)
+		}
 	}
 }
 

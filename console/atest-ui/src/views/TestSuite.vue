@@ -8,6 +8,7 @@ import { NewSuggestedAPIsQuery, GetHTTPMethods } from './types'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 import { API } from './net'
+import { Magic } from './magicKeys'
 import { Codemirror } from 'vue-codemirror'
 import yaml from 'js-yaml'
 
@@ -58,7 +59,7 @@ watch(props, () => {
   load()
 })
 
-function save() {
+const save = () => {
   let oldImportPath = ''
   let hasImport = false
   if (suite.value.spec && suite.value.spec.rpc) {
@@ -94,6 +95,7 @@ function save() {
     }
   )
 }
+Magic.Keys(save, ['Alt+S', 'Alt+ß'])
 
 const isFullScreen = ref(false)
 const dialogVisible = ref(false)
@@ -102,7 +104,8 @@ const testCaseForm = reactive({
   suiteName: '',
   name: '',
   api: '',
-  method: 'GET'
+  method: 'GET',
+  request: {}
 })
 const rules = reactive<FormRules<Suite>>({
   name: [{ required: true, message: 'Please input TestCase name', trigger: 'blur' }]
@@ -112,23 +115,21 @@ function openNewTestCaseDialog() {
   dialogVisible.value = true
   querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.name!)
 }
+Magic.Keys(openNewTestCaseDialog, ['Alt+N', 'Alt+dead'])
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  await formEl.validate((valid: boolean, fields) => {
+  await formEl.validate((valid: boolean) => {
     if (valid) {
       suiteCreatingLoading.value = true
 
-      API.CreateTestCase(
-        {
+      API.CreateTestCase({
           suiteName: props.name,
           name: testCaseForm.name,
-          api: testCaseForm.api,
-          method: testCaseForm.method
-        },
-        () => {
+          request: testCaseForm.request
+        }, () => {
           suiteCreatingLoading.value = false
-          emit('updated', 'hello from child')
+          emit('updated', props.name, testCaseForm.name)
         }
       )
 
@@ -200,6 +201,7 @@ const handleAPISelect = (item: TestCase) => {
     if (testCaseForm.name === '') {
         testCaseForm.name = item.name
     }
+    testCaseForm.request = item.request
 }
 
 function paramChange() {
@@ -218,7 +220,7 @@ const yamlDialogVisible = ref(false)
 
 function viewYaml() {
   yamlDialogVisible.value = true
-  API.GetTestSuiteYaml(props.name, 'local', (d) => {
+  API.GetTestSuiteYaml(props.name, (d) => {
     yamlFormat.value = yaml.dump(yaml.load(atob(d.data)))
   })
 }
@@ -331,7 +333,7 @@ const targetSuiteDuplicateName = ref('')
       <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{
         t('button.save')
       }}</el-button>
-      <el-button type="primary" @click="del" :icon="Delete" test-id="suite-del-but">{{
+      <el-button type="danger" @click="del" :icon="Delete" test-id="suite-del-but">{{
         t('button.delete')
       }}</el-button>
       <el-button type="primary" @click="convert" test-id="convert">{{

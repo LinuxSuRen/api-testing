@@ -32,7 +32,6 @@ public class Main {
         conn.setRequestProperty("Cookie", "name=value");
 
         conn.setDoOutput(true);
-        conn.getOutputStream().write(postDataBytes);
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
         StringBuilder response = new StringBuilder();

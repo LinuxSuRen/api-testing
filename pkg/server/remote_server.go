@@ -28,6 +28,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+
 	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/mock"
@@ -315,8 +318,12 @@ func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
 }
 
 // GetVersion returns the version
-func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
-	reply = &HelloReply{Message: version.GetVersion()}
+func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *Version, err error) {
+	reply = &Version{
+		Version: version.GetVersion(),
+		Date:    version.GetDate(),
+		Commit:  version.GetCommit(),
+	}
 	return
 }
 
@@ -494,8 +501,29 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	return
 }
 
+var ExecutionCountNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_count",
+	Help: "The total number of request execution",
+})
+var ExecutionSuccessNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_success",
+	Help: "The total number of request execution success",
+})
+var ExecutionFailNum = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "atest_execution_fail",
+	Help: "The total number of request execution fail",
+})
+
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
 	var targetTestSuite testing.TestSuite
+	ExecutionCountNum.Inc()
+	defer func() {
+		if result.Error == "" {
+			ExecutionSuccessNum.Inc()
+		} else {
+			ExecutionFailNum.Inc()
+		}
+	}()
 
 	result = &TestCaseResult{}
 	loader := s.getLoader(ctx)
@@ -748,7 +776,7 @@ func (s *server) PopularHeaders(ctx context.Context, in *Empty) (pairs *Pairs, e
 		Data: []*Pair{},
 	}
 
-	err = yaml.Unmarshal([]byte(popularHeaders), &pairs.Data)
+	err = yaml.Unmarshal(popularHeaders, &pairs.Data)
 	return
 }
 
@@ -986,7 +1014,7 @@ func (s *server) getLoaderByStoreName(storeName string) (loader testing.Writer, 
 }
 
 //go:embed data/headers.yaml
-var popularHeaders string
+var popularHeaders []byte
 
 func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (testcases []testing.TestCase) {
 	reg, matchErr := regexp.Compile(`(.*?\{\{.*\.\w*.*?\}\})`)

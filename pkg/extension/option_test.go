@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,8 +16,13 @@ limitations under the License.
 package extension
 
 import (
+	"context"
+	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 )
@@ -53,4 +58,79 @@ func TestExtension(t *testing.T) {
 
 	assert.NotNil(t, flags.Lookup("port"))
 	assert.NotNil(t, flags.Lookup("socket"))
+}
+
+func TestCreateRunner(t *testing.T) {
+
+	t.Run("invalid port", func(t *testing.T) {
+		extMgr := NewExtension("git", "store", 75530)
+		extMgr.Port = 75530
+		assert.NotNil(t, extMgr)
+		assert.Error(t, CreateRunner(extMgr, nil, nil))
+		assert.Error(t, CreateMonitor(extMgr, nil, nil))
+		assert.Error(t, CreateExtensionRunner(extMgr, nil, nil))
+	})
+
+	t.Run("random port", func(t *testing.T) {
+		extMgr := NewExtension("git", "store", -1)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		command := &cobra.Command{}
+		command.SetContext(ctx)
+		assert.Error(t, CreateRunner(extMgr, command, nil))
+	})
+
+	t.Run("random port, CreateMonitor", func(t *testing.T) {
+		extMgr := NewExtension("git", "store", -1)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		command := &cobra.Command{}
+		command.SetContext(ctx)
+		assert.Error(t, CreateMonitor(extMgr, command, nil))
+	})
+
+	t.Run("random port, CreateExtensionRunner", func(t *testing.T) {
+		extMgr := NewExtension("git", "store", -1)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		command := &cobra.Command{}
+		command.SetContext(ctx)
+		assert.Error(t, CreateExtensionRunner(extMgr, command, nil))
+	})
+
+	t.Run("socket", func(t *testing.T) {
+		extMgr := NewExtension("git", "store", -1)
+		extMgr.Socket = filepath.Join(os.TempDir(), time.Microsecond.String())
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		command := &cobra.Command{}
+		command.SetContext(ctx)
+		assert.Error(t, CreateRunner(extMgr, command, nil))
+	})
+
+	t.Run("socket, CreateMonitor", func(t *testing.T) {
+		extMgr := NewExtension("git", "store", -1)
+		extMgr.Socket = filepath.Join(os.TempDir(), time.Microsecond.String())
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		command := &cobra.Command{}
+		command.SetContext(ctx)
+		assert.Error(t, CreateMonitor(extMgr, command, nil))
+	})
+
+	t.Run("socket, CreateExtensionRunner", func(t *testing.T) {
+		extMgr := NewExtension("git", "store", -1)
+		extMgr.Socket = filepath.Join(os.TempDir(), time.Microsecond.String())
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		command := &cobra.Command{}
+		command.SetContext(ctx)
+		assert.Error(t, CreateExtensionRunner(extMgr, command, nil))
+	})
 }
