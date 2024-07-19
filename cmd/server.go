@@ -47,6 +47,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/service"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/testing/local"
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
@@ -242,9 +243,10 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		if secretServer, err = remote.NewGRPCSecretFrom(o.secretServer); err != nil {
 			return
 		}
-
-		template.SetSecretGetter(remote.NewGRPCSecretGetter(secretServer))
+	} else {
+		secretServer = local.NewLocalSecretService(o.configDir)
 	}
+	template.SetSecretGetter(remote.NewGRPCSecretGetter(secretServer))
 
 	extDownloader := downloader.NewStoreDownloader()
 	extDownloader.WithRegistry(o.extensionRegistry)

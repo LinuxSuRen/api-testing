@@ -4,6 +4,7 @@ import { reactive, ref } from 'vue'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { API } from './net'
+import type { Secret } from './net'
 import { UIAPI } from './net-vue'
 import { useI18n } from 'vue-i18n'
 
@@ -16,11 +17,6 @@ const secretFormRef = ref<FormInstance>()
 const secret = ref({} as Secret)
 const createAction = ref(true)
 const secretForm = reactive(secret)
-
-interface Secret {
-  Name: string
-  Value: string
-}
 
 function loadSecrets() {
   API.GetSecrets((e) => {
@@ -54,14 +50,11 @@ function addSecret() {
     createAction.value = true
 }
 
-const rules = reactive<FormRules<Secret>>({
-  Name: [{ required: true, message: 'Name is required', trigger: 'blur' }]
-})
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid: boolean) => {
     if (valid) {
-      UIAPI.CreateOrUpdateSecret(secret.value, createAction.value, () => {
+      UIAPI.CreateOrUpdateSecret(secretForm.value, createAction.value, () => {
           loadSecrets()
           dialogVisible.value = false
           formEl.resetFields()
@@ -78,7 +71,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         <el-button type="primary" @click="addSecret" :icon="Edit">{{t('button.new')}}</el-button>
     </div>
     <el-table :data="secrets" style="width: 100%">
-      <el-table-column :label="t('field.name')" width="180">
+      <el-table-column :label="t('field.name')">
         <template #default="scope">
           <el-text class="mx-1">{{ scope.row.Name }}</el-text>
         </template>
@@ -101,7 +94,6 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       <template #footer>
       <span class="dialog-footer">
         <el-form
-          :rules="rules"
           :model="secretForm"
           ref="secretFormRef"
           status-icon label-width="120px">

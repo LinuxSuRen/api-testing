@@ -426,6 +426,11 @@ function VerifyStore(name: string,
     .then(callback).catch(errHandle)
 }
 
+export interface Secret {
+  Name: string
+  Value: string
+}
+
 function GetSecrets(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
     headers: {
@@ -464,7 +469,7 @@ function DeleteSecret(name: string,
     .catch(errHandle)
 }
 
-function CreateOrUpdateSecret(payload: any, create: boolean,
+function CreateOrUpdateSecret(payload: Secret, create: boolean,
   callback: (d: any) => void, errHandle?: (e: any) => void | null,
   toggle?: (e: boolean) => void) {
   const requestOptions = {
@@ -477,7 +482,7 @@ function CreateOrUpdateSecret(payload: any, create: boolean,
   
   let api = `/api/v1/secrets`
   if (!create) {
-    api = `/api/v1/secrets/${payload.name}`
+    api = `/api/v1/secrets/${payload.Name}`
     requestOptions.method = "PUT"
   }
 
