@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -53,4 +53,35 @@ body:
 	err = yaml.Unmarshal([]byte(`body: plain`), req)
 	assert.Nil(t, err)
 	assert.Equal(t, "plain", req.Body.String())
+}
+
+func TestResponse(t *testing.T) {
+	resp := &atesting.Response{
+		Body: "body",
+		BodyFieldsExpect: map[string]interface{}{
+			"name": "rick",
+		},
+	}
+	assert.Equal(t, "body", resp.GetBody())
+	assert.Equal(t, map[string]interface{}{"name": "rick"}, resp.GetBodyFieldsExpect())
+}
+
+func TestSortedKeysStringMap(t *testing.T) {
+	obj := atesting.SortedKeysStringMap{
+		"c": "d",
+		"f": map[string]interface{}{
+			"value": "f",
+		},
+		"e": &atesting.Verifier{
+			Value: "e",
+		},
+		"a": "b",
+	}
+	assert.Equal(t, []string{"a", "c", "e", "f"}, obj.Keys())
+	assert.Equal(t, "b", obj.GetValue("a"))
+	assert.Nil(t, obj.GetVerifier("b"))
+	assert.Equal(t, "e", obj.GetValue("e"))
+	assert.Equal(t, "f", obj.GetValue("f"))
+	assert.Equal(t, "f", obj.GetVerifier("f").Value)
+	assert.Empty(t,obj.GetValue("not-found"))
 }
