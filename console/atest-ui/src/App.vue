@@ -46,7 +46,7 @@ API.GetVersion((d) => {
 })
 
 const sideWidth = ref("width: 200px; display: flex;flex-direction: column;")
-const isCollapse = ref(false)
+const isCollapse = ref(true)
 watch(isCollapse, (e) => {
   if (e) {
     sideWidth.value = "width: 80px; display: flex;flex-direction: column;"

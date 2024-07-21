@@ -139,9 +139,6 @@ func (s *storeFactory) GetStores() (stores []Store, err error) {
 func (s *storeFactory) GetStoresByOwner(owner string) (stores []Store, err error) {
 	var all []Store
 	all, err = s.GetStores()
-	if owner == "" {
-		return all, err
-	}
 	if err == nil {
 		for _, item := range all {
 			if item.Owner != owner {

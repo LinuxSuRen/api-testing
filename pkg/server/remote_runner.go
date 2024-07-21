@@ -66,6 +66,8 @@ func (s *remoteRunnerAdapter) WithExecer(fakeruntime.Execer) {
 func (s *remoteRunnerAdapter) WithSuite(suite *testing.TestSuite) {
 	s.suite = suite
 }
+func (s *remoteRunnerAdapter) WithAPISuggestLimit(limit int) {
+}
 
 func init() {
 	env := os.Environ()

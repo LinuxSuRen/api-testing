@@ -541,6 +541,7 @@ func TestBodyFiledsVerify(t *testing.T) {
 func TestGetSuggestedAPIs(t *testing.T) {
 	runner := NewSimpleTestCaseRunner()
 	runner.WithSuite(nil)
+	runner.WithAPISuggestLimit(6)
 	// not a swagger
 	result, err := runner.GetSuggestedAPIs(&atest.TestSuite{}, "")
 	assert.NoError(t, err, err)

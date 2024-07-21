@@ -72,8 +72,9 @@ func (r ReportResultSlice) Swap(i, j int) {
 
 type simpleTestCaseRunner struct {
 	UnimplementedRunner
-	simpleResponse SimpleResponse
-	cookies        []*http.Cookie
+	simpleResponse  SimpleResponse
+	cookies         []*http.Cookie
+	apiSuggestLimit int
 }
 
 // NewSimpleTestCaseRunner creates the instance of the simple test case runner
@@ -82,6 +83,7 @@ func NewSimpleTestCaseRunner() TestCaseRunner {
 		UnimplementedRunner: NewDefaultUnimplementedRunner(),
 		simpleResponse:      SimpleResponse{},
 		cookies:             []*http.Cookie{},
+		apiSuggestLimit:     10,
 	}
 	return runner
 }
@@ -234,7 +236,6 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 
 	var swagger *spec.Swagger
 	if swagger, err = apispec.ParseURLToSwagger(suite.Spec.URL); err == nil && swagger != nil {
-		result = []*testing.TestCase{}
 		swaggerAPI := apispec.NewSwaggerAPI(swagger)
 		for api, methods := range swaggerAPI.ApiMap {
 			for _, method := range methods {
@@ -267,6 +268,9 @@ func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api st
 					testcase.Name = swagger.Paths.Paths[api].Patch.ID
 				}
 				result = append(result, testcase)
+				if len(result) >= r.apiSuggestLimit {
+					return
+				}
 			}
 		}
 	}
@@ -303,8 +307,9 @@ func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (response
 func (r *simpleTestCaseRunner) GetResponseRecord() SimpleResponse {
 	return r.simpleResponse
 }
-func (s *simpleTestCaseRunner) WithSuite(suite *testing.TestSuite) {
-	// not need this parameter
+
+func (r *simpleTestCaseRunner) WithAPISuggestLimit(limit int) {
+	r.apiSuggestLimit = limit
 }
 
 func expectInt(name string, expect, actual int) (err error) {

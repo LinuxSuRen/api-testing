@@ -197,6 +197,8 @@ func (m SortedKeysStringMap) GetValue(key string) string {
 	case map[string]interface{}:
 		verifier := convertToVerifier(o)
 		return verifier.Value
+	case *Verifier:
+		return o.Value
 	}
 
 	return ""

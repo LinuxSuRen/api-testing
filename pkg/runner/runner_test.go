@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,4 +29,21 @@ func TestRunnerFactory(t *testing.T) {
 
 	runner = GetTestSuiteRunner(&atest.TestSuite{Spec: atest.APISpec{Kind: "grpc", RPC: &atest.RPCDesc{}}})
 	assert.IsType(t, NewGRPCTestCaseRunner("", atest.RPCDesc{}), runner)
+}
+
+func TestUnimplementedRunner(t *testing.T) {
+	runner := NewDefaultUnimplementedRunner()
+	output, err := runner.RunTestCase(&atest.TestCase{}, nil, nil)
+	assert.Nil(t, output)
+	assert.Error(t, err)
+
+	runner.WithWriteLevel("debug")
+	runner.WithTestReporter(nil)
+
+	var results []*atest.TestCase
+	results, err = runner.GetSuggestedAPIs(nil, "")
+	assert.Nil(t, results)
+	assert.NoError(t, err)
+
+	runner.WithAPISuggestLimit(0)
 }

@@ -13,6 +13,19 @@ stores:
       disabled: false
       properties:
         database: test
+    - name: git
+      owner: rick
+      kind:
+        name: ""
+        url: ""
+        enabled: false
+      description: ""
+      url: ""
+      username: ""
+      password: ""
+      readonly: false
+      disabled: false
+      properties: {}
 plugins:
     - name: database
       url: localhost:7071
