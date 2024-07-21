@@ -437,7 +437,7 @@ function formChange() {
   }
 }
 
-const bodyType = ref(5)
+const bodyType = ref(1)
 function bodyTypeChange(e: number) {
   let contentType = ""
   switch (e) {

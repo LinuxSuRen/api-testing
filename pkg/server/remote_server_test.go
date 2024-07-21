@@ -919,6 +919,20 @@ func TestFakeSecretServer(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestRemoteRunnerAdapter(t *testing.T) {
+	runner := &remoteRunnerAdapter{}
+	runner.GetSuggestedAPIs(nil, "")
+	runner.WithSecure(nil)
+	runner.WithOutputWriter(nil)
+	runner.WithWriteLevel("debug")
+	runner.WithTestReporter(nil)
+	runner.WithExecer(nil)
+	runner.WithSuite(nil)
+	runner.WithAPISuggestLimit(0)
+	_, err := runner.RunTestCase(nil, nil, nil)
+	assert.Error(t, err)
+}
+
 func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 	dir, _ := os.MkdirTemp(os.TempDir(), "remote-server-test")
 	call = func() { os.RemoveAll(dir) }
