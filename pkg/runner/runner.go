@@ -35,6 +35,7 @@ type TestCaseRunner interface {
 	WithTestReporter(TestReporter)
 	WithExecer(fakeruntime.Execer)
 	WithSuite(*testing.TestSuite)
+	WithAPISuggestLimit(int)
 }
 
 // HTTPResponseRecord represents a http response record
@@ -106,4 +107,12 @@ func (r *UnimplementedRunner) WithSecure(secure *testing.Secure) {
 func (r *UnimplementedRunner) GetSuggestedAPIs(suite *testing.TestSuite, api string) (result []*testing.TestCase, err error) {
 	// empty implement
 	return
+}
+
+func (r *UnimplementedRunner) WithAPISuggestLimit(int) {
+	// empty implement
+}
+
+func (s *UnimplementedRunner) WithSuite(suite *testing.TestSuite) {
+	// empty implement
 }

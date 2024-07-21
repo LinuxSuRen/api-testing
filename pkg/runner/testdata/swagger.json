@@ -61,6 +61,12 @@
                 "summary": "summary",
                 "operationId": "patchUser"
             }
+        },
+        "/api/v1/groups/{group}": {
+            "get": {
+                "summary": "summary",
+                "operationId": "getGroup"
+            }
         }
     },
     "components": {
