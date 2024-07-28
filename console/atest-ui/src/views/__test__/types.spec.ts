@@ -1,4 +1,4 @@
-import { describe } from 'node:test'
+import test, { describe } from 'node:test'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from '../types'
 import type { Pair } from '../types'
 

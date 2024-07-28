@@ -6,7 +6,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
 import { API } from './net'
 import { UIAPI } from './net-vue'
-import { SupportedExtensions } from './store'
+import { SupportedExtensions, SupportedExtension } from './store'
 import { useI18n } from 'vue-i18n'
 import { Magic } from './magicKeys'
 
@@ -99,10 +99,6 @@ function setStoreForm(store: Store) {
     storeForm.disabled = store.disabled
     storeForm.readonly = store.readonly
     storeForm.properties = store.properties
-    storeForm.properties.push({
-        key: '',
-        value: ''
-      })
 }
 
 function addStore() {
@@ -136,6 +132,32 @@ watch(storeForm, (e) => {
       e.kind.name = 'atest-store-git'
     }
   }
+
+  const ext = SupportedExtension(e.kind.name)
+  if (ext) {
+    let pro = e.properties.slice()
+
+    for (var i = 0; i < pro.length;) {
+      // remove it if the value or key is empty
+      if (pro[i].key === '' || pro[i].value === '') {
+        pro.splice(i, 1)
+        i--
+      } else {
+        i++
+      }
+    }
+    ext.params.forEach(p => {
+      const index = pro.findIndex(e => e.key === p.key)
+      if (index === -1) {
+        pro.push({
+          key: p.key,
+          value: ''
+        } as Pair)
+      }
+    })
+    e.properties = pro
+    updateKeys()
+  }
 })
 
 function storeVerify(formEl: FormInstance | undefined) {
@@ -157,8 +179,7 @@ function storeVerify(formEl: FormInstance | undefined) {
 
 function updateKeys() {
   const props = storeForm.properties
-  let lastItem = props[props.length - 1]
-  if (lastItem.key !== '') {
+  if (props.findIndex(p => p.key === '') === -1) {
     storeForm.properties.push({
       key: '',
       value: ''
@@ -250,9 +271,9 @@ function updateKeys() {
             >
               <el-option
                 v-for="item in SupportedExtensions()"
-                :key="item.value"
-                :label="item.key"
-                :value="item.value"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
               />
             </el-select>
           </el-form-item>
