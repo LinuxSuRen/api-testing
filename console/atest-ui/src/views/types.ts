@@ -43,6 +43,7 @@ export interface TestResult {
 export interface Pair {
   key: string
   value: string
+  defaultValue: string
 }
 
 export interface TestCaseWithSuite {

@@ -58,9 +58,11 @@ const storeExtensions = [
   {
     name: 'atest-store-orm',
     params: [{
-      key: 'driver'
+      key: 'driver',
+      defaultValue: 'mysql'
     }, {
-      key: 'database'
+      key: 'database',
+      defaultValue: 'atest'
     }]
   },
   {
@@ -72,7 +74,8 @@ const storeExtensions = [
     params: [{
       key: 'collection'
     }, {
-      key: 'database'
+      key: 'database',
+      defaultValue: 'atest'
     }]
   }
 ] as Store[]

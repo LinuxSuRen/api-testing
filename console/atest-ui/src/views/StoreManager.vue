@@ -126,37 +126,45 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
-watch(storeForm, (e) => {
-  if (e.kind.name === '') {
-    if (e.url.startsWith('https://github.com') || e.url.startsWith('https://gitee.com')) {
-      e.kind.name = 'atest-store-git'
-    }
-  }
-
-  const ext = SupportedExtension(e.kind.name)
+watch(() => storeForm.kind.name, (name) => {
+  const ext = SupportedExtension(name)
   if (ext) {
-    let pro = e.properties.slice()
+    let pro = storeForm.properties.slice()
 
     for (var i = 0; i < pro.length;) {
       // remove it if the value or key is empty
       if (pro[i].key === '' || pro[i].value === '') {
         pro.splice(i, 1)
-        i--
       } else {
         i++
       }
     }
+
+    // add extension related params
     ext.params.forEach(p => {
       const index = pro.findIndex(e => e.key === p.key)
       if (index === -1) {
         pro.push({
           key: p.key,
-          value: ''
+          value: '',
+          defaultValue: p.defaultValue
         } as Pair)
       }
     })
-    e.properties = pro
-    updateKeys()
+
+    // make sure there is always a empty pair for letting users input
+    pro.push({
+      key: '',
+      value: ''
+    } as Pair)
+    storeForm.properties = pro
+  }
+})
+watch(storeForm, (e) => {
+  if (e.kind.name === '') {
+    if (e.url.startsWith('https://github.com') || e.url.startsWith('https://gitee.com')) {
+      e.kind.name = 'atest-store-git'
+    }
   }
 })
 
@@ -183,7 +191,7 @@ function updateKeys() {
     storeForm.properties.push({
       key: '',
       value: ''
-    })
+    } as Pair)
   }
 }
 </script>
@@ -267,7 +275,6 @@ function updateKeys() {
               v-model="storeForm.kind.name"
               test-id="store-form-plugin-name"
               class="m-2"
-              size="middle"
             >
               <el-option
                 v-for="item in SupportedExtensions()"
@@ -293,7 +300,7 @@ function updateKeys() {
                 <el-table-column label="Value">
                     <template #default="scope">
                     <div style="display: flex; align-items: center">
-                        <el-input v-model="scope.row.value" placeholder="Value" />
+                        <el-input v-model="scope.row.value" :placeholder="scope.row.defaultValue" />
                     </div>
                     </template>
                 </el-table-column>
