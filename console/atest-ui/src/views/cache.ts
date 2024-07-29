@@ -19,12 +19,12 @@ export interface TestCaseResponse {
     statusCode: number
 }
 
-interface Store {
+export interface Store {
     name: string
     readOnly: boolean
 }
 
-interface Stores {
+export interface Stores {
     current: string
     items: Store[]
 }
@@ -87,21 +87,27 @@ export function SetPreference(preference: Preference) {
     return
 }
 
-export function WatchRequestActiveTab(tab: string) {
+export function WithRequestActiveTab(tab: string) {
     const preference = GetPreference()
     preference.requestActiveTab = tab
     SetPreference(preference)
 }
 
-function WatchResponseActiveTab(tab: string) {
+function WithResponseActiveTab(tab: string) {
     const preference = GetPreference()
     preference.responseActiveTab = tab
     SetPreference(preference)
 }
 
-function WatchDarkTheme(darkTheme: boolean) {
+function WithDarkTheme(darkTheme: boolean) {
     const preference = GetPreference()
     preference.darkTheme = darkTheme
+    SetPreference(preference)
+}
+
+function WithLocale(locale: string) {
+    const preference = GetPreference()
+    preference.language = locale
     SetPreference(preference)
 }
 
@@ -110,7 +116,7 @@ function GetCurrentStore() {
     const val = sessionStorage.getItem(storeKey)
     if (val && val !== '') {
         const stores = JSON.parse(val)
-        for (var i = 0; i < stores.items.length; i++) {
+        for (let i = 0; i < stores.items.length; i++) {
             if (stores.items[i].name === stores.current) {
                 return stores.items[i]
             }
@@ -118,6 +124,7 @@ function GetCurrentStore() {
     }
     return {}
 }
+
 function SetCurrentStore(name: string) {
     const val = sessionStorage.getItem(storeKey)
     if (val && val !== '') {
@@ -126,6 +133,7 @@ function SetCurrentStore(name: string) {
         SetStores(stores)
     }
 }
+
 function SetStores(stores: Stores | Store[]) {
     if ('current' in stores) {
         sessionStorage.setItem(storeKey, JSON.stringify(stores))
@@ -137,21 +145,15 @@ function SetStores(stores: Stores | Store[]) {
     return
 }
 
-function WatchLocale(locale: string) {
-    const preference = GetPreference()
-    preference.language = locale
-    SetPreference(preference)
-}
-
 export const Cache = {
     GetTestCaseResponseCache,
     SetTestCaseResponseCache,
     GetLastTestCaseLocation,
     SetLastTestCaseLocation,
     GetPreference,
-    WatchRequestActiveTab,
-    WatchResponseActiveTab,
-    WatchDarkTheme,
-    WatchLocale,
+    WithRequestActiveTab,
+    WithResponseActiveTab,
+    WithDarkTheme,
+    WithLocale,
     GetCurrentStore, SetStores, SetCurrentStore
 }

@@ -26,7 +26,7 @@ const emit = defineEmits(['updated'])
 
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.suite!)
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
-watch(testResultActiveTab, Cache.WatchResponseActiveTab)
+watch(testResultActiveTab, Cache.WithResponseActiveTab)
 Magic.Keys(() => {
   testResultActiveTab.value = 'output'
 }, ['Alt+KeyO'])

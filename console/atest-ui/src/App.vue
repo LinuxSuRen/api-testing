@@ -22,7 +22,7 @@ import setAsDarkTheme from './theme'
 
 const asDarkMode = ref(Cache.GetPreference().darkTheme)
 setAsDarkTheme(asDarkMode.value)
-watch(asDarkMode, Cache.WatchDarkTheme)
+watch(asDarkMode, Cache.WithDarkTheme)
 watch(asDarkMode, () => {
   setAsDarkTheme(asDarkMode.value)
 })
@@ -66,7 +66,7 @@ const locale = ref(Cache.GetPreference().language)
 i18nLocale.value = locale.value
 
 watch(locale, (e) =>{
-  Cache.WatchLocale(e.value)
+  Cache.WithLocale(e.value)
   i18nLocale.value = locale.value
 })
 
