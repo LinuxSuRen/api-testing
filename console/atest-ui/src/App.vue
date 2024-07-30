@@ -22,7 +22,7 @@ import setAsDarkTheme from './theme'
 
 const asDarkMode = ref(Cache.GetPreference().darkTheme)
 setAsDarkTheme(asDarkMode.value)
-watch(asDarkMode, Cache.WatchDarkTheme)
+watch(asDarkMode, Cache.WithDarkTheme)
 watch(asDarkMode, () => {
   setAsDarkTheme(asDarkMode.value)
 })
@@ -30,9 +30,9 @@ watch(asDarkMode, () => {
 const appVersion = ref('')
 const appVersionLink = ref('https://github.com/LinuxSuRen/api-testing')
 API.GetVersion((d) => {
-  appVersion.value = d.message
-  const version = d.message.match('^v\\d*.\\d*.\\d*')
-  const dirtyVersion = d.message.match('^v\\d*.\\d*.\\d*-\\d*-g')
+  appVersion.value = d.version
+  const version = d.version.match('^v\\d*.\\d*.\\d*')
+  const dirtyVersion = d.version.match('^v\\d*.\\d*.\\d*-\\d*-g')
 
   if (!version && !dirtyVersion) {
     return
@@ -65,8 +65,8 @@ const handleSelect = (key: string) => {
 const locale = ref(Cache.GetPreference().language)
 i18nLocale.value = locale.value
 
-watch(locale, (value) =>{
-  Cache.WatchLocale(value)
+watch(locale, (e) =>{
+  Cache.WithLocale(e.value)
   i18nLocale.value = locale.value
 })
 

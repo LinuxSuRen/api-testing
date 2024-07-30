@@ -28,7 +28,9 @@ function DefaultResponseProcess(response: any) {
 }
 
 interface AppVersion {
-  message: string
+  version: string
+  commit: string
+  date: string
 }
 
 function safeToggleFunc(toggle?: (e: boolean) => void) {

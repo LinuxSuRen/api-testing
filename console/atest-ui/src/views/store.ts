@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,27 +15,75 @@ limitations under the License.
 */
 import type { Pair } from './types'
 
+interface Store {
+  name: string;
+  params: Pair[];
+}
+
+const storeExtensions = [
+  {
+    name: 'atest-store-git',
+    params: [{
+      key: 'insecure'
+    }, {
+      key: 'timeout'
+    }, {
+      key: 'targetpath'
+    }, {
+      key: 'url'
+    }, {
+      key: 'email'
+    }, {
+      key: 'name'
+    }]
+  },
+  {
+    name: 'atest-store-s3',
+    params: [{
+      key: 'accesskeyid'
+    }, {
+      key: 'secretaccesskey'
+    }, {
+      key: 'sessiontoken'
+    }, {
+      key: 'region'
+    }, {
+      key: 'disablessl'
+    }, {
+      key: 'forcepathstyle'
+    }, {
+      key: 'bucket'
+    }]
+  },
+  {
+    name: 'atest-store-orm',
+    params: [{
+      key: 'driver',
+      defaultValue: 'mysql'
+    }, {
+      key: 'database',
+      defaultValue: 'atest'
+    }]
+  },
+  {
+    name: 'atest-store-etcd',
+    params: []
+  },
+  {
+    name: 'atest-store-mongodb',
+    params: [{
+      key: 'collection'
+    }, {
+      key: 'database',
+      defaultValue: 'atest'
+    }]
+  }
+] as Store[]
+
 export function SupportedExtensions() {
-    return [
-        {
-          value: 'atest-store-git',
-          key: 'atest-store-git'
-        },
-        {
-          value: 'atest-store-s3',
-          key: 'atest-store-s3'
-        },
-        {
-          value: 'atest-store-orm',
-          key: 'atest-store-orm'
-        },
-        {
-          value: 'atest-store-etcd',
-          key: 'atest-store-etcd'
-        },
-        {
-          value: 'atest-store-mongodb',
-          key: 'atest-store-mongodb'
-        }
-    ] as Pair[]
+    return storeExtensions
+}
+
+export function SupportedExtension(name: string) {
+    return storeExtensions.find(e => e.name === name)
 }

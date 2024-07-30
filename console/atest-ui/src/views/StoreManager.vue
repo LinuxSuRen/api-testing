@@ -6,7 +6,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
 import { API } from './net'
 import { UIAPI } from './net-vue'
-import { SupportedExtensions } from './store'
+import { SupportedExtensions, SupportedExtension } from './store'
 import { useI18n } from 'vue-i18n'
 import { Magic } from './magicKeys'
 
@@ -99,10 +99,6 @@ function setStoreForm(store: Store) {
     storeForm.disabled = store.disabled
     storeForm.readonly = store.readonly
     storeForm.properties = store.properties
-    storeForm.properties.push({
-        key: '',
-        value: ''
-      })
 }
 
 function addStore() {
@@ -130,6 +126,40 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
+watch(() => storeForm.kind.name, (name) => {
+  const ext = SupportedExtension(name)
+  if (ext) {
+    let pro = storeForm.properties.slice()
+
+    for (var i = 0; i < pro.length;) {
+      // remove it if the value or key is empty
+      if (pro[i].key === '' || pro[i].value === '') {
+        pro.splice(i, 1)
+      } else {
+        i++
+      }
+    }
+
+    // add extension related params
+    ext.params.forEach(p => {
+      const index = pro.findIndex(e => e.key === p.key)
+      if (index === -1) {
+        pro.push({
+          key: p.key,
+          value: '',
+          defaultValue: p.defaultValue
+        } as Pair)
+      }
+    })
+
+    // make sure there is always a empty pair for letting users input
+    pro.push({
+      key: '',
+      value: ''
+    } as Pair)
+    storeForm.properties = pro
+  }
+})
 watch(storeForm, (e) => {
   if (e.kind.name === '') {
     if (e.url.startsWith('https://github.com') || e.url.startsWith('https://gitee.com')) {
@@ -157,12 +187,11 @@ function storeVerify(formEl: FormInstance | undefined) {
 
 function updateKeys() {
   const props = storeForm.properties
-  let lastItem = props[props.length - 1]
-  if (lastItem.key !== '') {
+  if (props.findIndex(p => p.key === '') === -1) {
     storeForm.properties.push({
       key: '',
       value: ''
-    })
+    } as Pair)
   }
 }
 </script>
@@ -246,13 +275,12 @@ function updateKeys() {
               v-model="storeForm.kind.name"
               test-id="store-form-plugin-name"
               class="m-2"
-              size="middle"
             >
               <el-option
                 v-for="item in SupportedExtensions()"
-                :key="item.value"
-                :label="item.key"
-                :value="item.value"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name"
               />
             </el-select>
           </el-form-item>
@@ -272,7 +300,7 @@ function updateKeys() {
                 <el-table-column label="Value">
                     <template #default="scope">
                     <div style="display: flex; align-items: center">
-                        <el-input v-model="scope.row.value" placeholder="Value" />
+                        <el-input v-model="scope.row.value" :placeholder="scope.row.defaultValue" />
                     </div>
                     </template>
                 </el-table-column>
