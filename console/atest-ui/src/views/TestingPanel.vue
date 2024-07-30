@@ -11,6 +11,7 @@ import { API } from './net'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 import { Magic } from './magicKeys'
+import TestSuiteCreationDialog from '../components/TestSuiteCreationDialog.vue'
 
 const { t } = useI18n()
 
@@ -407,7 +408,8 @@ const suiteKinds = [{
     </el-container>
   </div>
 
-  <el-dialog v-model="dialogVisible" :title="t('title.createTestSuite')" width="30%" draggable>
+    <TestSuiteCreationDialog :visible="dialogVisible"/>
+  <el-dialog v-model="dialogVisiblea" :title="t('title.createTestSuite')" width="30%" draggable>
     <template #footer>
       <span class="dialog-footer">
         <el-form
