@@ -164,12 +164,11 @@ function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
   const requestOptions = {
     method: 'POST',
     headers: {
-      'X-Store-Name': source.store,
-      'X-Auth': getToken()
+        'Content-Type': 'application/json',
+        'X-Store-Name': source.store,
+        'X-Auth': getToken()
     },
-    body: JSON.stringify({
-      url: source.url
-    })
+    body: JSON.stringify(source)
   }
 
   fetch(`/api/v1/suites/import`, requestOptions)

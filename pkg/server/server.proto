@@ -36,6 +36,7 @@ service Runner {
     rpc ImportTestSuite(TestSuiteSource) returns (CommonResult) {
       option (google.api.http) = {
         post: "/api/v1/suites/import"
+        body: "*"
       };
     }
     rpc GetTestSuite(TestSuiteIdentity) returns (TestSuite) {
