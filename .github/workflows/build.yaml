@@ -17,7 +17,7 @@ jobs:
       - uses: ./tools/github-actions/setup-deps
       - name: Unit Test
         run: |
-          make test
+          make test build-ui test-ui
       - name: Long Test
         run: |
           make testlong
@@ -30,6 +30,7 @@ jobs:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         run: |
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial --force-coverage-parser go -r coverage.out
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial console/atest-ui/coverage/clover.xml
           bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 
   APITest:
