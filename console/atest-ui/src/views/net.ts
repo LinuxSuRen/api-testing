@@ -40,13 +40,13 @@ function safeToggleFunc(toggle?: (e: boolean) => void) {
   return toggle
 }
 
-function GetVersion(callback: (v: AppVersion) => void) {
+function GetVersion(callback?: (v: AppVersion) => void) {
   const requestOptions = {
     method: 'GET',
   }
   fetch('/api/v1/version', requestOptions)
   .then(DefaultResponseProcess)
-    .then(callback)
+    .then(emptyOrDefault(callback))
 }
 
 interface TestSuite {
@@ -73,7 +73,7 @@ function CreateTestSuite(suite: TestSuite,
 
   fetch('/api/v1/suites', requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 interface ImportSource {
@@ -93,11 +93,11 @@ function UpdateTestSuite(suite: any,
   }
   fetch(`/api/v1/suites/${suite.name}`, requestOptions)
   .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function GetTestSuite(name: string,
-  callback: (d: any) => void, errHandle: (e: any) => void) {
+  callback: (d: any) => void, errHandle?: (e: any) => void) {
   const store = Cache.GetCurrentStore()
   const requestOptions = {
     headers: {
@@ -107,7 +107,7 @@ function GetTestSuite(name: string,
   }
   fetch(`/api/v1/suites/${name}`, requestOptions)
   .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function DeleteTestSuite(name: string,
@@ -121,7 +121,7 @@ function DeleteTestSuite(name: string,
   }
   fetch(`/api/v1/suites/${name}`, requestOptions)
   .then(DefaultResponseProcess)
-  .then(callback).catch(errHandle)
+  .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function ConvertTestSuite(suiteName: string, genertor: string,
@@ -139,7 +139,7 @@ function ConvertTestSuite(suiteName: string, genertor: string,
   }
   fetch(`/api/v1/converters/convert`, requestOptions)
   .then(DefaultResponseProcess)
-  .then(callback).catch(errHandle)
+  .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function DuplicateTestSuite(sourceSuiteName: string, targetSuiteName: string,
@@ -176,7 +176,7 @@ function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
     .then(callback)
 }
 
-interface TestCase {
+export interface TestCase {
   suiteName: string
   name: string
   request: any
@@ -201,7 +201,7 @@ function CreateTestCase(testcase: TestCase,
 
   fetch(`/api/v1/suites/${testcase.suiteName}/cases`, requestOptions)
   .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function UpdateTestCase(testcase: any,
@@ -218,7 +218,7 @@ function UpdateTestCase(testcase: any,
     safeToggleFunc(toggle)(true)
     fetch(`/api/v1/suites/${testcase.suiteName}/cases/${testcase.data.name}`, requestOptions)
       .then(DefaultResponseProcess)
-      .then(callback).catch(errHandle)
+      .then(callback).catch(emptyOrDefault(errHandle))
       .finally(() => {
         safeToggleFunc(toggle)(false)
       })
@@ -234,7 +234,7 @@ function GetTestCase(req: TestCase,
   }
   fetch(`/api/v1/suites/${req.suiteName}/cases/${req.name}`, requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function ListTestCase(suite: string, store: string,
@@ -247,7 +247,7 @@ function ListTestCase(suite: string, store: string,
   }
   fetch(`/api/v1/suites/${suite}/cases`, requestOptions)
   .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function DeleteTestCase(testcase: TestCase,
@@ -264,7 +264,7 @@ function DeleteTestCase(testcase: TestCase,
       })
     }
     fetch(`/api/v1/suites/${testcase.suiteName}/cases/${testcase.name}`, requestOptions)
-      .then(callback).catch(errHandle)
+      .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 interface RunTestCaseRequest {
@@ -289,7 +289,7 @@ function RunTestCase(request: RunTestCaseRequest,
   }
   fetch(`/api/v1/suites/${request.suiteName}/cases/${request.name}/run`, requestOptions)
   .then(DefaultResponseProcess)
-  .then(callback).catch(errHandle)
+  .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function DuplicateTestCase(sourceSuiteName: string, targetSuiteName: string,
@@ -335,7 +335,7 @@ function GenerateCode(request: GenerateRequest,
   }
   fetch(`/api/v1/codeGenerators/generate`, requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function ListCodeGenerator(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
@@ -344,7 +344,7 @@ function ListCodeGenerator(callback: (d: any) => void, errHandle?: (e: any) => v
       'X-Auth': getToken()
     },
   }).then(DefaultResponseProcess)
-  .then(callback).catch(errHandle)
+  .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function PopularHeaders(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
@@ -356,7 +356,7 @@ function PopularHeaders(callback: (d: any) => void, errHandle?: (e: any) => void
   }
   fetch(`/api/v1/popularHeaders`, requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function CreateOrUpdateStore(payload: any, create: boolean,
@@ -379,13 +379,13 @@ function CreateOrUpdateStore(payload: any, create: boolean,
   safeToggleFunc(toggle)(true)
   fetch(api, requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle).finally(() => {
+    .then(callback).catch(emptyOrDefault(errHandle)).finally(() => {
       safeToggleFunc(toggle)(false)
     })
 }
 
 function GetStores(callback: (d: any) => void,
-  errHandle?: (e: any) => void | null, final?: () => void | null) {
+  errHandle?: (e: any) => void | null, final?: () => void | undefined | null) {
   const requestOptions = {
     headers: {
       'X-Auth': getToken()
@@ -393,7 +393,7 @@ function GetStores(callback: (d: any) => void,
   }
   fetch('/api/v1/stores', requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle).finally(final)
+    .then(callback).catch(emptyOrDefault(errHandle)).finally(emptyOrDefault(final))
 }
 
 function DeleteStore(name: string,
@@ -406,7 +406,7 @@ function DeleteStore(name: string,
   }
   fetch(`/api/v1/stores/${name}`, requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function VerifyStore(name: string,
@@ -424,7 +424,7 @@ function VerifyStore(name: string,
   const api = `/api/v1/stores/verify`
   fetch(api, requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 export interface Secret {
@@ -441,11 +441,11 @@ function GetSecrets(callback: (d: any) => void, errHandle?: (e: any) => void | n
   fetch(`/api/v1/secrets`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback)
-    .catch(errHandle)
+    .catch(emptyOrDefault(errHandle))
 }
 
 function FunctionsQuery(filter: string,
-  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  callback: (d: any) => void, errHandle?: (e: any) => (PromiseLike<void | null | undefined> | void | null | undefined) | undefined | null) {
   const requestOptions = {
     headers: {
       'X-Auth': getToken()
@@ -453,7 +453,7 @@ function FunctionsQuery(filter: string,
   }
   fetch(`/api/v1/functions?name=${filter}`, requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle)
+    .then(callback).catch(emptyOrDefault(errHandle))
 }
 
 function DeleteSecret(name: string,
@@ -467,7 +467,7 @@ function DeleteSecret(name: string,
   fetch(`/api/v1/secrets/${name}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback)
-    .catch(errHandle)
+    .catch(emptyOrDefault(errHandle))
 }
 
 function CreateOrUpdateSecret(payload: Secret, create: boolean,
@@ -490,7 +490,7 @@ function CreateOrUpdateSecret(payload: Secret, create: boolean,
   safeToggleFunc(toggle)(true)
   fetch(api, requestOptions)
     .then(DefaultResponseProcess)
-    .then(callback).catch(errHandle).finally(() => {
+    .then(callback).catch(emptyOrDefault(errHandle)).finally(() => {
       safeToggleFunc(toggle)(false)
     })
 }
@@ -551,7 +551,14 @@ const GetTestSuiteYaml = (suite: string, callback: (d: any) => void, errHandle?:
   fetch(`/api/v1/suites/${suite}/yaml`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback)
-    .catch(errHandle)
+    .catch(emptyOrDefault(errHandle))
+}
+
+function emptyOrDefault(fn: any) {
+    if (fn) {
+        return fn
+    }
+    return () => {}
 }
 
 export const API = {
