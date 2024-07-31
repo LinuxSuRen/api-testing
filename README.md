@@ -7,7 +7,7 @@
 
 > English | [中文](README-ZH.md)
 
-This is a API testing tool. 🚀
+This is an awesome API testing tool. 🚀
 
 ## Features
 
