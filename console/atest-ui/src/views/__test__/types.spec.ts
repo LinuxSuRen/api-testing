@@ -17,19 +17,9 @@ limitations under the License.
 import { describe } from 'node:test'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from '../types'
 import type { Pair } from '../types'
+import fetchMock from "jest-fetch-mock";
 
-const fakeFetch: { [key:string]:string; } = {};
-
-global.fetch = jest.fn((key: string) =>
-  Promise.resolve({
-    json: () => {
-      if (fakeFetch[key] === undefined) {
-        return Promise.resolve({})
-      }
-      return Promise.resolve(JSON.parse(fakeFetch[key]))
-    },
-  }),
-) as jest.Mock;
+fetchMock.enableMocks();
 
 describe('NewSuggestedAPIsQuery', () => {
   test('empty data', () => {

@@ -15,52 +15,28 @@ limitations under the License.
 */
 
 import { describe } from 'node:test'
-import {API, TestCase} from '../net'
+import {API} from '../net'
+import { type TestCase } from '../net'
+import { SetupStorage } from './common'
+import fetchMock from "jest-fetch-mock";
 
-const fakeFetch: { [key:string]:string; } = {};
+fetchMock.enableMocks();
+SetupStorage()
 
-global.fetch = jest.fn((key: string) =>
-    Promise.resolve({
-        json: () => {
-            if (fakeFetch[key] === undefined) {
-                return Promise.resolve({})
-            }
-            return Promise.resolve(JSON.parse(fakeFetch[key]))
-        },
-    }),
-) as jest.Mock;
-
-fakeFetch['/api/v1/version'] = '{"version":"0.0.1"}'
-
-const localStorageMock = (() => {
-    let store = {};
-
-    return {
-        getItem(key) {
-            return store[key] || null;
-        },
-        setItem(key, value) {
-            store[key] = value.toString();
-        },
-        removeItem(key) {
-            delete store[key];
-        },
-        clear() {
-            store = {};
-        }
-    };
-})();
-
-Object.defineProperty(global, 'sessionStorage', {
-    value: localStorageMock
+beforeEach(() => {
+    fetchMock.resetMocks();
 });
 
 describe('net', () => {
     test('GetVersion', () => {
-        API.GetVersion()
+        fetchMock.mockResponseOnce(`{"version":"v0.0.1"}`)
+        API.GetVersion((d) => {
+            expect(d.version).toEqual('v0.0.2')
+        })
     })
 
     test('CreateTestSuite', () => {
+        fetchMock.mockResponseOnce(`{"version":"v0.0.1"}`)
         API.CreateTestSuite({
             store: 'store',
             name: 'name',
@@ -72,27 +48,27 @@ describe('net', () => {
     })
 
     test('UpdateTestSuite', () => {
-        API.UpdateTestSuite({}, (d) => {})
+        API.UpdateTestSuite({}, () => {})
     })
 
     test('GetTestSuite', () => {
-        API.GetTestSuite('fake', (d) => {})
+        API.GetTestSuite('fake', () => {})
     })
 
     test('DeleteTestSuite', () => {
-        API.DeleteTestSuite('fake', (d) => {})
+        API.DeleteTestSuite('fake', () => {})
     })
 
     test('ConvertTestSuite', () => {
-        API.ConvertTestSuite('fake', 'generator', (d) => {})
+        API.ConvertTestSuite('fake', 'generator', () => {})
     })
 
     test('DuplicateTestSuite', () => {
-        API.DuplicateTestSuite('source', 'target', (d) => {})
+        API.DuplicateTestSuite('source', 'target', () => {})
     })
 
     test('GetTestSuiteYaml', () => {
-        API.GetTestSuiteYaml('fake', (d) => {})
+        API.GetTestSuiteYaml('fake', () => {})
     })
 
     test('CreateTestCase', () => {
