@@ -500,9 +500,77 @@
         "tags": [
           "Runner"
         ]
-      },
-      "put": {
-        "operationId": "Runner_UpdateSecret",
+      }
+    },
+    "/server.Runner/GetHistorySuites": {
+      "post": {
+        "summary": "history test related",
+        "operationId": "Runner_GetHistorySuites",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHistorySuites"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverEmpty"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/GetHistoryTestCase": {
+      "post": {
+        "operationId": "Runner_GetHistoryTestCase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestCase"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/GetSecrets": {
+      "post": {
+        "summary": "secret related interfaces",
+        "operationId": "Runner_GetSecrets",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1653,6 +1721,114 @@
         },
         "error": {
           "type": "string"
+        }
+      }
+    },
+    "serverHistoryCaseIdentity": {
+      "type": "object",
+      "properties": {
+        "suite": {
+          "type": "string"
+        },
+        "testcase": {
+          "type": "string"
+        },
+        "historySuiteName": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "string"
+        }
+      }
+    },
+    "serverHistoryItems": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverHistoryCaseIdentity"
+          }
+        }
+      }
+    },
+    "serverHistorySuites": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/serverHistoryItems"
+          }
+        }
+      }
+    },
+    "serverHistoryTestCase": {
+      "type": "object",
+      "properties": {
+        "caseName": {
+          "type": "string"
+        },
+        "suiteName": {
+          "type": "string"
+        },
+        "historySuiteName": {
+          "type": "string"
+        },
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "suiteParam": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "suiteSpec": {
+          "$ref": "#/definitions/serverAPISpec"
+        },
+        "suiteApi": {
+          "type": "string"
+        },
+        "request": {
+          "$ref": "#/definitions/serverRequest"
+        },
+        "response": {
+          "$ref": "#/definitions/serverResponse"
+        },
+        "ID": {
+          "type": "string"
+        }
+      }
+    },
+    "serverHistoryTestResult": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "testCaseResult": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverTestCaseResult"
+          }
+        },
+        "data": {
+          "$ref": "#/definitions/serverHistoryTestCase"
+        },
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },

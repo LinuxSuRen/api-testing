@@ -349,6 +349,33 @@ func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err e
 	return
 }
 
+func (s *server) GetHistorySuites(ctx context.Context, in *Empty) (reply *HistorySuites, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	reply = &HistorySuites{
+		Data: make(map[string]*HistoryItems),
+	}
+
+	var suites []testing.HistoryTestSuite
+	if suites, err = loader.ListHistoryTestSuite(); err == nil && suites != nil {
+		for _, suite := range suites {
+			items := &HistoryItems{}
+			for _, item := range suite.Items {
+				data := &HistoryCaseIdentity{
+					ID:               item.ID,
+					HistorySuiteName: item.HistorySuiteName,
+					Kind:             item.SuiteSpec.Kind,
+					Suite:            item.SuiteName,
+					Testcase:         item.CaseName,
+				}
+				items.Data = append(items.Data, data)
+			}
+			reply.Data[suite.HistorySuiteName] = items
+		}
+	}
+	return
+}
+
 func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
 	loader := s.getLoader(ctx)
@@ -501,6 +528,16 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	return
 }
 
+func (s *server) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HistoryTestResult, err error) {
+	var result testing.HistoryTestResult
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	if result, err = loader.GetHistoryTestCase(in.ID); err == nil {
+		reply = ToGRPCHistoryTestCaseResult(result)
+	}
+	return
+}
+
 var ExecutionCountNum = promauto.NewCounter(prometheus.CounterOpts{
 	Name: "atest_execution_count",
 	Help: "The total number of request execution",
@@ -562,8 +599,21 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 				}
 				return
 			}
+		
+			result = &TestCaseResult{
+				Output:     reply.Message,
+				Error:      reply.Error,
+				Body:       lastItem.Body,
+				Header:     lastItem.Header,
+				StatusCode: lastItem.StatusCode,
+			}
 		} else if err != nil {
 			result.Error = err.Error()
+		} else {
+			result = &TestCaseResult{
+				Output: reply.Message,
+				Error:  reply.Error,
+			}
 		}
 
 		if reply != nil {
@@ -574,6 +624,20 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 			result.Body = lastItem.Body
 			result.Header = lastItem.Header
 			result.StatusCode = lastItem.StatusCode
+		}
+		
+		normalResult := ToNormalTestCaseResult(result)
+		var testSuite *testing.TestSuite
+		if testSuite, err = s.getSuiteFromTestTask(task); err != nil {
+			result = &TestCaseResult{
+				Error: err.Error(),
+			}
+		}
+		err = loader.CreateHistoryTestCase(normalResult, testSuite)
+		if err != nil {
+			result = &TestCaseResult{
+				Error: err.Error(),
+			}
 		}
 	}
 	return

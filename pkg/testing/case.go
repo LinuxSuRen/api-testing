@@ -18,6 +18,7 @@ package testing
 import (
 	"encoding/json"
 	"sort"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -37,6 +38,31 @@ type APISpec struct {
 	RPC    *RPCDesc `yaml:"rpc,omitempty" json:"rpc,omitempty"`
 	Secure *Secure  `yaml:"secure,omitempty" json:"secure,omitempty"`
 	Metric *Metric  `yaml:"metric,omitempty" json:"metric,omitempty"`
+}
+
+type HistoryTestSuite struct {
+	HistorySuiteName string            `yaml:"name,omitempty" json:"name,omitempty"`
+	Items            []HistoryTestCase `yaml:"items,omitempty" json:"items,omitempty"`
+}
+
+type HistoryTestCase struct {
+	ID               string            `yaml:"id,omitempty" json:"id,omitempty"`
+	CaseName         string            `yaml:"caseName,omitempty" json:"name,omitempty"`
+	SuiteName        string            `yaml:"suiteName,omitempty" json:"suiteName,omitempty"`
+	HistorySuiteName string            `yaml:"historySuiteName,omitempty" json:"historySuiteName,omitempty"`
+	CreateTime       time.Time            `yaml:"createTime,omitempty" json:"createTime,omitempty"`
+	SuiteAPI         string            `yaml:"api,omitempty" json:"api,omitempty"`
+	SuiteSpec        APISpec           `yaml:"spec,omitempty" json:"spec,omitempty"`
+	SuiteParam       map[string]string `yaml:"param,omitempty" json:"param,omitempty"`
+	Data             TestCase          `yaml:"data,omitempty" json:"data,omitempty"`
+}
+
+type HistoryTestResult struct {
+	Message        string           `yaml:"message,omitempty" json:"message,omitempty"`
+	Error          string           `yaml:"error,omitempty" json:"error,omitempty"`
+	TestCaseResult []TestCaseResult `yaml:"testCaseResult,omitempty" json:"testCaseResult,omitempty"`
+	Data           HistoryTestCase  `yaml:"data,omitempty" json:"data,omitempty"`
+	CreateTime     time.Time           `yaml:"createTime,omitempty" json:"createTime,omitempty"`
 }
 
 type RPCDesc struct {
@@ -233,4 +259,19 @@ type Verifier struct {
 	Min       int    `yaml:"min"`
 	MaxLength int    `yaml:"maxLength"`
 	MinLength int    `yaml:"minLength"`
+}
+
+type TestResult struct {
+	Message        string            `yaml:"message,omitempty" json:"message,omitempty"`
+	Error          string            `yaml:"error,omitempty" json:"error,omitempty"`
+	TestCaseResult []*TestCaseResult `yaml:"testCaseResult,omitempty" json:"testCaseResult,omitempty"`
+}
+
+type TestCaseResult struct {
+	StatusCode int               `yaml:"statusCode,omitempty" json:"statusCode,omitempty"`
+	Body       string            `yaml:"body,omitempty" json:"body,omitempty"`
+	Header     map[string]string `yaml:"header,omitempty" json:"header,omitempty"`
+	Error      string            `yaml:"error,omitempty" json:"error,omitempty"`
+	Id         string            `yaml:"id,omitempty" json:"id,omitempty"`
+	Output     string            `yaml:"output,omitempty" json:"output,omitempty"`
 }

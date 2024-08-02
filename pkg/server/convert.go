@@ -18,6 +18,8 @@ package server
 import (
 	"strings"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
 )
@@ -185,6 +187,96 @@ func ToNormalTestCase(in *TestCase) (result testing.TestCase) {
 		result.Expect.ConditionalVerify = convertConditionalVerify(resp.ConditionalVerify)
 		result.Expect.BodyFieldsExpect = pairToInterMap(resp.BodyFieldsExpect)
 		result.Expect.Header = pairToMap(resp.Header)
+	}
+	return
+}
+
+func ToNormalTestCaseResult(testCaseResult *TestCaseResult) (result testing.TestCaseResult) {
+	result = testing.TestCaseResult{
+		StatusCode: int(testCaseResult.StatusCode),
+		Error:      testCaseResult.Error,
+		Body:       testCaseResult.Body,
+		Header:     pairToMap(testCaseResult.Header),
+		Id:         testCaseResult.Id,
+		Output:     testCaseResult.Output,
+	}
+	return result
+}
+
+func ToGRPCHistoryTestCaseResult(historyTestResult testing.HistoryTestResult) (result *HistoryTestResult) {
+	res := historyTestResult.Data.Data.Request
+	resp := historyTestResult.Data.Data.Expect
+	
+	result = &HistoryTestResult{
+		Message:    historyTestResult.Message,
+		Error:      historyTestResult.Error,
+		CreateTime: timestamppb.New(historyTestResult.CreateTime),
+
+		Data: &HistoryTestCase{
+			HistorySuiteName: historyTestResult.Data.HistorySuiteName,
+			CaseName:         historyTestResult.Data.CaseName,
+			CreateTime:       timestamppb.New(historyTestResult.CreateTime),
+			SuiteName:        historyTestResult.Data.SuiteName,
+			SuiteApi:         historyTestResult.Data.SuiteAPI,
+			SuiteParam:       mapToPair(historyTestResult.Data.SuiteParam),
+
+			Request: &Request{
+				Api:    res.API,
+				Method: res.Method,
+				Body:   res.Body.String(),
+				Header: mapToPair(res.Header),
+				Cookie: mapToPair(res.Cookie),
+				Query:  mapInterToPair(res.Query),
+				Form:   mapToPair(res.Form),
+			},
+
+			Response: &Response{
+				StatusCode:       int32(resp.StatusCode),
+				Body:             resp.Body,
+				Schema:           resp.Schema,
+				Verify:           resp.Verify,
+				BodyFieldsExpect: mapInterToPair(resp.BodyFieldsExpect),
+				Header:           mapToPair(resp.Header),
+			},
+		},
+	}
+
+	result.Data.SuiteSpec = ToGRPCTestSuiteSpec(historyTestResult.Data.SuiteSpec)
+
+	for _, testCaseResult := range historyTestResult.TestCaseResult {
+		result.TestCaseResult = append(result.TestCaseResult, &TestCaseResult{
+			StatusCode: int32(testCaseResult.StatusCode),
+			Error:      testCaseResult.Error,
+			Body:       testCaseResult.Body,
+			Header:     mapToPair(testCaseResult.Header),
+			Output:     testCaseResult.Output,
+			Id:         testCaseResult.Id,
+		})
+	}
+	return
+}
+
+func ToGRPCTestSuiteSpec(spec testing.APISpec) (result *APISpec) {
+	result = &APISpec{
+		Kind: spec.Kind,
+		Url:  spec.URL,
+	}
+	if spec.RPC != nil {
+		result.Rpc = &RPC{
+			Raw:              spec.RPC.Raw,
+			Protofile:        spec.RPC.ProtoFile,
+			Import:           spec.RPC.ImportPath,
+			ServerReflection: spec.RPC.ServerReflection,
+		}
+	}
+	if spec.Secure != nil {
+		result.Secure = &Secure{
+			Insecure:   spec.Secure.Insecure,
+			Cert:       spec.Secure.CertFile,
+			Ca:         spec.Secure.CAFile,
+			ServerName: spec.Secure.ServerName,
+			Key:        spec.Secure.KeyFile,
+		}
 	}
 	return
 }

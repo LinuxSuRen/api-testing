@@ -100,6 +100,18 @@ func (l *nonLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 	return
 }
 
+func (l *nonLoader) CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite) (err error) {
+	return
+}
+
+func (l *nonLoader) ListHistoryTestSuite()(suites []HistoryTestSuite, err error) {
+	return
+}
+
+func (l *nonLoader) GetHistoryTestCase(id string) (testcase HistoryTestResult, err error) {
+	return
+}
+
 func (l *nonLoader) Verify() (readOnly bool, err error) {
 	// always be okay
 	return

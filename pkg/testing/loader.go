@@ -37,6 +37,10 @@ type Writer interface {
 	UpdateTestCase(suite string, testcase TestCase) (err error)
 	DeleteTestCase(suite, testcase string) (err error)
 
+	ListHistoryTestSuite() (suites []HistoryTestSuite, err error)
+	CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite) (err error)
+	GetHistoryTestCase(id string) (historyTestCase HistoryTestResult, err error)
+
 	ListTestSuite() (suites []TestSuite, err error)
 	GetTestSuite(name string, full bool) (suite TestSuite, err error)
 	GetTestSuiteYaml(name string) (testSuiteYaml []byte, err error)

@@ -429,6 +429,18 @@ func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 	return
 }
 
+func (l *fileLoader) CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite) (err error) {	// always be okay
+	return
+}
+
+func (l *fileLoader) ListHistoryTestSuite() (suites []HistoryTestSuite, err error) {
+	return
+}
+
+func (l *fileLoader) GetHistoryTestCase(id string) (testcase HistoryTestResult, err error) {
+	return
+}
+
 func (l *fileLoader) Verify() (readOnly bool, err error) {
 	// always be okay
 	return

@@ -33,6 +33,9 @@ type LoaderClient interface {
 	GetTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.TestCase, error)
 	UpdateTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.TestCase, error)
 	DeleteTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.Empty, error)
+	ListHistoryTestSuite(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*HistoryTestSuites, error)
+	CreateTestCaseHistory(ctx context.Context, in *server.HistoryTestResult, opts ...grpc.CallOption) (*server.Empty, error)
+	GetHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.HistoryTestResult, error)
 	GetVersion(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.Version, error)
 	Verify(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.ExtensionStatus, error)
 	PProf(ctx context.Context, in *server.PProfRequest, opts ...grpc.CallOption) (*server.PProfData, error)
@@ -136,15 +139,6 @@ func (c *loaderClient) DeleteTestCase(ctx context.Context, in *server.TestCase, 
 	return out, nil
 }
 
-func (c *loaderClient) GetVersion(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.Version, error) {
-	out := new(server.Version)
-	err := c.cc.Invoke(ctx, "/remote.Loader/GetVersion", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *loaderClient) Verify(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.ExtensionStatus, error) {
 	out := new(server.ExtensionStatus)
 	err := c.cc.Invoke(ctx, "/remote.Loader/Verify", in, out, opts...)
@@ -177,7 +171,6 @@ type LoaderServer interface {
 	GetTestCase(context.Context, *server.TestCase) (*server.TestCase, error)
 	UpdateTestCase(context.Context, *server.TestCase) (*server.TestCase, error)
 	DeleteTestCase(context.Context, *server.TestCase) (*server.Empty, error)
-	GetVersion(context.Context, *server.Empty) (*server.Version, error)
 	Verify(context.Context, *server.Empty) (*server.ExtensionStatus, error)
 	PProf(context.Context, *server.PProfRequest) (*server.PProfData, error)
 	mustEmbedUnimplementedLoaderServer()
@@ -216,9 +209,6 @@ func (UnimplementedLoaderServer) UpdateTestCase(context.Context, *server.TestCas
 }
 func (UnimplementedLoaderServer) DeleteTestCase(context.Context, *server.TestCase) (*server.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTestCase not implemented")
-}
-func (UnimplementedLoaderServer) GetVersion(context.Context, *server.Empty) (*server.Version, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
 }
 func (UnimplementedLoaderServer) Verify(context.Context, *server.Empty) (*server.ExtensionStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Verify not implemented")
@@ -419,24 +409,6 @@ func _Loader_DeleteTestCase_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Loader_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(server.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LoaderServer).GetVersion(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/remote.Loader/GetVersion",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LoaderServer).GetVersion(ctx, req.(*server.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Loader_Verify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(server.Empty)
 	if err := dec(in); err != nil {
@@ -519,10 +491,6 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTestCase",
 			Handler:    _Loader_DeleteTestCase_Handler,
-		},
-		{
-			MethodName: "GetVersion",
-			Handler:    _Loader_GetVersion_Handler,
 		},
 		{
 			MethodName: "Verify",

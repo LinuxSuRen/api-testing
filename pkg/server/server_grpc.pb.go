@@ -44,6 +44,11 @@ type RunnerClient interface {
 	DeleteTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 	DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate, opts ...grpc.CallOption) (*HelloReply, error)
 	GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error)
+
+	// history test related
+	GetHistorySuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HistorySuites, error)
+	GetHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestResult, error)
+
 	// code generator
 	ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
@@ -240,6 +245,24 @@ func (c *runnerClient) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite
 func (c *runnerClient) DeleteTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*HelloReply, error) {
 	out := new(HelloReply)
 	err := c.cc.Invoke(ctx, "/server.Runner/DeleteTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetHistorySuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HistorySuites, error) {
+	out := new(HistorySuites)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetHistorySuites", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestResult, error) {
+	out := new(HistoryTestResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetHistoryTestCase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -492,6 +515,11 @@ type RunnerServer interface {
 	DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error)
 	DuplicateTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error)
 	GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error)
+
+	// history test related
+	GetHistorySuites(context.Context, *Empty) (*HistorySuites, error)
+	GetHistoryTestCase(context.Context, *HistoryTestCase) (*HistoryTestResult, error)
+
 	// code generator
 	ListCodeGenerator(context.Context, *Empty) (*SimpleList, error)
 	GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error)
@@ -572,6 +600,12 @@ func (UnimplementedRunnerServer) UpdateTestCase(context.Context, *TestCaseWithSu
 }
 func (UnimplementedRunnerServer) DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTestCase not implemented")
+}
+func (UnimplementedRunnerServer) GetHistorySuites(context.Context, *Empty) (*HistorySuites, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistorySuites not implemented")
+}
+func (UnimplementedRunnerServer) GetHistoryTestCase(context.Context, *HistoryTestCase) (*HistoryTestResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryTestCase not implemented")
 }
 func (UnimplementedRunnerServer) DuplicateTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DuplicateTestCase not implemented")
@@ -944,6 +978,42 @@ func _Runner_DeleteTestCase_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).DeleteTestCase(ctx, req.(*TestCaseIdentity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetHistorySuites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetHistorySuites(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetHistorySuites",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetHistorySuites(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetHistoryTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetHistoryTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetHistoryTestCase(ctx, req.(*HistoryTestCase))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1418,6 +1488,14 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTestCase",
 			Handler:    _Runner_DeleteTestCase_Handler,
+		},
+		{
+			MethodName: "GetHistorySuites",
+			Handler:    _Runner_GetHistorySuites_Handler,
+		},
+		{
+			MethodName: "GetHistoryTestCase",
+			Handler:    _Runner_GetHistoryTestCase_Handler,
 		},
 		{
 			MethodName: "DuplicateTestCase",

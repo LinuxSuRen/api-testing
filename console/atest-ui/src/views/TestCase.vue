@@ -21,6 +21,8 @@ const props = defineProps({
   name: String,
   suite: String,
   kindName: String,
+  historySuiteName: String,
+  historyCaseID: String
 })
 const emit = defineEmits(['updated'])
 
@@ -52,31 +54,10 @@ const runTestCase = () => {
   API.RunTestCase({
     suiteName: suite,
     name: name,
-      parameters: parameters.value
+    parameters: parameters.value
   }, (e) => {
-    testResult.value = e
+    handleTestResult(e)
     requestLoading.value = false
-
-    if (e.error !== '') {
-      ElMessage({
-        message: e.error,
-        type: 'error'
-      })
-    } else {
-      ElMessage({
-        message: 'Pass!',
-        type: 'success'
-      })
-    }
-    parseResponseBody(e.body)
-
-    Cache.SetTestCaseResponseCache(suite + '-' + name, {
-      body: testResult.value.bodyObject,
-      output: e.output,
-      statusCode: testResult.value.statusCode
-    } as TestCaseResponse)
-
-    parameters.value = []
   }, (e) => {
     parameters.value = []
 
@@ -100,6 +81,31 @@ const parseResponseBody = (body) => {
   }
 }
 
+const handleTestResult = (e) => {
+  testResult.value = e;
+
+  if (e.error !== '') {
+      ElMessage({
+        message: e.error,
+        type: 'error'
+      })
+    } else {
+      ElMessage({
+        message: 'Pass!',
+        type: 'success'
+      })
+    }
+    parseResponseBody(e.body)
+
+    Cache.SetTestCaseResponseCache(suite + '-' + name, {
+      body: testResult.value.bodyObject,
+      output: e.output,
+      statusCode: testResult.value.statusCode
+    } as TestCaseResponse)
+
+    parameters.value = []
+}
+
 const responseBodyFilterText = ref('')
 function responseBodyFilter() {
   if (responseBodyFilterText.value === '') {
@@ -117,8 +123,8 @@ function responseBodyFilter() {
 const parameterDialogOpened = ref(false)
 function openParameterDialog() {
   API.GetTestSuite(props.suite, (e) => {
-      parameters.value = e.param
-      parameterDialogOpened.value = true
+    parameters.value = e.param
+    parameterDialogOpened.value = true
   }, UIAPI.ErrorTip)
 }
 
@@ -136,16 +142,16 @@ function generateCode() {
     name: name,
     generator: currentCodeGenerator.value
   }, (e) => {
-      ElMessage({
-        message: 'Code generated!',
-        type: 'success'
-      })
-      if (currentCodeGenerator.value === "gRPCPayload") {
-        currentCodeContent.value = JSON.stringify(JSON.parse(e.message), null, 4)
-      } else {
-        currentCodeContent.value = e.message
-      }
-    }, UIAPI.ErrorTip)
+    ElMessage({
+      message: 'Code generated!',
+      type: 'success'
+    })
+    if (currentCodeGenerator.value === "gRPCPayload") {
+      currentCodeContent.value = JSON.stringify(JSON.parse(e.message), null, 4)
+    } else {
+      currentCodeContent.value = e.message
+    }
+  }, UIAPI.ErrorTip)
 }
 
 function copyCode() {
@@ -202,9 +208,17 @@ const emptyTestCaseWithSuite: TestCaseWithSuite = {
 
 const testCaseWithSuite = ref(emptyTestCaseWithSuite)
 
+let name
+let suite
+let historySuiteName
+let historyCaseID
+const isHistoryTestCase = ref(false)
+
 function load() {
-  const name = props.name
-  const suite = props.suite
+   name = props.name
+   suite = props.suite
+   historySuiteName = props.historySuiteName
+   historyCaseID = props.historyCaseID
   if (name === '' || suite === '') {
     return
   }
@@ -222,61 +236,75 @@ function load() {
   }
   testResult.value.originBodyObject = testResult.value.bodyObject
 
-  API.GetTestCase({
-    suiteName: suite,
-    name: name
-  }, (e) => {
-      if (e.request.method === '') {
-        e.request.method = 'GET'
-      }
-
-      e.request.header.push({
-        key: '',
-        value: ''
-      })
-      e.request.cookie.push({
-        key: '',
-        value: ''
-      })
-      e.request.query.push({
-        key: '',
-        value: ''
-      })
-      e.request.form.push({
-        key: '',
-        value: ''
-      })
-      e.response.header.push({
-        key: '',
-        value: ''
-      })
-      e.response.bodyFieldsExpect.push({
-        key: '',
-        value: ''
-      })
-      e.response.verify.push('')
-      if (e.response.statusCode === 0) {
-        e.response.statusCode = 200
-      }
-
-      e.request.header.forEach(item => {
-        if (item.key === "Content-Type") {
-          switch (item.value) {
-            case 'application/x-www-form-urlencoded':
-              bodyType.value = 4
-              break
-            case 'application/json':
-              bodyType.value = 5
-              break
-          }
-        }
-      });
-
-      testCaseWithSuite.value = {
-        suiteName: suite,
-        data: e
-      } as TestCaseWithSuite
+  if (historySuiteName != '' && historySuiteName != undefined) {
+    isHistoryTestCase.value = true
+    API.GetHistoryTestCase({
+      historyCaseID : historyCaseID
+    }, (e) => {
+      processResponse(e.data)
+      handleTestResult(e.testCaseResult[0])
     })
+  } else {
+    API.GetTestCase({
+      suiteName: suite,
+      name: name
+    }, (e) => {
+      processResponse(e)
+    })
+  }
+}
+
+function processResponse(e) {
+  if (e.request.method === '') {
+    e.request.method = 'GET'
+  }
+
+  e.request.header.push({
+    key: '',
+    value: ''
+  })
+  e.request.cookie.push({
+    key: '',
+    value: ''
+  })
+  e.request.query.push({
+    key: '',
+    value: ''
+  })
+  e.request.form.push({
+    key: '',
+    value: ''
+  })
+  e.response.header.push({
+    key: '',
+    value: ''
+  })
+  e.response.bodyFieldsExpect.push({
+    key: '',
+    value: ''
+  })
+  e.response.verify.push('')
+  if (e.response.statusCode === 0) {
+    e.response.statusCode = 200
+  }
+
+  e.request.header.forEach(item => {
+    if (item.key === "Content-Type") {
+      switch (item.value) {
+        case 'application/x-www-form-urlencoded':
+          bodyType.value = 4
+          break
+        case 'application/json':
+          bodyType.value = 5
+          break
+      }
+    }
+  });
+
+  testCaseWithSuite.value = {
+    suiteName: suite,
+    data: e
+  } as TestCaseWithSuite
 }
 load()
 watch(props, () => {
@@ -451,9 +479,9 @@ function bodyTypeChange(e: number) {
 
   if (contentType !== "") {
     testCaseWithSuite.value.data.request.header = insertOrUpdateIntoMap({
-        key: 'Content-Type',
-        value: contentType
-      } as Pair, testCaseWithSuite.value.data.request.header)
+      key: 'Content-Type',
+      value: contentType
+    } as Pair, testCaseWithSuite.value.data.request.header)
   }
 }
 
@@ -560,10 +588,10 @@ Magic.Keys(() => {
     <el-header style="padding-left: 5px;">
       <div style="margin-bottom: 5px">
         <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
-          disabled v-if="Cache.GetCurrentStore().readOnly"
+          disabled v-if="Cache.GetCurrentStore().readOnly || isHistoryTestCase"
           >{{ t('button.save') }}</el-button>
         <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
-          v-if="!Cache.GetCurrentStore().readOnly"
+          v-if="!Cache.GetCurrentStore().readOnly && !isHistoryTestCase"
           >{{ t('button.save') }}</el-button>
         <el-button type="danger" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
         <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument">{{ t('button.duplicate') }}</el-button>
@@ -599,11 +627,11 @@ Magic.Keys(() => {
 
         <el-dropdown split-button type="primary" @click="sendRequest" v-loading="requestLoading">
           {{ t('button.send') }}
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="openParameterDialog">{{ t('button.sendWithParam') }}</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="openParameterDialog">{{ t('button.sendWithParam') }}</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
         </el-dropdown>
       </div>
     </el-header>
@@ -682,7 +710,7 @@ Magic.Keys(() => {
             <el-table-column label="Value">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
-                <el-input v-model="scope.row.value" placeholder="value"/>
+                  <el-input v-model="scope.row.value" placeholder="value" />
                 </div>
               </template>
             </el-table-column>

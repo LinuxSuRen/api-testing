@@ -18,9 +18,10 @@ package remote
 
 import (
 	"fmt"
-
 	server "github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 )
 
 func ConvertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
@@ -31,8 +32,19 @@ func ConvertToNormalTestSuite(suite *TestSuite) (result *testing.TestSuite) {
 		Spec:  ConvertToNormalTestSuiteSpec(suite.Spec),
 	}
 
-	for _, testcase := range suite.Items {
-		result.Items = append(result.Items, ConvertToNormalTestCase(testcase))
+	for _, testCase := range suite.Items {
+		result.Items = append(result.Items, ConvertToNormalTestCase(testCase))
+	}
+	return
+}
+
+func ConvertToNormalHistoryTestSuite(suite *HistoryTestSuite) (result *testing.HistoryTestSuite) {
+	result = &testing.HistoryTestSuite{
+		HistorySuiteName: suite.HistorySuiteName,
+	}
+
+	for _, historyTestCase := range suite.Items {
+		result.Items = append(result.Items, ConvertToNormalHistoryTestCase(historyTestCase))
 	}
 	return
 }
@@ -126,6 +138,38 @@ func ConvertToNormalTestCase(testcase *server.TestCase) (result testing.TestCase
 	return
 }
 
+func ConvertToNormalHistoryTestCase(testcase *server.HistoryTestCase) (result testing.HistoryTestCase) {
+	result = testing.HistoryTestCase{
+		ID:         testcase.ID,
+		SuiteName:  testcase.SuiteName,
+		CaseName:   testcase.CaseName,
+		SuiteAPI:   testcase.SuiteApi,
+		SuiteParam: pairToMap(testcase.SuiteParam),
+		SuiteSpec:  ConvertToNormalTestSuiteSpec(testcase.SuiteSpec),
+	}
+	if testcase.Request != nil {
+		result.Data.Request = testing.Request{
+			API:    testcase.Request.Api,
+			Method: testcase.Request.Method,
+			Body:   testing.NewRequestBody(testcase.Request.Body),
+			Header: pairToMap(testcase.Request.Header),
+			Query:  pairToMapInter(testcase.Request.Query),
+			Form:   pairToMap(testcase.Request.Form),
+		}
+	}
+	if testcase.Response != nil {
+		result.Data.Expect = testing.Response{
+			Body:             testcase.Response.Body,
+			StatusCode:       int(testcase.Response.StatusCode),
+			Schema:           testcase.Response.Schema,
+			Verify:           testcase.Response.Verify,
+			Header:           pairToMap(testcase.Response.Header),
+			BodyFieldsExpect: pairToInterMap(testcase.Response.BodyFieldsExpect),
+		}
+	}
+	return
+}
+
 func ConvertToGRPCTestCase(testcase testing.TestCase) (result *server.TestCase) {
 	result = &server.TestCase{
 		Name: testcase.Name,
@@ -146,6 +190,35 @@ func ConvertToGRPCTestCase(testcase testing.TestCase) (result *server.TestCase) 
 			BodyFieldsExpect: mapInterToPair(testcase.Expect.BodyFieldsExpect),
 		},
 	}
+	return
+}
+
+func ConvertToGRPCHistoryTestCase(testcase testing.TestCase, suite *testing.TestSuite) (result *server.HistoryTestCase) {
+	result = &server.HistoryTestCase{
+		CaseName:   testcase.Name,
+		SuiteName:  suite.Name,
+		SuiteApi:   suite.API,
+		SuiteParam: mapToPair(suite.Param),
+
+		Request: &server.Request{
+			Api:    testcase.Request.API,
+			Method: testcase.Request.Method,
+			Body:   testcase.Request.Body.String(),
+			Header: mapToPair(testcase.Request.Header),
+			Query:  mapInterToPair(testcase.Request.Query),
+			Form:   mapToPair(testcase.Request.Form),
+		},
+
+		Response: &server.Response{
+			Body:             testcase.Expect.Body,
+			StatusCode:       int32(testcase.Expect.StatusCode),
+			Schema:           testcase.Expect.Schema,
+			Verify:           testcase.Expect.Verify,
+			Header:           mapToPair(testcase.Expect.Header),
+			BodyFieldsExpect: mapInterToPair(testcase.Expect.BodyFieldsExpect),
+		},
+	}
+	result.SuiteSpec = server.ToGRPCTestSuiteSpec(suite.Spec)
 	return
 }
 
@@ -193,4 +266,50 @@ func pairToInterMap(pairs []*server.Pair) (data map[string]interface{}) {
 		data[pair.Key] = pair.Value
 	}
 	return
+}
+
+func ConvertToGRPCTestCaseResult(testCaseResult testing.TestCaseResult, testSuite *testing.TestSuite) (result *server.HistoryTestResult) {
+	result = &server.HistoryTestResult{
+		Error:      testCaseResult.Error,
+		CreateTime: timestamppb.New(time.Now()),
+	}
+
+	res := &server.TestCaseResult{
+		StatusCode: int32(testCaseResult.StatusCode),
+		Body:       testCaseResult.Body,
+		Header:     mapToPair(testCaseResult.Header),
+		Error:      testCaseResult.Error,
+		Id:         testCaseResult.Id,
+		Output:     testCaseResult.Output,
+	}
+	result.TestCaseResult = append(result.TestCaseResult, res)
+
+	for _, testCase := range testSuite.Items {
+		result.Data = ConvertToGRPCHistoryTestCase(testCase, testSuite)
+	}
+
+	return result
+}
+
+func ConvertToNormalTestCaseResult(testResult *server.HistoryTestResult) (result testing.HistoryTestResult) {
+	result = testing.HistoryTestResult{
+		Message:    testResult.Message,
+		Error:      testResult.Error,
+		CreateTime: testResult.CreateTime.AsTime(),
+	}
+
+	for _, testCaseResult := range testResult.TestCaseResult {
+		testCaseResult := testing.TestCaseResult{
+			StatusCode: int(testCaseResult.StatusCode),
+			Body:       testCaseResult.Body,
+			Header:     pairToMap(testCaseResult.Header),
+			Error:      testCaseResult.Error,
+			Id:         testCaseResult.Id,
+			Output:     testCaseResult.Output,
+		}
+		result.TestCaseResult = append(result.TestCaseResult, testCaseResult)
+	}
+	result.Data = ConvertToNormalHistoryTestCase(testResult.Data)
+
+	return result
 }

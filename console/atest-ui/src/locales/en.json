@@ -38,6 +38,7 @@
         "apiRequestParameter": "API Request Parameter",
         "codeGenerator": "Code Generator",
         "testing": "Testing",
+        "history": "Testing History",
         "mock": "Mock",
         "welcome": "Welcome",
         "secrets": "Secrets",

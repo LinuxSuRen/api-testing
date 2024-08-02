@@ -33,6 +33,7 @@
         "apiRequestParameter": "API 请求参数",
         "codeGenerator": "代码生成",
         "testing": "测试",
+        "history": "测试历史",
         "welcome": "欢迎",
         "secrets": "凭据",
         "stores": "存储",
