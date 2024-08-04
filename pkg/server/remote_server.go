@@ -528,12 +528,22 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	return
 }
 
-func (s *server) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HistoryTestResult, err error) {
+func (s *server) GetHistoryTestCaseWithResult(ctx context.Context, in *HistoryTestCase) (reply *HistoryTestResult, err error) {
 	var result testing.HistoryTestResult
 	loader := s.getLoader(ctx)
 	defer loader.Close()
-	if result, err = loader.GetHistoryTestCase(in.ID); err == nil {
+	if result, err = loader.GetHistoryTestCaseWithResult(in.ID); err == nil {
 		reply = ToGRPCHistoryTestCaseResult(result)
+	}
+	return
+}
+
+func (s *server) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HistoryTestCase, err error) {
+	var result testing.HistoryTestCase
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	if result, err = loader.GetHistoryTestCase(in.ID); err == nil {
+		reply = ConvertToGRPCHistoryTestCase(result)
 	}
 	return
 }
@@ -599,7 +609,7 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 				}
 				return
 			}
-		
+
 			result = &TestCaseResult{
 				Output:     reply.Message,
 				Error:      reply.Error,
@@ -625,7 +635,7 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 			result.Header = lastItem.Header
 			result.StatusCode = lastItem.StatusCode
 		}
-		
+
 		normalResult := ToNormalTestCaseResult(result)
 		var testSuite *testing.TestSuite
 		if testSuite, err = s.getSuiteFromTestTask(task); err != nil {
@@ -730,6 +740,14 @@ func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (repl
 	defer loader.Close()
 	reply = &HelloReply{}
 	err = loader.DeleteTestCase(in.Suite, in.Testcase)
+	return
+}
+
+func (s *server) DeleteHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HelloReply, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	reply = &HelloReply{}
+	err = loader.DeleteHistoryTestCase(in.ID)
 	return
 }
 

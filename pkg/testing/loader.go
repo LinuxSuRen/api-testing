@@ -39,7 +39,9 @@ type Writer interface {
 
 	ListHistoryTestSuite() (suites []HistoryTestSuite, err error)
 	CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite) (err error)
-	GetHistoryTestCase(id string) (historyTestCase HistoryTestResult, err error)
+	GetHistoryTestCaseWithResult(id string) (historyTestCase HistoryTestResult, err error)
+	GetHistoryTestCase(id string) (historyTestCase HistoryTestCase, err error)
+	DeleteHistoryTestCase(id string) (err error)
 
 	ListTestSuite() (suites []TestSuite, err error)
 	GetTestSuite(name string, full bool) (suite TestSuite, err error)

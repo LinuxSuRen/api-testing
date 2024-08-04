@@ -108,7 +108,14 @@ func (l *nonLoader) ListHistoryTestSuite()(suites []HistoryTestSuite, err error)
 	return
 }
 
-func (l *nonLoader) GetHistoryTestCase(id string) (testcase HistoryTestResult, err error) {
+func (l *nonLoader) GetHistoryTestCaseWithResult(id string) (testcase HistoryTestResult, err error) {
+	return
+}
+
+func (l *nonLoader) GetHistoryTestCase(id string) (testcase HistoryTestCase, err error) {
+	return
+}
+func (l *nonLoader) DeleteHistoryTestCase(id string) (err error) {
 	return
 }
 

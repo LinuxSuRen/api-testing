@@ -48,7 +48,6 @@ type RunnerClient interface {
 	// history test related
 	GetHistorySuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HistorySuites, error)
 	GetHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestResult, error)
-
 	// code generator
 	ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
@@ -260,27 +259,18 @@ func (c *runnerClient) GetHistorySuites(ctx context.Context, in *Empty, opts ...
 	return out, nil
 }
 
-func (c *runnerClient) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestResult, error) {
+func (c *runnerClient) GetHistoryTestCaseWithResult(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestResult, error) {
 	out := new(HistoryTestResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetHistoryTestCaseWithResult", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestCase, error) {
+	out := new(HistoryTestCase)
 	err := c.cc.Invoke(ctx, "/server.Runner/GetHistoryTestCase", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runnerClient) DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate, opts ...grpc.CallOption) (*HelloReply, error) {
-	out := new(HelloReply)
-	err := c.cc.Invoke(ctx, "/server.Runner/DuplicateTestCase", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runnerClient) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error) {
-	out := new(TestCases)
-	err := c.cc.Invoke(ctx, "/server.Runner/GetSuggestedAPIs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -519,7 +509,6 @@ type RunnerServer interface {
 	// history test related
 	GetHistorySuites(context.Context, *Empty) (*HistorySuites, error)
 	GetHistoryTestCase(context.Context, *HistoryTestCase) (*HistoryTestResult, error)
-
 	// code generator
 	ListCodeGenerator(context.Context, *Empty) (*SimpleList, error)
 	GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error)
@@ -604,14 +593,11 @@ func (UnimplementedRunnerServer) DeleteTestCase(context.Context, *TestCaseIdenti
 func (UnimplementedRunnerServer) GetHistorySuites(context.Context, *Empty) (*HistorySuites, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHistorySuites not implemented")
 }
-func (UnimplementedRunnerServer) GetHistoryTestCase(context.Context, *HistoryTestCase) (*HistoryTestResult, error) {
+func (UnimplementedRunnerServer) GetHistoryTestCaseWithResult(context.Context, *HistoryTestCase) (*HistoryTestResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryTestCaseWithResult not implemented")
+}
+func (UnimplementedRunnerServer) GetHistoryTestCase(context.Context, *HistoryTestCase) (*HistoryTestCase, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryTestCase not implemented")
-}
-func (UnimplementedRunnerServer) DuplicateTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DuplicateTestCase not implemented")
-}
-func (UnimplementedRunnerServer) GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSuggestedAPIs not implemented")
 }
 func (UnimplementedRunnerServer) ListCodeGenerator(context.Context, *Empty) (*SimpleList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCodeGenerator not implemented")
@@ -1000,6 +986,24 @@ func _Runner_GetHistorySuites_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_GetHistoryTestCaseWithResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetHistoryTestCaseWithResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetHistoryTestCaseWithResult",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetHistoryTestCaseWithResult(ctx, req.(*HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_GetHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HistoryTestCase)
 	if err := dec(in); err != nil {
@@ -1014,42 +1018,6 @@ func _Runner_GetHistoryTestCase_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).GetHistoryTestCase(ctx, req.(*HistoryTestCase))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runner_DuplicateTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TestCaseDuplicate)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).DuplicateTestCase(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/server.Runner/DuplicateTestCase",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).DuplicateTestCase(ctx, req.(*TestCaseDuplicate))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runner_GetSuggestedAPIs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TestSuiteIdentity)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).GetSuggestedAPIs(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/server.Runner/GetSuggestedAPIs",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).GetSuggestedAPIs(ctx, req.(*TestSuiteIdentity))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1494,16 +1462,12 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_GetHistorySuites_Handler,
 		},
 		{
+			MethodName: "GetHistoryTestCaseWithResult",
+			Handler:    _Runner_GetHistoryTestCaseWithResult_Handler,
+		},
+		{
 			MethodName: "GetHistoryTestCase",
 			Handler:    _Runner_GetHistoryTestCase_Handler,
-		},
-		{
-			MethodName: "DuplicateTestCase",
-			Handler:    _Runner_DuplicateTestCase_Handler,
-		},
-		{
-			MethodName: "GetSuggestedAPIs",
-			Handler:    _Runner_GetSuggestedAPIs_Handler,
 		},
 		{
 			MethodName: "ListCodeGenerator",

@@ -50,7 +50,8 @@
         "filter": "Filter Keyword",
         "noParameter": "No Parameter",
         "testsuite": "Test Suite:",
-        "apiAddress": "API Address:"
+        "apiAddress": "API Address:",
+        "runningAt": "Running At:"
     },
     "field": {
         "name": "Name",

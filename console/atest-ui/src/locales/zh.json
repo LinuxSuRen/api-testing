@@ -45,7 +45,8 @@
         "filter": "过滤",
         "noParameter": "无参数",
         "testsuite": "测试集：",
-        "apiAddress": "API 地址："
+        "apiAddress": "API 地址：",
+        "runningAt": "运行于："
     },
     "field": {
         "name": "名称",

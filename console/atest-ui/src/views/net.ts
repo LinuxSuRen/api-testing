@@ -561,6 +561,23 @@ const GetTestSuiteYaml = (suite: string, callback: (d: any) => void, errHandle?:
     .catch(errHandle)
 }
 
+function GetHistoryTestCaseWithResult(req: HistoryTestCase,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      ID : req.historyCaseID
+    })
+  }
+  fetch('/server.Runner/GetHistoryTestCaseWithResult', requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle)
+}
+
 function GetHistoryTestCase(req: HistoryTestCase,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
@@ -578,19 +595,34 @@ function GetHistoryTestCase(req: HistoryTestCase,
     .then(callback).catch(errHandle)
 }
 
+function DeleteHistoryTestCase(req: HistoryTestCase,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'X-Store-Name': Cache.GetCurrentStore().name,
+        'X-Auth': getToken()
+      },
+      body: JSON.stringify({
+        ID : req.historyCaseID
+      })
+    }
+    fetch('/server.Runner/DeleteHistoryTestCase', requestOptions)
+      .then(callback).catch(errHandle)
+}
+
 export const API = {
-    DefaultResponseProcess,
-    GetVersion,
-    CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, GetTestSuiteYaml,
-    DuplicateTestSuite,
-    CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase, DuplicateTestCase,
-    GetHistoryTestCase,
-    GenerateCode, ListCodeGenerator,
-    PopularHeaders,
-    CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
-    FunctionsQuery,
-    GetSecrets, DeleteSecret, CreateOrUpdateSecret,
-    GetSuggestedAPIs,
-    ReloadMockServer, GetMockConfig,
-    getToken
+  DefaultResponseProcess,
+  GetVersion,
+  CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,GetTestSuiteYaml,
+  CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
+  GetHistoryTestCaseWithResult, DeleteHistoryTestCase,GetHistoryTestCase,
+  GenerateCode, ListCodeGenerator,
+  PopularHeaders,
+  CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
+  FunctionsQuery,
+  GetSecrets, DeleteSecret, CreateOrUpdateSecret,
+  GetSuggestedAPIs,
+  ReloadMockServer, GetMockConfig,
+  getToken
 }

@@ -21,7 +21,9 @@ service Loader {
 
     rpc ListHistoryTestSuite(server.Empty) returns (HistoryTestSuites) {}
     rpc CreateTestCaseHistory(server.HistoryTestResult) returns (server.Empty) {}
-    rpc GetHistoryTestCase(server.HistoryTestCase) returns (server.HistoryTestResult) {}
+    rpc GetHistoryTestCaseWithResult(server.HistoryTestCase) returns (server.HistoryTestResult) {}
+    rpc GetHistoryTestCase(server.HistoryTestCase) returns (server.HistoryTestCase) {}
+    rpc DeleteHistoryTestCase(server.HistoryTestCase) returns (server.Empty) {}
 
     rpc ListHistoryTestSuite(server.Empty) returns (HistoryTestSuites) {}
     rpc CreateTestCaseHistory(server.HistoryTestResult) returns (server.Empty) {}

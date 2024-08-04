@@ -65,6 +65,37 @@ func ToNormalStore(store *Store) (result testing.Store) {
 	return
 }
 
+func ConvertToGRPCHistoryTestCase(historyTestcase testing.HistoryTestCase) (result *HistoryTestCase) {
+	req := historyTestcase.Data.Request
+	res := historyTestcase.Data.Expect
+	result = &HistoryTestCase{
+		CaseName:   historyTestcase.CaseName,
+		SuiteName:  historyTestcase.SuiteName,
+		SuiteApi:   historyTestcase.SuiteAPI,
+		SuiteParam: mapToPair(historyTestcase.SuiteParam),
+
+		Request: &Request{
+			Api:    req.API,
+			Method: req.Method,
+			Body:   req.Body.String(),
+			Header: mapToPair(req.Header),
+			Query:  mapInterToPair(req.Query),
+			Form:   mapToPair(req.Form),
+		},
+
+		Response: &Response{
+			Body:             res.Body,
+			StatusCode:       int32(res.StatusCode),
+			Schema:           res.Schema,
+			Verify:           res.Verify,
+			Header:           mapToPair(res.Header),
+			BodyFieldsExpect: mapInterToPair(res.BodyFieldsExpect),
+		},
+	}
+	result.SuiteSpec = ToGRPCTestSuiteSpec(historyTestcase.SuiteSpec)
+	return
+}
+
 func ToGRPCSuite(suite *testing.TestSuite) (result *TestSuite) {
 	result = &TestSuite{
 		Name:  suite.Name,

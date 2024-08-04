@@ -50,7 +50,6 @@ const runTestCase = () => {
   requestLoading.value = true
   const name = props.name
   const suite = props.suite
-
   API.RunTestCase({
     suiteName: suite,
     name: name,
@@ -63,7 +62,6 @@ const runTestCase = () => {
 
     requestLoading.value = false
     UIAPI.ErrorTip(e)
-
     parseResponseBody(e.body)
   })
 }
@@ -84,18 +82,14 @@ const parseResponseBody = (body) => {
 const handleTestResult = (e) => {
   testResult.value = e;
 
-  if (e.error !== '') {
-      ElMessage({
-        message: e.error,
-        type: 'error'
-      })
-    } else {
-      ElMessage({
-        message: 'Pass!',
-        type: 'success'
-      })
-    }
-    parseResponseBody(e.body)
+  if (!isHistoryTestCase.value) {
+    handleTestResultError(e)
+  }
+
+  if (e.body !== '') {
+    testResult.value.bodyObject = JSON.parse(e.body);
+    testResult.value.originBodyObject = JSON.parse(e.body);
+  }
 
     Cache.SetTestCaseResponseCache(suite + '-' + name, {
       body: testResult.value.bodyObject,
@@ -103,7 +97,21 @@ const handleTestResult = (e) => {
       statusCode: testResult.value.statusCode
     } as TestCaseResponse)
 
-    parameters.value = []
+  parameters.value = [];
+}
+
+const handleTestResultError = (e) => {
+  if (e.error !== '') {
+    ElMessage({
+      message: e.error,
+      type: 'error'
+    });
+  } else {
+    ElMessage({
+      message: 'Pass!',
+      type: 'success'
+    });
+  }
 }
 
 const responseBodyFilterText = ref('')
@@ -213,6 +221,7 @@ let suite
 let historySuiteName
 let historyCaseID
 const isHistoryTestCase = ref(false)
+const HistoryTestCaseCreateTime = ref('')
 
 function load() {
    name = props.name
@@ -238,11 +247,12 @@ function load() {
 
   if (historySuiteName != '' && historySuiteName != undefined) {
     isHistoryTestCase.value = true
-    API.GetHistoryTestCase({
+    API.GetHistoryTestCaseWithResult({
       historyCaseID : historyCaseID
     }, (e) => {
       processResponse(e.data)
       handleTestResult(e.testCaseResult[0])
+      formatDate(e.createTime)
     })
   } else {
     API.GetTestCase({
@@ -252,6 +262,22 @@ function load() {
       processResponse(e)
     })
   }
+}
+
+function formatDate(createTimeStr : string){
+  let parts = createTimeStr.split(/[T.Z]/);
+    let datePart = parts[0].split("-");
+    let timePart = parts[1].split(":");
+
+    let year = datePart[0];
+    let month = datePart[1];
+    let day = datePart[2];
+    let hours = timePart[0];
+    let minutes = timePart[1];
+    let seconds = timePart[2].split(".")[0];
+
+    let formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    HistoryTestCaseCreateTime.value = formattedDate
 }
 
 function processResponse(e) {
@@ -334,28 +360,40 @@ function saveTestCase(tip: boolean = true, callback: (c: any) => void) {
   }, UIAPI.ErrorTip, saveLoading)
 }
 
-function deleteTestCase() {
+function deleteCase() {
   const name = props.name
   const suite = props.suite
+  const historyCaseID = props.historyCaseID
 
-  API.DeleteTestCase({
-    suiteName: suite,
-    name: name
-  }, (e) => {
-    if (e.ok) {
-      emit('updated', 'hello from child')
+  if (isHistoryTestCase.value == true){
+    deleteHistoryTestCase(historyCaseID)
+  } else {
+    deleteTestCase(name, suite)
+  }
+}
 
-      ElMessage({
-        message: 'Delete.',
-        type: 'success'
-      })
+function deleteHistoryTestCase(historyCaseID : string){
+  API.DeleteHistoryTestCase({ historyCaseID }, handleDeleteResponse);
+}
 
-      // clean all the values
-      testCaseWithSuite.value = emptyTestCaseWithSuite
-    } else {
-      UIAPI.ErrorTip(e)
-    }
-  })
+function deleteTestCase(name : string, suite : string){
+  API.DeleteTestCase({ suiteName: suite, name }, handleDeleteResponse);
+}
+
+function handleDeleteResponse(e) {
+  if (e.ok) {
+    emit('updated', 'hello from child');
+
+    ElMessage({
+      message: 'Delete.',
+      type: 'success'
+    });
+
+    // Clean all the values
+    testCaseWithSuite.value = emptyTestCaseWithSuite;
+  } else {
+    UIAPI.ErrorTip(e);
+  }
 }
 
 const codeDialogOpened = ref(false)
@@ -593,9 +631,10 @@ Magic.Keys(() => {
         <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
           v-if="!Cache.GetCurrentStore().readOnly && !isHistoryTestCase"
           >{{ t('button.save') }}</el-button>
-        <el-button type="danger" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
+        <el-button type="danger" @click="deleteCase" :icon="Delete">{{ t('button.delete') }}</el-button>
         <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument">{{ t('button.duplicate') }}</el-button>
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
+        <span v-if="isHistoryTestCase" style="margin-left: 15px;">{{ t('tip.runningAt') }}{{ HistoryTestCaseCreateTime }}</span>
       </div>
       <div style="display: flex;">
         <el-select
@@ -703,7 +742,7 @@ Magic.Keys(() => {
             <el-table-column label="Key">
               <template #default="scope">
                 <el-input v-model="scope.row.key" placeholder="Key"
-                @change="cookieChange"  
+                @change="cookieChange"
                 />
               </template>
             </el-table-column>

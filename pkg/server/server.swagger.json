@@ -255,6 +255,38 @@
         ]
       }
     },
+    "/server.Runner/DeleteHistoryTestCase": {
+      "post": {
+        "operationId": "Runner_DeleteHistoryTestCase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestCase"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
     "/api/v1/mock/reload": {
       "post": {
         "operationId": "Mock_Reload",
@@ -538,6 +570,70 @@
     "/server.Runner/GetHistoryTestCase": {
       "post": {
         "operationId": "Runner_GetHistoryTestCase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestCase"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestCase"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/GetHistoryTestCaseWithResult": {
+      "post": {
+        "operationId": "Runner_GetHistoryTestCaseWithResult",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestCase"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestCase"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/GetHistoryTestCaseWithResult": {
+      "post": {
+        "operationId": "Runner_GetHistoryTestCaseWithResult",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1296,7 +1392,7 @@
         ]
       }
     },
-    "/api/v1/suites/{sourceSuiteName}/duplicate": {
+    "/server.Runner/RunTestCase": {
       "post": {
         "operationId": "Runner_DuplicateTestSuite",
         "responses": {

@@ -437,7 +437,15 @@ func (l *fileLoader) ListHistoryTestSuite() (suites []HistoryTestSuite, err erro
 	return
 }
 
-func (l *fileLoader) GetHistoryTestCase(id string) (testcase HistoryTestResult, err error) {
+func (l *fileLoader) GetHistoryTestCaseWithResult(id string) (testcase HistoryTestResult, err error) {
+	return
+}
+
+func (l *fileLoader) GetHistoryTestCase(id string) (testcase HistoryTestCase, err error) {
+	return
+}
+
+func (l *fileLoader) DeleteHistoryTestCase(id string) (err error) {
 	return
 }
 

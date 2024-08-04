@@ -193,32 +193,34 @@ func ConvertToGRPCTestCase(testcase testing.TestCase) (result *server.TestCase) 
 	return
 }
 
-func ConvertToGRPCHistoryTestCase(testcase testing.TestCase, suite *testing.TestSuite) (result *server.HistoryTestCase) {
+func ConvertToGRPCHistoryTestCase(historyTestcase testing.HistoryTestCase) (result *server.HistoryTestCase) {
+	req := historyTestcase.Data.Request
+	res := historyTestcase.Data.Expect
 	result = &server.HistoryTestCase{
-		CaseName:   testcase.Name,
-		SuiteName:  suite.Name,
-		SuiteApi:   suite.API,
-		SuiteParam: mapToPair(suite.Param),
+		CaseName:   historyTestcase.CaseName,
+		SuiteName:  historyTestcase.SuiteName,
+		SuiteApi:   historyTestcase.SuiteAPI,
+		SuiteParam: mapToPair(historyTestcase.SuiteParam),
 
 		Request: &server.Request{
-			Api:    testcase.Request.API,
-			Method: testcase.Request.Method,
-			Body:   testcase.Request.Body.String(),
-			Header: mapToPair(testcase.Request.Header),
-			Query:  mapInterToPair(testcase.Request.Query),
-			Form:   mapToPair(testcase.Request.Form),
+			Api:    req.API,
+			Method: req.Method,
+			Body:   req.Body.String(),
+			Header: mapToPair(req.Header),
+			Query:  mapInterToPair(req.Query),
+			Form:   mapToPair(req.Form),
 		},
 
 		Response: &server.Response{
-			Body:             testcase.Expect.Body,
-			StatusCode:       int32(testcase.Expect.StatusCode),
-			Schema:           testcase.Expect.Schema,
-			Verify:           testcase.Expect.Verify,
-			Header:           mapToPair(testcase.Expect.Header),
-			BodyFieldsExpect: mapInterToPair(testcase.Expect.BodyFieldsExpect),
+			Body:             res.Body,
+			StatusCode:       int32(res.StatusCode),
+			Schema:           res.Schema,
+			Verify:           res.Verify,
+			Header:           mapToPair(res.Header),
+			BodyFieldsExpect: mapInterToPair(res.BodyFieldsExpect),
 		},
 	}
-	result.SuiteSpec = server.ToGRPCTestSuiteSpec(suite.Spec)
+	result.SuiteSpec = server.ToGRPCTestSuiteSpec(historyTestcase.SuiteSpec)
 	return
 }
 
@@ -285,7 +287,16 @@ func ConvertToGRPCTestCaseResult(testCaseResult testing.TestCaseResult, testSuit
 	result.TestCaseResult = append(result.TestCaseResult, res)
 
 	for _, testCase := range testSuite.Items {
-		result.Data = ConvertToGRPCHistoryTestCase(testCase, testSuite)
+		data := testing.HistoryTestCase{
+			CaseName:   testCase.Name,
+			SuiteName:  testSuite.Name,
+			SuiteAPI:   testSuite.API,
+			SuiteSpec:  testSuite.Spec,
+			SuiteParam: testSuite.Param,
+			Data:       testCase,
+		}
+
+		result.Data = ConvertToGRPCHistoryTestCase(data)
 	}
 
 	return result
