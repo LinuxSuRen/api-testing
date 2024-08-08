@@ -42,6 +42,7 @@ type Writer interface {
 	GetHistoryTestCaseWithResult(id string) (historyTestCase HistoryTestResult, err error)
 	GetHistoryTestCase(id string) (historyTestCase HistoryTestCase, err error)
 	DeleteHistoryTestCase(id string) (err error)
+	GetTestCaseAllHistory(suite, name string) (historyTestCase []HistoryTestCase, err error)
 
 	ListTestSuite() (suites []TestSuite, err error)
 	GetTestSuite(name string, full bool) (suite TestSuite, err error)

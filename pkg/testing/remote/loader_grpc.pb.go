@@ -38,7 +38,11 @@ type LoaderClient interface {
 	GetHistoryTestCaseWithResult(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.HistoryTestResult, error)
 	GetHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.HistoryTestCase, error)
 	DeleteHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.Empty, error)
+<<<<<<< HEAD
 	GetVersion(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.Version, error)
+=======
+	GetTestCaseAllHistory(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.HistoryTestCases, error)
+>>>>>>> 6c2cd54 (feat: add history case revert api and ui)
 	Verify(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.ExtensionStatus, error)
 	PProf(ctx context.Context, in *server.PProfRequest, opts ...grpc.CallOption) (*server.PProfData, error)
 }
@@ -168,6 +172,27 @@ func (c *loaderClient) GetHistoryTestCase(ctx context.Context, in *server.Histor
 	return out, nil
 }
 
+<<<<<<< HEAD
+=======
+func (c *loaderClient) DeleteHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.Empty, error) {
+	out := new(server.Empty)
+	err := c.cc.Invoke(ctx, "/remote.Loader/DeleteHistoryTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) GetTestCaseAllHistory(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.HistoryTestCases, error) {
+	out := new(server.HistoryTestCases)
+	err := c.cc.Invoke(ctx, "/remote.Loader/GetTestCaseAllHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+>>>>>>> 6c2cd54 (feat: add history case revert api and ui)
 func (c *loaderClient) Verify(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.ExtensionStatus, error) {
 	out := new(server.ExtensionStatus)
 	err := c.cc.Invoke(ctx, "/remote.Loader/Verify", in, out, opts...)
@@ -202,7 +227,14 @@ type LoaderServer interface {
 	DeleteTestCase(context.Context, *server.TestCase) (*server.Empty, error)
 	ListHistoryTestSuite(context.Context, *server.Empty) (*HistoryTestSuites, error)
 	CreateTestCaseHistory(context.Context, *server.HistoryTestResult) (*server.Empty, error)
+<<<<<<< HEAD
 	GetHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.HistoryTestResult, error)
+=======
+	GetHistoryTestCaseWithResult(context.Context, *server.HistoryTestCase) (*server.HistoryTestResult, error)
+	GetHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.HistoryTestCase, error)
+	DeleteHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.Empty, error)
+	GetTestCaseAllHistory(context.Context, *server.TestCase) (*server.HistoryTestCases, error)
+>>>>>>> 6c2cd54 (feat: add history case revert api and ui)
 	Verify(context.Context, *server.Empty) (*server.ExtensionStatus, error)
 	PProf(context.Context, *server.PProfRequest) (*server.PProfData, error)
 	mustEmbedUnimplementedLoaderServer()
@@ -251,6 +283,15 @@ func (UnimplementedLoaderServer) CreateTestCaseHistory(context.Context, *server.
 func (UnimplementedLoaderServer) GetHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.HistoryTestResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryTestCase not implemented")
 }
+<<<<<<< HEAD
+=======
+func (UnimplementedLoaderServer) DeleteHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteHistoryTestCase not implemented")
+}
+func (UnimplementedLoaderServer) GetTestCaseAllHistory(context.Context, *server.TestCase) (*server.HistoryTestCases, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTestCaseAllHistory not implemented")
+}
+>>>>>>> 6c2cd54 (feat: add history case revert api and ui)
 func (UnimplementedLoaderServer) Verify(context.Context, *server.Empty) (*server.ExtensionStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Verify not implemented")
 }
@@ -504,6 +545,45 @@ func _Loader_GetHistoryTestCase_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+<<<<<<< HEAD
+=======
+func _Loader_DeleteHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).DeleteHistoryTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/DeleteHistoryTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).DeleteHistoryTestCase(ctx, req.(*server.HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_GetTestCaseAllHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.TestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetTestCaseAllHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/GetTestCaseAllHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetTestCaseAllHistory(ctx, req.(*server.TestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+>>>>>>> 6c2cd54 (feat: add history case revert api and ui)
 func _Loader_Verify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(server.Empty)
 	if err := dec(in); err != nil {
@@ -600,6 +680,17 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Loader_GetHistoryTestCase_Handler,
 		},
 		{
+<<<<<<< HEAD
+=======
+			MethodName: "DeleteHistoryTestCase",
+			Handler:    _Loader_DeleteHistoryTestCase_Handler,
+		},
+		{
+			MethodName: "GetTestCaseAllHistory",
+			Handler:    _Loader_GetTestCaseAllHistory_Handler,
+		},
+		{
+>>>>>>> 6c2cd54 (feat: add history case revert api and ui)
 			MethodName: "Verify",
 			Handler:    _Loader_Verify_Handler,
 		},

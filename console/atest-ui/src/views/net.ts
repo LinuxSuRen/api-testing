@@ -186,7 +186,9 @@ interface TestCase {
 }
 
 interface HistoryTestCase {
-  historyCaseID : string
+  historyCaseID : string,
+  suiteName: string
+  caseName: string
 }
 
 function CreateTestCase(testcase: TestCase,
@@ -616,7 +618,7 @@ export const API = {
   GetVersion,
   CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,GetTestSuiteYaml,
   CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
-  GetHistoryTestCaseWithResult, DeleteHistoryTestCase,GetHistoryTestCase,
+  GetHistoryTestCaseWithResult, DeleteHistoryTestCase, GetHistoryTestCase, GetTestCaseAllHistory,
   GenerateCode, ListCodeGenerator,
   PopularHeaders,
   CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,

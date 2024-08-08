@@ -22,7 +22,9 @@
         "generateCode": "Generate Code",
         "sendWithParam": "Send With Parameter",
         "fullScreen": "Full Screen",
-        "cancelFullScreen": "Cancel Full Screen"
+        "cancelFullScreen": "Cancel Full Screen",
+        "viewHistory": "View History Test Case Result",
+        "revert": "Revert"
     },
     "title": {
         "createTestSuite": "Create Test Suite",

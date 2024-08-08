@@ -146,6 +146,7 @@ func ConvertToNormalHistoryTestCase(testcase *server.HistoryTestCase) (result te
 		SuiteAPI:   testcase.SuiteApi,
 		SuiteParam: pairToMap(testcase.SuiteParam),
 		SuiteSpec:  ConvertToNormalTestSuiteSpec(testcase.SuiteSpec),
+		CreateTime: testcase.CreateTime.AsTime(),
 	}
 	if testcase.Request != nil {
 		result.Data.Request = testing.Request{
@@ -165,6 +166,34 @@ func ConvertToNormalHistoryTestCase(testcase *server.HistoryTestCase) (result te
 			Verify:           testcase.Response.Verify,
 			Header:           pairToMap(testcase.Response.Header),
 			BodyFieldsExpect: pairToInterMap(testcase.Response.BodyFieldsExpect),
+		}
+	}
+	return
+}
+
+func ConvertHistoryToGRPCTestCase(historyTestcase *server.HistoryTestCase) (result testing.TestCase) {
+	result = testing.TestCase{
+		Name: historyTestcase.CaseName,
+		ID: historyTestcase.ID,
+	}
+	if historyTestcase.Request != nil {
+		result.Request = testing.Request{
+			API:    historyTestcase.Request.Api,
+			Method: historyTestcase.Request.Method,
+			Body:   testing.NewRequestBody(historyTestcase.Request.Body),
+			Header: pairToMap(historyTestcase.Request.Header),
+			Query:  pairToMapInter(historyTestcase.Request.Query),
+			Form:   pairToMap(historyTestcase.Request.Form),
+		}
+	}
+	if historyTestcase.Response != nil {
+		result.Expect = testing.Response{
+			Body:             historyTestcase.Response.Body,
+			StatusCode:       int(historyTestcase.Response.StatusCode),
+			Schema:           historyTestcase.Response.Schema,
+			Verify:           historyTestcase.Response.Verify,
+			Header:           pairToMap(historyTestcase.Response.Header),
+			BodyFieldsExpect: pairToInterMap(historyTestcase.Response.BodyFieldsExpect),
 		}
 	}
 	return

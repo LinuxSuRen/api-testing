@@ -119,6 +119,7 @@ service Runner {
     rpc GetHistoryTestCaseWithResult(HistoryTestCase) returns (HistoryTestResult) {}
     rpc GetHistoryTestCase(HistoryTestCase) returns (HistoryTestCase) {}
     rpc DeleteHistoryTestCase(HistoryTestCase) returns (HelloReply) {}
+    rpc GetTestCaseAllHistory(TestCase) returns (HistoryTestCases){}
 
     // code generator
     rpc ListCodeGenerator(Empty) returns (SimpleList) {
@@ -274,7 +275,7 @@ message TestCaseIdentity {
   string suite = 1;
   string testcase = 2;
   repeated Pair parameters = 3;
-  
+
 }
 
 message TestSuiteSource {
@@ -402,6 +403,10 @@ message HistoryTestCase {
   Request request = 8;
   Response response = 9;
   string ID = 10;
+}
+
+message HistoryTestCases{
+  repeated HistoryTestCase data = 1;
 }
 
 message Request {

@@ -22,7 +22,9 @@
         "generateCode": "生成代码",
         "sendWithParam": "参数化",
         "fullScreen": "全屏显示",
-        "cancelFullScreen": "取消全屏"
+        "cancelFullScreen": "取消全屏",
+        "viewHistory": "查看历史记录",
+        "revert": "回退"
     },
     "title": {
         "createTestSuite": "创建测试用例集",

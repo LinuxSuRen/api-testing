@@ -187,6 +187,20 @@ func (g *gRPCLoader) DeleteHistoryTestCase(id string) (err error) {
 	return
 }
 
+func (g *gRPCLoader) GetTestCaseAllHistory(suite, name string) (historyTestcases []testing.HistoryTestCase, err error) {
+	var historyTestCases *server.HistoryTestCases
+	historyTestCases, err = g.client.GetTestCaseAllHistory(g.ctx, &server.TestCase{
+		Name:      name,
+		SuiteName: suite,
+	})
+	if err == nil && historyTestCases.Data != nil {
+		for _, item := range historyTestCases.Data {
+			historyTestcases = append(historyTestcases, ConvertToNormalHistoryTestCase(item))
+		}
+	}
+	return
+}
+
 func (g *gRPCLoader) ListTestSuite() (suites []testing.TestSuite, err error) {
 	var items *TestSuites
 	items, err = g.client.ListTestSuite(g.ctx, &server.Empty{})

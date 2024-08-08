@@ -561,6 +561,19 @@ var ExecutionFailNum = promauto.NewCounter(prometheus.CounterOpts{
 	Help: "The total number of request execution fail",
 })
 
+func (s *server) GetTestCaseAllHistory(ctx context.Context, in *TestCase) (result *HistoryTestCases, err error) {
+	var items []testing.HistoryTestCase
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	if items, err = loader.GetTestCaseAllHistory(in.SuiteName, in.Name); err == nil {
+		result = &HistoryTestCases{}
+		for _, item := range items {
+			result.Data = append(result.Data, ConvertToGRPCHistoryTestCase(item))
+		}
+	}
+	return
+}
+
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
 	var targetTestSuite testing.TestSuite
 	ExecutionCountNum.Inc()

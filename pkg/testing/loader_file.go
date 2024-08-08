@@ -449,6 +449,10 @@ func (l *fileLoader) DeleteHistoryTestCase(id string) (err error) {
 	return
 }
 
+func (l *fileLoader) GetTestCaseAllHistory(suite, name string) (historyTestCase []HistoryTestCase, err error) {
+	return
+}
+
 func (l *fileLoader) Verify() (readOnly bool, err error) {
 	// always be okay
 	return

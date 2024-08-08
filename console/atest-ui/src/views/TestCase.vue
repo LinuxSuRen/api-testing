@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Edit, Delete, Search, CopyDocument } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
@@ -14,6 +14,19 @@ import { useI18n } from 'vue-i18n'
 import { JSONPath } from 'jsonpath-plus'
 import { Codemirror } from 'vue-codemirror'
 import jsonlint from 'jsonlint-mod'
+
+import CodeMirror from 'codemirror'
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/addon/merge/merge.js'
+import 'codemirror/addon/merge/merge.css'
+
+import DiffMatchPatch from 'diff-match-patch';
+
+
+window.diff_match_patch = DiffMatchPatch;
+window.DIFF_DELETE = -1;
+window.DIFF_INSERT = 1;
+window.DIFF_EQUAL = 0;
 
 const { t } = useI18n()
 
@@ -250,16 +263,20 @@ function load() {
     API.GetHistoryTestCaseWithResult({
       historyCaseID : historyCaseID
     }, (e) => {
-      processResponse(e.data)
+      setDefaultValues(e.data)
+      determineBodyType(e.data)
+      setTestCaseWithSuite(e.data,suite)
       handleTestResult(e.testCaseResult[0])
-      formatDate(e.createTime)
+      HistoryTestCaseCreateTime.value = formatDate(e.createTime)
     })
   } else {
     API.GetTestCase({
       suiteName: suite,
       name: name
     }, (e) => {
-      processResponse(e)
+      setDefaultValues(e)
+      determineBodyType(e)
+      setTestCaseWithSuite(e,suite)
     })
   }
 }
@@ -277,10 +294,25 @@ function formatDate(createTimeStr : string){
     let seconds = timePart[2].split(".")[0];
 
     let formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    HistoryTestCaseCreateTime.value = formattedDate
+    return formattedDate
 }
 
-function processResponse(e) {
+function determineBodyType(e) {
+  e.request.header.forEach(item => {
+    if (item.key === "Content-Type") {
+      switch (item.value) {
+        case 'application/x-www-form-urlencoded':
+          bodyType.value = 4
+          break
+        case 'application/json':
+          bodyType.value = 5
+          break
+      }
+    }
+  });
+}
+
+function setDefaultValues(e) {
   if (e.request.method === '') {
     e.request.method = 'GET'
   }
@@ -313,25 +345,16 @@ function processResponse(e) {
   if (e.response.statusCode === 0) {
     e.response.statusCode = 200
   }
+}
 
-  e.request.header.forEach(item => {
-    if (item.key === "Content-Type") {
-      switch (item.value) {
-        case 'application/x-www-form-urlencoded':
-          bodyType.value = 4
-          break
-        case 'application/json':
-          bodyType.value = 5
-          break
-      }
-    }
-  });
-
+function setTestCaseWithSuite(e, suite) {
+  e.suiteName = suite
   testCaseWithSuite.value = {
     suiteName: suite,
     data: e
-  } as TestCaseWithSuite
+  } as TestCaseWithSuite;
 }
+
 load()
 watch(props, () => {
   load()
@@ -414,6 +437,102 @@ function openCodeDialog() {
 watch(currentCodeGenerator, () => {
   generateCode()
 })
+
+const historyDialogOpened = ref(false)
+const historyForm = ref({ selectedID: '' })
+const historyRecords = ref([]); 
+const selectedHistory = ref(null);
+const viewHistoryRef = ref(null);
+const formatHistoryCase = ref(null);
+
+const rules = {
+  selectedID: [
+    { required: true, message: 'Please select history TestCase', trigger: 'change' }
+  ]
+}
+
+function openHistoryDialog(){
+  historyDialogOpened.value = true
+  name = props.name
+  suite = props.suite
+  API.GetTestCaseAllHistory({
+    suiteName : suite,
+    name: name,
+  }, (e) => {
+    historyRecords.value = e.data
+    historyRecords.value.forEach(record => {
+      record.createTime = formatDate(record.createTime)
+      setDefaultValues(record)
+    });
+  })
+}
+
+function handleHistoryChange(value) {
+  selectedHistory.value = historyRecords.value.find(record => record.ID === value);
+  const {
+  caseName: name,
+  suiteName,
+  request,
+  response
+  } = selectedHistory.value;
+  formatHistoryCase.value = {
+    name,
+    suiteName,
+    request,
+    response
+  };
+  initCompare(testCaseWithSuite.value.data, formatHistoryCase.value)
+}
+
+function initCompare(value, historyValue) {
+  const formattedHistoryValue = JSON.stringify(historyValue, null, 2);
+  const formattedNewValue = JSON.stringify(value, null, 2);
+  const target = document.getElementById('compareView')
+  target.innerHTML = ''
+
+  const mergeView = CodeMirror.MergeView(target, {
+    value: formattedHistoryValue, 
+    origLeft: null,
+    orig: formattedNewValue, 
+    lineNumbers: true, 
+    mode: { name: "javascript", json: true },
+    highlightDifferences: true,
+    foldGutter:true,
+    lineWrapping:true,
+    styleActiveLine: true,
+    matchBrackets: true, 
+    connect: 'align',
+    readOnly: true 
+  })
+}
+
+const caseRevertLoading = ref(false)
+const submitForm = async (formEl) => {
+  if (!formEl) return
+  await formEl.validate((valid: boolean, fields) => {
+    if (valid) {
+      caseRevertLoading.value = true
+      const historyTestCase =  {
+        suiteName: props.suite,
+        data: formatHistoryCase.value
+      } 
+      UIAPI.UpdateTestCase(historyTestCase, (e) => {
+        if(e.error == ""){
+          ElMessage({
+            message: 'Saved.',
+            type: 'success'
+          })
+          load()
+        }
+      }, UIAPI.ErrorTip, saveLoading)
+      caseRevertLoading.value = false
+      historyDialogOpened.value = false
+      historyForm.value.selectedID = ''
+      const target = document.getElementById('compareView');
+      target.innerHTML = '';
+    }
+  })
+}
 
 const options = GetHTTPMethods()
 const requestActiveTab = ref(Cache.GetPreference().requestActiveTab)
@@ -634,6 +753,7 @@ Magic.Keys(() => {
         <el-button type="danger" @click="deleteCase" :icon="Delete">{{ t('button.delete') }}</el-button>
         <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument">{{ t('button.duplicate') }}</el-button>
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
+        <el-button type="primary" v-if="!isHistoryTestCase" @click="openHistoryDialog">{{ t('button.viewHistory') }}</el-button>
         <span v-if="isHistoryTestCase" style="margin-left: 15px;">{{ t('tip.runningAt') }}{{ HistoryTestCaseCreateTime }}</span>
       </div>
       <div style="display: flex;">
@@ -903,6 +1023,47 @@ Magic.Keys(() => {
           <Codemirror v-model="currentCodeContent"/>
         </template>
       </el-drawer>
+
+      <el-dialog v-model="historyDialogOpened" :title="t('button.viewHistory')" width="50%" draggable>
+        <el-form
+          ref="viewHistoryRef"
+          :model="historyForm"
+          status-icon label-width="120px"
+          :rules="rules"
+        >
+          <el-form-item :label="t('title.history')" prop="selectedID">
+            <el-row :gutter="20">
+              <el-col :span="20">
+                <el-select  class="m-2"
+                  filterable
+                  clearable
+                  v-model="historyForm.selectedID"
+                  default-first-option
+                  placeholder="History Case"
+                  size="middle"
+                  @change="handleHistoryChange"
+                >
+                  <el-option
+                    v-for="item in historyRecords"
+                    :key="item.ID"
+                    :label="item.createTime"
+                    :value="item.ID"
+                  />
+                </el-select>
+              </el-col>
+              <el-col :span="4">
+                <el-button
+                  type="primary"
+                  @click="submitForm(viewHistoryRef)"
+                  :loading="caseRevertLoading"
+                  >{{ t('button.revert') }}
+                </el-button>
+              </el-col>
+            </el-row>
+          </el-form-item>
+        </el-form>
+        <div id="compareView"></div>
+      </el-dialog>
 
       <el-drawer v-model="parameterDialogOpened">
         <template #header>

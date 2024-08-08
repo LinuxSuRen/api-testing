@@ -119,6 +119,10 @@ func (l *nonLoader) DeleteHistoryTestCase(id string) (err error) {
 	return
 }
 
+func (l *nonLoader) GetTestCaseAllHistory(suite, name string) (historyTestCase []HistoryTestCase, err error) {
+	return
+}
+
 func (l *nonLoader) Verify() (readOnly bool, err error) {
 	// always be okay
 	return

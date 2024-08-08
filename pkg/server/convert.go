@@ -69,10 +69,14 @@ func ConvertToGRPCHistoryTestCase(historyTestcase testing.HistoryTestCase) (resu
 	req := historyTestcase.Data.Request
 	res := historyTestcase.Data.Expect
 	result = &HistoryTestCase{
-		CaseName:   historyTestcase.CaseName,
-		SuiteName:  historyTestcase.SuiteName,
-		SuiteApi:   historyTestcase.SuiteAPI,
-		SuiteParam: mapToPair(historyTestcase.SuiteParam),
+		ID:               historyTestcase.ID,
+		CreateTime:       timestamppb.New(historyTestcase.CreateTime),
+		CaseName:         historyTestcase.CaseName,
+		SuiteName:        historyTestcase.SuiteName,
+		HistorySuiteName: historyTestcase.HistorySuiteName,
+		SuiteSpec:        ToGRPCTestSuiteSpec(historyTestcase.SuiteSpec),
+		SuiteApi:         historyTestcase.SuiteAPI,
+		SuiteParam:       mapToPair(historyTestcase.SuiteParam),
 
 		Request: &Request{
 			Api:    req.API,

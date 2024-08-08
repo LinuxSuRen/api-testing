@@ -1050,7 +1050,139 @@
         ]
       },
       "post": {
+<<<<<<< HEAD
         "operationId": "Runner_CreateTestSuite",
+=======
+        "operationId": "Runner_GetTestCase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverTestCase"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverTestCaseIdentity"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/GetTestCaseAllHistory": {
+      "post": {
+        "operationId": "Runner_GetTestCaseAllHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestCases"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverTestCase"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/GetTestSuite": {
+      "post": {
+        "operationId": "Runner_GetTestSuite",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverTestSuite"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverTestSuiteIdentity"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/GetTestSuiteYaml": {
+      "post": {
+        "operationId": "Runner_GetTestSuiteYaml",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverYamlData"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverTestSuiteIdentity"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/server.Runner/GetVersion": {
+      "post": {
+        "operationId": "Runner_GetVersion",
+>>>>>>> 6c2cd54 (feat: add history case revert api and ui)
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1900,6 +2032,19 @@
         },
         "ID": {
           "type": "string"
+        }
+      },
+      "title": "todo TestCase和HistoryTestCase合并一下，这样就方便了"
+    },
+    "serverHistoryTestCases": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverHistoryTestCase"
+          }
         }
       }
     },
