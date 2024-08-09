@@ -1,3 +1,5 @@
+#!api-testing-mock
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-mock-schema.json
 objects:
   - name: user
     fields:
