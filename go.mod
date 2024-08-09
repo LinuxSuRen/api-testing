@@ -1,6 +1,6 @@
 module github.com/linuxsuren/api-testing
 
-go 1.22.2
+go 1.22.4
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
@@ -33,7 +33,7 @@ require (
 	github.com/tidwall/gjson v1.14.4
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/oauth2 v0.18.0
+	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sync v0.6.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240123012728-ef4313101c80
 	google.golang.org/grpc v1.62.1
@@ -64,6 +64,7 @@ require (
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/linuxsuren/oauth-hub v0.0.0-20240809060240-e78c21b5d8d4 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
