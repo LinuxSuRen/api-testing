@@ -64,7 +64,7 @@ const handleNodeClick = (data: Tree) => {
   }
 }
 
-const data = ref([] as Tree[])
+const treeData = ref([] as Tree[])
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const currentNodekey = ref('')
 
@@ -83,7 +83,8 @@ function loadHistoryTestSuites(storeName: string) {
         if (!d.data) {
           return
         }
-        Object.keys(d.data).map((k) => {
+        const sortedKeys = Object.keys(d.data).sort((a, b) => new Date(a) - new Date(b));
+        sortedKeys.map((k) => {
           let suite = {
             id: k,
             label: k,
@@ -102,10 +103,14 @@ function loadHistoryTestSuites(storeName: string) {
               parentID: suite.id
             } as Tree)
           })
-          data.value.push(suite)
+          treeData.value.push(suite)
         })
       })
   }
+}
+
+function generateTestCaseID(suiteName: string, caseName: string) {
+  return suiteName + caseName
 }
 
 interface Store {
@@ -116,19 +121,23 @@ interface Store {
 const loginDialogVisible = ref(false)
 const stores = ref([] as Store[])
 const storesLoading = ref(false)
-function loadStores() {
+function loadStores(lastSuitName?: string, lastCaseName?: string) {
+  if (lastSuitName && lastCaseName && lastSuitName !== '' && lastCaseName !== '') {
+    // get data from emit event
+    Cache.SetLastTestCaseLocation(lastSuitName, generateTestCaseID(lastSuitName, lastCaseName))
+  }
+
   storesLoading.value = true
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Auth': API.getToken()
     }
   }
-  fetch('/server.Runner/GetStores', requestOptions)
+  fetch('/api/v1/stores', requestOptions)
     .then(API.DefaultResponseProcess)
     .then(async (d) => {
       stores.value = d.data
-      data.value = [] as Tree[]
+      treeData.value = [] as Tree[]
       Cache.SetStores(d.data)
 
       for (const item of d.data) {
@@ -137,13 +146,14 @@ function loadStores() {
         }
       }
 
-      if (data.value.length > 0) {
+      if (treeData.value.length > 0) {
         const key = Cache.GetLastTestCaseLocation()
+
         let targetSuite = {} as Tree
         let targetChild = {} as Tree
         if (key.suite !== '' && key.testcase !== '') {
-          for (var i = 0; i < data.value.length; i++) {
-            const item = data.value[i]
+          for (var i = 0; i < treeData.value.length; i++) {
+            const item = treeData.value[i]
             if (item.id === key.suite && item.children) {
               for (var j = 0; j < item.children.length; j++) {
                 const child = item.children[j]
@@ -158,7 +168,7 @@ function loadStores() {
           }
         }
         if (!targetChild.id || targetChild.id === '') {
-          targetSuite = data.value[0]
+          targetSuite = treeData.value[0]
           if (targetSuite.children && targetSuite.children.length > 0) {
             targetChild = targetSuite.children[0]
           }
@@ -166,8 +176,10 @@ function loadStores() {
 
         viewName.value = 'testsuite'
         currentNodekey.value = targetChild.id
+
         treeRef.value!.setCurrentKey(targetChild.id)
         treeRef.value!.setCheckedKeys([targetChild.id], false)
+
         testSuite.value = targetSuite.label
         Cache.SetCurrentStore(targetSuite.store)
         testKind.value = targetChild.kind
@@ -233,7 +245,7 @@ const deviceAuthNext = () => {
 
             <el-tree
               v-loading="storesLoading"
-              :data=data
+              :data=treeData
               highlight-current
               :check-on-click-node="true"
               :expand-on-click-node="false"
