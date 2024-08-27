@@ -16,6 +16,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@vueuse/core": "^10.11.0",
     "codemirror": "^5.65.17",
     "diff-match-patch": "^1.0.5",
     "element-plus": "^2.3.7",

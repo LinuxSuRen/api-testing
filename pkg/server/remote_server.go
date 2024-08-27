@@ -548,6 +548,7 @@ func (s *server) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase) (r
 	return
 }
 
+<<<<<<< HEAD
 var ExecutionCountNum = promauto.NewCounter(prometheus.CounterOpts{
 	Name: "atest_execution_count",
 	Help: "The total number of request execution",

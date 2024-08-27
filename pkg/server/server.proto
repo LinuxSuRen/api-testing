@@ -115,11 +115,35 @@ service Runner {
     }
 
     // history test related
-    rpc GetHistorySuites(Empty) returns (HistorySuites) {}
-    rpc GetHistoryTestCaseWithResult(HistoryTestCase) returns (HistoryTestResult) {}
-    rpc GetHistoryTestCase(HistoryTestCase) returns (HistoryTestCase) {}
-    rpc DeleteHistoryTestCase(HistoryTestCase) returns (HelloReply) {}
-    rpc GetTestCaseAllHistory(TestCase) returns (HistoryTestCases){}
+    rpc GetHistorySuites(Empty) returns (HistorySuites) {
+        option (google.api.http) = {
+            get: "/api/v1/historySuites"
+        };
+    }
+
+    rpc GetHistoryTestCaseWithResult(HistoryTestCase) returns (HistoryTestResult) {
+        option (google.api.http) = {
+            get: "/api/v1/historyTestCaseWithResult"
+        };
+    }
+
+    rpc GetHistoryTestCase(HistoryTestCase) returns (HistoryTestCase) {
+        option (google.api.http) = {
+            get: "/api/v1/historyTestCase/{id}"
+        };
+    }
+
+    rpc DeleteHistoryTestCase(HistoryTestCase) returns (HelloReply) {
+        option (google.api.http) = {
+            delete: "/api/v1/historyTestCase/{id}"
+        };
+    }
+
+    rpc GetTestCaseAllHistory(TestCase) returns (HistoryTestCases) {
+        option (google.api.http) = {
+            get: "/api/v1/testCase/{id}/history"
+        };
+    }
 
     // code generator
     rpc ListCodeGenerator(Empty) returns (SimpleList) {
