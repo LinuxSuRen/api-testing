@@ -24,7 +24,8 @@
         "fullScreen": "Full Screen",
         "cancelFullScreen": "Cancel Full Screen",
         "viewHistory": "View History Test Case Result",
-        "revert": "Revert"
+        "revert": "Revert",
+        "goToHistory": "Go to History"
     },
     "title": {
         "createTestSuite": "Create Test Suite",

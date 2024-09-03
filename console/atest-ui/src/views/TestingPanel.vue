@@ -280,6 +280,11 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
+const emit = defineEmits(['toHistoryPanel']);
+const handleToHistoryPanel = (payload) => {
+  emit('toHistoryPanel', payload);
+};
+
 const importSuiteFormRules = reactive<FormRules<Suite>>({
   url: [
     { required: true, message: 'URL is required', trigger: 'blur' },
@@ -391,6 +396,7 @@ const suiteKinds = [{
               :suite="testSuite"
               :kindName="testSuiteKind"
               :name="testCaseName"
+              @toHistoryPanel="handleToHistoryPanel"
               @updated="loadStores"
               style="height: 100%;"
               data-intro="This is the test case editor. You can edit the test case here."

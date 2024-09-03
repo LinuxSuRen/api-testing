@@ -24,6 +24,9 @@ interface Tree {
   children?: Tree[]
 }
 
+const props = defineProps({
+  ID: String,
+})
 const testCaseName = ref('')
 const testSuite = ref('')
 const testKind = ref('')
@@ -151,19 +154,36 @@ function loadStores(lastSuitName?: string, lastCaseName?: string) {
 
         let targetSuite = {} as Tree
         let targetChild = {} as Tree
-        if (key.suite !== '' && key.testcase !== '') {
-          for (var i = 0; i < treeData.value.length; i++) {
-            const item = treeData.value[i]
-            if (item.id === key.suite && item.children) {
-              for (var j = 0; j < item.children.length; j++) {
-                const child = item.children[j]
-                if (child.id === key.testcase) {
-                  targetSuite = item
-                  targetChild = child
-                  break
-                }
+
+        const targetID = props.ID
+        if (targetID && targetID !== '') {
+          for (const suite of treeData.value) {
+            if (suite.children) {
+              const foundChild = suite.children.find(child => child.id === targetID)
+              if (foundChild) {
+                targetSuite = suite
+                targetChild = foundChild
+                handleNodeClick(targetChild)
+                updateTreeSelection(targetSuite, targetChild)
+                return
               }
-              break
+            }
+          }
+        } else {
+          if (key.suite !== '' && key.testcase !== '') {
+            for (var i = 0; i < treeData.value.length; i++) {
+              const item = treeData.value[i]
+              if (item.id === key.suite && item.children) {
+                for (var j = 0; j < item.children.length; j++) {
+                  const child = item.children[j]
+                  if (child.id === key.testcase) {
+                    targetSuite = item
+                    targetChild = child
+                    break
+                  }
+                }
+                break
+              }
             }
           }
         }
@@ -175,14 +195,7 @@ function loadStores(lastSuitName?: string, lastCaseName?: string) {
         }
 
         viewName.value = 'testsuite'
-        currentNodekey.value = targetChild.id
-
-        treeRef.value!.setCurrentKey(targetChild.id)
-        treeRef.value!.setCheckedKeys([targetChild.id], false)
-
-        testSuite.value = targetSuite.label
-        Cache.SetCurrentStore(targetSuite.store)
-        testKind.value = targetChild.kind
+        updateTreeSelection(targetSuite, targetChild)
       } else {
         viewName.value = ""
       }
@@ -197,6 +210,17 @@ function loadStores(lastSuitName?: string, lastCaseName?: string) {
     })
 }
 loadStores()
+
+function updateTreeSelection(targetSuite: Tree, targetChild: Tree) {
+    currentNodekey.value = targetChild.id
+
+    treeRef.value!.setCurrentKey(targetChild.id)
+    treeRef.value!.setCheckedKeys([targetChild.id], false)
+
+    testSuite.value = targetSuite.label
+    Cache.SetCurrentStore(targetSuite.store)
+    testKind.value = targetChild.kind
+}
 
 const filterText = ref('')
 watch(filterText, (val) => {
@@ -239,10 +263,8 @@ const deviceAuthNext = () => {
       <el-main style="padding-top: 5px; padding-bottom: 5px;">
         <el-container style="height: 100%">
           <el-aside>
-            <el-button type="primary" @click="Set" data-intro="History Set" test-id="history-set">设置</el-button>
             <el-button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</el-button>
             <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" style="padding: 5px;" />
-
             <el-tree
               v-loading="storesLoading"
               :data=treeData

@@ -83,6 +83,12 @@ const handleChangeLan = (command: string) => {
   }
 };
 
+const ID = ref(null);
+const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
+  ID.value = selectID;
+  panelName.value = historyPanelName;
+}
+
 </script>
 
 <template>
@@ -140,8 +146,8 @@ const handleChangeLan = (command: string) => {
           </el-dropdown>
         </el-col>
       </div>
-      <TestingPanel v-if="panelName === 'testing'" />
-      <TestingHistoryPanel v-else-if="panelName === 'history'" />
+      <TestingPanel v-if="panelName === 'testing'" @toHistoryPanel="toHistoryPanel"/>
+      <TestingHistoryPanel v-else-if="panelName === 'history'" :ID="ID"/>
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
       <SecretManager v-else-if="panelName === 'secret'" />
