@@ -117,31 +117,37 @@ service Runner {
     // history test related
     rpc GetHistorySuites(Empty) returns (HistorySuites) {
         option (google.api.http) = {
-            get: "/api/v1/historySuites"
+          post: "/api/v1/historySuites"
         };
     }
 
     rpc GetHistoryTestCaseWithResult(HistoryTestCase) returns (HistoryTestResult) {
         option (google.api.http) = {
-            get: "/api/v1/historyTestCaseWithResult"
+            get: "/api/v1/historyTestCaseWithResult/{ID}"
         };
     }
 
     rpc GetHistoryTestCase(HistoryTestCase) returns (HistoryTestCase) {
         option (google.api.http) = {
-            get: "/api/v1/historyTestCase/{id}"
+            get: "/api/v1/historyTestCase/{ID}"
         };
     }
 
     rpc DeleteHistoryTestCase(HistoryTestCase) returns (HelloReply) {
         option (google.api.http) = {
-            delete: "/api/v1/historyTestCase/{id}"
+            delete: "/api/v1/historyTestCase/{ID}"
+        };
+    }
+
+    rpc DeleteAllHistoryTestCase(HistoryTestCase) returns (HelloReply) {
+        option (google.api.http) = {
+            delete: "/api/v1/suites/{suiteName}/cases/{caseName}"
         };
     }
 
     rpc GetTestCaseAllHistory(TestCase) returns (HistoryTestCases) {
         option (google.api.http) = {
-            get: "/api/v1/testCase/{id}/history"
+            post: "/api/v1/suites/{suiteName}/cases/{name}"
         };
     }
 

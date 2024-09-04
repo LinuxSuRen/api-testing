@@ -549,6 +549,17 @@ const goToHistory = async (formEl) => {
   })
 }
 
+const deleteAllHistory = async (formEl) => {
+  if (!formEl) return
+  caseRevertLoading.value = true
+  API.DeleteAllHistoryTestCase(props.suite, props.name, handleDeleteResponse);
+  caseRevertLoading.value = false
+  historyDialogOpened.value = false
+  historyForm.value.selectedID = ''
+  const target = document.getElementById('compareView');
+  target.innerHTML = '';
+}
+
 const options = GetHTTPMethods()
 const requestActiveTab = ref(Cache.GetPreference().requestActiveTab)
 watch(requestActiveTab, Cache.WatchRequestActiveTab)
@@ -1079,6 +1090,12 @@ Magic.Keys(() => {
                   @click="goToHistory(viewHistoryRef)"
                   :loading="caseRevertLoading"
                   >{{ t('button.goToHistory') }}
+                </el-button>
+                <el-button
+                  type="primary"
+                  @click="deleteAllHistory(viewHistoryRef)"
+                  :loading="caseRevertLoading"
+                  >{{ t('button.deleteAllHistory') }}
                 </el-button>
               </div>
               </el-col>

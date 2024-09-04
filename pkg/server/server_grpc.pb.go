@@ -49,6 +49,7 @@ type RunnerClient interface {
 	GetHistoryTestCaseWithResult(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestResult, error)
 	GetHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestCase, error)
 	DeleteHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HelloReply, error)
+	DeleteAllHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HelloReply, error)
 	RunHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*TestCaseResult, error)
 	GetTestCaseAllHistory(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*HistoryTestCases, error)
 	// code generator
@@ -307,6 +308,15 @@ func (c *runnerClient) DeleteHistoryTestCase(ctx context.Context, in *HistoryTes
 	return out, nil
 }
 
+func (c *runnerClient) DeleteAllHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/DeleteAllHistoryTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) RunHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*TestCaseResult, error) {
 	out := new(TestCaseResult)
 	err := c.cc.Invoke(ctx, "/server.Runner/RunHistoryTestCase", in, out, opts...)
@@ -558,6 +568,7 @@ type RunnerServer interface {
 	GetHistoryTestCaseWithResult(context.Context, *HistoryTestCase) (*HistoryTestResult, error)
 	GetHistoryTestCase(context.Context, *HistoryTestCase) (*HistoryTestCase, error)
 	DeleteHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error)
+	DeleteAllHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error)
 	RunHistoryTestCase(context.Context, *HistoryTestCase) (*TestCaseResult, error)
 	GetTestCaseAllHistory(context.Context, *TestCase) (*HistoryTestCases, error)
 	// code generator
@@ -658,6 +669,9 @@ func (UnimplementedRunnerServer) GetHistoryTestCase(context.Context, *HistoryTes
 }
 func (UnimplementedRunnerServer) DeleteHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteHistoryTestCase not implemented")
+}
+func (UnimplementedRunnerServer) DeleteAllHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAllHistoryTestCase not implemented")
 }
 func (UnimplementedRunnerServer) RunHistoryTestCase(context.Context, *HistoryTestCase) (*TestCaseResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RunHistoryTestCase not implemented")
@@ -1138,6 +1152,24 @@ func _Runner_DeleteHistoryTestCase_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).DeleteHistoryTestCase(ctx, req.(*HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_DeleteAllHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).DeleteAllHistoryTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/DeleteAllHistoryTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).DeleteAllHistoryTestCase(ctx, req.(*HistoryTestCase))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1636,6 +1668,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteHistoryTestCase",
 			Handler:    _Runner_DeleteHistoryTestCase_Handler,
+		},
+		{
+			MethodName: "DeleteAllHistoryTestCase",
+			Handler:    _Runner_DeleteAllHistoryTestCase_Handler,
 		},
 		{
 			MethodName: "RunHistoryTestCase",

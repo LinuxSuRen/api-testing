@@ -566,16 +566,12 @@ const GetTestSuiteYaml = (suite: string, callback: (d: any) => void, errHandle?:
 function GetHistoryTestCaseWithResult(req: HistoryTestCase,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Store-Name': Cache.GetCurrentStore().name,
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      ID : req.historyCaseID
-    })
+    }
   }
-  fetch('/server.Runner/GetHistoryTestCaseWithResult', requestOptions)
+  fetch(`/api/v1/historyTestCaseWithResult/${req.historyCaseID}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -583,16 +579,12 @@ function GetHistoryTestCaseWithResult(req: HistoryTestCase,
 function GetHistoryTestCase(req: HistoryTestCase,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
-    method: 'POST',
     headers: {
       'X-Store-Name': Cache.GetCurrentStore().name,
       'X-Auth': getToken()
-    },
-    body: JSON.stringify({
-      ID : req.historyCaseID
-    })
+    }
   }
-  fetch('/server.Runner/GetHistoryTestCase', requestOptions)
+  fetch(`/api/v1/historyTestCase/${req.historyCaseID}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -600,7 +592,7 @@ function GetHistoryTestCase(req: HistoryTestCase,
 function DeleteHistoryTestCase(req: HistoryTestCase,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
     const requestOptions = {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         'X-Store-Name': Cache.GetCurrentStore().name,
         'X-Auth': getToken()
@@ -609,8 +601,25 @@ function DeleteHistoryTestCase(req: HistoryTestCase,
         ID : req.historyCaseID
       })
     }
-    fetch('/server.Runner/DeleteHistoryTestCase', requestOptions)
+    fetch(`/api/v1/historyTestCase/${req.historyCaseID}`, requestOptions)
       .then(callback).catch(errHandle)
+}
+
+function DeleteAllHistoryTestCase(suiteName: string, caseName: string,
+    callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+    const requestOptions = {
+        method: 'DELETE',
+        headers: {
+            'X-Store-Name': Cache.GetCurrentStore().name,
+            'X-Auth': getToken()
+        },
+        body: JSON.stringify({
+            suiteName : suiteName,
+            caseName:  caseName,
+        })
+    }
+    fetch(`/api/v1/suites/${suiteName}/cases/${caseName}`, requestOptions)
+        .then(callback).catch(errHandle)
 }
 
 export const API = {
@@ -618,7 +627,7 @@ export const API = {
   GetVersion,
   CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,GetTestSuiteYaml,
   CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
-  GetHistoryTestCaseWithResult, DeleteHistoryTestCase, GetHistoryTestCase, GetTestCaseAllHistory,
+  GetHistoryTestCaseWithResult, DeleteHistoryTestCase, GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase,
   GenerateCode, ListCodeGenerator,
   PopularHeaders,
   CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,

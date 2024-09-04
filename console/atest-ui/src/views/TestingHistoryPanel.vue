@@ -80,7 +80,7 @@ function loadHistoryTestSuites(storeName: string) {
     },
   }
   return async () => {
-    await fetch('/server.Runner/GetHistorySuites', requestOptions)
+    await fetch('/api/v1/historySuites', requestOptions)
       .then((response) => response.json())
       .then((d) => {
         if (!d.data) {

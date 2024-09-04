@@ -187,6 +187,14 @@ func (g *gRPCLoader) DeleteHistoryTestCase(id string) (err error) {
 	return
 }
 
+func (g *gRPCLoader) DeleteAllHistoryTestCase(suite, name string) (err error) {
+	_, err = g.client.DeleteAllHistoryTestCase(g.ctx, &server.HistoryTestCase{
+		SuiteName: suite,
+		CaseName:  name,
+	})
+	return
+}
+
 func (g *gRPCLoader) GetTestCaseAllHistory(suite, name string) (historyTestcases []testing.HistoryTestCase, err error) {
 	var historyTestCases *server.HistoryTestCases
 	historyTestCases, err = g.client.GetTestCaseAllHistory(g.ctx, &server.TestCase{

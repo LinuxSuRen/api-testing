@@ -25,7 +25,8 @@
         "cancelFullScreen": "Cancel Full Screen",
         "viewHistory": "View History Test Case Result",
         "revert": "Revert",
-        "goToHistory": "Go to History"
+        "goToHistory": "Go to History",
+        "deleteAllHistory": "Delete All History"
     },
     "title": {
         "createTestSuite": "Create Test Suite",

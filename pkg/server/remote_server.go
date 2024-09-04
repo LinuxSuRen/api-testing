@@ -765,6 +765,14 @@ func (s *server) DeleteHistoryTestCase(ctx context.Context, in *HistoryTestCase)
 	return
 }
 
+func (s *server) DeleteAllHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HelloReply, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	reply = &HelloReply{}
+	err = loader.DeleteAllHistoryTestCase(in.SuiteName, in.CaseName)
+	return
+}
+
 func (s *server) DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate) (reply *HelloReply, err error) {
 	loader := s.getLoader(ctx)
 	defer loader.Close()

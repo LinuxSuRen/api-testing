@@ -25,7 +25,8 @@
         "cancelFullScreen": "取消全屏",
         "viewHistory": "查看历史记录",
         "revert": "回退",
-        "goToHistory": "跳转历史记录"
+        "goToHistory": "跳转历史记录",
+    "deleteAllHistory": "删除所有历史记录"
     },
     "title": {
         "createTestSuite": "创建测试用例集",
