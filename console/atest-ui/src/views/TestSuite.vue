@@ -103,9 +103,10 @@ const testcaseFormRef = ref<FormInstance>()
 const testCaseForm = reactive({
   suiteName: '',
   name: '',
-  api: '',
-  method: 'GET',
-  request: {}
+  request: {
+    api: '',
+    method: 'GET'
+  }
 })
 const rules = reactive<FormRules<Suite>>({
   name: [{ required: true, message: 'Please input TestCase name', trigger: 'blur' }]
@@ -380,7 +381,7 @@ const targetSuiteDuplicateName = ref('')
             v-if="suite.spec.kind !== 'tRPC' && suite.spec.kind !== 'gRPC'"
           >
             <el-select
-              v-model="testCaseForm.method"
+              v-model="testCaseForm.request.method"
               class="m-2"
               placeholder="Method"
               size="middle"
@@ -396,7 +397,7 @@ const targetSuiteDuplicateName = ref('')
           </el-form-item>
           <el-form-item label="API" prop="api">
             <el-autocomplete
-              v-model="testCaseForm.api"
+              v-model="testCaseForm.request.api"
               :fetch-suggestions="querySuggestedAPIs"
               @select="handleAPISelect"
               placeholder="API Address"
