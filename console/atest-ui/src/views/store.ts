@@ -30,7 +30,7 @@ const storeExtensions = [
     }, {
       key: 'targetpath'
     }, {
-      key: 'url'
+      key: 'branch'
     }, {
       key: 'email'
     }, {
