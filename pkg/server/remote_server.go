@@ -273,6 +273,21 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		fmt.Fprintln(buf, reply.Error)
 	}
 	reply.Message = buf.String()
+	// create history record
+	go func() {
+		loader := s.getLoader(ctx)
+		defer loader.Close()
+		for _, testCaseResult := range reply.TestCaseResult {
+			for i, item := range suite.Items {
+				suite.Items[i].Request.API = fmt.Sprintf("%s/%s", suite.API, item.Request.API)
+			}
+			err = loader.CreateHistoryTestCase(ToNormalTestCaseResult(testCaseResult), suite)
+			if err != nil {
+				remoteServerLogger.Info("error create history")
+			}
+		}
+	}()
+
 	return
 }
 
@@ -548,7 +563,6 @@ func (s *server) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase) (r
 	return
 }
 
-<<<<<<< HEAD
 var ExecutionCountNum = promauto.NewCounter(prometheus.CounterOpts{
 	Name: "atest_execution_count",
 	Help: "The total number of request execution",
@@ -648,20 +662,6 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 			result.Body = lastItem.Body
 			result.Header = lastItem.Header
 			result.StatusCode = lastItem.StatusCode
-		}
-
-		normalResult := ToNormalTestCaseResult(result)
-		var testSuite *testing.TestSuite
-		if testSuite, err = s.getSuiteFromTestTask(task); err != nil {
-			result = &TestCaseResult{
-				Error: err.Error(),
-			}
-		}
-		err = loader.CreateHistoryTestCase(normalResult, testSuite)
-		if err != nil {
-			result = &TestCaseResult{
-				Error: err.Error(),
-			}
 		}
 	}
 	return
