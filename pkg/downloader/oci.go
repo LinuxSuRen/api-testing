@@ -169,8 +169,11 @@ func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string
 	} else {
 		defer resp.Body.Close()
 
+		progressReader := NewProgressReader(resp.Body)
+		progressReader.SetLength(resp.ContentLength)
+
 		var data []byte
-		if data, err = io.ReadAll(resp.Body); err != nil {
+		if data, err = io.ReadAll(progressReader); err != nil {
 			return
 		}
 

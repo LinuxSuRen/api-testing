@@ -18,7 +18,6 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"os"
@@ -26,6 +25,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/downloader"
 	"github.com/linuxsuren/api-testing/pkg/logging"
@@ -124,6 +125,8 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 
 func (s *storeExtManager) startPlugin(socketURL, plugin, pluginName string) (err error) {
 	socketFile := strings.TrimPrefix(socketURL, s.socketPrefix)
+	_ = os.RemoveAll(socketFile) // always deleting the socket file to avoid start failing
+
 	s.filesNeedToBeRemoved = append(s.filesNeedToBeRemoved, socketFile)
 	s.extStatusMap[pluginName] = true
 	if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, s.processChan, "--socket", socketFile); err != nil {
