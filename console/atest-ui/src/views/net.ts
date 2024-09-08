@@ -622,12 +622,50 @@ function DeleteAllHistoryTestCase(suiteName: string, caseName: string,
         .then(callback).catch(errHandle)
 }
 
+function GetTestCaseAllHistory(req: TestCase,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      suiteName: req.suiteName,
+      name: req.name
+    })
+  }
+  fetch(`/api/v1/suites/${req.suiteName}/cases/${req.name}`, requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle)
+}
+
+function DownloadResponseFile(testcase,
+    callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'X-Store-Name': Cache.GetCurrentStore().name,
+            'X-Auth': getToken()
+        },
+        body: JSON.stringify({
+            response: {
+                body: testcase.body,
+            }
+        })
+    }
+    fetch(`/api/v1/downloadFile/${testcase.body}`, requestOptions)
+        .then(DefaultResponseProcess)
+        .then(callback).catch(errHandle)
+}
+
+
 export const API = {
   DefaultResponseProcess,
   GetVersion,
   CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,GetTestSuiteYaml,
   CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
-  GetHistoryTestCaseWithResult, DeleteHistoryTestCase, GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase,
+  GetHistoryTestCaseWithResult, DeleteHistoryTestCase,GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
   GenerateCode, ListCodeGenerator,
   PopularHeaders,
   CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,

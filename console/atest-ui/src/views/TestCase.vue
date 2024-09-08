@@ -98,8 +98,11 @@ const handleTestResult = (e) => {
   if (!isHistoryTestCase.value) {
     handleTestResultError(e)
   }
+  const isFilePath = e.body.startsWith("isFilePath-")
 
-  if (e.body !== '') {
+  if(isFilePath){
+    isResponseFile.value = true
+  } else if(e.body !== ''){
     testResult.value.bodyObject = JSON.parse(e.body);
     testResult.value.originBodyObject = JSON.parse(e.body);
   }
@@ -310,6 +313,33 @@ function determineBodyType(e) {
       }
     }
   });
+}
+
+const isResponseFile = ref(false)
+function downloadResponseFile(){
+  API.DownloadResponseFile({
+      body: testResult.value.body
+    }, (e) => {
+    if (e && e.data) {
+      try {
+      const bytes = atob(e.data);
+      const blob = new Blob([bytes], { type: 'mimeType' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = e.filename.substring("isFilePath-".length);
+
+      document.body.appendChild(link);
+      link.click();
+
+      window.URL.revokeObjectURL(link.href);
+      document.body.removeChild(link);
+      } catch (error) {
+        console.error('Error during file download:', error);
+      }
+    } else {
+      console.error('No data to download.');
+    }
+    })
 }
 
 function setDefaultValues(e) {
@@ -1157,10 +1187,20 @@ Magic.Keys(() => {
           <div v-if="testResult.bodyObject">
             <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
               clearable placeholder="$.key" />
-            <JsonViewer :value="testResult.bodyObject" :expand-depth="2" copyable boxed sort />
+            <JsonViewer :value="testResult.bodyObject" :expand-depth="5" copyable boxed sort />
           </div>
           <div v-else>
-            <Codemirror v-model="testResult.bodyText"/>
+            <Codemirror v-if="!isResponseFile" v-model="testResult.bodyText"/>
+            <div v-if="isResponseFile" style="padding-top: 10px;">
+            <el-row>
+              <el-col :span="8">
+                <div>Response body is too large, please download to view.</div>
+              </el-col>
+              <el-col :span="4">
+                <el-button type="primary" @click="downloadResponseFile">Download</el-button>
+              </el-col>
+            </el-row>
+          </div>
           </div>
         </el-tab-pane>
         <el-tab-pane name="response-header">

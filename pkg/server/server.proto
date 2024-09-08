@@ -204,6 +204,12 @@ service Runner {
       };
     }
 
+    rpc DownloadResponseFile(TestCase) returns (FileData) {
+      option (google.api.http) = {
+          post: "/api/v1/downloadFile/{response.body}"
+          body: "*"
+      };
+    }
     // stores related interfaces
     rpc GetStoreKinds(Empty) returns (StoreKinds) {
       option (google.api.http) = {
@@ -556,6 +562,12 @@ message PProfRequest {
 
 message PProfData {
   bytes data = 1;
+}
+
+message FileData {
+    bytes data = 1;
+    string content_type = 2;
+    string filename = 3;
 }
 
 message Empty {

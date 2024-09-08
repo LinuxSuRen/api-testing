@@ -50,7 +50,6 @@ type RunnerClient interface {
 	GetHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestCase, error)
 	DeleteHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteAllHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HelloReply, error)
-	RunHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*TestCaseResult, error)
 	GetTestCaseAllHistory(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*HistoryTestCases, error)
 	// code generator
 	ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
@@ -64,6 +63,7 @@ type RunnerClient interface {
 	FunctionsQueryStream(ctx context.Context, opts ...grpc.CallOption) (Runner_FunctionsQueryStreamClient, error)
 	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error)
 	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
+	DownloadResponseFile(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*FileData, error)
 	// stores related interfaces
 	GetStoreKinds(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*StoreKinds, error)
 	GetStores(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Stores, error)
@@ -317,15 +317,6 @@ func (c *runnerClient) DeleteAllHistoryTestCase(ctx context.Context, in *History
 	return out, nil
 }
 
-func (c *runnerClient) RunHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*TestCaseResult, error) {
-	out := new(TestCaseResult)
-	err := c.cc.Invoke(ctx, "/server.Runner/RunHistoryTestCase", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *runnerClient) GetTestCaseAllHistory(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*HistoryTestCases, error) {
 	out := new(HistoryTestCases)
 	err := c.cc.Invoke(ctx, "/server.Runner/GetTestCaseAllHistory", in, out, opts...)
@@ -432,6 +423,15 @@ func (c *runnerClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.C
 func (c *runnerClient) Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error) {
 	out := new(HelloReply)
 	err := c.cc.Invoke(ctx, "/server.Runner/Sample", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) DownloadResponseFile(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*FileData, error) {
+	out := new(FileData)
+	err := c.cc.Invoke(ctx, "/server.Runner/DownloadResponseFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -569,7 +569,6 @@ type RunnerServer interface {
 	GetHistoryTestCase(context.Context, *HistoryTestCase) (*HistoryTestCase, error)
 	DeleteHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error)
 	DeleteAllHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error)
-	RunHistoryTestCase(context.Context, *HistoryTestCase) (*TestCaseResult, error)
 	GetTestCaseAllHistory(context.Context, *TestCase) (*HistoryTestCases, error)
 	// code generator
 	ListCodeGenerator(context.Context, *Empty) (*SimpleList, error)
@@ -583,6 +582,7 @@ type RunnerServer interface {
 	FunctionsQueryStream(Runner_FunctionsQueryStreamServer) error
 	GetVersion(context.Context, *Empty) (*Version, error)
 	Sample(context.Context, *Empty) (*HelloReply, error)
+	DownloadResponseFile(context.Context, *TestCase) (*FileData, error)
 	// stores related interfaces
 	GetStoreKinds(context.Context, *Empty) (*StoreKinds, error)
 	GetStores(context.Context, *Empty) (*Stores, error)
@@ -673,9 +673,6 @@ func (UnimplementedRunnerServer) DeleteHistoryTestCase(context.Context, *History
 func (UnimplementedRunnerServer) DeleteAllHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAllHistoryTestCase not implemented")
 }
-func (UnimplementedRunnerServer) RunHistoryTestCase(context.Context, *HistoryTestCase) (*TestCaseResult, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RunHistoryTestCase not implemented")
-}
 func (UnimplementedRunnerServer) GetTestCaseAllHistory(context.Context, *TestCase) (*HistoryTestCases, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTestCaseAllHistory not implemented")
 }
@@ -705,6 +702,9 @@ func (UnimplementedRunnerServer) GetVersion(context.Context, *Empty) (*Version, 
 }
 func (UnimplementedRunnerServer) Sample(context.Context, *Empty) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sample not implemented")
+}
+func (UnimplementedRunnerServer) DownloadResponseFile(context.Context, *TestCase) (*FileData, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DownloadResponseFile not implemented")
 }
 func (UnimplementedRunnerServer) GetStoreKinds(context.Context, *Empty) (*StoreKinds, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStoreKinds not implemented")
@@ -1174,24 +1174,6 @@ func _Runner_DeleteAllHistoryTestCase_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Runner_RunHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HistoryTestCase)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).RunHistoryTestCase(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/server.Runner/RunHistoryTestCase",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).RunHistoryTestCase(ctx, req.(*HistoryTestCase))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Runner_GetTestCaseAllHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TestCase)
 	if err := dec(in); err != nil {
@@ -1376,6 +1358,24 @@ func _Runner_Sample_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).Sample(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_DownloadResponseFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).DownloadResponseFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/DownloadResponseFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).DownloadResponseFile(ctx, req.(*TestCase))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1674,10 +1674,6 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_DeleteAllHistoryTestCase_Handler,
 		},
 		{
-			MethodName: "RunHistoryTestCase",
-			Handler:    _Runner_RunHistoryTestCase_Handler,
-		},
-		{
 			MethodName: "GetTestCaseAllHistory",
 			Handler:    _Runner_GetTestCaseAllHistory_Handler,
 		},
@@ -1712,6 +1708,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Sample",
 			Handler:    _Runner_Sample_Handler,
+		},
+		{
+			MethodName: "DownloadResponseFile",
+			Handler:    _Runner_DownloadResponseFile_Handler,
 		},
 		{
 			MethodName: "GetStoreKinds",

@@ -22,8 +22,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"os"
+	"path/filepath"
 	reflect "reflect"
 	"regexp"
 	"strings"
@@ -252,6 +254,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
 		if getter, ok := suiteRunner.(runner.ResponseRecord); ok {
 			resp := getter.GetResponseRecord()
+			resp, err = handleLargeResponseBody(resp, suite.Name, testCase.Name)
 			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
 				StatusCode: int32(resp.StatusCode),
 				Body:       resp.Body,
@@ -289,6 +292,65 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 	}()
 
 	return
+}
+
+func handleLargeResponseBody(resp runner.SimpleResponse, suite string, caseName string) (reply runner.SimpleResponse, err error) {
+	const maxSize = 1024
+	prefix := "isFilePath-" + strings.Join([]string{suite, caseName}, "-")
+
+	if len(resp.Body) > maxSize {
+		tmpFile, err := os.CreateTemp("", prefix+"-")
+		defer tmpFile.Close()
+		if err != nil {
+			return resp, fmt.Errorf("failed to create file: %w", err)
+		}
+
+		if _, err = tmpFile.Write([]byte(resp.Body)); err != nil {
+			return resp, fmt.Errorf("failed to write response body to file: %w", err)
+		}
+		absFilePath, err := filepath.Abs(tmpFile.Name())
+		if err != nil {
+			return resp, fmt.Errorf("failed to get absolute file path: %w", err)
+		}
+		resp.Body = filepath.Base(absFilePath)
+		return resp, nil
+	}
+	return resp, nil
+}
+
+func (s *server) DownloadResponseFile(ctx context.Context, in *TestCase) (reply *FileData, err error) {
+	if in.Response != nil {
+		tempFileName := in.Response.Body
+		if tempFileName == "" {
+			return nil, errors.New("file name is empty")
+		}
+
+		tempDir := os.TempDir()
+		filePath := filepath.Join(tempDir, tempFileName)
+		if filepath.Clean(filePath) != filepath.Join(tempDir, filepath.Base(tempFileName)) {
+			return nil, errors.New("invalid file path")
+		}
+
+		fileContent, err := os.ReadFile(filePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read file: %s", filePath)
+		}
+
+		mimeType := mime.TypeByExtension(filepath.Ext(filePath))
+		if mimeType == "" {
+			mimeType = "application/octet-stream"
+		}
+
+		reply = &FileData{
+			Data:        fileContent,
+			ContentType: mimeType,
+			Filename:    filepath.Base(filePath),
+		}
+
+		return reply, nil
+	} else {
+		return reply, errors.New("response is empty")
+	}
 }
 
 func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
