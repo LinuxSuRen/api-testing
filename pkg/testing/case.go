@@ -50,7 +50,7 @@ type HistoryTestCase struct {
 	CaseName         string            `yaml:"caseName,omitempty" json:"name,omitempty"`
 	SuiteName        string            `yaml:"suiteName,omitempty" json:"suiteName,omitempty"`
 	HistorySuiteName string            `yaml:"historySuiteName,omitempty" json:"historySuiteName,omitempty"`
-	CreateTime       time.Time            `yaml:"createTime,omitempty" json:"createTime,omitempty"`
+	CreateTime       time.Time         `yaml:"createTime,omitempty" json:"createTime,omitempty"`
 	SuiteAPI         string            `yaml:"api,omitempty" json:"api,omitempty"`
 	SuiteSpec        APISpec           `yaml:"spec,omitempty" json:"spec,omitempty"`
 	SuiteParam       map[string]string `yaml:"param,omitempty" json:"param,omitempty"`
@@ -62,7 +62,7 @@ type HistoryTestResult struct {
 	Error          string           `yaml:"error,omitempty" json:"error,omitempty"`
 	TestCaseResult []TestCaseResult `yaml:"testCaseResult,omitempty" json:"testCaseResult,omitempty"`
 	Data           HistoryTestCase  `yaml:"data,omitempty" json:"data,omitempty"`
-	CreateTime     time.Time           `yaml:"createTime,omitempty" json:"createTime,omitempty"`
+	CreateTime     time.Time        `yaml:"createTime,omitempty" json:"createTime,omitempty"`
 }
 
 type RPCDesc struct {

@@ -239,44 +239,14 @@ func ToNormalTestCaseResult(testCaseResult *TestCaseResult) (result testing.Test
 }
 
 func ToGRPCHistoryTestCaseResult(historyTestResult testing.HistoryTestResult) (result *HistoryTestResult) {
-	res := historyTestResult.Data.Data.Request
-	resp := historyTestResult.Data.Data.Expect
-	
+	convertedHistoryTestCase := ConvertToGRPCHistoryTestCase(historyTestResult.Data)
+
 	result = &HistoryTestResult{
 		Message:    historyTestResult.Message,
 		Error:      historyTestResult.Error,
 		CreateTime: timestamppb.New(historyTestResult.CreateTime),
-
-		Data: &HistoryTestCase{
-			HistorySuiteName: historyTestResult.Data.HistorySuiteName,
-			CaseName:         historyTestResult.Data.CaseName,
-			CreateTime:       timestamppb.New(historyTestResult.CreateTime),
-			SuiteName:        historyTestResult.Data.SuiteName,
-			SuiteApi:         historyTestResult.Data.SuiteAPI,
-			SuiteParam:       mapToPair(historyTestResult.Data.SuiteParam),
-
-			Request: &Request{
-				Api:    res.API,
-				Method: res.Method,
-				Body:   res.Body.String(),
-				Header: mapToPair(res.Header),
-				Cookie: mapToPair(res.Cookie),
-				Query:  mapInterToPair(res.Query),
-				Form:   mapToPair(res.Form),
-			},
-
-			Response: &Response{
-				StatusCode:       int32(resp.StatusCode),
-				Body:             resp.Body,
-				Schema:           resp.Schema,
-				Verify:           resp.Verify,
-				BodyFieldsExpect: mapInterToPair(resp.BodyFieldsExpect),
-				Header:           mapToPair(resp.Header),
-			},
-		},
+		Data:       convertedHistoryTestCase,
 	}
-
-	result.Data.SuiteSpec = ToGRPCTestSuiteSpec(historyTestResult.Data.SuiteSpec)
 
 	for _, testCaseResult := range historyTestResult.TestCaseResult {
 		result.TestCaseResult = append(result.TestCaseResult, &TestCaseResult{
@@ -288,7 +258,8 @@ func ToGRPCHistoryTestCaseResult(historyTestResult testing.HistoryTestResult) (r
 			Id:         testCaseResult.Id,
 		})
 	}
-	return
+
+	return result
 }
 
 func ToGRPCTestSuiteSpec(spec testing.APISpec) (result *APISpec) {

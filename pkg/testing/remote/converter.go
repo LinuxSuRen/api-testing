@@ -300,7 +300,7 @@ func pairToInterMap(pairs []*server.Pair) (data map[string]interface{}) {
 	return
 }
 
-func ConvertToGRPCTestCaseResult(testCaseResult testing.TestCaseResult, testSuite *testing.TestSuite) (result *server.HistoryTestResult) {
+func ConvertToGRPCHistoryTestCaseResult(testCaseResult testing.TestCaseResult, testSuite *testing.TestSuite) (result *server.HistoryTestResult) {
 	result = &server.HistoryTestResult{
 		Error:      testCaseResult.Error,
 		CreateTime: timestamppb.New(time.Now()),
@@ -340,7 +340,7 @@ func ConvertToNormalTestCaseResult(testResult *server.HistoryTestResult) (result
 	}
 
 	for _, testCaseResult := range testResult.TestCaseResult {
-		testCaseResult := testing.TestCaseResult{
+		testcaseResult := testing.TestCaseResult{
 			StatusCode: int(testCaseResult.StatusCode),
 			Body:       testCaseResult.Body,
 			Header:     pairToMap(testCaseResult.Header),
@@ -348,7 +348,7 @@ func ConvertToNormalTestCaseResult(testResult *server.HistoryTestResult) (result
 			Id:         testCaseResult.Id,
 			Output:     testCaseResult.Output,
 		}
-		result.TestCaseResult = append(result.TestCaseResult, testCaseResult)
+		result.TestCaseResult = append(result.TestCaseResult, testcaseResult)
 	}
 	result.Data = ConvertToNormalHistoryTestCase(testResult.Data)
 

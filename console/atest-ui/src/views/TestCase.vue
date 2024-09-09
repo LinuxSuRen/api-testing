@@ -838,6 +838,7 @@ Magic.Keys(() => {
           placeholder="Method"
           size="default"
           test-id="case-editor-method"
+          :disabled="isHistoryTestCase"
         >
           <el-option
             v-for="item in options"
@@ -1109,7 +1110,7 @@ Magic.Keys(() => {
         </template>
       </el-drawer>
 
-      <el-dialog v-model="historyDialogOpened" :title="t('button.viewHistory')" width="50%" draggable>
+      <el-dialog v-model="historyDialogOpened" :title="t('button.viewHistory')" width="60%" draggable>
         <el-form
           ref="viewHistoryRef"
           :model="historyForm"
@@ -1137,7 +1138,7 @@ Magic.Keys(() => {
                 </el-select>
               </el-col>
               <el-col :span="4">
-              <div style="display: flex">
+              <div style="display: flex;flex-wrap: nowrap;justify-content: flex-end;">
                 <el-button
                   type="primary"
                   @click="submitForm(viewHistoryRef)"
