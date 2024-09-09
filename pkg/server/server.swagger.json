@@ -77,6 +77,38 @@
         ]
       }
     },
+    "/api/v1/codeGenerators/history/generate": {
+      "post": {
+        "operationId": "Runner_HistoryGenerateCode",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverCodeGenerateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
     "/api/v1/converters": {
       "get": {
         "summary": "converter",
@@ -2545,6 +2577,9 @@
           "type": "string"
         },
         "Generator": {
+          "type": "string"
+        },
+        "ID": {
           "type": "string"
         }
       }

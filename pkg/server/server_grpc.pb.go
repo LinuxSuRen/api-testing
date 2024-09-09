@@ -54,6 +54,7 @@ type RunnerClient interface {
 	// code generator
 	ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
+	HistoryGenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
 	// converter
 	ListConverter(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
@@ -344,6 +345,15 @@ func (c *runnerClient) GenerateCode(ctx context.Context, in *CodeGenerateRequest
 	return out, nil
 }
 
+func (c *runnerClient) HistoryGenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/HistoryGenerateCode", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) ListConverter(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error) {
 	out := new(SimpleList)
 	err := c.cc.Invoke(ctx, "/server.Runner/ListConverter", in, out, opts...)
@@ -573,6 +583,7 @@ type RunnerServer interface {
 	// code generator
 	ListCodeGenerator(context.Context, *Empty) (*SimpleList, error)
 	GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error)
+	HistoryGenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error)
 	// converter
 	ListConverter(context.Context, *Empty) (*SimpleList, error)
 	ConvertTestSuite(context.Context, *CodeGenerateRequest) (*CommonResult, error)
@@ -681,6 +692,9 @@ func (UnimplementedRunnerServer) ListCodeGenerator(context.Context, *Empty) (*Si
 }
 func (UnimplementedRunnerServer) GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateCode not implemented")
+}
+func (UnimplementedRunnerServer) HistoryGenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HistoryGenerateCode not implemented")
 }
 func (UnimplementedRunnerServer) ListConverter(context.Context, *Empty) (*SimpleList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListConverter not implemented")
@@ -1228,6 +1242,24 @@ func _Runner_GenerateCode_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_HistoryGenerateCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CodeGenerateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).HistoryGenerateCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/HistoryGenerateCode",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).HistoryGenerateCode(ctx, req.(*CodeGenerateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_ListConverter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
@@ -1684,6 +1716,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateCode",
 			Handler:    _Runner_GenerateCode_Handler,
+		},
+		{
+			MethodName: "HistoryGenerateCode",
+			Handler:    _Runner_HistoryGenerateCode_Handler,
 		},
 		{
 			MethodName: "ListConverter",

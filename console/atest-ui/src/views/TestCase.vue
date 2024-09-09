@@ -160,22 +160,40 @@ function sendRequestWithParameter() {
 function generateCode() {
   const name = props.name
   const suite = props.suite
+  const ID = props.historyCaseID
+  if (isHistoryTestCase.value == true){
+    API.HistoryGenerateCode({
+      ID: ID,
+      generator: currentCodeGenerator.value
+    }, (e) => {
+      ElMessage({
+        message: 'Code generated!',
+        type: 'success'
+      })
+      if (currentCodeGenerator.value === "gRPCPayload") {
+        currentCodeContent.value = JSON.stringify(JSON.parse(e.message), null, 4)
+      } else {
+        currentCodeContent.value = e.message
+      }
+    }, UIAPI.ErrorTip)
+  } else{
+    API.GenerateCode({
+      suiteName: suite,
+      name: name,
+      generator: currentCodeGenerator.value
+    }, (e) => {
+      ElMessage({
+        message: 'Code generated!',
+        type: 'success'
+      })
+      if (currentCodeGenerator.value === "gRPCPayload") {
+        currentCodeContent.value = JSON.stringify(JSON.parse(e.message), null, 4)
+      } else {
+        currentCodeContent.value = e.message
+      }
+    }, UIAPI.ErrorTip)
+  }
 
-  API.GenerateCode({
-    suiteName: suite,
-    name: name,
-    generator: currentCodeGenerator.value
-  }, (e) => {
-    ElMessage({
-      message: 'Code generated!',
-      type: 'success'
-    })
-    if (currentCodeGenerator.value === "gRPCPayload") {
-      currentCodeContent.value = JSON.stringify(JSON.parse(e.message), null, 4)
-    } else {
-      currentCodeContent.value = e.message
-    }
-  }, UIAPI.ErrorTip)
 }
 
 function copyCode() {

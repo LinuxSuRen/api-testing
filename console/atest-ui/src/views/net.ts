@@ -326,6 +326,7 @@ interface GenerateRequest {
   suiteName: string
   name: string
   generator: string
+  id: string
 }
 
 function GenerateCode(request: GenerateRequest,
@@ -337,12 +338,30 @@ function GenerateCode(request: GenerateRequest,
       'X-Auth': getToken()
     },
     body: JSON.stringify({
-      TestSuite: request.suiteName,
-      TestCase: request.name,
-      Generator: request.generator
+        TestSuite: request.suiteName,
+        TestCase: request.name,
+        Generator: request.generator
     })
   }
   fetch(`/api/v1/codeGenerators/generate`, requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle)
+}
+
+function HistoryGenerateCode(request: GenerateRequest,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      ID: request.ID,
+      Generator: request.generator
+    })
+  }
+  fetch(`/api/v1/codeGenerators/history/generate`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(errHandle)
 }
@@ -666,7 +685,7 @@ export const API = {
   CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,GetTestSuiteYaml,
   CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
   GetHistoryTestCaseWithResult, DeleteHistoryTestCase,GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
-  GenerateCode, ListCodeGenerator,
+  GenerateCode, ListCodeGenerator, HistoryGenerateCode,
   PopularHeaders,
   CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
   FunctionsQuery,

@@ -148,6 +148,7 @@ func ConvertToNormalHistoryTestCase(testcase *server.HistoryTestCase) (result te
 		SuiteSpec:  ConvertToNormalTestSuiteSpec(testcase.SuiteSpec),
 		CreateTime: testcase.CreateTime.AsTime(),
 	}
+	result.Data.Name = testcase.CaseName
 	if testcase.Request != nil {
 		result.Data.Request = testing.Request{
 			API:    testcase.Request.Api,
@@ -174,7 +175,7 @@ func ConvertToNormalHistoryTestCase(testcase *server.HistoryTestCase) (result te
 func ConvertHistoryToGRPCTestCase(historyTestcase *server.HistoryTestCase) (result testing.TestCase) {
 	result = testing.TestCase{
 		Name: historyTestcase.CaseName,
-		ID: historyTestcase.ID,
+		ID:   historyTestcase.ID,
 	}
 	if historyTestcase.Request != nil {
 		result.Request = testing.Request{

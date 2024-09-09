@@ -898,6 +898,31 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 	return
 }
 
+func (s *server) HistoryGenerateCode(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
+	reply = &CommonResult{}
+	instance := generator.GetCodeGenerator(in.Generator)
+	if instance == nil {
+		reply.Success = false
+		reply.Message = fmt.Sprintf("generator '%s' not found", in.Generator)
+	} else {
+		loader := s.getLoader(ctx)
+		var result testing.HistoryTestCase
+		result, err = loader.GetHistoryTestCase(in.ID)
+		var testCase testing.TestCase
+		var suite testing.TestSuite
+		testCase = result.Data
+		suite.Name = result.SuiteName
+		suite.API = result.SuiteAPI
+		suite.Spec = result.SuiteSpec
+		suite.Param = result.SuiteParam
+
+		output, genErr := instance.Generate(&suite, &testCase)
+		reply.Success = genErr == nil
+		reply.Message = util.OrErrorMessage(genErr, output)
+	}
+	return
+}
+
 // converter
 func (s *server) ListConverter(ctx context.Context, in *Empty) (reply *SimpleList, err error) {
 	reply = &SimpleList{}

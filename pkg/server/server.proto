@@ -163,6 +163,12 @@ service Runner {
             body: "*"
         };
     }
+    rpc HistoryGenerateCode(CodeGenerateRequest)  returns (CommonResult) {
+      option (google.api.http) = {
+          post: "/api/v1/codeGenerators/history/generate"
+          body: "*"
+      };
+  }
 
     // converter
     rpc ListConverter(Empty) returns (SimpleList) {
@@ -537,6 +543,7 @@ message CodeGenerateRequest {
   string TestSuite = 1;
   string TestCase = 2;
   string Generator = 3;
+  string ID = 4;
 }
 
 message Secrets {
