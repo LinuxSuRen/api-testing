@@ -72,6 +72,7 @@ func (r ReportResultSlice) Swap(i, j int) {
 
 type simpleTestCaseRunner struct {
 	UnimplementedRunner
+	log             LevelWriter
 	simpleResponse  SimpleResponse
 	cookies         []*http.Cookie
 	apiSuggestLimit int
@@ -79,13 +80,14 @@ type simpleTestCaseRunner struct {
 
 // NewSimpleTestCaseRunner creates the instance of the simple test case runner
 func NewSimpleTestCaseRunner() TestCaseRunner {
-	runner := &simpleTestCaseRunner{
+
+	return &simpleTestCaseRunner{
 		UnimplementedRunner: NewDefaultUnimplementedRunner(),
+		log:                 NewDefaultLevelWriter("info", io.Discard),
 		simpleResponse:      SimpleResponse{},
 		cookies:             []*http.Cookie{},
 		apiSuggestLimit:     10,
 	}
-	return runner
 }
 
 func init() {
@@ -117,6 +119,10 @@ func (c ContextKey) GetContextValueOrEmpty(ctx context.Context) string {
 
 // RunTestCase is the main entry point of a test case
 func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext interface{}, ctx context.Context) (output interface{}, err error) {
+
+	// add log debug level output
+	r.log.Debug("Simple Http request infos: %v\n", testcase.Request)
+
 	r.log.Info("start to run: '%s'\n", testcase.Name)
 	record := NewReportRecord()
 	defer func(rr *ReportRecord) {

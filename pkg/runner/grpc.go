@@ -56,7 +56,7 @@ import (
 )
 
 var (
-	grpcRunnerLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("memory")
+	grpcRunnerLogger = logging.DefaultLogger(logging.LogLevelDebug).WithName("GRPCRunner")
 )
 
 type gRPCTestCaseRunner struct {
@@ -71,13 +71,13 @@ var regexFullQualifiedName = regexp.MustCompile(`^([\w\.:]+)\/([\w\.]+)\/(\w+)$`
 var regexURLPrefix = regexp.MustCompile(`^https?://`)
 
 func NewGRPCTestCaseRunner(host string, proto testing.RPCDesc) TestCaseRunner {
-	runner := &gRPCTestCaseRunner{
+
+	return &gRPCTestCaseRunner{
 		UnimplementedRunner: NewDefaultUnimplementedRunner(),
 		host:                host,
 		proto:               proto,
 		response:            SimpleResponse{},
 	}
-	return runner
 }
 
 func init() {
@@ -134,9 +134,13 @@ func (r *gRPCTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataContext
 
 	// pass the headers into gRPC request metadata
 	ctx = metadata.NewOutgoingContext(ctx, metadata.New(testcase.Request.Header))
+	payload := testcase.Request.Body.String()
 
-	payload := testcase.Request.Body
-	respsStr, err := invokeRequest(ctx, md, payload.String(), conn)
+	// add log debug level output
+	r.log.Debug("request infos: %v\n", testcase.Request)
+
+	respsStr, err := invokeRequest(ctx, md, payload, conn)
+
 	if err != nil {
 		return nil, err
 	}

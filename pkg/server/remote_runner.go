@@ -33,7 +33,8 @@ type remoteRunnerAdapter struct {
 }
 
 func (s *remoteRunnerAdapter) RunTestCase(testcase *testing.TestCase,
-	dataContext interface{}, ctx context.Context) (output interface{}, err error) {
+	ctx context.Context) (output interface{}, err error) {
+
 	var conn *grpc.ClientConn
 	if conn, err = grpc.Dial(s.address, grpc.WithInsecure()); err != nil {
 		return

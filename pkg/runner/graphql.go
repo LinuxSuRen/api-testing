@@ -18,6 +18,7 @@ package runner
 
 import (
 	"context"
+	"io"
 	"net/http"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -25,11 +26,13 @@ import (
 )
 
 type graphql struct {
+	log LevelWriter
 	TestCaseRunner
 }
 
 func NewGraphQLRunner(parent TestCaseRunner) TestCaseRunner {
 	return &graphql{
+		log:            NewDefaultLevelWriter("info", io.Discard),
 		TestCaseRunner: parent,
 	}
 }
@@ -43,6 +46,9 @@ func init() {
 func (r *graphql) RunTestCase(testcase *testing.TestCase, dataContext any, ctx context.Context) (
 	output any, err error) {
 	testcase.Request.Method = http.MethodPost
+
+	// add logo debug output
+	r.log.Debug("GraphQL request test: %v\n", testcase.Request)
 
 	if testcase.Request.Header == nil {
 		testcase.Request.Header = make(map[string]string, 1)

@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
+	"io"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
@@ -102,11 +103,13 @@ func DeepCopy(src, dist interface{}) (err error) {
 }
 
 type reverseHTTPRunner struct {
+	log LevelWriter
 	TestCaseRunner
 }
 
 func NewReverseHTTPRunner(normal TestCaseRunner) TestCaseRunner {
 	return &reverseHTTPRunner{
+		log:            NewDefaultLevelWriter("info", io.Discard),
 		TestCaseRunner: normal,
 	}
 }
@@ -136,6 +139,9 @@ func (r *reverseHTTPRunner) RunTestCase(testcase *testing.TestCase, dataContext 
 			})
 		}
 	}
+
+	// 	// add log debug level output
+	r.log.Debug("Http request infos: %v\n", testcase.Request)
 
 	for _, mutator := range mutators {
 		mutationCase := mutator.Render(testcase)
