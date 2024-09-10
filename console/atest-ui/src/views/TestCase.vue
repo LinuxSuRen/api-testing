@@ -559,10 +559,10 @@ Magic.Keys(() => {
   <el-container>
     <el-header style="padding-left: 5px;">
       <div style="margin-bottom: 5px">
-        <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
+        <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
           disabled v-if="Cache.GetCurrentStore().readOnly"
           >{{ t('button.save') }}</el-button>
-        <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
+        <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
           v-if="!Cache.GetCurrentStore().readOnly"
           >{{ t('button.save') }}</el-button>
         <el-button type="danger" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
@@ -597,7 +597,7 @@ Magic.Keys(() => {
           </template>
         </el-autocomplete>
 
-        <el-dropdown split-button type="primary" @click="sendRequest" :loading="requestLoading">
+        <el-dropdown split-button type="primary" @click="sendRequest" v-loading="requestLoading">
           {{ t('button.send') }}
             <template #dropdown>
               <el-dropdown-menu>

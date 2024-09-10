@@ -414,7 +414,7 @@ const targetSuiteDuplicateName = ref('')
             <el-button
               type="primary"
               @click="submitForm(testcaseFormRef)"
-              :loading="suiteCreatingLoading"
+              v-loading="suiteCreatingLoading"
               test-id="case-form-submit"
               >{{ t('button.submit') }}</el-button
             >

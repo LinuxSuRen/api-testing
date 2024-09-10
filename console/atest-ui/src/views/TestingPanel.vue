@@ -453,7 +453,7 @@ const suiteKinds = [{
             <el-button
               type="primary"
               @click="submitForm(suiteFormRef)"
-              :loading="suiteCreatingLoading"
+              v-loading="suiteCreatingLoading"
               test-id="suite-form-submit"
               >{{ t('button.submit') }}</el-button
             >
