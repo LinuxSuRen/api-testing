@@ -107,7 +107,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
             <el-button
               type="primary"
               @click="submitForm(secretFormRef)"
-              :loading="creatingLoading"
+              v-loading="creatingLoading"
               test-id="store-form-submit"
               >{{t('button.submit')}}</el-button
             >

@@ -316,7 +316,7 @@ function updateKeys() {
             <el-button
               type="primary"
               @click="submitForm(storeFormRef)"
-              :loading="creatingLoading"
+              v-loading="creatingLoading"
               test-id="store-form-submit"
               >{{t('button.submit')}}</el-button
             >
