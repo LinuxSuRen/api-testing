@@ -87,6 +87,27 @@ func TestNewGRPCLoader(t *testing.T) {
 		err = writer.DeleteSuite("")
 		assert.Error(t, err)
 
+		_, err = writer.ListHistoryTestSuite()
+		assert.Error(t, err)
+
+		err = writer.CreateHistoryTestCase(atest.TestCaseResult{}, &atest.TestSuite{})
+		assert.Error(t, err)
+
+		_, err = writer.GetHistoryTestCase("")
+		assert.Error(t, err)
+
+		_, err = writer.GetHistoryTestCaseWithResult("")
+		assert.Error(t, err)
+
+		_, err = writer.GetTestCaseAllHistory("", "")
+		assert.Error(t, err)
+
+		err = writer.DeleteHistoryTestCase("")
+		assert.Error(t, err)
+
+		err = writer.DeleteAllHistoryTestCase("", "")
+		assert.Error(t, err)
+
 		var readonly bool
 		readonly, err = writer.Verify()
 		assert.Error(t, err)

@@ -17,7 +17,9 @@ limitations under the License.
 package remote
 
 import (
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
+	"time"
 
 	server "github.com/linuxsuren/api-testing/pkg/server"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
@@ -25,6 +27,7 @@ import (
 )
 
 func TestConvert(t *testing.T) {
+	now := time.Now().UTC()
 	t.Run("convertToNormalTestSuite, empty object", func(t *testing.T) {
 		assert.Equal(t, &atest.TestSuite{
 			Param: map[string]string{},
@@ -122,6 +125,211 @@ func TestConvert(t *testing.T) {
 		}
 		assert.Equal(t, defaultPairs, result.Response.BodyFieldsExpect)
 		assert.Equal(t, defaultPairs, result.Response.Header)
+	})
+
+	t.Run("convertHistoryToGRPCTestCase", func(t *testing.T) {
+		result := ConvertHistoryToGRPCTestCase(&server.HistoryTestCase{
+			CaseName: "fake",
+			Request: &server.Request{
+				Header: defaultPairs,
+			},
+			Response: &server.Response{
+				BodyFieldsExpect: defaultPairs,
+			},
+		})
+		if !assert.NotNil(t, result) {
+			return
+		}
+		assert.Equal(t, defaultMap, result.Request.Header)
+		assert.Equal(t, defaultInterMap, result.Expect.BodyFieldsExpect)
+		assert.Equal(t, "fake", result.Name)
+	})
+
+	t.Run("convertToNormalHistoryTestCase", func(t *testing.T) {
+		assert.Equal(t, atest.HistoryTestCase{
+			CreateTime: now,
+			SuiteParam: defaultMap,
+			SuiteSpec: atest.APISpec{
+				Kind: "http",
+				URL:  "/v1",
+				RPC: &atest.RPCDesc{
+					Raw: "fake",
+				},
+				Secure: &atest.Secure{
+					KeyFile: "fake",
+				},
+			},
+			Data: atest.TestCase{
+				Request: atest.Request{
+					API:    "/v1",
+					Header: defaultMap,
+					Query:  map[string]interface{}{},
+					Form:   map[string]string{},
+				},
+				Expect: atest.Response{
+					BodyFieldsExpect: defaultInterMap,
+					Header:           map[string]string{},
+				},
+			},
+		}, ConvertToNormalHistoryTestCase(&server.HistoryTestCase{
+			CreateTime: timestamppb.New(now),
+			SuiteParam: defaultPairs,
+			SuiteSpec: &server.APISpec{
+				Url:  "/v1",
+				Kind: "http",
+				Rpc: &server.RPC{
+					Raw: "fake",
+				},
+				Secure: &server.Secure{
+					Key: "fake",
+				},
+			},
+			Request: &server.Request{
+				Header: defaultPairs,
+				Query:  nil,
+				Api:    "/v1",
+			},
+			Response: &server.Response{
+				BodyFieldsExpect: defaultPairs,
+			},
+		}))
+	})
+
+	t.Run("convertToNormalHistoryTestSuite, empty object", func(t *testing.T) {
+		assert.Equal(t, &atest.HistoryTestSuite{}, ConvertToNormalHistoryTestSuite(&HistoryTestSuite{}))
+	})
+
+	t.Run("convertToNormalHistoryTestSuite, normal object", func(t *testing.T) {
+		assert.Equal(t, &atest.HistoryTestSuite{
+			HistorySuiteName: "fake",
+			Items: []atest.HistoryTestCase{
+				{
+					CreateTime: now,
+					SuiteParam: defaultMap,
+					SuiteSpec: atest.APISpec{
+						Kind: "http",
+						URL:  "/v1",
+						RPC: &atest.RPCDesc{
+							Raw: "fake",
+						},
+						Secure: &atest.Secure{
+							KeyFile: "fake",
+						},
+					},
+				},
+			},
+		}, ConvertToNormalHistoryTestSuite(&HistoryTestSuite{
+			HistorySuiteName: "fake",
+			Items: []*server.HistoryTestCase{
+				{
+					CreateTime: timestamppb.New(now),
+					SuiteParam: defaultPairs,
+					SuiteSpec: &server.APISpec{
+						Url:  "/v1",
+						Kind: "http",
+						Rpc: &server.RPC{
+							Raw: "fake",
+						},
+						Secure: &server.Secure{
+							Key: "fake",
+						},
+					},
+				},
+			},
+		}))
+	})
+
+	t.Run("convertToGRPCHistoryTestCase", func(t *testing.T) {
+		result := ConvertToGRPCHistoryTestCase(atest.HistoryTestCase{
+			SuiteParam: defaultMap,
+			SuiteSpec: atest.APISpec{
+				Secure: &atest.Secure{
+					KeyFile: "fake",
+				},
+			},
+			Data: atest.TestCase{
+				Request: atest.Request{
+					Header: defaultMap,
+				},
+				Expect: atest.Response{
+					BodyFieldsExpect: defaultInterMap,
+				},
+			},
+		})
+		assert.Equal(t, defaultPairs, result.SuiteParam)
+		assert.Equal(t, defaultPairs, result.Request.Header)
+		assert.Equal(t, defaultPairs, result.Response.BodyFieldsExpect)
+		assert.Equal(t, "fake", result.SuiteSpec.Secure.Key)
+	})
+
+	t.Run("convertToGRPCHistoryTestCaseResult", func(t *testing.T) {
+		result := ConvertToGRPCHistoryTestCaseResult(atest.TestCaseResult{
+			Body:   "fake body",
+			Output: "fake output",
+		}, &atest.TestSuite{
+			Param: defaultMap,
+			Spec: atest.APISpec{
+				Secure: &atest.Secure{
+					KeyFile: "fake",
+				},
+			},
+			Items: []atest.TestCase{
+				{
+					Request: atest.Request{
+						Header: defaultMap,
+					},
+					Expect: atest.Response{
+						BodyFieldsExpect: defaultInterMap,
+					},
+				},
+			},
+		})
+		assert.Equal(t, defaultPairs, result.Data.SuiteParam)
+		assert.Equal(t, defaultPairs, result.Data.Request.Header)
+		assert.Equal(t, defaultPairs, result.Data.Response.BodyFieldsExpect)
+		assert.Equal(t, "fake", result.Data.SuiteSpec.Secure.Key)
+		assert.Equal(t, "fake output", result.TestCaseResult[0].Output)
+		assert.Equal(t, "fake body", result.TestCaseResult[0].Body)
+	})
+
+	t.Run("convertToNormalTestCaseResult", func(t *testing.T) {
+		assert.Equal(t, atest.HistoryTestResult{
+			CreateTime: now,
+			Data: atest.HistoryTestCase{
+				SuiteParam: defaultMap,
+				CreateTime: now,
+			},
+			TestCaseResult: []atest.TestCaseResult{
+				{
+					Body:   "fake body",
+					Output: "fake output",
+					Header: defaultMap,
+				},
+				{
+					Body:   "fake body 2",
+					Output: "fake output 2",
+					Header: defaultMap,
+				},
+			},
+		}, ConvertToNormalTestCaseResult(&server.HistoryTestResult{
+			CreateTime: timestamppb.New(now),
+			Data: &server.HistoryTestCase{
+				SuiteParam: defaultPairs,
+				CreateTime: timestamppb.New(now),
+			},
+			TestCaseResult: []*server.TestCaseResult{
+				{
+					Body:   "fake body",
+					Output: "fake output",
+					Header: defaultPairs,
+				},
+				{
+					Body:   "fake body 2",
+					Output: "fake output 2",
+					Header: defaultPairs,
+				},
+			},
+		}))
 	})
 }
 
