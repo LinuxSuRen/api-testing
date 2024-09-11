@@ -15,13 +15,15 @@ limitations under the License.
 */
 import { Cache } from './cache'
 
-function DefaultResponseProcess(response: any) {
+async function DefaultResponseProcess(response: any) {
   if (!response.ok) {
     switch (response.status) {
       case 401:
         throw new Error("Unauthenticated")
     }
-    throw new Error(response.statusText)
+
+    const message = await response.json().then((data :any) => data.message)
+    throw new Error(message)
   } else {
     return response.json()
   }

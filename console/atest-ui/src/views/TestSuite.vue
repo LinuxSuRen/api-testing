@@ -131,6 +131,9 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         }, () => {
           suiteCreatingLoading.value = false
           emit('updated', props.name, testCaseForm.name)
+        }, (e) => {
+          suiteCreatingLoading.value = false
+          ElMessage.error('Oops, ' + e)
         }
       )
 

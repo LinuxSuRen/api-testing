@@ -349,7 +349,15 @@ func (l *fileLoader) GetTestCase(suite, name string) (testcase TestCase, err err
 	return
 }
 
-func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err error) {
+func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) error {
+	return l.createOrUpdate(suiteName, testcase, false)
+}
+
+func (l *fileLoader) UpdateTestCase(suite string, testcase TestCase) error {
+	return l.createOrUpdate(suite, testcase, true)
+}
+
+func (l *fileLoader) createOrUpdate(suiteName string, testcase TestCase, update bool) (err error) {
 	var suite *TestSuite
 	var suiteFilepath string
 	for i := range l.paths {
@@ -377,18 +385,14 @@ func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err er
 
 		if !found {
 			suite.Items = append(suite.Items, testcase)
+		} else if !update {
+			err = fmt.Errorf("test case %s already exists", testcase.Name)
+			return
 		}
-
 		err = SaveTestSuiteToFile(suite, suiteFilepath)
 	}
 	return
 }
-
-func (l *fileLoader) UpdateTestCase(suite string, testcase TestCase) (err error) {
-	err = l.CreateTestCase(suite, testcase)
-	return
-}
-
 func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 	var suite *TestSuite
 	var suiteFilepath string
