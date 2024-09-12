@@ -357,7 +357,7 @@ function HistoryGenerateCode(request: GenerateRequest,
       'X-Auth': getToken()
     },
     body: JSON.stringify({
-      ID: request.ID,
+      ID: request.id,
       Generator: request.generator
     })
   }

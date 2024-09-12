@@ -429,7 +429,7 @@ func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 	return
 }
 
-func (l *fileLoader) CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite) (err error) { // always be okay
+func (l *fileLoader) CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite, historyHeader map[string]string ) (err error) { // always be okay
 	return
 }
 

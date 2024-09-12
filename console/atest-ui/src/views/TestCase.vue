@@ -163,7 +163,7 @@ function generateCode() {
   const ID = props.historyCaseID
   if (isHistoryTestCase.value == true){
     API.HistoryGenerateCode({
-      ID: ID,
+      id: ID,
       generator: currentCodeGenerator.value
     }, (e) => {
       ElMessage({
@@ -401,6 +401,9 @@ function setTestCaseWithSuite(e, suite) {
     suiteName: suite,
     data: e
   } as TestCaseWithSuite;
+    if (isHistoryTestCase.value == true){ 
+      testCaseWithSuite.value.data.request.api = `${testCaseWithSuite.value.data.suiteApi}${testCaseWithSuite.value.data.request.api}` 
+    }
 }
 
 load()
@@ -515,14 +518,28 @@ function openHistoryDialog(){
   })
 }
 
+function handleDialogClose(){
+  caseRevertLoading.value = false
+  historyDialogOpened.value = false
+  historyForm.value.selectedID = ''
+  const target = document.getElementById('compareView');
+  target.innerHTML = ''
+}
+
 function handleHistoryChange(value) {
   selectedHistory.value = historyRecords.value.find(record => record.ID === value);
   const {
   caseName: name,
   suiteName,
   request,
-  response
+  response,
+  historyHeader,
   } = selectedHistory.value;
+  request.header = historyHeader
+  request.header.push({
+        key: '',
+        value: ''
+  })
   formatHistoryCase.value = {
     name,
     suiteName,
@@ -573,11 +590,7 @@ const submitForm = async (formEl) => {
           load()
         }
       }, UIAPI.ErrorTip, saveLoading)
-      caseRevertLoading.value = false
-      historyDialogOpened.value = false
-      historyForm.value.selectedID = ''
-      const target = document.getElementById('compareView');
-      target.innerHTML = '';
+      handleDialogClose()
     }
   })
 }
@@ -587,12 +600,8 @@ const goToHistory = async (formEl) => {
   await formEl.validate((valid: boolean, fields) => {
     if (valid) {
       caseRevertLoading.value = true
-      emit('toHistoryPanel', { ID: selectedHistory.value.ID, panelName: 'history' });
-      caseRevertLoading.value = false
-      historyDialogOpened.value = false
-      historyForm.value.selectedID = ''
-      const target = document.getElementById('compareView');
-      target.innerHTML = '';
+      emit('toHistoryPanel', { ID: selectedHistory.value.ID, panelName: 'history' })
+      handleDialogClose()
     }
   })
 }
@@ -600,12 +609,8 @@ const goToHistory = async (formEl) => {
 const deleteAllHistory = async (formEl) => {
   if (!formEl) return
   caseRevertLoading.value = true
-  API.DeleteAllHistoryTestCase(props.suite, props.name, handleDeleteResponse);
-  caseRevertLoading.value = false
-  historyDialogOpened.value = false
-  historyForm.value.selectedID = ''
-  const target = document.getElementById('compareView');
-  target.innerHTML = '';
+  API.DeleteAllHistoryTestCase(props.suite, props.name, handleDeleteResponse)
+  handleDialogClose()
 }
 
 const options = GetHTTPMethods()
@@ -1110,7 +1115,7 @@ Magic.Keys(() => {
         </template>
       </el-drawer>
 
-      <el-dialog v-model="historyDialogOpened" :title="t('button.viewHistory')" width="60%" draggable>
+      <el-dialog @close="handleDialogClose" v-model="historyDialogOpened" :title="t('button.viewHistory')" width="60%" draggable>
         <el-form
           ref="viewHistoryRef"
           :model="historyForm"

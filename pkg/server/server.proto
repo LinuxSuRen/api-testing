@@ -445,6 +445,7 @@ message HistoryTestCase {
   Request request = 8;
   Response response = 9;
   string ID = 10;
+  repeated Pair historyHeader = 11;
 }
 
 message HistoryTestCases{

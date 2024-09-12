@@ -100,7 +100,7 @@ func (l *nonLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 	return
 }
 
-func (l *nonLoader) CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite) (err error) {
+func (l *nonLoader) CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite, historyHeader map[string]string ) (err error) {
 	return
 }
 

@@ -77,6 +77,7 @@ func ConvertToGRPCHistoryTestCase(historyTestcase testing.HistoryTestCase) (resu
 		SuiteSpec:        ToGRPCTestSuiteSpec(historyTestcase.SuiteSpec),
 		SuiteApi:         historyTestcase.SuiteAPI,
 		SuiteParam:       mapToPair(historyTestcase.SuiteParam),
+		HistoryHeader:    mapToPair(historyTestcase.HistoryHeader),
 
 		Request: &Request{
 			Api:    req.API,

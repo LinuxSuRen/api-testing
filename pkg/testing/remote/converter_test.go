@@ -147,8 +147,9 @@ func TestConvert(t *testing.T) {
 
 	t.Run("convertToNormalHistoryTestCase", func(t *testing.T) {
 		assert.Equal(t, atest.HistoryTestCase{
-			CreateTime: now,
-			SuiteParam: defaultMap,
+			CreateTime:    now,
+			SuiteParam:    defaultMap,
+			HistoryHeader: map[string]string{},
 			SuiteSpec: atest.APISpec{
 				Kind: "http",
 				URL:  "/v1",
@@ -204,8 +205,9 @@ func TestConvert(t *testing.T) {
 			HistorySuiteName: "fake",
 			Items: []atest.HistoryTestCase{
 				{
-					CreateTime: now,
-					SuiteParam: defaultMap,
+					CreateTime:    now,
+					SuiteParam:    defaultMap,
+					HistoryHeader: map[string]string{},
 					SuiteSpec: atest.APISpec{
 						Kind: "http",
 						URL:  "/v1",
@@ -283,7 +285,7 @@ func TestConvert(t *testing.T) {
 					},
 				},
 			},
-		})
+		}, map[string]string{})
 		assert.Equal(t, defaultPairs, result.Data.SuiteParam)
 		assert.Equal(t, defaultPairs, result.Data.Request.Header)
 		assert.Equal(t, defaultPairs, result.Data.Response.BodyFieldsExpect)
@@ -296,8 +298,9 @@ func TestConvert(t *testing.T) {
 		assert.Equal(t, atest.HistoryTestResult{
 			CreateTime: now,
 			Data: atest.HistoryTestCase{
-				SuiteParam: defaultMap,
-				CreateTime: now,
+				SuiteParam:    defaultMap,
+				CreateTime:    now,
+				HistoryHeader: map[string]string{},
 			},
 			TestCaseResult: []atest.TestCaseResult{
 				{

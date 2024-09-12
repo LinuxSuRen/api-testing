@@ -163,8 +163,8 @@ func (g *gRPCLoader) DeleteTestCase(suite, testcase string) (err error) {
 	return
 }
 
-func (g *gRPCLoader) CreateHistoryTestCase(testcaseResult testing.TestCaseResult, testSuite *testing.TestSuite) (err error) {
-	payload := ConvertToGRPCHistoryTestCaseResult(testcaseResult, testSuite)
+func (g *gRPCLoader) CreateHistoryTestCase(testcaseResult testing.TestCaseResult, testSuite *testing.TestSuite, historyHeader map[string]string ) (err error) {
+	payload := ConvertToGRPCHistoryTestCaseResult(testcaseResult, testSuite, historyHeader)
 	_, err = g.client.CreateTestCaseHistory(g.ctx, payload)
 	return
 }

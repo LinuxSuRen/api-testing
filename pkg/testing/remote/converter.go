@@ -140,13 +140,14 @@ func ConvertToNormalTestCase(testcase *server.TestCase) (result testing.TestCase
 
 func ConvertToNormalHistoryTestCase(testcase *server.HistoryTestCase) (result testing.HistoryTestCase) {
 	result = testing.HistoryTestCase{
-		ID:         testcase.ID,
-		SuiteName:  testcase.SuiteName,
-		CaseName:   testcase.CaseName,
-		SuiteAPI:   testcase.SuiteApi,
-		SuiteParam: pairToMap(testcase.SuiteParam),
-		SuiteSpec:  ConvertToNormalTestSuiteSpec(testcase.SuiteSpec),
-		CreateTime: testcase.CreateTime.AsTime(),
+		ID:            testcase.ID,
+		SuiteName:     testcase.SuiteName,
+		CaseName:      testcase.CaseName,
+		SuiteAPI:      testcase.SuiteApi,
+		SuiteParam:    pairToMap(testcase.SuiteParam),
+		SuiteSpec:     ConvertToNormalTestSuiteSpec(testcase.SuiteSpec),
+		CreateTime:    testcase.CreateTime.AsTime(),
+		HistoryHeader: pairToMap(testcase.HistoryHeader),
 	}
 	result.Data.Name = testcase.CaseName
 	if testcase.Request != nil {
@@ -227,10 +228,11 @@ func ConvertToGRPCHistoryTestCase(historyTestcase testing.HistoryTestCase) (resu
 	req := historyTestcase.Data.Request
 	res := historyTestcase.Data.Expect
 	result = &server.HistoryTestCase{
-		CaseName:   historyTestcase.CaseName,
-		SuiteName:  historyTestcase.SuiteName,
-		SuiteApi:   historyTestcase.SuiteAPI,
-		SuiteParam: mapToPair(historyTestcase.SuiteParam),
+		CaseName:      historyTestcase.CaseName,
+		SuiteName:     historyTestcase.SuiteName,
+		SuiteApi:      historyTestcase.SuiteAPI,
+		SuiteParam:    mapToPair(historyTestcase.SuiteParam),
+		HistoryHeader: mapToPair(historyTestcase.HistoryHeader),
 
 		Request: &server.Request{
 			Api:    req.API,
@@ -300,7 +302,7 @@ func pairToInterMap(pairs []*server.Pair) (data map[string]interface{}) {
 	return
 }
 
-func ConvertToGRPCHistoryTestCaseResult(testCaseResult testing.TestCaseResult, testSuite *testing.TestSuite) (result *server.HistoryTestResult) {
+func ConvertToGRPCHistoryTestCaseResult(testCaseResult testing.TestCaseResult, testSuite *testing.TestSuite, historyHeader map[string]string) (result *server.HistoryTestResult) {
 	result = &server.HistoryTestResult{
 		Error:      testCaseResult.Error,
 		CreateTime: timestamppb.New(time.Now()),
@@ -318,12 +320,13 @@ func ConvertToGRPCHistoryTestCaseResult(testCaseResult testing.TestCaseResult, t
 
 	for _, testCase := range testSuite.Items {
 		data := testing.HistoryTestCase{
-			CaseName:   testCase.Name,
-			SuiteName:  testSuite.Name,
-			SuiteAPI:   testSuite.API,
-			SuiteSpec:  testSuite.Spec,
-			SuiteParam: testSuite.Param,
-			Data:       testCase,
+			CaseName:      testCase.Name,
+			SuiteName:     testSuite.Name,
+			SuiteAPI:      testSuite.API,
+			SuiteSpec:     testSuite.Spec,
+			SuiteParam:    testSuite.Param,
+			Data:          testCase,
+			HistoryHeader: historyHeader,
 		}
 
 		result.Data = ConvertToGRPCHistoryTestCase(data)

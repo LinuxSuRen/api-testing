@@ -90,7 +90,7 @@ func TestNewGRPCLoader(t *testing.T) {
 		_, err = writer.ListHistoryTestSuite()
 		assert.Error(t, err)
 
-		err = writer.CreateHistoryTestCase(atest.TestCaseResult{}, &atest.TestSuite{})
+		err = writer.CreateHistoryTestCase(atest.TestCaseResult{}, &atest.TestSuite{}, map[string]string{})
 		assert.Error(t, err)
 
 		_, err = writer.GetHistoryTestCase("")

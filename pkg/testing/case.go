@@ -55,6 +55,7 @@ type HistoryTestCase struct {
 	SuiteSpec        APISpec           `yaml:"spec,omitempty" json:"spec,omitempty"`
 	SuiteParam       map[string]string `yaml:"param,omitempty" json:"param,omitempty"`
 	Data             TestCase          `yaml:"data,omitempty" json:"data,omitempty"`
+	HistoryHeader    map[string]string `yaml:"historyHeader,omitempty" json:"historyHeader,omitempty"`
 }
 
 type HistoryTestResult struct {

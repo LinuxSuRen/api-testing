@@ -250,6 +250,10 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 
 		// reuse the API prefix
 		testCase.Request.RenderAPI(suite.API)
+		historyHeader := make(map[string]string)
+		for k, v := range testCase.Request.Header {
+			historyHeader[k] = v
+		}
 
 		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
 		if getter, ok := suiteRunner.(runner.ResponseRecord); ok {
@@ -270,27 +274,23 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 			reply.Error = testErr.Error()
 			break
 		}
+		// create history record
+		go func(historyHeader map[string]string) {
+			loader := s.getLoader(ctx)
+			defer loader.Close()
+			for _, testCaseResult := range reply.TestCaseResult {
+				err = loader.CreateHistoryTestCase(ToNormalTestCaseResult(testCaseResult), suite, historyHeader)
+				if err != nil {
+					remoteServerLogger.Info("error create history")
+				}
+			}
+		}(historyHeader)
 	}
 
 	if reply.Error != "" {
 		fmt.Fprintln(buf, reply.Error)
 	}
 	reply.Message = buf.String()
-	// create history record
-	go func() {
-		loader := s.getLoader(ctx)
-		defer loader.Close()
-		for _, testCaseResult := range reply.TestCaseResult {
-			for i, item := range suite.Items {
-				suite.Items[i].Request.API = fmt.Sprintf("%s/%s", suite.API, item.Request.API)
-			}
-			err = loader.CreateHistoryTestCase(ToNormalTestCaseResult(testCaseResult), suite)
-			if err != nil {
-				remoteServerLogger.Info("error create history")
-			}
-		}
-	}()
-
 	return
 }
 
