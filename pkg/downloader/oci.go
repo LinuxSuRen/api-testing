@@ -44,6 +44,7 @@ type PlatformAwareOCIDownloader interface {
 	WithOS(string)
 	WithArch(string)
 	GetTargetFile() string
+	WithImagePrefix(string)
 }
 
 type defaultOCIDownloader struct {
