@@ -27,8 +27,9 @@ import (
 
 type storeDownloader struct {
 	OCIDownloader
-	os, arch string
-	extFile  string
+	os, arch    string
+	extFile     string
+	imagePrefix string
 }
 
 func NewStoreDownloader() PlatformAwareOCIDownloader {
@@ -37,6 +38,7 @@ func NewStoreDownloader() PlatformAwareOCIDownloader {
 	}
 	ociDownloader.WithOS(runtime.GOOS)
 	ociDownloader.WithArch(runtime.GOARCH)
+	ociDownloader.WithImagePrefix("linuxsuren")
 	return ociDownloader
 }
 
@@ -46,7 +48,7 @@ func (d *storeDownloader) Download(name, tag, _ string) (reader io.Reader, err e
 	if d.os == "windows" {
 		d.extFile = fmt.Sprintf("%s.exe", d.extFile)
 	}
-	image := fmt.Sprintf("linuxsuren/atest-ext-store-%s", name)
+	image := fmt.Sprintf("%s/atest-ext-store-%s", d.imagePrefix, name)
 	reader, err = d.OCIDownloader.Download(image, tag, d.extFile)
 	return
 }
@@ -68,6 +70,10 @@ func (d *storeDownloader) GetTargetFile() string {
 
 func (d *storeDownloader) WithOS(os string) {
 	d.os = os
+}
+
+func (d *storeDownloader) WithImagePrefix(imagePrefix string) {
+	d.imagePrefix = imagePrefix
 }
 
 func (d *storeDownloader) WithArch(arch string) {
