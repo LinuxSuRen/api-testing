@@ -19,7 +19,6 @@ import (
 	"strings"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
-
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
 )
