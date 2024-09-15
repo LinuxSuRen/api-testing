@@ -188,7 +188,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		return
 	}
 
-	r.log.Debug("test case %q, status code: %d\n", testcase.Name, resp.StatusCode)
+	r.log.Debug("test case %q, test case info: %v, status code: %d\n", testcase.Name, testcase, resp.StatusCode)
 
 	if err = testcase.Expect.Render(dataContext); err != nil {
 		return

@@ -148,7 +148,7 @@ func TestRunTestCase(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		assert.Equal(t, sampleBody, result.Body)
-		assert.Contains(t, result.Output, "start to run: 'get'\nstart to send request to http://foo\ntest case \"get\", status code: 200\n")
+		assert.Contains(t, result.Output, "start to run: 'get'\nstart to send request to http://foo\ntest case \"get\", test case info: &{ get  <nil> <nil> {http://foo GET map[] map[key:value] map[] map[]  } {0  map[] map[] [] [] }}, status code: 200\n")
 	})
 
 	t.Run("text response", func(t *testing.T) {
