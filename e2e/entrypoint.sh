@@ -26,7 +26,7 @@ openssl x509 -req -days 365 -in test.csr \
 
 echo "start to download extenions"
 atest extension --output /usr/local/bin --registry ghcr.io git
-atest extension --output /usr/local/bin --registry registry-1.docker.io orm --image-prefix ysf233
+atest extension --output /usr/local/bin --registry ghcr.io orm
 atest extension --output /usr/local/bin --registry ghcr.io etcd
 atest extension --output /usr/local/bin --registry ghcr.io mongodb
 
