@@ -326,6 +326,190 @@
         ]
       }
     },
+    "/api/v1/historySuites/{suiteName}/cases/{caseName}": {
+      "delete": {
+        "operationId": "Runner_DeleteAllHistoryTestCase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "suiteName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "caseName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "historySuiteName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "createTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "suiteSpec.kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.url",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.import",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "suiteSpec.rpc.serverReflection",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.rpc.protofile",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.protoset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.raw",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.insecure",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.secure.cert",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.ca",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.serverName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.key",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteApi",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.method",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.statusCode",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "response.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.verify",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "response.schema",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ID",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
     "/api/v1/historyTestCase/{ID}": {
       "get": {
         "operationId": "Runner_GetHistoryTestCase",
@@ -1873,190 +2057,6 @@
             "schema": {
               "$ref": "#/definitions/RunnerCreateTestCaseBody"
             }
-          }
-        ],
-        "tags": [
-          "Runner"
-        ]
-      }
-    },
-    "/api/v1/suites/{suiteName}/cases/{caseName}": {
-      "delete": {
-        "operationId": "Runner_DeleteAllHistoryTestCase",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverHelloReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "suiteName",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "caseName",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "historySuiteName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "createTime",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "date-time"
-          },
-          {
-            "name": "suiteSpec.kind",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "suiteSpec.url",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "suiteSpec.rpc.import",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          },
-          {
-            "name": "suiteSpec.rpc.serverReflection",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "suiteSpec.rpc.protofile",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "suiteSpec.rpc.protoset",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "suiteSpec.rpc.raw",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "suiteSpec.secure.insecure",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "suiteSpec.secure.cert",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "suiteSpec.secure.ca",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "suiteSpec.secure.serverName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "suiteSpec.secure.key",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "suiteApi",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "request.api",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "request.method",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "request.body",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "response.statusCode",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "response.body",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "response.verify",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          },
-          {
-            "name": "response.schema",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ID",
-            "in": "query",
-            "required": false,
-            "type": "string"
           }
         ],
         "tags": [

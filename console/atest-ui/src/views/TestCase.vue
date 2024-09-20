@@ -832,7 +832,7 @@ Magic.Keys(() => {
         <el-button type="danger" @click="deleteCase" :icon="Delete">{{ t('button.delete') }}</el-button>
         <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument" v-if="!isHistoryTestCase">{{ t('button.duplicate') }}</el-button>
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
-        <el-button type="primary" v-if="!isHistoryTestCase" @click="openHistoryDialog">{{ t('button.viewHistory') }}</el-button>
+        <el-button type="primary" v-if="!isHistoryTestCase && Cache.GetCurrentStore().kind.name == 'atest-store-orm'" @click="openHistoryDialog">{{ t('button.viewHistory') }}</el-button>
         <span v-if="isHistoryTestCase" style="margin-left: 15px;">{{ t('tip.runningAt') }}{{ HistoryTestCaseCreateTime }}</span>
       </div>
       <div style="display: flex;">

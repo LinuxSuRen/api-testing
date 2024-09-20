@@ -141,7 +141,7 @@ service Runner {
 
     rpc DeleteAllHistoryTestCase(HistoryTestCase) returns (HelloReply) {
         option (google.api.http) = {
-            delete: "/api/v1/suites/{suiteName}/cases/{caseName}"
+            delete: "/api/v1/historySuites/{suiteName}/cases/{caseName}"
         };
     }
 
