@@ -37,7 +37,7 @@ const props = defineProps({
   historySuiteName: String,
   historyCaseID: String
 })
-const emit = defineEmits(['updated','toHistoryPanel'])
+const emit = defineEmits(['updated','toHistoryPanel', 'toOriginTestcase'])
 
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.suite!)
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
@@ -606,6 +606,8 @@ const goToHistory = async (formEl) => {
   })
 }
 
+function goToOriginTestcase(){ emit('toOriginTestcase', { originSuite: props.suite, originCase: props.name, panelName: 'testing' })}
+
 const deleteAllHistory = async (formEl) => {
   if (!formEl) return
   caseRevertLoading.value = true
@@ -830,6 +832,7 @@ Magic.Keys(() => {
           v-if="!Cache.GetCurrentStore().readOnly && !isHistoryTestCase"
           >{{ t('button.save') }}</el-button>
         <el-button type="danger" @click="deleteCase" :icon="Delete">{{ t('button.delete') }}</el-button>
+        <el-button type="primary" @click="goToOriginTestcase" v-if="isHistoryTestCase">{{ t('button.goToOriginTestcase') }}</el-button>
         <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument" v-if="!isHistoryTestCase">{{ t('button.duplicate') }}</el-button>
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
         <el-button type="primary" v-if="!isHistoryTestCase && Cache.GetCurrentStore().kind.name == 'atest-store-orm'" @click="openHistoryDialog">{{ t('button.viewHistory') }}</el-button>

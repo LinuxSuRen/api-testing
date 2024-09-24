@@ -25,6 +25,10 @@ interface Tree {
   children?: Tree[]
 }
 
+const props = defineProps({
+  originSuite: String,
+  originCase: String,
+})
 const testCaseName = ref('')
 const testSuite = ref('')
 const testSuiteKind = ref('')
@@ -181,23 +185,42 @@ function loadStores(lastSuitName?: string, lastCaseName?: string) {
 
         let targetSuite = {} as Tree
         let targetChild = {} as Tree
-        if (key.suite !== '' && key.testcase !== '') {
-          for (var i = 0; i < treeData.value.length; i++) {
-            const item = treeData.value[i]
-            if (item.id === key.suite && item.children) {
-              for (var j = 0; j < item.children.length; j++) {
-                const child = item.children[j]
-                if (child.id === key.testcase) {
-                  targetSuite = item
-                  targetChild = child
-                  break
+
+        const originSuite = props.originSuite
+        const originCase = props.originCase
+          if (originSuite && originCase && originCase !== '' && originSuite !== '') {
+            for (const data of treeData.value) {
+              if (data.label == originSuite) {
+                  const foundChild = data.children?.find(child => child.label === originCase)
+                  if (foundChild) {
+                      targetSuite = data
+                      targetChild = foundChild
+                      handleTreeClick(targetChild)
+                      updateTreeSelection(targetSuite, targetChild)
+                      return
+                  }
+              }
+            }
+            emit('clearOriginTestcase')
+            ElMessage.error(`Oops, not found for suite:${originSuite} with testcase:${originCase}`)
+          } else {
+            if (key.suite !== '' && key.testcase !== '') {
+              for (var i = 0; i < treeData.value.length; i++) {
+                const item = treeData.value[i]
+                if (item.id === key.suite && item.children) {
+                    for (var j = 0; j < item.children.length; j++) {
+                      const child = item.children[j]
+                      if (child.id === key.testcase) {
+                        targetSuite = item
+                        targetChild = child
+                        break
+                      }
+                    }
+                    break
                 }
               }
-              break
-            }
-          }
-        }
-        
+          }}
+
         if (!targetChild.id || targetChild.id === '') {
           targetSuite = treeData.value[0]
           if (targetSuite.children && targetSuite.children.length > 0) {
@@ -206,14 +229,7 @@ function loadStores(lastSuitName?: string, lastCaseName?: string) {
         }
 
         viewName.value = 'testsuite'
-        currentNodekey.value = targetChild.id
-
-        treeRef.value!.setCurrentKey(targetChild.id)
-        treeRef.value!.setCheckedKeys([targetChild.id], false)
-
-        testSuite.value = targetSuite.label
-        Cache.SetCurrentStore(targetSuite.store)
-        testSuiteKind.value = targetChild.kind
+        updateTreeSelection(targetSuite, targetChild)
       } else {
         viewName.value = ""
       }
@@ -228,6 +244,17 @@ function loadStores(lastSuitName?: string, lastCaseName?: string) {
     })
 }
 loadStores()
+
+function updateTreeSelection(targetSuite: Tree, targetChild: Tree) {
+    currentNodekey.value = targetChild.id
+
+    treeRef.value!.setCurrentKey(targetChild.id)
+    treeRef.value!.setCheckedKeys([targetChild.id], false)
+
+    testSuite.value = targetSuite.label
+    Cache.SetCurrentStore(targetSuite.store)
+    testSuiteKind.value = targetChild.kind
+}
 
 const dialogVisible = ref(false)
 const importDialogVisible = ref(false)
@@ -280,9 +307,9 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
-const emit = defineEmits(['toHistoryPanel']);
+const emit = defineEmits(['toHistoryPanel', 'clearOriginTestcase'])
 const handleToHistoryPanel = (payload) => {
-  emit('toHistoryPanel', payload);
+  emit('toHistoryPanel', payload)
 };
 
 const importSuiteFormRules = reactive<FormRules<Suite>>({

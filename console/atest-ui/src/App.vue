@@ -83,12 +83,24 @@ const handleChangeLan = (command: string) => {
   }
 };
 
-const ID = ref(null);
+const ID = ref(null)
 const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
   ID.value = selectID;
-  panelName.value = historyPanelName;
+  panelName.value = historyPanelName
 }
 
+const suiteName = ref(null)
+const caseName = ref(null)
+const toOriginTestcase = ({ originSuite, originCase, panelName: testingPanelName }) => {
+    suiteName.value = originSuite
+    caseName.value = originCase
+    panelName.value = testingPanelName
+}
+
+const clearOriginTestcase = () =>{
+    suiteName.value = null
+    caseName.value = null
+}
 </script>
 
 <template>
@@ -146,8 +158,8 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
           </el-dropdown>
         </el-col>
       </div>
-      <TestingPanel v-if="panelName === 'testing'" @toHistoryPanel="toHistoryPanel"/>
-      <TestingHistoryPanel v-else-if="panelName === 'history'" :ID="ID"/>
+      <TestingPanel v-if="panelName === 'testing'" @toHistoryPanel="toHistoryPanel" @clearOriginTestcase="clearOriginTestcase" :originSuite="suiteName" :originCase="caseName"/>
+      <TestingHistoryPanel v-else-if="panelName === 'history'" @toOriginTestcase="toOriginTestcase" :ID="ID"/>
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
       <SecretManager v-else-if="panelName === 'secret'" />

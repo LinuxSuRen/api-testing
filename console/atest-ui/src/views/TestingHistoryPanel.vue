@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import TestCase from './TestCase.vue'
 import TestSuite from './TestSuite.vue'
-import TemplateFunctions from './TemplateFunctions.vue'
 import { reactive, ref, watch } from 'vue'
 import { ElTree, ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -255,6 +254,11 @@ const deviceAuthNext = () => {
   }
 }
 
+const emit = defineEmits(['toOriginTestcase']);
+const handleToOriginTestcase = (payload) => {
+    emit('toOriginTestcase', payload);
+};
+
 </script>
 
 <template>
@@ -278,11 +282,10 @@ const deviceAuthNext = () => {
               @node-click="handleNodeClick"
               data-intro="This is the test history tree. You can click the history test to browse it."
             />
-            <TemplateFunctions />
           </el-aside>
 
           <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px;">
-            <TestCase v-if="viewName === 'testcase'" :suite="testSuite" :kindName="testKind" :name="testCaseName"
+            <TestCase v-if="viewName === 'testcase'" @toOriginTestcase="handleToOriginTestcase" :suite="testSuite" :kindName="testKind" :name="testCaseName"
               :historySuiteName="historySuiteName" :historyCaseID="historyCaseID" @updated="loadStores" style="height: 100%;"
               data-intro="This is the test case editor. You can edit the test case here." />
           </el-main>
