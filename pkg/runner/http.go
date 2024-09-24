@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -229,6 +230,16 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	return
 }
 
+func ammendHeaders(headers http.Header, body []byte) {
+	// add content-length if it's missing
+	if val := headers.Get(util.ContentLength); val == "" {
+		headers.Add(util.ContentLength, strconv.Itoa(len(body)))
+		fmt.Printf("add content-length: %d\n", len(body))
+	} else {
+		fmt.Printf("content-length already exist: %s\n", val)
+	}
+}
+
 func (r *simpleTestCaseRunner) GetSuggestedAPIs(suite *testing.TestSuite, api string) (result []*testing.TestCase, err error) {
 	if suite.Spec.URL == "" || suite.Spec.Kind != "swagger" {
 		return
@@ -297,6 +308,9 @@ func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (response
 		Header:     make(map[string]string),
 		Body:       string(responseBodyData),
 	}
+
+	// add some headers for convienience
+	ammendHeaders(resp.Header, responseBodyData)
 	for key := range resp.Header {
 		r.simpleResponse.Header[key] = resp.Header.Get(key)
 	}

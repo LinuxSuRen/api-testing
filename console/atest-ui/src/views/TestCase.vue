@@ -85,6 +85,7 @@ const parseResponseBody = (body) => {
   }
 
   try {
+    testResult.value.bodyLength = body.length
     testResult.value.bodyObject = JSON.parse(body)
     testResult.value.originBodyObject = JSON.parse(body)
   } catch {
@@ -103,6 +104,7 @@ const handleTestResult = (e) => {
   if(isFilePath){
     isResponseFile.value = true
   } else if(e.body !== ''){
+    testResult.value.bodyLength = e.body.length
     testResult.value.bodyObject = JSON.parse(e.body);
     testResult.value.originBodyObject = JSON.parse(e.body);
   }
@@ -1210,7 +1212,9 @@ Magic.Keys(() => {
         <el-tab-pane label="Body" name="body">
           <div v-if="testResult.bodyObject">
             <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
-              clearable placeholder="$.key" />
+              clearable placeholder="$.key">
+              <template #prepend v-if="testResult.bodyLength > 0">Body Size: {{testResult.bodyLength}}</template>
+            </el-input>
             <JsonViewer :value="testResult.bodyObject" :expand-depth="5" copyable boxed sort />
           </div>
           <div v-else>
