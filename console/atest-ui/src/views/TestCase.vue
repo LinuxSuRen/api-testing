@@ -121,11 +121,13 @@ const handleTestResult = (e) => {
 const handleTestResultError = (e) => {
   if (e.error !== '') {
     ElMessage({
+      showClose: true,
       message: e.error,
       type: 'error'
     });
   } else {
     ElMessage({
+      showClose: true,
       message: 'Pass!',
       type: 'success'
     });
@@ -169,6 +171,7 @@ function generateCode() {
       generator: currentCodeGenerator.value
     }, (e) => {
       ElMessage({
+        showClose: true,
         message: 'Code generated!',
         type: 'success'
       })
@@ -185,6 +188,7 @@ function generateCode() {
       generator: currentCodeGenerator.value
     }, (e) => {
       ElMessage({
+        showClose: true,
         message: 'Code generated!',
         type: 'success'
       })
@@ -425,6 +429,7 @@ function saveTestCase(tip: boolean = true, callback: (c: any) => void) {
   UIAPI.UpdateTestCase(testCaseWithSuite.value, (e) => {
     if (tip) {
       ElMessage({
+        showClose: true,
         message: 'Saved.',
         type: 'success'
       })
@@ -461,6 +466,7 @@ function handleDeleteResponse(e) {
     emit('updated', 'hello from child');
 
     ElMessage({
+      showClose: true,
       message: 'Delete.',
       type: 'success'
     });
@@ -564,6 +570,7 @@ function initCompare(value, historyValue) {
     lineNumbers: true, 
     mode: { name: "javascript", json: true },
     highlightDifferences: true,
+    collapseIdentical: true,
     foldGutter:true,
     lineWrapping:true,
     styleActiveLine: true,
@@ -586,6 +593,7 @@ const submitForm = async (formEl) => {
       UIAPI.UpdateTestCase(historyTestCase, (e) => {
         if(e.error == ""){
           ElMessage({
+            showClose: true,
             message: 'Saved.',
             type: 'success'
           })
@@ -808,6 +816,7 @@ const duplicateTestCase = () => {
     API.DuplicateTestCase(props.suite, props.suite, props.name, targetTestCaseName.value,(d) => {
         duplicateTestCaseDialog.value = false
         ElMessage({
+            showClose: true,
             message: 'Duplicated.',
             type: 'success'
         })
