@@ -295,10 +295,11 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 }
 
 func handleLargeResponseBody(resp runner.SimpleResponse, suite string, caseName string) (reply runner.SimpleResponse, err error) {
-	const maxSize = 1024
+	const maxSize = 5120
 	prefix := "isFilePath-" + strings.Join([]string{suite, caseName}, "-")
 
 	if len(resp.Body) > maxSize {
+		remoteServerLogger.Logger.Info("response body is too large, will be saved to file", "size", len(resp.Body))
 		tmpFile, err := os.CreateTemp("", prefix+"-")
 		defer tmpFile.Close()
 		if err != nil {

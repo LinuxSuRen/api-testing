@@ -22,6 +22,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -137,7 +138,7 @@ func TestInMemoryServer(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		assert.Equal(t, "176", resp.Header.Get("Content-Length"))
+		assert.Equal(t, "176", resp.Header.Get(util.ContentLength))
 		assert.Equal(t, "mock", resp.Header.Get("Server"))
 		assert.NotEmpty(t, resp.Header.Get(headerMockServer))
 

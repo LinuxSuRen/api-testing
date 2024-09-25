@@ -292,7 +292,7 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
 			h.item.Response.Header = make(map[string]string)
 		}
 		h.item.Response.Header[headerMockServer] = fmt.Sprintf("api-testing: %s", version.GetVersion())
-		h.item.Response.Header["content-length"] = fmt.Sprintf("%d", len(h.item.Response.BodyData))
+		h.item.Response.Header[util.ContentLength] = fmt.Sprintf("%d", len(h.item.Response.BodyData))
 		for k, v := range h.item.Response.Header {
 			hv, hErr := render.Render("mock-server-header", v, &h.item)
 			if hErr != nil {

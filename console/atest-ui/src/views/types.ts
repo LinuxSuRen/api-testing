@@ -31,6 +31,7 @@ export interface TestResult {
   body: string
   bodyObject: {}
   bodyText: string
+  bodyLength: number
   output: string
   error: string
   statusCode: number
