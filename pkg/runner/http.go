@@ -176,7 +176,9 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 			Value: v,
 		})
 	}
-	r.log.Info("start to send request to %s\n", testcase.Request.API)
+	r.log.Info("request method: %s\n", request.Method)
+	r.log.Info("request header %v\n", request.Header)
+	r.log.Info("start to send request to %v\n", request.URL)
 
 	// TODO only do this for unit testing, should remove it once we have a better way
 	if strings.HasPrefix(testcase.Request.API, "http://") {
@@ -189,7 +191,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		return
 	}
 
-	r.log.Debug("test case %q, test case info: %v, status code: %d\n", testcase.Name, testcase, resp.StatusCode)
+	r.log.Debug("test case %q, status code: %d\n", testcase.Name, resp.StatusCode)
 
 	if err = testcase.Expect.Render(dataContext); err != nil {
 		return
