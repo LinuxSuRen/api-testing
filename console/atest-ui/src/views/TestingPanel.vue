@@ -304,6 +304,8 @@ const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
         loadStores()
         importDialogVisible.value = false
         formEl.resetFields()
+      }, (e) => {
+        ElMessage.error(e)
       })
     }
   })
@@ -354,8 +356,8 @@ const importSourceKinds = [{
   "name": "Postman",
   "value": "postman"
 }, {
-  "name": "Atest",
-  "value": "atest"
+  "name": "Native",
+  "value": "native"
 }]
 
 </script>
@@ -480,7 +482,6 @@ const importSourceKinds = [{
   </el-dialog>
 
   <el-dialog v-model="importDialogVisible" title="Import Test Suite" width="30%" draggable>
-    <span>Supported source URL: Postman collection share link</span>
     <template #footer>
       <span class="dialog-footer">
         <el-form

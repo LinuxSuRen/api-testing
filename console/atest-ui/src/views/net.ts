@@ -146,7 +146,7 @@ function ConvertTestSuite(suiteName: string, genertor: string,
 }
 
 function DuplicateTestSuite(sourceSuiteName: string, targetSuiteName: string,
-    callback: (d: any) => void, errHandle?: ((reason: any) => PromiseLike<never>) | undefined | null ) {
+    callback: (d: any) => void, errHandle?: ((reason: any) => PromiseLike<never>) | undefined | null) {
     const requestOptions = {
       method: 'POST',
       headers: {
@@ -163,7 +163,8 @@ function DuplicateTestSuite(sourceSuiteName: string, targetSuiteName: string,
         .then(callback).catch(errHandle)
 }
 
-function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
+function ImportTestSuite(source: ImportSource, callback: (d: any) => void,
+  errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -173,9 +174,8 @@ function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
     body: JSON.stringify(source)
   }
 
-  fetch(`/api/v1/suites/import`, requestOptions)
-  .then(DefaultResponseProcess)
-    .then(callback)
+  fetch(`/api/v1/suites/import`, requestOptions).
+    then(DefaultResponseProcess).then(callback).catch(errHandle)
 }
 
 interface TestCase {

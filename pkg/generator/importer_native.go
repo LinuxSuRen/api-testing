@@ -34,6 +34,10 @@ type nativeData struct {
 	Data string `json:"data"`
 }
 
+func NewNativeImporter() Importer {
+	return &nativeImporter{}
+}
+
 func (p *nativeImporter) Convert(data []byte) (suite *testing.TestSuite, err error) {
 	nativeData := nativeData{}
 	if err = json.Unmarshal(data, &nativeData); err == nil {
@@ -45,36 +49,42 @@ func (p *nativeImporter) Convert(data []byte) (suite *testing.TestSuite, err err
 	return
 }
 
-func (p *nativeImporter) ConvertFromFile(dataFile string) (suite *testing.TestSuite, err error) {
+func (p *nativeImporter) ConvertFromFile(dataFile string) (*testing.TestSuite, error) {
+	return convertFromFile(dataFile, p)
+}
+
+func (p *nativeImporter) ConvertFromURL(dataURLStr string) (*testing.TestSuite, error) {
+	return convertFromURL(dataURLStr, p)
+}
+
+func convertFromFile(dataFile string, dataImport DataImporter) (suite *testing.TestSuite, err error) {
 	var data []byte
 	if data, err = os.ReadFile(dataFile); err == nil {
-		suite, err = p.Convert(data)
+		suite, err = dataImport.Convert(data)
 	}
 	return
 }
 
-func (p *nativeImporter) ConvertFromURL(dataURLStr string) (suite *testing.TestSuite, err error) {
+func convertFromURL(dataURLStr string, dataImport DataImporter) (suite *testing.TestSuite, err error) {
 	var req *http.Request
 	var resp *http.Response
 	var dataURL *url.URL
 
-	if dataURL, err = url.Parse(dataURLStr); err != nil {
-		return
+	if dataURL, err = url.Parse(dataURLStr); err == nil {
+		req, err = http.NewRequest(http.MethodGet, dataURLStr, nil)
 	}
 
-	if req, err = http.NewRequest(http.MethodGet, dataURLStr, nil); err != nil {
-		return
-	}
+	if err == nil {
+		// put all query params as headers
+		for k, v := range dataURL.Query() {
+			req.Header.Add(k, v[0])
+		}
 
-	// put all query params as headers
-	for k, v := range dataURL.Query() {
-		req.Header.Add(k, v[0])
-	}
-
-	if resp, err = http.DefaultClient.Do(req); err == nil {
-		var data []byte
-		if data, err = io.ReadAll(resp.Body); err == nil {
-			suite, err = p.Convert(data)
+		if resp, err = http.DefaultClient.Do(req); err == nil {
+			var data []byte
+			if data, err = io.ReadAll(resp.Body); err == nil {
+				suite, err = dataImport.Convert(data)
+			}
 		}
 	}
 	return

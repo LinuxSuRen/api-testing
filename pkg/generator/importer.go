@@ -89,21 +89,22 @@ func (p Paris) ToMap() (result map[string]string) {
 	return
 }
 
-type Importer interface {
+type DataImporter interface {
 	Convert(data []byte) (*testing.TestSuite, error)
+}
+
+type Importer interface {
+	DataImporter
 	ConvertFromFile(dataFile string) (*testing.TestSuite, error)
 	ConvertFromURL(dataURL string) (*testing.TestSuite, error)
 }
 
 type postmanImporter struct {
-	nativeImporter
 }
 
 // NewPostmanImporter returns a new postman importer
 func NewPostmanImporter() Importer {
-	return &postmanImporter{
-		nativeImporter: nativeImporter{},
-	}
+	return &postmanImporter{}
 }
 
 // Convert converts the postman data to test suite
@@ -122,11 +123,16 @@ func (p *postmanImporter) Convert(data []byte) (suite *testing.TestSuite, err er
 
 	suite = &testing.TestSuite{}
 	suite.Name = postman.Info.Name
-	if err = p.convertItems(postman.Item, "", suite); err != nil {
-		return
-	}
-
+	err = p.convertItems(postman.Item, "", suite)
 	return
+}
+
+func (p *postmanImporter) ConvertFromFile(dataFile string) (*testing.TestSuite, error) {
+	return convertFromFile(dataFile, p)
+}
+
+func (p *postmanImporter) ConvertFromURL(dataURLStr string) (*testing.TestSuite, error) {
+	return convertFromURL(dataURLStr, p)
 }
 
 func (p *postmanImporter) convertItems(items []PostmanItem, prefix string, suite *testing.TestSuite) (err error) {
