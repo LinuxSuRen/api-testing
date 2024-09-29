@@ -81,6 +81,7 @@ function CreateTestSuite(suite: TestSuite,
 interface ImportSource {
   store: string
   url: string
+  kind: string
 }
 
 function UpdateTestSuite(suite: any,
@@ -169,9 +170,7 @@ function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
       'X-Store-Name': source.store,
       'X-Auth': getToken()
     },
-    body: JSON.stringify({
-      url: source.url
-    })
+    body: JSON.stringify(source)
   }
 
   fetch(`/api/v1/suites/import`, requestOptions)

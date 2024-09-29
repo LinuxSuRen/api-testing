@@ -242,7 +242,8 @@ const testSuiteForm = reactive({
 const importSuiteFormRef = ref<FormInstance>()
 const importSuiteForm = reactive({
   url: '',
-  store: ''
+  store: '',
+  kind: ''
 })
 
 function openTestSuiteCreateDialog() {
@@ -290,7 +291,8 @@ const importSuiteFormRules = reactive<FormRules<Suite>>({
     { required: true, message: 'URL is required', trigger: 'blur' },
     { type: 'url', message: 'Should be a valid URL value', trigger: 'blur' }
   ],
-  store: [{ required: true, message: 'Location is required', trigger: 'blur' }]
+  store: [{ required: true, message: 'Location is required', trigger: 'blur' }],
+  kind: [{ required: true, message: 'Kind is required', trigger: 'blur' }]
 })
 const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -346,6 +348,14 @@ const suiteKinds = [{
   "name": "gRPC",
 }, {
   "name": "tRPC",
+}]
+
+const importSourceKinds = [{
+  "name": "Postman",
+  "value": "postman"
+}, {
+  "name": "Atest",
+  "value": "atest"
 }]
 
 </script>
@@ -489,6 +499,20 @@ const suiteKinds = [{
                 :key="item.name"
                 :label="item.name"
                 :value="item.name"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Kind" prop="kind">
+            <el-select v-model="importSuiteForm.kind" class="m-2"
+              filterable=true
+              test-id="suite-import-form-kind"
+              default-first-option=true
+              placeholder="Kind" size="middle">
+              <el-option
+                v-for="item in importSourceKinds"
+                :key="item.name"
+                :label="item.name"
+                :value="item.value"
               />
             </el-select>
           </el-form-item>

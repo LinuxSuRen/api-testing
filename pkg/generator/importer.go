@@ -18,9 +18,6 @@ package generator
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
-	"os"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
@@ -99,11 +96,14 @@ type Importer interface {
 }
 
 type postmanImporter struct {
+	nativeImporter
 }
 
 // NewPostmanImporter returns a new postman importer
 func NewPostmanImporter() Importer {
-	return &postmanImporter{}
+	return &postmanImporter{
+		nativeImporter: nativeImporter{},
+	}
 }
 
 // Convert converts the postman data to test suite
@@ -146,25 +146,6 @@ func (p *postmanImporter) convertItems(items []PostmanItem, prefix string, suite
 			if err = p.convertItems(item.Item, itemName+" ", suite); err != nil {
 				return
 			}
-		}
-	}
-	return
-}
-
-func (p *postmanImporter) ConvertFromFile(dataFile string) (suite *testing.TestSuite, err error) {
-	var data []byte
-	if data, err = os.ReadFile(dataFile); err == nil {
-		suite, err = p.Convert(data)
-	}
-	return
-}
-
-func (p *postmanImporter) ConvertFromURL(dataURL string) (suite *testing.TestSuite, err error) {
-	var resp *http.Response
-	if resp, err = http.Get(dataURL); err == nil {
-		var data []byte
-		if data, err = io.ReadAll(resp.Body); err == nil {
-			suite, err = p.Convert(data)
 		}
 	}
 	return

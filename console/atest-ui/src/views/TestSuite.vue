@@ -34,6 +34,7 @@ const suite = ref({
     }
   }
 } as Suite)
+const shareLink = ref('')
 function load() {
   const store = Cache.GetCurrentStore()
   if (!props.name || store.name === '') return
@@ -48,6 +49,8 @@ function load() {
           value: ''
         } as Pair)
       }
+
+      shareLink.value = `${window.location.href}api/v1/suites/${e.name}/yaml?store=${store.name}`
     },
     (e) => {
       ElMessage.error('Oops, ' + e)
@@ -225,7 +228,11 @@ const yamlDialogVisible = ref(false)
 function viewYaml() {
   yamlDialogVisible.value = true
   API.GetTestSuiteYaml(props.name, (d) => {
-    yamlFormat.value = yaml.dump(yaml.load(atob(d.data)))
+    try {
+      yamlFormat.value = yaml.dump(yaml.load(atob(d.data)))
+    } catch (e) {
+      ElMessage.error('Oops, ' + e)
+    }
   })
 }
 
@@ -330,6 +337,9 @@ const targetSuiteDuplicateName = ref('')
       <el-divider />
     </div>
 
+    <div class="button-container">
+        Share link: <el-input readonly v-model="shareLink" style="width: 80%" />
+    </div>
     <div class="button-container">
       <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{
         t('button.save')
