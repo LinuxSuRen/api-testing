@@ -45,6 +45,7 @@ export interface Pair {
   key: string
   value: string
   defaultValue: string
+  description: string
 }
 
 export interface TestCaseWithSuite {
@@ -62,9 +63,11 @@ export interface TestCaseRequest {
   api: string
   method: string
   header: Pair[]
+  cookie: Pair[]
   query: Pair[]
   form: Pair[]
   body: string
+  filepath: string
 }
 
 export interface TestCaseResponse {

@@ -32,9 +32,11 @@ const storeExtensions = [
     }, {
       key: 'branch'
     }, {
-      key: 'email'
+      key: 'email',
+      description: 'See also: git config --local user.email xxx@xxx.com'
     }, {
-      key: 'name'
+      key: 'name',
+      description: 'See also: git config --local user.name xxx'
     }]
   },
   {
@@ -59,10 +61,15 @@ const storeExtensions = [
     name: 'atest-store-orm',
     params: [{
       key: 'driver',
-      defaultValue: 'mysql'
+      defaultValue: 'mysql',
+      description: 'Supported: mysql, postgres'
     }, {
       key: 'database',
       defaultValue: 'atest'
+    }, {
+      key: 'historyLimit',
+      defaultValue: '',
+      description: 'Set the limit of the history record count'
     }]
   },
   {

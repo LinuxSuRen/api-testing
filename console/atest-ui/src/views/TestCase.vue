@@ -3,7 +3,7 @@ import { ref, watch, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Edit, Delete, Search, CopyDocument } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
-import type { Pair, TestResult, TestCaseWithSuite } from './types'
+import type { Pair, TestResult, TestCaseWithSuite, TestCase } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
 import { Cache } from './cache'
 import { API } from './net'
@@ -241,7 +241,8 @@ const emptyTestCaseWithSuite: TestCaseWithSuite = {
       query: [],
       cookie: [],
       form: [],
-      body: ''
+      body: '',
+      filepath: ''
     },
     response: {
       statusCode: 0,
@@ -324,7 +325,7 @@ function formatDate(createTimeStr : string){
     return formattedDate
 }
 
-function determineBodyType(e) {
+function determineBodyType(e: TestCase) {
   e.request.header.forEach(item => {
     if (item.key === "Content-Type") {
       switch (item.value) {
@@ -333,6 +334,15 @@ function determineBodyType(e) {
           break
         case 'application/json':
           bodyType.value = 5
+          break
+        case 'multipart/form-data':
+          bodyType.value = 6
+
+          e.request.form.forEach(fItem => {
+            if (fItem.key !== '' && fItem.key !== '') {
+              e.request.filepath = fItem.key + "=" + fItem.value
+            }
+          })
           break
       }
     }
@@ -721,6 +731,17 @@ function bodyTypeChange(e: number) {
     case 5:
       contentType = 'application/json'
       break;
+    case 6:
+      contentType = 'multipart/form-data'
+
+      const items = testCaseWithSuite.value.data.request.filepath.split("=")
+      if (items && items.length > 1) {
+        testCaseWithSuite.value.data.request.form = [{
+          key: items[0],
+          value: items[1]
+        } as Pair]
+      }
+      break;
   }
 
   if (contentType !== "") {
@@ -732,7 +753,7 @@ function bodyTypeChange(e: number) {
 }
 
 const lintingError = ref('')
-function jsonFormat(space) {
+function jsonFormat(space: number) {
   const jsonText = testCaseWithSuite.value.data.request.body
   if (bodyType.value !== 5 || jsonText === '') {
     return
@@ -987,10 +1008,14 @@ Magic.Keys(() => {
             <el-radio :label="3">raw</el-radio>
             <el-radio :label="4">x-www-form-urlencoded</el-radio>
             <el-radio :label="5">JSON</el-radio>
+            <el-radio :label="6">EmbedFile</el-radio>
           </el-radio-group>
 
           <div style="flex-grow: 1;">
-            <Codemirror v-if="bodyType === 3 || bodyType === 5"
+            <div v-if="bodyType === 6">
+              Filename: <el-input v-model="testCaseWithSuite.data.request.filepath" placeholder="file=sample.txt" />
+            </div>
+            <Codemirror v-if="bodyType === 3 || bodyType === 5 || bodyType === 6"
               @blur="jsonFormat(-1)"
               v-model="testCaseWithSuite.data.request.body"
               :disabled="isHistoryTestCase"/>
