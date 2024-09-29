@@ -45,6 +45,7 @@ export interface Pair {
   key: string
   value: string
   defaultValue: string
+  description: string
 }
 
 export interface TestCaseWithSuite {

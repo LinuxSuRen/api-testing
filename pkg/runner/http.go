@@ -147,6 +147,31 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		return
 	}
 
+	// var fileWriter *multipart.Writer
+	// var bodyLength int
+	// if ct := testcase.Request.Header[util.ContentType]; ct == "multipart/form-data" {
+	// 	fmt.Println("file upload ------")
+	// 	body := &bytes.Buffer{}
+	// 	fileWriter = multipart.NewWriter(body)
+	// 	var part io.Writer
+
+	// 	if part, err = fileWriter.CreateFormFile("file", "file.csv"); err != nil {
+	// 		return
+	// 	}
+
+	// 	if _, err = io.Copy(part, requestBody); err != nil {
+	// 		return
+	// 	}
+
+	// 	// overwrite the requestBody
+	// 	requestBody = body
+	// 	bodyLength = body.Len()
+	// 	testcase.Request.Method = http.MethodPost
+	// 	fmt.Println(body.String())
+	// } else {
+	// 	fmt.Println(ct, "=======ddd")
+	// }
+
 	var request *http.Request
 	if request, err = http.NewRequestWithContext(ctx, testcase.Request.Method, testcase.Request.API, requestBody); err != nil {
 		return
@@ -162,6 +187,11 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	for key, val := range testcase.Request.Header {
 		request.Header.Add(key, val)
 	}
+	// if fileWriter != nil {
+	// 	request.Header.Set(util.ContentType, fileWriter.FormDataContentType())
+	// 	request.Header.Set(util.ContentLength, strconv.Itoa(bodyLength))
+	// 	fmt.Println("file upload", request.Header)
+	// }
 
 	if err = runJob(testcase.Before, dataContext, nil); err != nil {
 		return
@@ -225,7 +255,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 		err = errors.Join(err, jsonSchemaValidation(testcase.Expect.Schema, responseBodyData))
 	} else {
-		r.log.Trace(fmt.Sprintf("skip to read the body due to it is not struct content: %q\n", respType))
+		r.log.Debug("skip to read the body due to it is not struct content: %q\n", respType)
 	}
 
 	r.cookies = append(r.cookies, resp.Cookies()...)
