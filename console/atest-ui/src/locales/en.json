@@ -26,6 +26,7 @@
         "viewHistory": "View History Test Case Result",
         "revert": "Revert",
         "goToHistory": "Go to History",
+        "goToOriginTestcase": "Go to Origin TestCase",
         "deleteAllHistory": "Delete All History"
     },
     "title": {
