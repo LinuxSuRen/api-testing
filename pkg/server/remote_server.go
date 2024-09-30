@@ -483,18 +483,24 @@ func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (re
 
 func (s *server) ImportTestSuite(ctx context.Context, in *TestSuiteSource) (result *CommonResult, err error) {
 	result = &CommonResult{}
-	if in.Kind != "postman" && in.Kind != "" {
+	var dataImporter generator.Importer
+	switch in.Kind {
+	case "postman":
+		dataImporter = generator.NewPostmanImporter()
+	case "native", "":
+		dataImporter = generator.NewNativeImporter()
+	default:
 		result.Success = false
 		result.Message = fmt.Sprintf("not support kind: %s", in.Kind)
 		return
 	}
 
+	remoteServerLogger.Logger.Info("import test suite", "kind", in.Kind, "url", in.Url)
 	var suite *testing.TestSuite
-	importer := generator.NewPostmanImporter()
 	if in.Url != "" {
-		suite, err = importer.ConvertFromURL(in.Url)
+		suite, err = dataImporter.ConvertFromURL(in.Url)
 	} else if in.Data != "" {
-		suite, err = importer.Convert([]byte(in.Data))
+		suite, err = dataImporter.Convert([]byte(in.Data))
 	} else {
 		err = errors.New("url or data is required")
 	}

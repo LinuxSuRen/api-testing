@@ -88,6 +88,10 @@ func (g *gRPCLoader) Reset() {
 }
 
 func (g *gRPCLoader) GetTestSuiteYaml(suite string) (testSuiteYaml []byte, err error) {
+	var testSuite testing.TestSuite
+	if testSuite, err = g.GetTestSuite(suite, true); err == nil {
+		testSuiteYaml, err = testing.ToYAML(&testSuite)
+	}
 	return
 }
 
@@ -163,7 +167,7 @@ func (g *gRPCLoader) DeleteTestCase(suite, testcase string) (err error) {
 	return
 }
 
-func (g *gRPCLoader) CreateHistoryTestCase(testcaseResult testing.TestCaseResult, testSuite *testing.TestSuite, historyHeader map[string]string ) (err error) {
+func (g *gRPCLoader) CreateHistoryTestCase(testcaseResult testing.TestCaseResult, testSuite *testing.TestSuite, historyHeader map[string]string) (err error) {
 	payload := ConvertToGRPCHistoryTestCaseResult(testcaseResult, testSuite, historyHeader)
 	_, err = g.client.CreateTestCaseHistory(g.ctx, payload)
 	return
