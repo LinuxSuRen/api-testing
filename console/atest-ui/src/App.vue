@@ -47,15 +47,7 @@ API.GetVersion((d) => {
   }
 })
 
-const sideWidth = ref("width: 200px; display: flex;flex-direction: column;")
 const isCollapse = ref(true)
-watch(isCollapse, (e) => {
-  if (e) {
-    sideWidth.value = "width: 80px; display: flex;flex-direction: column;"
-  } else {
-    sideWidth.value = "width: 200px; display: flex;flex-direction: column;"
-  }
-})
 const lastActiveMenu = window.localStorage.getItem('activeMenu')
 const activeMenu = ref(lastActiveMenu === '' ? 'welcome' : lastActiveMenu)
 const panelName = ref(activeMenu)
@@ -92,14 +84,15 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
 </script>
 
 <template>
-  <el-container style="height: 100%">
-    <el-aside :style="sideWidth">
+  <el-container style="height: 100%;">
+    <el-aside width="auto" style="display: flex; flex-direction: column;">
       <el-radio-group v-model="isCollapse">
         <el-radio-button :label="false">+</el-radio-button>
         <el-radio-button :label="true">-</el-radio-button>
       </el-radio-group>
       <el-menu
-        style="flex-grow: 1;"
+        class="el-menu-vertical"
+        style="height: 100%;"
         :default-active="activeMenu"
         :collapse="isCollapse"
         @select="handleSelect"
@@ -159,3 +152,9 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
     </div>
   </el-container>
 </template>
+
+<style>
+.el-menu-vertical:not(.el-menu--collapse) {
+  width: 200px;
+}
+</style>
