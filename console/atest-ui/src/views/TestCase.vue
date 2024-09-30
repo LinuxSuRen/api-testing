@@ -852,7 +852,7 @@ Magic.Keys(() => {
 </script>
 
 <template>
-  <el-container>
+  <el-container style="height: 100%;">
     <el-header style="padding-left: 5px;">
       <div style="margin-bottom: 5px">
         <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"

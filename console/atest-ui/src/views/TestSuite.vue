@@ -50,7 +50,7 @@ function load() {
         } as Pair)
       }
 
-      shareLink.value = `${window.location.href}api/v1/suites/${e.name}/yaml?store=${store.name}`
+      shareLink.value = `${window.location.href}api/v1/suites/${e.name}/yaml?x-store-name=${store.name}`
     },
     (e) => {
       ElMessage.error('Oops, ' + e)
