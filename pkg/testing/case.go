@@ -16,10 +16,14 @@ limitations under the License.
 package testing
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"log"
 	"sort"
+	"strings"
 	"time"
 
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"gopkg.in/yaml.v3"
 )
 
@@ -173,6 +177,23 @@ var _ yaml.Marshaler = &RequestBody{}
 
 func (e RequestBody) String() string {
 	return e.Value
+}
+
+func (e RequestBody) IsEmpty() bool {
+	return e.Value == ""
+}
+
+func (e RequestBody) Bytes() []byte {
+	if strings.HasPrefix(e.Value, util.ImageBase64Prefix) {
+		rawStr := strings.TrimPrefix(e.Value, util.ImageBase64Prefix)
+		if data, err := base64.StdEncoding.DecodeString(rawStr); err == nil {
+			return data
+		} else {
+			log.Printf("Error decoding: %v", err)
+			return nil
+		}
+	}
+	return []byte(e.Value)
 }
 
 type GraphQLRequestBody struct {

@@ -28,7 +28,7 @@ func TestNonLoader(t *testing.T) {
 	defer loader.Close()
 
 	assert.False(t, loader.HasMore())
-	
+
 	data, err := loader.Load()
 	assert.NoError(t, err)
 	assert.Nil(t, data)

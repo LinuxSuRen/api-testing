@@ -25,10 +25,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	mathrand "math/rand"
 	"strings"
+	"text/template"
 
 	"crypto/rsa"
 	"crypto/x509"
@@ -92,6 +92,8 @@ func FuncMap() template.FuncMap {
 		funcs[item.FuncName] = item.Func
 	}
 	funcs["rasEncryptWithPublicKey"] = rasEncryptWithPublicKey
+	funcs["randImage"] = generateRandomImage
+	funcs["randPdf"] = generateRandomPdf
 	return funcs
 }
 
