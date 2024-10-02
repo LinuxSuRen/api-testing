@@ -68,6 +68,7 @@ export interface TestCaseRequest {
   form: Pair[]
   body: string
   filepath: string
+  filename: string
 }
 
 export interface TestCaseResponse {

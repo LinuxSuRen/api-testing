@@ -47,6 +47,7 @@
         "welcome": "Welcome",
         "secrets": "Secrets",
         "stores": "Stores",
+        "files": "Files",
         "templateQuery": "Template Functions Query",
         "output": "Output"
     },

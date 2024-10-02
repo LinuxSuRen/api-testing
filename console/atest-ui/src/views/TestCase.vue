@@ -242,7 +242,8 @@ const emptyTestCaseWithSuite: TestCaseWithSuite = {
       cookie: [],
       form: [],
       body: '',
-      filepath: ''
+      filepath: '',
+      filename: ''
     },
     response: {
       statusCode: 0,
@@ -337,7 +338,6 @@ function determineBodyType(e: TestCase) {
           break
         case 'multipart/form-data':
           bodyType.value = 6
-
           e.request.form.forEach(fItem => {
             if (fItem.key !== '' && fItem.key !== '') {
               e.request.filepath = fItem.key + "=" + fItem.value
@@ -634,6 +634,7 @@ const deleteAllHistory = async (formEl) => {
 }
 
 const options = GetHTTPMethods()
+const fileLists = ref([])
 const requestActiveTab = ref(Cache.GetPreference().requestActiveTab)
 watch(requestActiveTab, Cache.WatchRequestActiveTab)
 Magic.Keys(() => {
@@ -721,6 +722,22 @@ function formChange() {
   }
 }
 
+function handleSelectChange() {
+  const items = testCaseWithSuite.value.data.request.filename
+  if (items) {
+    testCaseWithSuite.value.data.request.form = [{
+          key: "file",
+          value: items
+        } as Pair]
+
+    const file = fileLists.value.find((e) => e.value === items)
+    if (file) {
+      const content = file.content.split(',')[1]
+      testCaseWithSuite.value.data.request.body = atob(content)
+    }
+  }
+}
+
 const bodyType = ref(1)
 function bodyTypeChange(e: number) {
   let contentType = ""
@@ -740,6 +757,20 @@ function bodyTypeChange(e: number) {
           key: items[0],
           value: items[1]
         } as Pair]
+      }
+      break;
+    case 7:
+      // 获取localStorage中的数据
+      const savedFiles = localStorage.getItem('fileLists')
+      if (savedFiles) {
+        const fileList = JSON.parse(savedFiles)
+        console.log(fileList)
+        fileLists.value = fileList.map(file => ({
+          label: file.name,
+          value: file.name,
+          content: file.content,
+          disabled: false
+        }))
       }
       break;
   }
@@ -1009,9 +1040,23 @@ Magic.Keys(() => {
             <el-radio :label="4">x-www-form-urlencoded</el-radio>
             <el-radio :label="5">JSON</el-radio>
             <el-radio :label="6">EmbedFile</el-radio>
+            <el-radio-button :label="7">UploadFile</el-radio-button>
           </el-radio-group>
 
           <div style="flex-grow: 1;">
+            <el-select v-if="bodyType === 7" 
+              v-model="testCaseWithSuite.data.request.filename" 
+              @change="handleSelectChange"
+              placeholder="Select" 
+              style="width: 240px">
+              <el-option
+                v-for="item in fileLists"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+                :disabled="item.disabled"
+              />
+            </el-select>
             <div v-if="bodyType === 6">
               Filename: <el-input v-model="testCaseWithSuite.data.request.filepath" placeholder="file=sample.txt" />
             </div>

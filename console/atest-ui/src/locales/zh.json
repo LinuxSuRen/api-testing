@@ -41,6 +41,7 @@
         "welcome": "欢迎",
         "secrets": "凭据",
         "stores": "存储",
+        "files": "文件",
         "parameter": "参数",
         "templateQuery": "模板函数查询",
         "output": "输出"
