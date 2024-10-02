@@ -189,6 +189,8 @@ func (e RequestBody) Bytes() (data []byte) {
 		data, err = decodeBase64Body(e.Value, util.ImageBase64Prefix)
 	} else if strings.HasPrefix(e.Value, util.PDFBase64Prefix) {
 		data, err = decodeBase64Body(e.Value, util.PDFBase64Prefix)
+	} else if strings.HasPrefix(e.Value, util.ZIPBase64Prefix) {
+		data, err = decodeBase64Body(e.Value, util.ZIPBase64Prefix)
 	} else {
 		data = []byte(e.Value)
 	}

@@ -282,7 +282,7 @@ func TestRasEncryptWithPublicKey(t *testing.T) {
 }
 
 func TestFuncUsages(t *testing.T) {
-	funcs := []string{"randImage"}
+	funcs := []string{"randImage", "randZip"}
 
 	for _, f := range funcs {
 		usage := FuncUsage(f)

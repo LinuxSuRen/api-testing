@@ -96,6 +96,7 @@ func FuncMap() template.FuncMap {
 	funcs["rasEncryptWithPublicKey"] = rasEncryptWithPublicKey
 	funcs["randImage"] = generateRandomImage
 	funcs["randPdf"] = generateRandomPdf
+	funcs["randZip"] = generateRandomZip
 	return funcs
 }
 
