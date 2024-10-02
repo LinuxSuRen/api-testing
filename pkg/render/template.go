@@ -21,6 +21,7 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"crypto/sha256"
+	_ "embed"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -38,6 +39,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/linuxsuren/api-testing/pkg/secret"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"gopkg.in/yaml.v3"
 )
 
 var secretGetter secret.SecretGetter
@@ -95,6 +97,15 @@ func FuncMap() template.FuncMap {
 	funcs["randImage"] = generateRandomImage
 	funcs["randPdf"] = generateRandomPdf
 	return funcs
+}
+
+// FuncUsage returns the usage of target template function
+func FuncUsage(funcName string) (usage string) {
+	usageMap := make(map[string]string)
+	if err := yaml.Unmarshal(templateUsage, usageMap); err == nil {
+		usage = usageMap[funcName]
+	}
+	return
 }
 
 // RenderThenPrint renders the template then prints the result
@@ -251,3 +262,6 @@ func rasEncryptWithPublicKey(content, key string) (string, error) {
 
 	return base64.StdEncoding.EncodeToString(encryptedData), nil
 }
+
+//go:embed data/templateUsage.yaml
+var templateUsage []byte

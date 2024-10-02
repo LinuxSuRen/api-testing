@@ -183,17 +183,25 @@ func (e RequestBody) IsEmpty() bool {
 	return e.Value == ""
 }
 
-func (e RequestBody) Bytes() []byte {
+func (e RequestBody) Bytes() (data []byte) {
+	var err error
 	if strings.HasPrefix(e.Value, util.ImageBase64Prefix) {
-		rawStr := strings.TrimPrefix(e.Value, util.ImageBase64Prefix)
-		if data, err := base64.StdEncoding.DecodeString(rawStr); err == nil {
-			return data
-		} else {
-			log.Printf("Error decoding: %v", err)
-			return nil
-		}
+		data, err = decodeBase64Body(e.Value, util.ImageBase64Prefix)
+	} else if strings.HasPrefix(e.Value, util.PDFBase64Prefix) {
+		data, err = decodeBase64Body(e.Value, util.PDFBase64Prefix)
+	} else {
+		data = []byte(e.Value)
 	}
-	return []byte(e.Value)
+
+	if err != nil {
+		log.Printf("Error decoding: %v", err)
+	}
+	return
+}
+
+func decodeBase64Body(raw, prefix string) ([]byte, error) {
+	rawStr := strings.TrimPrefix(raw, prefix)
+	return base64.StdEncoding.DecodeString(rawStr)
 }
 
 type GraphQLRequestBody struct {

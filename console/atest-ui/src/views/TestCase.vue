@@ -721,6 +721,15 @@ function formChange() {
   }
 }
 
+const filepathChange = () => {
+  const items = testCaseWithSuite.value.data.request.filepath.split("=")
+      if (items && items.length > 1) {
+        testCaseWithSuite.value.data.request.form = [{
+          key: items[0],
+          value: items[1]
+        } as Pair]
+      }
+}
 const bodyType = ref(1)
 function bodyTypeChange(e: number) {
   let contentType = ""
@@ -733,14 +742,7 @@ function bodyTypeChange(e: number) {
       break;
     case 6:
       contentType = 'multipart/form-data'
-
-      const items = testCaseWithSuite.value.data.request.filepath.split("=")
-      if (items && items.length > 1) {
-        testCaseWithSuite.value.data.request.form = [{
-          key: items[0],
-          value: items[1]
-        } as Pair]
-      }
+      filepathChange()
       break;
   }
 
@@ -1025,7 +1027,7 @@ Magic.Keys(() => {
               <el-row>
                 <el-col :span="4">Filename:</el-col>
                 <el-col :span="20">
-                  <el-input v-model="testCaseWithSuite.data.request.filepath" placeholder="file=sample.txt" />
+                  <el-input v-model="testCaseWithSuite.data.request.filepath" placeholder="file=sample.txt" @change="filepathChange" />
                 </el-col>
               </el-row>
             </div>

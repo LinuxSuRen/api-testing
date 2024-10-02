@@ -1,0 +1,6 @@
+randImage: |
+  {{ randImage width height }}
+randAscii: |
+  {{ randAscii count }}
+randPdf: |
+  {{ randPdf "content" }}

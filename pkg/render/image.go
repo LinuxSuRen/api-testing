@@ -30,6 +30,20 @@ import (
 )
 
 func generateRandomImage(width, height int) (data string, err error) {
+	// avoid unexpected image size
+	if width < 4 {
+		width = 4
+	}
+	if height < 4 {
+		height = 4
+	}
+	if width > 2048 {
+		width = 2048
+	}
+	if height > 2048 {
+		height = 2048
+	}
+
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	blockSize := int(math.Max(float64(width), float64(height)) / 4)
 	rand.Seed(time.Now().UnixNano())

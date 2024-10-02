@@ -280,3 +280,12 @@ func TestRasEncryptWithPublicKey(t *testing.T) {
 		t.Fatalf("Decrypted message does not match original. Got: %s, want: %s", decryptedMessage, message)
 	}
 }
+
+func TestFuncUsages(t *testing.T) {
+	funcs := []string{"randImage"}
+
+	for _, f := range funcs {
+		usage := FuncUsage(f)
+		assert.NotEmpty(t, usage)
+	}
+}
