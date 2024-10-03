@@ -15,13 +15,15 @@ limitations under the License.
 */
 import { Cache } from './cache'
 
-function DefaultResponseProcess(response: any) {
+async function DefaultResponseProcess(response: any) {
   if (!response.ok) {
     switch (response.status) {
       case 401:
         throw new Error("Unauthenticated")
     }
-    throw new Error(response.statusText)
+
+    const message = await response.json().then((data :any) => data.message)
+    throw new Error(message)
   } else {
     return response.json()
   }
@@ -79,6 +81,7 @@ function CreateTestSuite(suite: TestSuite,
 interface ImportSource {
   store: string
   url: string
+  kind: string
 }
 
 function UpdateTestSuite(suite: any,
@@ -143,7 +146,7 @@ function ConvertTestSuite(suiteName: string, genertor: string,
 }
 
 function DuplicateTestSuite(sourceSuiteName: string, targetSuiteName: string,
-    callback: (d: any) => void, errHandle?: ((reason: any) => PromiseLike<never>) | undefined | null ) {
+    callback: (d: any) => void, errHandle?: ((reason: any) => PromiseLike<never>) | undefined | null) {
     const requestOptions = {
       method: 'POST',
       headers: {
@@ -160,7 +163,8 @@ function DuplicateTestSuite(sourceSuiteName: string, targetSuiteName: string,
         .then(callback).catch(errHandle)
 }
 
-function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
+function ImportTestSuite(source: ImportSource, callback: (d: any) => void,
+  errHandle?: (e: any) => void | null) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -171,15 +175,20 @@ function ImportTestSuite(source: ImportSource, callback: (d: any) => void) {
     body: JSON.stringify(source)
   }
 
-  fetch(`/api/v1/suites/import`, requestOptions)
-  .then(DefaultResponseProcess)
-    .then(callback)
+  fetch(`/api/v1/suites/import`, requestOptions).
+    then(DefaultResponseProcess).then(callback).catch(errHandle)
 }
 
 export interface TestCase {
   suiteName: string
   name: string
   request: any
+}
+
+interface HistoryTestCase {
+  historyCaseID : string,
+  suiteName: string
+  caseName: string
 }
 
 function CreateTestCase(testcase: TestCase,
@@ -317,6 +326,7 @@ interface GenerateRequest {
   suiteName: string
   name: string
   generator: string
+  id: string
 }
 
 function GenerateCode(request: GenerateRequest,
@@ -328,14 +338,32 @@ function GenerateCode(request: GenerateRequest,
       'X-Auth': getToken()
     },
     body: JSON.stringify({
-      TestSuite: request.suiteName,
-      TestCase: request.name,
-      Generator: request.generator
+        TestSuite: request.suiteName,
+        TestCase: request.name,
+        Generator: request.generator
     })
   }
   fetch(`/api/v1/codeGenerators/generate`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(emptyOrDefault(errHandle))
+}
+
+function HistoryGenerateCode(request: GenerateRequest,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      ID: request.id,
+      Generator: request.generator
+    })
+  }
+  fetch(`/api/v1/codeGenerators/history/generate`, requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle)
 }
 
 function ListCodeGenerator(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
@@ -561,18 +589,115 @@ function emptyOrDefault(fn: any) {
     return () => {}
 }
 
+function GetHistoryTestCaseWithResult(req: HistoryTestCase,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
+    }
+  }
+  fetch(`/api/v1/historyTestCaseWithResult/${req.historyCaseID}`, requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle)
+}
+
+function GetHistoryTestCase(req: HistoryTestCase,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
+    }
+  }
+  fetch(`/api/v1/historyTestCase/${req.historyCaseID}`, requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle)
+}
+
+function DeleteHistoryTestCase(req: HistoryTestCase,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+    const requestOptions = {
+      method: 'DELETE',
+      headers: {
+        'X-Store-Name': Cache.GetCurrentStore().name,
+        'X-Auth': getToken()
+      },
+      body: JSON.stringify({
+        ID : req.historyCaseID
+      })
+    }
+    fetch(`/api/v1/historyTestCase/${req.historyCaseID}`, requestOptions)
+      .then(callback).catch(errHandle)
+}
+
+function DeleteAllHistoryTestCase(suiteName: string, caseName: string,
+    callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+    const requestOptions = {
+        method: 'DELETE',
+        headers: {
+            'X-Store-Name': Cache.GetCurrentStore().name,
+            'X-Auth': getToken()
+        },
+        body: JSON.stringify({
+            suiteName : suiteName,
+            caseName:  caseName,
+        })
+    }
+    fetch(`/api/v1/suites/${suiteName}/cases/${caseName}`, requestOptions)
+        .then(callback).catch(errHandle)
+}
+
+function GetTestCaseAllHistory(req: TestCase,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      suiteName: req.suiteName,
+      name: req.name
+    })
+  }
+  fetch(`/api/v1/suites/${req.suiteName}/cases/${req.name}`, requestOptions)
+    .then(DefaultResponseProcess)
+    .then(callback).catch(errHandle)
+}
+
+function DownloadResponseFile(testcase,
+    callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'X-Store-Name': Cache.GetCurrentStore().name,
+            'X-Auth': getToken()
+        },
+        body: JSON.stringify({
+            response: {
+                body: testcase.body,
+            }
+        })
+    }
+    fetch(`/api/v1/downloadFile/${testcase.body}`, requestOptions)
+        .then(DefaultResponseProcess)
+        .then(callback).catch(errHandle)
+}
+
+
 export const API = {
-    DefaultResponseProcess,
-    GetVersion,
-    CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, GetTestSuiteYaml,
-    DuplicateTestSuite,
-    CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase, DuplicateTestCase,
-    GenerateCode, ListCodeGenerator,
-    PopularHeaders,
-    CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
-    FunctionsQuery,
-    GetSecrets, DeleteSecret, CreateOrUpdateSecret,
-    GetSuggestedAPIs,
-    ReloadMockServer, GetMockConfig,
-    getToken
+  DefaultResponseProcess,
+  GetVersion,
+  CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,GetTestSuiteYaml,
+  CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
+  GetHistoryTestCaseWithResult, DeleteHistoryTestCase,GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
+  GenerateCode, ListCodeGenerator, HistoryGenerateCode,
+  PopularHeaders,
+  CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
+  FunctionsQuery,
+  GetSecrets, DeleteSecret, CreateOrUpdateSecret,
+  GetSuggestedAPIs,
+  ReloadMockServer, GetMockConfig,
+  getToken
 }

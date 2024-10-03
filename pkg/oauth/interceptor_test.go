@@ -19,6 +19,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/linuxsuren/oauth-hub"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -47,7 +48,7 @@ func TestAuthInterceptor(t *testing.T) {
 	})
 
 	t.Run("normal", func(t *testing.T) {
-		accessToken["fake"] = &UserInfo{}
+		oauth.SetUser("fake", &oauth.UserInfo{})
 		ctx := metadata.NewIncomingContext(context.TODO(), metadata.Pairs("auth", "fake"))
 
 		inter := &authInter{}

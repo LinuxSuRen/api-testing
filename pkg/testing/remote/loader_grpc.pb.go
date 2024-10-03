@@ -33,6 +33,13 @@ type LoaderClient interface {
 	GetTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.TestCase, error)
 	UpdateTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.TestCase, error)
 	DeleteTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.Empty, error)
+	ListHistoryTestSuite(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*HistoryTestSuites, error)
+	CreateTestCaseHistory(ctx context.Context, in *server.HistoryTestResult, opts ...grpc.CallOption) (*server.Empty, error)
+	GetHistoryTestCaseWithResult(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.HistoryTestResult, error)
+	GetHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.HistoryTestCase, error)
+	DeleteHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.Empty, error)
+	DeleteAllHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.Empty, error)
+	GetTestCaseAllHistory(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.HistoryTestCases, error)
 	GetVersion(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.Version, error)
 	Verify(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.ExtensionStatus, error)
 	PProf(ctx context.Context, in *server.PProfRequest, opts ...grpc.CallOption) (*server.PProfData, error)
@@ -136,6 +143,69 @@ func (c *loaderClient) DeleteTestCase(ctx context.Context, in *server.TestCase, 
 	return out, nil
 }
 
+func (c *loaderClient) ListHistoryTestSuite(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*HistoryTestSuites, error) {
+	out := new(HistoryTestSuites)
+	err := c.cc.Invoke(ctx, "/remote.Loader/ListHistoryTestSuite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) CreateTestCaseHistory(ctx context.Context, in *server.HistoryTestResult, opts ...grpc.CallOption) (*server.Empty, error) {
+	out := new(server.Empty)
+	err := c.cc.Invoke(ctx, "/remote.Loader/CreateTestCaseHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) GetHistoryTestCaseWithResult(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.HistoryTestResult, error) {
+	out := new(server.HistoryTestResult)
+	err := c.cc.Invoke(ctx, "/remote.Loader/GetHistoryTestCaseWithResult", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) GetHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.HistoryTestCase, error) {
+	out := new(server.HistoryTestCase)
+	err := c.cc.Invoke(ctx, "/remote.Loader/GetHistoryTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) DeleteHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.Empty, error) {
+	out := new(server.Empty)
+	err := c.cc.Invoke(ctx, "/remote.Loader/DeleteHistoryTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) DeleteAllHistoryTestCase(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.Empty, error) {
+	out := new(server.Empty)
+	err := c.cc.Invoke(ctx, "/remote.Loader/DeleteAllHistoryTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) GetTestCaseAllHistory(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.HistoryTestCases, error) {
+	out := new(server.HistoryTestCases)
+	err := c.cc.Invoke(ctx, "/remote.Loader/GetTestCaseAllHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *loaderClient) GetVersion(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.Version, error) {
 	out := new(server.Version)
 	err := c.cc.Invoke(ctx, "/remote.Loader/GetVersion", in, out, opts...)
@@ -177,6 +247,13 @@ type LoaderServer interface {
 	GetTestCase(context.Context, *server.TestCase) (*server.TestCase, error)
 	UpdateTestCase(context.Context, *server.TestCase) (*server.TestCase, error)
 	DeleteTestCase(context.Context, *server.TestCase) (*server.Empty, error)
+	ListHistoryTestSuite(context.Context, *server.Empty) (*HistoryTestSuites, error)
+	CreateTestCaseHistory(context.Context, *server.HistoryTestResult) (*server.Empty, error)
+	GetHistoryTestCaseWithResult(context.Context, *server.HistoryTestCase) (*server.HistoryTestResult, error)
+	GetHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.HistoryTestCase, error)
+	DeleteHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.Empty, error)
+	DeleteAllHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.Empty, error)
+	GetTestCaseAllHistory(context.Context, *server.TestCase) (*server.HistoryTestCases, error)
 	GetVersion(context.Context, *server.Empty) (*server.Version, error)
 	Verify(context.Context, *server.Empty) (*server.ExtensionStatus, error)
 	PProf(context.Context, *server.PProfRequest) (*server.PProfData, error)
@@ -216,6 +293,27 @@ func (UnimplementedLoaderServer) UpdateTestCase(context.Context, *server.TestCas
 }
 func (UnimplementedLoaderServer) DeleteTestCase(context.Context, *server.TestCase) (*server.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTestCase not implemented")
+}
+func (UnimplementedLoaderServer) ListHistoryTestSuite(context.Context, *server.Empty) (*HistoryTestSuites, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListHistoryTestSuite not implemented")
+}
+func (UnimplementedLoaderServer) CreateTestCaseHistory(context.Context, *server.HistoryTestResult) (*server.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTestCaseHistory not implemented")
+}
+func (UnimplementedLoaderServer) GetHistoryTestCaseWithResult(context.Context, *server.HistoryTestCase) (*server.HistoryTestResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryTestCaseWithResult not implemented")
+}
+func (UnimplementedLoaderServer) GetHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.HistoryTestCase, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryTestCase not implemented")
+}
+func (UnimplementedLoaderServer) DeleteHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteHistoryTestCase not implemented")
+}
+func (UnimplementedLoaderServer) DeleteAllHistoryTestCase(context.Context, *server.HistoryTestCase) (*server.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAllHistoryTestCase not implemented")
+}
+func (UnimplementedLoaderServer) GetTestCaseAllHistory(context.Context, *server.TestCase) (*server.HistoryTestCases, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTestCaseAllHistory not implemented")
 }
 func (UnimplementedLoaderServer) GetVersion(context.Context, *server.Empty) (*server.Version, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
@@ -419,6 +517,132 @@ func _Loader_DeleteTestCase_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Loader_ListHistoryTestSuite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).ListHistoryTestSuite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/ListHistoryTestSuite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).ListHistoryTestSuite(ctx, req.(*server.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_CreateTestCaseHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.HistoryTestResult)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).CreateTestCaseHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/CreateTestCaseHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).CreateTestCaseHistory(ctx, req.(*server.HistoryTestResult))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_GetHistoryTestCaseWithResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetHistoryTestCaseWithResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/GetHistoryTestCaseWithResult",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetHistoryTestCaseWithResult(ctx, req.(*server.HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_GetHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetHistoryTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/GetHistoryTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetHistoryTestCase(ctx, req.(*server.HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_DeleteHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).DeleteHistoryTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/DeleteHistoryTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).DeleteHistoryTestCase(ctx, req.(*server.HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_DeleteAllHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).DeleteAllHistoryTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/DeleteAllHistoryTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).DeleteAllHistoryTestCase(ctx, req.(*server.HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_GetTestCaseAllHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.TestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetTestCaseAllHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/GetTestCaseAllHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetTestCaseAllHistory(ctx, req.(*server.TestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Loader_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(server.Empty)
 	if err := dec(in); err != nil {
@@ -519,6 +743,34 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTestCase",
 			Handler:    _Loader_DeleteTestCase_Handler,
+		},
+		{
+			MethodName: "ListHistoryTestSuite",
+			Handler:    _Loader_ListHistoryTestSuite_Handler,
+		},
+		{
+			MethodName: "CreateTestCaseHistory",
+			Handler:    _Loader_CreateTestCaseHistory_Handler,
+		},
+		{
+			MethodName: "GetHistoryTestCaseWithResult",
+			Handler:    _Loader_GetHistoryTestCaseWithResult_Handler,
+		},
+		{
+			MethodName: "GetHistoryTestCase",
+			Handler:    _Loader_GetHistoryTestCase_Handler,
+		},
+		{
+			MethodName: "DeleteHistoryTestCase",
+			Handler:    _Loader_DeleteHistoryTestCase_Handler,
+		},
+		{
+			MethodName: "DeleteAllHistoryTestCase",
+			Handler:    _Loader_DeleteAllHistoryTestCase_Handler,
+		},
+		{
+			MethodName: "GetTestCaseAllHistory",
+			Handler:    _Loader_GetTestCaseAllHistory_Handler,
 		},
 		{
 			MethodName: "GetVersion",

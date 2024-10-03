@@ -187,7 +187,14 @@ func (r *Request) GetBody() (reader io.Reader, err error) {
 				writer.WriteField(key, val)
 			}
 
-			_ = writer.Close()
+			if f, ok := r.Form["file"]; ok && f != "" && !r.Body.IsEmpty() {
+				var part io.Writer
+				if part, err = writer.CreateFormFile("file", r.Form["file"]); err == nil {
+					part.Write(r.Body.Bytes())
+				}
+			}
+
+			err = writer.Close()
 			reader = multiBody
 			r.Header[util.ContentType] = writer.FormDataContentType()
 		} else if r.Header[util.ContentType] == util.Form {
@@ -202,7 +209,7 @@ func (r *Request) GetBody() (reader io.Reader, err error) {
 	} else if r.BodyFromFile != "" {
 		var data []byte
 		if data, err = os.ReadFile(r.BodyFromFile); err == nil {
-			reader = bytes.NewBufferString(string(data))
+			reader = bytes.NewBuffer(data)
 		}
 	}
 	return

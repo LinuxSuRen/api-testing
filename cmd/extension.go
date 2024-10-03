@@ -35,6 +35,7 @@ type extensionOption struct {
 	os            string
 	arch          string
 	timeout       time.Duration
+	imagePrefix   string
 }
 
 func createExtensionCommand(ociDownloader downloader.PlatformAwareOCIDownloader) (c *cobra.Command) {
@@ -55,6 +56,7 @@ func createExtensionCommand(ociDownloader downloader.PlatformAwareOCIDownloader)
 	flags.StringVarP(&opt.os, "os", "", runtime.GOOS, "The OS")
 	flags.StringVarP(&opt.arch, "arch", "", runtime.GOARCH, "The architecture")
 	flags.DurationVarP(&opt.timeout, "timeout", "", time.Minute, "The timeout of downloading")
+	flags.StringVarP(&opt.imagePrefix, "image-prefix", "", "linuxsuren", "The prefix for the image address")
 	return
 }
 
@@ -62,6 +64,7 @@ func (o *extensionOption) runE(cmd *cobra.Command, args []string) (err error) {
 	o.ociDownloader.WithOS(o.os)
 	o.ociDownloader.WithArch(o.arch)
 	o.ociDownloader.WithRegistry(o.registry)
+	o.ociDownloader.WithImagePrefix(o.imagePrefix)
 	o.ociDownloader.WithTimeout(o.timeout)
 	o.ociDownloader.WithContext(cmd.Context())
 

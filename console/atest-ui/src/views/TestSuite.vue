@@ -34,6 +34,7 @@ const suite = ref({
     }
   }
 } as Suite)
+const shareLink = ref('')
 function load() {
   const store = Cache.GetCurrentStore()
   if (!props.name || store.name === '') return
@@ -48,6 +49,8 @@ function load() {
           value: ''
         } as Pair)
       }
+
+      shareLink.value = `${window.location.href}api/v1/suites/${e.name}/yaml?x-store-name=${store.name}`
     },
     (e) => {
       ElMessage.error('Oops, ' + e)
@@ -103,9 +106,10 @@ const testcaseFormRef = ref<FormInstance>()
 const testCaseForm = reactive({
   suiteName: '',
   name: '',
-  api: '',
-  method: 'GET',
-  request: {}
+  request: {
+    api: '',
+    method: 'GET'
+  }
 })
 const rules = reactive<FormRules<Suite>>({
   name: [{ required: true, message: 'Please input TestCase name', trigger: 'blur' }]
@@ -130,6 +134,9 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         }, () => {
           suiteCreatingLoading.value = false
           emit('updated', props.name, testCaseForm.name)
+        }, (e) => {
+          suiteCreatingLoading.value = false
+          ElMessage.error('Oops, ' + e)
         }
       )
 
@@ -221,7 +228,11 @@ const yamlDialogVisible = ref(false)
 function viewYaml() {
   yamlDialogVisible.value = true
   API.GetTestSuiteYaml(props.name, (d) => {
-    yamlFormat.value = yaml.dump(yaml.load(atob(d.data)))
+    try {
+      yamlFormat.value = yaml.dump(yaml.load(atob(d.data)))
+    } catch (e) {
+      ElMessage.error('Oops, ' + e)
+    }
   })
 }
 
@@ -327,6 +338,9 @@ const targetSuiteDuplicateName = ref('')
     </div>
 
     <div class="button-container">
+        Share link: <el-input readonly v-model="shareLink" style="width: 80%" />
+    </div>
+    <div class="button-container">
       <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{
         t('button.save')
       }}</el-button>
@@ -380,7 +394,7 @@ const targetSuiteDuplicateName = ref('')
             v-if="suite.spec.kind !== 'tRPC' && suite.spec.kind !== 'gRPC'"
           >
             <el-select
-              v-model="testCaseForm.method"
+              v-model="testCaseForm.request.method"
               class="m-2"
               placeholder="Method"
               size="middle"
@@ -396,7 +410,7 @@ const targetSuiteDuplicateName = ref('')
           </el-form-item>
           <el-form-item label="API" prop="api">
             <el-autocomplete
-              v-model="testCaseForm.api"
+              v-model="testCaseForm.request.api"
               :fetch-suggestions="querySuggestedAPIs"
               @select="handleAPISelect"
               placeholder="API Address"
@@ -413,7 +427,7 @@ const targetSuiteDuplicateName = ref('')
             <el-button
               type="primary"
               @click="submitForm(testcaseFormRef)"
-              :loading="suiteCreatingLoading"
+              v-loading="suiteCreatingLoading"
               test-id="case-form-submit"
               >{{ t('button.submit') }}</el-button
             >

@@ -16,7 +16,9 @@ limitations under the License.
 package server
 
 import (
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
+	"time"
 
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/stretchr/testify/assert"
@@ -149,3 +151,132 @@ func TestToNormalSuite(t *testing.T) {
 		},
 	}))
 }
+
+func TestConvertToGRPCHistoryTestCase(t *testing.T) {
+	now := time.Now().UTC()
+	result := ConvertToGRPCHistoryTestCase(atest.HistoryTestCase{
+		CreateTime: now,
+		SuiteParam: defaultMap,
+		SuiteSpec: atest.APISpec{
+			Kind: "http",
+			URL:  "/v1",
+			RPC: &atest.RPCDesc{
+				Raw: "fake",
+			},
+			Secure: &atest.Secure{
+				KeyFile: "fake",
+			},
+		},
+		Data: atest.TestCase{
+			Request: atest.Request{
+				Header: defaultMap,
+			},
+			Expect: atest.Response{
+				BodyFieldsExpect: defaultInterMap,
+			},
+		},
+	})
+	assert.Equal(t, result.Request.Header, defaultPairs)
+	assert.Equal(t, result.SuiteParam, defaultPairs)
+	assert.Equal(t, result.Response.BodyFieldsExpect, defaultPairs)
+	assert.Equal(t, "fake", result.SuiteSpec.Secure.Key)
+	assert.Equal(t, timestamppb.New(now), result.CreateTime)
+}
+
+func TestToNormalTestCaseResult(t *testing.T) {
+	assert.Equal(t, atest.TestCaseResult{
+		Body:       "body",
+		Error:      "error",
+		Header:     defaultMap,
+		Id:         "id",
+		Output:     "output",
+		StatusCode: 200,
+	}, ToNormalTestCaseResult(&TestCaseResult{
+		Body:       "body",
+		Error:      "error",
+		Header:     defaultPairs,
+		Id:         "id",
+		Output:     "output",
+		StatusCode: 200,
+	}))
+}
+
+func TestToGRPCHistoryTestCaseResult(t *testing.T) {
+	t.Run("TestCaseResult is empty", func(t *testing.T) {
+		historyTestResult := atest.HistoryTestResult{
+			Message:    "test message",
+			Error:      "test error",
+			CreateTime: time.Now(),
+			Data: atest.HistoryTestCase{
+				ID: "test-id",
+			},
+			TestCaseResult: nil,
+		}
+
+		result := ToGRPCHistoryTestCaseResult(historyTestResult)
+
+		assert.Equal(t, 0, len(result.TestCaseResult))
+		assert.Equal(t, historyTestResult.Message, result.Message)
+		assert.Equal(t, historyTestResult.Error, result.Error)
+	})
+
+	t.Run("TestCaseResult is not empty", func(t *testing.T) {
+		now := time.Now().UTC()
+
+		result := ToGRPCHistoryTestCaseResult(atest.HistoryTestResult{
+			Message:    "fake message",
+			CreateTime: now,
+			Data: atest.HistoryTestCase{
+				ID: "fake id",
+			},
+			TestCaseResult: []atest.TestCaseResult{
+				{
+					StatusCode: 200,
+					Output:     "fake output",
+				},
+				{
+					Output: "fake output 2",
+				},
+			},
+		})
+
+		assert.Equal(t, 2, len(result.TestCaseResult))
+		assert.Equal(t, "fake message", result.Message)
+		assert.Equal(t, now, result.CreateTime.AsTime())
+		assert.Equal(t, "fake output", result.TestCaseResult[0].Output)
+		assert.Equal(t, "fake output 2", result.TestCaseResult[1].Output)
+	})
+}
+
+func TestToGRPCTestSuiteSpec(t *testing.T) {
+
+	t.Run("empty", func(t *testing.T) {
+		assert.Equal(t, &APISpec{}, ToGRPCTestSuiteSpec(atest.APISpec{}))
+	})
+
+	t.Run("fields", func(t *testing.T) {
+		assert.Equal(t, &APISpec{
+			Url:  "/v1",
+			Kind: "http",
+			Rpc: &RPC{
+				Raw: "fake",
+			},
+			Secure: &Secure{
+				Key: "fake",
+			},
+		}, ToGRPCTestSuiteSpec(atest.APISpec{
+			Kind: "http",
+			URL:  "/v1",
+			RPC: &atest.RPCDesc{
+				Raw: "fake",
+			},
+			Secure: &atest.Secure{
+				KeyFile: "fake",
+			},
+		}))
+	})
+}
+
+var defaultInterMap = map[string]interface{}{"foo": "bar"}
+var defaultMap map[string]string = map[string]string{"foo": "bar"}
+var defaultPairs []*Pair = []*Pair{{Key: "foo", Value: "bar"}}

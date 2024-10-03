@@ -349,7 +349,15 @@ func (l *fileLoader) GetTestCase(suite, name string) (testcase TestCase, err err
 	return
 }
 
-func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err error) {
+func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) error {
+	return l.createOrUpdate(suiteName, testcase, false)
+}
+
+func (l *fileLoader) UpdateTestCase(suite string, testcase TestCase) error {
+	return l.createOrUpdate(suite, testcase, true)
+}
+
+func (l *fileLoader) createOrUpdate(suiteName string, testcase TestCase, update bool) (err error) {
 	var suite *TestSuite
 	var suiteFilepath string
 	for i := range l.paths {
@@ -377,18 +385,14 @@ func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) (err er
 
 		if !found {
 			suite.Items = append(suite.Items, testcase)
+		} else if !update {
+			err = fmt.Errorf("test case %s already exists", testcase.Name)
+			return
 		}
-
 		err = SaveTestSuiteToFile(suite, suiteFilepath)
 	}
 	return
 }
-
-func (l *fileLoader) UpdateTestCase(suite string, testcase TestCase) (err error) {
-	err = l.CreateTestCase(suite, testcase)
-	return
-}
-
 func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 	var suite *TestSuite
 	var suiteFilepath string
@@ -422,6 +426,34 @@ func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
 
 		err = SaveTestSuiteToFile(suite, suiteFilepath)
 	}
+	return
+}
+
+func (l *fileLoader) CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite, historyHeader map[string]string) (err error) { // always be okay
+	return
+}
+
+func (l *fileLoader) ListHistoryTestSuite() (suites []HistoryTestSuite, err error) {
+	return
+}
+
+func (l *fileLoader) GetHistoryTestCaseWithResult(id string) (testcase HistoryTestResult, err error) {
+	return
+}
+
+func (l *fileLoader) GetHistoryTestCase(id string) (testcase HistoryTestCase, err error) {
+	return
+}
+
+func (l *fileLoader) DeleteHistoryTestCase(id string) (err error) {
+	return
+}
+
+func (l *fileLoader) DeleteAllHistoryTestCase(suite, name string) (err error) {
+	return
+}
+
+func (l *fileLoader) GetTestCaseAllHistory(suite, name string) (historyTestCase []HistoryTestCase, err error) {
 	return
 }
 

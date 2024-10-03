@@ -4,6 +4,8 @@ option go_package = "github.com/linuxsuren/api-testing/pkg/server";
 
 package server;
 
+import "google/protobuf/timestamp.proto";
+
 import "google/api/annotations.proto";
 
 service Runner {
@@ -113,6 +115,43 @@ service Runner {
         };
     }
 
+    // history test related
+    rpc GetHistorySuites(Empty) returns (HistorySuites) {
+        option (google.api.http) = {
+          post: "/api/v1/historySuites"
+        };
+    }
+
+    rpc GetHistoryTestCaseWithResult(HistoryTestCase) returns (HistoryTestResult) {
+        option (google.api.http) = {
+            get: "/api/v1/historyTestCaseWithResult/{ID}"
+        };
+    }
+
+    rpc GetHistoryTestCase(HistoryTestCase) returns (HistoryTestCase) {
+        option (google.api.http) = {
+            get: "/api/v1/historyTestCase/{ID}"
+        };
+    }
+
+    rpc DeleteHistoryTestCase(HistoryTestCase) returns (HelloReply) {
+        option (google.api.http) = {
+            delete: "/api/v1/historyTestCase/{ID}"
+        };
+    }
+
+    rpc DeleteAllHistoryTestCase(HistoryTestCase) returns (HelloReply) {
+        option (google.api.http) = {
+            delete: "/api/v1/historySuites/{suiteName}/cases/{caseName}"
+        };
+    }
+
+    rpc GetTestCaseAllHistory(TestCase) returns (HistoryTestCases) {
+        option (google.api.http) = {
+            post: "/api/v1/suites/{suiteName}/cases/{name}"
+        };
+    }
+
     // code generator
     rpc ListCodeGenerator(Empty) returns (SimpleList) {
         option (google.api.http) = {
@@ -125,6 +164,12 @@ service Runner {
             body: "*"
         };
     }
+    rpc HistoryGenerateCode(CodeGenerateRequest)  returns (CommonResult) {
+      option (google.api.http) = {
+          post: "/api/v1/codeGenerators/history/generate"
+          body: "*"
+      };
+  }
 
     // converter
     rpc ListConverter(Empty) returns (SimpleList) {
@@ -166,6 +211,12 @@ service Runner {
       };
     }
 
+    rpc DownloadResponseFile(TestCase) returns (FileData) {
+      option (google.api.http) = {
+          post: "/api/v1/downloadFile/{response.body}"
+          body: "*"
+      };
+    }
     // stores related interfaces
     rpc GetStoreKinds(Empty) returns (StoreKinds) {
       option (google.api.http) = {
@@ -247,10 +298,27 @@ message Items {
   string kind = 2;
 }
 
+message HistorySuites {
+  map<string, HistoryItems> data = 1;
+}
+
+message HistoryItems {
+  repeated HistoryCaseIdentity data = 1;
+}
+
+message HistoryCaseIdentity {
+  string suite = 1;
+  string testcase = 2;
+  string historySuiteName = 3;
+  string kind = 4;
+  string ID = 5;
+}
+
 message TestCaseIdentity {
   string suite = 1;
   string testcase = 2;
   repeated Pair parameters = 3;
+
 }
 
 message TestSuiteSource {
@@ -327,6 +395,15 @@ message TestResult {
   repeated TestCaseResult testCaseResult = 3;
 }
 
+message HistoryTestResult {
+  string message = 1;
+  string error = 2;
+  repeated TestCaseResult testCaseResult = 3;
+  HistoryTestCase data = 4;
+  google.protobuf.Timestamp createTime = 5;
+}
+
+
 message HelloReply {
   string message = 1;
   string error = 2;
@@ -356,6 +433,24 @@ message TestCase {
   string suiteName = 2;
   Request request = 3;
   Response response = 4;
+}
+
+message HistoryTestCase {
+  string caseName = 1;
+  string suiteName = 2;
+  string historySuiteName = 3;
+  google.protobuf.Timestamp createTime = 4;
+  repeated Pair suiteParam = 5;
+  APISpec suiteSpec = 6;
+  string suiteApi = 7;
+  Request request = 8;
+  Response response = 9;
+  string ID = 10;
+  repeated Pair historyHeader = 11;
+}
+
+message HistoryTestCases{
+  repeated HistoryTestCase data = 1;
 }
 
 message Request {
@@ -395,6 +490,7 @@ message TestCaseResult {
 message Pair {
   string key = 1;
   string value = 2;
+  string description = 3;
 }
 
 message Pairs {
@@ -450,6 +546,7 @@ message CodeGenerateRequest {
   string TestSuite = 1;
   string TestCase = 2;
   string Generator = 3;
+  string ID = 4;
 }
 
 message Secrets {
@@ -463,18 +560,24 @@ message Secret {
 }
 
 message ExtensionStatus {
-    bool ready = 1;
-    bool readOnly = 2;
-    string version = 3;
-    string message = 4;
+  bool ready = 1;
+  bool readOnly = 2;
+  string version = 3;
+  string message = 4;
 }
 
 message PProfRequest {
-    string name = 1;
+  string name = 1;
 }
 
 message PProfData {
+  bytes data = 1;
+}
+
+message FileData {
     bytes data = 1;
+    string content_type = 2;
+    string filename = 3;
 }
 
 message Empty {

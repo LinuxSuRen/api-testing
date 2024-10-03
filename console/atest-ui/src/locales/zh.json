@@ -22,7 +22,11 @@
         "generateCode": "生成代码",
         "sendWithParam": "参数化",
         "fullScreen": "全屏显示",
-        "cancelFullScreen": "取消全屏"
+        "cancelFullScreen": "取消全屏",
+        "viewHistory": "查看历史记录",
+        "revert": "回退",
+        "goToHistory": "跳转历史记录",
+        "deleteAllHistory": "删除所有历史记录"
     },
     "title": {
         "createTestSuite": "创建测试用例集",
@@ -33,6 +37,7 @@
         "apiRequestParameter": "API 请求参数",
         "codeGenerator": "代码生成",
         "testing": "测试",
+        "history": "测试历史",
         "welcome": "欢迎",
         "secrets": "凭据",
         "stores": "存储",
@@ -44,7 +49,8 @@
         "filter": "过滤",
         "noParameter": "无参数",
         "testsuite": "测试集：",
-        "apiAddress": "API 地址："
+        "apiAddress": "API 地址：",
+        "runningAt": "运行于："
     },
     "field": {
         "name": "名称",

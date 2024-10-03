@@ -251,7 +251,6 @@ const filterTestCases = (value: string, data: Tree) => {
 }
 
 const viewName = ref('')
-
 </script>
 
 <template>
@@ -300,6 +299,7 @@ const viewName = ref('')
               :suite="testSuite"
               :kindName="testSuiteKind"
               :name="testCaseName"
+              @toHistoryPanel="handleToHistoryPanel"
               @updated="loadStores"
               style="height: 100%;"
               data-intro="This is the test case editor. You can edit the test case here."

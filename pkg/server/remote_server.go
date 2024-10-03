@@ -22,8 +22,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"os"
+	"path/filepath"
 	reflect "reflect"
 	"regexp"
 	"strings"
@@ -248,10 +250,15 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 
 		// reuse the API prefix
 		testCase.Request.RenderAPI(suite.API)
+		historyHeader := make(map[string]string)
+		for k, v := range testCase.Request.Header {
+			historyHeader[k] = v
+		}
 
 		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
 		if getter, ok := suiteRunner.(runner.ResponseRecord); ok {
 			resp := getter.GetResponseRecord()
+			resp, err = handleLargeResponseBody(resp, suite.Name, testCase.Name)
 			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
 				StatusCode: int32(resp.StatusCode),
 				Body:       resp.Body,
@@ -267,6 +274,17 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 			reply.Error = testErr.Error()
 			break
 		}
+		// create history record
+		go func(historyHeader map[string]string) {
+			loader := s.getLoader(ctx)
+			defer loader.Close()
+			for _, testCaseResult := range reply.TestCaseResult {
+				err = loader.CreateHistoryTestCase(ToNormalTestCaseResult(testCaseResult), suite, historyHeader)
+				if err != nil {
+					remoteServerLogger.Info("error create history")
+				}
+			}
+		}(historyHeader)
 	}
 
 	if reply.Error != "" {
@@ -274,6 +292,66 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 	}
 	reply.Message = buf.String()
 	return
+}
+
+func handleLargeResponseBody(resp runner.SimpleResponse, suite string, caseName string) (reply runner.SimpleResponse, err error) {
+	const maxSize = 5120
+	prefix := "isFilePath-" + strings.Join([]string{suite, caseName}, "-")
+
+	if len(resp.Body) > maxSize {
+		remoteServerLogger.Logger.Info("response body is too large, will be saved to file", "size", len(resp.Body))
+		tmpFile, err := os.CreateTemp("", prefix+"-")
+		defer tmpFile.Close()
+		if err != nil {
+			return resp, fmt.Errorf("failed to create file: %w", err)
+		}
+
+		if _, err = tmpFile.Write([]byte(resp.Body)); err != nil {
+			return resp, fmt.Errorf("failed to write response body to file: %w", err)
+		}
+		absFilePath, err := filepath.Abs(tmpFile.Name())
+		if err != nil {
+			return resp, fmt.Errorf("failed to get absolute file path: %w", err)
+		}
+		resp.Body = filepath.Base(absFilePath)
+		return resp, nil
+	}
+	return resp, nil
+}
+
+func (s *server) DownloadResponseFile(ctx context.Context, in *TestCase) (reply *FileData, err error) {
+	if in.Response != nil {
+		tempFileName := in.Response.Body
+		if tempFileName == "" {
+			return nil, errors.New("file name is empty")
+		}
+
+		tempDir := os.TempDir()
+		filePath := filepath.Join(tempDir, tempFileName)
+		if filepath.Clean(filePath) != filepath.Join(tempDir, filepath.Base(tempFileName)) {
+			return nil, errors.New("invalid file path")
+		}
+
+		fileContent, err := os.ReadFile(filePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read file: %s", filePath)
+		}
+
+		mimeType := mime.TypeByExtension(filepath.Ext(filePath))
+		if mimeType == "" {
+			mimeType = "application/octet-stream"
+		}
+
+		reply = &FileData{
+			Data:        fileContent,
+			ContentType: mimeType,
+			Filename:    filepath.Base(filePath),
+		}
+
+		return reply, nil
+	} else {
+		return reply, errors.New("response is empty")
+	}
 }
 
 func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
@@ -349,6 +427,33 @@ func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err e
 	return
 }
 
+func (s *server) GetHistorySuites(ctx context.Context, in *Empty) (reply *HistorySuites, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	reply = &HistorySuites{
+		Data: make(map[string]*HistoryItems),
+	}
+
+	var suites []testing.HistoryTestSuite
+	if suites, err = loader.ListHistoryTestSuite(); err == nil && suites != nil {
+		for _, suite := range suites {
+			items := &HistoryItems{}
+			for _, item := range suite.Items {
+				data := &HistoryCaseIdentity{
+					ID:               item.ID,
+					HistorySuiteName: item.HistorySuiteName,
+					Kind:             item.SuiteSpec.Kind,
+					Suite:            item.SuiteName,
+					Testcase:         item.CaseName,
+				}
+				items.Data = append(items.Data, data)
+			}
+			reply.Data[suite.HistorySuiteName] = items
+		}
+	}
+	return
+}
+
 func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
 	reply = &HelloReply{}
 	loader := s.getLoader(ctx)
@@ -378,18 +483,24 @@ func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (re
 
 func (s *server) ImportTestSuite(ctx context.Context, in *TestSuiteSource) (result *CommonResult, err error) {
 	result = &CommonResult{}
-	if in.Kind != "postman" && in.Kind != "" {
+	var dataImporter generator.Importer
+	switch in.Kind {
+	case "postman":
+		dataImporter = generator.NewPostmanImporter()
+	case "native", "":
+		dataImporter = generator.NewNativeImporter()
+	default:
 		result.Success = false
 		result.Message = fmt.Sprintf("not support kind: %s", in.Kind)
 		return
 	}
 
+	remoteServerLogger.Logger.Info("import test suite", "kind", in.Kind, "url", in.Url)
 	var suite *testing.TestSuite
-	importer := generator.NewPostmanImporter()
 	if in.Url != "" {
-		suite, err = importer.ConvertFromURL(in.Url)
+		suite, err = dataImporter.ConvertFromURL(in.Url)
 	} else if in.Data != "" {
-		suite, err = importer.Convert([]byte(in.Data))
+		suite, err = dataImporter.Convert([]byte(in.Data))
 	} else {
 		err = errors.New("url or data is required")
 	}
@@ -501,6 +612,26 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	return
 }
 
+func (s *server) GetHistoryTestCaseWithResult(ctx context.Context, in *HistoryTestCase) (reply *HistoryTestResult, err error) {
+	var result testing.HistoryTestResult
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	if result, err = loader.GetHistoryTestCaseWithResult(in.ID); err == nil {
+		reply = ToGRPCHistoryTestCaseResult(result)
+	}
+	return
+}
+
+func (s *server) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HistoryTestCase, err error) {
+	var result testing.HistoryTestCase
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	if result, err = loader.GetHistoryTestCase(in.ID); err == nil {
+		reply = ConvertToGRPCHistoryTestCase(result)
+	}
+	return
+}
+
 var ExecutionCountNum = promauto.NewCounter(prometheus.CounterOpts{
 	Name: "atest_execution_count",
 	Help: "The total number of request execution",
@@ -513,6 +644,19 @@ var ExecutionFailNum = promauto.NewCounter(prometheus.CounterOpts{
 	Name: "atest_execution_fail",
 	Help: "The total number of request execution fail",
 })
+
+func (s *server) GetTestCaseAllHistory(ctx context.Context, in *TestCase) (result *HistoryTestCases, err error) {
+	var items []testing.HistoryTestCase
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	if items, err = loader.GetTestCaseAllHistory(in.SuiteName, in.Name); err == nil {
+		result = &HistoryTestCases{}
+		for _, item := range items {
+			result.Data = append(result.Data, ConvertToGRPCHistoryTestCase(item))
+		}
+	}
+	return
+}
 
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
 	var targetTestSuite testing.TestSuite
@@ -562,8 +706,21 @@ func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result 
 				}
 				return
 			}
+
+			result = &TestCaseResult{
+				Output:     reply.Message,
+				Error:      reply.Error,
+				Body:       lastItem.Body,
+				Header:     lastItem.Header,
+				StatusCode: lastItem.StatusCode,
+			}
 		} else if err != nil {
 			result.Error = err.Error()
+		} else {
+			result = &TestCaseResult{
+				Output: reply.Message,
+				Error:  reply.Error,
+			}
 		}
 
 		if reply != nil {
@@ -669,6 +826,22 @@ func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (repl
 	return
 }
 
+func (s *server) DeleteHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HelloReply, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	reply = &HelloReply{}
+	err = loader.DeleteHistoryTestCase(in.ID)
+	return
+}
+
+func (s *server) DeleteAllHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HelloReply, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	reply = &HelloReply{}
+	err = loader.DeleteAllHistoryTestCase(in.SuiteName, in.CaseName)
+	return
+}
+
 func (s *server) DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate) (reply *HelloReply, err error) {
 	loader := s.getLoader(ctx)
 	defer loader.Close()
@@ -728,6 +901,31 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 			reply.Success = genErr == nil
 			reply.Message = util.OrErrorMessage(genErr, output)
 		}
+	}
+	return
+}
+
+func (s *server) HistoryGenerateCode(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
+	reply = &CommonResult{}
+	instance := generator.GetCodeGenerator(in.Generator)
+	if instance == nil {
+		reply.Success = false
+		reply.Message = fmt.Sprintf("generator '%s' not found", in.Generator)
+	} else {
+		loader := s.getLoader(ctx)
+		var result testing.HistoryTestCase
+		result, err = loader.GetHistoryTestCase(in.ID)
+		var testCase testing.TestCase
+		var suite testing.TestSuite
+		testCase = result.Data
+		suite.Name = result.SuiteName
+		suite.API = result.SuiteAPI
+		suite.Spec = result.SuiteSpec
+		suite.Param = result.SuiteParam
+
+		output, genErr := instance.Generate(&suite, &testCase)
+		reply.Success = genErr == nil
+		reply.Message = util.OrErrorMessage(genErr, output)
 	}
 	return
 }
@@ -812,8 +1010,9 @@ func (s *server) FunctionsQuery(ctx context.Context, in *SimpleQuery) (reply *Pa
 		lowerCaseName := strings.ToLower(name)
 		if in.Name == "" || strings.Contains(lowerCaseName, in.Name) {
 			reply.Data = append(reply.Data, &Pair{
-				Key:   name,
-				Value: fmt.Sprintf("%v", reflect.TypeOf(fn)),
+				Key:         name,
+				Value:       fmt.Sprintf("%v", reflect.TypeOf(fn)),
+				Description: render.FuncUsage(name),
 			})
 		}
 	}

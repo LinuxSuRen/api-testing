@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { Edit, Delete } from '@element-plus/icons-vue'
+import { Edit, Delete, QuestionFilled } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
 import { API } from './net'
@@ -24,7 +24,8 @@ const emptyStore = function() {
     },
     properties: [{
         key: '',
-        value: ''
+        value: '',
+        description: '',
     }],
     disabled: false,
     readonly: false
@@ -147,8 +148,11 @@ watch(() => storeForm.kind.name, (name) => {
         pro.push({
           key: p.key,
           value: '',
-          defaultValue: p.defaultValue
+          defaultValue: p.defaultValue,
+          description: p.description,
         } as Pair)
+      } else {
+        pro[index].description = p.description
       }
     })
 
@@ -205,20 +209,27 @@ function updateKeys() {
     <el-table :data="stores" style="width: 100%" v-loading=storesLoading>
       <el-table-column :label="t('field.name')" width="180">
         <template #default="scope">
-          <el-input v-model="scope.row.name" placeholder="Name"/>
+          {{ scope.row.name }}
         </template>
       </el-table-column>
       <el-table-column label="URL">
         <template #default="scope">
           <div style="display: flex; align-items: center">
-            <el-input v-model="scope.row.url" placeholder="URL" />
+            {{ scope.row.url }}
           </div>
         </template>
       </el-table-column>
       <el-table-column :label="t('field.plugin')">
         <template #default="scope">
           <div style="display: flex; align-items: center">
-            <el-input v-model="scope.row.kind.url" placeholder="Plugin" />
+            {{ scope.row.kind.name }}
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="Socket">
+        <template #default="scope">
+          <div style="display: flex; align-items: center">
+            {{ scope.row.kind.url }}
           </div>
         </template>
       </el-table-column>
@@ -299,9 +310,17 @@ function updateKeys() {
                 </el-table-column>
                 <el-table-column label="Value">
                     <template #default="scope">
-                    <div style="display: flex; align-items: center">
-                        <el-input v-model="scope.row.value" :placeholder="scope.row.defaultValue" />
-                    </div>
+                      <div style="display: flex; align-items: center">
+                        <el-input v-model="scope.row.value" :placeholder="scope.row.defaultValue">
+                          <template #append v-if="scope.row.description">
+                            <el-tooltip :content="scope.row.description">
+                              <el-icon>
+                                <QuestionFilled/>
+                              </el-icon>
+                            </el-tooltip>
+                          </template>
+                        </el-input>
+                      </div>
                     </template>
                 </el-table-column>
             </el-table>
@@ -316,7 +335,7 @@ function updateKeys() {
             <el-button
               type="primary"
               @click="submitForm(storeFormRef)"
-              :loading="creatingLoading"
+              v-loading="creatingLoading"
               test-id="store-form-submit"
               >{{t('button.submit')}}</el-button
             >

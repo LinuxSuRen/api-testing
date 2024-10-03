@@ -88,6 +88,10 @@ func (g *gRPCLoader) Reset() {
 }
 
 func (g *gRPCLoader) GetTestSuiteYaml(suite string) (testSuiteYaml []byte, err error) {
+	var testSuite testing.TestSuite
+	if testSuite, err = g.GetTestSuite(suite, true); err == nil {
+		testSuiteYaml, err = testing.ToYAML(&testSuite)
+	}
 	return
 }
 
@@ -119,6 +123,28 @@ func (g *gRPCLoader) GetTestCase(suite, name string) (testcase testing.TestCase,
 	return
 }
 
+func (g *gRPCLoader) GetHistoryTestCaseWithResult(id string) (result testing.HistoryTestResult, err error) {
+	var historyTestResult *server.HistoryTestResult
+	historyTestResult, err = g.client.GetHistoryTestCaseWithResult(g.ctx, &server.HistoryTestCase{
+		ID: id,
+	})
+	if err == nil && historyTestResult != nil {
+		result = ConvertToNormalTestCaseResult(historyTestResult)
+	}
+	return
+}
+
+func (g *gRPCLoader) GetHistoryTestCase(id string) (result testing.HistoryTestCase, err error) {
+	var historyTestCase *server.HistoryTestCase
+	historyTestCase, err = g.client.GetHistoryTestCase(g.ctx, &server.HistoryTestCase{
+		ID: id,
+	})
+	if err == nil && historyTestCase != nil {
+		result = ConvertToNormalHistoryTestCase(historyTestCase)
+	}
+	return
+}
+
 func (g *gRPCLoader) CreateTestCase(suite string, testcase testing.TestCase) (err error) {
 	payload := ConvertToGRPCTestCase(testcase)
 	payload.SuiteName = suite
@@ -138,6 +164,52 @@ func (g *gRPCLoader) DeleteTestCase(suite, testcase string) (err error) {
 		Name:      testcase,
 		SuiteName: suite,
 	})
+	return
+}
+
+func (g *gRPCLoader) CreateHistoryTestCase(testcaseResult testing.TestCaseResult, testSuite *testing.TestSuite, historyHeader map[string]string) (err error) {
+	payload := ConvertToGRPCHistoryTestCaseResult(testcaseResult, testSuite, historyHeader)
+	_, err = g.client.CreateTestCaseHistory(g.ctx, payload)
+	return
+}
+
+func (g *gRPCLoader) ListHistoryTestSuite() (suites []testing.HistoryTestSuite, err error) {
+	var items *HistoryTestSuites
+	items, err = g.client.ListHistoryTestSuite(g.ctx, &server.Empty{})
+	if err == nil && items != nil {
+		for _, item := range items.Data {
+			suites = append(suites, *ConvertToNormalHistoryTestSuite(item))
+		}
+	}
+	return
+}
+
+func (g *gRPCLoader) DeleteHistoryTestCase(id string) (err error) {
+	_, err = g.client.DeleteHistoryTestCase(g.ctx, &server.HistoryTestCase{
+		ID: id,
+	})
+	return
+}
+
+func (g *gRPCLoader) DeleteAllHistoryTestCase(suite, name string) (err error) {
+	_, err = g.client.DeleteAllHistoryTestCase(g.ctx, &server.HistoryTestCase{
+		SuiteName: suite,
+		CaseName:  name,
+	})
+	return
+}
+
+func (g *gRPCLoader) GetTestCaseAllHistory(suite, name string) (historyTestcases []testing.HistoryTestCase, err error) {
+	var historyTestCases *server.HistoryTestCases
+	historyTestCases, err = g.client.GetTestCaseAllHistory(g.ctx, &server.TestCase{
+		Name:      name,
+		SuiteName: suite,
+	})
+	if err == nil && historyTestCases.Data != nil {
+		for _, item := range historyTestCases.Data {
+			historyTestcases = append(historyTestcases, ConvertToNormalHistoryTestCase(item))
+		}
+	}
 	return
 }
 

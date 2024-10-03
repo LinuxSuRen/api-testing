@@ -14,7 +14,8 @@ const props = defineProps({
 const importSuiteFormRef = ref<FormInstance>()
 const importSuiteForm = reactive({
     url: '',
-    store: ''
+    store: '',
+    kind: ''
 })
 
 const importSuiteFormRules = reactive<FormRules<Suite>>({
@@ -22,7 +23,8 @@ const importSuiteFormRules = reactive<FormRules<Suite>>({
         { required: true, message: 'URL is required', trigger: 'blur' },
         { type: 'url', message: 'Should be a valid URL value', trigger: 'blur' }
     ],
-    store: [{ required: true, message: 'Location is required', trigger: 'blur' }]
+    store: [{ required: true, message: 'Location is required', trigger: 'blur' }],
+    kind: [{ required: true, message: 'Kind is required', trigger: 'blur' }]
 })
 
 const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
@@ -55,6 +57,14 @@ function loadStores() {
         })
 }
 loadStores()
+
+const importSourceKinds = [{
+  "name": "Postman",
+  "value": "postman"
+}, {
+  "name": "Native",
+  "value": "native"
+}]
 </script>
 
 <template>
@@ -67,31 +77,44 @@ loadStores()
                 :model="importSuiteForm"
                 ref="importSuiteFormRef"
                 status-icon label-width="120px">
-              <el-form-item label="Location" prop="store">
-                <el-select v-model="importSuiteForm.store" class="m-2"
-                           test-id="suite-import-form-store"
-                           filterable
-                           default-first-option
-                           placeholder="Storage Location">
-                  <el-option
-                      v-for="item in stores"
-                      :key="item.name"
-                      :label="item.name"
-                      :value="item.name"
-                  />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="URL" prop="url">
-                <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api" placeholder="https://api.postman.com/collections/xxx" />
-              </el-form-item>
-              <el-form-item>
-                <el-button
-                    type="primary"
-                    @click="importSuiteFormSubmit(importSuiteFormRef)"
-                    test-id="suite-import-submit"
-                >{{ t('button.import') }}</el-button
-                >
-              </el-form-item>
+                <el-form-item label="Location" prop="store">
+                    <el-select v-model="importSuiteForm.store" class="m-2"
+                                test-id="suite-import-form-store"
+                                filterable
+                                default-first-option
+                                placeholder="Storage Location">
+                        <el-option
+                            v-for="item in stores"
+                            :key="item.name"
+                            :label="item.name"
+                            :value="item.name"
+                        />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="Kind" prop="kind">
+                    <el-select v-model="importSuiteForm.kind" class="m-2"
+                    filterable=true
+                    test-id="suite-import-form-kind"
+                    default-first-option=true
+                    placeholder="Kind" size="middle">
+                    <el-option
+                        v-for="item in importSourceKinds"
+                        :key="item.name"
+                        :label="item.name"
+                        :value="item.value"
+                    />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="URL" prop="url">
+                    <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api" placeholder="https://api.postman.com/collections/xxx" />
+                </el-form-item>
+                <el-form-item>
+                    <el-button
+                        type="primary"
+                        @click="importSuiteFormSubmit(importSuiteFormRef)"
+                        test-id="suite-import-submit"
+                    >{{ t('button.import') }}</el-button>
+                </el-form-item>
             </el-form>
           </span>
         </template>

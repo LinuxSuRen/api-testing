@@ -44,9 +44,17 @@ type RunnerClient interface {
 	DeleteTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 	DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate, opts ...grpc.CallOption) (*HelloReply, error)
 	GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error)
+	// history test related
+	GetHistorySuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HistorySuites, error)
+	GetHistoryTestCaseWithResult(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestResult, error)
+	GetHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestCase, error)
+	DeleteHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HelloReply, error)
+	DeleteAllHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HelloReply, error)
+	GetTestCaseAllHistory(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*HistoryTestCases, error)
 	// code generator
 	ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
+	HistoryGenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
 	// converter
 	ListConverter(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error)
@@ -56,6 +64,7 @@ type RunnerClient interface {
 	FunctionsQueryStream(ctx context.Context, opts ...grpc.CallOption) (Runner_FunctionsQueryStreamClient, error)
 	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error)
 	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
+	DownloadResponseFile(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*FileData, error)
 	// stores related interfaces
 	GetStoreKinds(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*StoreKinds, error)
 	GetStores(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Stores, error)
@@ -264,6 +273,60 @@ func (c *runnerClient) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdenti
 	return out, nil
 }
 
+func (c *runnerClient) GetHistorySuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HistorySuites, error) {
+	out := new(HistorySuites)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetHistorySuites", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetHistoryTestCaseWithResult(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestResult, error) {
+	out := new(HistoryTestResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetHistoryTestCaseWithResult", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HistoryTestCase, error) {
+	out := new(HistoryTestCase)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetHistoryTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) DeleteHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/DeleteHistoryTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) DeleteAllHistoryTestCase(ctx context.Context, in *HistoryTestCase, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/DeleteAllHistoryTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetTestCaseAllHistory(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*HistoryTestCases, error) {
+	out := new(HistoryTestCases)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetTestCaseAllHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) ListCodeGenerator(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error) {
 	out := new(SimpleList)
 	err := c.cc.Invoke(ctx, "/server.Runner/ListCodeGenerator", in, out, opts...)
@@ -276,6 +339,15 @@ func (c *runnerClient) ListCodeGenerator(ctx context.Context, in *Empty, opts ..
 func (c *runnerClient) GenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error) {
 	out := new(CommonResult)
 	err := c.cc.Invoke(ctx, "/server.Runner/GenerateCode", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) HistoryGenerateCode(ctx context.Context, in *CodeGenerateRequest, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/HistoryGenerateCode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -361,6 +433,15 @@ func (c *runnerClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.C
 func (c *runnerClient) Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error) {
 	out := new(HelloReply)
 	err := c.cc.Invoke(ctx, "/server.Runner/Sample", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) DownloadResponseFile(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*FileData, error) {
+	out := new(FileData)
+	err := c.cc.Invoke(ctx, "/server.Runner/DownloadResponseFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -492,9 +573,17 @@ type RunnerServer interface {
 	DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error)
 	DuplicateTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error)
 	GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error)
+	// history test related
+	GetHistorySuites(context.Context, *Empty) (*HistorySuites, error)
+	GetHistoryTestCaseWithResult(context.Context, *HistoryTestCase) (*HistoryTestResult, error)
+	GetHistoryTestCase(context.Context, *HistoryTestCase) (*HistoryTestCase, error)
+	DeleteHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error)
+	DeleteAllHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error)
+	GetTestCaseAllHistory(context.Context, *TestCase) (*HistoryTestCases, error)
 	// code generator
 	ListCodeGenerator(context.Context, *Empty) (*SimpleList, error)
 	GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error)
+	HistoryGenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error)
 	// converter
 	ListConverter(context.Context, *Empty) (*SimpleList, error)
 	ConvertTestSuite(context.Context, *CodeGenerateRequest) (*CommonResult, error)
@@ -504,6 +593,7 @@ type RunnerServer interface {
 	FunctionsQueryStream(Runner_FunctionsQueryStreamServer) error
 	GetVersion(context.Context, *Empty) (*Version, error)
 	Sample(context.Context, *Empty) (*HelloReply, error)
+	DownloadResponseFile(context.Context, *TestCase) (*FileData, error)
 	// stores related interfaces
 	GetStoreKinds(context.Context, *Empty) (*StoreKinds, error)
 	GetStores(context.Context, *Empty) (*Stores, error)
@@ -579,11 +669,32 @@ func (UnimplementedRunnerServer) DuplicateTestCase(context.Context, *TestCaseDup
 func (UnimplementedRunnerServer) GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSuggestedAPIs not implemented")
 }
+func (UnimplementedRunnerServer) GetHistorySuites(context.Context, *Empty) (*HistorySuites, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistorySuites not implemented")
+}
+func (UnimplementedRunnerServer) GetHistoryTestCaseWithResult(context.Context, *HistoryTestCase) (*HistoryTestResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryTestCaseWithResult not implemented")
+}
+func (UnimplementedRunnerServer) GetHistoryTestCase(context.Context, *HistoryTestCase) (*HistoryTestCase, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryTestCase not implemented")
+}
+func (UnimplementedRunnerServer) DeleteHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteHistoryTestCase not implemented")
+}
+func (UnimplementedRunnerServer) DeleteAllHistoryTestCase(context.Context, *HistoryTestCase) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAllHistoryTestCase not implemented")
+}
+func (UnimplementedRunnerServer) GetTestCaseAllHistory(context.Context, *TestCase) (*HistoryTestCases, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTestCaseAllHistory not implemented")
+}
 func (UnimplementedRunnerServer) ListCodeGenerator(context.Context, *Empty) (*SimpleList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCodeGenerator not implemented")
 }
 func (UnimplementedRunnerServer) GenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateCode not implemented")
+}
+func (UnimplementedRunnerServer) HistoryGenerateCode(context.Context, *CodeGenerateRequest) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HistoryGenerateCode not implemented")
 }
 func (UnimplementedRunnerServer) ListConverter(context.Context, *Empty) (*SimpleList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListConverter not implemented")
@@ -605,6 +716,9 @@ func (UnimplementedRunnerServer) GetVersion(context.Context, *Empty) (*Version, 
 }
 func (UnimplementedRunnerServer) Sample(context.Context, *Empty) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sample not implemented")
+}
+func (UnimplementedRunnerServer) DownloadResponseFile(context.Context, *TestCase) (*FileData, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DownloadResponseFile not implemented")
 }
 func (UnimplementedRunnerServer) GetStoreKinds(context.Context, *Empty) (*StoreKinds, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStoreKinds not implemented")
@@ -984,6 +1098,114 @@ func _Runner_GetSuggestedAPIs_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_GetHistorySuites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetHistorySuites(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetHistorySuites",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetHistorySuites(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetHistoryTestCaseWithResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetHistoryTestCaseWithResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetHistoryTestCaseWithResult",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetHistoryTestCaseWithResult(ctx, req.(*HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetHistoryTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetHistoryTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetHistoryTestCase(ctx, req.(*HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_DeleteHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).DeleteHistoryTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/DeleteHistoryTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).DeleteHistoryTestCase(ctx, req.(*HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_DeleteAllHistoryTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryTestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).DeleteAllHistoryTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/DeleteAllHistoryTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).DeleteAllHistoryTestCase(ctx, req.(*HistoryTestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetTestCaseAllHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetTestCaseAllHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetTestCaseAllHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetTestCaseAllHistory(ctx, req.(*TestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_ListCodeGenerator_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
@@ -1016,6 +1238,24 @@ func _Runner_GenerateCode_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).GenerateCode(ctx, req.(*CodeGenerateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_HistoryGenerateCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CodeGenerateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).HistoryGenerateCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/HistoryGenerateCode",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).HistoryGenerateCode(ctx, req.(*CodeGenerateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1150,6 +1390,24 @@ func _Runner_Sample_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).Sample(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_DownloadResponseFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestCase)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).DownloadResponseFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/DownloadResponseFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).DownloadResponseFile(ctx, req.(*TestCase))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1428,12 +1686,40 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_GetSuggestedAPIs_Handler,
 		},
 		{
+			MethodName: "GetHistorySuites",
+			Handler:    _Runner_GetHistorySuites_Handler,
+		},
+		{
+			MethodName: "GetHistoryTestCaseWithResult",
+			Handler:    _Runner_GetHistoryTestCaseWithResult_Handler,
+		},
+		{
+			MethodName: "GetHistoryTestCase",
+			Handler:    _Runner_GetHistoryTestCase_Handler,
+		},
+		{
+			MethodName: "DeleteHistoryTestCase",
+			Handler:    _Runner_DeleteHistoryTestCase_Handler,
+		},
+		{
+			MethodName: "DeleteAllHistoryTestCase",
+			Handler:    _Runner_DeleteAllHistoryTestCase_Handler,
+		},
+		{
+			MethodName: "GetTestCaseAllHistory",
+			Handler:    _Runner_GetTestCaseAllHistory_Handler,
+		},
+		{
 			MethodName: "ListCodeGenerator",
 			Handler:    _Runner_ListCodeGenerator_Handler,
 		},
 		{
 			MethodName: "GenerateCode",
 			Handler:    _Runner_GenerateCode_Handler,
+		},
+		{
+			MethodName: "HistoryGenerateCode",
+			Handler:    _Runner_HistoryGenerateCode_Handler,
 		},
 		{
 			MethodName: "ListConverter",
@@ -1458,6 +1744,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Sample",
 			Handler:    _Runner_Sample_Handler,
+		},
+		{
+			MethodName: "DownloadResponseFile",
+			Handler:    _Runner_DownloadResponseFile_Handler,
 		},
 		{
 			MethodName: "GetStoreKinds",

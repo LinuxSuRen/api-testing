@@ -42,7 +42,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/downloader"
 	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/mock"
-	"github.com/linuxsuren/api-testing/pkg/oauth"
+	atestoauth "github.com/linuxsuren/api-testing/pkg/oauth"
 	template "github.com/linuxsuren/api-testing/pkg/render"
 	"github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/service"
@@ -51,6 +51,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing/remote"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
+	"github.com/linuxsuren/oauth-hub"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -182,7 +183,7 @@ func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 			return
 		}
 
-		grpcOpts = append(grpcOpts, oauth.NewAuthInterceptor(o.oauthGroup))
+		grpcOpts = append(grpcOpts, atestoauth.NewAuthInterceptor(o.oauthGroup))
 	}
 	if o.tls {
 		if o.tlsCert != "" && o.tlsKey != "" {
@@ -468,7 +469,7 @@ func debugHandler(mux *runtime.ServeMux, remoteServer server.RunnerServer) {
 				Name: sub,
 			})
 			if err == nil {
-				w.Header().Set("Content-Type", "application/octet-stream")
+				w.Header().Set(util.ContentType, "application/octet-stream")
 				w.Write(data.Data)
 			} else {
 				w.WriteHeader(http.StatusBadRequest)

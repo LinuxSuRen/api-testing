@@ -20,6 +20,7 @@ import (
 
 	"errors"
 
+	"github.com/linuxsuren/oauth-hub"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -77,11 +78,11 @@ func (a *authInter) authInterceptor(ctx context.Context, req interface{}, info *
 	return
 }
 
-func GetUserFromContext(ctx context.Context) (user *UserInfo) {
+func GetUserFromContext(ctx context.Context) (user *oauth.UserInfo) {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		data := md.Get("auth")
 		if len(data) > 0 {
-			user = GetUser(data[0])
+			user = oauth.GetUser(data[0])
 		}
 	}
 	return

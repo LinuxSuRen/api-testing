@@ -186,6 +186,9 @@ func (n *nonDownloader) WithRegistry(string) {
 	// Do nothing because this is an empty implementation
 }
 
+func (n *nonDownloader) WithImagePrefix(imagePrefix string) {
+	// Do nothing because this is an empty implementation
+}
 func (d *nonDownloader) WithRoundTripper(rt http.RoundTripper) {
 	// Do nothing because this is an empty implementation
 }

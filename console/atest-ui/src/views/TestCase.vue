@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Edit, Delete, Search, CopyDocument } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
-import type { Pair, TestResult, TestCaseWithSuite } from './types'
+import type { Pair, TestResult, TestCaseWithSuite, TestCase } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
 import { Cache } from './cache'
 import { API } from './net'
@@ -15,14 +15,29 @@ import { JSONPath } from 'jsonpath-plus'
 import { Codemirror } from 'vue-codemirror'
 import jsonlint from 'jsonlint-mod'
 
+import CodeMirror from 'codemirror'
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/addon/merge/merge.js'
+import 'codemirror/addon/merge/merge.css'
+
+import DiffMatchPatch from 'diff-match-patch';
+
+
+window.diff_match_patch = DiffMatchPatch;
+window.DIFF_DELETE = -1;
+window.DIFF_INSERT = 1;
+window.DIFF_EQUAL = 0;
+
 const { t } = useI18n()
 
 const props = defineProps({
   name: String,
   suite: String,
   kindName: String,
+  historySuiteName: String,
+  historyCaseID: String
 })
-const emit = defineEmits(['updated'])
+const emit = defineEmits(['updated','toHistoryPanel'])
 
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.suite!)
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
@@ -48,41 +63,18 @@ const runTestCase = () => {
   requestLoading.value = true
   const name = props.name
   const suite = props.suite
-
   API.RunTestCase({
     suiteName: suite,
     name: name,
-      parameters: parameters.value
+    parameters: parameters.value
   }, (e) => {
-    testResult.value = e
+    handleTestResult(e)
     requestLoading.value = false
-
-    if (e.error !== '') {
-      ElMessage({
-        message: e.error,
-        type: 'error'
-      })
-    } else {
-      ElMessage({
-        message: 'Pass!',
-        type: 'success'
-      })
-    }
-    parseResponseBody(e.body)
-
-    Cache.SetTestCaseResponseCache(suite + '-' + name, {
-      body: testResult.value.bodyObject,
-      output: e.output,
-      statusCode: testResult.value.statusCode
-    } as TestCaseResponse)
-
-    parameters.value = []
   }, (e) => {
     parameters.value = []
 
     requestLoading.value = false
     UIAPI.ErrorTip(e)
-
     parseResponseBody(e.body)
   })
 }
@@ -93,10 +85,52 @@ const parseResponseBody = (body) => {
   }
 
   try {
+    testResult.value.bodyLength = body.length
     testResult.value.bodyObject = JSON.parse(body)
     testResult.value.originBodyObject = JSON.parse(body)
   } catch {
     testResult.value.bodyText = body
+  }
+}
+
+const handleTestResult = (e) => {
+  testResult.value = e;
+
+  if (!isHistoryTestCase.value) {
+    handleTestResultError(e)
+  }
+  const isFilePath = e.body.startsWith("isFilePath-")
+
+  if(isFilePath){
+    isResponseFile.value = true
+  } else if(e.body !== ''){
+    testResult.value.bodyLength = e.body.length
+    testResult.value.bodyObject = JSON.parse(e.body);
+    testResult.value.originBodyObject = JSON.parse(e.body);
+  }
+
+    Cache.SetTestCaseResponseCache(suite + '-' + name, {
+      body: testResult.value.bodyObject,
+      output: e.output,
+      statusCode: testResult.value.statusCode
+    } as TestCaseResponse)
+
+  parameters.value = [];
+}
+
+const handleTestResultError = (e) => {
+  if (e.error !== '') {
+    ElMessage({
+      showClose: true,
+      message: e.error,
+      type: 'error'
+    });
+  } else {
+    ElMessage({
+      showClose: true,
+      message: 'Pass!',
+      type: 'success'
+    });
   }
 }
 
@@ -117,8 +151,8 @@ function responseBodyFilter() {
 const parameterDialogOpened = ref(false)
 function openParameterDialog() {
   API.GetTestSuite(props.suite, (e) => {
-      parameters.value = e.param
-      parameterDialogOpened.value = true
+    parameters.value = e.param
+    parameterDialogOpened.value = true
   }, UIAPI.ErrorTip)
 }
 
@@ -130,13 +164,14 @@ function sendRequestWithParameter() {
 function generateCode() {
   const name = props.name
   const suite = props.suite
-
-  API.GenerateCode({
-    suiteName: suite,
-    name: name,
-    generator: currentCodeGenerator.value
-  }, (e) => {
+  const ID = props.historyCaseID
+  if (isHistoryTestCase.value == true){
+    API.HistoryGenerateCode({
+      id: ID,
+      generator: currentCodeGenerator.value
+    }, (e) => {
       ElMessage({
+        showClose: true,
         message: 'Code generated!',
         type: 'success'
       })
@@ -146,6 +181,25 @@ function generateCode() {
         currentCodeContent.value = e.message
       }
     }, UIAPI.ErrorTip)
+  } else{
+    API.GenerateCode({
+      suiteName: suite,
+      name: name,
+      generator: currentCodeGenerator.value
+    }, (e) => {
+      ElMessage({
+        showClose: true,
+        message: 'Code generated!',
+        type: 'success'
+      })
+      if (currentCodeGenerator.value === "gRPCPayload") {
+        currentCodeContent.value = JSON.stringify(JSON.parse(e.message), null, 4)
+      } else {
+        currentCodeContent.value = e.message
+      }
+    }, UIAPI.ErrorTip)
+  }
+
 }
 
 function copyCode() {
@@ -187,7 +241,8 @@ const emptyTestCaseWithSuite: TestCaseWithSuite = {
       query: [],
       cookie: [],
       form: [],
-      body: ''
+      body: '',
+      filepath: ''
     },
     response: {
       statusCode: 0,
@@ -202,9 +257,18 @@ const emptyTestCaseWithSuite: TestCaseWithSuite = {
 
 const testCaseWithSuite = ref(emptyTestCaseWithSuite)
 
+let name
+let suite
+let historySuiteName
+let historyCaseID
+const isHistoryTestCase = ref(false)
+const HistoryTestCaseCreateTime = ref('')
+
 function load() {
-  const name = props.name
-  const suite = props.suite
+   name = props.name
+   suite = props.suite
+   historySuiteName = props.historySuiteName
+   historyCaseID = props.historyCaseID
   if (name === '' || suite === '') {
     return
   }
@@ -222,62 +286,142 @@ function load() {
   }
   testResult.value.originBodyObject = testResult.value.bodyObject
 
-  API.GetTestCase({
-    suiteName: suite,
-    name: name
-  }, (e) => {
-      if (e.request.method === '') {
-        e.request.method = 'GET'
+  if (historySuiteName != '' && historySuiteName != undefined) {
+    isHistoryTestCase.value = true
+    API.GetHistoryTestCaseWithResult({
+      historyCaseID : historyCaseID
+    }, (e) => {
+      setDefaultValues(e.data)
+      determineBodyType(e.data)
+      setTestCaseWithSuite(e.data,suite)
+      handleTestResult(e.testCaseResult[0])
+      HistoryTestCaseCreateTime.value = formatDate(e.createTime)
+    })
+  } else {
+    API.GetTestCase({
+      suiteName: suite,
+      name: name
+    }, (e) => {
+      setDefaultValues(e)
+      determineBodyType(e)
+      setTestCaseWithSuite(e,suite)
+    })
+  }
+}
+
+function formatDate(createTimeStr : string){
+  let parts = createTimeStr.split(/[T.Z]/);
+    let datePart = parts[0].split("-");
+    let timePart = parts[1].split(":");
+
+    let year = datePart[0];
+    let month = datePart[1];
+    let day = datePart[2];
+    let hours = timePart[0];
+    let minutes = timePart[1];
+    let seconds = timePart[2].split(".")[0];
+
+    let formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    return formattedDate
+}
+
+function determineBodyType(e: TestCase) {
+  e.request.header.forEach(item => {
+    if (item.key === "Content-Type") {
+      switch (item.value) {
+        case 'application/x-www-form-urlencoded':
+          bodyType.value = 4
+          break
+        case 'application/json':
+          bodyType.value = 5
+          break
+        case 'multipart/form-data':
+          bodyType.value = 6
+
+          e.request.form.forEach(fItem => {
+            if (fItem.key !== '' && fItem.key !== '') {
+              e.request.filepath = fItem.key + "=" + fItem.value
+            }
+          })
+          break
       }
+    }
+  });
+}
 
-      e.request.header.push({
-        key: '',
-        value: ''
-      })
-      e.request.cookie.push({
-        key: '',
-        value: ''
-      })
-      e.request.query.push({
-        key: '',
-        value: ''
-      })
-      e.request.form.push({
-        key: '',
-        value: ''
-      })
-      e.response.header.push({
-        key: '',
-        value: ''
-      })
-      e.response.bodyFieldsExpect.push({
-        key: '',
-        value: ''
-      })
-      e.response.verify.push('')
-      if (e.response.statusCode === 0) {
-        e.response.statusCode = 200
+const isResponseFile = ref(false)
+function downloadResponseFile(){
+  API.DownloadResponseFile({
+      body: testResult.value.body
+    }, (e) => {
+    if (e && e.data) {
+      try {
+      const bytes = atob(e.data);
+      const blob = new Blob([bytes], { type: 'mimeType' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = e.filename.substring("isFilePath-".length);
+
+      document.body.appendChild(link);
+      link.click();
+
+      window.URL.revokeObjectURL(link.href);
+      document.body.removeChild(link);
+      } catch (error) {
+        console.error('Error during file download:', error);
       }
-
-      e.request.header.forEach(item => {
-        if (item.key === "Content-Type") {
-          switch (item.value) {
-            case 'application/x-www-form-urlencoded':
-              bodyType.value = 4
-              break
-            case 'application/json':
-              bodyType.value = 5
-              break
-          }
-        }
-      });
-
-      testCaseWithSuite.value = {
-        suiteName: suite,
-        data: e
-      } as TestCaseWithSuite
+    } else {
+      console.error('No data to download.');
+    }
     })
 }
+
+function setDefaultValues(e) {
+  if (e.request.method === '') {
+    e.request.method = 'GET'
+  }
+
+  e.request.header.push({
+    key: '',
+    value: ''
+  })
+  e.request.cookie.push({
+    key: '',
+    value: ''
+  })
+  e.request.query.push({
+    key: '',
+    value: ''
+  })
+  e.request.form.push({
+    key: '',
+    value: ''
+  })
+  e.response.header.push({
+    key: '',
+    value: ''
+  })
+  e.response.bodyFieldsExpect.push({
+    key: '',
+    value: ''
+  })
+  e.response.verify.push('')
+  if (e.response.statusCode === 0) {
+    e.response.statusCode = 200
+  }
+}
+
+function setTestCaseWithSuite(e, suite) {
+  e.suiteName = suite
+  testCaseWithSuite.value = {
+    suiteName: suite,
+    data: e
+  } as TestCaseWithSuite;
+    if (isHistoryTestCase.value == true){ 
+      testCaseWithSuite.value.data.request.api = `${testCaseWithSuite.value.data.suiteApi}${testCaseWithSuite.value.data.request.api}` 
+    }
+}
+
 load()
 watch(props, () => {
   load()
@@ -295,6 +439,7 @@ function saveTestCase(tip: boolean = true, callback: (c: any) => void) {
   UIAPI.UpdateTestCase(testCaseWithSuite.value, (e) => {
     if (tip) {
       ElMessage({
+        showClose: true,
         message: 'Saved.',
         type: 'success'
       })
@@ -306,28 +451,41 @@ function saveTestCase(tip: boolean = true, callback: (c: any) => void) {
   }, UIAPI.ErrorTip, saveLoading)
 }
 
-function deleteTestCase() {
+function deleteCase() {
   const name = props.name
   const suite = props.suite
+  const historyCaseID = props.historyCaseID
 
-  API.DeleteTestCase({
-    suiteName: suite,
-    name: name
-  }, (e) => {
-    if (e.ok) {
-      emit('updated', 'hello from child')
+  if (isHistoryTestCase.value == true){
+    deleteHistoryTestCase(historyCaseID)
+  } else {
+    deleteTestCase(name, suite)
+  }
+}
 
-      ElMessage({
-        message: 'Delete.',
-        type: 'success'
-      })
+function deleteHistoryTestCase(historyCaseID : string){
+  API.DeleteHistoryTestCase({ historyCaseID }, handleDeleteResponse);
+}
 
-      // clean all the values
-      testCaseWithSuite.value = emptyTestCaseWithSuite
-    } else {
-      UIAPI.ErrorTip(e)
-    }
-  })
+function deleteTestCase(name : string, suite : string){
+  API.DeleteTestCase({ suiteName: suite, name }, handleDeleteResponse);
+}
+
+function handleDeleteResponse(e) {
+  if (e.ok) {
+    emit('updated', 'hello from child');
+
+    ElMessage({
+      showClose: true,
+      message: 'Delete.',
+      type: 'success'
+    });
+
+    // Clean all the values
+    testCaseWithSuite.value = emptyTestCaseWithSuite;
+  } else {
+    UIAPI.ErrorTip(e);
+  }
 }
 
 const codeDialogOpened = ref(false)
@@ -348,6 +506,132 @@ function openCodeDialog() {
 watch(currentCodeGenerator, () => {
   generateCode()
 })
+
+const historyDialogOpened = ref(false)
+const historyForm = ref({ selectedID: '' })
+const historyRecords = ref([]); 
+const selectedHistory = ref(null);
+const viewHistoryRef = ref(null);
+const formatHistoryCase = ref(null);
+
+const rules = {
+  selectedID: [
+    { required: true, message: 'Please select history TestCase', trigger: 'change' }
+  ]
+}
+
+function openHistoryDialog(){
+  historyDialogOpened.value = true
+  name = props.name
+  suite = props.suite
+  API.GetTestCaseAllHistory({
+    suiteName : suite,
+    name: name,
+  }, (e) => {
+    historyRecords.value = e.data
+    historyRecords.value.forEach(record => {
+      record.createTime = formatDate(record.createTime)
+      setDefaultValues(record)
+    });
+  })
+}
+
+function handleDialogClose(){
+  caseRevertLoading.value = false
+  historyDialogOpened.value = false
+  historyForm.value.selectedID = ''
+  const target = document.getElementById('compareView');
+  target.innerHTML = ''
+}
+
+function handleHistoryChange(value) {
+  selectedHistory.value = historyRecords.value.find(record => record.ID === value);
+  const {
+  caseName: name,
+  suiteName,
+  request,
+  response,
+  historyHeader,
+  } = selectedHistory.value;
+  request.header = historyHeader
+  request.header.push({
+        key: '',
+        value: ''
+  })
+  formatHistoryCase.value = {
+    name,
+    suiteName,
+    request,
+    response
+  };
+  initCompare(testCaseWithSuite.value.data, formatHistoryCase.value)
+}
+
+function initCompare(value, historyValue) {
+  const formattedHistoryValue = JSON.stringify(historyValue, null, 2);
+  const formattedNewValue = JSON.stringify(value, null, 2);
+  const target = document.getElementById('compareView')
+  target.innerHTML = ''
+
+  const mergeView = CodeMirror.MergeView(target, {
+    value: formattedHistoryValue, 
+    origLeft: null,
+    orig: formattedNewValue, 
+    lineNumbers: true, 
+    mode: { name: "javascript", json: true },
+    highlightDifferences: true,
+    collapseIdentical: true,
+    foldGutter:true,
+    lineWrapping:true,
+    styleActiveLine: true,
+    matchBrackets: true, 
+    connect: 'align',
+    readOnly: true 
+  })
+}
+
+const caseRevertLoading = ref(false)
+const submitForm = async (formEl) => {
+  if (!formEl) return
+  await formEl.validate((valid: boolean, fields) => {
+    if (valid) {
+      caseRevertLoading.value = true
+      const historyTestCase =  {
+        suiteName: props.suite,
+        data: formatHistoryCase.value
+      } 
+      UIAPI.UpdateTestCase(historyTestCase, (e) => {
+        if(e.error == ""){
+          ElMessage({
+            showClose: true,
+            message: 'Saved.',
+            type: 'success'
+          })
+          load()
+        }
+      }, UIAPI.ErrorTip, saveLoading)
+      handleDialogClose()
+    }
+  })
+}
+
+const goToHistory = async (formEl) => {
+  if (!formEl) return
+  await formEl.validate((valid: boolean, fields) => {
+    if (valid) {
+      caseRevertLoading.value = true
+      emit('toHistoryPanel', { ID: selectedHistory.value.ID, panelName: 'history' })
+      handleDialogClose()
+    }
+  })
+}
+
+const deleteAllHistory = async (formEl) => {
+  if (!formEl) return
+  caseRevertLoading.value = true
+  API.DeleteAllHistoryTestCase(props.suite, props.name, handleDeleteResponse)
+  handleDialogClose()
+}
 
 const options = GetHTTPMethods()
 const requestActiveTab = ref(Cache.GetPreference().requestActiveTab)
@@ -437,6 +721,15 @@ function formChange() {
   }
 }
 
+const filepathChange = () => {
+  const items = testCaseWithSuite.value.data.request.filepath.split("=")
+      if (items && items.length > 1) {
+        testCaseWithSuite.value.data.request.form = [{
+          key: items[0],
+          value: items[1]
+        } as Pair]
+      }
+}
 const bodyType = ref(1)
 function bodyTypeChange(e: number) {
   let contentType = ""
@@ -447,18 +740,22 @@ function bodyTypeChange(e: number) {
     case 5:
       contentType = 'application/json'
       break;
+    case 6:
+      contentType = 'multipart/form-data'
+      filepathChange()
+      break;
   }
 
   if (contentType !== "") {
     testCaseWithSuite.value.data.request.header = insertOrUpdateIntoMap({
-        key: 'Content-Type',
-        value: contentType
-      } as Pair, testCaseWithSuite.value.data.request.header)
+      key: 'Content-Type',
+      value: contentType
+    } as Pair, testCaseWithSuite.value.data.request.header)
   }
 }
 
 const lintingError = ref('')
-function jsonFormat(space) {
+function jsonFormat(space: number) {
   const jsonText = testCaseWithSuite.value.data.request.body
   if (bodyType.value !== 5 || jsonText === '') {
     return
@@ -542,6 +839,7 @@ const duplicateTestCase = () => {
     API.DuplicateTestCase(props.suite, props.suite, props.name, targetTestCaseName.value,(d) => {
         duplicateTestCaseDialog.value = false
         ElMessage({
+            showClose: true,
             message: 'Duplicated.',
             type: 'success'
         })
@@ -556,55 +854,68 @@ Magic.Keys(() => {
 </script>
 
 <template>
-  <el-container>
+  <el-container style="height: 100%;">
     <el-header style="padding-left: 5px;">
       <div style="margin-bottom: 5px">
-        <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
-          disabled v-if="Cache.GetCurrentStore().readOnly"
+        <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
+          disabled v-if="Cache.GetCurrentStore().readOnly || isHistoryTestCase"
           >{{ t('button.save') }}</el-button>
-        <el-button type="primary" @click="saveTestCase" :icon="Edit" :loading="saveLoading"
-          v-if="!Cache.GetCurrentStore().readOnly"
+        <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
+          v-if="!Cache.GetCurrentStore().readOnly && !isHistoryTestCase"
           >{{ t('button.save') }}</el-button>
-        <el-button type="danger" @click="deleteTestCase" :icon="Delete">{{ t('button.delete') }}</el-button>
-        <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument">{{ t('button.duplicate') }}</el-button>
+        <el-button type="danger" @click="deleteCase" :icon="Delete">{{ t('button.delete') }}</el-button>
+        <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument" v-if="!isHistoryTestCase">{{ t('button.duplicate') }}</el-button>
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
+        <el-button type="primary" v-if="!isHistoryTestCase && Cache.GetCurrentStore().kind.name == 'atest-store-orm'" @click="openHistoryDialog">{{ t('button.viewHistory') }}</el-button>
+        <span v-if="isHistoryTestCase" style="margin-left: 15px;">{{ t('tip.runningAt') }}{{ HistoryTestCaseCreateTime }}</span>
       </div>
-      <div style="display: flex;">
-        <el-select
-          v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'"
-          v-model="testCaseWithSuite.data.request.method"
-          class="m-2"
-          placeholder="Method"
-          size="default"
-          test-id="case-editor-method"
-        >
-          <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.key"
-            :value="item.value"
-          />
-        </el-select>
-        <el-autocomplete
-          v-model="testCaseWithSuite.data.request.api"
-          :fetch-suggestions="querySuggestedAPIs"
-          placeholder="API Address"
-          style="width: 50%; margin-left: 5px; margin-right: 5px; flex-grow: 1;"
-        >
-          <template #default="{ item }">
-            <div class="value">{{ item.request.method }}</div>
-            <span class="link">{{ item.request.api }}</span>
-          </template>
-        </el-autocomplete>
-
-        <el-dropdown split-button type="primary" @click="sendRequest" :loading="requestLoading">
-          {{ t('button.send') }}
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="openParameterDialog">{{ t('button.sendWithParam') }}</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-        </el-dropdown>
+      <div>
+        <el-row>
+          <el-col :span="3">
+            <el-select
+              v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'"
+              v-model="testCaseWithSuite.data.request.method"
+              class="m-2"
+              placeholder="Method"
+              size="default"
+              test-id="case-editor-method"
+              :disabled="isHistoryTestCase"
+            >
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.key"
+                :value="item.value"
+              />
+            </el-select>
+          </el-col>
+          <el-col :span="18">
+            <el-autocomplete
+              v-model="testCaseWithSuite.data.request.api"
+              style="width: 100%"
+              :fetch-suggestions="querySuggestedAPIs"
+              placeholder="API Address"
+              :readonly="isHistoryTestCase">
+              <template #default="{ item }">
+                <div class="value">{{ item.request.method }}</div>
+                <span class="link">{{ item.request.api }}</span>
+              </template>
+            </el-autocomplete>
+          </el-col>
+          <el-col :span="3">
+            <el-dropdown split-button type="primary"
+              @click="sendRequest"
+              v-loading="requestLoading"
+              v-if="!isHistoryTestCase">
+              {{ t('button.send') }}
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="openParameterDialog">{{ t('button.sendWithParam') }}</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </el-col>
+        </el-row>
       </div>
     </el-header>
 
@@ -622,13 +933,14 @@ Magic.Keys(() => {
                   v-model="scope.row.key"
                   placeholder="Key"
                   @change="queryChange"
+                  :readonly="isHistoryTestCase"
                 />
               </template>
             </el-table-column>
             <el-table-column label="Value">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
-                  <el-input v-model="scope.row.value" placeholder="Value" />
+                  <el-input v-model="scope.row.value" placeholder="Value" :readonly="isHistoryTestCase"/>
                 </div>
               </template>
             </el-table-column>
@@ -649,6 +961,7 @@ Magic.Keys(() => {
                   placeholder="Key"
                   @change="headerChange"
                   @select="headerSelect"
+                  :readonly="isHistoryTestCase"
                 />
               </template>
             </el-table-column>
@@ -659,6 +972,7 @@ Magic.Keys(() => {
                     v-model="scope.row.value"
                     :fetch-suggestions="queryHeaderValues"
                     style="width: 100%;"
+                    :readonly="isHistoryTestCase"
                   />
                 </div>
               </template>
@@ -675,14 +989,15 @@ Magic.Keys(() => {
             <el-table-column label="Key">
               <template #default="scope">
                 <el-input v-model="scope.row.key" placeholder="Key"
-                @change="cookieChange"  
+                @change="cookieChange"
+                :readonly="isHistoryTestCase"
                 />
               </template>
             </el-table-column>
             <el-table-column label="Value">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
-                <el-input v-model="scope.row.value" placeholder="value"/>
+                  <el-input v-model="scope.row.value" placeholder="value" :readonly="isHistoryTestCase"/>
                 </div>
               </template>
             </el-table-column>
@@ -704,22 +1019,32 @@ Magic.Keys(() => {
             <el-radio :label="3">raw</el-radio>
             <el-radio :label="4">x-www-form-urlencoded</el-radio>
             <el-radio :label="5">JSON</el-radio>
+            <el-radio :label="6">EmbedFile</el-radio>
           </el-radio-group>
 
           <div style="flex-grow: 1;">
-            <Codemirror v-if="bodyType === 3 || bodyType === 5"
+            <div v-if="bodyType === 6">
+              <el-row>
+                <el-col :span="4">Filename:</el-col>
+                <el-col :span="20">
+                  <el-input v-model="testCaseWithSuite.data.request.filepath" placeholder="file=sample.txt" @change="filepathChange" />
+                </el-col>
+              </el-row>
+            </div>
+            <Codemirror v-if="bodyType === 3 || bodyType === 5 || bodyType === 6"
               @blur="jsonFormat(-1)"
-              v-model="testCaseWithSuite.data.request.body"/>
+              v-model="testCaseWithSuite.data.request.body"
+              :disabled="isHistoryTestCase"/>
             <el-table :data="testCaseWithSuite.data.request.form" style="width: 100%" v-if="bodyType === 4">
               <el-table-column label="Key" width="180">
                 <template #default="scope">
-                  <el-input v-model="scope.row.key" placeholder="Key" @change="formChange"/>
+                  <el-input v-model="scope.row.key" placeholder="Key" @change="formChange" :readonly="isHistoryTestCase"/>
                 </template>
               </el-table-column>
               <el-table-column label="Value">
                 <template #default="scope">
                   <div style="display: flex; align-items: center">
-                    <el-input v-model="scope.row.value" placeholder="Value" />
+                    <el-input v-model="scope.row.value" placeholder="Value" :readonly="isHistoryTestCase"/>
                   </div>
                 </template>
               </el-table-column>
@@ -731,25 +1056,34 @@ Magic.Keys(() => {
         </el-tab-pane>
 
         <el-tab-pane label="Expected" name="expected" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
-          <el-row :gutter="20">
-            <span
-              class="ml-3 w-50 text-gray-600 inline-flex items-center"
-              style="margin-left: 15px; margin-right: 15px"
-              >Status Code:</span
-            >
-            <el-input
-              v-model="testCaseWithSuite.data.response.statusCode"
-              class="w-50 m-2"
-              placeholder="Please input"
-              style="width: 200px"
-            />
+          <el-row>
+            <el-col :span="4">
+              Status Code:
+            </el-col>
+            <el-col :span="20">
+              <el-input
+                v-model="testCaseWithSuite.data.response.statusCode"
+                class="w-50 m-2"
+                placeholder="Please input"
+                :readonly="isHistoryTestCase">
+                <template #append>
+                  {{  t('httpCode.' + testCaseWithSuite.data.response.statusCode) }}
+                </template>
+              </el-input>
+            </el-col>
           </el-row>
-          <el-input
-            v-model="testCaseWithSuite.data.response.body"
-            :autosize="{ minRows: 4, maxRows: 8 }"
-            type="textarea"
-            placeholder="Expected Body"
-          />
+          <el-row>
+            <el-col :span="4">Body:</el-col>
+            <el-col :span="20">
+              <el-input
+                v-model="testCaseWithSuite.data.response.body"
+                :autosize="{ minRows: 4, maxRows: 8 }"
+                type="textarea"
+                placeholder="Expected Body"
+                :readonly="isHistoryTestCase"
+              />
+            </el-col>
+          </el-row>
         </el-tab-pane>
 
         <el-tab-pane label="Expected Headers" name="expected-headers" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
@@ -760,13 +1094,14 @@ Magic.Keys(() => {
                   v-model="scope.row.key"
                   placeholder="Key"
                   @change="expectedHeaderChange"
+                  :readonly="isHistoryTestCase"
                 />
               </template>
             </el-table-column>
             <el-table-column label="Value">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
-                  <el-input v-model="scope.row.value" placeholder="Value" />
+                  <el-input v-model="scope.row.value" placeholder="Value" :readonly="isHistoryTestCase"/>
                 </div>
               </template>
             </el-table-column>
@@ -783,13 +1118,14 @@ Magic.Keys(() => {
                   clearable
                   placeholder="Key"
                   @change="bodyFiledExpectChange"
+                  :readonly="isHistoryTestCase"
                 />
               </template>
             </el-table-column>
             <el-table-column label="Value">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
-                  <el-input v-model="scope.row.value" placeholder="Value" />
+                  <el-input v-model="scope.row.value" placeholder="Value" :readonly="isHistoryTestCase"/>
                 </div>
               </template>
             </el-table-column>
@@ -798,7 +1134,7 @@ Magic.Keys(() => {
 
         <el-tab-pane label="Verify" name="verify" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <div v-for="verify in testCaseWithSuite.data.response.verify" :key="verify">
-            <el-input :value="verify" />
+            <el-input :value="verify" :readonly="isHistoryTestCase"/>
           </div>
         </el-tab-pane>
 
@@ -807,6 +1143,7 @@ Magic.Keys(() => {
             v-model="testCaseWithSuite.data.response.schema"
             :autosize="{ minRows: 4, maxRows: 20 }"
             type="textarea"
+            :readonly="isHistoryTestCase"
           />
         </el-tab-pane>
       </el-tabs>
@@ -836,6 +1173,61 @@ Magic.Keys(() => {
           <Codemirror v-model="currentCodeContent"/>
         </template>
       </el-drawer>
+
+      <el-dialog @close="handleDialogClose" v-model="historyDialogOpened" :title="t('button.viewHistory')" width="60%" draggable>
+        <el-form
+          ref="viewHistoryRef"
+          :model="historyForm"
+          status-icon label-width="120px"
+          :rules="rules"
+        >
+          <el-form-item :label="t('title.history')" prop="selectedID">
+            <el-row :gutter="20">
+              <el-col :span="20">
+                <el-select  class="m-2"
+                  filterable
+                  clearable
+                  v-model="historyForm.selectedID"
+                  default-first-option
+                  placeholder="History Case"
+                  size="middle"
+                  @change="handleHistoryChange"
+                >
+                  <el-option
+                    v-for="item in historyRecords"
+                    :key="item.ID"
+                    :label="item.createTime"
+                    :value="item.ID"
+                  />
+                </el-select>
+              </el-col>
+              <el-col :span="4">
+              <div style="display: flex;flex-wrap: nowrap;justify-content: flex-end;">
+                <el-button
+                  type="primary"
+                  @click="submitForm(viewHistoryRef)"
+                  :loading="caseRevertLoading"
+                  >{{ t('button.revert') }}
+                </el-button>
+                <el-button
+                  type="primary"
+                  @click="goToHistory(viewHistoryRef)"
+                  :loading="caseRevertLoading"
+                  >{{ t('button.goToHistory') }}
+                </el-button>
+                <el-button
+                  type="primary"
+                  @click="deleteAllHistory(viewHistoryRef)"
+                  :loading="caseRevertLoading"
+                  >{{ t('button.deleteAllHistory') }}
+                </el-button>
+              </div>
+              </el-col>
+            </el-row>
+          </el-form-item>
+        </el-form>
+        <div id="compareView"></div>
+      </el-dialog>
 
       <el-drawer v-model="parameterDialogOpened">
         <template #header>
@@ -877,11 +1269,23 @@ Magic.Keys(() => {
         <el-tab-pane label="Body" name="body">
           <div v-if="testResult.bodyObject">
             <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
-              clearable placeholder="$.key" />
-            <JsonViewer :value="testResult.bodyObject" :expand-depth="2" copyable boxed sort />
+              clearable placeholder="$.key">
+              <template #prepend v-if="testResult.bodyLength > 0">Body Size: {{testResult.bodyLength}}</template>
+            </el-input>
+            <JsonViewer :value="testResult.bodyObject" :expand-depth="5" copyable boxed sort />
           </div>
           <div v-else>
-            <Codemirror v-model="testResult.bodyText"/>
+            <Codemirror v-if="!isResponseFile" v-model="testResult.bodyText"/>
+            <div v-if="isResponseFile" style="padding-top: 10px;">
+            <el-row>
+              <el-col :span="8">
+                <div>Response body is too large, please download to view.</div>
+              </el-col>
+              <el-col :span="4">
+                <el-button type="primary" @click="downloadResponseFile">Download</el-button>
+              </el-col>
+            </el-row>
+          </div>
           </div>
         </el-tab-pane>
         <el-tab-pane name="response-header">

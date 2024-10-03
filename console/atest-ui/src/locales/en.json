@@ -22,7 +22,11 @@
         "generateCode": "Generate Code",
         "sendWithParam": "Send With Parameter",
         "fullScreen": "Full Screen",
-        "cancelFullScreen": "Cancel Full Screen"
+        "cancelFullScreen": "Cancel Full Screen",
+        "viewHistory": "View History Test Case Result",
+        "revert": "Revert",
+        "goToHistory": "Go to History",
+        "deleteAllHistory": "Delete All History"
     },
     "title": {
         "createTestSuite": "Create Test Suite",
@@ -38,6 +42,7 @@
         "apiRequestParameter": "API Request Parameter",
         "codeGenerator": "Code Generator",
         "testing": "Testing",
+        "history": "Testing History",
         "mock": "Mock",
         "welcome": "Welcome",
         "secrets": "Secrets",
@@ -49,7 +54,8 @@
         "filter": "Filter Keyword",
         "noParameter": "No Parameter",
         "testsuite": "Test Suite:",
-        "apiAddress": "API Address:"
+        "apiAddress": "API Address:",
+        "runningAt": "Running At:"
     },
     "field": {
         "name": "Name",

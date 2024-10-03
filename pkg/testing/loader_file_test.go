@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -188,6 +188,12 @@ func TestSuite(t *testing.T) {
 			},
 		})
 		assert.NoError(t, err)
+
+		// should failed when creating duplicated test case
+		err = writer.CreateTestCase("test", atest.TestCase{
+			Name: "login",
+		})
+		assert.Error(t, err)
 
 		var suite atest.TestSuite
 		suite, err = writer.GetTestSuite("test", false)

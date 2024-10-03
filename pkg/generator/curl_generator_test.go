@@ -63,8 +63,8 @@ func TestCurlGenerator(t *testing.T) {
 			Request: atest.Request{
 				API: fooForTest,
 				Header: map[string]string{
-					"Content-Type": util.Plain,
-					"Connection":   "keep-alive",
+					util.ContentType: util.Plain,
+					"Connection":     "keep-alive",
 				},
 			},
 		},

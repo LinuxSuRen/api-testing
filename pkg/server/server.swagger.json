@@ -77,6 +77,38 @@
         ]
       }
     },
+    "/api/v1/codeGenerators/history/generate": {
+      "post": {
+        "operationId": "Runner_HistoryGenerateCode",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverCodeGenerateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
     "/api/v1/converters": {
       "get": {
         "summary": "converter",
@@ -124,6 +156,44 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/serverCodeGenerateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/api/v1/downloadFile/{response.body}": {
+      "post": {
+        "operationId": "Runner_DownloadResponseFile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverFileData"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "response.body",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RunnerDownloadResponseFileBody"
             }
           }
         ],
@@ -223,6 +293,763 @@
         "parameters": [
           {
             "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/api/v1/historySuites": {
+      "post": {
+        "summary": "history test related",
+        "operationId": "Runner_GetHistorySuites",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHistorySuites"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/api/v1/historySuites/{suiteName}/cases/{caseName}": {
+      "delete": {
+        "operationId": "Runner_DeleteAllHistoryTestCase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "suiteName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "caseName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "historySuiteName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "createTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "suiteSpec.kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.url",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.import",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "suiteSpec.rpc.serverReflection",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.rpc.protofile",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.protoset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.raw",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.insecure",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.secure.cert",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.ca",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.serverName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.key",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteApi",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.method",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.statusCode",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "response.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.verify",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "response.schema",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ID",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/api/v1/historyTestCase/{ID}": {
+      "get": {
+        "operationId": "Runner_GetHistoryTestCase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestCase"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "caseName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "historySuiteName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "createTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "suiteSpec.kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.url",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.import",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "suiteSpec.rpc.serverReflection",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.rpc.protofile",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.protoset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.raw",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.insecure",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.secure.cert",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.ca",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.serverName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.key",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteApi",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.method",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.statusCode",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "response.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.verify",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "response.schema",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      },
+      "delete": {
+        "operationId": "Runner_DeleteHistoryTestCase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "caseName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "historySuiteName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "createTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "suiteSpec.kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.url",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.import",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "suiteSpec.rpc.serverReflection",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.rpc.protofile",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.protoset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.raw",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.insecure",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.secure.cert",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.ca",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.serverName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.key",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteApi",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.method",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.statusCode",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "response.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.verify",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "response.schema",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/api/v1/historyTestCaseWithResult/{ID}": {
+      "get": {
+        "operationId": "Runner_GetHistoryTestCaseWithResult",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "caseName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "historySuiteName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "createTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "suiteSpec.kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.url",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.import",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "suiteSpec.rpc.serverReflection",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.rpc.protofile",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.protoset",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.rpc.raw",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.insecure",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "suiteSpec.secure.cert",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.ca",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.serverName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteSpec.secure.key",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteApi",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.method",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.statusCode",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "response.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.verify",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "response.schema",
             "in": "query",
             "required": false,
             "type": "string"
@@ -529,15 +1356,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "Value": {
-                  "type": "string"
-                },
-                "Description": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateSecretBody"
             }
           }
         ],
@@ -776,43 +1595,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "owner": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "url": {
-                  "type": "string"
-                },
-                "username": {
-                  "type": "string"
-                },
-                "password": {
-                  "type": "string"
-                },
-                "properties": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/serverPair"
-                  }
-                },
-                "kind": {
-                  "$ref": "#/definitions/serverStoreKind"
-                },
-                "ready": {
-                  "type": "boolean"
-                },
-                "readOnly": {
-                  "type": "boolean"
-                },
-                "disabled": {
-                  "type": "boolean"
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateStoreBody"
             }
           }
         ],
@@ -1067,22 +1850,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "api": {
-                  "type": "string"
-                },
-                "param": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/serverPair"
-                  }
-                },
-                "spec": {
-                  "$ref": "#/definitions/serverAPISpec"
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateTestSuiteBody"
             }
           }
         ],
@@ -1211,15 +1979,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                },
-                "targetCaseName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerDuplicateTestCaseBody"
             }
           }
         ],
@@ -1257,12 +2017,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerDuplicateTestSuiteBody"
             }
           }
         ],
@@ -1300,12 +2055,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "$ref": "#/definitions/serverTestCase"
-                }
-              }
+              "$ref": "#/definitions/RunnerCreateTestCaseBody"
             }
           }
         ],
@@ -1349,24 +2099,91 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "suiteName": {
-                      "type": "string"
-                    },
-                    "request": {
-                      "$ref": "#/definitions/serverRequest"
-                    },
-                    "response": {
-                      "$ref": "#/definitions/serverResponse"
-                    }
-                  }
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateTestCaseBody"
             }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/api/v1/suites/{suiteName}/cases/{name}": {
+      "post": {
+        "operationId": "Runner_GetTestCaseAllHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHistoryTestCases"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "suiteName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "request.api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.method",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.statusCode",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "response.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.verify",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "response.schema",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1538,6 +2355,173 @@
     }
   },
   "definitions": {
+    "RunnerCreateTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/serverTestCase"
+        }
+      }
+    },
+    "RunnerDownloadResponseFileBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "suiteName": {
+          "type": "string"
+        },
+        "request": {
+          "$ref": "#/definitions/serverRequest"
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "statusCode": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "header": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/serverPair"
+              }
+            },
+            "bodyFieldsExpect": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/serverPair"
+              }
+            },
+            "verify": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "ConditionalVerify": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/serverConditionalVerify"
+              }
+            },
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "RunnerDuplicateTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        },
+        "targetCaseName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerDuplicateTestSuiteBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerUpdateSecretBody": {
+      "type": "object",
+      "properties": {
+        "Value": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerUpdateStoreBody": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "kind": {
+          "$ref": "#/definitions/serverStoreKind"
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "RunnerUpdateTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "suiteName": {
+              "type": "string"
+            },
+            "request": {
+              "$ref": "#/definitions/serverRequest"
+            },
+            "response": {
+              "$ref": "#/definitions/serverResponse"
+            }
+          }
+        }
+      }
+    },
+    "RunnerUpdateTestSuiteBody": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "param": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "spec": {
+          "$ref": "#/definitions/serverAPISpec"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -1594,6 +2578,9 @@
         },
         "Generator": {
           "type": "string"
+        },
+        "ID": {
+          "type": "string"
         }
       }
     },
@@ -1645,6 +2632,21 @@
         }
       }
     },
+    "serverFileData": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "format": "byte"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        }
+      }
+    },
     "serverHelloReply": {
       "type": "object",
       "properties": {
@@ -1653,6 +2655,133 @@
         },
         "error": {
           "type": "string"
+        }
+      }
+    },
+    "serverHistoryCaseIdentity": {
+      "type": "object",
+      "properties": {
+        "suite": {
+          "type": "string"
+        },
+        "testcase": {
+          "type": "string"
+        },
+        "historySuiteName": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "string"
+        }
+      }
+    },
+    "serverHistoryItems": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverHistoryCaseIdentity"
+          }
+        }
+      }
+    },
+    "serverHistorySuites": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/serverHistoryItems"
+          }
+        }
+      }
+    },
+    "serverHistoryTestCase": {
+      "type": "object",
+      "properties": {
+        "caseName": {
+          "type": "string"
+        },
+        "suiteName": {
+          "type": "string"
+        },
+        "historySuiteName": {
+          "type": "string"
+        },
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "suiteParam": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "suiteSpec": {
+          "$ref": "#/definitions/serverAPISpec"
+        },
+        "suiteApi": {
+          "type": "string"
+        },
+        "request": {
+          "$ref": "#/definitions/serverRequest"
+        },
+        "response": {
+          "$ref": "#/definitions/serverResponse"
+        },
+        "ID": {
+          "type": "string"
+        },
+        "historyHeader": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        }
+      }
+    },
+    "serverHistoryTestCases": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverHistoryTestCase"
+          }
+        }
+      }
+    },
+    "serverHistoryTestResult": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "testCaseResult": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverTestCaseResult"
+          }
+        },
+        "data": {
+          "$ref": "#/definitions/serverHistoryTestCase"
+        },
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
