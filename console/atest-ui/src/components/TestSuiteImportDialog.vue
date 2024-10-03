@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { reactive, ref } from 'vue'
 import type { Suite } from '@/views/types'
 import { API } from '@/views/net'
+import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 
 const { t } = useI18n()
@@ -34,6 +35,8 @@ const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
             API.ImportTestSuite(importSuiteForm, () => {
                 emit('created')
                 formEl.resetFields()
+            }, (e) => {
+                ElMessage.error(e)
             })
         }
     })
@@ -59,64 +62,71 @@ function loadStores() {
 loadStores()
 
 const importSourceKinds = [{
-  "name": "Postman",
-  "value": "postman"
+    "name": "Postman",
+    "value": "postman",
+    "description": "https://api.postman.com/collections/xxx"
 }, {
-  "name": "Native",
-  "value": "native"
+    "name": "Native",
+    "value": "native",
+    "description": "http://your-server/api/v1/suites/xxx/yaml?x-store-name=xxx"
 }]
+const placeholderOfImportURL = ref("")
+const kindChanged = (e) => {
+    importSourceKinds.forEach(k => {
+        if (k.value === e) {
+            placeholderOfImportURL.value = k.description
+        }
+    });
+}
 </script>
 
 <template>
-    <el-dialog :modelValue="visible" title="Import Test Suite" width="30%" draggable>
-        <span>Supported source URL: Postman collection share link</span>
-        <template #footer>
-          <span class="dialog-footer">
-            <el-form
-                :rules="importSuiteFormRules"
-                :model="importSuiteForm"
-                ref="importSuiteFormRef"
-                status-icon label-width="120px">
-                <el-form-item label="Location" prop="store">
-                    <el-select v-model="importSuiteForm.store" class="m-2"
-                                test-id="suite-import-form-store"
-                                filterable
-                                default-first-option
-                                placeholder="Storage Location">
-                        <el-option
-                            v-for="item in stores"
-                            :key="item.name"
-                            :label="item.name"
-                            :value="item.name"
-                        />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="Kind" prop="kind">
-                    <el-select v-model="importSuiteForm.kind" class="m-2"
-                    filterable=true
+    <el-dialog :modelValue="visible" title="Import Test Suite" width="40%"
+        draggable destroy-on-close>
+        <el-form
+            :rules="importSuiteFormRules"
+            :model="importSuiteForm"
+            ref="importSuiteFormRef"
+            status-icon label-width="85px">
+            <el-form-item label="Location" prop="store">
+                <el-select v-model="importSuiteForm.store" class="m-2"
+                    test-id="suite-import-form-store"
+                    filterable
+                    default-first-option
+                    placeholder="Storage Location">
+                    <el-option
+                        v-for="item in stores"
+                        :key="item.name"
+                        :label="item.name"
+                        :value="item.name"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="Kind" prop="kind">
+                <el-select v-model="importSuiteForm.kind" class="m-2"
+                    filterable
+                    @change="kindChanged"
                     test-id="suite-import-form-kind"
-                    default-first-option=true
-                    placeholder="Kind" size="middle">
+                    default-first-option
+                    placeholder="Kind">
                     <el-option
                         v-for="item in importSourceKinds"
                         :key="item.name"
                         :label="item.name"
                         :value="item.value"
                     />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="URL" prop="url">
-                    <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api" placeholder="https://api.postman.com/collections/xxx" />
-                </el-form-item>
-                <el-form-item>
-                    <el-button
-                        type="primary"
-                        @click="importSuiteFormSubmit(importSuiteFormRef)"
-                        test-id="suite-import-submit"
-                    >{{ t('button.import') }}</el-button>
-                </el-form-item>
-            </el-form>
-          </span>
-        </template>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="URL" prop="url">
+                <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api" :placeholder="placeholderOfImportURL" />
+            </el-form-item>
+            <el-form-item>
+                <el-button
+                    type="primary"
+                    @click="importSuiteFormSubmit(importSuiteFormRef)"
+                    test-id="suite-import-submit"
+                >{{ t('button.import') }}</el-button>
+            </el-form-item>
+        </el-form>
     </el-dialog>
 </template>
