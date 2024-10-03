@@ -490,6 +490,7 @@ message TestCaseResult {
 message Pair {
   string key = 1;
   string value = 2;
+  string description = 3;
 }
 
 message Pairs {

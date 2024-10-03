@@ -18,9 +18,9 @@ package server
 import (
 	"strings"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // ToGRPCStore convert the normal store to GRPC store
