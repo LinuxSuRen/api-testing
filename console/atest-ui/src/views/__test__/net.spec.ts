@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { describe } from 'node:test'
 import {API} from '../net'
 import { type TestCase } from '../net'
 import { SetupStorage } from './common'
@@ -29,7 +28,7 @@ beforeEach(() => {
 
 describe('net', () => {
     test('GetVersion', () => {
-        fetchMock.mockResponseOnce(`{"version":"v0.0.1"}`)
+        fetchMock.mockResponseOnce(`{"version":"v0.0.2"}`)
         API.GetVersion((d) => {
             expect(d.version).toEqual('v0.0.2')
         })
