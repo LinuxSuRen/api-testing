@@ -83,5 +83,5 @@ func TestSortedKeysStringMap(t *testing.T) {
 	assert.Equal(t, "e", obj.GetValue("e"))
 	assert.Equal(t, "f", obj.GetValue("f"))
 	assert.Equal(t, "f", obj.GetVerifier("f").Value)
-	assert.Empty(t,obj.GetValue("not-found"))
+	assert.Empty(t, obj.GetValue("not-found"))
 }

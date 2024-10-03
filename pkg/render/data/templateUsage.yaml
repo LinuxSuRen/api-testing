@@ -1,0 +1,8 @@
+randImage: |
+  {{ randImage 100 100 }}
+randAscii: |
+  {{ randAscii 5 }}
+randPdf: |
+  {{ randPdf "content" }}
+randZip: |
+  {{ randZip 5 }}

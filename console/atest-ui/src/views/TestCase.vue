@@ -738,6 +738,16 @@ function handleSelectChange() {
   }
 }
 
+const filepathChange = () => {
+  const items = testCaseWithSuite.value.data.request.filepath.split("=")
+      if (items && items.length > 1) {
+        testCaseWithSuite.value.data.request.form = [{
+          key: items[0],
+          value: items[1]
+        } as Pair]
+      }
+}
+
 const bodyType = ref(1)
 function bodyTypeChange(e: number) {
   let contentType = ""
@@ -750,14 +760,7 @@ function bodyTypeChange(e: number) {
       break;
     case 6:
       contentType = 'multipart/form-data'
-
-      const items = testCaseWithSuite.value.data.request.filepath.split("=")
-      if (items && items.length > 1) {
-        testCaseWithSuite.value.data.request.form = [{
-          key: items[0],
-          value: items[1]
-        } as Pair]
-      }
+      filepathChange()
       break;
     case 7:
       // 获取localStorage中的数据
@@ -898,44 +901,53 @@ Magic.Keys(() => {
         <el-button type="primary" v-if="!isHistoryTestCase && Cache.GetCurrentStore().kind.name == 'atest-store-orm'" @click="openHistoryDialog">{{ t('button.viewHistory') }}</el-button>
         <span v-if="isHistoryTestCase" style="margin-left: 15px;">{{ t('tip.runningAt') }}{{ HistoryTestCaseCreateTime }}</span>
       </div>
-      <div style="display: flex;">
-        <el-select
-          v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'"
-          v-model="testCaseWithSuite.data.request.method"
-          class="m-2"
-          placeholder="Method"
-          size="default"
-          test-id="case-editor-method"
-          :disabled="isHistoryTestCase"
-        >
-          <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.key"
-            :value="item.value"
-          />
-        </el-select>
-        <el-autocomplete
-          v-model="testCaseWithSuite.data.request.api"
-          :fetch-suggestions="querySuggestedAPIs"
-          placeholder="API Address"
-          style="width: 50%; margin-left: 5px; margin-right: 5px; flex-grow: 1;"
-          :readonly="isHistoryTestCase"
-        >
-          <template #default="{ item }">
-            <div class="value">{{ item.request.method }}</div>
-            <span class="link">{{ item.request.api }}</span>
-          </template>
-        </el-autocomplete>
-
-        <el-dropdown split-button type="primary" @click="sendRequest" v-loading="requestLoading" v-if="!isHistoryTestCase">
-          {{ t('button.send') }}
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="openParameterDialog">{{ t('button.sendWithParam') }}</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+      <div>
+        <el-row>
+          <el-col :span="3">
+            <el-select
+              v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'"
+              v-model="testCaseWithSuite.data.request.method"
+              class="m-2"
+              placeholder="Method"
+              size="default"
+              test-id="case-editor-method"
+              :disabled="isHistoryTestCase"
+            >
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.key"
+                :value="item.value"
+              />
+            </el-select>
+          </el-col>
+          <el-col :span="18">
+            <el-autocomplete
+              v-model="testCaseWithSuite.data.request.api"
+              style="width: 100%"
+              :fetch-suggestions="querySuggestedAPIs"
+              placeholder="API Address"
+              :readonly="isHistoryTestCase">
+              <template #default="{ item }">
+                <div class="value">{{ item.request.method }}</div>
+                <span class="link">{{ item.request.api }}</span>
+              </template>
+            </el-autocomplete>
+          </el-col>
+          <el-col :span="3">
+            <el-dropdown split-button type="primary"
+              @click="sendRequest"
+              v-loading="requestLoading"
+              v-if="!isHistoryTestCase">
+              {{ t('button.send') }}
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="openParameterDialog">{{ t('button.sendWithParam') }}</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </el-col>
+        </el-row>
       </div>
     </el-header>
 
@@ -1058,7 +1070,12 @@ Magic.Keys(() => {
               />
             </el-select>
             <div v-if="bodyType === 6">
-              Filename: <el-input v-model="testCaseWithSuite.data.request.filepath" placeholder="file=sample.txt" />
+              <el-row>
+                <el-col :span="4">Filename:</el-col>
+                <el-col :span="20">
+                  <el-input v-model="testCaseWithSuite.data.request.filepath" placeholder="file=sample.txt" @change="filepathChange" />
+                </el-col>
+              </el-row>
             </div>
             <Codemirror v-if="bodyType === 3 || bodyType === 5 || bodyType === 6"
               @blur="jsonFormat(-1)"
@@ -1085,27 +1102,34 @@ Magic.Keys(() => {
         </el-tab-pane>
 
         <el-tab-pane label="Expected" name="expected" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
-          <el-row :gutter="20">
-            <span
-              class="ml-3 w-50 text-gray-600 inline-flex items-center"
-              style="margin-left: 15px; margin-right: 15px"
-              >Status Code:</span
-            >
-            <el-input
-              v-model="testCaseWithSuite.data.response.statusCode"
-              class="w-50 m-2"
-              placeholder="Please input"
-              style="width: 200px"
-              :readonly="isHistoryTestCase"
-            />
+          <el-row>
+            <el-col :span="4">
+              Status Code:
+            </el-col>
+            <el-col :span="20">
+              <el-input
+                v-model="testCaseWithSuite.data.response.statusCode"
+                class="w-50 m-2"
+                placeholder="Please input"
+                :readonly="isHistoryTestCase">
+                <template #append>
+                  {{  t('httpCode.' + testCaseWithSuite.data.response.statusCode) }}
+                </template>
+              </el-input>
+            </el-col>
           </el-row>
-          <el-input
-            v-model="testCaseWithSuite.data.response.body"
-            :autosize="{ minRows: 4, maxRows: 8 }"
-            type="textarea"
-            placeholder="Expected Body"
-            :readonly="isHistoryTestCase"
-          />
+          <el-row>
+            <el-col :span="4">Body:</el-col>
+            <el-col :span="20">
+              <el-input
+                v-model="testCaseWithSuite.data.response.body"
+                :autosize="{ minRows: 4, maxRows: 8 }"
+                type="textarea"
+                placeholder="Expected Body"
+                :readonly="isHistoryTestCase"
+              />
+            </el-col>
+          </el-row>
         </el-tab-pane>
 
         <el-tab-pane label="Expected Headers" name="expected-headers" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">

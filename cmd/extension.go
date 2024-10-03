@@ -56,7 +56,7 @@ func createExtensionCommand(ociDownloader downloader.PlatformAwareOCIDownloader)
 	flags.StringVarP(&opt.os, "os", "", runtime.GOOS, "The OS")
 	flags.StringVarP(&opt.arch, "arch", "", runtime.GOARCH, "The architecture")
 	flags.DurationVarP(&opt.timeout, "timeout", "", time.Minute, "The timeout of downloading")
-	flags.StringVarP(&opt.imagePrefix, "image-prefix", "", "linuxsuren", "The prefix for the image address") 
+	flags.StringVarP(&opt.imagePrefix, "image-prefix", "", "linuxsuren", "The prefix for the image address")
 	return
 }
 

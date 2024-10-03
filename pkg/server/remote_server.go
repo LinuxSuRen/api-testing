@@ -1010,8 +1010,9 @@ func (s *server) FunctionsQuery(ctx context.Context, in *SimpleQuery) (reply *Pa
 		lowerCaseName := strings.ToLower(name)
 		if in.Name == "" || strings.Contains(lowerCaseName, in.Name) {
 			reply.Data = append(reply.Data, &Pair{
-				Key:   name,
-				Value: fmt.Sprintf("%v", reflect.TypeOf(fn)),
+				Key:         name,
+				Value:       fmt.Sprintf("%v", reflect.TypeOf(fn)),
+				Description: render.FuncUsage(name),
 			})
 		}
 	}
