@@ -18,9 +18,6 @@ package generator
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
-	"os"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
@@ -92,8 +89,12 @@ func (p Paris) ToMap() (result map[string]string) {
 	return
 }
 
-type Importer interface {
+type DataImporter interface {
 	Convert(data []byte) (*testing.TestSuite, error)
+}
+
+type Importer interface {
+	DataImporter
 	ConvertFromFile(dataFile string) (*testing.TestSuite, error)
 	ConvertFromURL(dataURL string) (*testing.TestSuite, error)
 }
@@ -122,11 +123,16 @@ func (p *postmanImporter) Convert(data []byte) (suite *testing.TestSuite, err er
 
 	suite = &testing.TestSuite{}
 	suite.Name = postman.Info.Name
-	if err = p.convertItems(postman.Item, "", suite); err != nil {
-		return
-	}
-
+	err = p.convertItems(postman.Item, "", suite)
 	return
+}
+
+func (p *postmanImporter) ConvertFromFile(dataFile string) (*testing.TestSuite, error) {
+	return convertFromFile(dataFile, p)
+}
+
+func (p *postmanImporter) ConvertFromURL(dataURLStr string) (*testing.TestSuite, error) {
+	return convertFromURL(dataURLStr, p)
 }
 
 func (p *postmanImporter) convertItems(items []PostmanItem, prefix string, suite *testing.TestSuite) (err error) {
@@ -146,25 +152,6 @@ func (p *postmanImporter) convertItems(items []PostmanItem, prefix string, suite
 			if err = p.convertItems(item.Item, itemName+" ", suite); err != nil {
 				return
 			}
-		}
-	}
-	return
-}
-
-func (p *postmanImporter) ConvertFromFile(dataFile string) (suite *testing.TestSuite, err error) {
-	var data []byte
-	if data, err = os.ReadFile(dataFile); err == nil {
-		suite, err = p.Convert(data)
-	}
-	return
-}
-
-func (p *postmanImporter) ConvertFromURL(dataURL string) (suite *testing.TestSuite, err error) {
-	var resp *http.Response
-	if resp, err = http.Get(dataURL); err == nil {
-		var data []byte
-		if data, err = io.ReadAll(resp.Body); err == nil {
-			suite, err = p.Convert(data)
 		}
 	}
 	return

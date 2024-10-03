@@ -628,6 +628,12 @@ func TestGenerateRandomValue(t *testing.T) {
 	}
 }
 
+func TestAmmendHeaders(t *testing.T) {
+	headers := http.Header{"Content-Type": []string{"application/json"}}
+	ammendHeaders(headers, []byte("good"))
+	assert.Equal(t, "4", headers.Get(util.ContentLength))
+}
+
 const defaultSchemaForTest = `{"properties": {
 	"name": {"type": "string"},
 	"age": {"type": "integer"}

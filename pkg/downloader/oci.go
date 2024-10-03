@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/blang/semver/v4"
+	"github.com/linuxsuren/api-testing/pkg/util"
 )
 
 type OCIDownloader interface {
@@ -44,6 +45,7 @@ type PlatformAwareOCIDownloader interface {
 	WithOS(string)
 	WithArch(string)
 	GetTargetFile() string
+	WithImagePrefix(string)
 }
 
 type defaultOCIDownloader struct {
@@ -94,7 +96,7 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 		return
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authStr))
+	req.Header.Set(util.Authorization, fmt.Sprintf("Bearer %s", authStr))
 	req.Header.Set("Accept", "application/vnd.oci.image.manifest.v1+json")
 
 	var resp *http.Response
@@ -105,8 +107,12 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 		err = fmt.Errorf("failed to get manifest from %q, status code: %d", api, resp.StatusCode)
 		return
 	} else {
+		progressReader := NewProgressReader(resp.Body)
+		progressReader.SetLength(resp.ContentLength)
+		progressReader.SetTitle("Fetching manifest:")
+
 		var data []byte
-		data, err = io.ReadAll(resp.Body)
+		data, err = io.ReadAll(progressReader)
 		if err != nil {
 			return
 		}
@@ -160,7 +166,7 @@ func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string
 		return
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
+	req.Header.Set(util.Authorization, fmt.Sprintf("Bearer %s", authToken))
 	var resp *http.Response
 	if resp, err = d.getHTTPClient().Do(req); err != nil {
 		err = fmt.Errorf("failed to get image tags from %q, error: %v", req.URL, err)
@@ -171,6 +177,7 @@ func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string
 
 		progressReader := NewProgressReader(resp.Body)
 		progressReader.SetLength(resp.ContentLength)
+		progressReader.SetTitle("Fetching tags:")
 
 		var data []byte
 		if data, err = io.ReadAll(progressReader); err != nil {
@@ -216,13 +223,17 @@ func (d *defaultOCIDownloader) downloadLayer(image, digest, authToken string) (r
 		return
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
+	req.Header.Set(util.Authorization, fmt.Sprintf("Bearer %s", authToken))
 	var resp *http.Response
 	if resp, err = d.getHTTPClient().Do(req); err != nil {
 		err = fmt.Errorf("failed to get layer from %q, error: %v", req.URL.String(), err)
 	} else {
+		progressReader := NewProgressReader(resp.Body)
+		progressReader.SetLength(resp.ContentLength)
+		progressReader.SetTitle("Fetching Layer:")
+
 		var data []byte
-		if data, err = io.ReadAll(resp.Body); err != nil {
+		if data, err = io.ReadAll(progressReader); err != nil {
 			return
 		}
 

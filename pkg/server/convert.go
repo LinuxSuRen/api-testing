@@ -20,6 +20,7 @@ import (
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // ToGRPCStore convert the normal store to GRPC store
@@ -60,6 +61,42 @@ func ToNormalStore(store *Store) (result testing.Store) {
 			URL:  store.Kind.Url,
 		}
 	}
+	return
+}
+
+func ConvertToGRPCHistoryTestCase(historyTestcase testing.HistoryTestCase) (result *HistoryTestCase) {
+	req := historyTestcase.Data.Request
+	res := historyTestcase.Data.Expect
+	result = &HistoryTestCase{
+		ID:               historyTestcase.ID,
+		CreateTime:       timestamppb.New(historyTestcase.CreateTime),
+		CaseName:         historyTestcase.CaseName,
+		SuiteName:        historyTestcase.SuiteName,
+		HistorySuiteName: historyTestcase.HistorySuiteName,
+		SuiteSpec:        ToGRPCTestSuiteSpec(historyTestcase.SuiteSpec),
+		SuiteApi:         historyTestcase.SuiteAPI,
+		SuiteParam:       mapToPair(historyTestcase.SuiteParam),
+		HistoryHeader:    mapToPair(historyTestcase.HistoryHeader),
+
+		Request: &Request{
+			Api:    req.API,
+			Method: req.Method,
+			Body:   req.Body.String(),
+			Header: mapToPair(req.Header),
+			Query:  mapInterToPair(req.Query),
+			Form:   mapToPair(req.Form),
+		},
+
+		Response: &Response{
+			Body:             res.Body,
+			StatusCode:       int32(res.StatusCode),
+			Schema:           res.Schema,
+			Verify:           res.Verify,
+			Header:           mapToPair(res.Header),
+			BodyFieldsExpect: mapInterToPair(res.BodyFieldsExpect),
+		},
+	}
+	result.SuiteSpec = ToGRPCTestSuiteSpec(historyTestcase.SuiteSpec)
 	return
 }
 
@@ -185,6 +222,67 @@ func ToNormalTestCase(in *TestCase) (result testing.TestCase) {
 		result.Expect.ConditionalVerify = convertConditionalVerify(resp.ConditionalVerify)
 		result.Expect.BodyFieldsExpect = pairToInterMap(resp.BodyFieldsExpect)
 		result.Expect.Header = pairToMap(resp.Header)
+	}
+	return
+}
+
+func ToNormalTestCaseResult(testCaseResult *TestCaseResult) (result testing.TestCaseResult) {
+	result = testing.TestCaseResult{
+		StatusCode: int(testCaseResult.StatusCode),
+		Error:      testCaseResult.Error,
+		Body:       testCaseResult.Body,
+		Header:     pairToMap(testCaseResult.Header),
+		Id:         testCaseResult.Id,
+		Output:     testCaseResult.Output,
+	}
+	return result
+}
+
+func ToGRPCHistoryTestCaseResult(historyTestResult testing.HistoryTestResult) (result *HistoryTestResult) {
+	convertedHistoryTestCase := ConvertToGRPCHistoryTestCase(historyTestResult.Data)
+
+	result = &HistoryTestResult{
+		Message:    historyTestResult.Message,
+		Error:      historyTestResult.Error,
+		CreateTime: timestamppb.New(historyTestResult.CreateTime),
+		Data:       convertedHistoryTestCase,
+	}
+
+	for _, testCaseResult := range historyTestResult.TestCaseResult {
+		result.TestCaseResult = append(result.TestCaseResult, &TestCaseResult{
+			StatusCode: int32(testCaseResult.StatusCode),
+			Error:      testCaseResult.Error,
+			Body:       testCaseResult.Body,
+			Header:     mapToPair(testCaseResult.Header),
+			Output:     testCaseResult.Output,
+			Id:         testCaseResult.Id,
+		})
+	}
+
+	return result
+}
+
+func ToGRPCTestSuiteSpec(spec testing.APISpec) (result *APISpec) {
+	result = &APISpec{
+		Kind: spec.Kind,
+		Url:  spec.URL,
+	}
+	if spec.RPC != nil {
+		result.Rpc = &RPC{
+			Raw:              spec.RPC.Raw,
+			Protofile:        spec.RPC.ProtoFile,
+			Import:           spec.RPC.ImportPath,
+			ServerReflection: spec.RPC.ServerReflection,
+		}
+	}
+	if spec.Secure != nil {
+		result.Secure = &Secure{
+			Insecure:   spec.Secure.Insecure,
+			Cert:       spec.Secure.CertFile,
+			Ca:         spec.Secure.CAFile,
+			ServerName: spec.Secure.ServerName,
+			Key:        spec.Secure.KeyFile,
+		}
 	}
 	return
 }

@@ -51,7 +51,7 @@ func (r *defualtReader) request(api string) (result map[string]interface{}, err 
 	client := GetClient()
 	var req *http.Request
 	if req, err = http.NewRequest(http.MethodGet, api, nil); err == nil {
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", r.token))
+		req.Header.Add(util.Authorization, fmt.Sprintf("Bearer %s", r.token))
 		var resp *http.Response
 		if resp, err = client.Do(req); err == nil && resp.StatusCode == http.StatusOK {
 			var data []byte

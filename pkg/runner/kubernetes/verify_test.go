@@ -100,7 +100,7 @@ func TestKubernetesValidatorFunc(t *testing.T) {
 func preparePod() {
 	gock.New(urlFoo).
 		Get("/api/v1/namespaces/ns/pods/foo").
-		MatchHeader("Authorization", defaultToken).
+		MatchHeader(util.Authorization, defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"pod"}`)
 }
@@ -108,7 +108,7 @@ func preparePod() {
 func prepareDeploy() {
 	gock.New(urlFoo).
 		Get("/apis/apps/v1/namespaces/ns/deployments/foo").
-		MatchHeader("Authorization", defaultToken).
+		MatchHeader(util.Authorization, defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"deploy"}`)
 }
@@ -116,7 +116,7 @@ func prepareDeploy() {
 func prepareStatefulset() {
 	gock.New(urlFoo).
 		Get("/apis/apps/v1/namespaces/ns/statefulsets/foo").
-		MatchHeader("Authorization", defaultToken).
+		MatchHeader(util.Authorization, defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"statefulset"}`)
 }
@@ -124,7 +124,7 @@ func prepareStatefulset() {
 func prepareDaemonset() {
 	gock.New(urlFoo).
 		Get("/apis/apps/v1/namespaces/ns/daemonsets/foo").
-		MatchHeader("Authorization", defaultToken).
+		MatchHeader(util.Authorization, defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"daemonset","items":[]}`)
 }
@@ -132,7 +132,7 @@ func prepareDaemonset() {
 func prepareCRDVM() {
 	gock.New(urlFoo).
 		Get("/apis/bar/v2/namespaces/ns/vms/foo").
-		MatchHeader("Authorization", defaultToken).
+		MatchHeader(util.Authorization, defaultToken).
 		Reply(http.StatusOK).
 		JSON(`{"kind":"vm"}`)
 }

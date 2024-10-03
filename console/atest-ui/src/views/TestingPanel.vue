@@ -242,7 +242,8 @@ const testSuiteForm = reactive({
 const importSuiteFormRef = ref<FormInstance>()
 const importSuiteForm = reactive({
   url: '',
-  store: ''
+  store: '',
+  kind: ''
 })
 
 function openTestSuiteCreateDialog() {
@@ -280,12 +281,18 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
+const emit = defineEmits(['toHistoryPanel']);
+const handleToHistoryPanel = (payload) => {
+  emit('toHistoryPanel', payload);
+};
+
 const importSuiteFormRules = reactive<FormRules<Suite>>({
   url: [
     { required: true, message: 'URL is required', trigger: 'blur' },
     { type: 'url', message: 'Should be a valid URL value', trigger: 'blur' }
   ],
-  store: [{ required: true, message: 'Location is required', trigger: 'blur' }]
+  store: [{ required: true, message: 'Location is required', trigger: 'blur' }],
+  kind: [{ required: true, message: 'Kind is required', trigger: 'blur' }]
 })
 const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -297,6 +304,8 @@ const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
         loadStores()
         importDialogVisible.value = false
         formEl.resetFields()
+      }, (e) => {
+        ElMessage.error(e)
       })
     }
   })
@@ -341,6 +350,14 @@ const suiteKinds = [{
   "name": "gRPC",
 }, {
   "name": "tRPC",
+}]
+
+const importSourceKinds = [{
+  "name": "Postman",
+  "value": "postman"
+}, {
+  "name": "Native",
+  "value": "native"
 }]
 
 </script>
@@ -391,6 +408,7 @@ const suiteKinds = [{
               :suite="testSuite"
               :kindName="testSuiteKind"
               :name="testCaseName"
+              @toHistoryPanel="handleToHistoryPanel"
               @updated="loadStores"
               style="height: 100%;"
               data-intro="This is the test case editor. You can edit the test case here."
@@ -453,7 +471,7 @@ const suiteKinds = [{
             <el-button
               type="primary"
               @click="submitForm(suiteFormRef)"
-              :loading="suiteCreatingLoading"
+              v-loading="suiteCreatingLoading"
               test-id="suite-form-submit"
               >{{ t('button.submit') }}</el-button
             >
@@ -464,7 +482,6 @@ const suiteKinds = [{
   </el-dialog>
 
   <el-dialog v-model="importDialogVisible" title="Import Test Suite" width="30%" draggable>
-    <span>Supported source URL: Postman collection share link</span>
     <template #footer>
       <span class="dialog-footer">
         <el-form
@@ -483,6 +500,20 @@ const suiteKinds = [{
                 :key="item.name"
                 :label="item.name"
                 :value="item.name"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Kind" prop="kind">
+            <el-select v-model="importSuiteForm.kind" class="m-2"
+              filterable=true
+              test-id="suite-import-form-kind"
+              default-first-option=true
+              placeholder="Kind" size="middle">
+              <el-option
+                v-for="item in importSourceKinds"
+                :key="item.name"
+                :label="item.name"
+                :value="item.value"
               />
             </el-select>
           </el-form-item>

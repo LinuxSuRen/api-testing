@@ -16,9 +16,14 @@ limitations under the License.
 package testing
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"log"
 	"sort"
+	"strings"
+	"time"
 
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"gopkg.in/yaml.v3"
 )
 
@@ -37,6 +42,32 @@ type APISpec struct {
 	RPC    *RPCDesc `yaml:"rpc,omitempty" json:"rpc,omitempty"`
 	Secure *Secure  `yaml:"secure,omitempty" json:"secure,omitempty"`
 	Metric *Metric  `yaml:"metric,omitempty" json:"metric,omitempty"`
+}
+
+type HistoryTestSuite struct {
+	HistorySuiteName string            `yaml:"name,omitempty" json:"name,omitempty"`
+	Items            []HistoryTestCase `yaml:"items,omitempty" json:"items,omitempty"`
+}
+
+type HistoryTestCase struct {
+	ID               string            `yaml:"id,omitempty" json:"id,omitempty"`
+	CaseName         string            `yaml:"caseName,omitempty" json:"name,omitempty"`
+	SuiteName        string            `yaml:"suiteName,omitempty" json:"suiteName,omitempty"`
+	HistorySuiteName string            `yaml:"historySuiteName,omitempty" json:"historySuiteName,omitempty"`
+	CreateTime       time.Time         `yaml:"createTime,omitempty" json:"createTime,omitempty"`
+	SuiteAPI         string            `yaml:"api,omitempty" json:"api,omitempty"`
+	SuiteSpec        APISpec           `yaml:"spec,omitempty" json:"spec,omitempty"`
+	SuiteParam       map[string]string `yaml:"param,omitempty" json:"param,omitempty"`
+	Data             TestCase          `yaml:"data,omitempty" json:"data,omitempty"`
+	HistoryHeader    map[string]string `yaml:"historyHeader,omitempty" json:"historyHeader,omitempty"`
+}
+
+type HistoryTestResult struct {
+	Message        string           `yaml:"message,omitempty" json:"message,omitempty"`
+	Error          string           `yaml:"error,omitempty" json:"error,omitempty"`
+	TestCaseResult []TestCaseResult `yaml:"testCaseResult,omitempty" json:"testCaseResult,omitempty"`
+	Data           HistoryTestCase  `yaml:"data,omitempty" json:"data,omitempty"`
+	CreateTime     time.Time        `yaml:"createTime,omitempty" json:"createTime,omitempty"`
 }
 
 type RPCDesc struct {
@@ -148,6 +179,33 @@ func (e RequestBody) String() string {
 	return e.Value
 }
 
+func (e RequestBody) IsEmpty() bool {
+	return e.Value == ""
+}
+
+func (e RequestBody) Bytes() (data []byte) {
+	var err error
+	if strings.HasPrefix(e.Value, util.ImageBase64Prefix) {
+		data, err = decodeBase64Body(e.Value, util.ImageBase64Prefix)
+	} else if strings.HasPrefix(e.Value, util.PDFBase64Prefix) {
+		data, err = decodeBase64Body(e.Value, util.PDFBase64Prefix)
+	} else if strings.HasPrefix(e.Value, util.ZIPBase64Prefix) {
+		data, err = decodeBase64Body(e.Value, util.ZIPBase64Prefix)
+	} else {
+		data = []byte(e.Value)
+	}
+
+	if err != nil {
+		log.Printf("Error decoding: %v", err)
+	}
+	return
+}
+
+func decodeBase64Body(raw, prefix string) ([]byte, error) {
+	rawStr := strings.TrimPrefix(raw, prefix)
+	return base64.StdEncoding.DecodeString(rawStr)
+}
+
 type GraphQLRequestBody struct {
 	Query         string            `yaml:"query" json:"query"`
 	OperationName string            `yaml:"operationName" json:"operationName"`
@@ -233,4 +291,19 @@ type Verifier struct {
 	Min       int    `yaml:"min"`
 	MaxLength int    `yaml:"maxLength"`
 	MinLength int    `yaml:"minLength"`
+}
+
+type TestResult struct {
+	Message        string            `yaml:"message,omitempty" json:"message,omitempty"`
+	Error          string            `yaml:"error,omitempty" json:"error,omitempty"`
+	TestCaseResult []*TestCaseResult `yaml:"testCaseResult,omitempty" json:"testCaseResult,omitempty"`
+}
+
+type TestCaseResult struct {
+	StatusCode int               `yaml:"statusCode,omitempty" json:"statusCode,omitempty"`
+	Body       string            `yaml:"body,omitempty" json:"body,omitempty"`
+	Header     map[string]string `yaml:"header,omitempty" json:"header,omitempty"`
+	Error      string            `yaml:"error,omitempty" json:"error,omitempty"`
+	Id         string            `yaml:"id,omitempty" json:"id,omitempty"`
+	Output     string            `yaml:"output,omitempty" json:"output,omitempty"`
 }

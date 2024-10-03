@@ -180,7 +180,7 @@ func (w *githubPRCommentWriter) sendRequest(req *http.Request) (resp *http.Respo
 }
 
 func (w *githubPRCommentWriter) setHeader(req *http.Request) {
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", w.Token))
+	req.Header.Set(util.Authorization, fmt.Sprintf("Bearer %s", w.Token))
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 }

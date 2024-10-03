@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ limitations under the License.
 package generator
 
 import (
+	"bytes"
 	"net/http"
 	"strings"
 	"testing"
@@ -45,7 +46,7 @@ func TestPostmanImport(t *testing.T) {
 	})
 
 	t.Run("simple postman, from []byte", func(t *testing.T) {
-		suite, err := importer.Convert([]byte(simplePostman))
+		suite, err := importer.Convert(simplePostman)
 		assert.NoError(t, err)
 
 		var result string
@@ -74,9 +75,9 @@ func TestPostmanImport(t *testing.T) {
 		assert.Equal(t, expectedSuiteFromSubPostman, strings.TrimSpace(result), result)
 	})
 
-	t.Run("simple postman, from URl", func(t *testing.T) {
+	t.Run("simple postman, from URL", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(urlFoo).Get("/").Reply(http.StatusOK).BodyString(simplePostman)
+		gock.New(urlFoo).Get("/").Reply(http.StatusOK).Body(bytes.NewBuffer(simplePostman))
 
 		suite, err := importer.ConvertFromURL(urlFoo)
 		assert.NoError(t, err)
@@ -99,10 +100,10 @@ func TestPostmanImport(t *testing.T) {
 }
 
 const emptyJSON = "{}"
-const urlFoo = "http://foo"
+const urlFoo = "http://foo?a=b"
 
 //go:embed testdata/postman.json
-var simplePostman string
+var simplePostman []byte
 
 //go:embed testdata/expected_suite_from_postman.yaml
 var expectedSuiteFromPostman string

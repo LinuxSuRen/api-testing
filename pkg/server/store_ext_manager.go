@@ -18,6 +18,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -98,6 +99,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 	} else {
 		binaryPath, err = s.execer.LookPath(name)
 		if err != nil {
+			err = fmt.Errorf("not found extension, try to download it.")
 			go func() {
 				reader, dErr := s.ociDownloader.Download(name, "", "")
 				if dErr != nil {
@@ -188,6 +190,9 @@ func (n *nonDownloader) WithRegistry(string) {
 	// Do nothing because this is an empty implementation
 }
 
+func (n *nonDownloader) WithImagePrefix(imagePrefix string) {
+	// Do nothing because this is an empty implementation
+}
 func (d *nonDownloader) WithRoundTripper(rt http.RoundTripper) {
 	// Do nothing because this is an empty implementation
 }

@@ -28,25 +28,33 @@ Magic.Keys(() => {
             data-intro="You can search your desired template functions.">{{ t('button.toolbox') }}</el-button>
     </el-affix>
 
-    <el-dialog v-model="dialogVisible" :title="t('title.templateQuery')" width="40%" draggable destroy-on-close>
-        <template #footer>
-            <el-input v-model="query" placeholder="Query after enter" v-on:keyup.enter="queryFuncs" />
-            <span class="dialog-footer">
-                <el-table :data="funcs" style="width: 100%">
-                    <el-table-column label="Key" width="250">
-                        <template #default="scope">
-                            <el-input v-model="scope.row.key" placeholder="Value" />
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="Value">
-                        <template #default="scope">
-                            <div style="display: flex; align-items: center">
-                                <el-input v-model="scope.row.value" placeholder="Value" />
-                            </div>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </span>
-        </template>
+    <el-dialog v-model="dialogVisible" :title="t('title.templateQuery')" width="50%" draggable destroy-on-close>
+        <el-input
+            v-model="query" placeholder="Query after enter" v-on:keyup.enter="queryFuncs">
+            <template #append v-if="funcs.length > 0">
+                {{ funcs.length }}
+            </template>
+        </el-input>
+        <span class="dialog-footer">
+            <el-table :data="funcs">
+                <el-table-column label="Name" width="250">
+                    <template #default="scope">
+                        {{ scope.row.key }}
+                    </template>
+                </el-table-column>
+                <el-table-column label="Function">
+                    <template #default="scope">
+                        {{ scope.row.value }}
+                    </template>
+                </el-table-column>
+                <el-table-column label="Usage">
+                    <template #default="scope">
+                        <div style="display: flex; align-items: center">
+                            <el-input v-model="scope.row.description" readonly />
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </span>
     </el-dialog>
 </template>

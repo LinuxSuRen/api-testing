@@ -27,6 +27,7 @@ import (
 	"os"
 
 	"github.com/linuxsuren/api-testing/pkg/apispec"
+	"github.com/linuxsuren/api-testing/pkg/util"
 )
 
 type httpResultWriter struct {
@@ -118,7 +119,7 @@ func (w *httpResultWriter) Output(result []ReportResult) (err error) {
 	} else {
 		contentType = "application/json"
 	}
-	req.Header.Set("Content-Type", contentType)
+	req.Header.Set(util.ContentType, contentType)
 
 	var resp *http.Response
 	if resp, err = http.DefaultClient.Do(req); err != nil {
