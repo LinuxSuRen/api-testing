@@ -689,7 +689,7 @@ function DownloadResponseFile(testcase,
 export const API = {
   DefaultResponseProcess,
   GetVersion,
-  CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite,GetTestSuiteYaml,
+  CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, DuplicateTestSuite, GetTestSuiteYaml,
   CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
   GetHistoryTestCaseWithResult, DeleteHistoryTestCase,GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
   GenerateCode, ListCodeGenerator, HistoryGenerateCode,
