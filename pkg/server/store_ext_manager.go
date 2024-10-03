@@ -18,7 +18,6 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"os"
@@ -26,6 +25,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/downloader"
 	"github.com/linuxsuren/api-testing/pkg/logging"
@@ -127,7 +128,7 @@ func (s *storeExtManager) startPlugin(socketURL, plugin, pluginName string) (err
 	s.filesNeedToBeRemoved = append(s.filesNeedToBeRemoved, socketFile)
 	s.extStatusMap[pluginName] = true
 	if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, s.processChan, "--socket", socketFile); err != nil {
-		serverLogger.Info("failed to start: ", socketURL, "error: ", err.Error())
+		serverLogger.Info("failed to start ext manager", "socket", socketURL, "error: ", err.Error())
 	}
 	return
 }

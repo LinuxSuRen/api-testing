@@ -14,39 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { describe } from 'node:test'
 import {Cache, SetPreference, TestCaseResponse, Store, Stores} from '../cache'
+import { SetupStorage } from './common'
 
-const localStorageMock = (() => {
-    let store = {};
-
-    return {
-        getItem(key) {
-            return store[key] || null;
-        },
-        setItem(key, value) {
-            store[key] = value.toString();
-        },
-        removeItem(key) {
-            delete store[key];
-        },
-        clear() {
-            store = {};
-        }
-    };
-})();
-
-Object.defineProperty(global, 'sessionStorage', {
-    value: localStorageMock
-});
-Object.defineProperty(global, 'localStorage', {
-    value: localStorageMock
-});
-Object.defineProperty(global, 'navigator', {
-    value: {
-        language: 'en'
-    }
-});
+SetupStorage()
 
 describe('TestCaseResponseCache', () => {
     test('should set and get test case response cache', () => {
