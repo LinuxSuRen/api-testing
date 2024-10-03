@@ -43,31 +43,31 @@ describe('net', () => {
             kind: 'kind',
         }, (d) => {
             expect(d).toEqual({})
-        })
+        }, () => {})
     })
 
     test('UpdateTestSuite', () => {
-        API.UpdateTestSuite({}, () => {})
+        API.UpdateTestSuite({}, () => {}, () => {})
     })
 
     test('GetTestSuite', () => {
-        API.GetTestSuite('fake', () => {})
+        API.GetTestSuite('fake', () => {}, () => {})
     })
 
     test('DeleteTestSuite', () => {
-        API.DeleteTestSuite('fake', () => {})
+        API.DeleteTestSuite('fake', () => {}, () => {})
     })
 
     test('ConvertTestSuite', () => {
-        API.ConvertTestSuite('fake', 'generator', () => {})
+        API.ConvertTestSuite('fake', 'generator', () => {}, () => {})
     })
 
     test('DuplicateTestSuite', () => {
-        API.DuplicateTestSuite('source', 'target', () => {})
+        API.DuplicateTestSuite('source', 'target', () => {}, () => {})
     })
 
     test('GetTestSuiteYaml', () => {
-        API.GetTestSuiteYaml('fake', () => {})
+        API.GetTestSuiteYaml('fake', () => {}, () => {})
     })
 
     test('CreateTestCase', () => {
@@ -76,6 +76,6 @@ describe('net', () => {
             name: 'name'
         } as TestCase, (d) => {
             expect(d).toEqual({})
-        })
+        }, () => {})
     })
 })

@@ -146,7 +146,7 @@ function ConvertTestSuite(suiteName: string, genertor: string,
 }
 
 function DuplicateTestSuite(sourceSuiteName: string, targetSuiteName: string,
-    callback: (d: any) => void, errHandle?: ((reason: any) => PromiseLike<never>) | undefined | null) {
+    callback: (d: any) => void, errHandle?: (e: any) => void | null) {
     const requestOptions = {
       method: 'POST',
       headers: {
