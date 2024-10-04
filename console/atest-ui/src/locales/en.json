@@ -68,7 +68,7 @@
         "disabled": "Disabled",
         "status": "Status",
         "operations": "Operations",
-        "storageLocation": "Storage Location",
+        "storageLocation": "Location",
         "suiteKind": "Suite Kind",
         "key": "Key",
         "value": "Value"
