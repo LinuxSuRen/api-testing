@@ -18,6 +18,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -98,6 +99,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 	} else {
 		binaryPath, err = s.execer.LookPath(name)
 		if err != nil {
+			err = fmt.Errorf("not found extension, try to download it.")
 			go func() {
 				reader, dErr := s.ociDownloader.Download(name, "", "")
 				if dErr != nil {
@@ -125,6 +127,8 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 
 func (s *storeExtManager) startPlugin(socketURL, plugin, pluginName string) (err error) {
 	socketFile := strings.TrimPrefix(socketURL, s.socketPrefix)
+	_ = os.RemoveAll(socketFile) // always deleting the socket file to avoid start failing
+
 	s.filesNeedToBeRemoved = append(s.filesNeedToBeRemoved, socketFile)
 	s.extStatusMap[pluginName] = true
 	if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, s.processChan, "--socket", socketFile); err != nil {

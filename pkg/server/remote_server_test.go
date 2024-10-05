@@ -188,7 +188,7 @@ func TestFindParentTestCases(t *testing.T) {
 		testcase: &atest.TestCase{
 			Request: atest.Request{
 				Header: map[string]string{
-					"Authorization": BearerToken,
+					util.Authorization: BearerToken,
 				},
 			},
 		},
@@ -252,7 +252,7 @@ func TestFindParentTestCases(t *testing.T) {
 			Request: atest.Request{
 				API: "/users/{{(index .users 0).name}}{{randomKubernetesName}}",
 				Header: map[string]string{
-					"Authorization": BearerToken,
+					util.Authorization: BearerToken,
 				},
 			},
 		},
@@ -269,7 +269,7 @@ func TestFindParentTestCases(t *testing.T) {
 				Request: atest.Request{
 					API: "/users/{{(index .users 0).name}}",
 					Header: map[string]string{
-						"Authorization": BearerToken,
+						util.Authorization: BearerToken,
 					},
 				},
 			}},

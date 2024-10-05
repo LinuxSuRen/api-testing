@@ -112,7 +112,7 @@ Magic.Keys(addStore, ['Alt+KeyN'])
 const rules = reactive<FormRules<Store>>({
   name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
   url: [{ required: true, message: 'URL is required', trigger: 'blur' }],
-  "kind.name": [{ required: true, message: 'Plugin is required', trigger: 'blur' }]
+  pluginName: [{ required: true, message: 'Plugin is required', trigger: 'blur' }]
 })
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -185,7 +185,7 @@ function storeVerify(formEl: FormInstance | undefined) {
       ElMessage.error(e.message)
     }
   }, (e) => {
-    ElMessage.error('Oops, ' + e)
+    ElMessage.error(e.message)
   })
 }
 

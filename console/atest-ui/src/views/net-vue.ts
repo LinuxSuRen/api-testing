@@ -47,10 +47,8 @@ function CreateOrUpdateStore(payload: any, create: boolean,
     })
 }
 
-function ErrorTip(e: {
-    statusText:''
-}) {
-    ElMessage.error('Oops, ' + e.statusText)
+const ErrorTip = (e: any) => {
+    ElMessage.error(e.message)
 }
 
 export const UIAPI = {
