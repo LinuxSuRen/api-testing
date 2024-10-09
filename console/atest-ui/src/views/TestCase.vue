@@ -886,7 +886,9 @@ Magic.Keys(() => {
                 :key="item.value"
                 :label="item.key"
                 :value="item.value"
-              />
+              >
+              <el-text class="mx-1" :type="item.type">{{ item.key }}</el-text>
+             </el-option>
             </el-select>
           </el-col>
           <el-col :span="18">
@@ -894,11 +896,13 @@ Magic.Keys(() => {
               v-model="testCaseWithSuite.data.request.api"
               style="width: 100%"
               :fetch-suggestions="querySuggestedAPIs"
-              placeholder="API Address"
               :readonly="isHistoryTestCase">
               <template #default="{ item }">
                 <div class="value">{{ item.request.method }}</div>
                 <span class="link">{{ item.request.api }}</span>
+              </template>
+              <template #prefix v-if="!testCaseWithSuite.data.request.api.startsWith('http://') && !testCaseWithSuite.data.request.api.startsWith('https://')">
+                {{ testCaseWithSuite.data.server }}
               </template>
             </el-autocomplete>
           </el-col>
