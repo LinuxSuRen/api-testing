@@ -431,8 +431,9 @@ message TestCases {
 message TestCase {
   string name = 1;
   string suiteName = 2;
-  Request request = 3;
-  Response response = 4;
+  string server = 3;
+  Request request = 4;
+  Response response = 5;
 }
 
 message HistoryTestCase {

@@ -44,6 +44,7 @@ export interface TestResult {
 export interface Pair {
   key: string
   value: string
+  type: string
   defaultValue: string
   description: string
 }
@@ -55,6 +56,7 @@ export interface TestCaseWithSuite {
 
 export interface TestCase {
   name: string
+  server: string
   request: TestCaseRequest
   response: TestCaseResponse
 }
@@ -122,33 +124,49 @@ export function GetHTTPMethods() {
   return [
     {
       value: 'GET',
-      key: 'GET'
+      key: 'GET',
+      type: ''
     },
     {
       value: 'POST',
-      key: 'POST'
+      key: 'POST',
+      type: 'success'
     },
     {
       value: 'DELETE',
-      key: 'DELETE'
+      key: 'DELETE',
+      type: 'danger'
     },
     {
       value: 'PUT',
-      key: 'PUT'
+      key: 'PUT',
+      type: 'warning'
     },
     {
       value: 'HEAD',
-      key: 'HEAD'
+      key: 'HEAD',
+      type: ''
     },
     {
       value: 'PATCH',
-      key: 'PATCH'
+      key: 'PATCH',
+      type: ''
     },
     {
       value: 'OPTIONS',
-      key: 'OPTIONS'
+      key: 'OPTIONS',
+      type: ''
     }
   ] as Pair[]
+}
+
+export function GetHTTPMethod(name: string) {
+  for (const method of GetHTTPMethods()) {
+    if (method.key === name) {
+      return method
+    }
+  }
+  return {} as Pair
 }
 
 export function FlattenObject(obj: any): any {

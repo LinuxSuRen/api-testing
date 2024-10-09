@@ -608,6 +608,11 @@ func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *
 	defer loader.Close()
 	if result, err = loader.GetTestCase(in.Suite, in.Testcase); err == nil {
 		reply = ToGRPCTestCase(result)
+
+		var suite testing.TestSuite
+		if suite, err = loader.GetTestSuite(in.Suite, false); err == nil {
+			reply.Server = suite.API
+		}
 	}
 	return
 }

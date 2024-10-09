@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import TestCase from './TestCase.vue'
 import TestSuite from './TestSuite.vue'
+import { GetHTTPMethod } from './types'
 import TemplateFunctions from './TemplateFunctions.vue'
 import { ref, watch } from 'vue'
 import { ElTree, ElMessage } from 'element-plus'
@@ -283,10 +284,7 @@ const viewName = ref('')
             >
               <template #default="{ node, data }">
                 <span class="custom-tree-node">
-                  <el-text class="mx-1" v-if="data.method === 'POST'" type="success">{{ node.label }}</el-text>
-                  <el-text class="mx-1" v-else-if="data.method === 'PUT'" type="warning">{{ node.label }}</el-text>
-                  <el-text class="mx-1" v-else-if="data.method === 'DELETE'" type="danger">{{ node.label }}</el-text>
-                  <el-text class="mx-1" v-else>{{ node.label }}</el-text>
+                  <el-text class="mx-1" :type="GetHTTPMethod(data.method).type">{{ node.label }}</el-text>
                 </span>
               </template>
             </el-tree>
