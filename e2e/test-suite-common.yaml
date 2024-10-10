@@ -174,7 +174,10 @@ items:
       }
   expect:
     bodyFieldsExpect:
+      request.api: /GetTestSuite
+      request.method: POST
       request.body: good
+      server: http://localhost:8080/server.Runner
 - name: duplicateTestCase
   request:
     api: /suites/{{.param.suiteName}}/cases/{{.param.caseName}}/duplicate
