@@ -16,6 +16,7 @@ import MockManager from './views/MockManager.vue'
 import StoreManager from './views/StoreManager.vue'
 import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
+import FileManage from './views/FileManager.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale: i18nLocale } = useI18n()
@@ -121,6 +122,10 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
           <el-icon><location /></el-icon>
           <template #title>{{ t('title.stores') }}</template>
         </el-menu-item>
+        <el-menu-item index="file">
+          <el-icon><document /></el-icon>
+          <template #title>{{ t('title.files') }}</template>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -144,6 +149,7 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
       <SecretManager v-else-if="panelName === 'secret'" />
+      <FileManage v-else-if="panelName === 'file'" />
       <WelcomePage v-else />
     </el-main>
 
