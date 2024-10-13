@@ -79,7 +79,14 @@ service Runner {
     rpc RunTestCase(TestCaseIdentity) returns (TestCaseResult) {
         option (google.api.http) = {
             post: "/api/v1/suites/{suite}/cases/{testcase}/run"
+            body: "*"
         };
+    }
+    rpc BatchRun (stream BatchTestTask) returns (stream TestResult) {
+      option (google.api.http) = {
+        post: "/api/v1/batchRun"
+        body: "*"
+      };
     }
     rpc GetTestCase(TestCaseIdentity) returns (TestCase) {
         option (google.api.http) = {
@@ -387,6 +394,13 @@ message TestTask {
   string level = 4;
   map<string, string> env = 5;
   repeated Pair parameters = 6;
+}
+
+message BatchTestTask {
+  string suiteName = 1;
+  string caseName = 2;
+  repeated Pair parameters = 3;
+  int32 count = 4;
 }
 
 message TestResult {

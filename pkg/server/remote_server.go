@@ -29,6 +29,7 @@ import (
 	reflect "reflect"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -291,6 +292,44 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		fmt.Fprintln(buf, reply.Error)
 	}
 	reply.Message = buf.String()
+	return
+}
+
+func (s *server) BatchRun(srv Runner_BatchRunServer) (err error) {
+	ctx := srv.Context()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			var in *BatchTestTask
+			in, err = srv.Recv()
+			if err != nil {
+				if err == io.EOF {
+					return nil
+				}
+				return err
+			}
+
+			for i := 0; i < int(in.Count); i++ {
+				var reply *TestCaseResult
+				if reply, err = s.RunTestCase(ctx, &TestCaseIdentity{
+					Suite:    in.SuiteName,
+					Testcase: in.CaseName,
+				}); err != nil {
+					return
+				}
+
+				if err = srv.Send(&TestResult{
+					TestCaseResult: []*TestCaseResult{reply},
+					Error:          reply.Error,
+				}); err != nil {
+					return err
+				}
+				time.Sleep(time.Second * 2)
+			}
+		}
+	}
 	return
 }
 

@@ -17,6 +17,7 @@ import type { Pair } from './types'
 
 interface Store {
   name: string;
+  link: string;
   params: Pair[];
 }
 
@@ -37,7 +38,8 @@ const storeExtensions = [
     }, {
       key: 'name',
       description: 'See also: git config --local user.name xxx'
-    }]
+    }],
+    link: 'https://github.com/LinuxSuRen/atest-ext-store-git'
   },
   {
     name: 'atest-store-s3',
@@ -55,14 +57,15 @@ const storeExtensions = [
       key: 'forcepathstyle'
     }, {
       key: 'bucket'
-    }]
+    }],
+    link: 'https://github.com/LinuxSuRen/atest-ext-store-s3'
   },
   {
     name: 'atest-store-orm',
     params: [{
       key: 'driver',
       defaultValue: 'mysql',
-      description: 'Supported: mysql, postgres'
+      description: 'Supported: mysql, postgres, sqlite'
     }, {
       key: 'database',
       defaultValue: 'atest'
@@ -70,11 +73,13 @@ const storeExtensions = [
       key: 'historyLimit',
       defaultValue: '',
       description: 'Set the limit of the history record count'
-    }]
+    }],
+    link: 'https://github.com/LinuxSuRen/atest-ext-store-orm'
   },
   {
     name: 'atest-store-etcd',
-    params: []
+    params: [],
+    link: 'https://github.com/LinuxSuRen/atest-ext-store-etcd'
   },
   {
     name: 'atest-store-mongodb',
@@ -83,7 +88,8 @@ const storeExtensions = [
     }, {
       key: 'database',
       defaultValue: 'atest'
-    }]
+    }],
+    link: 'https://github.com/LinuxSuRen/atest-ext-store-mongodb'
   }
 ] as Store[]
 

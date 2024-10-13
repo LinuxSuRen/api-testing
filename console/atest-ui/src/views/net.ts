@@ -282,6 +282,11 @@ interface RunTestCaseRequest {
   parameters: any
 }
 
+interface BatchRunTestCaseRequest {
+  count: number
+  request: RunTestCaseRequest
+}
+
 function RunTestCase(request: RunTestCaseRequest,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
@@ -299,6 +304,41 @@ function RunTestCase(request: RunTestCaseRequest,
   fetch(`/api/v1/suites/${request.suiteName}/cases/${request.name}/run`, requestOptions)
   .then(DefaultResponseProcess)
   .then(callback).catch(emptyOrDefault(errHandle))
+}
+
+const BatchRunTestCase = (request: BatchRunTestCaseRequest, callback: (d: any) => void) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'Accept': 'text/event-stream',
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      suiteName: request.request.suiteName,
+      caseName: request.request.name,
+      parameters: request.request.parameters,
+      count: request.count,
+    })
+  }
+  fetch(`/api/v1/batchRun`, requestOptions)
+    .then((response: any) => {
+      if (response.ok) {
+        const reader = response.body.getReader();
+        let { done, value } = reader.read();
+        while (!done) {
+          const chunk = new TextDecoder().decode(value, { stream: true });
+
+          console.log(chunk);
+          // callback(chunk);
+
+          ({ done, value } = reader.read());
+        }
+        callback('');
+      } else {
+        throw new Error('Network response was not ok.');
+      }
+    })
 }
 
 function DuplicateTestCase(sourceSuiteName: string, targetSuiteName: string,
@@ -690,7 +730,7 @@ export const API = {
   DefaultResponseProcess,
   GetVersion,
   CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, DuplicateTestSuite, GetTestSuiteYaml,
-  CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
+  CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase, BatchRunTestCase,
   GetHistoryTestCaseWithResult, DeleteHistoryTestCase,GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
   GenerateCode, ListCodeGenerator, HistoryGenerateCode,
   PopularHeaders,
