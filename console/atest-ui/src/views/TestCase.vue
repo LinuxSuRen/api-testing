@@ -60,6 +60,10 @@ const sendRequest = async () => {
 }
 Magic.Keys(sendRequest, ['Alt+S', 'Alt+ß'])
 
+const runTestCaseResultHandler = (e: any) => {
+  requestLoading.value = false
+  handleTestResult(e)
+}
 const runTestCase = () => {
   requestLoading.value = true
   const name = props.name
@@ -73,20 +77,17 @@ const runTestCase = () => {
   if (batchRunMode.value) {
     API.BatchRunTestCase({
       count: batchRunCount.value,
+      interval: batchRunInterval.value,
       request: request
-    }, (d) => {
+    }, runTestCaseResultHandler, (e) => {
+      parameters.value = []
+
       requestLoading.value = false
-      ElMessage({
-        showClose: true,
-        message: d,
-        type: 'success'
-      })
+      UIAPI.ErrorTip(e)
+      parseResponseBody(e.body)
     })
   } else {
-    API.RunTestCase(request, (e) => {
-      handleTestResult(e)
-      requestLoading.value = false
-    }, (e) => {
+    API.RunTestCase(request, runTestCaseResultHandler, (e) => {
       parameters.value = []
 
       requestLoading.value = false
@@ -168,6 +169,7 @@ function responseBodyFilter() {
 const parameterDialogOpened = ref(false)
 const batchRunMode = ref(false)
 const batchRunCount = ref(1)
+const batchRunInterval = ref('1s')
 const openBatchRunDialog = () => {
   batchRunMode.value = true
   openParameterDialog()
@@ -1269,7 +1271,15 @@ Magic.Keys(() => {
                 Count:
               </el-col>
               <el-col :span="18">
-                <el-input v-model="batchRunCount" type="number" />
+                <el-input v-model="batchRunCount" type="number" min="1" max="100"/>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="6">
+                Interval:
+              </el-col>
+              <el-col :span="18">
+                <el-input v-model="batchRunInterval" />
               </el-col>
             </el-row>
           </div>

@@ -311,6 +311,11 @@ func (s *server) BatchRun(srv Runner_BatchRunServer) (err error) {
 				return err
 			}
 
+			var duration time.Duration
+			if duration, err = time.ParseDuration(in.Interval); err != nil {
+				return
+			}
+
 			for i := 0; i < int(in.Count); i++ {
 				var reply *TestCaseResult
 				if reply, err = s.RunTestCase(ctx, &TestCaseIdentity{
@@ -326,7 +331,8 @@ func (s *server) BatchRun(srv Runner_BatchRunServer) (err error) {
 				}); err != nil {
 					return err
 				}
-				time.Sleep(time.Second * 2)
+
+				time.Sleep(duration)
 			}
 		}
 	}

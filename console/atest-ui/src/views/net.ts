@@ -284,6 +284,7 @@ interface RunTestCaseRequest {
 
 interface BatchRunTestCaseRequest {
   count: number
+  interval: string
   request: RunTestCaseRequest
 }
 
@@ -306,7 +307,8 @@ function RunTestCase(request: RunTestCaseRequest,
   .then(callback).catch(emptyOrDefault(errHandle))
 }
 
-const BatchRunTestCase = (request: BatchRunTestCaseRequest, callback: (d: any) => void) => {
+const BatchRunTestCase = (request: BatchRunTestCaseRequest,
+  callback: (d: any) => void,  errHandle?: (e: any) => void | null) => {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -319,26 +321,29 @@ const BatchRunTestCase = (request: BatchRunTestCaseRequest, callback: (d: any) =
       caseName: request.request.name,
       parameters: request.request.parameters,
       count: request.count,
+      interval: request.interval,
     })
   }
   fetch(`/api/v1/batchRun`, requestOptions)
     .then((response: any) => {
       if (response.ok) {
-        const reader = response.body.getReader();
-        let { done, value } = reader.read();
-        while (!done) {
-          const chunk = new TextDecoder().decode(value, { stream: true });
-
-          console.log(chunk);
-          // callback(chunk);
-
-          ({ done, value } = reader.read());
+        const read = (reader: any) => {
+          reader.read().then((data: any) => {
+            if (data.done) {
+              return;
+            }
+  
+            const value = data.value;
+            const chunk = new TextDecoder().decode(value, { stream: true });
+            callback(JSON.parse(chunk).result.testCaseResult[0]);
+            read(reader);
+          });
         }
-        callback('');
+        read(response.body.getReader());
       } else {
-        throw new Error('Network response was not ok.');
+        return DefaultResponseProcess(response)
       }
-    })
+    }).catch(emptyOrDefault(errHandle))
 }
 
 function DuplicateTestCase(sourceSuiteName: string, targetSuiteName: string,

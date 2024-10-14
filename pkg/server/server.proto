@@ -401,6 +401,7 @@ message BatchTestTask {
   string caseName = 2;
   repeated Pair parameters = 3;
   int32 count = 4;
+  string interval = 5;
 }
 
 message TestResult {
