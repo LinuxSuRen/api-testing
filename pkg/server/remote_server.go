@@ -311,8 +311,13 @@ func (s *server) BatchRun(srv Runner_BatchRunServer) (err error) {
 				return err
 			}
 
+			var interval string
+			if interval, err = render.Render("batch run interval", in.Interval, nil); err != nil {
+				return
+			}
+
 			var duration time.Duration
-			if duration, err = time.ParseDuration(in.Interval); err != nil {
+			if duration, err = time.ParseDuration(interval); err != nil {
 				return
 			}
 
