@@ -311,16 +311,6 @@ func (s *server) BatchRun(srv Runner_BatchRunServer) (err error) {
 				return err
 			}
 
-			var interval string
-			if interval, err = render.Render("batch run interval", in.Interval, nil); err != nil {
-				return
-			}
-
-			var duration time.Duration
-			if duration, err = time.ParseDuration(interval); err != nil {
-				return
-			}
-
 			for i := 0; i < int(in.Count); i++ {
 				var reply *TestCaseResult
 				if reply, err = s.RunTestCase(ctx, &TestCaseIdentity{
@@ -337,6 +327,15 @@ func (s *server) BatchRun(srv Runner_BatchRunServer) (err error) {
 					return err
 				}
 
+				var interval string
+				if interval, err = render.Render("batch run interval", in.Interval, nil); err != nil {
+					return
+				}
+
+				var duration time.Duration
+				if duration, err = time.ParseDuration(interval); err != nil {
+					return
+				}
 				time.Sleep(duration)
 			}
 		}
