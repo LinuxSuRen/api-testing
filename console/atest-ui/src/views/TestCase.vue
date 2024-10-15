@@ -7,6 +7,7 @@ import type { Pair, TestResult, TestCaseWithSuite, TestCase } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
 import { Cache } from './cache'
 import { API } from './net'
+import type { RunTestCaseRequest } from './net'
 import { UIAPI } from './net-vue'
 import type { TestCaseResponse } from './cache'
 import { Magic } from './magicKeys'
@@ -59,27 +60,44 @@ const sendRequest = async () => {
 }
 Magic.Keys(sendRequest, ['Alt+S', 'Alt+ß'])
 
+const runTestCaseResultHandler = (e: any) => {
+  requestLoading.value = false
+  handleTestResult(e)
+}
 const runTestCase = () => {
   requestLoading.value = true
   const name = props.name
   const suite = props.suite
-  API.RunTestCase({
+  const request = {
     suiteName: suite,
     name: name,
     parameters: parameters.value
-  }, (e) => {
-    handleTestResult(e)
-    requestLoading.value = false
-  }, (e) => {
-    parameters.value = []
+  } as RunTestCaseRequest
 
-    requestLoading.value = false
-    UIAPI.ErrorTip(e)
-    parseResponseBody(e.body)
-  })
+  if (batchRunMode.value) {
+    API.BatchRunTestCase({
+      count: batchRunCount.value,
+      interval: batchRunInterval.value,
+      request: request
+    }, runTestCaseResultHandler, (e) => {
+      parameters.value = []
+
+      requestLoading.value = false
+      UIAPI.ErrorTip(e)
+      parseResponseBody(e.body)
+    })
+  } else {
+    API.RunTestCase(request, runTestCaseResultHandler, (e) => {
+      parameters.value = []
+
+      requestLoading.value = false
+      UIAPI.ErrorTip(e)
+      parseResponseBody(e.body)
+    })
+  }
 }
 
-const parseResponseBody = (body) => {
+const parseResponseBody = (body: any) => {
   if (body === '') {
     return
   }
@@ -93,7 +111,7 @@ const parseResponseBody = (body) => {
   }
 }
 
-const handleTestResult = (e) => {
+const handleTestResult = (e: any) => {
   testResult.value = e;
 
   if (!isHistoryTestCase.value) {
@@ -149,6 +167,13 @@ function responseBodyFilter() {
 }
 
 const parameterDialogOpened = ref(false)
+const batchRunMode = ref(false)
+const batchRunCount = ref(1)
+const batchRunInterval = ref('1s')
+const openBatchRunDialog = () => {
+  batchRunMode.value = true
+  openParameterDialog()
+}
 function openParameterDialog() {
   API.GetTestSuite(props.suite, (e) => {
     parameters.value = e.param
@@ -159,6 +184,7 @@ function openParameterDialog() {
 function sendRequestWithParameter() {
   parameterDialogOpened.value = false
   sendRequest()
+  batchRunMode.value = false
 }
 
 function generateCode() {
@@ -915,6 +941,7 @@ Magic.Keys(() => {
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openParameterDialog">{{ t('button.sendWithParam') }}</el-dropdown-item>
+                  <el-dropdown-item @click="openBatchRunDialog">Batch Send</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -1238,6 +1265,24 @@ Magic.Keys(() => {
           <h4>{{ t('title.apiRequestParameter') }}</h4>
         </template>
         <template #default>
+          <div v-if="batchRunMode">
+            <el-row>
+              <el-col :span="6">
+                Count:
+              </el-col>
+              <el-col :span="18">
+                <el-input v-model="batchRunCount" type="number" min="1" max="100"/>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="6">
+                Interval:
+              </el-col>
+              <el-col :span="18">
+                <el-input v-model="batchRunInterval" />
+              </el-col>
+            </el-row>
+          </div>
           <el-table :data="parameters" style="width: 100%"
             :empty-text="t('tip.noParameter')">
             <el-table-column :label="t('field.key')" width="180">

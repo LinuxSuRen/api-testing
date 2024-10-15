@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { Edit, Delete, QuestionFilled } from '@element-plus/icons-vue'
+import { Edit, Delete, QuestionFilled, Help } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
 import { API } from './net'
@@ -111,8 +111,7 @@ Magic.Keys(addStore, ['Alt+KeyN'])
 
 const rules = reactive<FormRules<Store>>({
   name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
-  url: [{ required: true, message: 'URL is required', trigger: 'blur' }],
-  pluginName: [{ required: true, message: 'Plugin is required', trigger: 'blur' }]
+  url: [{ required: true, message: 'URL is required', trigger: 'blur' }]
 })
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -130,6 +129,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 watch(() => storeForm.kind.name, (name) => {
   const ext = SupportedExtension(name)
   if (ext) {
+    storeExtLink.value = ext.link
     let pro = storeForm.properties.slice()
 
     for (var i = 0; i < pro.length;) {
@@ -198,6 +198,8 @@ function updateKeys() {
     } as Pair)
   }
 }
+
+const storeExtLink = ref('')
 </script>
 
 <template>
@@ -294,6 +296,11 @@ function updateKeys() {
                 :value="item.name"
               />
             </el-select>
+            <el-icon v-if="storeExtLink && storeExtLink !== ''">
+              <el-link :href="storeExtLink" target="_blank">
+                <Help />
+              </el-link>
+            </el-icon>
           </el-form-item>
           <el-form-item :label="t('field.pluginURL')" prop="plugin">
             <el-input v-model="storeForm.kind.url" test-id="store-form-plugin" />

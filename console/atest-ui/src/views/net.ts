@@ -282,6 +282,12 @@ interface RunTestCaseRequest {
   parameters: any
 }
 
+interface BatchRunTestCaseRequest {
+  count: number
+  interval: string
+  request: RunTestCaseRequest
+}
+
 function RunTestCase(request: RunTestCaseRequest,
   callback: (d: any) => void, errHandle?: (e: any) => void | null) {
   const requestOptions = {
@@ -299,6 +305,45 @@ function RunTestCase(request: RunTestCaseRequest,
   fetch(`/api/v1/suites/${request.suiteName}/cases/${request.name}/run`, requestOptions)
   .then(DefaultResponseProcess)
   .then(callback).catch(emptyOrDefault(errHandle))
+}
+
+const BatchRunTestCase = (request: BatchRunTestCaseRequest,
+  callback: (d: any) => void,  errHandle?: (e: any) => void | null) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'Accept': 'text/event-stream',
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+      suiteName: request.request.suiteName,
+      caseName: request.request.name,
+      parameters: request.request.parameters,
+      count: request.count,
+      interval: request.interval,
+    })
+  }
+  fetch(`/api/v1/batchRun`, requestOptions)
+    .then((response: any) => {
+      if (response.ok) {
+        const read = (reader: any) => {
+          reader.read().then((data: any) => {
+            if (data.done) {
+              return;
+            }
+  
+            const value = data.value;
+            const chunk = new TextDecoder().decode(value, { stream: true });
+            callback(JSON.parse(chunk).result.testCaseResult[0]);
+            read(reader);
+          });
+        }
+        read(response.body.getReader());
+      } else {
+        return DefaultResponseProcess(response)
+      }
+    }).catch(emptyOrDefault(errHandle))
 }
 
 function DuplicateTestCase(sourceSuiteName: string, targetSuiteName: string,
@@ -690,7 +735,7 @@ export const API = {
   DefaultResponseProcess,
   GetVersion,
   CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, DuplicateTestSuite, GetTestSuiteYaml,
-  CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase,
+  CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase, BatchRunTestCase,
   GetHistoryTestCaseWithResult, DeleteHistoryTestCase,GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
   GenerateCode, ListCodeGenerator, HistoryGenerateCode,
   PopularHeaders,
