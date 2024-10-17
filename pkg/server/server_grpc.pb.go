@@ -33,6 +33,7 @@ type RunnerClient interface {
 	UpdateTestSuite(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 	DuplicateTestSuite(ctx context.Context, in *TestSuiteDuplicate, opts ...grpc.CallOption) (*HelloReply, error)
+	RenameTestSuite(ctx context.Context, in *TestSuiteDuplicate, opts ...grpc.CallOption) (*HelloReply, error)
 	GetTestSuiteYaml(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*YamlData, error)
 	// test cases related
 	ListTestCase(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*Suite, error)
@@ -44,6 +45,7 @@ type RunnerClient interface {
 	UpdateTestCase(ctx context.Context, in *TestCaseWithSuite, opts ...grpc.CallOption) (*HelloReply, error)
 	DeleteTestCase(ctx context.Context, in *TestCaseIdentity, opts ...grpc.CallOption) (*HelloReply, error)
 	DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate, opts ...grpc.CallOption) (*HelloReply, error)
+	RenameTestCase(ctx context.Context, in *TestCaseDuplicate, opts ...grpc.CallOption) (*HelloReply, error)
 	GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*TestCases, error)
 	// history test related
 	GetHistorySuites(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HistorySuites, error)
@@ -193,6 +195,15 @@ func (c *runnerClient) DuplicateTestSuite(ctx context.Context, in *TestSuiteDupl
 	return out, nil
 }
 
+func (c *runnerClient) RenameTestSuite(ctx context.Context, in *TestSuiteDuplicate, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/RenameTestSuite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) GetTestSuiteYaml(ctx context.Context, in *TestSuiteIdentity, opts ...grpc.CallOption) (*YamlData, error) {
 	out := new(YamlData)
 	err := c.cc.Invoke(ctx, "/server.Runner/GetTestSuiteYaml", in, out, opts...)
@@ -290,6 +301,15 @@ func (c *runnerClient) DeleteTestCase(ctx context.Context, in *TestCaseIdentity,
 func (c *runnerClient) DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate, opts ...grpc.CallOption) (*HelloReply, error) {
 	out := new(HelloReply)
 	err := c.cc.Invoke(ctx, "/server.Runner/DuplicateTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) RenameTestCase(ctx context.Context, in *TestCaseDuplicate, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, "/server.Runner/RenameTestCase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -594,6 +614,7 @@ type RunnerServer interface {
 	UpdateTestSuite(context.Context, *TestSuite) (*HelloReply, error)
 	DeleteTestSuite(context.Context, *TestSuiteIdentity) (*HelloReply, error)
 	DuplicateTestSuite(context.Context, *TestSuiteDuplicate) (*HelloReply, error)
+	RenameTestSuite(context.Context, *TestSuiteDuplicate) (*HelloReply, error)
 	GetTestSuiteYaml(context.Context, *TestSuiteIdentity) (*YamlData, error)
 	// test cases related
 	ListTestCase(context.Context, *TestSuiteIdentity) (*Suite, error)
@@ -605,6 +626,7 @@ type RunnerServer interface {
 	UpdateTestCase(context.Context, *TestCaseWithSuite) (*HelloReply, error)
 	DeleteTestCase(context.Context, *TestCaseIdentity) (*HelloReply, error)
 	DuplicateTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error)
+	RenameTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error)
 	GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error)
 	// history test related
 	GetHistorySuites(context.Context, *Empty) (*HistorySuites, error)
@@ -675,6 +697,9 @@ func (UnimplementedRunnerServer) DeleteTestSuite(context.Context, *TestSuiteIden
 func (UnimplementedRunnerServer) DuplicateTestSuite(context.Context, *TestSuiteDuplicate) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DuplicateTestSuite not implemented")
 }
+func (UnimplementedRunnerServer) RenameTestSuite(context.Context, *TestSuiteDuplicate) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenameTestSuite not implemented")
+}
 func (UnimplementedRunnerServer) GetTestSuiteYaml(context.Context, *TestSuiteIdentity) (*YamlData, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTestSuiteYaml not implemented")
 }
@@ -701,6 +726,9 @@ func (UnimplementedRunnerServer) DeleteTestCase(context.Context, *TestCaseIdenti
 }
 func (UnimplementedRunnerServer) DuplicateTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DuplicateTestCase not implemented")
+}
+func (UnimplementedRunnerServer) RenameTestCase(context.Context, *TestCaseDuplicate) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenameTestCase not implemented")
 }
 func (UnimplementedRunnerServer) GetSuggestedAPIs(context.Context, *TestSuiteIdentity) (*TestCases, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSuggestedAPIs not implemented")
@@ -972,6 +1000,24 @@ func _Runner_DuplicateTestSuite_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_RenameTestSuite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestSuiteDuplicate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).RenameTestSuite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/RenameTestSuite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).RenameTestSuite(ctx, req.(*TestSuiteDuplicate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_GetTestSuiteYaml_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TestSuiteIdentity)
 	if err := dec(in); err != nil {
@@ -1138,6 +1184,24 @@ func _Runner_DuplicateTestCase_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).DuplicateTestCase(ctx, req.(*TestCaseDuplicate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_RenameTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestCaseDuplicate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).RenameTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/RenameTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).RenameTestCase(ctx, req.(*TestCaseDuplicate))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1712,6 +1776,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_DuplicateTestSuite_Handler,
 		},
 		{
+			MethodName: "RenameTestSuite",
+			Handler:    _Runner_RenameTestSuite_Handler,
+		},
+		{
 			MethodName: "GetTestSuiteYaml",
 			Handler:    _Runner_GetTestSuiteYaml_Handler,
 		},
@@ -1742,6 +1810,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DuplicateTestCase",
 			Handler:    _Runner_DuplicateTestCase_Handler,
+		},
+		{
+			MethodName: "RenameTestCase",
+			Handler:    _Runner_RenameTestCase_Handler,
 		},
 		{
 			MethodName: "GetSuggestedAPIs",

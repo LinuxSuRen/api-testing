@@ -7,6 +7,7 @@ import type { Pair, TestResult, TestCaseWithSuite, TestCase } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
 import { Cache } from './cache'
 import { API } from './net'
+import EditButton from '../components/EditButton.vue'
 import type { RunTestCaseRequest } from './net'
 import { UIAPI } from './net-vue'
 import type { TestCaseResponse } from './cache'
@@ -22,7 +23,6 @@ import 'codemirror/addon/merge/merge.js'
 import 'codemirror/addon/merge/merge.css'
 
 import DiffMatchPatch from 'diff-match-patch';
-
 
 window.diff_match_patch = DiffMatchPatch;
 window.DIFF_DELETE = -1;
@@ -380,25 +380,25 @@ function downloadResponseFile(){
   API.DownloadResponseFile({
       body: testResult.value.body
     }, (e) => {
-    if (e && e.data) {
-      try {
-      const bytes = atob(e.data);
-      const blob = new Blob([bytes], { type: 'mimeType' });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = e.filename.substring("isFilePath-".length);
+      if (e && e.data) {
+        try {
+        const bytes = atob(e.data);
+        const blob = new Blob([bytes], { type: 'mimeType' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = e.filename.substring("isFilePath-".length);
 
-      document.body.appendChild(link);
-      link.click();
+        document.body.appendChild(link);
+        link.click();
 
-      window.URL.revokeObjectURL(link.href);
-      document.body.removeChild(link);
-      } catch (error) {
-        console.error('Error during file download:', error);
+        window.URL.revokeObjectURL(link.href);
+        document.body.removeChild(link);
+        } catch (error) {
+          console.error('Error during file download:', error);
+        }
+      } else {
+        console.error('No data to download.');
       }
-    } else {
-      console.error('No data to download.');
-    }
     })
 }
 
@@ -877,6 +877,13 @@ Magic.Keys(() => {
     duplicateTestCase()
   }
 }, ['Alt+KeyO'])
+
+const renameTestCase = (name: string) => {
+  const suiteName = props.suite
+  API.RenameTestCase(suiteName, suiteName, props.name, name, (d) => {
+    emit('updated', suiteName, name)
+  })
+}
 </script>
 
 <template>
@@ -894,6 +901,7 @@ Magic.Keys(() => {
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
         <el-button type="primary" v-if="!isHistoryTestCase && Cache.GetCurrentStore().kind.name == 'atest-store-orm'" @click="openHistoryDialog">{{ t('button.viewHistory') }}</el-button>
         <span v-if="isHistoryTestCase" style="margin-left: 15px;">{{ t('tip.runningAt') }}{{ HistoryTestCaseCreateTime }}</span>
+        <EditButton :value="props.name" @changed="renameTestCase"/>
       </div>
       <div>
         <el-row>
