@@ -7,6 +7,7 @@ import type { Pair, TestResult, TestCaseWithSuite, TestCase } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
 import { Cache } from './cache'
 import { API } from './net'
+import EditButton from '../components/EditButton.vue'
 import type { RunTestCaseRequest } from './net'
 import { UIAPI } from './net-vue'
 import type { TestCaseResponse } from './cache'
@@ -877,6 +878,12 @@ Magic.Keys(() => {
     duplicateTestCase()
   }
 }, ['Alt+KeyO'])
+
+const renameTestCase = (name) => {
+  API.RenameTestCase(props.suite, props.suite, props.name, name, (d) => {
+    emit('updated')
+  })
+}
 </script>
 
 <template>
@@ -894,6 +901,7 @@ Magic.Keys(() => {
         <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
         <el-button type="primary" v-if="!isHistoryTestCase && Cache.GetCurrentStore().kind.name == 'atest-store-orm'" @click="openHistoryDialog">{{ t('button.viewHistory') }}</el-button>
         <span v-if="isHistoryTestCase" style="margin-left: 15px;">{{ t('tip.runningAt') }}{{ HistoryTestCaseCreateTime }}</span>
+        <EditButton :value="props.name" @changed="renameTestCase"/>
       </div>
       <div>
         <el-row>

@@ -163,6 +163,24 @@ function DuplicateTestSuite(sourceSuiteName: string, targetSuiteName: string,
         .then(callback).catch(errHandle)
 }
 
+const RenameTestSuite = (sourceSuiteName: string, targetSuiteName: string,
+  callback: (d: any) => void, errHandle?: (e: any) => void | null) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'X-Store-Name': Cache.GetCurrentStore().name,
+      'X-Auth': getToken()
+    },
+    body: JSON.stringify({
+        sourceSuiteName: sourceSuiteName,
+        targetSuiteName: targetSuiteName,
+    })
+  }
+  fetch(`/api/v1/suites/${sourceSuiteName}/rename`, requestOptions)
+      .then(DefaultResponseProcess)
+      .then(callback).catch(errHandle)
+}
+
 function ImportTestSuite(source: ImportSource, callback: (d: any) => void,
   errHandle?: (e: any) => void | null) {
   const requestOptions = {
@@ -363,6 +381,27 @@ function DuplicateTestCase(sourceSuiteName: string, targetSuiteName: string,
         })
     }
     fetch(`/api/v1/suites/${sourceSuiteName}/cases/${sourceTestCaseName}/duplicate`, requestOptions)
+        .then(DefaultResponseProcess)
+        .then(callback).catch(errHandle)
+}
+
+function RenameTestCase(sourceSuiteName: string, targetSuiteName: string,
+                            sourceTestCaseName: string, targetTestCaseName: string,
+                            callback: (d: any) => void, errHandle?: ((reason: any) => PromiseLike<never>) | undefined | null ) {
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'X-Store-Name': Cache.GetCurrentStore().name,
+            'X-Auth': getToken()
+        },
+        body: JSON.stringify({
+            sourceSuiteName: sourceSuiteName,
+            targetSuiteName: targetSuiteName,
+            sourceCaseName: sourceTestCaseName,
+            targetCaseName: targetTestCaseName,
+        })
+    }
+    fetch(`/api/v1/suites/${sourceSuiteName}/cases/${sourceTestCaseName}/rename`, requestOptions)
         .then(DefaultResponseProcess)
         .then(callback).catch(errHandle)
 }
@@ -734,8 +773,8 @@ function DownloadResponseFile(testcase,
 export const API = {
   DefaultResponseProcess,
   GetVersion,
-  CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, DuplicateTestSuite, GetTestSuiteYaml,
-  CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, RunTestCase, BatchRunTestCase,
+  CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, DuplicateTestSuite, RenameTestSuite, GetTestSuiteYaml,
+  CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, DuplicateTestCase, RenameTestCase, RunTestCase, BatchRunTestCase,
   GetHistoryTestCaseWithResult, DeleteHistoryTestCase,GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
   GenerateCode, ListCodeGenerator, HistoryGenerateCode,
   PopularHeaders,
