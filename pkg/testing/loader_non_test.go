@@ -73,6 +73,10 @@ func TestNonLoader(t *testing.T) {
 	assert.NoError(t, loader.CreateTestCase("", atest.TestCase{}))
 	assert.NoError(t, loader.UpdateTestCase("", atest.TestCase{}))
 	assert.NoError(t, loader.DeleteTestCase("", ""))
+	assert.NoError(t, loader.DeleteAllHistoryTestCase("", ""))
+	assert.NoError(t, loader.DeleteHistoryTestCase(""))
+	assert.NoError(t, loader.RenameTestSuite("", ""))
+	assert.NoError(t, loader.RenameTestCase("", "", ""))
 
 	var readonly bool
 	readonly, err = loader.Verify()

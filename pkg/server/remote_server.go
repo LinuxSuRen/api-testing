@@ -626,6 +626,14 @@ func (s *server) DuplicateTestSuite(ctx context.Context, in *TestSuiteDuplicate)
 	return
 }
 
+func (s *server) RenameTestSuite(ctx context.Context, in *TestSuiteDuplicate) (reply *HelloReply, err error) {
+	reply = &HelloReply{}
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	err = loader.RenameTestSuite(in.SourceSuiteName, in.TargetSuiteName)
+	return
+}
+
 func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (result *Suite, err error) {
 	var items []testing.TestCase
 	loader := s.getLoader(ctx)
@@ -911,6 +919,14 @@ func (s *server) DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate) (
 		testcase.Name = in.TargetCaseName
 		err = loader.CreateTestCase(in.TargetSuiteName, testcase)
 	}
+	return
+}
+
+func (s *server) RenameTestCase(ctx context.Context, in *TestCaseDuplicate) (result *HelloReply, err error) {
+	result = &HelloReply{}
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+	err = loader.RenameTestCase(in.SourceSuiteName, in.SourceCaseName, in.TargetCaseName)
 	return
 }
 

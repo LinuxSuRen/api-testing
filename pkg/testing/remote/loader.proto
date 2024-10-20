@@ -12,12 +12,14 @@ service Loader {
     rpc GetTestSuite(TestSuite) returns (TestSuite) {}
     rpc UpdateTestSuite(TestSuite) returns (TestSuite) {}
     rpc DeleteTestSuite(TestSuite) returns (server.Empty) {}
+    rpc RenameTestSuite(server.TestSuiteDuplicate) returns (server.HelloReply) {}
 
     rpc ListTestCases(TestSuite) returns (server.TestCases) {}
     rpc CreateTestCase(server.TestCase) returns (server.Empty) {}
     rpc GetTestCase(server.TestCase) returns (server.TestCase) {}
     rpc UpdateTestCase(server.TestCase) returns (server.TestCase) {}
     rpc DeleteTestCase(server.TestCase) returns (server.Empty) {}
+    rpc RenameTestCase(server.TestCaseDuplicate) returns (server.HelloReply) {}
 
     rpc ListHistoryTestSuite(server.Empty) returns (HistoryTestSuites) {}
     rpc CreateTestCaseHistory(server.HistoryTestResult) returns (server.Empty) {}

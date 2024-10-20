@@ -43,6 +43,7 @@ type Writer interface {
 	GetHistoryTestCase(id string) (historyTestCase HistoryTestCase, err error)
 	DeleteHistoryTestCase(id string) (err error)
 	DeleteAllHistoryTestCase(suite, name string) (err error)
+	RenameTestCase(suite, oldName, newName string) (err error)
 	GetTestCaseAllHistory(suite, name string) (historyTestCase []HistoryTestCase, err error)
 
 	ListTestSuite() (suites []TestSuite, err error)
@@ -52,5 +53,6 @@ type Writer interface {
 	GetSuite(name string) (*TestSuite, string, error)
 	UpdateSuite(TestSuite) (err error)
 	DeleteSuite(name string) (err error)
+	RenameTestSuite(oldName, newName string) error
 	Close()
 }

@@ -165,15 +165,17 @@ func TestSuite(t *testing.T) {
 
 		assert.Equal(t, 2, writer.GetCount())
 
+		newName := fmt.Sprintf("%s-%d", fakeName, time.Now().Nanosecond())
+		assert.NoError(t, writer.RenameTestSuite(fakeName, newName))
+
 		err = writer.DeleteSuite("test")
 		assert.NoError(t, err)
-		err = writer.DeleteSuite(fakeName)
+		err = writer.DeleteSuite(newName)
 		assert.NoError(t, err)
 
 		assert.Equal(t, 0, writer.GetCount())
-
-		err = writer.DeleteSuite(fakeName)
-		assert.Error(t, err)
+		assert.Error(t, writer.DeleteSuite(newName))
+		assert.Error(t, writer.RenameTestSuite(newName, newName))
 	})
 
 	t.Run("create case", func(t *testing.T) {
@@ -211,8 +213,9 @@ func TestSuite(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
+		oldName := "login"
 		var testcase atest.TestCase
-		testcase, err = writer.GetTestCase("test", "login")
+		testcase, err = writer.GetTestCase("test", oldName)
 		if assert.NoError(t, err) {
 			assert.Equal(t, urlTestLogin, testcase.Request.API)
 		}
@@ -230,14 +233,13 @@ func TestSuite(t *testing.T) {
 			assert.Equal(t, data, testSuiteYaml)
 		}
 
-		err = writer.DeleteTestCase("test", "login")
-		assert.NoError(t, err)
+		newName := fmt.Sprintf("%s-%d", oldName, time.Now().Nanosecond())
+		assert.NoError(t, writer.RenameTestCase("test", oldName, newName))
+		assert.Error(t, writer.RenameTestCase("test", oldName, newName))
 
-		err = writer.DeleteTestCase("test", "login")
-		assert.Error(t, err)
-
-		err = writer.DeleteSuite("test")
-		assert.NoError(t, err)
+		assert.NoError(t, writer.DeleteTestCase("test", newName))
+		assert.Error(t, writer.DeleteTestCase("test", oldName))
+		assert.NoError(t, writer.DeleteSuite("test"))
 	})
 }
 

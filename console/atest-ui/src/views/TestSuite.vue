@@ -5,6 +5,7 @@ import { Edit, CopyDocument, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery, GetHTTPMethods } from './types'
+import EditButton from '../components/EditButton.vue'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 import { API } from './net'
@@ -252,11 +253,17 @@ const duplicateTestSuite = () => {
 }
 const testSuiteDuplicateDialog = ref(false)
 const targetSuiteDuplicateName = ref('')
+
+const renameTestSuite = (name: string) => {
+  API.RenameTestSuite(props.name, name, (d) => {
+    emit('updated', name)
+  })
+}
 </script>
 
 <template>
   <div class="common-layout">
-    {{ t('tip.testsuite') }}<el-text class="mx-1" type="primary">{{ suite.name }}</el-text>
+    {{ t('tip.testsuite') }}<EditButton :value="suite.name" @changed="renameTestSuite"/>
 
     <table style="width: 100%">
       <tr>

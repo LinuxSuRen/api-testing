@@ -397,6 +397,20 @@ func TestUpdateTestCase(t *testing.T) {
 		testCase, err = server.GetTestCase(ctx, &TestCaseIdentity{Suite: "simple", Testcase: "get"})
 		assert.Nil(t, testCase)
 		assert.Error(t, err)
+
+		_, err = server.RenameTestCase(ctx, &TestCaseDuplicate{
+			SourceCaseName:  "get",
+			SourceSuiteName: "simple",
+			TargetCaseName:  "get2",
+		})
+		assert.Error(t, err)
+
+		// rename test suite
+		_, err = server.RenameTestSuite(ctx, &TestSuiteDuplicate{
+			SourceSuiteName: "simple",
+			TargetSuiteName: "simple2",
+		})
+		assert.NoError(t, err)
 	})
 }
 
