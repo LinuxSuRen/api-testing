@@ -237,8 +237,6 @@ func ammendHeaders(headers http.Header, body []byte) {
 	if val := headers.Get(util.ContentLength); val == "" {
 		headers.Add(util.ContentLength, strconv.Itoa(len(body)))
 		fmt.Printf("add content-length: %d\n", len(body))
-	} else {
-		fmt.Printf("content-length already exist: %s\n", val)
 	}
 }
 

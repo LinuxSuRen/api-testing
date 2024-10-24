@@ -8,7 +8,8 @@ param:
   caseName: "{{randAlpha 6}}"
   gRPCSuiteName: "{{randAlpha 6}}"
   gRPCCaseName: "{{randAlpha 6}}"
-  store: "{{randAlpha 3}}"
+  store: |
+    {{randAlpha 6}}-{{env "kind"}}
   server: |
     {{default "http://localhost:8080" (env "SERVER")}}
 items:

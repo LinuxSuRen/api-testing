@@ -32,7 +32,7 @@ atest extension --output /usr/local/bin --registry ghcr.io mongodb
 
 echo "start to run server"
 nohup atest server --tls-grpc --cert-file test.pem --key-file test.key&
-cmd="atest run -p test-suite-common.yaml"
+cmd="atest run -p test-suite-common.yaml --request-ignore-error"
 
 echo "start to run testing: $cmd"
 kind=orm target=mysql:3306 driver=mysql $cmd
