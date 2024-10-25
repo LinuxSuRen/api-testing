@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	sync "sync"
 	"syscall"
 	"time"
 
@@ -54,6 +55,7 @@ type storeExtManager struct {
 	processs             []fakeruntime.Process
 	processChan          chan fakeruntime.Process
 	stopSingal           chan struct{}
+	lock                 *sync.RWMutex
 }
 
 var ss *storeExtManager
@@ -63,6 +65,7 @@ func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
 		ss = &storeExtManager{
 			processChan: make(chan fakeruntime.Process),
 			stopSingal:  make(chan struct{}, 1),
+			lock:        &sync.RWMutex{},
 		}
 		ss.execer = execer
 		ss.socketPrefix = "unix://"
@@ -77,6 +80,7 @@ func NewStoreExtManagerInstance(execer fakeruntime.Execer) ExtManager {
 	ss = &storeExtManager{
 		processChan: make(chan fakeruntime.Process),
 		stopSingal:  make(chan struct{}, 1),
+		lock:        &sync.RWMutex{},
 	}
 	ss.execer = execer
 	ss.socketPrefix = "unix://"
@@ -129,8 +133,11 @@ func (s *storeExtManager) startPlugin(socketURL, plugin, pluginName string) (err
 	socketFile := strings.TrimPrefix(socketURL, s.socketPrefix)
 	_ = os.RemoveAll(socketFile) // always deleting the socket file to avoid start failing
 
+	s.lock.Lock()
 	s.filesNeedToBeRemoved = append(s.filesNeedToBeRemoved, socketFile)
 	s.extStatusMap[pluginName] = true
+	s.lock.Unlock()
+
 	if err = s.execer.RunCommandWithIO(plugin, "", os.Stdout, os.Stderr, s.processChan, "--socket", socketFile); err != nil {
 		serverLogger.Info("failed to start ext manager", "socket", socketURL, "error: ", err.Error())
 	}

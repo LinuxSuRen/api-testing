@@ -167,6 +167,15 @@ func (g *gRPCLoader) DeleteTestCase(suite, testcase string) (err error) {
 	return
 }
 
+func (g *gRPCLoader) RenameTestCase(suite, oldName, newName string) (err error) {
+	_, err = g.client.RenameTestCase(g.ctx, &server.TestCaseDuplicate{
+		SourceCaseName:  oldName,
+		SourceSuiteName: suite,
+		TargetCaseName:  newName,
+	})
+	return
+}
+
 func (g *gRPCLoader) CreateHistoryTestCase(testcaseResult testing.TestCaseResult, testSuite *testing.TestSuite, historyHeader map[string]string) (err error) {
 	payload := ConvertToGRPCHistoryTestCaseResult(testcaseResult, testSuite, historyHeader)
 	_, err = g.client.CreateTestCaseHistory(g.ctx, payload)
@@ -260,6 +269,14 @@ func (g *gRPCLoader) UpdateSuite(suite testing.TestSuite) (err error) {
 func (g *gRPCLoader) DeleteSuite(name string) (err error) {
 	_, err = g.client.DeleteTestSuite(g.ctx, &TestSuite{
 		Name: name,
+	})
+	return
+}
+
+func (g *gRPCLoader) RenameTestSuite(oldName, newName string) (err error) {
+	_, err = g.client.RenameTestSuite(g.ctx, &server.TestSuiteDuplicate{
+		SourceSuiteName: oldName,
+		TargetSuiteName: newName,
 	})
 	return
 }

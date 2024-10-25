@@ -63,6 +63,12 @@ service Runner {
         body: "*"
       };
     }
+    rpc RenameTestSuite(TestSuiteDuplicate) returns (HelloReply) {
+      option (google.api.http) = {
+        post: "/api/v1/suites/{sourceSuiteName}/rename"
+        body: "*"
+      };
+    }
     rpc GetTestSuiteYaml(TestSuiteIdentity) returns (YamlData) {
       option (google.api.http) = {
         get: "/api/v1/suites/{name}/yaml"
@@ -113,6 +119,12 @@ service Runner {
     rpc DuplicateTestCase(TestCaseDuplicate) returns (HelloReply) {
       option (google.api.http) = {
           post: "/api/v1/suites/{sourceSuiteName}/cases/{sourceCaseName}/duplicate"
+          body: "*"
+      };
+    }
+    rpc RenameTestCase(TestCaseDuplicate) returns (HelloReply) {
+      option (google.api.http) = {
+          post: "/api/v1/suites/{sourceSuiteName}/cases/{sourceCaseName}/rename"
           body: "*"
       };
     }

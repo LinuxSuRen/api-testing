@@ -28,11 +28,13 @@ type LoaderClient interface {
 	GetTestSuite(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*TestSuite, error)
 	UpdateTestSuite(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*TestSuite, error)
 	DeleteTestSuite(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*server.Empty, error)
+	RenameTestSuite(ctx context.Context, in *server.TestSuiteDuplicate, opts ...grpc.CallOption) (*server.HelloReply, error)
 	ListTestCases(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*server.TestCases, error)
 	CreateTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.Empty, error)
 	GetTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.TestCase, error)
 	UpdateTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.TestCase, error)
 	DeleteTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.Empty, error)
+	RenameTestCase(ctx context.Context, in *server.TestCaseDuplicate, opts ...grpc.CallOption) (*server.HelloReply, error)
 	ListHistoryTestSuite(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*HistoryTestSuites, error)
 	CreateTestCaseHistory(ctx context.Context, in *server.HistoryTestResult, opts ...grpc.CallOption) (*server.Empty, error)
 	GetHistoryTestCaseWithResult(ctx context.Context, in *server.HistoryTestCase, opts ...grpc.CallOption) (*server.HistoryTestResult, error)
@@ -98,6 +100,15 @@ func (c *loaderClient) DeleteTestSuite(ctx context.Context, in *TestSuite, opts 
 	return out, nil
 }
 
+func (c *loaderClient) RenameTestSuite(ctx context.Context, in *server.TestSuiteDuplicate, opts ...grpc.CallOption) (*server.HelloReply, error) {
+	out := new(server.HelloReply)
+	err := c.cc.Invoke(ctx, "/remote.Loader/RenameTestSuite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *loaderClient) ListTestCases(ctx context.Context, in *TestSuite, opts ...grpc.CallOption) (*server.TestCases, error) {
 	out := new(server.TestCases)
 	err := c.cc.Invoke(ctx, "/remote.Loader/ListTestCases", in, out, opts...)
@@ -137,6 +148,15 @@ func (c *loaderClient) UpdateTestCase(ctx context.Context, in *server.TestCase, 
 func (c *loaderClient) DeleteTestCase(ctx context.Context, in *server.TestCase, opts ...grpc.CallOption) (*server.Empty, error) {
 	out := new(server.Empty)
 	err := c.cc.Invoke(ctx, "/remote.Loader/DeleteTestCase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) RenameTestCase(ctx context.Context, in *server.TestCaseDuplicate, opts ...grpc.CallOption) (*server.HelloReply, error) {
+	out := new(server.HelloReply)
+	err := c.cc.Invoke(ctx, "/remote.Loader/RenameTestCase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -242,11 +262,13 @@ type LoaderServer interface {
 	GetTestSuite(context.Context, *TestSuite) (*TestSuite, error)
 	UpdateTestSuite(context.Context, *TestSuite) (*TestSuite, error)
 	DeleteTestSuite(context.Context, *TestSuite) (*server.Empty, error)
+	RenameTestSuite(context.Context, *server.TestSuiteDuplicate) (*server.HelloReply, error)
 	ListTestCases(context.Context, *TestSuite) (*server.TestCases, error)
 	CreateTestCase(context.Context, *server.TestCase) (*server.Empty, error)
 	GetTestCase(context.Context, *server.TestCase) (*server.TestCase, error)
 	UpdateTestCase(context.Context, *server.TestCase) (*server.TestCase, error)
 	DeleteTestCase(context.Context, *server.TestCase) (*server.Empty, error)
+	RenameTestCase(context.Context, *server.TestCaseDuplicate) (*server.HelloReply, error)
 	ListHistoryTestSuite(context.Context, *server.Empty) (*HistoryTestSuites, error)
 	CreateTestCaseHistory(context.Context, *server.HistoryTestResult) (*server.Empty, error)
 	GetHistoryTestCaseWithResult(context.Context, *server.HistoryTestCase) (*server.HistoryTestResult, error)
@@ -279,6 +301,9 @@ func (UnimplementedLoaderServer) UpdateTestSuite(context.Context, *TestSuite) (*
 func (UnimplementedLoaderServer) DeleteTestSuite(context.Context, *TestSuite) (*server.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTestSuite not implemented")
 }
+func (UnimplementedLoaderServer) RenameTestSuite(context.Context, *server.TestSuiteDuplicate) (*server.HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenameTestSuite not implemented")
+}
 func (UnimplementedLoaderServer) ListTestCases(context.Context, *TestSuite) (*server.TestCases, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTestCases not implemented")
 }
@@ -293,6 +318,9 @@ func (UnimplementedLoaderServer) UpdateTestCase(context.Context, *server.TestCas
 }
 func (UnimplementedLoaderServer) DeleteTestCase(context.Context, *server.TestCase) (*server.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTestCase not implemented")
+}
+func (UnimplementedLoaderServer) RenameTestCase(context.Context, *server.TestCaseDuplicate) (*server.HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenameTestCase not implemented")
 }
 func (UnimplementedLoaderServer) ListHistoryTestSuite(context.Context, *server.Empty) (*HistoryTestSuites, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListHistoryTestSuite not implemented")
@@ -427,6 +455,24 @@ func _Loader_DeleteTestSuite_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Loader_RenameTestSuite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.TestSuiteDuplicate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).RenameTestSuite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/RenameTestSuite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).RenameTestSuite(ctx, req.(*server.TestSuiteDuplicate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Loader_ListTestCases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TestSuite)
 	if err := dec(in); err != nil {
@@ -513,6 +559,24 @@ func _Loader_DeleteTestCase_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LoaderServer).DeleteTestCase(ctx, req.(*server.TestCase))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_RenameTestCase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.TestCaseDuplicate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).RenameTestCase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/RenameTestCase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).RenameTestCase(ctx, req.(*server.TestCaseDuplicate))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -725,6 +789,10 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Loader_DeleteTestSuite_Handler,
 		},
 		{
+			MethodName: "RenameTestSuite",
+			Handler:    _Loader_RenameTestSuite_Handler,
+		},
+		{
 			MethodName: "ListTestCases",
 			Handler:    _Loader_ListTestCases_Handler,
 		},
@@ -743,6 +811,10 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTestCase",
 			Handler:    _Loader_DeleteTestCase_Handler,
+		},
+		{
+			MethodName: "RenameTestCase",
+			Handler:    _Loader_RenameTestCase_Handler,
 		},
 		{
 			MethodName: "ListHistoryTestSuite",

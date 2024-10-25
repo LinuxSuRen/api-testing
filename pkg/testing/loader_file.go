@@ -433,6 +433,25 @@ func (l *fileLoader) CreateHistoryTestCase(testcaseResult TestCaseResult, suiteN
 	return
 }
 
+func (l *fileLoader) RenameTestCase(suite, oldName, newName string) (err error) {
+	var (
+		oldCase TestCase
+		newCase TestCase
+	)
+	oldCase, err = l.GetTestCase(suite, oldName)
+	newCase, err = l.GetTestCase(suite, newName)
+	if oldCase.Name != oldName || newCase.Name == newName {
+		err = fmt.Errorf("the old or new test case name is not correct")
+		return
+	}
+
+	oldCase.Name = newName
+	if err = l.CreateTestCase(suite, oldCase); err == nil {
+		err = l.DeleteTestCase(suite, oldName)
+	}
+	return
+}
+
 func (l *fileLoader) ListHistoryTestSuite() (suites []HistoryTestSuite, err error) {
 	return
 }
@@ -454,6 +473,31 @@ func (l *fileLoader) DeleteAllHistoryTestCase(suite, name string) (err error) {
 }
 
 func (l *fileLoader) GetTestCaseAllHistory(suite, name string) (historyTestCase []HistoryTestCase, err error) {
+	return
+}
+
+func (l *fileLoader) RenameTestSuite(oldName, newName string) (err error) {
+	var (
+		oldSuite *TestSuite
+		newSuite TestSuite
+	)
+	var absPath string
+	if oldSuite, absPath, err = l.GetSuite(oldName); err != nil {
+		return
+	}
+
+	newSuite, err = l.GetTestSuite(newName, false)
+	if oldSuite == nil || oldSuite.Name != oldName || newSuite.Name == newName {
+		err = fmt.Errorf("the old or new test suite name is not correct")
+		return
+	}
+
+	oldSuite.Name = newName
+	newSuiteFile := path.Join(path.Dir(absPath), newName+".yaml")
+	if err = SaveTestSuiteToFile(oldSuite, newSuiteFile); err == nil {
+		l.Put(newSuiteFile)
+		err = l.DeleteSuite(oldName)
+	}
 	return
 }
 
