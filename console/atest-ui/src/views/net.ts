@@ -620,15 +620,13 @@ function GetSuggestedAPIs(name: string,
     .then(callback)
 }
 
-function ReloadMockServer(config: string) {
+function ReloadMockServer(config: any) {
   const requestOptions = {
     method: 'POST',
     headers: {
       'X-Auth': getToken()
     },
-    body: JSON.stringify({
-      Config: config
-    })
+    body: JSON.stringify(config)
   }
   fetch(`/api/v1/mock/reload`, requestOptions)
       .then(DefaultResponseProcess)

@@ -266,7 +266,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	// create mock server controller
 	mockInMemoryReader := mock.NewInMemoryReader("")
 	dynamicMockServer := mock.NewInMemoryServer(0)
-	mockServerController := server.NewMockServerController(mockInMemoryReader, dynamicMockServer)
+	mockServerController := server.NewMockServerController(mockInMemoryReader, dynamicMockServer, o.httpPort)
 
 	clean := make(chan os.Signal, 1)
 	signal.Notify(clean, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
