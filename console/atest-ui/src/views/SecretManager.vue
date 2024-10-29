@@ -2,7 +2,7 @@
 import { ElMessage } from 'element-plus'
 import { reactive, ref } from 'vue'
 import { Edit, Delete } from '@element-plus/icons-vue'
-import type { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import { API } from './net'
 import type { Secret } from './net'
 import { UIAPI } from './net-vue'

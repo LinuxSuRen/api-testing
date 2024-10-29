@@ -434,6 +434,8 @@ func (s *inMemoryServer) GetPort() string {
 func (s *inMemoryServer) Stop() (err error) {
 	if s.listener != nil {
 		err = s.listener.Close()
+	} else {
+		memLogger.Info("listener is nil")
 	}
 	if s.cancelFunc != nil {
 		s.cancelFunc()

@@ -4,7 +4,7 @@ import { ElInput } from 'element-plus'
 import type { InputInstance } from 'element-plus'
 
 const props = defineProps({
-    value: String,
+    value: String || Number,
 })
 
 const emit = defineEmits(['changed'])
