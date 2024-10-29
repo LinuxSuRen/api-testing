@@ -13,3 +13,21 @@ title = "插件"
 | 存储 | [etcd](https://github.com/LinuxSuRen/atest-ext-store-etcd) | 保存数据到 Etcd 数据库中 |
 | 存储 | [git](https://github.com/LinuxSuRen/atest-ext-store-git)  | 保存数据到 Git 仓库中 |
 | 存储 | [mongodb](https://github.com/LinuxSuRen/atest-ext-store-mongodb) | 保存数据到 MongDB 中 |
+
+> `atest` 也是唯一支持如此丰富的存储的接口开发、测试的开源工具。
+
+## 下载插件
+
+我们建议通过如下的命令来下载插件：
+
+```shell
+atest extension orm
+```
+
+上面的命令，会识别当前的操作系统，自动下载最新版本的插件。当然，用户可以通过自行编译、手动下载的方式获取插件二进制文件。
+
+`atest` 可以从任意支持 OCI 的镜像仓库中（命令参数说明中给出了支持的镜像服务地址）下载插件，也可以指定下载超时时间：
+
+```shell
+atest extension orm --registry ghcr.io --timeout 2ms
+```

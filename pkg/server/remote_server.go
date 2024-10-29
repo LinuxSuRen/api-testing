@@ -1273,8 +1273,7 @@ func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (repl
 		}
 
 		server := mock.NewInMemoryServer(int(in.GetPort()))
-		mockInMemoryReader := mock.NewInMemoryReader(in.Config)
-		server.Start(mockInMemoryReader, in.Prefix)
+		server.Start(s.mockWriter, in.Prefix)
 		s.loader = server
 	}
 	err = s.loader.Load()

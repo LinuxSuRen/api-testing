@@ -17,8 +17,9 @@ package mock
 
 import (
 	"errors"
-	"github.com/linuxsuren/api-testing/docs"
 	"os"
+
+	"github.com/linuxsuren/api-testing/docs"
 
 	"gopkg.in/yaml.v3"
 )
@@ -37,7 +38,7 @@ type localFileReader struct {
 	data []byte
 }
 
-func NewLocalFileReader(file string) Reader {
+func NewLocalFileReader(file string) ReaderAndWriter {
 	return &localFileReader{file: file}
 }
 
@@ -46,6 +47,11 @@ func (r *localFileReader) Parse() (server *Server, err error) {
 		server, err = validateAndParse(r.data)
 	}
 	return
+}
+
+func (r *localFileReader) Write(data []byte) {
+	r.data = data
+	_ = os.WriteFile(r.file, r.data, 0644)
 }
 
 func (r *localFileReader) GetData() []byte {
