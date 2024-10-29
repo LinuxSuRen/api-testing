@@ -628,6 +628,7 @@ service Mock {
 message MockConfig {
   string Prefix = 1;
   string Config = 2;
+  int32 Port = 3;
 }
 
 message Version {

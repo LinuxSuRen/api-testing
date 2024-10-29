@@ -102,6 +102,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.StringArrayVarP(&opt.mockConfig, "mock-config", "", nil, "The mock config files")
 	flags.StringVarP(&opt.mockPrefix, "mock-prefix", "", "/mock", "The mock server API prefix")
 	flags.StringVarP(&opt.extensionRegistry, "extension-registry", "", "docker.io", "The extension registry URL")
+	flags.DurationVarP(&opt.downloadTimeout, "download-timeout", "", time.Second*10, "The timeout of extension download")
 
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
@@ -129,6 +130,7 @@ type serverOption struct {
 	configDir         string
 	skyWalking        string
 	extensionRegistry string
+	downloadTimeout   time.Duration
 
 	auth          string
 	oauthProvider string
@@ -251,6 +253,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 
 	extDownloader := downloader.NewStoreDownloader()
 	extDownloader.WithRegistry(o.extensionRegistry)
+	extDownloader.WithTimeout(o.downloadTimeout)
 	storeExtMgr := server.NewStoreExtManager(o.execer)
 	storeExtMgr.WithDownloader(extDownloader)
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir, o.grpcMaxRecvMsgSize)
@@ -264,9 +267,16 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// create mock server controller
-	mockInMemoryReader := mock.NewInMemoryReader("")
+	var mockWriter mock.ReaderAndWriter
+	if len(o.mockConfig) > 0 {
+		cmd.Println("currently only one mock config is supported, will take the first one")
+		mockWriter = mock.NewLocalFileReader(o.mockConfig[0])
+	} else {
+		mockWriter = mock.NewInMemoryReader("")
+	}
+
 	dynamicMockServer := mock.NewInMemoryServer(0)
-	mockServerController := server.NewMockServerController(mockInMemoryReader, dynamicMockServer)
+	mockServerController := server.NewMockServerController(mockWriter, dynamicMockServer, o.httpPort)
 
 	clean := make(chan os.Signal, 1)
 	signal.Notify(clean, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
@@ -363,17 +373,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		combineHandlers := server.NewDefaultCombineHandler()
 		combineHandlers.PutHandler("", mux)
 
-		if len(o.mockConfig) > 0 {
-			cmd.Println("currently only one mock config is supported, will take the first one")
-			var mockServerHandler http.Handler
-			if mockServerHandler, err = mock.NewInMemoryServer(0).
-				SetupHandler(mock.NewLocalFileReader(o.mockConfig[0]), o.mockPrefix); err != nil {
-				return
-			}
-			combineHandlers.PutHandler(o.mockPrefix, mockServerHandler)
-		}
-
-		if handler, hErr := dynamicMockServer.SetupHandler(mockInMemoryReader, o.mockPrefix+"/server"); hErr != nil {
+		if handler, hErr := dynamicMockServer.SetupHandler(mockWriter, o.mockPrefix+"/server"); hErr != nil {
 			err = hErr
 			return
 		} else {

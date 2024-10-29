@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	reflect "reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -1243,27 +1244,50 @@ func (s *server) PProf(ctx context.Context, in *PProfRequest) (reply *PProfData,
 // Start starts the mock server
 type mockServerController struct {
 	UnimplementedMockServer
-	mockWriter mock.ReaderAndWriter
-	loader     mock.Loadable
-	reader     mock.Reader
+	mockWriter  mock.ReaderAndWriter
+	loader      mock.Loadable
+	reader      mock.Reader
+	prefix      string
+	combinePort int
 }
 
-func NewMockServerController(mockWriter mock.ReaderAndWriter, loader mock.Loadable) MockServer {
+func NewMockServerController(mockWriter mock.ReaderAndWriter, loader mock.Loadable, combinePort int) MockServer {
 	return &mockServerController{
-		mockWriter: mockWriter,
-		loader:     loader,
+		mockWriter:  mockWriter,
+		loader:      loader,
+		prefix:      "/mock/server",
+		combinePort: combinePort,
 	}
 }
 
 func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (reply *Empty, err error) {
 	s.mockWriter.Write([]byte(in.Config))
+	s.prefix = in.Prefix
+	if dServer, ok := s.loader.(mock.DynamicServer); ok && dServer.GetPort() != strconv.Itoa(int(in.GetPort())) {
+		if strconv.Itoa(s.combinePort) != dServer.GetPort() {
+			if stopErr := dServer.Stop(); stopErr != nil {
+				remoteServerLogger.Info("failed to stop old server", "error", stopErr)
+			} else {
+				remoteServerLogger.Info("old server stopped", "port", dServer.GetPort())
+			}
+		}
+
+		server := mock.NewInMemoryServer(int(in.GetPort()))
+		server.Start(s.mockWriter, in.Prefix)
+		s.loader = server
+	}
 	err = s.loader.Load()
 	return
 }
 func (s *mockServerController) GetConfig(ctx context.Context, in *Empty) (reply *MockConfig, err error) {
 	reply = &MockConfig{
-		Prefix: "/mock/server",
+		Prefix: s.prefix,
 		Config: string(s.mockWriter.GetData()),
+	}
+	if dServer, ok := s.loader.(mock.DynamicServer); ok {
+		if port, pErr := strconv.ParseInt(dServer.GetPort(), 10, 32); pErr == nil {
+			reply.Port = int32(port)
+		}
 	}
 	return
 }

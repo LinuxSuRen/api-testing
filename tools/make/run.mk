@@ -12,7 +12,9 @@ ATEST_UI = console/atest-ui
 run-server: ## Run the API Testing server
 run-server: build-ui run-backend
 run-backend:
-	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist --extension-registry ghcr.io
+	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist \
+		--mock-config bin/mock.yaml \
+		--extension-registry ghcr.io --download-timeout 90s
 
 .PHONY: run-console
 run-console: ## Run the API Testing console
