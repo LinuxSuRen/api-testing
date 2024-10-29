@@ -1285,7 +1285,7 @@ func (s *mockServerController) GetConfig(ctx context.Context, in *Empty) (reply 
 		Config: string(s.mockWriter.GetData()),
 	}
 	if dServer, ok := s.loader.(mock.DynamicServer); ok {
-		if port, pErr := strconv.Atoi(dServer.GetPort()); pErr == nil {
+		if port, pErr := strconv.ParseInt(dServer.GetPort(), 10, 32); pErr == nil {
 			reply.Port = int32(port)
 		}
 	}
