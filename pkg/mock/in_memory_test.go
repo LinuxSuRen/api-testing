@@ -118,7 +118,7 @@ func TestInMemoryServer(t *testing.T) {
 		assert.NoError(t, err)
 		resp, err = http.DefaultClient.Do(delReq)
 		assert.NoError(t, err)
-		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
 	})
 
 	t.Run("only accept GET method in getting a single object", func(t *testing.T) {

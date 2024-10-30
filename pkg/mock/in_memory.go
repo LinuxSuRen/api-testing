@@ -48,6 +48,7 @@ type inMemoryServer struct {
 	mux        *mux.Router
 	listener   net.Listener
 	port       int
+	prefix     string
 	wg         sync.WaitGroup
 	ctx        context.Context
 	cancelFunc context.CancelFunc
@@ -69,6 +70,7 @@ func (s *inMemoryServer) SetupHandler(reader Reader, prefix string) (handler htt
 	// init the data
 	s.data = make(map[string][]map[string]interface{})
 	s.mux = mux.NewRouter().PathPrefix(prefix).Subrouter()
+	s.prefix = prefix
 	handler = s.mux
 	err = s.Load()
 	return
@@ -120,7 +122,45 @@ func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 
 func (s *inMemoryServer) startObject(obj Object) {
 	// create a simple CRUD server
+	s.mux.HandleFunc(fmt.Sprintf("/%s/{%s}", obj.Name, obj.Name), func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("mock server received request", req.URL.Path)
+		method := req.Method
+		w.Header().Set(util.ContentType, util.JSON)
+
+		objName := strings.TrimPrefix(req.URL.Path, s.prefix+"/"+obj.Name+"/")
+
+		switch method {
+		case http.MethodGet:
+			// list all items
+			for _, item := range s.data[obj.Name] {
+				if item["name"] == objName {
+					data, err := json.Marshal(item)
+					writeResponse(w, data, err)
+					return
+				}
+			}
+		case http.MethodDelete:
+			// delete an item
+			for i, item := range s.data[obj.Name] {
+				if item["name"] == objName {
+					if len(s.data[obj.Name]) == i+1 {
+						s.data[obj.Name] = s.data[obj.Name][:i]
+					} else {
+						s.data[obj.Name] = append(s.data[obj.Name][:i], s.data[obj.Name][i+1])
+					}
+
+					writeResponse(w, []byte(`{"msg": "deleted"}`), nil)
+					return
+				}
+			}
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		writeResponse(w, []byte(`{"msg": "not found"}`), fmt.Errorf("not found"))
+	})
 	s.mux.HandleFunc("/"+obj.Name, func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("mock server received request", req.URL.Path)
 		method := req.Method
 		w.Header().Set(util.ContentType, util.JSON)
 
@@ -172,32 +212,6 @@ func (s *inMemoryServer) startObject(obj Object) {
 			} else {
 				memLogger.Info("failed to read from body", "error", err)
 			}
-		case http.MethodDelete:
-			// delete an item
-			if data, err := io.ReadAll(req.Body); err == nil {
-				objData := map[string]interface{}{}
-
-				jsonErr := json.Unmarshal(data, &objData)
-				if jsonErr != nil {
-					memLogger.Info(jsonErr.Error())
-					return
-				}
-
-				for i, item := range s.data[obj.Name] {
-					if objData["name"] == item["name"] {
-						if len(s.data[obj.Name]) == i+1 {
-							s.data[obj.Name] = s.data[obj.Name][:i]
-						} else {
-							s.data[obj.Name] = append(s.data[obj.Name][:i], s.data[obj.Name][i+1])
-						}
-						break
-					}
-				}
-
-				_, _ = w.Write(data)
-			} else {
-				memLogger.Info("failed to read from body", "error", err)
-			}
 		case http.MethodPut:
 			if data, err := io.ReadAll(req.Body); err == nil {
 				objData := map[string]interface{}{}
@@ -220,7 +234,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 				memLogger.Info("failed to read from body", "error", err)
 			}
 		default:
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
 	})
 
