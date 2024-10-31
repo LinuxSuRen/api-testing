@@ -76,7 +76,7 @@ curl http://localhost:6060/mock/projects/atest -X DELETE
 items:
   - name: prList
     request:
-      path: /v1/repos/{repo}/prs
+      path: /api/v1/repos/{repo}/prs
     response:
       header:
         server: mock
@@ -97,7 +97,7 @@ items:
 启动 Mock 服务后，我们就可以发起如下的请求：
 
 ```shell
-curl http://localhost:6060/mock/v1/repos/atest/prs -v
+curl http://localhost:6060/mock/api/v1/repos/atest/prs -v
 ```
 
 另外，为了满足复杂的场景，还可以对 Response Body 做特定的解码，目前支持：`base64`、`url`：
@@ -108,7 +108,7 @@ curl http://localhost:6060/mock/v1/repos/atest/prs -v
 items:
   - name: base64
     request:
-      path: /v1/base64
+      path: /api/v1/base64
     response:
       body: aGVsbG8=
       encoder: base64
@@ -117,7 +117,7 @@ items:
 上面 Body 的内容是经过 `base64` 编码的，这可以用于不希望直接明文显示，或者是图片的场景：
 
 ```shell
-curl http://localhost:6060/mock/v1/base64
+curl http://localhost:6060/mock/api/v1/base64
 ```
 
 如果你的 Body 内容可以通过另外一个 HTTP 请求（GET）获得，那么你可以这么写：
@@ -128,7 +128,7 @@ curl http://localhost:6060/mock/v1/base64
 items:
   - name: baidu
     request:
-      path: /v1/baidu
+      path: /api/v1/baidu
     response:
       body: https://baidu.com
       encoder: url

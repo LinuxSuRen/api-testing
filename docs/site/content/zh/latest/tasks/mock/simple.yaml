@@ -3,7 +3,7 @@
 items:
   - name: prList
     request:
-      path: /v1/repos/{repo}/prs
+      path: /api/v1/repos/{repo}/prs
     response:
       header:
         server: mock
@@ -20,7 +20,7 @@ items:
         }
   - name: base64
     request:
-      path: /v1/base64
+      path: /api/v1/base64
     response:
       body: aGVsbG8=
       encoder: base64
@@ -30,3 +30,6 @@ items:
     response:
       body: https://baidu.com
       encoder: url
+proxies:
+  - path: /api/v1/{point}
+    target: http://atest.localhost:8080

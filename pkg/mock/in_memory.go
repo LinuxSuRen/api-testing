@@ -106,7 +106,31 @@ func (s *inMemoryServer) Load() (err error) {
 	for _, proxy := range server.Proxies {
 		memLogger.Info("start to proxy", "target", proxy.Target)
 		s.mux.HandleFunc(proxy.Path, func(w http.ResponseWriter, req *http.Request) {
-			fmt.Println("catch all", req.URL.Path)
+			api := fmt.Sprintf("%s/%s", proxy.Target, strings.TrimPrefix(req.URL.Path, s.prefix))
+			memLogger.Info("redirect to", "target", api)
+
+			targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, req.Body)
+			if err != nil {
+				memLogger.Error(err, "failed to create proxy request")
+				return
+			}
+
+			resp, err := http.DefaultClient.Do(targetReq)
+			if err != nil {
+				memLogger.Error(err, "failed to do proxy request")
+				return
+			}
+
+			data, err := io.ReadAll(resp.Body)
+			if err != nil {
+				memLogger.Error(err, "failed to read response body")
+				return
+			}
+
+			for k, v := range resp.Header {
+				w.Header().Add(k, v[0])
+			}
+			w.Write(data)
 		})
 	}
 	return
