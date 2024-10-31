@@ -122,43 +122,6 @@ func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 
 func (s *inMemoryServer) startObject(obj Object) {
 	// create a simple CRUD server
-	s.mux.HandleFunc(fmt.Sprintf("/%s/{%s}", obj.Name, obj.Name), func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("mock server received request", req.URL.Path)
-		method := req.Method
-		w.Header().Set(util.ContentType, util.JSON)
-
-		objName := strings.TrimPrefix(req.URL.Path, s.prefix+"/"+obj.Name+"/")
-
-		switch method {
-		case http.MethodGet:
-			// list all items
-			for _, item := range s.data[obj.Name] {
-				if item["name"] == objName {
-					data, err := json.Marshal(item)
-					writeResponse(w, data, err)
-					return
-				}
-			}
-		case http.MethodDelete:
-			// delete an item
-			for i, item := range s.data[obj.Name] {
-				if item["name"] == objName {
-					if len(s.data[obj.Name]) == i+1 {
-						s.data[obj.Name] = s.data[obj.Name][:i]
-					} else {
-						s.data[obj.Name] = append(s.data[obj.Name][:i], s.data[obj.Name][i+1])
-					}
-
-					writeResponse(w, []byte(`{"msg": "deleted"}`), nil)
-					return
-				}
-			}
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			return
-		}
-		writeResponse(w, []byte(`{"msg": "not found"}`), fmt.Errorf("not found"))
-	})
 	s.mux.HandleFunc("/"+obj.Name, func(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("mock server received request", req.URL.Path)
 		method := req.Method
@@ -174,7 +137,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 				exclude := false
 
 				for k, v := range req.URL.Query() {
-					if v == nil || len(v) == 0 {
+					if len(v) == 0 {
 						continue
 					}
 
@@ -238,29 +201,48 @@ func (s *inMemoryServer) startObject(obj Object) {
 		}
 	})
 
-	// get a single object
+	// handle a single object
 	s.mux.HandleFunc(fmt.Sprintf("/%s/{name:[a-z]+}", obj.Name), func(w http.ResponseWriter, req *http.Request) {
-		if req.Method != http.MethodGet {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			return
-		}
-
 		w.Header().Set(util.ContentType, util.JSON)
 		objects := s.data[obj.Name]
 		if objects != nil {
 			name := mux.Vars(req)["name"]
-
+			var data []byte
 			for _, obj := range objects {
 				if obj["name"] == name {
 
-					data, err := json.Marshal(obj)
-					writeResponse(w, data, err)
-					return
+					data, _ = json.Marshal(obj)
+					break
 				}
 			}
+
+			if len(data) == 0 {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			method := req.Method
+			switch method {
+			case http.MethodGet:
+				writeResponse(w, data, nil)
+			case http.MethodDelete:
+				for i, item := range s.data[obj.Name] {
+					if item["name"] == name {
+						if len(s.data[obj.Name]) == i+1 {
+							s.data[obj.Name] = s.data[obj.Name][:i]
+						} else {
+							s.data[obj.Name] = append(s.data[obj.Name][:i], s.data[obj.Name][i+1])
+						}
+
+						writeResponse(w, []byte(`{"msg": "deleted"}`), nil)
+					}
+				}
+			default:
+				w.WriteHeader(http.StatusMethodNotAllowed)
+			}
+
 		}
 	})
-	return
 }
 
 func (s *inMemoryServer) startItem(item Item) {
