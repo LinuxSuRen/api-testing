@@ -102,6 +102,13 @@ func (s *inMemoryServer) Load() (err error) {
 	}
 
 	s.handleOpenAPI()
+
+	for _, proxy := range server.Proxies {
+		memLogger.Info("start to proxy", "target", proxy.Target)
+		s.mux.HandleFunc(proxy.Path, func(w http.ResponseWriter, req *http.Request) {
+			fmt.Println("catch all", req.URL.Path)
+		})
+	}
 	return
 }
 

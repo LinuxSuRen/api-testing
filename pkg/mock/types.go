@@ -55,8 +55,14 @@ type Webhook struct {
 	Request Request `yaml:"request" json:"request"`
 }
 
+type Proxy struct {
+	Path   string `yaml:"path" json:"path"`
+	Target string `yaml:"target" json:"target"`
+}
+
 type Server struct {
 	Objects  []Object  `yaml:"objects" json:"objects"`
 	Items    []Item    `yaml:"items" json:"items"`
+	Proxies  []Proxy   `yaml:"proxies" json:"proxies"`
 	Webhooks []Webhook `yaml:"webhooks" json:"webhooks"`
 }
