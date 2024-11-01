@@ -203,34 +203,13 @@ func (s *inMemoryServer) startObject(obj Object) {
 			} else {
 				memLogger.Info("failed to read from body", "error", err)
 			}
-		case http.MethodPut:
-			if data, err := io.ReadAll(req.Body); err == nil {
-				objData := map[string]interface{}{}
-
-				jsonErr := json.Unmarshal(data, &objData)
-				if jsonErr != nil {
-					memLogger.Info(jsonErr.Error())
-					return
-				}
-
-				for i, item := range s.data[obj.Name] {
-					if objData["name"] == item["name"] {
-						s.data[obj.Name][i] = objData
-						break
-					}
-				}
-
-				_, _ = w.Write(data)
-			} else {
-				memLogger.Info("failed to read from body", "error", err)
-			}
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
 	})
 
 	// handle a single object
-	s.mux.HandleFunc(fmt.Sprintf("/%s/{name:[a-z]+}", obj.Name), func(w http.ResponseWriter, req *http.Request) {
+	s.mux.HandleFunc(fmt.Sprintf("/%s/{name}", obj.Name), func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set(util.ContentType, util.JSON)
 		objects := s.data[obj.Name]
 		if objects != nil {
@@ -253,6 +232,23 @@ func (s *inMemoryServer) startObject(obj Object) {
 			switch method {
 			case http.MethodGet:
 				writeResponse(w, data, nil)
+			case http.MethodPut:
+				objData := map[string]interface{}{}
+				if data, err := io.ReadAll(req.Body); err == nil {
+
+					jsonErr := json.Unmarshal(data, &objData)
+					if jsonErr != nil {
+						memLogger.Info(jsonErr.Error())
+						return
+					}
+					for i, item := range s.data[obj.Name] {
+						if item["name"] == name {
+							s.data[obj.Name][i] = objData
+							break
+						}
+					}
+					_, _ = w.Write(data)
+				}
 			case http.MethodDelete:
 				for i, item := range s.data[obj.Name] {
 					if item["name"] == name {
