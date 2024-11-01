@@ -16,15 +16,9 @@ limitations under the License.
 package mock
 
 type Object struct {
-	Name      string  `yaml:"name" json:"name"`
-	InitCount *int    `yaml:"initCount" json:"initCount"`
-	Sample    string  `yaml:"sample" json:"sample"`
-	Fields    []Field `yaml:"fields" json:"fields"`
-}
-
-type Field struct {
-	Name string `yaml:"name" json:"name"`
-	Kind string `yaml:"kind" json:"kind"`
+	Name      string `yaml:"name" json:"name"`
+	InitCount *int   `yaml:"initCount" json:"initCount"`
+	Sample    string `yaml:"sample" json:"sample"`
 }
 
 type Item struct {
@@ -55,8 +49,14 @@ type Webhook struct {
 	Request Request `yaml:"request" json:"request"`
 }
 
+type Proxy struct {
+	Path   string `yaml:"path" json:"path"`
+	Target string `yaml:"target" json:"target"`
+}
+
 type Server struct {
 	Objects  []Object  `yaml:"objects" json:"objects"`
 	Items    []Item    `yaml:"items" json:"items"`
+	Proxies  []Proxy   `yaml:"proxies" json:"proxies"`
 	Webhooks []Webhook `yaml:"webhooks" json:"webhooks"`
 }

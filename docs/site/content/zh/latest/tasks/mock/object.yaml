@@ -1,0 +1,10 @@
+#!api-testing-mock
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-mock-schema.json
+objects:
+  - name: projects
+    initCount: 3
+    sample: |
+      {
+        "name": "atest",
+        "color": "{{ randEnum "blue" "read" "pink" }}"
+      }

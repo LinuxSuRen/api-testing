@@ -95,10 +95,7 @@ func TestInMemoryServer(t *testing.T) {
 	})
 
 	// delete object
-	delReq, err := http.NewRequest(http.MethodDelete, api+"/team", bytes.NewBufferString(`{
-		"name": "test",
-		"members": []
-	}`))
+	delReq, err := http.NewRequest(http.MethodDelete, api+"/team/test", nil)
 	assert.NoError(t, err)
 	resp, err = http.DefaultClient.Do(delReq)
 	assert.NoError(t, err)
@@ -111,6 +108,11 @@ func TestInMemoryServer(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, `[{"name":"someone"}]`, string(data))
 		}
+
+		resp, err = http.Get(api + "/team/test")
+		if assert.NoError(t, err) {
+			assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+		}
 	})
 
 	t.Run("invalid request method", func(t *testing.T) {
@@ -118,11 +120,11 @@ func TestInMemoryServer(t *testing.T) {
 		assert.NoError(t, err)
 		resp, err = http.DefaultClient.Do(delReq)
 		assert.NoError(t, err)
-		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
 	})
 
 	t.Run("only accept GET method in getting a single object", func(t *testing.T) {
-		wrongMethodReq, err := http.NewRequest(http.MethodPut, api+"/team/test", nil)
+		wrongMethodReq, err := http.NewRequest(http.MethodPut, api+"/team/someone", nil)
 		assert.NoError(t, err)
 		resp, err = http.DefaultClient.Do(wrongMethodReq)
 		assert.NoError(t, err)

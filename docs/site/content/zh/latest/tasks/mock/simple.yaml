@@ -1,0 +1,35 @@
+#!api-testing-mock
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-mock-schema.json
+items:
+  - name: prList
+    request:
+      path: /api/v1/repos/{repo}/prs
+    response:
+      header:
+        server: mock
+      body: |
+        {
+          "count": 1,
+          "items": [{
+            "title": "fix: there is a bug on page {{ randEnum "one" }}",
+            "number": 123,
+            "message": "{{.Response.Header.server}}",
+            "author": "someone",
+            "status": "success"
+          }]
+        }
+  - name: base64
+    request:
+      path: /api/v1/base64
+    response:
+      body: aGVsbG8=
+      encoder: base64
+  - name: baidu
+    request:
+      path: /v1/baidu
+    response:
+      body: https://baidu.com
+      encoder: url
+proxies:
+  - path: /api/v1/{part}
+    target: http://atest.localhost:8080

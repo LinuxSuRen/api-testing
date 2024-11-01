@@ -48,6 +48,7 @@ type inMemoryServer struct {
 	mux        *mux.Router
 	listener   net.Listener
 	port       int
+	prefix     string
 	wg         sync.WaitGroup
 	ctx        context.Context
 	cancelFunc context.CancelFunc
@@ -69,6 +70,7 @@ func (s *inMemoryServer) SetupHandler(reader Reader, prefix string) (handler htt
 	// init the data
 	s.data = make(map[string][]map[string]interface{})
 	s.mux = mux.NewRouter().PathPrefix(prefix).Subrouter()
+	s.prefix = prefix
 	handler = s.mux
 	err = s.Load()
 	return
@@ -100,27 +102,56 @@ func (s *inMemoryServer) Load() (err error) {
 	}
 
 	s.handleOpenAPI()
+
+	for _, proxy := range server.Proxies {
+		memLogger.Info("start to proxy", "target", proxy.Target)
+		s.mux.HandleFunc(proxy.Path, func(w http.ResponseWriter, req *http.Request) {
+			api := fmt.Sprintf("%s/%s", proxy.Target, strings.TrimPrefix(req.URL.Path, s.prefix))
+			memLogger.Info("redirect to", "target", api)
+
+			targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, req.Body)
+			if err != nil {
+				memLogger.Error(err, "failed to create proxy request")
+				return
+			}
+
+			resp, err := http.DefaultClient.Do(targetReq)
+			if err != nil {
+				memLogger.Error(err, "failed to do proxy request")
+				return
+			}
+
+			data, err := io.ReadAll(resp.Body)
+			if err != nil {
+				memLogger.Error(err, "failed to read response body")
+				return
+			}
+
+			for k, v := range resp.Header {
+				w.Header().Add(k, v[0])
+			}
+			w.Write(data)
+		})
+	}
 	return
 }
 
 func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 	var handler http.Handler
-	if handler, err = s.SetupHandler(reader, prefix); err != nil {
-		return
+	if handler, err = s.SetupHandler(reader, prefix); err == nil {
+		if s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port)); err == nil {
+			go func() {
+				err = http.Serve(s.listener, handler)
+			}()
+		}
 	}
-
-	if s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port)); err != nil {
-		return
-	}
-	go func() {
-		err = http.Serve(s.listener, handler)
-	}()
 	return
 }
 
 func (s *inMemoryServer) startObject(obj Object) {
 	// create a simple CRUD server
 	s.mux.HandleFunc("/"+obj.Name, func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("mock server received request", req.URL.Path)
 		method := req.Method
 		w.Header().Set(util.ContentType, util.JSON)
 
@@ -134,7 +165,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 				exclude := false
 
 				for k, v := range req.URL.Query() {
-					if v == nil || len(v) == 0 {
+					if len(v) == 0 {
 						continue
 					}
 
@@ -172,32 +203,6 @@ func (s *inMemoryServer) startObject(obj Object) {
 			} else {
 				memLogger.Info("failed to read from body", "error", err)
 			}
-		case http.MethodDelete:
-			// delete an item
-			if data, err := io.ReadAll(req.Body); err == nil {
-				objData := map[string]interface{}{}
-
-				jsonErr := json.Unmarshal(data, &objData)
-				if jsonErr != nil {
-					memLogger.Info(jsonErr.Error())
-					return
-				}
-
-				for i, item := range s.data[obj.Name] {
-					if objData["name"] == item["name"] {
-						if len(s.data[obj.Name]) == i+1 {
-							s.data[obj.Name] = s.data[obj.Name][:i]
-						} else {
-							s.data[obj.Name] = append(s.data[obj.Name][:i], s.data[obj.Name][i+1])
-						}
-						break
-					}
-				}
-
-				_, _ = w.Write(data)
-			} else {
-				memLogger.Info("failed to read from body", "error", err)
-			}
 		case http.MethodPut:
 			if data, err := io.ReadAll(req.Body); err == nil {
 				objData := map[string]interface{}{}
@@ -220,33 +225,52 @@ func (s *inMemoryServer) startObject(obj Object) {
 				memLogger.Info("failed to read from body", "error", err)
 			}
 		default:
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
 	})
 
-	// get a single object
+	// handle a single object
 	s.mux.HandleFunc(fmt.Sprintf("/%s/{name:[a-z]+}", obj.Name), func(w http.ResponseWriter, req *http.Request) {
-		if req.Method != http.MethodGet {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			return
-		}
-
 		w.Header().Set(util.ContentType, util.JSON)
 		objects := s.data[obj.Name]
 		if objects != nil {
 			name := mux.Vars(req)["name"]
-
+			var data []byte
 			for _, obj := range objects {
 				if obj["name"] == name {
 
-					data, err := json.Marshal(obj)
-					writeResponse(w, data, err)
-					return
+					data, _ = json.Marshal(obj)
+					break
 				}
 			}
+
+			if len(data) == 0 {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			method := req.Method
+			switch method {
+			case http.MethodGet:
+				writeResponse(w, data, nil)
+			case http.MethodDelete:
+				for i, item := range s.data[obj.Name] {
+					if item["name"] == name {
+						if len(s.data[obj.Name]) == i+1 {
+							s.data[obj.Name] = s.data[obj.Name][:i]
+						} else {
+							s.data[obj.Name] = append(s.data[obj.Name][:i], s.data[obj.Name][i+1])
+						}
+
+						writeResponse(w, []byte(`{"msg": "deleted"}`), nil)
+					}
+				}
+			default:
+				w.WriteHeader(http.StatusMethodNotAllowed)
+			}
+
 		}
 	})
-	return
 }
 
 func (s *inMemoryServer) startItem(item Item) {
