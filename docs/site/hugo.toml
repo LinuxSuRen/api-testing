@@ -258,6 +258,10 @@ enable = true
 
   # i18n for Chinese
   [[languages.zh.menu.main]]
+    name = "版本发布"
+    weight = -80
+    url = "/releases"
+  [[languages.zh.menu.main]]
     name = "贡献"
     weight = -98
     url = "/contributions"

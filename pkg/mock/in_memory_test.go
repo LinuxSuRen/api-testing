@@ -72,7 +72,7 @@ func TestInMemoryServer(t *testing.T) {
 	})
 
 	t.Run("update object", func(t *testing.T) {
-		updateReq, err := http.NewRequest(http.MethodPut, api+"/team", bytes.NewBufferString(`{
+		updateReq, err := http.NewRequest(http.MethodPut, api+"/team/test", bytes.NewBufferString(`{
 			"name": "test",
 			"members": [{
 				"name": "rick"
@@ -124,7 +124,7 @@ func TestInMemoryServer(t *testing.T) {
 	})
 
 	t.Run("only accept GET method in getting a single object", func(t *testing.T) {
-		wrongMethodReq, err := http.NewRequest(http.MethodPut, api+"/team/someone", nil)
+		wrongMethodReq, err := http.NewRequest(http.MethodPut, api+"/team", nil)
 		assert.NoError(t, err)
 		resp, err = http.DefaultClient.Do(wrongMethodReq)
 		assert.NoError(t, err)

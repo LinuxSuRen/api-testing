@@ -52,7 +52,7 @@ change-template: '* $TITLE (#$NUMBER) @$AUTHOR'
 template: |
   ## What’s Changed
 
-  [中文 ChangeLog](https://linuxsuren.github.io/api-testing/release-note-v$NEXT_PATCH_VERSION)
+  [中文 ChangeLog](https://linuxsuren.github.io/api-testing/latest/releases/release-note-v$NEXT_PATCH_VERSION)
 
   $CHANGES
 
