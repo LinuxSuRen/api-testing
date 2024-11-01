@@ -138,16 +138,13 @@ func (s *inMemoryServer) Load() (err error) {
 
 func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 	var handler http.Handler
-	if handler, err = s.SetupHandler(reader, prefix); err != nil {
-		return
+	if handler, err = s.SetupHandler(reader, prefix); err == nil {
+		if s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port)); err == nil {
+			go func() {
+				err = http.Serve(s.listener, handler)
+			}()
+		}
 	}
-
-	if s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port)); err != nil {
-		return
-	}
-	go func() {
-		err = http.Serve(s.listener, handler)
-	}()
 	return
 }
 

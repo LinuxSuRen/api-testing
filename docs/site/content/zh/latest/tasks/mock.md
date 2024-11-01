@@ -122,7 +122,7 @@ curl http://localhost:6060/mock/api/v1/base64
 
 如果你的 Body 内容可以通过另外一个 HTTP 请求（GET）获得，那么你可以这么写：
 
-```
+```yaml
 #!api-testing-mock
 # yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-mock-schema.json
 items:
@@ -133,3 +133,21 @@ items:
       body: https://baidu.com
       encoder: url
 ```
+
+在实际情况中，往往是向已有系统或平台添加新的 API，此时要 Mock 所有已经存在的 API 就既没必要也需要很多工作量。因此，我们提供了一种简单的方式，即可以增加**代理**的方式把已有的 API 请求转发到实际的地址，只对新增的 API 进行 Mock 处理。如下所示：
+
+```yaml
+#!api-testing-mock
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-mock-schema.json
+proxies:
+  - path: /api/v1/{part}
+    target: http://atest.localhost:8080
+```
+
+当我们发起如下的请求时，实际请求的地址为 `http://atest.localhost:8080/api/v1/projects`
+
+```shell
+curl http://localhost:6060/mock/api/v1/projects
+```
+
+> 更多 URL 中通配符的用法，请参考 https://github.com/gorilla/mux

@@ -31,5 +31,5 @@ items:
       body: https://baidu.com
       encoder: url
 proxies:
-  - path: /api/v1/{point}
+  - path: /api/v1/{part}
     target: http://atest.localhost:8080

@@ -10,18 +10,7 @@
         "properties": {
           "name": {"type": "string"},
           "initCount": {"type": "integer"},
-          "sample": {"type": "string"},
-          "fields": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {"type": "string"},
-                "kind": {"type": "string"}
-              },
-              "required": ["name", "kind"]
-            }
-          }
+          "sample": {"type": "string"}
         },
         "required": ["name"]
       }
@@ -64,6 +53,17 @@
           }
         },
         "required": ["name", "request", "response"]
+      }
+    },
+    "proxies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string"},
+          "target": {"type": "string"}
+        },
+        "required": ["path", "target"]
       }
     },
     "webhooks": {

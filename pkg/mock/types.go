@@ -16,15 +16,9 @@ limitations under the License.
 package mock
 
 type Object struct {
-	Name      string  `yaml:"name" json:"name"`
-	InitCount *int    `yaml:"initCount" json:"initCount"`
-	Sample    string  `yaml:"sample" json:"sample"`
-	Fields    []Field `yaml:"fields" json:"fields"`
-}
-
-type Field struct {
-	Name string `yaml:"name" json:"name"`
-	Kind string `yaml:"kind" json:"kind"`
+	Name      string `yaml:"name" json:"name"`
+	InitCount *int   `yaml:"initCount" json:"initCount"`
+	Sample    string `yaml:"sample" json:"sample"`
 }
 
 type Item struct {
