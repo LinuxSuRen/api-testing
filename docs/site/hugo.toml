@@ -1,9 +1,9 @@
-baseURL = "/"
+baseURL = "/api-testing"
 title = "API Testing"
 
 # Language settings
 contentDir = "content"
-defaultContentLanguage = "en"
+defaultContentLanguage = "zh"
 defaultContentLanguageInSubdir = false
 # Useful when translating.
 enableMissingTranslationPlaceholders = true
