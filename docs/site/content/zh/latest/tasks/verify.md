@@ -16,3 +16,30 @@ title = "测试用例验证"
       verify:
         - len(data.data)  == 6
 ```
+
+## 数组值检查
+
+```yaml
+- name: popularHeaders
+  request:
+    api: /popularHeaders
+  expect:
+    verify:
+      - any(data.data, {.key == "Content-Type"})
+```
+
+[更多用法](https://expr-lang.org/docs/language-definition#any).
+
+## 字符串判断
+
+```yaml
+- name: metrics
+  request:
+    api: |
+      {{.param.server}}/metrics
+  expect:
+    verify:
+      - indexOf(data, "atest_execution_count") != -1
+```
+
+[更多用法](https://expr-lang.org/docs/language-definition#indexOf).
