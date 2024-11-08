@@ -376,3 +376,13 @@ items:
       - indexOf(data, "atest_execution_success") != -1
       - indexOf(data, "atest_runners_count") != -1
       - indexOf(data, "http_requests_total") != -1
+
+- name: sbom
+  request:
+    api: /sbom
+  expect:
+    verify:
+      - keys(data) == ["go", "js"]
+      - len(data.go) > 0
+      - len(data.js.dependencies) > 0
+      - len(data.js.devDependencies) > 0

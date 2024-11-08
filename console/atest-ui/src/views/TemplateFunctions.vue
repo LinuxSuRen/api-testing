@@ -56,5 +56,8 @@ Magic.Keys(() => {
                 </el-table-column>
             </el-table>
         </span>
+        <div>
+            Powered by <a href="https://masterminds.github.io/sprig/" target="_blank">Sprig</a> and <a href="https://pkg.go.dev/text/template" target="_blank">built-in templates</a>.
+        </div>
     </el-dialog>
 </template>

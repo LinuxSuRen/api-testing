@@ -18,6 +18,7 @@ package util
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"io"
 	"net/http"
 )
@@ -67,4 +68,13 @@ func (c *cachedClient) RoundTrip(req *http.Request) (*http.Response, error) {
 	c.cacheData[key] = data
 
 	return resp, err
+}
+
+func WriteAsJSON(obj interface{}, w http.ResponseWriter) (n int, err error) {
+	w.Header().Set(ContentType, JSON)
+	var data []byte
+	if data, err = json.Marshal(obj); err == nil {
+		n, err = w.Write(data)
+	}
+	return
 }

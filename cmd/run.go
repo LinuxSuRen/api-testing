@@ -51,6 +51,7 @@ type runOption struct {
 	duration           time.Duration
 	requestTimeout     time.Duration
 	requestIgnoreError bool
+	caseFilter         string
 	thread             int64
 	context            context.Context
 	qps                int32
@@ -116,6 +117,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
+	flags.StringVarP(&opt.caseFilter, "case-filter", "", "", "The filter of the test case")
 	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus, http, grpc")
 	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
 	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
@@ -130,8 +132,10 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	return
 }
 
+const caseFilter = "case-filter"
+
 func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
-	o.context = cmd.Context()
+	o.context = context.WithValue(cmd.Context(), caseFilter, o.caseFilter)
 	writer := cmd.OutOrStdout()
 
 	if o.reportFile != "" && !strings.HasPrefix(o.reportFile, "http://") && !strings.HasPrefix(o.reportFile, "https://") {
@@ -345,8 +349,12 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 	suiteRunner.WithOutputWriter(os.Stdout)
 	suiteRunner.WithWriteLevel(o.level)
 	suiteRunner.WithSuite(testSuite)
-	runLogger.Info("run test suite", "name", testSuite.Name)
+	caseFilter := o.context.Value(caseFilter)
+	runLogger.Info("run test suite", "name", testSuite.Name, "filter", caseFilter)
 	for _, testCase := range testSuite.Items {
+		if caseFilter != nil && !strings.Contains(testCase.Name, caseFilter.(string)) {
+			continue
+		}
 		if !testCase.InScope(o.caseItems) {
 			continue
 		}

@@ -337,6 +337,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/swagger.json", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
+		mux.HandlePath(http.MethodGet, "/api/v1/sbom", service.SBomHandler)
 
 		postRequestProxyFunc := postRequestProxy(o.skyWalking)
 		mux.HandlePath(http.MethodPost, "/browser/{app}", postRequestProxyFunc)

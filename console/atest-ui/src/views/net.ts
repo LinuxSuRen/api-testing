@@ -767,6 +767,11 @@ function DownloadResponseFile(testcase,
         .then(callback).catch(errHandle)
 }
 
+var SBOM = (callback: (d: any) => void) => {
+  fetch(`/api/sbom`, {})
+      .then(DefaultResponseProcess)
+      .then(callback)
+}
 
 export const API = {
   DefaultResponseProcess,
@@ -780,6 +785,6 @@ export const API = {
   FunctionsQuery,
   GetSecrets, DeleteSecret, CreateOrUpdateSecret,
   GetSuggestedAPIs,
-  ReloadMockServer, GetMockConfig,
+  ReloadMockServer, GetMockConfig, SBOM,
   getToken
 }
