@@ -42,7 +42,7 @@
         "secrets": "凭据",
         "stores": "存储",
         "parameter": "参数",
-        "templateQuery": "模板函数查询",
+        "functionQuery": "函数查询",
         "output": "输出"
     },
     "tip": {

@@ -7,12 +7,13 @@ import { Magic } from './magicKeys'
 
 const { t } = useI18n()
 
+const functionKind = ref('template')
 const dialogVisible = ref(false)
 const query = ref('')
 const funcs = ref([] as Pair[])
 
 function queryFuncs() {
-    API.FunctionsQuery(query.value, (d) => {
+    API.FunctionsQuery(query.value, functionKind.value, (d) => {
         funcs.value = d.data
     })
 }
@@ -28,11 +29,19 @@ Magic.Keys(() => {
             data-intro="You can search your desired template functions.">{{ t('button.toolbox') }}</el-button>
     </el-affix>
 
-    <el-dialog v-model="dialogVisible" :title="t('title.templateQuery')" width="50%" draggable destroy-on-close>
+    <el-dialog v-model="dialogVisible" :title="t('title.functionQuery')" width="50%" draggable destroy-on-close>
         <el-input
             v-model="query" placeholder="Query after enter" v-on:keyup.enter="queryFuncs">
             <template #append v-if="funcs.length > 0">
                 {{ funcs.length }}
+            </template>
+            <template #prepend>
+                <el-select
+                    v-model="functionKind"
+                >
+                    <el-option label="Template" value="template" />
+                    <el-option label="Verify" value="verify" />
+                </el-select>
             </template>
         </el-input>
         <span class="dialog-footer">
