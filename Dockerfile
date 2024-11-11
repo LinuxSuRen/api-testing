@@ -24,6 +24,7 @@ COPY go.work go.work
 COPY go.work.sum go.work.sum
 COPY main.go main.go
 COPY console/atest-ui/ui.go console/atest-ui/ui.go
+COPY console/atest-ui/package.json console/atest-ui/package.json
 COPY README.md README.md
 COPY LICENSE LICENSE
 

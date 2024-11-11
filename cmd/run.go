@@ -135,7 +135,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 const caseFilter = "case-filter"
 
 func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
-	ctx := o.context
+	ctx := cmd.Context()
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -353,13 +353,13 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 	suiteRunner.WithOutputWriter(os.Stdout)
 	suiteRunner.WithWriteLevel(o.level)
 	suiteRunner.WithSuite(testSuite)
-	var caseFilter interface{}
+	var caseFilterObj interface{}
 	if o.context != nil {
-		caseFilter = o.context.Value(caseFilter)
+		caseFilterObj = o.context.Value(caseFilter)
 	}
 	runLogger.Info("run test suite", "name", testSuite.Name, "filter", caseFilter)
 	for _, testCase := range testSuite.Items {
-		if caseFilter != nil && !strings.Contains(testCase.Name, caseFilter.(string)) {
+		if caseFilterObj != nil && !strings.Contains(testCase.Name, caseFilterObj.(string)) {
 			continue
 		}
 		if !testCase.InScope(o.caseItems) {
