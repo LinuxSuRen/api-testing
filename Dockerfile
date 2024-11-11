@@ -10,6 +10,8 @@ FROM docker.io/golang:1.22.4 AS builder
 ARG VERSION
 ARG GOPROXY
 WORKDIR /workspace
+RUN mkdir -p console/atest-ui
+
 COPY cmd/ cmd/
 COPY pkg/ pkg/
 COPY operator/ operator/
@@ -21,6 +23,8 @@ COPY go.sum go.sum
 COPY go.work go.work
 COPY go.work.sum go.work.sum
 COPY main.go main.go
+COPY console/atest-ui/ui.go console/atest-ui/ui.go
+COPY console/atest-ui/package.json console/atest-ui/package.json
 COPY README.md README.md
 COPY LICENSE LICENSE
 

@@ -289,3 +289,8 @@ func TestFuncUsages(t *testing.T) {
 		assert.NotEmpty(t, usage)
 	}
 }
+
+func TestGetEngineVersion(t *testing.T) {
+	ver := GetEngineVersion()
+	assert.Empty(t, ver)
+}

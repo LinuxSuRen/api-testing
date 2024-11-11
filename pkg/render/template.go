@@ -26,6 +26,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/version"
 	"io"
 	mathrand "math/rand"
 	"strings"
@@ -191,6 +192,11 @@ var advancedFuncs = []AdvancedFunc{{
 // GetAdvancedFuncs returns all the advanced functions
 func GetAdvancedFuncs() []AdvancedFunc {
 	return advancedFuncs
+}
+
+func GetEngineVersion() (ver string) {
+	ver, _ = version.GetModVersion("github.com/Masterminds/sprig", "")
+	return
 }
 
 func generateJSONString(fields []string) (result string) {

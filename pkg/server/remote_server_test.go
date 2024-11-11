@@ -148,7 +148,7 @@ func TestRunTestCase(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		assert.Equal(t, sampleBody, result.Body)
-		assert.Contains(t, result.Output, "request method: GET")
+		assert.Contains(t, result.Output, "with method GET")
 		assert.Contains(t, result.Output, "request header")
 		assert.Contains(t, result.Output, "start to send request to http://foo")
 		assert.Contains(t, result.Output, "test case \"get\", status code: 200")
