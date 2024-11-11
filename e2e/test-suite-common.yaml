@@ -382,7 +382,6 @@ items:
     api: /sbom
   expect:
     verify:
-      - keys(data) == ["go", "js"]
       - len(data.go) > 0
       - len(data.js.dependencies) > 0
       - len(data.js.devDependencies) > 0

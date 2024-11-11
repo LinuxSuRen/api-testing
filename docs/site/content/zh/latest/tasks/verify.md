@@ -43,14 +43,3 @@ title = "测试用例验证"
 ```
 
 [更多用法](https://expr-lang.org/docs/language-definition#indexOf).
-
-## JSON 字段判断
-
-```yaml
-- name: sbom
-  request:
-    api: /sbom
-  expect:
-    verify:
-      - keys(data) == ["go", "js"]
-```
