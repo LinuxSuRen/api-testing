@@ -556,14 +556,14 @@ function GetSecrets(callback: (d: any) => void, errHandle?: (e: any) => void | n
     .catch(emptyOrDefault(errHandle))
 }
 
-function FunctionsQuery(filter: string,
+function FunctionsQuery(filter: string, kind: string,
   callback: (d: any) => void, errHandle?: (e: any) => (PromiseLike<void | null | undefined> | void | null | undefined) | undefined | null) {
   const requestOptions = {
     headers: {
       'X-Auth': getToken()
     }
   }
-  fetch(`/api/v1/functions?name=${filter}`, requestOptions)
+  fetch(`/api/v1/functions?name=${filter}&kind=${kind}`, requestOptions)
     .then(DefaultResponseProcess)
     .then(callback).catch(emptyOrDefault(errHandle))
 }

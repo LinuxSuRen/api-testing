@@ -47,7 +47,7 @@
         "welcome": "Welcome",
         "secrets": "Secrets",
         "stores": "Stores",
-        "templateQuery": "Template Functions Query",
+        "functionQuery": "Functions Query",
         "output": "Output"
     },
     "tip": {

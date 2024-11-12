@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/expr-lang/expr/builtin"
 	"io"
 	"mime"
 	"net/http"
@@ -1077,14 +1078,26 @@ func (s *server) FunctionsQuery(ctx context.Context, in *SimpleQuery) (reply *Pa
 	reply = &Pairs{}
 	in.Name = strings.ToLower(in.Name)
 
-	for name, fn := range render.FuncMap() {
-		lowerCaseName := strings.ToLower(name)
-		if in.Name == "" || strings.Contains(lowerCaseName, in.Name) {
-			reply.Data = append(reply.Data, &Pair{
-				Key:         name,
-				Value:       fmt.Sprintf("%v", reflect.TypeOf(fn)),
-				Description: render.FuncUsage(name),
-			})
+	if in.Kind == "verify" {
+		for _, fn := range builtin.Builtins {
+			lowerName := strings.ToLower(fn.Name)
+			if in.Name == "" || strings.Contains(lowerName, in.Name) {
+				reply.Data = append(reply.Data, &Pair{
+					Key:   fn.Name,
+					Value: fmt.Sprintf("%v", reflect.TypeOf(fn.Func)),
+				})
+			}
+		}
+	} else {
+		for name, fn := range render.FuncMap() {
+			lowerName := strings.ToLower(name)
+			if in.Name == "" || strings.Contains(lowerName, in.Name) {
+				reply.Data = append(reply.Data, &Pair{
+					Key:         name,
+					Value:       fmt.Sprintf("%v", reflect.TypeOf(fn)),
+					Description: render.FuncUsage(name),
+				})
+			}
 		}
 	}
 	return
