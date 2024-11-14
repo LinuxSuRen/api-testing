@@ -21,20 +21,27 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 )
 
-type javascriptGenerator struct {
+type robotGenerator struct {
 }
 
-func NewJavaScriptGenerator() CodeGenerator {
-	return &javascriptGenerator{}
+func NewRobotGenerator() CodeGenerator {
+	return &robotGenerator{}
 }
 
-func (g *javascriptGenerator) Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (string, error) {
-	return generate(testSuite, testcase, "javascript template", javascriptTemplate)
+func (g *robotGenerator) Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (string, error) {
+	tpl := robotTemplate
+	if testcase == nil {
+		tpl = robotSuiteTemplate
+	}
+	return generate(testSuite, testcase, "robot-framework", tpl)
 }
 
 func init() {
-	RegisterCodeGenerator("JavaScript", NewJavaScriptGenerator())
+	RegisterCodeGenerator("robot-framework", NewRobotGenerator())
 }
 
-//go:embed data/main.javascript.tpl
-var javascriptTemplate string
+//go:embed data/robot.tpl
+var robotTemplate string
+
+//go:embed data/robot-suite.tpl
+var robotSuiteTemplate string
