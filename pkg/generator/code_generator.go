@@ -15,7 +15,14 @@ limitations under the License.
 */
 package generator
 
-import "github.com/linuxsuren/api-testing/pkg/testing"
+import (
+	"bytes"
+	"fmt"
+	"net/http"
+	"text/template"
+
+	"github.com/linuxsuren/api-testing/pkg/testing"
+)
 
 // CodeGenerator is the interface of code generator
 type CodeGenerator interface {
@@ -61,6 +68,38 @@ func GetTestSuiteConverters() (result map[string]TestSuiteConverter) {
 	result = make(map[string]TestSuiteConverter, len(converters))
 	for k, v := range converters {
 		result[k] = v
+	}
+	return
+}
+
+func generate(testsuite *testing.TestSuite, testcase *testing.TestCase, templateName, templateText string) (result string, err error) {
+	if testcase != nil && testcase.Request.Method == "" {
+		testcase.Request.Method = http.MethodGet
+	}
+	if testsuite != nil && testsuite.Items != nil {
+		for i, _ := range testsuite.Items {
+			if testsuite.Items[i].Request.Method == "" {
+				testsuite.Items[i].Request.Method = http.MethodGet
+			}
+		}
+	}
+	var tpl *template.Template
+	if tpl, err = template.New(templateName).
+		Funcs(template.FuncMap{"safeString": safeString}).
+		Parse(templateText); err == nil {
+		buf := new(bytes.Buffer)
+		var ctx interface{}
+		if testcase == nil {
+			ctx = testsuite
+		} else {
+			ctx = testcase
+		}
+
+		if err = tpl.Execute(buf, ctx); err == nil {
+			result = buf.String()
+		}
+	} else {
+		fmt.Println(err)
 	}
 	return
 }

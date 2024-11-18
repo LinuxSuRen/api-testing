@@ -16,10 +16,6 @@ limitations under the License.
 package generator
 
 import (
-	"bytes"
-	"net/http"
-	"text/template"
-
 	_ "embed"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
@@ -33,17 +29,7 @@ func NewPythonGenerator() CodeGenerator {
 }
 
 func (g *pythonGenerator) Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (result string, err error) {
-	if testcase.Request.Method == "" {
-		testcase.Request.Method = http.MethodGet
-	}
-	var tpl *template.Template
-	if tpl, err = template.New("python template").Parse(pythonTemplate); err == nil {
-		buf := new(bytes.Buffer)
-		if err = tpl.Execute(buf, testcase); err == nil {
-			result = buf.String()
-		}
-	}
-	return
+	return generate(testSuite, testcase, "python template", pythonTemplate)
 }
 
 func init() {

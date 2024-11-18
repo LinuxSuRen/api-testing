@@ -3,7 +3,7 @@ set -e
 
 docker compose version
 
-targets=(golang java python javascript curl)
+targets=(golang java python javascript curl robot-framework)
 for target in "${targets[@]}"
 do
     docker compose down

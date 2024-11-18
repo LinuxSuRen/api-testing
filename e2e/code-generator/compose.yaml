@@ -26,6 +26,15 @@ services:
     command:
       - /workspace/entrypoint.sh
       - python
+  robot-framework:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - LAN_ENV=docker.io/library/python:3.8
+    command:
+      - /workspace/entrypoint.sh
+      - robot-framework
   javascript:
     build:
       context: .

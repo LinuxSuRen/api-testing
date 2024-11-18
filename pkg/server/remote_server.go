@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/expr-lang/expr/builtin"
 	"io"
 	"mime"
 	"net/http"
@@ -32,6 +31,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/expr-lang/expr/builtin"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -965,14 +966,19 @@ func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (rep
 			return
 		}
 
-		if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
+		var output string
+		var genErr error
+		if in.TestCase == "" {
+			output, genErr = instance.Generate(&suite, nil)
+		} else {
+			if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
+				result.Request.RenderAPI(suite.API)
 
-			result.Request.RenderAPI(suite.API)
-
-			output, genErr := instance.Generate(&suite, &result)
-			reply.Success = genErr == nil
-			reply.Message = util.OrErrorMessage(genErr, output)
+				output, genErr = instance.Generate(&suite, &result)
+			}
 		}
+		reply.Success = genErr == nil
+		reply.Message = util.OrErrorMessage(genErr, output)
 	}
 	return
 }

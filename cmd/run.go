@@ -51,7 +51,7 @@ type runOption struct {
 	duration           time.Duration
 	requestTimeout     time.Duration
 	requestIgnoreError bool
-	caseFilter         string
+	caseFilter         []string
 	thread             int64
 	context            context.Context
 	qps                int32
@@ -117,7 +117,7 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
 	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
 	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
-	flags.StringVarP(&opt.caseFilter, "case-filter", "", "", "The filter of the test case")
+	flags.StringArrayVarP(&opt.caseFilter, "case-filter", "", nil, "The filter of the test case")
 	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus, http, grpc")
 	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
 	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
@@ -359,8 +359,20 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 	}
 	runLogger.Info("run test suite", "name", testSuite.Name, "filter", caseFilter)
 	for _, testCase := range testSuite.Items {
-		if caseFilterObj != nil && !strings.Contains(testCase.Name, caseFilterObj.(string)) {
-			continue
+		if caseFilterObj != nil {
+			if filter, ok := caseFilterObj.([]string); ok && len(filter) > 0{
+				match := false
+				for _, ff := range filter {
+					if strings.Contains(testCase.Name, ff) {
+						match = true
+						break
+					}
+				}
+
+				if !match {
+					continue
+				}
+			}
 		}
 		if !testCase.InScope(o.caseItems) {
 			continue
