@@ -163,6 +163,32 @@ items:
           }
         }
       }
+- name: createTestCaseForBinary
+  request:
+    api: /suites/{{.param.suiteName}}/cases
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+    body: |
+      {
+        "suiteName": "{{.param.suiteName}}",
+        "data": {
+          "name": "binary",
+          "request": {
+            "api": "{{.param.server}}/get",
+            "method": "GET"
+          }
+        }
+      }
+- name: runBinaryCase
+  request:
+    api: /suites/{{.param.suiteName}}/cases/binary/run
+    method: POST
+    header:
+      X-Store-Name: "{{.param.store}}"
+  expect:
+    header:
+      Content-Type: application/octet-stream
 - name: getTestCase
   request:
     api: /suites/{{.param.suiteName}}/cases/{{.param.caseName}}

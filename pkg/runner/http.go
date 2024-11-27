@@ -206,10 +206,11 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 	respType := util.GetFirstHeaderValue(resp.Header, util.ContentType)
 
+	r.withSimpleResponseRecord(resp)
 	if isNonBinaryContent(respType) {
 		var responseBodyData []byte
 		var rErr error
-		if responseBodyData, rErr = r.withResponseRecord(resp); rErr != nil {
+		if responseBodyData, rErr = r.withResponseBodyRecord(resp); rErr != nil {
 			err = errors.Join(err, rErr)
 			return
 		}
@@ -300,19 +301,23 @@ func generateRandomValue(param spec.Parameter) interface{} {
 	}
 }
 
-func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (responseBodyData []byte, err error) {
-	responseBodyData, err = io.ReadAll(resp.Body)
+func (r *simpleTestCaseRunner) withSimpleResponseRecord(resp *http.Response) {
 	r.simpleResponse = SimpleResponse{
 		StatusCode: resp.StatusCode,
 		Header:     make(map[string]string),
-		Body:       string(responseBodyData),
 	}
 
-	// add some headers for convienience
-	ammendHeaders(resp.Header, responseBodyData)
 	for key := range resp.Header {
 		r.simpleResponse.Header[key] = resp.Header.Get(key)
 	}
+}
+
+func (r *simpleTestCaseRunner) withResponseBodyRecord(resp *http.Response) (responseBodyData []byte, err error) {
+	responseBodyData, err = io.ReadAll(resp.Body)
+	r.simpleResponse.Body = string(responseBodyData)
+
+	// add some headers for convenience
+	ammendHeaders(resp.Header, responseBodyData)
 	return
 }
 
