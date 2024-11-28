@@ -47,6 +47,7 @@ type ResponseRecord interface {
 type SimpleResponse struct {
 	Header     map[string]string
 	Body       string
+	RawBody    []byte
 	StatusCode int
 }
 

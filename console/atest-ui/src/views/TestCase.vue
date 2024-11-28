@@ -1335,10 +1335,10 @@ const renameTestCase = (name: string) => {
             <Codemirror v-if="!isResponseFile" v-model="testResult.bodyText"/>
             <div v-if="isResponseFile" style="padding-top: 10px;">
             <el-row>
-              <el-col :span="8">
+              <el-col :span="10">
                 <div>Response body is too large, please download to view.</div>
               </el-col>
-              <el-col :span="4">
+              <el-col :span="2">
                 <el-button type="primary" @click="downloadResponseFile">Download</el-button>
               </el-col>
             </el-row>
