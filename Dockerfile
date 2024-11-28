@@ -55,7 +55,7 @@ COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
 # required for atest-store-git
-RUN apk add curl openssh-client bash
+RUN apk add curl openssh-client bash openssl
     
 EXPOSE 8080
 CMD ["atest", "server", "--local-storage=/var/data/api-testing/*.yaml"]
