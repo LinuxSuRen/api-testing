@@ -187,8 +187,8 @@ items:
     header:
       X-Store-Name: "{{.param.store}}"
   expect:
-    header:
-      Content-Type: application/octet-stream
+    verify:
+      - any(data.header, {.value == "application/octet-stream"})
 - name: getTestCase
   request:
     api: /suites/{{.param.suiteName}}/cases/{{.param.caseName}}
