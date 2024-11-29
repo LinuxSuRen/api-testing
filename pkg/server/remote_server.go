@@ -262,7 +262,7 @@ func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, er
 		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
 		if getter, ok := suiteRunner.(runner.ResponseRecord); ok {
 			resp := getter.GetResponseRecord()
-			resp, err = handleLargeResponseBody(resp, suite.Name, testCase.Name)
+			resp, err = runner.HandleLargeResponseBody(resp, suite.Name, testCase.Name)
 			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
 				StatusCode: int32(resp.StatusCode),
 				Body:       resp.Body,
@@ -343,32 +343,6 @@ func (s *server) BatchRun(srv Runner_BatchRunServer) (err error) {
 			}
 		}
 	}
-	return
-}
-
-func handleLargeResponseBody(resp runner.SimpleResponse, suite string, caseName string) (reply runner.SimpleResponse, err error) {
-	const maxSize = 5120
-	prefix := "isFilePath-" + strings.Join([]string{suite, caseName}, "-")
-
-	if len(resp.Body) > maxSize {
-		remoteServerLogger.Logger.Info("response body is too large, will be saved to file", "size", len(resp.Body))
-		tmpFile, err := os.CreateTemp("", prefix+"-")
-		defer tmpFile.Close()
-		if err != nil {
-			return resp, fmt.Errorf("failed to create file: %w", err)
-		}
-
-		if _, err = tmpFile.Write([]byte(resp.Body)); err != nil {
-			return resp, fmt.Errorf("failed to write response body to file: %w", err)
-		}
-		absFilePath, err := filepath.Abs(tmpFile.Name())
-		if err != nil {
-			return resp, fmt.Errorf("failed to get absolute file path: %w", err)
-		}
-		resp.Body = filepath.Base(absFilePath)
-		return resp, nil
-	}
-	return resp, nil
 }
 
 func (s *server) DownloadResponseFile(ctx context.Context, in *TestCase) (reply *FileData, err error) {

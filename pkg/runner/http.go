@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -206,10 +208,11 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 	respType := util.GetFirstHeaderValue(resp.Header, util.ContentType)
 
+	r.withSimpleResponseRecord(resp)
 	if isNonBinaryContent(respType) {
 		var responseBodyData []byte
 		var rErr error
-		if responseBodyData, rErr = r.withResponseRecord(resp); rErr != nil {
+		if responseBodyData, rErr = r.withResponseBodyRecord(resp); rErr != nil {
 			err = errors.Join(err, rErr)
 			return
 		}
@@ -224,11 +227,47 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 
 		err = errors.Join(err, jsonSchemaValidation(testcase.Expect.Schema, responseBodyData))
 	} else {
+		switch respType {
+		case util.OctetStream, util.Image:
+			var data []byte
+			if data, err = io.ReadAll(resp.Body); err == nil {
+				r.simpleResponse.RawBody = data
+				r.simpleResponse, err = HandleLargeResponseBody(r.simpleResponse, testcase.Group, testcase.Name)
+			}
+		}
 		r.log.Debug("skip to read the body due to it is not struct content: %q\n", respType)
 	}
 
 	r.cookies = append(r.cookies, resp.Cookies()...)
 	return
+}
+
+func HandleLargeResponseBody(resp SimpleResponse, suite string, caseName string) (SimpleResponse, error) {
+	const maxSize = 5120
+	prefix := "isFilePath-" + strings.Join([]string{suite, caseName}, "-")
+	if len(resp.Body) > 0 {
+		resp.RawBody = []byte(resp.Body)
+	}
+
+	if len(resp.RawBody) > maxSize {
+		fmt.Println("response body is too large, will be saved to file", "size", len(resp.RawBody))
+		tmpFile, err := os.CreateTemp("", prefix+"-")
+		defer tmpFile.Close()
+		if err != nil {
+			return resp, fmt.Errorf("failed to create file: %w", err)
+		}
+
+		if _, err = tmpFile.Write(resp.RawBody); err != nil {
+			return resp, fmt.Errorf("failed to write response body to file: %w", err)
+		}
+		absFilePath, err := filepath.Abs(tmpFile.Name())
+		if err != nil {
+			return resp, fmt.Errorf("failed to get absolute file path: %w", err)
+		}
+		resp.Body = filepath.Base(absFilePath)
+		return resp, nil
+	}
+	return resp, nil
 }
 
 func ammendHeaders(headers http.Header, body []byte) {
@@ -300,19 +339,23 @@ func generateRandomValue(param spec.Parameter) interface{} {
 	}
 }
 
-func (r *simpleTestCaseRunner) withResponseRecord(resp *http.Response) (responseBodyData []byte, err error) {
-	responseBodyData, err = io.ReadAll(resp.Body)
+func (r *simpleTestCaseRunner) withSimpleResponseRecord(resp *http.Response) {
 	r.simpleResponse = SimpleResponse{
 		StatusCode: resp.StatusCode,
 		Header:     make(map[string]string),
-		Body:       string(responseBodyData),
 	}
 
-	// add some headers for convienience
-	ammendHeaders(resp.Header, responseBodyData)
 	for key := range resp.Header {
 		r.simpleResponse.Header[key] = resp.Header.Get(key)
 	}
+}
+
+func (r *simpleTestCaseRunner) withResponseBodyRecord(resp *http.Response) (responseBodyData []byte, err error) {
+	responseBodyData, err = io.ReadAll(resp.Body)
+	r.simpleResponse.Body = string(responseBodyData)
+
+	// add some headers for convenience
+	ammendHeaders(resp.Header, responseBodyData)
 	return
 }
 

@@ -36,7 +36,7 @@ COPY --from=ui /workspace/dist/assets/*.css cmd/data/index.css
 RUN CGO_ENABLED=0 go build -v -a -ldflags "-w -s -X github.com/linuxsuren/api-testing/pkg/version.version=${VERSION}\
     -X github.com/linuxsuren/api-testing/pkg/version.date=$(date +%Y-%m-%d)" -o atest .
 
-FROM docker.io/library/ubuntu:23.10
+FROM docker.io/library/alpine:3.20.3
 
 LABEL "com.github.actions.name"="API testing"
 LABEL "com.github.actions.description"="API testing"
@@ -54,10 +54,8 @@ COPY --from=builder /workspace/atest /usr/local/bin/atest
 COPY --from=builder /workspace/LICENSE /LICENSE
 COPY --from=builder /workspace/README.md /README.md
 
-RUN apt update -y && \
-    # required for atest-store-git
-    apt install -y --no-install-recommends ssh-client ca-certificates curl && \
-    rm -rf /var/lib/apt/lists/*
-
+# required for atest-store-git
+RUN apk add curl openssh-client bash openssl
+    
 EXPOSE 8080
 CMD ["atest", "server", "--local-storage=/var/data/api-testing/*.yaml"]

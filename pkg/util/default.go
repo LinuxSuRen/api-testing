@@ -78,6 +78,7 @@ const (
 	YAML               = "application/yaml"
 	ZIP                = "application/zip"
 	OctetStream        = "application/octet-stream"
+	Image              = "image/jpeg"
 	Plain              = "text/plain"
 	Authorization      = "Authorization"
 )
