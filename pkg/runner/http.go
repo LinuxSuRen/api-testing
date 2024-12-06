@@ -245,18 +245,18 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 func HandleLargeResponseBody(resp SimpleResponse, suite string, caseName string) (SimpleResponse, error) {
 	const maxSize = 5120
 	prefix := "isFilePath-" + strings.Join([]string{suite, caseName}, "-")
-	if len(resp.Body) > 0 {
+	if len(resp.RawBody) == 0 && len(resp.Body) > 0 {
 		resp.RawBody = []byte(resp.Body)
 	}
 
 	if len(resp.RawBody) > maxSize {
-		fmt.Println("response body is too large, will be saved to file", "size", len(resp.RawBody))
 		tmpFile, err := os.CreateTemp("", prefix+"-")
 		defer tmpFile.Close()
 		if err != nil {
 			return resp, fmt.Errorf("failed to create file: %w", err)
 		}
 
+		fmt.Println("response body is too large, will be saved to file", "size", len(resp.RawBody), "path", tmpFile.Name())
 		if _, err = tmpFile.Write(resp.RawBody); err != nil {
 			return resp, fmt.Errorf("failed to write response body to file: %w", err)
 		}
@@ -265,6 +265,9 @@ func HandleLargeResponseBody(resp SimpleResponse, suite string, caseName string)
 			return resp, fmt.Errorf("failed to get absolute file path: %w", err)
 		}
 		resp.Body = filepath.Base(absFilePath)
+
+		// save the original filename into a new file
+		_ = os.WriteFile(absFilePath+"name", []byte(resp.getFileName()), 0644)
 		return resp, nil
 	}
 	return resp, nil

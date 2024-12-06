@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/linuxsuren/api-testing/pkg/testing"
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
@@ -49,6 +50,15 @@ type SimpleResponse struct {
 	Body       string
 	RawBody    []byte
 	StatusCode int
+}
+
+func (s SimpleResponse) getFileName() string {
+	for k, v := range s.Header {
+		if k == "Content-Disposition" {
+			return strings.TrimSuffix(strings.TrimPrefix(v, `attachment; filename="`), `"`)
+		}
+	}
+	return ""
 }
 
 // NewDefaultUnimplementedRunner initializes an unimplementedRunner using the default values.
