@@ -375,6 +375,16 @@ function determineBodyType(e: TestCase) {
   });
 }
 
+function base64ToBinary(base64: string): Uint8Array {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+}
+
 const isResponseFile = ref(false)
 function downloadResponseFile(){
   API.DownloadResponseFile({
@@ -382,12 +392,17 @@ function downloadResponseFile(){
     }, (e) => {
       if (e && e.data) {
         try {
-        const bytes = atob(e.data);
+        const bytes = base64ToBinary(e.data);
         const blob = new Blob([bytes], { type: 'mimeType' });
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
-        link.download = e.filename.substring("isFilePath-".length);
+        if (e.filename.indexOf('isFilePath-') === -1) {
+            link.download = e.filename;
+        } else {
+            link.download = e.filename.substring("isFilePath-".length);
+        }
 
+        console.log(e.filename);
         document.body.appendChild(link);
         link.click();
 

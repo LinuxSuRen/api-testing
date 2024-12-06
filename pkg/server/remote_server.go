@@ -17,72 +17,72 @@ limitations under the License.
 package server
 
 import (
-	"bytes"
-	"context"
-	"errors"
-	"fmt"
-	"io"
-	"mime"
-	"net/http"
-	"os"
-	"path/filepath"
-	reflect "reflect"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
+    "bytes"
+    "context"
+    "errors"
+    "fmt"
+    "io"
+    "mime"
+    "net/http"
+    "os"
+    "path/filepath"
+    reflect "reflect"
+    "regexp"
+    "strconv"
+    "strings"
+    "time"
 
-	"github.com/expr-lang/expr/builtin"
+    "github.com/expr-lang/expr/builtin"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+    "github.com/prometheus/client_golang/prometheus"
+    "github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/linuxsuren/api-testing/pkg/util/home"
+    "github.com/linuxsuren/api-testing/pkg/util/home"
 
-	"github.com/linuxsuren/api-testing/pkg/mock"
+    "github.com/linuxsuren/api-testing/pkg/mock"
 
-	_ "embed"
+    _ "embed"
 
-	"github.com/linuxsuren/api-testing/pkg/generator"
-	"github.com/linuxsuren/api-testing/pkg/logging"
-	"github.com/linuxsuren/api-testing/pkg/oauth"
-	"github.com/linuxsuren/api-testing/pkg/render"
-	"github.com/linuxsuren/api-testing/pkg/runner"
-	"github.com/linuxsuren/api-testing/pkg/testing"
-	"github.com/linuxsuren/api-testing/pkg/util"
-	"github.com/linuxsuren/api-testing/pkg/version"
-	"github.com/linuxsuren/api-testing/sample"
+    "github.com/linuxsuren/api-testing/pkg/generator"
+    "github.com/linuxsuren/api-testing/pkg/logging"
+    "github.com/linuxsuren/api-testing/pkg/oauth"
+    "github.com/linuxsuren/api-testing/pkg/render"
+    "github.com/linuxsuren/api-testing/pkg/runner"
+    "github.com/linuxsuren/api-testing/pkg/testing"
+    "github.com/linuxsuren/api-testing/pkg/util"
+    "github.com/linuxsuren/api-testing/pkg/version"
+    "github.com/linuxsuren/api-testing/sample"
 
-	"google.golang.org/grpc/metadata"
-	"gopkg.in/yaml.v3"
+    "google.golang.org/grpc/metadata"
+    "gopkg.in/yaml.v3"
 )
 
 var (
-	remoteServerLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("remote_server")
-	GrpcMaxRecvMsgSize int
+    remoteServerLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("remote_server")
+    GrpcMaxRecvMsgSize int
 )
 
 type server struct {
-	UnimplementedRunnerServer
-	loader             testing.Writer
-	storeWriterFactory testing.StoreWriterFactory
-	configDir          string
-	storeExtMgr        ExtManager
+    UnimplementedRunnerServer
+    loader             testing.Writer
+    storeWriterFactory testing.StoreWriterFactory
+    configDir          string
+    storeExtMgr        ExtManager
 
-	secretServer SecretServiceServer
+    secretServer SecretServiceServer
 
-	grpcMaxRecvMsgSize int
+    grpcMaxRecvMsgSize int
 }
 
 type SecretServiceServer interface {
-	GetSecrets(context.Context, *Empty) (*Secrets, error)
-	CreateSecret(context.Context, *Secret) (*CommonResult, error)
-	DeleteSecret(context.Context, *Secret) (*CommonResult, error)
-	UpdateSecret(context.Context, *Secret) (*CommonResult, error)
+    GetSecrets(context.Context, *Empty) (*Secrets, error)
+    CreateSecret(context.Context, *Secret) (*CommonResult, error)
+    DeleteSecret(context.Context, *Secret) (*CommonResult, error)
+    UpdateSecret(context.Context, *Secret) (*CommonResult, error)
 }
 
 type SecertServiceGetable interface {
-	GetSecret(context.Context, *Secret) (*Secret, error)
+    GetSecret(context.Context, *Secret) (*Secret, error)
 }
 
 type fakeSecretServer struct{}
@@ -90,1297 +90,1305 @@ type fakeSecretServer struct{}
 var errNoSecretService = errors.New("no secret service found")
 
 func (f *fakeSecretServer) GetSecrets(ctx context.Context, in *Empty) (reply *Secrets, err error) {
-	err = errNoSecretService
-	return
+    err = errNoSecretService
+    return
 }
 
 func (f *fakeSecretServer) CreateSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
-	err = errNoSecretService
-	return
+    err = errNoSecretService
+    return
 }
 
 func (f *fakeSecretServer) DeleteSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
-	err = errNoSecretService
-	return
+    err = errNoSecretService
+    return
 }
 
 func (f *fakeSecretServer) UpdateSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
-	err = errNoSecretService
-	return
+    err = errNoSecretService
+    return
 }
 
 // NewRemoteServer creates a remote server instance
 func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, secretServer SecretServiceServer, storeExtMgr ExtManager, configDir string, grpcMaxRecvMsgSize int) RunnerServer {
-	if secretServer == nil {
-		secretServer = &fakeSecretServer{}
-	}
-	GrpcMaxRecvMsgSize = grpcMaxRecvMsgSize
-	return &server{
-		loader:             loader,
-		storeWriterFactory: storeWriterFactory,
-		configDir:          configDir,
-		secretServer:       secretServer,
-		storeExtMgr:        storeExtMgr,
-		grpcMaxRecvMsgSize: grpcMaxRecvMsgSize,
-	}
+    if secretServer == nil {
+        secretServer = &fakeSecretServer{}
+    }
+    GrpcMaxRecvMsgSize = grpcMaxRecvMsgSize
+    return &server{
+        loader:             loader,
+        storeWriterFactory: storeWriterFactory,
+        configDir:          configDir,
+        secretServer:       secretServer,
+        storeExtMgr:        storeExtMgr,
+        grpcMaxRecvMsgSize: grpcMaxRecvMsgSize,
+    }
 }
 
 func withDefaultValue(old, defVal any) any {
-	if old == "" || old == nil {
-		old = defVal
-	}
-	return old
+    if old == "" || old == nil {
+        old = defVal
+    }
+    return old
 }
 
 func parseSuiteWithItems(data []byte) (suite *testing.TestSuite, err error) {
-	suite, err = testing.ParseFromData(data)
-	if err == nil && (suite == nil || suite.Items == nil) {
-		err = errNoTestSuiteFound
-	}
-	return
+    suite, err = testing.ParseFromData(data)
+    if err == nil && (suite == nil || suite.Items == nil) {
+        err = errNoTestSuiteFound
+    }
+    return
 }
 
 func (s *server) getSuiteFromTestTask(task *TestTask) (suite *testing.TestSuite, err error) {
-	switch task.Kind {
-	case "suite":
-		suite, err = parseSuiteWithItems([]byte(task.Data))
-	case "testcase":
-		var testCase *testing.TestCase
-		if testCase, err = testing.ParseTestCaseFromData([]byte(task.Data)); err != nil {
-			return
-		}
-		suite = &testing.TestSuite{
-			Items: []testing.TestCase{*testCase},
-		}
-	case "testcaseInSuite":
-		suite, err = parseSuiteWithItems([]byte(task.Data))
-		if err != nil {
-			return
-		}
+    switch task.Kind {
+    case "suite":
+        suite, err = parseSuiteWithItems([]byte(task.Data))
+    case "testcase":
+        var testCase *testing.TestCase
+        if testCase, err = testing.ParseTestCaseFromData([]byte(task.Data)); err != nil {
+            return
+        }
+        suite = &testing.TestSuite{
+            Items: []testing.TestCase{*testCase},
+        }
+    case "testcaseInSuite":
+        suite, err = parseSuiteWithItems([]byte(task.Data))
+        if err != nil {
+            return
+        }
 
-		var targetTestcase *testing.TestCase
-		for _, item := range suite.Items {
-			if item.Name == task.CaseName {
-				targetTestcase = &item
-				break
-			}
-		}
+        var targetTestcase *testing.TestCase
+        for _, item := range suite.Items {
+            if item.Name == task.CaseName {
+                targetTestcase = &item
+                break
+            }
+        }
 
-		if targetTestcase != nil {
-			parentCases := findParentTestCases(targetTestcase, suite)
-			remoteServerLogger.Info("find parent cases", "num", len(parentCases))
-			suite.Items = append(parentCases, *targetTestcase)
-		} else {
-			err = fmt.Errorf("cannot found testcase %s", task.CaseName)
-		}
-	default:
-		err = fmt.Errorf("not support '%s'", task.Kind)
-	}
-	return
+        if targetTestcase != nil {
+            parentCases := findParentTestCases(targetTestcase, suite)
+            remoteServerLogger.Info("find parent cases", "num", len(parentCases))
+            suite.Items = append(parentCases, *targetTestcase)
+        } else {
+            err = fmt.Errorf("cannot found testcase %s", task.CaseName)
+        }
+    default:
+        err = fmt.Errorf("not support '%s'", task.Kind)
+    }
+    return
 }
 
 func resetEnv(oldEnv map[string]string) {
-	for key, val := range oldEnv {
-		os.Setenv(key, val)
-	}
+    for key, val := range oldEnv {
+        os.Setenv(key, val)
+    }
 }
 
 func (s *server) getLoader(ctx context.Context) (loader testing.Writer) {
-	var ok bool
-	loader = s.loader
+    var ok bool
+    loader = s.loader
 
-	var mdd metadata.MD
-	if mdd, ok = metadata.FromIncomingContext(ctx); ok {
-		storeNameMeta := mdd.Get(HeaderKeyStoreName)
-		if len(storeNameMeta) > 0 {
-			storeName := strings.TrimSpace(storeNameMeta[0])
-			if storeName == "local" || storeName == "" {
-				return
-			}
+    var mdd metadata.MD
+    if mdd, ok = metadata.FromIncomingContext(ctx); ok {
+        storeNameMeta := mdd.Get(HeaderKeyStoreName)
+        if len(storeNameMeta) > 0 {
+            storeName := strings.TrimSpace(storeNameMeta[0])
+            if storeName == "local" || storeName == "" {
+                return
+            }
 
-			var err error
-			if loader, err = s.getLoaderByStoreName(storeName); err != nil {
-				remoteServerLogger.Info("failed to get loader", "name", storeName, "error", err)
-				loader = testing.NewNonWriter()
-			}
-		}
-	}
-	return
+            var err error
+            if loader, err = s.getLoaderByStoreName(storeName); err != nil {
+                remoteServerLogger.Info("failed to get loader", "name", storeName, "error", err)
+                loader = testing.NewNonWriter()
+            }
+        }
+    }
+    return
 }
 
 // Run start to run the test task
 func (s *server) Run(ctx context.Context, task *TestTask) (reply *TestResult, err error) {
-	task.Level = withDefaultValue(task.Level, "info").(string)
-	task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
+    task.Level = withDefaultValue(task.Level, "info").(string)
+    task.Env = withDefaultValue(task.Env, map[string]string{}).(map[string]string)
 
-	var suite *testing.TestSuite
-	// TODO may not safe in multiple threads
-	oldEnv := map[string]string{}
-	for key, val := range task.Env {
-		oldEnv[key] = os.Getenv(key)
-		os.Setenv(key, val)
-	}
+    var suite *testing.TestSuite
+    // TODO may not safe in multiple threads
+    oldEnv := map[string]string{}
+    for key, val := range task.Env {
+        oldEnv[key] = os.Getenv(key)
+        os.Setenv(key, val)
+    }
 
-	defer func() {
-		resetEnv(oldEnv)
-	}()
+    defer func() {
+        resetEnv(oldEnv)
+    }()
 
-	if suite, err = s.getSuiteFromTestTask(task); err != nil {
-		return
-	}
+    if suite, err = s.getSuiteFromTestTask(task); err != nil {
+        return
+    }
 
-	remoteServerLogger.Info("prepare to run", "name", suite.Name, " with level: ", task.Level)
-	remoteServerLogger.Info("task kind to run", "kind", task.Kind, "lens", len(suite.Items))
-	dataContext := map[string]interface{}{}
+    remoteServerLogger.Info("prepare to run", "name", suite.Name, " with level: ", task.Level)
+    remoteServerLogger.Info("task kind to run", "kind", task.Kind, "lens", len(suite.Items))
+    dataContext := map[string]interface{}{}
 
-	if err = suite.Render(dataContext); err != nil {
-		reply.Error = err.Error()
-		err = nil
-		return
-	}
-	// inject the parameters from input
-	if len(task.Parameters) > 0 {
-		dataContext[testing.ContextKeyGlobalParam] = pairToMap(task.Parameters)
-	}
+    if err = suite.Render(dataContext); err != nil {
+        reply.Error = err.Error()
+        err = nil
+        return
+    }
+    // inject the parameters from input
+    if len(task.Parameters) > 0 {
+        dataContext[testing.ContextKeyGlobalParam] = pairToMap(task.Parameters)
+    }
 
-	buf := new(bytes.Buffer)
-	reply = &TestResult{}
+    buf := new(bytes.Buffer)
+    reply = &TestResult{}
 
-	for _, testCase := range suite.Items {
-		suiteRunner := runner.GetTestSuiteRunner(suite)
-		suiteRunner.WithOutputWriter(buf)
-		suiteRunner.WithWriteLevel(task.Level)
-		suiteRunner.WithSecure(suite.Spec.Secure)
+    for _, testCase := range suite.Items {
+        suiteRunner := runner.GetTestSuiteRunner(suite)
+        suiteRunner.WithOutputWriter(buf)
+        suiteRunner.WithWriteLevel(task.Level)
+        suiteRunner.WithSecure(suite.Spec.Secure)
 
-		// reuse the API prefix
-		testCase.Request.RenderAPI(suite.API)
-		historyHeader := make(map[string]string)
-		for k, v := range testCase.Request.Header {
-			historyHeader[k] = v
-		}
+        // reuse the API prefix
+        testCase.Request.RenderAPI(suite.API)
+        historyHeader := make(map[string]string)
+        for k, v := range testCase.Request.Header {
+            historyHeader[k] = v
+        }
 
-		output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
-		if getter, ok := suiteRunner.(runner.ResponseRecord); ok {
-			resp := getter.GetResponseRecord()
-			resp, err = runner.HandleLargeResponseBody(resp, suite.Name, testCase.Name)
-			reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
-				StatusCode: int32(resp.StatusCode),
-				Body:       resp.Body,
-				Header:     mapToPair(resp.Header),
-				Id:         testCase.ID,
-				Output:     buf.String(),
-			})
-		}
+        output, testErr := suiteRunner.RunTestCase(&testCase, dataContext, ctx)
+        if getter, ok := suiteRunner.(runner.ResponseRecord); ok {
+            resp := getter.GetResponseRecord()
+            //resp, err = runner.HandleLargeResponseBody(resp, suite.Name, testCase.Name)
+            reply.TestCaseResult = append(reply.TestCaseResult, &TestCaseResult{
+                StatusCode: int32(resp.StatusCode),
+                Body:       resp.Body,
+                Header:     mapToPair(resp.Header),
+                Id:         testCase.ID,
+                Output:     buf.String(),
+            })
+        }
 
-		if testErr == nil {
-			dataContext[testCase.Name] = output
-		} else {
-			reply.Error = testErr.Error()
-			break
-		}
-		// create history record
-		go func(historyHeader map[string]string) {
-			loader := s.getLoader(ctx)
-			defer loader.Close()
-			for _, testCaseResult := range reply.TestCaseResult {
-				err = loader.CreateHistoryTestCase(ToNormalTestCaseResult(testCaseResult), suite, historyHeader)
-				if err != nil {
-					remoteServerLogger.Info("error create history")
-				}
-			}
-		}(historyHeader)
-	}
+        if testErr == nil {
+            dataContext[testCase.Name] = output
+        } else {
+            reply.Error = testErr.Error()
+            break
+        }
+        // create history record
+        go func(historyHeader map[string]string) {
+            loader := s.getLoader(ctx)
+            defer loader.Close()
+            for _, testCaseResult := range reply.TestCaseResult {
+                err = loader.CreateHistoryTestCase(ToNormalTestCaseResult(testCaseResult), suite, historyHeader)
+                if err != nil {
+                    remoteServerLogger.Info("error create history")
+                }
+            }
+        }(historyHeader)
+    }
 
-	if reply.Error != "" {
-		fmt.Fprintln(buf, reply.Error)
-	}
-	reply.Message = buf.String()
-	return
+    if reply.Error != "" {
+        fmt.Fprintln(buf, reply.Error)
+    }
+    reply.Message = buf.String()
+    return
 }
 
 func (s *server) BatchRun(srv Runner_BatchRunServer) (err error) {
-	ctx := srv.Context()
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-			var in *BatchTestTask
-			in, err = srv.Recv()
-			if err != nil {
-				if err == io.EOF {
-					return nil
-				}
-				return err
-			}
+    ctx := srv.Context()
+    for {
+        select {
+        case <-ctx.Done():
+            return ctx.Err()
+        default:
+            var in *BatchTestTask
+            in, err = srv.Recv()
+            if err != nil {
+                if err == io.EOF {
+                    return nil
+                }
+                return err
+            }
 
-			for i := 0; i < int(in.Count); i++ {
-				var reply *TestCaseResult
-				if reply, err = s.RunTestCase(ctx, &TestCaseIdentity{
-					Suite:    in.SuiteName,
-					Testcase: in.CaseName,
-				}); err != nil {
-					return
-				}
+            for i := 0; i < int(in.Count); i++ {
+                var reply *TestCaseResult
+                if reply, err = s.RunTestCase(ctx, &TestCaseIdentity{
+                    Suite:    in.SuiteName,
+                    Testcase: in.CaseName,
+                }); err != nil {
+                    return
+                }
 
-				if err = srv.Send(&TestResult{
-					TestCaseResult: []*TestCaseResult{reply},
-					Error:          reply.Error,
-				}); err != nil {
-					return err
-				}
+                if err = srv.Send(&TestResult{
+                    TestCaseResult: []*TestCaseResult{reply},
+                    Error:          reply.Error,
+                }); err != nil {
+                    return err
+                }
 
-				var interval string
-				if interval, err = render.Render("batch run interval", in.Interval, nil); err != nil {
-					return
-				}
+                var interval string
+                if interval, err = render.Render("batch run interval", in.Interval, nil); err != nil {
+                    return
+                }
 
-				var duration time.Duration
-				if duration, err = time.ParseDuration(interval); err != nil {
-					return
-				}
-				time.Sleep(duration)
-			}
-		}
-	}
+                var duration time.Duration
+                if duration, err = time.ParseDuration(interval); err != nil {
+                    return
+                }
+                time.Sleep(duration)
+            }
+        }
+    }
 }
 
 func (s *server) DownloadResponseFile(ctx context.Context, in *TestCase) (reply *FileData, err error) {
-	if in.Response != nil {
-		tempFileName := in.Response.Body
-		if tempFileName == "" {
-			return nil, errors.New("file name is empty")
-		}
+    if in.Response != nil {
+        tempFileName := in.Response.Body
+        if tempFileName == "" {
+            return nil, errors.New("file name is empty")
+        }
 
-		tempDir := os.TempDir()
-		filePath := filepath.Join(tempDir, tempFileName)
-		if filepath.Clean(filePath) != filepath.Join(tempDir, filepath.Base(tempFileName)) {
-			return nil, errors.New("invalid file path")
-		}
+        tempDir := os.TempDir()
+        filePath := filepath.Join(tempDir, tempFileName)
+        if filepath.Clean(filePath) != filepath.Join(tempDir, filepath.Base(tempFileName)) {
+            return nil, errors.New("invalid file path")
+        }
 
-		fileContent, err := os.ReadFile(filePath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read file: %s", filePath)
-		}
+        fmt.Println("get file from", filePath)
+        fileContent, err := os.ReadFile(filePath)
+        if err != nil {
+            return nil, fmt.Errorf("failed to read file: %s", filePath)
+        }
 
-		mimeType := mime.TypeByExtension(filepath.Ext(filePath))
-		if mimeType == "" {
-			mimeType = "application/octet-stream"
-		}
+        mimeType := mime.TypeByExtension(filepath.Ext(filePath))
+        if mimeType == "" {
+            mimeType = "application/octet-stream"
+        }
 
-		reply = &FileData{
-			Data:        fileContent,
-			ContentType: mimeType,
-			Filename:    filepath.Base(filePath),
-		}
+        filename := filepath.Base(filePath)
+        // try to get the original filename
+        var originalFileName []byte
+        if originalFileName, err = os.ReadFile(filePath + "name"); err == nil && len(originalFileName) > 0 {
+            filename = string(originalFileName)
+        }
 
-		return reply, nil
-	} else {
-		return reply, errors.New("response is empty")
-	}
+        reply = &FileData{
+            Data:        fileContent,
+            ContentType: mimeType,
+            Filename:    filename,
+        }
+
+        return reply, nil
+    } else {
+        return reply, errors.New("response is empty")
+    }
 }
 
 func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
-	ctx := srv.Context()
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-			var in *TestSuiteIdentity
-			in, err = srv.Recv()
-			if err != nil {
-				if err == io.EOF {
-					return nil
-				}
-				return err
-			}
+    ctx := srv.Context()
+    for {
+        select {
+        case <-ctx.Done():
+            return ctx.Err()
+        default:
+            var in *TestSuiteIdentity
+            in, err = srv.Recv()
+            if err != nil {
+                if err == io.EOF {
+                    return nil
+                }
+                return err
+            }
 
-			var suite *Suite
-			if suite, err = s.ListTestCase(ctx, in); err != nil {
-				return
-			}
+            var suite *Suite
+            if suite, err = s.ListTestCase(ctx, in); err != nil {
+                return
+            }
 
-			for _, item := range suite.Items {
-				var reply *TestCaseResult
-				if reply, err = s.RunTestCase(ctx, &TestCaseIdentity{
-					Suite:    in.Name,
-					Testcase: item.Name,
-				}); err != nil {
-					return
-				}
+            for _, item := range suite.Items {
+                var reply *TestCaseResult
+                if reply, err = s.RunTestCase(ctx, &TestCaseIdentity{
+                    Suite:    in.Name,
+                    Testcase: item.Name,
+                }); err != nil {
+                    return
+                }
 
-				if err = srv.Send(&TestResult{
-					TestCaseResult: []*TestCaseResult{reply},
-					Error:          reply.Error,
-				}); err != nil {
-					return err
-				}
-			}
-		}
-	}
+                if err = srv.Send(&TestResult{
+                    TestCaseResult: []*TestCaseResult{reply},
+                    Error:          reply.Error,
+                }); err != nil {
+                    return err
+                }
+            }
+        }
+    }
 }
 
 // GetVersion returns the version
 func (s *server) GetVersion(ctx context.Context, in *Empty) (reply *Version, err error) {
-	reply = &Version{
-		Version: version.GetVersion(),
-		Date:    version.GetDate(),
-		Commit:  version.GetCommit(),
-	}
-	return
+    reply = &Version{
+        Version: version.GetVersion(),
+        Date:    version.GetDate(),
+        Commit:  version.GetCommit(),
+    }
+    return
 }
 
 func (s *server) GetSuites(ctx context.Context, in *Empty) (reply *Suites, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	reply = &Suites{
-		Data: make(map[string]*Items),
-	}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    reply = &Suites{
+        Data: make(map[string]*Items),
+    }
 
-	var suites []testing.TestSuite
-	if suites, err = loader.ListTestSuite(); err == nil && suites != nil {
-		for _, suite := range suites {
-			items := &Items{}
-			for _, item := range suite.Items {
-				items.Data = append(items.Data, item.Name)
-			}
-			items.Kind = suite.Spec.Kind
-			reply.Data[suite.Name] = items
-		}
-	}
+    var suites []testing.TestSuite
+    if suites, err = loader.ListTestSuite(); err == nil && suites != nil {
+        for _, suite := range suites {
+            items := &Items{}
+            for _, item := range suite.Items {
+                items.Data = append(items.Data, item.Name)
+            }
+            items.Kind = suite.Spec.Kind
+            reply.Data[suite.Name] = items
+        }
+    }
 
-	return
+    return
 }
 
 func (s *server) GetHistorySuites(ctx context.Context, in *Empty) (reply *HistorySuites, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	reply = &HistorySuites{
-		Data: make(map[string]*HistoryItems),
-	}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    reply = &HistorySuites{
+        Data: make(map[string]*HistoryItems),
+    }
 
-	var suites []testing.HistoryTestSuite
-	if suites, err = loader.ListHistoryTestSuite(); err == nil && suites != nil {
-		for _, suite := range suites {
-			items := &HistoryItems{}
-			for _, item := range suite.Items {
-				data := &HistoryCaseIdentity{
-					ID:               item.ID,
-					HistorySuiteName: item.HistorySuiteName,
-					Kind:             item.SuiteSpec.Kind,
-					Suite:            item.SuiteName,
-					Testcase:         item.CaseName,
-				}
-				items.Data = append(items.Data, data)
-			}
-			reply.Data[suite.HistorySuiteName] = items
-		}
-	}
-	return
+    var suites []testing.HistoryTestSuite
+    if suites, err = loader.ListHistoryTestSuite(); err == nil && suites != nil {
+        for _, suite := range suites {
+            items := &HistoryItems{}
+            for _, item := range suite.Items {
+                data := &HistoryCaseIdentity{
+                    ID:               item.ID,
+                    HistorySuiteName: item.HistorySuiteName,
+                    Kind:             item.SuiteSpec.Kind,
+                    Suite:            item.SuiteName,
+                    Testcase:         item.CaseName,
+                }
+                items.Data = append(items.Data, data)
+            }
+            reply.Data[suite.HistorySuiteName] = items
+        }
+    }
+    return
 }
 
 func (s *server) CreateTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	if loader == nil {
-		reply.Error = "no loader found"
-	} else {
-		if err = loader.CreateSuite(in.Name, in.Api); err == nil {
-			toUpdate := testing.TestSuite{
-				Name: in.Name,
-				API:  in.Api,
-				Spec: testing.APISpec{
-					Kind: in.Kind,
-				},
-			}
+    reply = &HelloReply{}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    if loader == nil {
+        reply.Error = "no loader found"
+    } else {
+        if err = loader.CreateSuite(in.Name, in.Api); err == nil {
+            toUpdate := testing.TestSuite{
+                Name: in.Name,
+                API:  in.Api,
+                Spec: testing.APISpec{
+                    Kind: in.Kind,
+                },
+            }
 
-			switch strings.ToLower(in.Kind) {
-			case "grpc", "trpc":
-				toUpdate.Spec.RPC = &testing.RPCDesc{}
-			}
+            switch strings.ToLower(in.Kind) {
+            case "grpc", "trpc":
+                toUpdate.Spec.RPC = &testing.RPCDesc{}
+            }
 
-			err = loader.UpdateSuite(toUpdate)
-		}
-	}
-	return
+            err = loader.UpdateSuite(toUpdate)
+        }
+    }
+    return
 }
 
 func (s *server) ImportTestSuite(ctx context.Context, in *TestSuiteSource) (result *CommonResult, err error) {
-	result = &CommonResult{}
-	var dataImporter generator.Importer
-	switch in.Kind {
-	case "postman":
-		dataImporter = generator.NewPostmanImporter()
-	case "native", "":
-		dataImporter = generator.NewNativeImporter()
-	default:
-		result.Success = false
-		result.Message = fmt.Sprintf("not support kind: %s", in.Kind)
-		return
-	}
+    result = &CommonResult{}
+    var dataImporter generator.Importer
+    switch in.Kind {
+    case "postman":
+        dataImporter = generator.NewPostmanImporter()
+    case "native", "":
+        dataImporter = generator.NewNativeImporter()
+    default:
+        result.Success = false
+        result.Message = fmt.Sprintf("not support kind: %s", in.Kind)
+        return
+    }
 
-	remoteServerLogger.Logger.Info("import test suite", "kind", in.Kind, "url", in.Url)
-	var suite *testing.TestSuite
-	if in.Url != "" {
-		suite, err = dataImporter.ConvertFromURL(in.Url)
-	} else if in.Data != "" {
-		suite, err = dataImporter.Convert([]byte(in.Data))
-	} else {
-		err = errors.New("url or data is required")
-	}
+    remoteServerLogger.Logger.Info("import test suite", "kind", in.Kind, "url", in.Url)
+    var suite *testing.TestSuite
+    if in.Url != "" {
+        suite, err = dataImporter.ConvertFromURL(in.Url)
+    } else if in.Data != "" {
+        suite, err = dataImporter.Convert([]byte(in.Data))
+    } else {
+        err = errors.New("url or data is required")
+    }
 
-	if err != nil {
-		result.Success = false
-		result.Message = err.Error()
-		return
-	}
+    if err != nil {
+        result.Success = false
+        result.Message = err.Error()
+        return
+    }
 
-	loader := s.getLoader(ctx)
-	defer loader.Close()
+    loader := s.getLoader(ctx)
+    defer loader.Close()
 
-	if err = loader.CreateSuite(suite.Name, suite.API); err != nil {
-		return
-	}
+    if err = loader.CreateSuite(suite.Name, suite.API); err != nil {
+        return
+    }
 
-	for _, item := range suite.Items {
-		if err = loader.CreateTestCase(suite.Name, item); err != nil {
-			break
-		}
-	}
-	result.Success = true
-	return
+    for _, item := range suite.Items {
+        if err = loader.CreateTestCase(suite.Name, item); err != nil {
+            break
+        }
+    }
+    result.Success = true
+    return
 }
 
 func (s *server) GetTestSuite(ctx context.Context, in *TestSuiteIdentity) (result *TestSuite, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	var suite *testing.TestSuite
-	if suite, _, err = loader.GetSuite(in.Name); err == nil && suite != nil {
-		result = ToGRPCSuite(suite)
-	}
-	return
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    var suite *testing.TestSuite
+    if suite, _, err = loader.GetSuite(in.Name); err == nil && suite != nil {
+        result = ToGRPCSuite(suite)
+    }
+    return
 }
 
 func (s *server) UpdateTestSuite(ctx context.Context, in *TestSuite) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	err = loader.UpdateSuite(*ToNormalSuite(in))
-	return
+    reply = &HelloReply{}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    err = loader.UpdateSuite(*ToNormalSuite(in))
+    return
 }
 
 func (s *server) DeleteTestSuite(ctx context.Context, in *TestSuiteIdentity) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	err = loader.DeleteSuite(in.Name)
-	return
+    reply = &HelloReply{}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    err = loader.DeleteSuite(in.Name)
+    return
 }
 
 func (s *server) DuplicateTestSuite(ctx context.Context, in *TestSuiteDuplicate) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	loader := s.getLoader(ctx)
-	defer loader.Close()
+    reply = &HelloReply{}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
 
-	if in.SourceSuiteName == in.TargetSuiteName {
-		reply.Error = "source and target suite name should be different"
-		return
-	}
+    if in.SourceSuiteName == in.TargetSuiteName {
+        reply.Error = "source and target suite name should be different"
+        return
+    }
 
-	var suite testing.TestSuite
-	if suite, err = loader.GetTestSuite(in.SourceSuiteName, true); err == nil {
-		suite.Name = in.TargetSuiteName
-		if err = loader.CreateSuite(suite.Name, suite.API); err == nil {
-			for _, testCase := range suite.Items {
-				if err = loader.CreateTestCase(suite.Name, testCase); err != nil {
-					break
-				}
-			}
-		}
-	}
-	return
+    var suite testing.TestSuite
+    if suite, err = loader.GetTestSuite(in.SourceSuiteName, true); err == nil {
+        suite.Name = in.TargetSuiteName
+        if err = loader.CreateSuite(suite.Name, suite.API); err == nil {
+            for _, testCase := range suite.Items {
+                if err = loader.CreateTestCase(suite.Name, testCase); err != nil {
+                    break
+                }
+            }
+        }
+    }
+    return
 }
 
 func (s *server) RenameTestSuite(ctx context.Context, in *TestSuiteDuplicate) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	err = loader.RenameTestSuite(in.SourceSuiteName, in.TargetSuiteName)
-	return
+    reply = &HelloReply{}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    err = loader.RenameTestSuite(in.SourceSuiteName, in.TargetSuiteName)
+    return
 }
 
 func (s *server) ListTestCase(ctx context.Context, in *TestSuiteIdentity) (result *Suite, err error) {
-	var items []testing.TestCase
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	if items, err = loader.ListTestCase(in.Name); err == nil {
-		result = &Suite{}
-		for _, item := range items {
-			result.Items = append(result.Items, ToGRPCTestCase(item))
-		}
-	}
-	return
+    var items []testing.TestCase
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    if items, err = loader.ListTestCase(in.Name); err == nil {
+        result = &Suite{}
+        for _, item := range items {
+            result.Items = append(result.Items, ToGRPCTestCase(item))
+        }
+    }
+    return
 }
 
 func (s *server) GetTestSuiteYaml(ctx context.Context, in *TestSuiteIdentity) (reply *YamlData, err error) {
-	var data []byte
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	if data, err = loader.GetTestSuiteYaml(in.Name); err == nil {
-		reply = &YamlData{
-			Data: data,
-		}
-	}
-	return
+    var data []byte
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    if data, err = loader.GetTestSuiteYaml(in.Name); err == nil {
+        reply = &YamlData{
+            Data: data,
+        }
+    }
+    return
 }
 
 func (s *server) GetTestCase(ctx context.Context, in *TestCaseIdentity) (reply *TestCase, err error) {
-	var result testing.TestCase
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	if result, err = loader.GetTestCase(in.Suite, in.Testcase); err == nil {
-		reply = ToGRPCTestCase(result)
+    var result testing.TestCase
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    if result, err = loader.GetTestCase(in.Suite, in.Testcase); err == nil {
+        reply = ToGRPCTestCase(result)
 
-		var suite testing.TestSuite
-		if suite, err = loader.GetTestSuite(in.Suite, false); err == nil {
-			reply.Server = suite.API
-		}
-	}
-	return
+        var suite testing.TestSuite
+        if suite, err = loader.GetTestSuite(in.Suite, false); err == nil {
+            reply.Server = suite.API
+        }
+    }
+    return
 }
 
 func (s *server) GetHistoryTestCaseWithResult(ctx context.Context, in *HistoryTestCase) (reply *HistoryTestResult, err error) {
-	var result testing.HistoryTestResult
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	if result, err = loader.GetHistoryTestCaseWithResult(in.ID); err == nil {
-		reply = ToGRPCHistoryTestCaseResult(result)
-	}
-	return
+    var result testing.HistoryTestResult
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    if result, err = loader.GetHistoryTestCaseWithResult(in.ID); err == nil {
+        reply = ToGRPCHistoryTestCaseResult(result)
+    }
+    return
 }
 
 func (s *server) GetHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HistoryTestCase, err error) {
-	var result testing.HistoryTestCase
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	if result, err = loader.GetHistoryTestCase(in.ID); err == nil {
-		reply = ConvertToGRPCHistoryTestCase(result)
-	}
-	return
+    var result testing.HistoryTestCase
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    if result, err = loader.GetHistoryTestCase(in.ID); err == nil {
+        reply = ConvertToGRPCHistoryTestCase(result)
+    }
+    return
 }
 
 var ExecutionCountNum = promauto.NewCounter(prometheus.CounterOpts{
-	Name: "atest_execution_count",
-	Help: "The total number of request execution",
+    Name: "atest_execution_count",
+    Help: "The total number of request execution",
 })
 var ExecutionSuccessNum = promauto.NewCounter(prometheus.CounterOpts{
-	Name: "atest_execution_success",
-	Help: "The total number of request execution success",
+    Name: "atest_execution_success",
+    Help: "The total number of request execution success",
 })
 var ExecutionFailNum = promauto.NewCounter(prometheus.CounterOpts{
-	Name: "atest_execution_fail",
-	Help: "The total number of request execution fail",
+    Name: "atest_execution_fail",
+    Help: "The total number of request execution fail",
 })
 
 func (s *server) GetTestCaseAllHistory(ctx context.Context, in *TestCase) (result *HistoryTestCases, err error) {
-	var items []testing.HistoryTestCase
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	if items, err = loader.GetTestCaseAllHistory(in.SuiteName, in.Name); err == nil {
-		result = &HistoryTestCases{}
-		for _, item := range items {
-			result.Data = append(result.Data, ConvertToGRPCHistoryTestCase(item))
-		}
-	}
-	return
+    var items []testing.HistoryTestCase
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    if items, err = loader.GetTestCaseAllHistory(in.SuiteName, in.Name); err == nil {
+        result = &HistoryTestCases{}
+        for _, item := range items {
+            result.Data = append(result.Data, ConvertToGRPCHistoryTestCase(item))
+        }
+    }
+    return
 }
 
 func (s *server) RunTestCase(ctx context.Context, in *TestCaseIdentity) (result *TestCaseResult, err error) {
-	var targetTestSuite testing.TestSuite
-	ExecutionCountNum.Inc()
-	defer func() {
-		if result.Error == "" {
-			ExecutionSuccessNum.Inc()
-		} else {
-			ExecutionFailNum.Inc()
-		}
-	}()
+    var targetTestSuite testing.TestSuite
+    ExecutionCountNum.Inc()
+    defer func() {
+        if result.Error == "" {
+            ExecutionSuccessNum.Inc()
+        } else {
+            ExecutionFailNum.Inc()
+        }
+    }()
 
-	result = &TestCaseResult{}
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	targetTestSuite, err = loader.GetTestSuite(in.Suite, true)
-	if err != nil || targetTestSuite.Name == "" {
-		err = nil
-		result.Error = fmt.Sprintf("not found suite: %s", in.Suite)
-		return
-	}
+    result = &TestCaseResult{}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    targetTestSuite, err = loader.GetTestSuite(in.Suite, true)
+    if err != nil || targetTestSuite.Name == "" {
+        err = nil
+        result.Error = fmt.Sprintf("not found suite: %s", in.Suite)
+        return
+    }
 
-	var data []byte
-	if data, err = yaml.Marshal(targetTestSuite); err == nil {
-		task := &TestTask{
-			Kind:       "testcaseInSuite",
-			Data:       string(data),
-			CaseName:   in.Testcase,
-			Level:      "debug",
-			Parameters: in.Parameters,
-		}
+    var data []byte
+    if data, err = yaml.Marshal(targetTestSuite); err == nil {
+        task := &TestTask{
+            Kind:       "testcaseInSuite",
+            Data:       string(data),
+            CaseName:   in.Testcase,
+            Level:      "debug",
+            Parameters: in.Parameters,
+        }
 
-		var reply *TestResult
-		var lastItem *TestCaseResult
-		if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
-			lastIndex := len(reply.TestCaseResult) - 1
-			lastItem = reply.TestCaseResult[lastIndex]
+        var reply *TestResult
+        var lastItem *TestCaseResult
+        if reply, err = s.Run(ctx, task); err == nil && len(reply.TestCaseResult) > 0 {
+            lastIndex := len(reply.TestCaseResult) - 1
+            lastItem = reply.TestCaseResult[lastIndex]
 
-			if len(lastItem.Body) > GrpcMaxRecvMsgSize {
-				e := "the HTTP response body exceeded the maximum message size limit received by the gRPC client"
-				result = &TestCaseResult{
-					Output:     reply.Message,
-					Error:      e,
-					Body:       "",
-					Header:     lastItem.Header,
-					StatusCode: http.StatusOK,
-				}
-				return
-			}
+            if len(lastItem.Body) > GrpcMaxRecvMsgSize {
+                e := "the HTTP response body exceeded the maximum message size limit received by the gRPC client"
+                result = &TestCaseResult{
+                    Output:     reply.Message,
+                    Error:      e,
+                    Body:       "",
+                    Header:     lastItem.Header,
+                    StatusCode: http.StatusOK,
+                }
+                return
+            }
 
-			result = &TestCaseResult{
-				Output:     reply.Message,
-				Error:      reply.Error,
-				Body:       lastItem.Body,
-				Header:     lastItem.Header,
-				StatusCode: lastItem.StatusCode,
-			}
-		} else if err != nil {
-			result.Error = err.Error()
-		} else {
-			result = &TestCaseResult{
-				Output: reply.Message,
-				Error:  reply.Error,
-			}
-		}
+            result = &TestCaseResult{
+                Output:     reply.Message,
+                Error:      reply.Error,
+                Body:       lastItem.Body,
+                Header:     lastItem.Header,
+                StatusCode: lastItem.StatusCode,
+            }
+        } else if err != nil {
+            result.Error = err.Error()
+        } else {
+            result = &TestCaseResult{
+                Output: reply.Message,
+                Error:  reply.Error,
+            }
+        }
 
-		if reply != nil {
-			result.Output = reply.Message
-			result.Error = reply.Error
-		}
-		if lastItem != nil {
-			result.Body = lastItem.Body
-			result.Header = lastItem.Header
-			result.StatusCode = lastItem.StatusCode
-		}
-	}
-	return
+        if reply != nil {
+            result.Output = reply.Message
+            result.Error = reply.Error
+        }
+        if lastItem != nil {
+            result.Body = lastItem.Body
+            result.Header = lastItem.Header
+            result.StatusCode = lastItem.StatusCode
+        }
+    }
+    return
 }
 
 func mapInterToPair(data map[string]interface{}) (pairs []*Pair) {
-	pairs = make([]*Pair, 0)
-	for k, v := range data {
-		pairs = append(pairs, &Pair{
-			Key:   k,
-			Value: fmt.Sprintf("%v", v),
-		})
-	}
-	return
+    pairs = make([]*Pair, 0)
+    for k, v := range data {
+        pairs = append(pairs, &Pair{
+            Key:   k,
+            Value: fmt.Sprintf("%v", v),
+        })
+    }
+    return
 }
 
 func mapToPair(data map[string]string) (pairs []*Pair) {
-	pairs = make([]*Pair, 0)
-	for k, v := range data {
-		pairs = append(pairs, &Pair{
-			Key:   k,
-			Value: v,
-		})
-	}
-	return
+    pairs = make([]*Pair, 0)
+    for k, v := range data {
+        pairs = append(pairs, &Pair{
+            Key:   k,
+            Value: v,
+        })
+    }
+    return
 }
 
 func pairToInterMap(pairs []*Pair) (data map[string]interface{}) {
-	data = make(map[string]interface{})
-	for _, pair := range pairs {
-		if pair.Key == "" {
-			continue
-		}
-		data[pair.Key] = pair.Value
-	}
-	return
+    data = make(map[string]interface{})
+    for _, pair := range pairs {
+        if pair.Key == "" {
+            continue
+        }
+        data[pair.Key] = pair.Value
+    }
+    return
 }
 
 func pairToMap(pairs []*Pair) (data map[string]string) {
-	data = make(map[string]string)
-	for _, pair := range pairs {
-		if pair.Key == "" {
-			continue
-		}
-		data[pair.Key] = pair.Value
-	}
-	return
+    data = make(map[string]string)
+    for _, pair := range pairs {
+        if pair.Key == "" {
+            continue
+        }
+        data[pair.Key] = pair.Value
+    }
+    return
 }
 
 func convertConditionalVerify(verify []*ConditionalVerify) (result []testing.ConditionalVerify) {
-	if verify != nil {
-		result = make([]testing.ConditionalVerify, 0)
+    if verify != nil {
+        result = make([]testing.ConditionalVerify, 0)
 
-		for _, item := range verify {
-			result = append(result, testing.ConditionalVerify{
-				Condition: item.Condition,
-				Verify:    item.Verify,
-			})
-		}
-	}
-	return
+        for _, item := range verify {
+            result = append(result, testing.ConditionalVerify{
+                Condition: item.Condition,
+                Verify:    item.Verify,
+            })
+        }
+    }
+    return
 }
 
 func (s *server) CreateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	if in.Data == nil {
-		err = errors.New("data is required")
-	} else {
-		loader := s.getLoader(ctx)
-		defer loader.Close()
-		err = loader.CreateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
-	}
-	return
+    reply = &HelloReply{}
+    if in.Data == nil {
+        err = errors.New("data is required")
+    } else {
+        loader := s.getLoader(ctx)
+        defer loader.Close()
+        err = loader.CreateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
+    }
+    return
 }
 
 func (s *server) UpdateTestCase(ctx context.Context, in *TestCaseWithSuite) (reply *HelloReply, err error) {
-	reply = &HelloReply{}
-	if in.Data == nil {
-		err = errors.New("data is required")
-		return
-	}
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	err = loader.UpdateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
-	return
+    reply = &HelloReply{}
+    if in.Data == nil {
+        err = errors.New("data is required")
+        return
+    }
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    err = loader.UpdateTestCase(in.SuiteName, ToNormalTestCase(in.Data))
+    return
 }
 
 func (s *server) DeleteTestCase(ctx context.Context, in *TestCaseIdentity) (reply *HelloReply, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	reply = &HelloReply{}
-	err = loader.DeleteTestCase(in.Suite, in.Testcase)
-	return
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    reply = &HelloReply{}
+    err = loader.DeleteTestCase(in.Suite, in.Testcase)
+    return
 }
 
 func (s *server) DeleteHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HelloReply, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	reply = &HelloReply{}
-	err = loader.DeleteHistoryTestCase(in.ID)
-	return
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    reply = &HelloReply{}
+    err = loader.DeleteHistoryTestCase(in.ID)
+    return
 }
 
 func (s *server) DeleteAllHistoryTestCase(ctx context.Context, in *HistoryTestCase) (reply *HelloReply, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	reply = &HelloReply{}
-	err = loader.DeleteAllHistoryTestCase(in.SuiteName, in.CaseName)
-	return
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    reply = &HelloReply{}
+    err = loader.DeleteAllHistoryTestCase(in.SuiteName, in.CaseName)
+    return
 }
 
 func (s *server) DuplicateTestCase(ctx context.Context, in *TestCaseDuplicate) (reply *HelloReply, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	reply = &HelloReply{}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    reply = &HelloReply{}
 
-	if in.SourceCaseName == in.TargetCaseName {
-		reply.Error = "source and target case name should be different"
-		return
-	}
+    if in.SourceCaseName == in.TargetCaseName {
+        reply.Error = "source and target case name should be different"
+        return
+    }
 
-	var testcase testing.TestCase
-	if testcase, err = loader.GetTestCase(in.SourceSuiteName, in.SourceCaseName); err == nil {
-		testcase.Name = in.TargetCaseName
-		err = loader.CreateTestCase(in.TargetSuiteName, testcase)
-	}
-	return
+    var testcase testing.TestCase
+    if testcase, err = loader.GetTestCase(in.SourceSuiteName, in.SourceCaseName); err == nil {
+        testcase.Name = in.TargetCaseName
+        err = loader.CreateTestCase(in.TargetSuiteName, testcase)
+    }
+    return
 }
 
 func (s *server) RenameTestCase(ctx context.Context, in *TestCaseDuplicate) (result *HelloReply, err error) {
-	result = &HelloReply{}
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	err = loader.RenameTestCase(in.SourceSuiteName, in.SourceCaseName, in.TargetCaseName)
-	return
+    result = &HelloReply{}
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    err = loader.RenameTestCase(in.SourceSuiteName, in.SourceCaseName, in.TargetCaseName)
+    return
 }
 
 // code generator
 func (s *server) ListCodeGenerator(ctx context.Context, in *Empty) (reply *SimpleList, err error) {
-	reply = &SimpleList{}
+    reply = &SimpleList{}
 
-	generators := generator.GetCodeGenerators()
-	for name := range generators {
-		reply.Data = append(reply.Data, &Pair{
-			Key: name,
-		})
-	}
-	return
+    generators := generator.GetCodeGenerators()
+    for name := range generators {
+        reply.Data = append(reply.Data, &Pair{
+            Key: name,
+        })
+    }
+    return
 }
 
 func (s *server) GenerateCode(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
-	reply = &CommonResult{}
-	instance := generator.GetCodeGenerator(in.Generator)
-	if instance == nil {
-		reply.Success = false
-		reply.Message = fmt.Sprintf("generator '%s' not found", in.Generator)
-	} else {
-		var result testing.TestCase
-		var suite testing.TestSuite
+    reply = &CommonResult{}
+    instance := generator.GetCodeGenerator(in.Generator)
+    if instance == nil {
+        reply.Success = false
+        reply.Message = fmt.Sprintf("generator '%s' not found", in.Generator)
+    } else {
+        var result testing.TestCase
+        var suite testing.TestSuite
 
-		loader := s.getLoader(ctx)
-		if suite, err = loader.GetTestSuite(in.TestSuite, true); err != nil {
-			return
-		}
+        loader := s.getLoader(ctx)
+        if suite, err = loader.GetTestSuite(in.TestSuite, true); err != nil {
+            return
+        }
 
-		dataContext := map[string]interface{}{}
-		if err = suite.Render(dataContext); err != nil {
-			return
-		}
+        dataContext := map[string]interface{}{}
+        if err = suite.Render(dataContext); err != nil {
+            return
+        }
 
-		var output string
-		var genErr error
-		if in.TestCase == "" {
-			output, genErr = instance.Generate(&suite, nil)
-		} else {
-			if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
-				result.Request.RenderAPI(suite.API)
+        var output string
+        var genErr error
+        if in.TestCase == "" {
+            output, genErr = instance.Generate(&suite, nil)
+        } else {
+            if result, err = loader.GetTestCase(in.TestSuite, in.TestCase); err == nil {
+                result.Request.RenderAPI(suite.API)
 
-				output, genErr = instance.Generate(&suite, &result)
-			}
-		}
-		reply.Success = genErr == nil
-		reply.Message = util.OrErrorMessage(genErr, output)
-	}
-	return
+                output, genErr = instance.Generate(&suite, &result)
+            }
+        }
+        reply.Success = genErr == nil
+        reply.Message = util.OrErrorMessage(genErr, output)
+    }
+    return
 }
 
 func (s *server) HistoryGenerateCode(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
-	reply = &CommonResult{}
-	instance := generator.GetCodeGenerator(in.Generator)
-	if instance == nil {
-		reply.Success = false
-		reply.Message = fmt.Sprintf("generator '%s' not found", in.Generator)
-	} else {
-		loader := s.getLoader(ctx)
-		var result testing.HistoryTestCase
-		result, err = loader.GetHistoryTestCase(in.ID)
-		var testCase testing.TestCase
-		var suite testing.TestSuite
-		testCase = result.Data
-		suite.Name = result.SuiteName
-		suite.API = result.SuiteAPI
-		suite.Spec = result.SuiteSpec
-		suite.Param = result.SuiteParam
+    reply = &CommonResult{}
+    instance := generator.GetCodeGenerator(in.Generator)
+    if instance == nil {
+        reply.Success = false
+        reply.Message = fmt.Sprintf("generator '%s' not found", in.Generator)
+    } else {
+        loader := s.getLoader(ctx)
+        var result testing.HistoryTestCase
+        result, err = loader.GetHistoryTestCase(in.ID)
+        var testCase testing.TestCase
+        var suite testing.TestSuite
+        testCase = result.Data
+        suite.Name = result.SuiteName
+        suite.API = result.SuiteAPI
+        suite.Spec = result.SuiteSpec
+        suite.Param = result.SuiteParam
 
-		output, genErr := instance.Generate(&suite, &testCase)
-		reply.Success = genErr == nil
-		reply.Message = util.OrErrorMessage(genErr, output)
-	}
-	return
+        output, genErr := instance.Generate(&suite, &testCase)
+        reply.Success = genErr == nil
+        reply.Message = util.OrErrorMessage(genErr, output)
+    }
+    return
 }
 
 // converter
 func (s *server) ListConverter(ctx context.Context, in *Empty) (reply *SimpleList, err error) {
-	reply = &SimpleList{}
-	converters := generator.GetTestSuiteConverters()
-	for name := range converters {
-		reply.Data = append(reply.Data, &Pair{
-			Key: name,
-		})
-	}
-	return
+    reply = &SimpleList{}
+    converters := generator.GetTestSuiteConverters()
+    for name := range converters {
+        reply.Data = append(reply.Data, &Pair{
+            Key: name,
+        })
+    }
+    return
 }
 
 func (s *server) ConvertTestSuite(ctx context.Context, in *CodeGenerateRequest) (reply *CommonResult, err error) {
-	reply = &CommonResult{}
+    reply = &CommonResult{}
 
-	instance := generator.GetTestSuiteConverter(in.Generator)
-	if instance == nil {
-		reply.Success = false
-		reply.Message = fmt.Sprintf("converter '%s' not found", in.Generator)
-	} else {
-		var result testing.TestSuite
-		loader := s.getLoader(ctx)
-		defer loader.Close()
-		if result, err = loader.GetTestSuite(in.TestSuite, true); err == nil {
-			output, genErr := instance.Convert(&result)
-			reply.Success = genErr == nil
-			reply.Message = util.OrErrorMessage(genErr, output)
-		}
-	}
-	return
+    instance := generator.GetTestSuiteConverter(in.Generator)
+    if instance == nil {
+        reply.Success = false
+        reply.Message = fmt.Sprintf("converter '%s' not found", in.Generator)
+    } else {
+        var result testing.TestSuite
+        loader := s.getLoader(ctx)
+        defer loader.Close()
+        if result, err = loader.GetTestSuite(in.TestSuite, true); err == nil {
+            output, genErr := instance.Convert(&result)
+            reply.Success = genErr == nil
+            reply.Message = util.OrErrorMessage(genErr, output)
+        }
+    }
+    return
 }
 
 // Sample returns a sample of the test task
 func (s *server) Sample(ctx context.Context, in *Empty) (reply *HelloReply, err error) {
-	reply = &HelloReply{Message: sample.TestSuiteGitLab}
-	return
+    reply = &HelloReply{Message: sample.TestSuiteGitLab}
+    return
 }
 
 // PopularHeaders returns a list of popular headers
 func (s *server) PopularHeaders(ctx context.Context, in *Empty) (pairs *Pairs, err error) {
-	pairs = &Pairs{
-		Data: []*Pair{},
-	}
+    pairs = &Pairs{
+        Data: []*Pair{},
+    }
 
-	err = yaml.Unmarshal(popularHeaders, &pairs.Data)
-	return
+    err = yaml.Unmarshal(popularHeaders, &pairs.Data)
+    return
 }
 
 // GetSuggestedAPIs returns a list of suggested APIs
 func (s *server) GetSuggestedAPIs(ctx context.Context, in *TestSuiteIdentity) (reply *TestCases, err error) {
-	reply = &TestCases{}
+    reply = &TestCases{}
 
-	var suite *testing.TestSuite
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	if suite, _, err = loader.GetSuite(in.Name); err != nil || suite == nil {
-		return
-	}
+    var suite *testing.TestSuite
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    if suite, _, err = loader.GetSuite(in.Name); err != nil || suite == nil {
+        return
+    }
 
-	remoteServerLogger.Info("Finding APIs from", "name", in.Name, "with loader", reflect.TypeOf(loader))
+    remoteServerLogger.Info("Finding APIs from", "name", in.Name, "with loader", reflect.TypeOf(loader))
 
-	suiteRunner := runner.GetTestSuiteRunner(suite)
-	var result []*testing.TestCase
-	if result, err = suiteRunner.GetSuggestedAPIs(suite, in.Api); err == nil && result != nil {
-		for i := range result {
-			reply.Data = append(reply.Data, ToGRPCTestCase(*result[i]))
-		}
-	}
-	return
+    suiteRunner := runner.GetTestSuiteRunner(suite)
+    var result []*testing.TestCase
+    if result, err = suiteRunner.GetSuggestedAPIs(suite, in.Api); err == nil && result != nil {
+        for i := range result {
+            reply.Data = append(reply.Data, ToGRPCTestCase(*result[i]))
+        }
+    }
+    return
 }
 
 // FunctionsQuery returns a list of functions
 func (s *server) FunctionsQuery(ctx context.Context, in *SimpleQuery) (reply *Pairs, err error) {
-	reply = &Pairs{}
-	in.Name = strings.ToLower(in.Name)
+    reply = &Pairs{}
+    in.Name = strings.ToLower(in.Name)
 
-	if in.Kind == "verify" {
-		for _, fn := range builtin.Builtins {
-			lowerName := strings.ToLower(fn.Name)
-			if in.Name == "" || strings.Contains(lowerName, in.Name) {
-				reply.Data = append(reply.Data, &Pair{
-					Key:   fn.Name,
-					Value: fmt.Sprintf("%v", reflect.TypeOf(fn.Func)),
-				})
-			}
-		}
-	} else {
-		for name, fn := range render.FuncMap() {
-			lowerName := strings.ToLower(name)
-			if in.Name == "" || strings.Contains(lowerName, in.Name) {
-				reply.Data = append(reply.Data, &Pair{
-					Key:         name,
-					Value:       fmt.Sprintf("%v", reflect.TypeOf(fn)),
-					Description: render.FuncUsage(name),
-				})
-			}
-		}
-	}
-	return
+    if in.Kind == "verify" {
+        for _, fn := range builtin.Builtins {
+            lowerName := strings.ToLower(fn.Name)
+            if in.Name == "" || strings.Contains(lowerName, in.Name) {
+                reply.Data = append(reply.Data, &Pair{
+                    Key:   fn.Name,
+                    Value: fmt.Sprintf("%v", reflect.TypeOf(fn.Func)),
+                })
+            }
+        }
+    } else {
+        for name, fn := range render.FuncMap() {
+            lowerName := strings.ToLower(name)
+            if in.Name == "" || strings.Contains(lowerName, in.Name) {
+                reply.Data = append(reply.Data, &Pair{
+                    Key:         name,
+                    Value:       fmt.Sprintf("%v", reflect.TypeOf(fn)),
+                    Description: render.FuncUsage(name),
+                })
+            }
+        }
+    }
+    return
 }
 
 // FunctionsQueryStream works like FunctionsQuery but is implemented in bidirectional streaming
 func (s *server) FunctionsQueryStream(srv Runner_FunctionsQueryStreamServer) error {
-	ctx := srv.Context()
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-			in, err := srv.Recv()
-			if err != nil {
-				if err == io.EOF {
-					return nil
-				}
-				return err
-			}
-			reply := &Pairs{}
-			in.Name = strings.ToLower(in.Name)
+    ctx := srv.Context()
+    for {
+        select {
+        case <-ctx.Done():
+            return ctx.Err()
+        default:
+            in, err := srv.Recv()
+            if err != nil {
+                if err == io.EOF {
+                    return nil
+                }
+                return err
+            }
+            reply := &Pairs{}
+            in.Name = strings.ToLower(in.Name)
 
-			for name, fn := range render.FuncMap() {
-				lowerCaseName := strings.ToLower(name)
-				if in.Name == "" || strings.Contains(lowerCaseName, in.Name) {
-					reply.Data = append(reply.Data, &Pair{
-						Key:   name,
-						Value: fmt.Sprintf("%v", reflect.TypeOf(fn)),
-					})
-				}
-			}
-			if err := srv.Send(reply); err != nil {
-				return err
-			}
-		}
-	}
+            for name, fn := range render.FuncMap() {
+                lowerCaseName := strings.ToLower(name)
+                if in.Name == "" || strings.Contains(lowerCaseName, in.Name) {
+                    reply.Data = append(reply.Data, &Pair{
+                        Key:   name,
+                        Value: fmt.Sprintf("%v", reflect.TypeOf(fn)),
+                    })
+                }
+            }
+            if err := srv.Send(reply); err != nil {
+                return err
+            }
+        }
+    }
 }
 
 func (s *server) GetStoreKinds(context.Context, *Empty) (kinds *StoreKinds, err error) {
-	storeFactory := testing.NewStoreFactory(s.configDir)
-	var stores []testing.StoreKind
-	if stores, err = storeFactory.GetStoreKinds(); err == nil {
-		kinds = &StoreKinds{}
-		for _, store := range stores {
-			kinds.Data = append(kinds.Data, &StoreKind{
-				Name:    store.Name,
-				Enabled: store.Enabled,
-				Url:     store.URL,
-			})
-		}
-	}
-	return
+    storeFactory := testing.NewStoreFactory(s.configDir)
+    var stores []testing.StoreKind
+    if stores, err = storeFactory.GetStoreKinds(); err == nil {
+        kinds = &StoreKinds{}
+        for _, store := range stores {
+            kinds.Data = append(kinds.Data, &StoreKind{
+                Name:    store.Name,
+                Enabled: store.Enabled,
+                Url:     store.URL,
+            })
+        }
+    }
+    return
 }
 
 func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err error) {
-	user := oauth.GetUserFromContext(ctx)
-	storeFactory := testing.NewStoreFactory(s.configDir)
-	var stores []testing.Store
-	var owner string
-	if user != nil {
-		owner = user.Name
-	}
-	if stores, err = storeFactory.GetStoresByOwner(owner); err == nil {
-		reply = &Stores{
-			Data: make([]*Store, 0),
-		}
-		for _, item := range stores {
-			grpcStore := ToGRPCStore(item)
+    user := oauth.GetUserFromContext(ctx)
+    storeFactory := testing.NewStoreFactory(s.configDir)
+    var stores []testing.Store
+    var owner string
+    if user != nil {
+        owner = user.Name
+    }
+    if stores, err = storeFactory.GetStoresByOwner(owner); err == nil {
+        reply = &Stores{
+            Data: make([]*Store, 0),
+        }
+        for _, item := range stores {
+            grpcStore := ToGRPCStore(item)
 
-			storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
-			grpcStore.Ready = sErr == nil && storeStatus.Ready
-			grpcStore.ReadOnly = storeStatus.ReadOnly
-			grpcStore.Password = "******" // return a placeholder instead of the actual value for the security reason
+            storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
+            grpcStore.Ready = sErr == nil && storeStatus.Ready
+            grpcStore.ReadOnly = storeStatus.ReadOnly
+            grpcStore.Password = "******" // return a placeholder instead of the actual value for the security reason
 
-			reply.Data = append(reply.Data, grpcStore)
-		}
-		reply.Data = append(reply.Data, &Store{
-			Name:  "local",
-			Kind:  &StoreKind{},
-			Ready: true,
-		})
-	}
-	return
+            reply.Data = append(reply.Data, grpcStore)
+        }
+        reply.Data = append(reply.Data, &Store{
+            Name:  "local",
+            Kind:  &StoreKind{},
+            Ready: true,
+        })
+    }
+    return
 }
 func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err error) {
-	reply = &Store{}
-	user := oauth.GetUserFromContext(ctx)
-	if user != nil {
-		in.Owner = user.Name
-	}
+    reply = &Store{}
+    user := oauth.GetUserFromContext(ctx)
+    if user != nil {
+        in.Owner = user.Name
+    }
 
-	storeFactory := testing.NewStoreFactory(s.configDir)
-	store := ToNormalStore(in)
+    storeFactory := testing.NewStoreFactory(s.configDir)
+    store := ToNormalStore(in)
 
-	if store.Kind.URL == "" {
-		store.Kind.URL = fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(store.Kind.Name))
-	}
+    if store.Kind.URL == "" {
+        store.Kind.URL = fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(store.Kind.Name))
+    }
 
-	if err = storeFactory.CreateStore(store); err == nil && s.storeExtMgr != nil {
-		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
-	}
-	return
+    if err = storeFactory.CreateStore(store); err == nil && s.storeExtMgr != nil {
+        err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
+    }
+    return
 }
 func (s *server) UpdateStore(ctx context.Context, in *Store) (reply *Store, err error) {
-	reply = &Store{}
-	storeFactory := testing.NewStoreFactory(s.configDir)
-	store := ToNormalStore(in)
-	if err = storeFactory.UpdateStore(store); err == nil && s.storeExtMgr != nil {
-		// TODO need to restart extension if config was changed
-		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
-	}
-	return
+    reply = &Store{}
+    storeFactory := testing.NewStoreFactory(s.configDir)
+    store := ToNormalStore(in)
+    if err = storeFactory.UpdateStore(store); err == nil && s.storeExtMgr != nil {
+        // TODO need to restart extension if config was changed
+        err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
+    }
+    return
 }
 func (s *server) DeleteStore(ctx context.Context, in *Store) (reply *Store, err error) {
-	reply = &Store{}
-	storeFactory := testing.NewStoreFactory(s.configDir)
-	err = storeFactory.DeleteStore(in.Name)
-	return
+    reply = &Store{}
+    storeFactory := testing.NewStoreFactory(s.configDir)
+    err = storeFactory.DeleteStore(in.Name)
+    return
 }
 func (s *server) VerifyStore(ctx context.Context, in *SimpleQuery) (reply *ExtensionStatus, err error) {
-	reply = &ExtensionStatus{}
-	var loader testing.Writer
-	if loader, err = s.getLoaderByStoreName(in.Name); err == nil && loader != nil {
-		readOnly, verifyErr := loader.Verify()
-		reply.Ready = verifyErr == nil
-		reply.ReadOnly = readOnly
-		reply.Message = util.OKOrErrorMessage(verifyErr)
-	}
-	return
+    reply = &ExtensionStatus{}
+    var loader testing.Writer
+    if loader, err = s.getLoaderByStoreName(in.Name); err == nil && loader != nil {
+        readOnly, verifyErr := loader.Verify()
+        reply.Ready = verifyErr == nil
+        reply.ReadOnly = readOnly
+        reply.Message = util.OKOrErrorMessage(verifyErr)
+    }
+    return
 }
 
 // secret related interfaces
 func (s *server) GetSecrets(ctx context.Context, in *Empty) (reply *Secrets, err error) {
-	return s.secretServer.GetSecrets(ctx, in)
+    return s.secretServer.GetSecrets(ctx, in)
 }
 func (s *server) CreateSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
-	return s.secretServer.CreateSecret(ctx, in)
+    return s.secretServer.CreateSecret(ctx, in)
 }
 func (s *server) DeleteSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
-	return s.secretServer.DeleteSecret(ctx, in)
+    return s.secretServer.DeleteSecret(ctx, in)
 }
 func (s *server) UpdateSecret(ctx context.Context, in *Secret) (reply *CommonResult, err error) {
-	return s.secretServer.UpdateSecret(ctx, in)
+    return s.secretServer.UpdateSecret(ctx, in)
 }
 func (s *server) PProf(ctx context.Context, in *PProfRequest) (reply *PProfData, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-	reply = &PProfData{
-		Data: loader.PProf(in.Name),
-	}
-	return
+    loader := s.getLoader(ctx)
+    defer loader.Close()
+    reply = &PProfData{
+        Data: loader.PProf(in.Name),
+    }
+    return
 }
 
 // implement the mock server
 
 // Start starts the mock server
 type mockServerController struct {
-	UnimplementedMockServer
-	mockWriter  mock.ReaderAndWriter
-	loader      mock.Loadable
-	reader      mock.Reader
-	prefix      string
-	combinePort int
+    UnimplementedMockServer
+    mockWriter  mock.ReaderAndWriter
+    loader      mock.Loadable
+    reader      mock.Reader
+    prefix      string
+    combinePort int
 }
 
 func NewMockServerController(mockWriter mock.ReaderAndWriter, loader mock.Loadable, combinePort int) MockServer {
-	return &mockServerController{
-		mockWriter:  mockWriter,
-		loader:      loader,
-		prefix:      "/mock/server",
-		combinePort: combinePort,
-	}
+    return &mockServerController{
+        mockWriter:  mockWriter,
+        loader:      loader,
+        prefix:      "/mock/server",
+        combinePort: combinePort,
+    }
 }
 
 func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (reply *Empty, err error) {
-	s.mockWriter.Write([]byte(in.Config))
-	s.prefix = in.Prefix
-	if dServer, ok := s.loader.(mock.DynamicServer); ok && dServer.GetPort() != strconv.Itoa(int(in.GetPort())) {
-		if strconv.Itoa(s.combinePort) != dServer.GetPort() {
-			if stopErr := dServer.Stop(); stopErr != nil {
-				remoteServerLogger.Info("failed to stop old server", "error", stopErr)
-			} else {
-				remoteServerLogger.Info("old server stopped", "port", dServer.GetPort())
-			}
-		}
+    s.mockWriter.Write([]byte(in.Config))
+    s.prefix = in.Prefix
+    if dServer, ok := s.loader.(mock.DynamicServer); ok && dServer.GetPort() != strconv.Itoa(int(in.GetPort())) {
+        if strconv.Itoa(s.combinePort) != dServer.GetPort() {
+            if stopErr := dServer.Stop(); stopErr != nil {
+                remoteServerLogger.Info("failed to stop old server", "error", stopErr)
+            } else {
+                remoteServerLogger.Info("old server stopped", "port", dServer.GetPort())
+            }
+        }
 
-		server := mock.NewInMemoryServer(int(in.GetPort()))
-		server.Start(s.mockWriter, in.Prefix)
-		s.loader = server
-	}
-	err = s.loader.Load()
-	return
+        server := mock.NewInMemoryServer(int(in.GetPort()))
+        server.Start(s.mockWriter, in.Prefix)
+        s.loader = server
+    }
+    err = s.loader.Load()
+    return
 }
 func (s *mockServerController) GetConfig(ctx context.Context, in *Empty) (reply *MockConfig, err error) {
-	reply = &MockConfig{
-		Prefix: s.prefix,
-		Config: string(s.mockWriter.GetData()),
-	}
-	if dServer, ok := s.loader.(mock.DynamicServer); ok {
-		if port, pErr := strconv.ParseInt(dServer.GetPort(), 10, 32); pErr == nil {
-			reply.Port = int32(port)
-		}
-	}
-	return
+    reply = &MockConfig{
+        Prefix: s.prefix,
+        Config: string(s.mockWriter.GetData()),
+    }
+    if dServer, ok := s.loader.(mock.DynamicServer); ok {
+        if port, pErr := strconv.ParseInt(dServer.GetPort(), 10, 32); pErr == nil {
+            reply.Port = int32(port)
+        }
+    }
+    return
 }
 
 func (s *server) getLoaderByStoreName(storeName string) (loader testing.Writer, err error) {
-	var store *testing.Store
-	store, err = testing.NewStoreFactory(s.configDir).GetStore(storeName)
-	if err == nil && store != nil {
-		loader, err = s.storeWriterFactory.NewInstance(*store)
-		if err != nil {
-			err = fmt.Errorf("failed to new grpc loader from store %s, err: %v", store.Name, err)
-		}
-	} else {
-		err = fmt.Errorf("failed to get store %s, err: %v", storeName, err)
-	}
-	return
+    var store *testing.Store
+    store, err = testing.NewStoreFactory(s.configDir).GetStore(storeName)
+    if err == nil && store != nil {
+        loader, err = s.storeWriterFactory.NewInstance(*store)
+        if err != nil {
+            err = fmt.Errorf("failed to new grpc loader from store %s, err: %v", store.Name, err)
+        }
+    } else {
+        err = fmt.Errorf("failed to get store %s, err: %v", storeName, err)
+    }
+    return
 }
 
 //go:embed data/headers.yaml
 var popularHeaders []byte
 
 func findParentTestCases(testcase *testing.TestCase, suite *testing.TestSuite) (testcases []testing.TestCase) {
-	reg, matchErr := regexp.Compile(`(.*?\{\{.*\.\w*.*?\}\})`)
-	targetReg, targetErr := regexp.Compile(`\.\w*`)
+    reg, matchErr := regexp.Compile(`(.*?\{\{.*\.\w*.*?\}\})`)
+    targetReg, targetErr := regexp.Compile(`\.\w*`)
 
-	expectNames := new(UniqueSlice[string])
-	if matchErr == nil && targetErr == nil {
-		var expectName string
-		for _, val := range testcase.Request.Header {
-			if matched := reg.MatchString(val); matched {
-				expectName = targetReg.FindString(val)
-				expectName = strings.TrimPrefix(expectName, ".")
-				expectNames.Push(expectName)
-			}
-		}
+    expectNames := new(UniqueSlice[string])
+    if matchErr == nil && targetErr == nil {
+        var expectName string
+        for _, val := range testcase.Request.Header {
+            if matched := reg.MatchString(val); matched {
+                expectName = targetReg.FindString(val)
+                expectName = strings.TrimPrefix(expectName, ".")
+                expectNames.Push(expectName)
+            }
+        }
 
-		findExpectNames(testcase.Request.API, expectNames)
-		findExpectNames(testcase.Request.Body.String(), expectNames)
+        findExpectNames(testcase.Request.API, expectNames)
+        findExpectNames(testcase.Request.Body.String(), expectNames)
 
-		remoteServerLogger.Info("expect test case names", "name", expectNames.GetAll())
-		for _, item := range suite.Items {
-			if expectNames.Exist(item.Name) {
-				testcases = append(testcases, item)
-			}
-		}
-	}
-	return
+        remoteServerLogger.Info("expect test case names", "name", expectNames.GetAll())
+        for _, item := range suite.Items {
+            if expectNames.Exist(item.Name) {
+                testcases = append(testcases, item)
+            }
+        }
+    }
+    return
 }
 
 func findExpectNames(target string, expectNames *UniqueSlice[string]) {
-	reg, _ := regexp.Compile(`(.*?\{\{.*\.\w*.*?\}\})`)
-	targetReg, _ := regexp.Compile(`\.\w*`)
+    reg, _ := regexp.Compile(`(.*?\{\{.*\.\w*.*?\}\})`)
+    targetReg, _ := regexp.Compile(`\.\w*`)
 
-	for _, sub := range reg.FindStringSubmatch(target) {
-		// remove {{ and }}
-		if left, leftErr := regexp.Compile(`.*\{\{`); leftErr == nil {
-			body := left.ReplaceAllString(sub, "")
+    for _, sub := range reg.FindStringSubmatch(target) {
+        // remove {{ and }}
+        if left, leftErr := regexp.Compile(`.*\{\{`); leftErr == nil {
+            body := left.ReplaceAllString(sub, "")
 
-			expectName := targetReg.FindString(body)
-			expectName = strings.TrimPrefix(expectName, ".")
-			expectNames.Push(expectName)
-		}
-	}
+            expectName := targetReg.FindString(body)
+            expectName = strings.TrimPrefix(expectName, ".")
+            expectNames.Push(expectName)
+        }
+    }
 }
 
 // UniqueSlice represents an unique slice
 type UniqueSlice[T comparable] struct {
-	data []T
+    data []T
 }
 
 // Push pushes an item if it's not exist
 func (s *UniqueSlice[T]) Push(item T) *UniqueSlice[T] {
-	if s.data == nil {
-		s.data = []T{item}
-	} else {
-		for _, it := range s.data {
-			if it == item {
-				return s
-			}
-		}
-		s.data = append(s.data, item)
-	}
-	return s
+    if s.data == nil {
+        s.data = []T{item}
+    } else {
+        for _, it := range s.data {
+            if it == item {
+                return s
+            }
+        }
+        s.data = append(s.data, item)
+    }
+    return s
 }
 
 // Exist checks if the item exist, return true it exists
 func (s *UniqueSlice[T]) Exist(item T) bool {
-	if s.data != nil {
-		for _, it := range s.data {
-			if it == item {
-				return true
-			}
-		}
-	}
-	return false
+    if s.data != nil {
+        for _, it := range s.data {
+            if it == item {
+                return true
+            }
+        }
+    }
+    return false
 }
 
 // GetAll returns all the items
 func (s *UniqueSlice[T]) GetAll() []T {
-	return s.data
+    return s.data
 }
 
 var errNoTestSuiteFound = errors.New("no test suite found")

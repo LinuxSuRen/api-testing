@@ -47,3 +47,17 @@ func TestUnimplementedRunner(t *testing.T) {
 
 	runner.WithAPISuggestLimit(0)
 }
+
+func TestSimpleResponse(t *testing.T) {
+	t.Run("get fileName", func(t *testing.T) {
+		// without filename
+		assert.Empty(t, SimpleResponse{}.getFileName())
+
+		// normal case
+		assert.Equal(t, "a.txt", SimpleResponse{
+			Header: map[string]string{
+				"Content-Disposition": `attachment; filename="a.txt"`,
+			},
+		}.getFileName())
+	})
+}
