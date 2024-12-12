@@ -22,7 +22,7 @@
     "element-plus": "^2.3.7",
     "intro.js": "^7.0.1",
     "jsonlint-mod": "^1.7.6",
-    "jsonpath-plus": "^7.2.0",
+    "jsonpath-plus": "^10.0.7",
     "skywalking-client-js": "^0.10.0",
     "vue": "^3.3.4",
     "vue-codemirror": "^5.1.0",
@@ -58,7 +58,7 @@
     "start-server-and-test": "^2.0.0",
     "ts-jest": "^29.1.1",
     "typescript": "~5.0.4",
-    "vite": "^4.3.9",
+    "vite": "^4.5.5",
     "vitest": "^0.32.4",
     "vue-tsc": "^1.6.5"
   },
