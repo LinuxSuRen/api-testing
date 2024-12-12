@@ -17,7 +17,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.0
 	github.com/h2non/gock v1.2.0
-	github.com/invopop/jsonschema v0.7.0
+	github.com/invopop/jsonschema v0.12.0
 	github.com/jhump/protoreflect v1.15.3
 	github.com/linuxsuren/go-fake-runtime v0.0.4
 	github.com/linuxsuren/go-service v0.0.0-20231225060426-efabcd3a5161
@@ -44,6 +44,12 @@ require (
 require golang.org/x/mod v0.22.0
 
 require (
+	github.com/bahlo/generic-list-go v0.2.0 // indirect
+	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
+)
+
+require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -62,7 +68,6 @@ require (
 	github.com/hashicorp/go-memdb v1.3.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
-	github.com/iancoleman/orderedmap v0.3.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
