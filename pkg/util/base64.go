@@ -17,7 +17,8 @@ limitations under the License.
 package util
 
 const (
-	ImageBase64Prefix = "data:image/png;base64,"
-	PDFBase64Prefix   = "data:application/pdf;base64,"
-	ZIPBase64Prefix   = "data:application/zip;base64,"
+	ImageBase64Prefix  = "data:image/png;base64,"
+	PDFBase64Prefix    = "data:application/pdf;base64,"
+	ZIPBase64Prefix    = "data:application/zip;base64,"
+	BinaryBase64Prefix = "data:application/octet-stream;base64,"
 )

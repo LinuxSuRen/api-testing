@@ -26,11 +26,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/version"
 	"io"
 	mathrand "math/rand"
 	"strings"
 	"text/template"
+
+	"github.com/linuxsuren/api-testing/pkg/version"
 
 	"crypto/rsa"
 	"crypto/x509"
@@ -98,6 +99,7 @@ func FuncMap() template.FuncMap {
 	funcs["randImage"] = generateRandomImage
 	funcs["randPdf"] = generateRandomPdf
 	funcs["randZip"] = generateRandomZip
+	funcs["readFile"] = readFile
 	return funcs
 }
 

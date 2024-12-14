@@ -10,26 +10,19 @@ You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
+See the License for the specific language 24 permissions and
 limitations under the License.
 */
-package server
+package render
 
 import (
-	"context"
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMetadataStoreFunc(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set(HeaderKeyStoreName, "test")
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	md := MetadataStoreFunc(context.TODO(), req)
-	assert.Equal(t, "test", md.Get(HeaderKeyStoreName)[0])
+func TestReadFile(t *testing.T) {
+	data, err := readFile("data/templateUsage.yaml")
+	assert.Nil(t, err)
+	assert.Equal(t, "data:application/octet-stream;base64,cmFuZEltYWdlOiB8CiAge3sgcmFuZEltYWdlIDEwMCAxMDAgfX0KcmFuZEFzY2lpOiB8CiAge3sgcmFuZEFzY2lpIDUgfX0KcmFuZFBkZjogfAogIHt7IHJhbmRQZGYgImNvbnRlbnQiIH19CnJhbmRaaXA6IHwKICB7eyByYW5kWmlwIDUgfX0K", data)
 }

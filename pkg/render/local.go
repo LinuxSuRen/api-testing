@@ -10,26 +10,23 @@ You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
+See the License for the specific language 24 permissions and
 limitations under the License.
 */
-package server
+package render
 
 import (
-	"context"
-	"net/http"
-	"testing"
+	"encoding/base64"
+	"fmt"
+	"os"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/linuxsuren/api-testing/pkg/util"
 )
 
-func TestMetadataStoreFunc(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set(HeaderKeyStoreName, "test")
-	if !assert.NoError(t, err) {
-		return
+func readFile(filename string) (data string, err error) {
+	var rawData []byte
+	if rawData, err = os.ReadFile(filename); err == nil {
+		data = fmt.Sprintf("%s%s", util.BinaryBase64Prefix, base64.StdEncoding.EncodeToString(rawData))
 	}
-
-	md := MetadataStoreFunc(context.TODO(), req)
-	assert.Equal(t, "test", md.Get(HeaderKeyStoreName)[0])
+	return
 }
