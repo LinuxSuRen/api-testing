@@ -1068,12 +1068,12 @@ const renameTestCase = (name: string) => {
             <el-badge :is-dot="testCaseWithSuite.data.request.body !== ''" class="item">Body</el-badge>
           </template>
           <el-radio-group v-model="bodyType" @change="bodyTypeChange">
-            <el-radio :label="1">none</el-radio>
-            <el-radio :label="2">form-data</el-radio>
-            <el-radio :label="3">raw</el-radio>
-            <el-radio :label="4">x-www-form-urlencoded</el-radio>
-            <el-radio :label="5">JSON</el-radio>
-            <el-radio :label="6">EmbedFile</el-radio>
+            <el-radio :value="1">none</el-radio>
+            <el-radio :value="2">form-data</el-radio>
+            <el-radio :value="3">raw</el-radio>
+            <el-radio :value="4">x-www-form-urlencoded</el-radio>
+            <el-radio :value="5">JSON</el-radio>
+            <el-radio :value="6">EmbedFile</el-radio>
           </el-radio-group>
 
           <div style="flex-grow: 1;">
