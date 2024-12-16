@@ -43,7 +43,7 @@ const handleTreeClick = (data: Tree) => {
           data.children = []
           d.items.forEach((item: any) => {
             data.children?.push({
-              id: data.label,
+              id: item.name,
               label: item.name,
               method: item.request.method,
               kind: data.kind,

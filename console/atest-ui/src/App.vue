@@ -87,8 +87,8 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
   <el-container style="height: 100%;">
     <el-aside width="auto" style="display: flex; flex-direction: column;">
       <el-radio-group v-model="isCollapse">
-        <el-radio-button :label="false">+</el-radio-button>
-        <el-radio-button :label="true">-</el-radio-button>
+        <el-radio-button :value="false">+</el-radio-button>
+        <el-radio-button :value="true">-</el-radio-button>
       </el-radio-group>
       <el-menu
         class="el-menu-vertical"
