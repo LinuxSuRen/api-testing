@@ -84,6 +84,7 @@
         "404": "404 Not Found",
         "405": "405 Method Not Allowed",
         "409": "409 Conflict",
+        "413": "Content Too Large",
         "415": "415 Unsupported Media Type",
         "422": "422 Unprocessable Content",
         "500": "500 Internal Server Error",
