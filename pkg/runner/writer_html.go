@@ -26,7 +26,7 @@ import (
 
 type htmlResultWriter struct {
 	writer       io.Writer
-	apiConverage apispec.APIConverage
+	apiConverage apispec.APICoverage
 }
 
 // NewHTMLResultWriter creates a new htmlResultWriter
@@ -40,7 +40,7 @@ func (w *htmlResultWriter) Output(result []ReportResult) (err error) {
 }
 
 // WithAPIConverage sets the api coverage
-func (w *htmlResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
+func (w *htmlResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) ReportResultWriter {
 	w.apiConverage = apiConverage
 	return w
 }

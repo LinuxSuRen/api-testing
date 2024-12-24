@@ -60,7 +60,7 @@ func TestGithubPRCommentWriter(t *testing.T) {
 
 		err = writer.Output(nil)
 		assert.NoError(t, err)
-		assert.Nil(t, writer.WithAPIConverage(nil))
+		assert.Nil(t, writer.WithAPICoverage(nil))
 		assert.NotNil(t, writer.WithResourceUsage(nil))
 	})
 

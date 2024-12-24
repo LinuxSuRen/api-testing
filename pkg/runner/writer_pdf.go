@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package runner
 
 import (
 	_ "embed"
+	"fmt"
 	"github.com/linuxsuren/api-testing/pkg/logging"
 
-	"fmt"
 	"io"
 	"strconv"
 
@@ -44,15 +44,24 @@ func NewPDFResultWriter(writer io.Writer) ReportResultWriter {
 
 // Output writes the PDF base report to target writer
 func (w *pdfResultWriter) Output(result []ReportResult) (err error) {
-
 	pdf := gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
-	writeLogger.Info(findfont.List()[len(findfont.List())-1])
-	fontPath, err := findfont.Find("DejaVuSerif.ttf")
+
+	var fontPath string
+	fontPath, err = findfont.Find("DejaVuSerif.ttf")
 	if err != nil {
-		panic(err)
+		writeLogger.Error(err, "Failed to find 'ttf'", "path", fontPath)
+
+		if len(findfont.List()) == 0 {
+			err = fmt.Errorf("cannot find font")
+			writeLogger.Error(err, "No font found")
+			return
+		}
+
+		fontPath = findfont.List()[0]
 	}
-	fmt.Printf("Found 'ttf' in '%s'\n", fontPath)
+
+	writeLogger.Info("Found font 'ttf'", "path", fontPath)
 	err = pdf.AddTTFFont("wts11", fontPath)
 	if err != nil {
 		writeLogger.Info(err.Error())
@@ -65,7 +74,6 @@ func (w *pdfResultWriter) Output(result []ReportResult) (err error) {
 	}
 
 	pdf.AddHeader(func() {
-
 	})
 	pdf.AddFooter(func() {
 		const X_bias float64 = 101
@@ -103,16 +111,14 @@ func (w *pdfResultWriter) Output(result []ReportResult) (err error) {
 		if api.Error != 0 {
 			pdf.Image("../pkg/runner/data/imgs/warn.jpg", 30, Y_start+line_bias*6-5, nil)
 		}
-
 	}
 
-	fmt.Fprint(w.writer, "Report is OK!")
-	pdf.WritePdf("Report.pdf")
+	_, err = pdf.WriteTo(w.writer)
 	return
 }
 
 // WithAPIConverage sets the api coverage
-func (w *pdfResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
+func (w *pdfResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) ReportResultWriter {
 	return w
 }
 

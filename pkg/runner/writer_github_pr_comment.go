@@ -185,7 +185,7 @@ func (w *githubPRCommentWriter) setHeader(req *http.Request) {
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 }
 
-func (w *githubPRCommentWriter) WithAPIConverage(apiConverage apispec.APIConverage) (r ReportResultWriter) {
+func (w *githubPRCommentWriter) WithAPICoverage(apiConverage apispec.APICoverage) (r ReportResultWriter) {
 	// not have this feature
 	return
 }

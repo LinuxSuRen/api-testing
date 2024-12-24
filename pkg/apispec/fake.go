@@ -21,7 +21,7 @@ type fakeAPISpec struct {
 }
 
 // NewFakeAPISpec creates a new instance of fakeAPISpec
-func NewFakeAPISpec(apis [][]string) APIConverage {
+func NewFakeAPISpec(apis [][]string) APICoverage {
 	return &fakeAPISpec{apis: apis}
 }
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -163,6 +163,10 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	case "", "std":
 		o.reportWriter = runner.NewResultWriter(writer)
 	case "pdf":
+		if o.reportFile == "" {
+			err = fmt.Errorf("report file is required for pdf report")
+			return
+		}
 		o.reportWriter = runner.NewPDFResultWriter(writer)
 	case "prometheus":
 		if o.reportFile == "" {
@@ -189,7 +193,7 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 		var swaggerAPI apispec.SwaggerAPI
 		if o.swaggerURL != "" {
 			if swaggerAPI.Swagger, err = apispec.ParseURLToSwagger(o.swaggerURL); err == nil {
-				o.reportWriter.WithAPIConverage(&swaggerAPI)
+				o.reportWriter.WithAPICoverage(&swaggerAPI)
 			}
 		}
 	}
@@ -360,7 +364,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 	runLogger.Info("run test suite", "name", testSuite.Name, "filter", caseFilter)
 	for _, testCase := range testSuite.Items {
 		if caseFilterObj != nil {
-			if filter, ok := caseFilterObj.([]string); ok && len(filter) > 0{
+			if filter, ok := caseFilterObj.([]string); ok && len(filter) > 0 {
 				match := false
 				for _, ff := range filter {
 					if strings.Contains(testCase.Name, ff) {

@@ -141,7 +141,7 @@ func (w *httpResultWriter) Output(result []ReportResult) (err error) {
 var defaultTemplate string
 
 // WithAPIConverage sets the api coverage
-func (w *httpResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
+func (w *httpResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) ReportResultWriter {
 	return w
 }
 

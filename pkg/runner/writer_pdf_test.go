@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,48 +14,56 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package runner_test
+package runner
 
 import (
 	"bytes"
-	"testing"
-
-	_ "embed"
-
-	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/stretchr/testify/assert"
+	"io"
+	"testing"
 )
 
-func TestHTMLResultWriter(t *testing.T) {
+func TestPDF(t *testing.T) {
 	tests := []struct {
 		name    string
-		buf     *bytes.Buffer
-		results []runner.ReportResult
-		expect  string
+		buf     io.Writer
+		results []ReportResult
+		verify  func(t *testing.T)
+		hasErr  bool
 	}{{
-		name: "simple",
+		name: "normal",
 		buf:  new(bytes.Buffer),
-		results: []runner.ReportResult{{
-			API:     "/foo",
-			Max:     3,
-			Min:     3,
-			Average: 3,
-			Error:   0,
+		results: []ReportResult{{
+			Name:    "/api",
+			API:     "/api",
+			Average: 1,
+			Max:     1,
+			Min:     1,
+			QPS:     10,
 			Count:   1,
+			Error:   0,
 		}},
-		expect: htmlReportExpect,
+		verify: func(t *testing.T) {
+
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := runner.NewHTMLResultWriter(tt.buf)
-			w.WithAPICoverage(nil)
-			err := w.Output(tt.results)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expect, tt.buf.String())
-			assert.NotNil(t, w.WithResourceUsage(nil))
+			writer := NewPDFResultWriter(tt.buf)
+			if !assert.NotNil(t, writer) {
+				return
+			}
+
+			err := writer.Output(tt.results)
+			if tt.hasErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			tt.verify(t)
+			writer.WithResourceUsage(nil)
+			writer.WithAPICoverage(nil)
 		})
 	}
 }
-
-//go:embed testdata/report.html
-var htmlReportExpect string
