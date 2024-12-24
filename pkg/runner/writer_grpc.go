@@ -111,7 +111,7 @@ func getConnection(host string) (conn *grpc.ClientConn, err error) {
 }
 
 // WithAPIConverage sets the api coverage
-func (w *grpcResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
+func (w *grpcResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) ReportResultWriter {
 	return w
 }
 

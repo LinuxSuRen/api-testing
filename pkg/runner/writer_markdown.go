@@ -26,7 +26,7 @@ import (
 
 type markdownResultWriter struct {
 	writer        io.Writer
-	apiConverage  apispec.APIConverage
+	apiConverage  apispec.APICoverage
 	resourceUsage []ResourceUsage
 }
 
@@ -59,7 +59,7 @@ func (w *markdownResultWriter) Output(result []ReportResult) (err error) {
 }
 
 // WithAPIConverage sets the api coverage
-func (w *markdownResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
+func (w *markdownResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) ReportResultWriter {
 	w.apiConverage = apiConverage
 	return w
 }

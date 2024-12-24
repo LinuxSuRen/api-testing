@@ -28,7 +28,7 @@ import (
 func TestJSONResultWriter(t *testing.T) {
 	buf := new(bytes.Buffer)
 	writer := runner.NewJSONResultWriter(buf)
-	writer.WithAPIConverage(nil)
+	writer.WithAPICoverage(nil)
 
 	err := writer.Output([]runner.ReportResult{{
 		Name:    "foo",

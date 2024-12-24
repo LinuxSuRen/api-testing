@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2024 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import (
 
 type stdResultWriter struct {
 	writer       io.Writer
-	apiConverage apispec.APIConverage
+	apiConverage apispec.APICoverage
 }
 
 // NewResultWriter creates a result writer with the specific io.Writer
@@ -42,9 +42,9 @@ func NewDiscardResultWriter() ReportResultWriter {
 // Output writer the report to target writer
 func (w *stdResultWriter) Output(results []ReportResult) error {
 	var errResults []ReportResult
-	fmt.Fprintf(w.writer, "Name Average Max Min QPS Count Error\n")
+	_, _ = fmt.Fprintf(w.writer, "Name Average Max Min QPS Count Error\n")
 	for _, r := range results {
-		fmt.Fprintf(w.writer, "%s %v %v %v %d %d %d\n", r.Name, r.Average, r.Max,
+		_, _ = fmt.Fprintf(w.writer, "%s %v %v %v %d %d %d\n", r.Name, r.Average, r.Max,
 			r.Min, r.QPS, r.Count, r.Error)
 		if r.Error > 0 && r.LastErrorMessage != "" {
 			errResults = append(errResults, r)
@@ -52,15 +52,16 @@ func (w *stdResultWriter) Output(results []ReportResult) error {
 	}
 
 	for _, r := range errResults {
-		fmt.Fprintf(w.writer, "%s error: %s\n", r.API, r.LastErrorMessage)
+		_, _ = fmt.Fprintf(w.writer, "%s error: %s\n", r.API, r.LastErrorMessage)
 	}
 
+	_, _ = fmt.Fprintf(w.writer, "Test case count: %d\n", len(results))
 	apiConveragePrint(results, w.apiConverage, w.writer)
 	return nil
 }
 
 // WithAPIConverage sets the api coverage
-func (w *stdResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
+func (w *stdResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) ReportResultWriter {
 	w.apiConverage = apiConverage
 	return w
 }
@@ -69,14 +70,14 @@ func (w *stdResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter 
 	return w
 }
 
-func apiConveragePrint(result []ReportResult, apiConverage apispec.APIConverage, w io.Writer) {
+func apiConveragePrint(result []ReportResult, apiConverage apispec.APICoverage, w io.Writer) {
 	covered, total := apiConverageCount(result, apiConverage)
 	if total > 0 {
 		fmt.Fprintf(w, "\nAPI Coverage: %d/%d\n", covered, total)
 	}
 }
 
-func apiConverageCount(result []ReportResult, apiConverage apispec.APIConverage) (covered, total int) {
+func apiConverageCount(result []ReportResult, apiConverage apispec.APICoverage) (covered, total int) {
 	if apiConverage == nil {
 		return
 	}

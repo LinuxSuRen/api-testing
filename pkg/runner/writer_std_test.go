@@ -29,7 +29,7 @@ func TestNewStdResultWriter(t *testing.T) {
 	tests := []struct {
 		name         string
 		buf          *bytes.Buffer
-		apiConverage apispec.APIConverage
+		apiConverage apispec.APICoverage
 		results      []runner.ReportResult
 		expect       string
 	}{{
@@ -37,6 +37,7 @@ func TestNewStdResultWriter(t *testing.T) {
 		buf:     new(bytes.Buffer),
 		results: nil,
 		expect: `Name Average Max Min QPS Count Error
+Test case count: 0
 `,
 	}, {
 		name: "have one item",
@@ -56,6 +57,7 @@ func TestNewStdResultWriter(t *testing.T) {
 		}},
 		expect: `Name Average Max Min QPS Count Error
 /api 1ns 1ns 1ns 10 1 0
+Test case count: 1
 
 API Coverage: 1/1
 `,
@@ -76,6 +78,7 @@ API Coverage: 1/1
 		expect: `Name Average Max Min QPS Count Error
 api 1ns 1ns 1ns 10 1 1
 api error: error
+Test case count: 1
 `,
 	}, {
 		name: "have no errors but with message",
@@ -93,6 +96,7 @@ api error: error
 		}},
 		expect: `Name Average Max Min QPS Count Error
 api 1ns 1ns 1ns 10 1 0
+Test case count: 1
 `,
 	}}
 	for _, tt := range tests {
@@ -102,7 +106,7 @@ api 1ns 1ns 1ns 10 1 0
 				return
 			}
 
-			writer.WithAPIConverage(tt.apiConverage)
+			writer.WithAPICoverage(tt.apiConverage)
 			err := writer.Output(tt.results)
 			assert.Nil(t, err)
 			assert.Equal(t, tt.expect, tt.buf.String())

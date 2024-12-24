@@ -48,7 +48,7 @@ func TestMarkdownWriter(t *testing.T) {
 	t.Run("short", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		writer := runner.NewMarkdownResultWriter(buf)
-		writer.WithAPIConverage(nil)
+		writer.WithAPICoverage(nil)
 		err := writer.Output(createSlice(sample, 2))
 		assert.Nil(t, err)
 		assert.Equal(t, `There are 2 test cases, failed count 0:
@@ -62,7 +62,7 @@ func TestMarkdownWriter(t *testing.T) {
 	t.Run("long", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		writer := runner.NewMarkdownResultWriter(buf)
-		writer.WithAPIConverage(nil)
+		writer.WithAPICoverage(nil)
 		err := writer.Output(createSlice(sample, 8))
 		assert.Nil(t, err)
 		assert.Equal(t, `There are 8 test cases, failed count 0:
@@ -86,7 +86,7 @@ func TestMarkdownWriter(t *testing.T) {
 	t.Run("long, there are error cases", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		writer := runner.NewMarkdownResultWriter(buf)
-		writer.WithAPIConverage(nil)
+		writer.WithAPICoverage(nil)
 		err := writer.Output(append(createSlice(sample, 8), errSample))
 		assert.Nil(t, err)
 		assert.Equal(t, `There are 9 test cases, failed count 1:
@@ -115,7 +115,7 @@ func TestMarkdownWriter(t *testing.T) {
 	t.Run("with resource usage", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		writer := runner.NewMarkdownResultWriter(buf)
-		writer.WithAPIConverage(nil)
+		writer.WithAPICoverage(nil)
 		writer.WithResourceUsage([]runner.ResourceUsage{{
 			CPU:    1,
 			Memory: 1,
@@ -137,7 +137,7 @@ Resource usage:
 	t.Run("have error message", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		writer := runner.NewMarkdownResultWriter(buf)
-		writer.WithAPIConverage(nil)
+		writer.WithAPICoverage(nil)
 		result := sample
 		result.LastErrorMessage = "error happend"
 		err := writer.Output(createSlice(result, 2))
@@ -159,7 +159,7 @@ Resource usage:
 	t.Run("with api converage", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		writer := runner.NewMarkdownResultWriter(buf)
-		writer.WithAPIConverage(apispec.NewFakeAPISpec([][]string{{
+		writer.WithAPICoverage(apispec.NewFakeAPISpec([][]string{{
 			"api", "GET",
 		}}))
 		err := writer.Output(createSlice(sample, 2))

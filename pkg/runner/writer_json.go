@@ -44,7 +44,7 @@ func (w *jsonResultWriter) Output(result []ReportResult) (err error) {
 }
 
 // WithAPIConverage sets the api coverage
-func (w *jsonResultWriter) WithAPIConverage(apiConverage apispec.APIConverage) ReportResultWriter {
+func (w *jsonResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) ReportResultWriter {
 	return w
 }
 
