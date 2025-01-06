@@ -19,6 +19,20 @@ title = "测试用例验证"
 
 ## 数组值检查
 
+### 检查数组中是否有元素的字段包含特定值
+
+示例数据：
+
+```json
+{
+  "data": [{
+    "key": "Content-Type"
+  }]
+}
+```
+
+校验配置：
+
 ```yaml
 - name: popularHeaders
   request:
@@ -26,6 +40,19 @@ title = "测试用例验证"
   expect:
     verify:
       - any(data.data, {.key == "Content-Type"})
+```
+
+### 检查数组中是否有元素的字段只包含特定值
+
+校验配置：
+
+```yaml
+- name: popularHeaders
+  request:
+    api: /popularHeaders
+  expect:
+    verify:
+      - all(data.data, {.key == "Content-Type" or .key == "Target"})
 ```
 
 [更多用法](https://expr-lang.org/docs/language-definition#any).
