@@ -94,7 +94,7 @@ docker run -p 1234:8080 -v /var/tmp:/var/tmp \
 
 ## Template
 
-The following fields are templated with [sprig](http://masterminds.github.io/sprig/):
+The following fields are templated with [sprig](https://masterminds.github.io/sprig/):
 
 * API
 * Request Body
@@ -102,7 +102,7 @@ The following fields are templated with [sprig](http://masterminds.github.io/spr
 
 ### Functions
 
-You could use all the common functions which comes from [sprig](http://masterminds.github.io/sprig/). Besides some specific functions are available:
+You could use all the common functions which comes from [sprig](https://masterminds.github.io/sprig/). Besides some specific functions are available:
 
 | Name | Usage |
 |---|---|
