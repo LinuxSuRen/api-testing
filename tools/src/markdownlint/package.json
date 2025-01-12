@@ -1,0 +1,5 @@
+{
+    "dependencies": {
+        "markdownlint": "^0.37.3"
+    }
+}

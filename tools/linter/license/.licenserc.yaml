@@ -1,0 +1,26 @@
+header:
+  license:
+    spdx-id: Apache License
+    copyright-owner: API Testing Authors
+
+  paths:
+    - "**"
+
+  paths-ignore:
+    - "dist"
+    - "licenses"
+    - "**/*.md"
+    - "LICENSE"
+    - "NOTICE"
+
+  comment: on-failure
+
+  language:
+    Go:
+      extensions:
+        - ".go"
+      comment_style_id: SlashAsterisk
+
+  dependency:
+    files:
+      - ../../../go.mod
