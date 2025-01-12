@@ -1,4 +1,5 @@
-name: Hugo Docs
+name: File Lint Check
+
 on:
   push:
     branches:
