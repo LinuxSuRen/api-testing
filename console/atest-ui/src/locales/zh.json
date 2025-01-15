@@ -65,6 +65,12 @@
         "storageLocation": "保存位置",
         "suiteKind": "类型",
         "key": "键",
-        "value": "值"
+        "value": "值",
+        "proxy": "代理"
+    },
+    "proxy": {
+        "http": "HTTP 代理",
+        "https": "HTTPS 代理",
+        "no": "无需代理"
     }
 }

@@ -33,6 +33,11 @@ const suite = ref({
       protofile: '',
       serverReflection: false
     }
+  },
+  proxy: {
+    http: '',
+    https: '',
+    no: ''
   }
 } as Suite)
 const shareLink = ref('')
@@ -49,6 +54,13 @@ function load() {
           key: '',
           value: ''
         } as Pair)
+      }
+      if (!suite.value.proxy) {
+          suite.value.proxy = {
+            http: '',
+            https: '',
+            no: ''
+          }
       }
 
       shareLink.value = `${window.location.href}api/v1/suites/${e.name}/yaml?x-store-name=${store.name}`
@@ -343,6 +355,20 @@ const renameTestSuite = (name: string) => {
       </div>
       <el-divider />
     </div>
+
+    <div>
+      <span>{{ t('proxy.http') }}</span>
+      <el-input class="mx-1" v-model="suite.proxy.http" placeholder="HTTP Proxy"></el-input>
+    </div>
+    <div>
+      <span>{{ t('proxy.https') }}</span>
+      <el-input class="mx-1" v-model="suite.proxy.https" placeholder="HTTPS Proxy"></el-input>
+    </div>
+    <div>
+      <span>{{ t('proxy.no') }}</span>
+      <el-input class="mx-1" v-model="suite.proxy.no" placeholder="No Proxy"></el-input>
+    </div>
+    <el-divider />
 
     <div class="button-container">
         Share link: <el-input readonly v-model="shareLink" style="width: 80%" />
