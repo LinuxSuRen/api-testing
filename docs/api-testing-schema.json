@@ -27,6 +27,24 @@
                     "title": "Param",
                     "additionalProperties": true
                 },
+                "proxy": {
+                    "type": "object",
+                    "properties": {
+                        "http": {
+                            "type": "string",
+                            "description": "HTTP proxy URL"
+                        },
+                        "https": {
+                            "type": "string",
+                            "description": "HTTPS proxy URL"
+                        },
+                        "no": {
+                            "type": "string",
+                            "description": "Comma-separated list of hosts to exclude from proxying"
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "items": {
                     "type": "array",
                     "items": {
