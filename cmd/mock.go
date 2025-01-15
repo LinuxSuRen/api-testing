@@ -17,6 +17,8 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -49,14 +51,13 @@ func createMockCmd() (c *cobra.Command) {
 func (o *mockOption) runE(c *cobra.Command, args []string) (err error) {
 	reader := mock.NewLocalFileReader(args[0])
 	server := mock.NewInMemoryServer(o.port)
-
-	c.Println("start listen", o.port)
 	if err = server.Start(reader, o.prefix); err != nil {
 		return
 	}
 
 	clean := make(chan os.Signal, 1)
 	signal.Notify(clean, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
+	printLocalIPs(c, o.port)
 
 	select {
 	case <-c.Context().Done():
@@ -64,4 +65,29 @@ func (o *mockOption) runE(c *cobra.Command, args []string) (err error) {
 	}
 	err = server.Stop()
 	return
+}
+
+func printLocalIPs(c *cobra.Command, port int) {
+	if ips, err := getLocalIPs(); err == nil {
+		for _, ip := range ips {
+			c.Printf("server is available at http://%s:%d\n", ip, port)
+		}
+	}
+}
+
+func getLocalIPs() ([]string, error) {
+	var ips []string
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get interface addresses: %v", err)
+	}
+
+	for _, addr := range addrs {
+		if ipNet, ok := addr.(*net.IPNet); ok {
+			if ipNet.IP.To4() != nil && !ipNet.IP.IsLoopback() {
+				ips = append(ips, ipNet.IP.String())
+			}
+		}
+	}
+	return ips, nil
 }
