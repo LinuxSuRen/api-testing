@@ -1,5 +1,5 @@
 /*
-Copyright 2023-2024 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package runner
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -142,6 +144,27 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 	contextDir := NewContextKeyBuilder().ParentDir().GetContextValueOrEmpty(ctx)
 	if err = testcase.Request.Render(dataContext, contextDir); err != nil {
 		return
+	}
+
+	// add proxy setting
+	if r.proxy != nil {
+		var proxyURL *url.URL
+		if proxyURL, err = url.Parse(r.proxy.HTTP); err == nil {
+			client.Transport = &http.Transport{
+				Proxy: func(req *http.Request) (*url.URL, error) {
+					for _, noProxy := range strings.Split(r.proxy.No, ",") {
+						if strings.Contains(req.URL.Host, noProxy) {
+							return nil, nil
+						}
+					}
+					return http.ProxyURL(proxyURL)(req)
+				},
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			}
+		} else {
+			err = fmt.Errorf("failed to parse proxy URL: %v", err)
+			return
+		}
 	}
 
 	var requestBody io.Reader

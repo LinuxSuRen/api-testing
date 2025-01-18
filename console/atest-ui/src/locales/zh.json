@@ -43,7 +43,8 @@
         "stores": "存储",
         "parameter": "参数",
         "functionQuery": "函数查询",
-        "output": "输出"
+        "output": "输出",
+        "proxy": "代理"
     },
     "tip": {
         "filter": "过滤",
@@ -71,6 +72,6 @@
     "proxy": {
         "http": "HTTP 代理",
         "https": "HTTPS 代理",
-        "no": "无需代理"
+        "no": "跳过代理"
     }
 }

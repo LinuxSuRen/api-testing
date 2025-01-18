@@ -25,6 +25,11 @@ export interface Suite {
     kind: string
     url: string
   }
+  proxy: {
+    http: string
+    https: string
+    no: string
+  }
 }
 
 export interface TestResult {
