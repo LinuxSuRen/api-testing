@@ -43,7 +43,9 @@
         "stores": "存储",
         "parameter": "参数",
         "functionQuery": "函数查询",
-        "output": "输出"
+        "output": "输出",
+        "proxy": "代理",
+        "secure": "安全"
     },
     "tip": {
         "filter": "过滤",
@@ -65,6 +67,13 @@
         "storageLocation": "保存位置",
         "suiteKind": "类型",
         "key": "键",
-        "value": "值"
+        "value": "值",
+        "proxy": "代理",
+        "insecure": "忽略证书验证"
+    },
+    "proxy": {
+        "http": "HTTP 代理",
+        "https": "HTTPS 代理",
+        "no": "跳过代理"
     }
 }

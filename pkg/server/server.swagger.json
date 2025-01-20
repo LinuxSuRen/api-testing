@@ -22,6 +22,48 @@
     "application/json"
   ],
   "paths": {
+    "/api/v1/batchRun": {
+      "post": {
+        "operationId": "Runner_BatchRun",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/serverTestResult"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of serverTestResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverBatchTestTask"
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
     "/api/v1/codeGenerators": {
       "get": {
         "summary": "code generator",
@@ -310,6 +352,12 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -346,6 +394,12 @@
         "parameters": [
           {
             "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "kind",
             "in": "query",
             "required": false,
             "type": "string"
@@ -1951,6 +2005,9 @@
                 },
                 "spec": {
                   "$ref": "#/definitions/serverAPISpec"
+                },
+                "proxy": {
+                  "$ref": "#/definitions/serverProxyConfig"
                 }
               }
             }
@@ -2098,9 +2155,104 @@
         ]
       }
     },
+    "/api/v1/suites/{sourceSuiteName}/cases/{sourceCaseName}/rename": {
+      "post": {
+        "operationId": "Runner_RenameTestCase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sourceSuiteName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sourceCaseName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "targetSuiteName": {
+                  "type": "string"
+                },
+                "targetCaseName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
     "/api/v1/suites/{sourceSuiteName}/duplicate": {
       "post": {
         "operationId": "Runner_DuplicateTestSuite",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverHelloReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sourceSuiteName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "targetSuiteName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/api/v1/suites/{sourceSuiteName}/rename": {
+      "post": {
+        "operationId": "Runner_RenameTestSuite",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -2436,6 +2588,23 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "parameters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/serverPair"
+                  }
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -2542,6 +2711,31 @@
         },
         "secure": {
           "$ref": "#/definitions/serverSecure"
+        }
+      }
+    },
+    "serverBatchTestTask": {
+      "type": "object",
+      "properties": {
+        "suiteName": {
+          "type": "string"
+        },
+        "caseName": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "interval": {
+          "type": "string"
         }
       }
     },
@@ -2785,6 +2979,10 @@
         },
         "Config": {
           "type": "string"
+        },
+        "Port": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -2828,6 +3026,23 @@
             "type": "object",
             "$ref": "#/definitions/serverPair"
           }
+        }
+      }
+    },
+    "serverProxyConfig": {
+      "type": "object",
+      "properties": {
+        "http": {
+          "type": "string",
+          "title": "HTTP proxy URL"
+        },
+        "https": {
+          "type": "string",
+          "title": "HTTPS proxy URL"
+        },
+        "no": {
+          "type": "string",
+          "title": "Comma-separated list of hosts to exclude from proxying"
         }
       }
     },
@@ -3000,6 +3215,9 @@
       "type": "object",
       "properties": {
         "name": {
+          "type": "string"
+        },
+        "kind": {
           "type": "string"
         }
       }
@@ -3209,6 +3427,9 @@
         },
         "spec": {
           "$ref": "#/definitions/serverAPISpec"
+        },
+        "proxy": {
+          "$ref": "#/definitions/serverProxyConfig"
         }
       }
     },

@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@ limitations under the License.
 package server
 
 import (
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/stretchr/testify/assert"
@@ -95,6 +96,11 @@ func TestToGRPCSuite(t *testing.T) {
 		Param: []*Pair{{
 			Key: "foo", Value: "bar",
 		}},
+		Proxy: &ProxyConfig{
+			Http:  "http",
+			Https: "https",
+			No:    "no",
+		},
 		Spec: &APISpec{
 			Secure: &Secure{
 				Insecure: true,
@@ -108,6 +114,11 @@ func TestToGRPCSuite(t *testing.T) {
 		API:  "api",
 		Param: map[string]string{
 			"foo": "bar",
+		},
+		Proxy: &atest.Proxy{
+			HTTP:  "http",
+			HTTPS: "https",
+			No:    "no",
 		},
 		Spec: atest.APISpec{
 			Secure: &atest.Secure{
@@ -127,6 +138,11 @@ func TestToNormalSuite(t *testing.T) {
 		Param: map[string]string{
 			"foo": "bar",
 		},
+		Proxy: &atest.Proxy{
+			HTTP:  "http",
+			HTTPS: "https",
+			No:    "no",
+		},
 		Spec: atest.APISpec{
 			Secure: &atest.Secure{
 				Insecure: true,
@@ -141,6 +157,11 @@ func TestToNormalSuite(t *testing.T) {
 		Param: []*Pair{{
 			Key: "foo", Value: "bar",
 		}},
+		Proxy: &ProxyConfig{
+			Http:  "http",
+			Https: "https",
+			No:    "no",
+		},
 		Spec: &APISpec{
 			Secure: &Secure{
 				Insecure: true,
@@ -275,6 +296,56 @@ func TestToGRPCTestSuiteSpec(t *testing.T) {
 			},
 		}))
 	})
+}
+
+func TestToNormalSuiteYAML(t *testing.T) {
+	suite := &TestSuite{
+		Name: "test-suite",
+		Api:  "http://example.com",
+		Param: []*Pair{
+			{Key: "param1", Value: "value1"},
+		},
+		Spec: &APISpec{
+			Kind: "swagger",
+			Url:  "http://example.com/swagger.json",
+			Secure: &Secure{
+				Insecure:   true,
+				Cert:       "cert.pem",
+				Ca:         "ca.pem",
+				ServerName: "example.com",
+				Key:        "key.pem",
+			},
+		},
+		Proxy: &ProxyConfig{
+			Http:  "http://proxy.com",
+			Https: "https://proxy.com",
+			No:    "localhost",
+		},
+	}
+
+	yamlData, err := ToNormalSuiteYAML(suite)
+	assert.NoError(t, err)
+	assert.NotNil(t, yamlData)
+
+	expectedYAML := `name: test-suite
+api: http://example.com
+spec:
+    kind: swagger
+    url: http://example.com/swagger.json
+    secure:
+        insecure: true
+        cert: cert.pem
+        ca: ca.pem
+        key: key.pem
+        serverName: example.com
+param:
+    param1: value1
+proxy:
+    http: http://proxy.com
+    https: https://proxy.com
+    "no": localhost
+`
+	assert.Equal(t, expectedYAML, string(yamlData))
 }
 
 var defaultInterMap = map[string]interface{}{"foo": "bar"}

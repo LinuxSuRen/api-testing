@@ -5,7 +5,8 @@ import {
   Histogram,
   Location,
   Share,
-  ArrowDown
+  ArrowDown,
+  Guide,
 } from '@element-plus/icons-vue'
 import { ref, watch } from 'vue'
 import { API } from './views/net'
@@ -59,9 +60,9 @@ const handleSelect = (key: string) => {
 const locale = ref(Cache.GetPreference().language)
 i18nLocale.value = locale.value
 
-watch(locale, (e) =>{
-  Cache.WithLocale(e.value)
-  i18nLocale.value = locale.value
+watch(locale, (e: string) =>{
+  Cache.WithLocale(e)
+  i18nLocale.value = locale
 })
 
 const handleChangeLan = (command: string) => {
@@ -110,7 +111,7 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
           <template #title>{{ t('title.history' )}}</template>
         </el-menu-item>
         <el-menu-item index="mock" test-id="mock-menu">
-          <el-icon><icon-menu /></el-icon>
+          <el-icon><Guide /></el-icon>
           <template #title>{{ t('title.mock' )}}</template>
         </el-menu-item>
         <el-menu-item index="secret">

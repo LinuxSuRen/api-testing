@@ -32,7 +32,15 @@ const suite = ref({
       raw: '',
       protofile: '',
       serverReflection: false
-    }
+    },
+      secure: {
+        insecure: true
+      }
+  },
+  proxy: {
+    http: '',
+    https: '',
+    no: ''
   }
 } as Suite)
 const shareLink = ref('')
@@ -50,6 +58,18 @@ function load() {
           value: ''
         } as Pair)
       }
+      if (!suite.value.proxy) {
+          suite.value.proxy = {
+            http: '',
+            https: '',
+            no: ''
+          }
+      }
+      if (!suite.value.spec.secure) {
+          suite.value.spec.secure = {
+            insecure: false
+          }
+      }
 
       shareLink.value = `${window.location.href}api/v1/suites/${e.name}/yaml?x-store-name=${store.name}`
     },
@@ -63,7 +83,16 @@ watch(props, () => {
   load()
 })
 
-const save = () => {
+const testSuiteFormRef = ref<FormInstance>()
+const updateTestSuiteForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      saveTestSuite()
+    }
+  })
+}
+const saveTestSuite = () => {
   let oldImportPath = ''
   let hasImport = false
   if (suite.value.spec && suite.value.spec.rpc) {
@@ -99,7 +128,7 @@ const save = () => {
     }
   )
 }
-Magic.Keys(save, ['Alt+S', 'Alt+ß'])
+Magic.Keys(saveTestSuite, ['Alt+S', 'Alt+ß'])
 
 const isFullScreen = ref(false)
 const dialogVisible = ref(false)
@@ -113,7 +142,8 @@ const testCaseForm = reactive({
   }
 })
 const rules = reactive<FormRules<Suite>>({
-  name: [{ required: true, message: 'Please input TestCase name', trigger: 'blur' }]
+  name: [{ required: true, message: 'Please input TestCase name', trigger: 'blur' }],
+  'proxy.http': [{ type: 'url', message: 'Please input a valid URL', trigger: 'blur' }],
 })
 
 function openNewTestCaseDialog() {
@@ -122,7 +152,7 @@ function openNewTestCaseDialog() {
 }
 Magic.Keys(openNewTestCaseDialog, ['Alt+N', 'Alt+dead'])
 
-const submitForm = async (formEl: FormInstance | undefined) => {
+const submitTestCaseForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid: boolean) => {
     if (valid) {
@@ -263,123 +293,141 @@ const renameTestSuite = (name: string) => {
 
 <template>
   <div class="common-layout">
-    {{ t('tip.testsuite') }}<EditButton :value="suite.name" @changed="renameTestSuite"/>
+    <el-form :rules="rules"
+      ref="testSuiteFormRef"
+      :model="suite"
+      label-width="auto">
+      {{ t('tip.testsuite') }}<EditButton :value="suite.name" @changed="renameTestSuite"/>
 
-    <table style="width: 100%">
-      <tr>
-        <td style="width: 20%">
-          {{ t('tip.apiAddress') }}
-        </td>
-        <td style="width: 80%">
-          <el-input
-            class="w-50 m-2"
-            v-model="suite.api"
-            placeholder="API"
-            test-id="suite-editor-api"
-          ></el-input>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <el-select
-            v-model="suite.spec.kind"
-            class="m-2"
-            placeholder="API Spec Kind"
-            size="default"
-          >
-            <el-option
-              v-for="item in apiSpecKinds"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </td>
-        <td>
-          <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
-        </td>
-      </tr>
-    </table>
-
-    <div style="margin-top: 10px">
-      <el-text class="mx-1" type="primary">{{ t('title.parameter') }}</el-text>
-      <el-table :data="suite.param" style="width: 100%">
-        <el-table-column :label="t('field.key')" width="180">
-          <template #default="scope">
-            <el-input v-model="scope.row.key" :placeholder="t('field.key')" @change="paramChange" />
-          </template>
-        </el-table-column>
-        <el-table-column :label="t('field.value')">
-          <template #default="scope">
-            <div style="display: flex; align-items: center">
-              <el-input v-model="scope.row.value" :placeholder="t('field.value')" />
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-divider />
-    </div>
-
-    <div v-if="suite.spec.rpc">
-      <div>
-        <span>{{ t('title.refelction') }}</span>
-        <el-switch v-model="suite.spec.rpc.serverReflection" />
-      </div>
-      <div>
-        <span>{{ t('title.protoContent') }}</span>
+      <el-form-item :label="t('tip.apiAddress')" prop="api">
         <el-input
-          v-model="suite.spec.rpc.raw"
-          :autosize="{ minRows: 4, maxRows: 8 }"
-          type="textarea"
-        />
-      </div>
-      <div>
-        <span>{{ t('title.protoImport') }}</span>
-        <el-input class="mx-1" v-model="suite.spec.rpc.import"></el-input>
-      </div>
-      <div>
-        <span>{{ t('title.protoFile') }}</span>
-        <el-input class="mx-1" v-model="suite.spec.rpc.protofile"></el-input>
-      </div>
-      <el-divider />
-    </div>
+          class="w-50 m-2"
+          v-model="suite.api"
+          placeholder="API"
+          test-id="suite-editor-api"
+        ></el-input>
+      </el-form-item>
+      <table style="width: 100%">
+        <tr>
+          <td>
+            <el-select
+              v-model="suite.spec.kind"
+              class="m-2"
+              placeholder="API Spec Kind"
+              size="default"
+            >
+              <el-option
+                v-for="item in apiSpecKinds"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </td>
+          <td>
+            <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
+          </td>
+        </tr>
+      </table>
 
-    <div class="button-container">
-        Share link: <el-input readonly v-model="shareLink" style="width: 80%" />
-    </div>
-    <div class="button-container">
-      <el-button type="primary" @click="save" v-if="!Cache.GetCurrentStore().readOnly">{{
-        t('button.save')
-      }}</el-button>
-      <el-button type="primary" @click="save" disabled v-if="Cache.GetCurrentStore().readOnly">{{
-        t('button.save')
-      }}</el-button>
-      <el-button type="danger" @click="del" :icon="Delete" test-id="suite-del-but">{{
-        t('button.delete')
-      }}</el-button>
-      <el-button type="primary" @click="convert" test-id="convert">{{
-        t('button.export')
-      }}</el-button>
-      <el-button
-        type="primary"
-        @click="openDuplicateDialog"
-        :icon="CopyDocument"
-        test-id="duplicate"
-        >{{ t('button.duplicate') }}</el-button
-      >
-      <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{
-        t('button.viewYaml')
-      }}</el-button>
-    </div>
-    <div class="button-container">
-      <el-button
-        type="primary"
-        @click="openNewTestCaseDialog"
-        :icon="Edit"
-        test-id="open-new-case-dialog"
-        >{{ t('button.newtestcase') }}</el-button
-      >
-    </div>
+      <el-collapse>
+        <el-collapse-item :title="t('title.parameter')">
+          <el-table :data="suite.param" style="width: 100%">
+            <el-table-column :label="t('field.key')" width="180">
+              <template #default="scope">
+                <el-input v-model="scope.row.key" :placeholder="t('field.key')" @change="paramChange" />
+              </template>
+            </el-table-column>
+            <el-table-column :label="t('field.value')">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-input v-model="scope.row.value" :placeholder="t('field.value')" />
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-collapse-item>
+          <el-collapse-item v-if="suite.spec.rpc">
+              <div>
+                  <span>{{ t('title.refelction') }}</span>
+                  <el-switch v-model="suite.spec.rpc.serverReflection" />
+              </div>
+              <div>
+                  <span>{{ t('title.protoContent') }}</span>
+                  <el-input
+                      v-model="suite.spec.rpc.raw"
+                      :autosize="{ minRows: 4, maxRows: 8 }"
+                      type="textarea"
+                  />
+              </div>
+              <div>
+                  <span>{{ t('title.protoImport') }}</span>
+                  <el-input class="mx-1" v-model="suite.spec.rpc.import"></el-input>
+              </div>
+              <div>
+                  <span>{{ t('title.protoFile') }}</span>
+                  <el-input class="mx-1" v-model="suite.spec.rpc.protofile"></el-input>
+              </div>
+          </el-collapse-item>
+          <el-collapse-item :title="t('title.secure')">
+              <el-switch v-model="suite.spec.secure.insecure" active-text="Insecure" inactive-text="Secure" inline-prompt/>
+          </el-collapse-item>
+        <el-collapse-item :title="t('title.proxy')">
+          <div>
+            <el-form-item :label="t('proxy.http')" prop="proxy.http">
+              <el-input class="mx-1" v-model="suite.proxy.http" placeholder="HTTP Proxy"></el-input>
+            </el-form-item>
+          </div>
+          <div>
+            <el-form-item :label="t('proxy.https')" prop="proxy.http">
+              <el-input class="mx-1" v-model="suite.proxy.https" placeholder="HTTPS Proxy"></el-input>
+            </el-form-item>
+          </div>
+          <div>
+            <el-form-item :label="t('proxy.no')">
+              <el-input class="mx-1" v-model="suite.proxy.no" placeholder="No Proxy"></el-input>
+            </el-form-item>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
+
+      <div class="button-container">
+          Share link: <el-input readonly v-model="shareLink" style="width: 80%" />
+      </div>
+      <div class="button-container">
+        <el-button type="primary" @click="updateTestSuiteForm(testSuiteFormRef)" v-if="!Cache.GetCurrentStore().readOnly">{{
+          t('button.save')
+        }}</el-button>
+        <el-button type="primary" @click="updateTestSuiteForm(testSuiteFormRef)" disabled v-if="Cache.GetCurrentStore().readOnly">{{
+          t('button.save')
+        }}</el-button>
+        <el-button type="danger" @click="del" :icon="Delete" test-id="suite-del-but">{{
+          t('button.delete')
+        }}</el-button>
+        <el-button type="primary" @click="convert" test-id="convert">{{
+          t('button.export')
+        }}</el-button>
+        <el-button
+          type="primary"
+          @click="openDuplicateDialog"
+          :icon="CopyDocument"
+          test-id="duplicate"
+          >{{ t('button.duplicate') }}</el-button
+        >
+        <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{
+          t('button.viewYaml')
+        }}</el-button>
+      </div>
+      <div class="button-container">
+        <el-button
+          type="primary"
+          @click="openNewTestCaseDialog"
+          :icon="Edit"
+          test-id="open-new-case-dialog"
+          >{{ t('button.newtestcase') }}</el-button
+        >
+      </div>
+    </el-form>
   </div>
 
   <el-dialog v-model="dialogVisible" :title="t('title.createTestCase')" width="40%" draggable>
@@ -433,7 +481,7 @@ const renameTestSuite = (name: string) => {
           <el-form-item>
             <el-button
               type="primary"
-              @click="submitForm(testcaseFormRef)"
+              @click="submitTestCaseForm(testcaseFormRef)"
               v-loading="suiteCreatingLoading"
               test-id="case-form-submit"
               >{{ t('button.submit') }}</el-button

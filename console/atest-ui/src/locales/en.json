@@ -48,7 +48,9 @@
         "secrets": "Secrets",
         "stores": "Stores",
         "functionQuery": "Functions Query",
-        "output": "Output"
+        "output": "Output",
+        "proxy": "Proxy",
+        "secure": "Secure"
     },
     "tip": {
         "filter": "Filter Keyword",
@@ -71,7 +73,9 @@
         "storageLocation": "Location",
         "suiteKind": "Suite Kind",
         "key": "Key",
-        "value": "Value"
+        "value": "Value",
+        "proxy": "Proxy",
+        "insecure": "Insecure"
     },
     "//see http spec": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
     "httpCode": {
@@ -90,5 +94,10 @@
         "500": "500 Internal Server Error",
         "502": "502 Bad Gateway",
         "503": "503 Service Unavailable"
+    },
+    "proxy": {
+        "http": "HTTP Proxy",
+        "https": "HTTPS Proxy",
+        "no": "No Proxy"
     }
 }

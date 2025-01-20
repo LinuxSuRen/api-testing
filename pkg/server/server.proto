@@ -351,6 +351,7 @@ message TestSuite {
     string api = 2;
     repeated Pair param = 3;
     APISpec spec = 4;
+    ProxyConfig proxy = 5;
 }
 
 message TestSuiteWithCase {
@@ -636,4 +637,10 @@ message Version {
   string version = 1;
   string commit = 2;
   string date = 3;
+}
+
+message ProxyConfig {
+  string http = 1;    // HTTP proxy URL
+  string https = 2;   // HTTPS proxy URL
+  string no = 3;      // Comma-separated list of hosts to exclude from proxying
 }

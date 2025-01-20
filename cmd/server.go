@@ -386,6 +386,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		serverLogger.Info("HTTP server started", "addr", httplis.Addr())
 		serverLogger.Info("gRPC server started", "addr", lis.Addr())
 		serverLogger.Info("Server is running.")
+		printLocalIPs(cmd, o.httpPort)
 
 		err = o.httpServer.Serve(httplis)
 		err = util.IgnoreErrServerClosed(err)

@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"testing"
 
@@ -29,6 +30,7 @@ import (
 func TestExtensionCmd(t *testing.T) {
 	t.Run("minimum one arg", func(t *testing.T) {
 		command := createExtensionCommand(nil)
+		command.SetOut(io.Discard)
 		err := command.Execute()
 		assert.Error(t, err)
 	})
@@ -57,6 +59,7 @@ func TestExtensionCmd(t *testing.T) {
 		assert.NoError(t, err)
 
 		command := createExtensionCommand(d)
+		command.SetOut(io.Discard)
 		command.SetArgs([]string{"git", "--output", tmpDownloadDir, "--registry", registry})
 		err = command.Execute()
 		assert.NoError(t, err)
