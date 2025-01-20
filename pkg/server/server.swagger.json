@@ -2008,9 +2008,6 @@
                 },
                 "proxy": {
                   "$ref": "#/definitions/serverProxyConfig"
-                },
-                "secure": {
-                  "$ref": "#/definitions/serverSecure"
                 }
               }
             }
@@ -3433,9 +3430,6 @@
         },
         "proxy": {
           "$ref": "#/definitions/serverProxyConfig"
-        },
-        "secure": {
-          "$ref": "#/definitions/serverSecure"
         }
       }
     },
