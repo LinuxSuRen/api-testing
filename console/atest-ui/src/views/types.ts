@@ -24,6 +24,9 @@ export interface Suite {
   spec: {
     kind: string
     url: string
+    secure: {
+        insecure: boolean
+    }
   }
   proxy: {
     http: string

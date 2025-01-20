@@ -140,14 +140,18 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
         }
     }()
 
-    client := util.TlsAwareHTTPClient(true) // TODO should have a way to change it
+    insecure := false
+    if r.Secure != nil {
+        insecure = r.Secure.Insecure
+    }
+    client := util.TlsAwareHTTPClient(insecure) // TODO should have a way to change it
     contextDir := NewContextKeyBuilder().ParentDir().GetContextValueOrEmpty(ctx)
     if err = testcase.Request.Render(dataContext, contextDir); err != nil {
         return
     }
 
     // add proxy setting
-    if r.proxy != nil {
+    if r.proxy != nil && r.proxy.HTTP != "" {
         var proxyURL *url.URL
         if proxyURL, err = url.Parse(r.proxy.HTTP); err == nil {
             client.Transport = &http.Transport{
@@ -161,7 +165,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
                     r.log.Info("using proxy: %v\n", proxyURL)
                     return proxyURL, nil
                 },
-                TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+                TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
             }
         } else {
             err = fmt.Errorf("failed to parse proxy URL: %v", err)

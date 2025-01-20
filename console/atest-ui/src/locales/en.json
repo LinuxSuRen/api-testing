@@ -49,7 +49,8 @@
         "stores": "Stores",
         "functionQuery": "Functions Query",
         "output": "Output",
-        "proxy": "Proxy"
+        "proxy": "Proxy",
+        "secure": "Secure"
     },
     "tip": {
         "filter": "Filter Keyword",
@@ -73,7 +74,8 @@
         "suiteKind": "Suite Kind",
         "key": "Key",
         "value": "Value",
-        "proxy": "Proxy"
+        "proxy": "Proxy",
+        "insecure": "Insecure"
     },
     "//see http spec": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
     "httpCode": {

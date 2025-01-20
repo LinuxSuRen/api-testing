@@ -32,7 +32,10 @@ const suite = ref({
       raw: '',
       protofile: '',
       serverReflection: false
-    }
+    },
+      secure: {
+        insecure: true
+      }
   },
   proxy: {
     http: '',
@@ -60,6 +63,11 @@ function load() {
             http: '',
             https: '',
             no: ''
+          }
+      }
+      if (!suite.value.spec.secure) {
+          suite.value.spec.secure = {
+            insecure: false
           }
       }
 
@@ -322,29 +330,6 @@ const renameTestSuite = (name: string) => {
         </tr>
       </table>
 
-      <div v-if="suite.spec.rpc">
-        <div>
-          <span>{{ t('title.refelction') }}</span>
-          <el-switch v-model="suite.spec.rpc.serverReflection" />
-        </div>
-        <div>
-          <span>{{ t('title.protoContent') }}</span>
-          <el-input
-            v-model="suite.spec.rpc.raw"
-            :autosize="{ minRows: 4, maxRows: 8 }"
-            type="textarea"
-          />
-        </div>
-        <div>
-          <span>{{ t('title.protoImport') }}</span>
-          <el-input class="mx-1" v-model="suite.spec.rpc.import"></el-input>
-        </div>
-        <div>
-          <span>{{ t('title.protoFile') }}</span>
-          <el-input class="mx-1" v-model="suite.spec.rpc.protofile"></el-input>
-        </div>
-      </div>
-
       <el-collapse>
         <el-collapse-item :title="t('title.parameter')">
           <el-table :data="suite.param" style="width: 100%">
@@ -362,6 +347,31 @@ const renameTestSuite = (name: string) => {
             </el-table-column>
           </el-table>
         </el-collapse-item>
+          <el-collapse-item v-if="suite.spec.rpc">
+              <div>
+                  <span>{{ t('title.refelction') }}</span>
+                  <el-switch v-model="suite.spec.rpc.serverReflection" />
+              </div>
+              <div>
+                  <span>{{ t('title.protoContent') }}</span>
+                  <el-input
+                      v-model="suite.spec.rpc.raw"
+                      :autosize="{ minRows: 4, maxRows: 8 }"
+                      type="textarea"
+                  />
+              </div>
+              <div>
+                  <span>{{ t('title.protoImport') }}</span>
+                  <el-input class="mx-1" v-model="suite.spec.rpc.import"></el-input>
+              </div>
+              <div>
+                  <span>{{ t('title.protoFile') }}</span>
+                  <el-input class="mx-1" v-model="suite.spec.rpc.protofile"></el-input>
+              </div>
+          </el-collapse-item>
+          <el-collapse-item :title="t('title.secure')">
+              <el-switch v-model="suite.spec.secure.insecure" active-text="Insecure" inactive-text="Secure" inline-prompt/>
+          </el-collapse-item>
         <el-collapse-item :title="t('title.proxy')">
           <div>
             <el-form-item :label="t('proxy.http')" prop="proxy.http">
