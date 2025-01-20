@@ -352,6 +352,7 @@ message TestSuite {
     repeated Pair param = 3;
     APISpec spec = 4;
     ProxyConfig proxy = 5;
+    Secure secure = 6;
 }
 
 message TestSuiteWithCase {
