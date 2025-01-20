@@ -270,7 +270,7 @@ func TestPreRunE(t *testing.T) {
 func TestPrinter(t *testing.T) {
 	buf := new(bytes.Buffer)
 	c := &cobra.Command{}
-	c.SetOutput(buf)
+	c.SetOut(buf)
 
 	println(c, nil, "foo")
 	assert.Empty(t, buf.String())
