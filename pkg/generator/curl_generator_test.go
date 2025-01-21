@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ func TestCurlGenerator(t *testing.T) {
 				API: fooForTest,
 			},
 		},
-		expect: `curl -X GET 'http://foo'`,
+		expect: `curl -k -X GET 'http://foo'`,
 	}, {
 		name: "has query string",
 		testCase: atest.TestCase{
@@ -47,7 +47,7 @@ func TestCurlGenerator(t *testing.T) {
 				},
 			},
 		},
-		expect: `curl -X GET 'http://foo?page=1&size=10'`,
+		expect: `curl -k -X GET 'http://foo?page=1&size=10'`,
 	}, {
 		name: "basic HTTP POST",
 		testCase: atest.TestCase{
@@ -56,7 +56,7 @@ func TestCurlGenerator(t *testing.T) {
 				Method: http.MethodPost,
 			},
 		},
-		expect: `curl -X POST 'http://foo'`,
+		expect: `curl -k -X POST 'http://foo'`,
 	}, {
 		name: "has header",
 		testCase: atest.TestCase{
@@ -68,7 +68,7 @@ func TestCurlGenerator(t *testing.T) {
 				},
 			},
 		},
-		expect: `curl -X GET 'http://foo' \
+		expect: `curl -k -X GET 'http://foo' \
   -H 'Connection: keep-alive' \
   -H 'Content-Type: text/plain'`,
 	}, {
@@ -79,8 +79,20 @@ func TestCurlGenerator(t *testing.T) {
 				Body: atest.NewRequestBody("hello"),
 			},
 		},
-		expect: `curl -X GET 'http://foo' \
+		expect: `curl -k -X GET 'http://foo' \
   --data-raw 'hello'`,
+	}, {
+		name: "include golang template",
+		testCase: atest.TestCase{
+			Request: atest.Request{
+				API: fooForTest,
+				Header: map[string]string{
+					util.ContentType: `{{ base64 "test"}}`,
+				},
+			},
+		},
+		expect: `curl -k -X GET 'http://foo' \
+  -H 'Content-Type: dGVzdA=='`,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
