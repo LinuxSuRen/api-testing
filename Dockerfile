@@ -14,7 +14,6 @@ RUN mkdir -p console/atest-ui
 
 COPY cmd/ cmd/
 COPY pkg/ pkg/
-COPY operator/ operator/
 COPY .github/ .github/
 COPY sample/ sample/
 COPY docs/ docs/
