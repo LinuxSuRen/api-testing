@@ -74,8 +74,6 @@ jobs:
         with:
           version: '~> v2'
           args: release --clean --snapshot
-      # - name: Operator
-      #   run: cd operator && make build
 
   E2E:
     runs-on: ubuntu-22.04

@@ -24,7 +24,7 @@
 * [Github 扩展支持](https://github.com/marketplace/actions/api-testing-with-kubernetes)
 * 支持多种存储方式 (Local, ORM Database, S3, Git, Etcd, etc.)
 * [HTTP API record](https://github.com/LinuxSuRen/atest-ext-collector)
-* 支持多种安装方式(CLI, Container, Native-Service, Operator, Helm, etc.)
+* 支持多种安装方式(CLI, Container, Native-Service, [Operator](https://github.com/LinuxSuRen/atest-operator), Helm, etc.)
 * 整合 Prometheus, SkyWalking 监控
 
 ## 快速开始

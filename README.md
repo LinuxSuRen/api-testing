@@ -23,7 +23,7 @@ This is an awesome API testing tool. 🚀
 * [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
 * Multiple storage backends supported(Local, ORM Database, S3, Git, Etcd, etc.)
 * [HTTP API record](https://github.com/LinuxSuRen/atest-ext-collector)
-* Install in multiple use cases(CLI, Container, Native-Service, Operator, Helm, etc.)
+* Install in multiple use cases(CLI, Container, Native-Service, [Operator](https://github.com/LinuxSuRen/atest-operator), Helm, etc.)
 * Monitoring integration with Prometheus, SkyWalking
 
 ## Get started
