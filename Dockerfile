@@ -14,14 +14,11 @@ RUN mkdir -p console/atest-ui
 
 COPY cmd/ cmd/
 COPY pkg/ pkg/
-COPY operator/ operator/
 COPY .github/ .github/
 COPY sample/ sample/
 COPY docs/ docs/
 COPY go.mod go.mod
 COPY go.sum go.sum
-COPY go.work go.work
-COPY go.work.sum go.work.sum
 COPY main.go main.go
 COPY console/atest-ui/ui.go console/atest-ui/ui.go
 COPY console/atest-ui/package.json console/atest-ui/package.json

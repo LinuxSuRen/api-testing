@@ -211,34 +211,3 @@ jobs:
           Rename-Item -Path package.json.new -NewName package.json
           npm i
           npm run publish
-
-  # image-operator:
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - name: Setup Docker buildx
-  #       uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
-  #     - name: Log into registry ${{ env.REGISTRY }}
-  #       if: github.event_name != 'pull_request'
-  #       uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
-  #       with:
-  #         registry: ${{ env.REGISTRY }}
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GH_PUBLISH_SECRETS }}
-  #     - name: Extract Docker metadata
-  #       id: meta
-  #       uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-  #       with:
-  #         images: ${{ env.REGISTRY }}/linuxsuren/api-testing-operator
-  #     - name: Build and push Docker image
-  #       id: build-and-push
-  #       uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
-  #       with:
-  #         context: operator
-  #         push: ${{ github.event_name != 'pull_request' }}
-  #         tags: ${{ steps.meta.outputs.tags }}
-  #         labels: ${{ steps.meta.outputs.labels }}
-  #         platforms: linux/amd64,linux/arm64
-  #         cache-from: type=gha
-  #         cache-to: type=gha,mode=max
