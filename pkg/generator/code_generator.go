@@ -83,6 +83,11 @@ func generate(testsuite *testing.TestSuite, testcase *testing.TestCase, template
 			}
 		}
 	}
+	if testcase != nil {
+		if err = testcase.Request.Render(nil, ""); err != nil {
+			return
+		}
+	}
 	var tpl *template.Template
 	if tpl, err = template.New(templateName).
 		Funcs(template.FuncMap{"safeString": safeString}).

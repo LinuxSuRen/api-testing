@@ -1,5 +1,5 @@
 '''
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -23,7 +23,7 @@ def main():
     {{- end}}
     body = io.BytesIO(encoded_data.encode("utf-8"))
     {{- else}}
-    body = io.BytesIO(b"{{.Request.Body.String}}")
+    body = io.BytesIO(b"""{{.Request.Body.String}}""")
     {{- end}}
     {{- if gt (len .Request.Header) 0 }}
     {{- range $key, $val := .Request.Header}}
@@ -49,7 +49,7 @@ def main():
         raise e
     {{- end}}
 
-    resp = requests.Session().send(req.prepare())
+    resp = requests.Session().send(req.prepare(), verify=False)
     if resp.status_code != 200:
         raise Exception("status code is not 200")
 
