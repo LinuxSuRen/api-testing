@@ -20,7 +20,7 @@ const path = require('node:path');
 
 module.exports = {
   packagerConfig: {
-    icon: path.join(__dirname, 'api-testing'),
+    icon: path.join(__dirname, 'api-testing.ico'),
     asar: true
   },
   rebuildConfig: {},
@@ -48,8 +48,7 @@ module.exports = {
     {
       name: '@electron-forge/maker-dmg',
       config: {
-        format: 'ULFO',
-        icon: path.join(__dirname, 'api-testing.png')
+        icon: path.join(__dirname, 'api-testing.icns')
       }
     },
     {
