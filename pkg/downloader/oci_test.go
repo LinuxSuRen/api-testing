@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ limitations under the License.
 package downloader
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -58,7 +59,7 @@ func TestDetectAuthURL(t *testing.T) {
 }
 
 func TestDownload(t *testing.T) {
-	server := mock.NewInMemoryServer(0)
+	server := mock.NewInMemoryServer(context.Background(), 0)
 	err := server.Start(mock.NewLocalFileReader("testdata/registry.yaml"), "/v2")
 	assert.NoError(t, err)
 	defer func() {

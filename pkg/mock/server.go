@@ -15,7 +15,9 @@ limitations under the License.
 */
 package mock
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type Loadable interface {
 	Load() error
@@ -26,6 +28,7 @@ type DynamicServer interface {
 	SetupHandler(reader Reader, prefix string) (http.Handler, error)
 	Stop() error
 	GetPort() string
+	EnableMetrics()
 	Loadable
 }
 

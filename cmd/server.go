@@ -275,7 +275,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mockWriter = mock.NewInMemoryReader("")
 	}
 
-	dynamicMockServer := mock.NewInMemoryServer(0)
+	dynamicMockServer := mock.NewInMemoryServer(cmd.Context(), 0)
 	mockServerController := server.NewMockServerController(mockWriter, dynamicMockServer, o.httpPort)
 
 	clean := make(chan os.Signal, 1)

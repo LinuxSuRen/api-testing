@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strconv"
 	"testing"
 	"time"
 
@@ -36,7 +37,8 @@ func TestConvert(t *testing.T) {
 	c.SetOut(io.Discard)
 
 	t.Run("normal", func(t *testing.T) {
-		tmpFile := path.Join(os.TempDir(), time.Now().String())
+		now := strconv.Itoa(int(time.Now().Unix()))
+		tmpFile := path.Join(os.TempDir(), now)
 		defer os.RemoveAll(tmpFile)
 
 		c.SetArgs([]string{"convert", "-p=testdata/simple-suite.yaml", "--converter=jmeter", "--target", tmpFile})

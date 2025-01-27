@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package mock
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"strings"
@@ -27,7 +28,8 @@ import (
 )
 
 func TestInMemoryServer(t *testing.T) {
-	server := NewInMemoryServer(0)
+	server := NewInMemoryServer(context.Background(), 0)
+	server.EnableMetrics()
 
 	err := server.Start(NewLocalFileReader("testdata/api.yaml"), "/mock")
 	assert.NoError(t, err)
@@ -165,13 +167,13 @@ func TestInMemoryServer(t *testing.T) {
 	})
 
 	t.Run("not found config file", func(t *testing.T) {
-		server := NewInMemoryServer(0)
+		server := NewInMemoryServer(context.Background(), 0)
 		err := server.Start(NewLocalFileReader("fake"), "/")
 		assert.Error(t, err)
 	})
 
 	t.Run("invalid webhook", func(t *testing.T) {
-		server := NewInMemoryServer(0)
+		server := NewInMemoryServer(context.Background(), 0)
 		err := server.Start(NewInMemoryReader(`webhooks:
   - timer: aa
     name: fake`), "/")
@@ -179,14 +181,14 @@ func TestInMemoryServer(t *testing.T) {
 	})
 
 	t.Run("missing name or timer in webhook", func(t *testing.T) {
-		server := NewInMemoryServer(0)
+		server := NewInMemoryServer(context.Background(), 0)
 		err := server.Start(NewInMemoryReader(`webhooks:
   - timer: 1s`), "/")
 		assert.Error(t, err)
 	})
 
 	t.Run("invalid webhook payload", func(t *testing.T) {
-		server := NewInMemoryServer(0)
+		server := NewInMemoryServer(context.Background(), 0)
 		err := server.Start(NewInMemoryReader(`webhooks:
   - name: invalid
     timer: 1ms
@@ -196,7 +198,7 @@ func TestInMemoryServer(t *testing.T) {
 	})
 
 	t.Run("invalid webhook api template", func(t *testing.T) {
-		server := NewInMemoryServer(0)
+		server := NewInMemoryServer(context.Background(), 0)
 		err := server.Start(NewInMemoryReader(`webhooks:
   - name: invalid
     timer: 1ms
@@ -204,5 +206,21 @@ func TestInMemoryServer(t *testing.T) {
       body: "{}"
       path: "{{.fake"`), "/")
 		assert.NoError(t, err)
+	})
+
+	t.Run("proxy", func(t *testing.T) {
+		resp, err = http.Get(api + "/v1/myProjects")
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		resp, err = http.Get(api + "/v1/invalid-template")
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+
+	t.Run("metrics", func(t *testing.T) {
+		resp, err = http.Get(api + "/metrics")
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	})
 }
