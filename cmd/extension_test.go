@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -37,7 +38,7 @@ func TestExtensionCmd(t *testing.T) {
 
 	t.Run("normal", func(t *testing.T) {
 		d := downloader.NewStoreDownloader()
-		server := mock.NewInMemoryServer(0)
+		server := mock.NewInMemoryServer(context.Background(), 0)
 
 		err := server.Start(mock.NewLocalFileReader("../pkg/downloader/testdata/registry.yaml"), "/v2")
 		assert.NoError(t, err)

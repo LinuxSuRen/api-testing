@@ -49,6 +49,11 @@ items:
             "status": "success"
           }]
         }
+proxies:
+  - path: /v1/myProjects
+    target: http://localhost:{{.GetPort}}
+  - path: /v1/invalid-template
+    target: http://localhost:{{.GetPort}
 webhooks:
   - timer: 1ms
     name: baidu

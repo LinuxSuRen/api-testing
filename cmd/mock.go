@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -53,6 +53,9 @@ func createMockCmd() (c *cobra.Command) {
 func (o *mockOption) runE(c *cobra.Command, args []string) (err error) {
 	reader := mock.NewLocalFileReader(args[0])
 	server := mock.NewInMemoryServer(c.Context(), o.port)
+	if o.metrics {
+		server.EnableMetrics()
+	}
 	if err = server.Start(reader, o.prefix); err != nil {
 		return
 	}
@@ -61,7 +64,6 @@ func (o *mockOption) runE(c *cobra.Command, args []string) (err error) {
 	signal.Notify(clean, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
 	printLocalIPs(c, o.port)
 	if o.metrics {
-		server.EnableMetrics()
 		c.Printf("Metrics available at http://localhost:%d%s/metrics\n", o.port, o.prefix)
 	}
 

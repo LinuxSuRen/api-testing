@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -74,6 +74,7 @@ func (s *inMemoryServer) SetupHandler(reader Reader, prefix string) (handler htt
 	s.mux = mux.NewRouter().PathPrefix(prefix).Subrouter()
 	s.prefix = prefix
 	handler = s.mux
+	s.metrics.AddMetricsHandler(s.mux)
 	err = s.Load()
 	return
 }
@@ -109,22 +110,31 @@ func (s *inMemoryServer) Load() (err error) {
 		memLogger.Info("start to proxy", "target", proxy.Target)
 		s.mux.HandleFunc(proxy.Path, func(w http.ResponseWriter, req *http.Request) {
 			api := fmt.Sprintf("%s/%s", proxy.Target, strings.TrimPrefix(req.URL.Path, s.prefix))
+			api, err = render.Render("proxy api", api, s)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				memLogger.Error(err, "failed to render proxy api")
+				return
+			}
 			memLogger.Info("redirect to", "target", api)
 
 			targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, req.Body)
 			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
 				memLogger.Error(err, "failed to create proxy request")
 				return
 			}
 
 			resp, err := http.DefaultClient.Do(targetReq)
 			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
 				memLogger.Error(err, "failed to do proxy request")
 				return
 			}
 
 			data, err := io.ReadAll(resp.Body)
 			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
 				memLogger.Error(err, "failed to read response body")
 				return
 			}
