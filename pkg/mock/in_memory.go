@@ -53,15 +53,17 @@ type inMemoryServer struct {
 	ctx        context.Context
 	cancelFunc context.CancelFunc
 	reader     Reader
+	metrics    RequestMetrics
 }
 
-func NewInMemoryServer(port int) DynamicServer {
-	ctx, cancel := context.WithCancel(context.TODO())
+func NewInMemoryServer(ctx context.Context, port int) DynamicServer {
+	ctx, cancel := context.WithCancel(ctx)
 	return &inMemoryServer{
 		port:       port,
 		wg:         sync.WaitGroup{},
 		ctx:        ctx,
 		cancelFunc: cancel,
+		metrics:    NewNoopMetrics(),
 	}
 }
 
@@ -148,10 +150,15 @@ func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 	return
 }
 
+func (s *inMemoryServer) EnableMetrics() {
+	s.metrics = NewInMemoryMetrics()
+}
+
 func (s *inMemoryServer) startObject(obj Object) {
 	// create a simple CRUD server
 	s.mux.HandleFunc("/"+obj.Name, func(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("mock server received request", req.URL.Path)
+		s.metrics.RecordRequest(req.URL.Path)
 		method := req.Method
 		w.Header().Set(util.ContentType, util.JSON)
 
@@ -210,6 +217,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 	// handle a single object
 	s.mux.HandleFunc(fmt.Sprintf("/%s/{name}", obj.Name), func(w http.ResponseWriter, req *http.Request) {
+		s.metrics.RecordRequest(req.URL.Path)
 		w.Header().Set(util.ContentType, util.JSON)
 		objects := s.data[obj.Name]
 		if objects != nil {
@@ -278,15 +286,17 @@ func (s *inMemoryServer) startItem(item Item) {
 		headerSlices = append(headerSlices, k, v)
 	}
 
-	adHandler := &advanceHandler{item: &item}
+	adHandler := &advanceHandler{item: &item, metrics: s.metrics}
 	s.mux.HandleFunc(item.Request.Path, adHandler.handle).Methods(strings.Split(method, ",")...).Headers(headerSlices...)
 }
 
 type advanceHandler struct {
-	item *Item
+	item    *Item
+	metrics RequestMetrics
 }
 
 func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
+	h.metrics.RecordRequest(req.URL.Path)
 	memLogger.Info("receiving mock request", "name", h.item.Name, "method", req.Method, "path", req.URL.Path,
 		"encoder", h.item.Response.Encoder)
 
