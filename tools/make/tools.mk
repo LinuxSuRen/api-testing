@@ -39,6 +39,7 @@ $(tools.bindir)/%: $(tools.srcdir)/%/package.json
 	mkdir -p $(@D)
 	cd $(<D) && npm install
 	ln -sf $(<D)/node_modules/.bin/$* $@
+	ls -ahl tools/bin
 
 tools.clean: # Remove all tools
 	@$(LOG_TARGET)
