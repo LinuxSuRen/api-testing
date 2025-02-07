@@ -38,7 +38,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: actions/checkout@v4.1.4
       - uses: ./tools/github-actions/setup-deps
       - name: API Test
         env:
@@ -65,7 +65,7 @@ jobs:
   Build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: actions/checkout@v4.1.4
       - uses: ./tools/github-actions/setup-deps
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
@@ -80,7 +80,7 @@ jobs:
   E2E:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
+      - uses: actions/checkout@v4.1.4
       - uses: ./tools/github-actions/setup-deps
       - name: Set output
         id: vars

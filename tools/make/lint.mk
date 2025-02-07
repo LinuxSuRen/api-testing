@@ -4,8 +4,6 @@
 
 ##@ Lint
 
-GITHUB_ACTION ?=
-
 .PHONY: lint
 lint: ## Run all linter of code sources, including golint, yamllint.
 
@@ -13,8 +11,6 @@ lint: ## Run all linter of code sources, including golint, yamllint.
 # by the lint tooling.
 .PHONY: lint-deps
 lint-deps: ## Everything necessary to lint
-
-GOLANGCI_LINT_FLAGS ?= $(if $(GITHUB_ACTION),--out-format=github-actions)
 
 .PHONY: lint.golint
 lint: lint.golint

@@ -1,5 +1,5 @@
 {
     "dependencies": {
-        "markdownlint": "^0.37.3"
+        "markdownlint-cli": "^0.44.0"
     }
 }
