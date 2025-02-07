@@ -12,6 +12,7 @@ tools/buf = $(tools.bindir)/buf
 tools/skywalking-eyes = $(tools.bindir)/skywalking-eyes
 
 $(tools.bindir)/%: $(tools.srcdir)/%/pin.go $(tools.srcdir)/%/go.mod
+	mkdir -p $(@D)
 	cd $(<D) && GOOS= GOARCH= go build -o $(abspath $@) $$(sed -En 's,^import _ "(.*)".*,\1,p' pin.go)
 
 # `pip install`-able things
@@ -35,6 +36,7 @@ tools/markdownlint = $(tools.bindir)/markdownlint
 tools/linkinator = $(tools.bindir)/linkinator
 
 $(tools.bindir)/%: $(tools.srcdir)/%/package.json
+	mkdir -p $(@D)
 	cd $(<D) && npm install
 	ln -sf $(<D)/node_modules/.bin/$* $@
 
