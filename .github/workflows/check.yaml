@@ -24,6 +24,7 @@ jobs:
 
       - name: Markdown Lint check
         run: |
+          ls -ahl tools/bin
           make lint.markdown
 
       - name: Yaml Lint check
