@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -53,15 +53,17 @@ type inMemoryServer struct {
 	ctx        context.Context
 	cancelFunc context.CancelFunc
 	reader     Reader
+	metrics    RequestMetrics
 }
 
-func NewInMemoryServer(port int) DynamicServer {
-	ctx, cancel := context.WithCancel(context.TODO())
+func NewInMemoryServer(ctx context.Context, port int) DynamicServer {
+	ctx, cancel := context.WithCancel(ctx)
 	return &inMemoryServer{
 		port:       port,
 		wg:         sync.WaitGroup{},
 		ctx:        ctx,
 		cancelFunc: cancel,
+		metrics:    NewNoopMetrics(),
 	}
 }
 
@@ -72,6 +74,7 @@ func (s *inMemoryServer) SetupHandler(reader Reader, prefix string) (handler htt
 	s.mux = mux.NewRouter().PathPrefix(prefix).Subrouter()
 	s.prefix = prefix
 	handler = s.mux
+	s.metrics.AddMetricsHandler(s.mux)
 	err = s.Load()
 	return
 }
@@ -107,22 +110,31 @@ func (s *inMemoryServer) Load() (err error) {
 		memLogger.Info("start to proxy", "target", proxy.Target)
 		s.mux.HandleFunc(proxy.Path, func(w http.ResponseWriter, req *http.Request) {
 			api := fmt.Sprintf("%s/%s", proxy.Target, strings.TrimPrefix(req.URL.Path, s.prefix))
+			api, err = render.Render("proxy api", api, s)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				memLogger.Error(err, "failed to render proxy api")
+				return
+			}
 			memLogger.Info("redirect to", "target", api)
 
 			targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, req.Body)
 			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
 				memLogger.Error(err, "failed to create proxy request")
 				return
 			}
 
 			resp, err := http.DefaultClient.Do(targetReq)
 			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
 				memLogger.Error(err, "failed to do proxy request")
 				return
 			}
 
 			data, err := io.ReadAll(resp.Body)
 			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
 				memLogger.Error(err, "failed to read response body")
 				return
 			}
@@ -148,10 +160,15 @@ func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 	return
 }
 
+func (s *inMemoryServer) EnableMetrics() {
+	s.metrics = NewInMemoryMetrics()
+}
+
 func (s *inMemoryServer) startObject(obj Object) {
 	// create a simple CRUD server
 	s.mux.HandleFunc("/"+obj.Name, func(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("mock server received request", req.URL.Path)
+		s.metrics.RecordRequest(req.URL.Path)
 		method := req.Method
 		w.Header().Set(util.ContentType, util.JSON)
 
@@ -210,6 +227,7 @@ func (s *inMemoryServer) startObject(obj Object) {
 
 	// handle a single object
 	s.mux.HandleFunc(fmt.Sprintf("/%s/{name}", obj.Name), func(w http.ResponseWriter, req *http.Request) {
+		s.metrics.RecordRequest(req.URL.Path)
 		w.Header().Set(util.ContentType, util.JSON)
 		objects := s.data[obj.Name]
 		if objects != nil {
@@ -278,15 +296,17 @@ func (s *inMemoryServer) startItem(item Item) {
 		headerSlices = append(headerSlices, k, v)
 	}
 
-	adHandler := &advanceHandler{item: &item}
+	adHandler := &advanceHandler{item: &item, metrics: s.metrics}
 	s.mux.HandleFunc(item.Request.Path, adHandler.handle).Methods(strings.Split(method, ",")...).Headers(headerSlices...)
 }
 
 type advanceHandler struct {
-	item *Item
+	item    *Item
+	metrics RequestMetrics
 }
 
 func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
+	h.metrics.RecordRequest(req.URL.Path)
 	memLogger.Info("receiving mock request", "name", h.item.Name, "method", req.Method, "path", req.URL.Path,
 		"encoder", h.item.Response.Encoder)
 
