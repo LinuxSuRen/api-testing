@@ -55,7 +55,9 @@ type SimpleResponse struct {
 func (s SimpleResponse) getFileName() string {
     for k, v := range s.Header {
         if k == "Content-Disposition" {
-            return strings.TrimSuffix(strings.TrimPrefix(v, `attachment; filename="`), `"`)
+            v = strings.ReplaceAll(v, "attachment; filename=", "attachment;filename=")
+            v = strings.ReplaceAll(v, `filename="`, "filename=")
+            return strings.TrimSuffix(strings.TrimPrefix(v, `attachment;filename=`), `"`)
         }
     }
     return ""
