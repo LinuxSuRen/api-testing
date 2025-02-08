@@ -68,12 +68,22 @@ go.clean: ## Clean the building output files
 	@$(LOG_TARGET)
 	rm -rf $(OUTPUT_DIR)
 
+>PHONY: go.mod.vet
+go.mod.vet:
+	@$(LOG_TARGET)
+	@go vet ./...
+
+>PHONY: go.mod.fmt
+go.mod.fmt:
+	@$(LOG_TARGET)
+	@go fmt ./...
+
 .PHONY: go.mod.lint
 lint: go.mod.lint
 go.mod.lint:
 	@$(LOG_TARGET)
 	@go mod tidy -compat=$(GO_VERSION)
-	@go fmt ./...
+	@make go.mod.fmt
 	@if test -n "$$(git status -s -- go.mod go.sum)"; then \
 		git diff --exit-code go.mod; \
 		git diff --exit-code go.sum; \

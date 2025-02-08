@@ -9,13 +9,17 @@ tools/protoc-gen-go = $(tools.bindir)/protoc-gen-go
 tools/protoc-gen-go-grpc = $(tools.bindir)/protoc-gen-go-grpc
 tools/goreleaser = $(tools.bindir)/goreleaser
 tools/buf = $(tools.bindir)/buf
+tools/skywalking-eyes = $(tools.bindir)/skywalking-eyes
 
 $(tools.bindir)/%: $(tools.srcdir)/%/pin.go $(tools.srcdir)/%/go.mod
+	mkdir -p $(@D)
 	cd $(<D) && GOOS= GOARCH= go build -o $(abspath $@) $$(sed -En 's,^import _ "(.*)".*,\1,p' pin.go)
 
 # `pip install`-able things
 # =========================
 tools/yamllint = $(tools.bindir)/yamllint
+tools/codespell = $(tools.bindir)/codespell
+
 $(tools.bindir)/%.d/venv: $(tools.srcdir)/%/requirements.txt
 	mkdir -p $(@D)
 	python3 -m venv $@
@@ -26,6 +30,16 @@ $(tools.bindir)/%: $(tools.bindir)/%.d/venv
 	else \
 		ln -sf $*.d/venv/bin/$* $@; \
 	fi
+
+# `npm install`-able things
+tools/markdownlint = $(tools.bindir)/markdownlint
+tools/linkinator = $(tools.bindir)/linkinator
+
+$(tools.bindir)/%: $(tools.srcdir)/%/package.json
+	mkdir -p $(@D)
+	cd $(<D) && npm install
+	ln -sf $(<D)/node_modules/.bin/$* $@
+	ls -ahl tools/bin
 
 tools.clean: # Remove all tools
 	@$(LOG_TARGET)
