@@ -30,6 +30,7 @@ import (
 	mathrand "math/rand"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/version"
 
@@ -180,6 +181,11 @@ var advancedFuncs = []AdvancedFunc{{
 		return hex.EncodeToString(h.Sum(nil))
 	},
 }, {
+	FuncName: "randFloat",
+	Func: func(from float64, to float64) float64 {
+		return mathrand.Float64()*(to-from) + from
+	},
+}, {
 	FuncName: "randEnum",
 	Func: func(items ...string) string {
 		return items[mathrand.Intn(len(items))]
@@ -189,7 +195,14 @@ var advancedFuncs = []AdvancedFunc{{
 	Func: func() string {
 		return fmt.Sprintf("%s@%s.com", util.String(3), util.String(3))
 	},
+}, {
+	FuncName: "uptime",
+	Func: func() string {
+		return time.Since(uptime).String()
+	},
 }}
+
+var uptime = time.Now()
 
 // GetAdvancedFuncs returns all the advanced functions
 func GetAdvancedFuncs() []AdvancedFunc {

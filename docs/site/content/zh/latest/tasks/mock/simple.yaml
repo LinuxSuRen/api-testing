@@ -7,16 +7,20 @@ items:
     response:
       header:
         server: mock
+        content-type: application/json
       body: |
         {
           "count": 1,
           "items": [{
             "title": "fix: there is a bug on page {{ randEnum "one" }}",
-            "number": 123,
+            "number": {{randInt 100 199}},
+            "float": {{randFloat 0.0 1.0}},
             "message": "{{.Response.Header.server}}",
             "author": "someone",
-            "status": "success"
-          }]
+            "status": "success",
+            "created": "{{ now.Format "2006-01-02T15:04:05Z07:00" }}"
+          }],
+          "uptime": "{{uptime}}"
         }
   - name: base64
     request:
