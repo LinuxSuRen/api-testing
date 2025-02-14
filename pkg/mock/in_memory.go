@@ -403,53 +403,63 @@ func (s *inMemoryServer) startWebhook(webhook *Webhook) (err error) {
                 memLogger.Info("stop webhook server", "name", wh.Name)
                 return
             case <-timer.C:
-                client := http.DefaultClient
-
-                payload, err := render.RenderAsReader("mock webhook server payload", wh.Request.Body, wh)
-                if err != nil {
-                    memLogger.Error(err, "Error when render payload")
-                    continue
-                }
-
-                method := util.EmptyThenDefault(wh.Request.Method, http.MethodPost)
-                api, err := render.Render("webhook request api", wh.Request.Path, s)
-                if err != nil {
-                    memLogger.Error(err, "Error when render api", "raw", wh.Request.Path)
-                    continue
-                }
-
-                var bearerToken string
-                bearerToken, err = getBearerToken(s.ctx, wh.Request)
-                if err != nil {
-                    memLogger.Error(err, "Error when render bearer token")
-                    continue
-                }
-
-                req, err := http.NewRequestWithContext(s.ctx, method, api, payload)
-                if err != nil {
-                    memLogger.Error(err, "Error when create request")
-                    continue
-                }
-
-                if bearerToken != "" {
-                    memLogger.V(7).Info("set bearer token", "token", bearerToken)
-                    req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearerToken))
-                }
-
-                for k, v := range wh.Request.Header {
-                    req.Header.Set(k, v)
-                }
-
-                resp, err := client.Do(req)
-                if err != nil {
-                    memLogger.Error(err, "Error when sending webhook")
-                } else {
-                    data, _ := io.ReadAll(resp.Body)
-                    memLogger.V(7).Info("received from webhook", "code", resp.StatusCode, "response", string(data))
+                if err = runWebhook(s.ctx, s, wh); err != nil {
+                    memLogger.Error(err, "Error when run webhook")
                 }
             }
         }
     }(webhook)
+    return
+}
+
+func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error) {
+    client := http.DefaultClient
+
+    var payload io.Reader
+    payload, err = render.RenderAsReader("mock webhook server payload", wh.Request.Body, wh)
+    if err != nil {
+        err = fmt.Errorf("error when render payload: %w", err)
+        return
+    }
+
+    method := util.EmptyThenDefault(wh.Request.Method, http.MethodPost)
+    var api string
+    api, err = render.Render("webhook request api", wh.Request.Path, objCtx)
+    if err != nil {
+        err = fmt.Errorf("error when render api: %w", err)
+        return
+    }
+
+    var bearerToken string
+    bearerToken, err = getBearerToken(ctx, wh.Request)
+    if err != nil {
+        memLogger.Error(err, "Error when render bearer token")
+        return
+    }
+
+    var req *http.Request
+    req, err = http.NewRequestWithContext(ctx, method, api, payload)
+    if err != nil {
+        memLogger.Error(err, "Error when create request")
+        return
+    }
+
+    if bearerToken != "" {
+        memLogger.V(7).Info("set bearer token", "token", bearerToken)
+        req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearerToken))
+    }
+
+    for k, v := range wh.Request.Header {
+        req.Header.Set(k, v)
+    }
+
+    resp, err := client.Do(req)
+    if err != nil {
+        err = fmt.Errorf("error when sending webhook")
+    } else {
+        data, _ := io.ReadAll(resp.Body)
+        memLogger.V(7).Info("received from webhook", "code", resp.StatusCode, "response", string(data))
+    }
     return
 }
 
@@ -459,7 +469,6 @@ type bearerToken struct {
 
 func getBearerToken(ctx context.Context, request RequestWithAuth) (token string, err error) {
     if request.BearerAPI == "" {
-        memLogger.Info("bearer token is not set")
         return
     }
 
