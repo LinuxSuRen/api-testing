@@ -12,12 +12,12 @@ items:
         {
           "count": 1,
           "items": [{
-            "title": "fix: there is a bug on page {{ randEnum "one" }}",
+            "title": "fix: there is a bug on page {{ randEnum "one" "two" "three" "four" }}",
             "number": {{randInt 100 199}},
             "float": {{randFloat 0.0 1.0}},
+            "status": "{{randWeightEnum (weightObject 4 "open") (weightObject 1 "closed")}}",
             "message": "{{.Response.Header.server}}",
-            "author": "someone",
-            "status": "success",
+            "author": "{{env "USER"}}",
             "created": "{{ now.Format "2006-01-02T15:04:05Z07:00" }}"
           }],
           "uptime": "{{uptime}}"
