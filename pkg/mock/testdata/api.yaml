@@ -55,7 +55,7 @@ proxies:
   - path: /v1/invalid-template
     target: http://localhost:{{.GetPort}
 webhooks:
-  - timer: 1ms
+  - timer: 1m
     name: baidu
     request:
       method: GET

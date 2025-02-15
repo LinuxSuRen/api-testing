@@ -1,5 +1,5 @@
 /*
-Copyright 2023-2024 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -82,8 +82,20 @@ func TestRender(t *testing.T) {
 			assert.Equal(t, 20, len(s), s)
 		},
 	}, {
+		name: "randFloat",
+		text: `{{randFloat 1 2}}`,
+		verify: func(t *testing.T, s string) {
+			assert.NotEmpty(t, s)
+		},
+	}, {
 		name: "randEnum",
 		text: `{{randEnum "a" "b" "c"}}`,
+		verify: func(t *testing.T, s string) {
+			assert.Contains(t, []string{"a", "b", "c"}, s)
+		},
+	}, {
+		name: "randWeightEnum",
+		text: `{{randWeightEnum (weightObject 1 "a") (weightObject 2 "b") (weightObject 3 "c")}}`,
 		verify: func(t *testing.T, s string) {
 			assert.Contains(t, []string{"a", "b", "c"}, s)
 		},
@@ -102,6 +114,18 @@ func TestRender(t *testing.T) {
 		},
 		verify: func(t *testing.T, s string) {
 			assert.Equal(t, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824", s)
+		},
+	}, {
+		name: "uptime",
+		text: `{{uptime}}`,
+		verify: func(t *testing.T, s string) {
+			assert.NotEmpty(t, s)
+		},
+	}, {
+		name: "uptimeSeconds",
+		text: `{{uptimeSeconds}}`,
+		verify: func(t *testing.T, s string) {
+			assert.NotEmpty(t, s)
 		},
 	}}
 	for _, tt := range tests {

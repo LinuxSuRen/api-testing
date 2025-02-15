@@ -1,5 +1,5 @@
 /*
-Copyright 2023-2024 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import (
 	mathrand "math/rand"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/version"
 
@@ -180,16 +181,58 @@ var advancedFuncs = []AdvancedFunc{{
 		return hex.EncodeToString(h.Sum(nil))
 	},
 }, {
+	FuncName: "randFloat",
+	Func: func(from float64, to float64) float64 {
+		return mathrand.Float64()*(to-from) + from
+	},
+}, {
 	FuncName: "randEnum",
 	Func: func(items ...string) string {
 		return items[mathrand.Intn(len(items))]
+	},
+}, {
+	FuncName: "weightObject",
+	Func: func(weight int, object interface{}) WeightEnum {
+		return WeightEnum{
+			Weight: weight,
+			Object: object,
+		}
+	},
+}, {
+	FuncName: "randWeightEnum",
+	Func: func(items ...WeightEnum) interface{} {
+		var newItems []interface{}
+		for _, item := range items {
+			for j := 0; j < item.Weight; j++ {
+				newItems = append(newItems, item.Object)
+			}
+		}
+		return newItems[mathrand.Intn(len(newItems))]
 	},
 }, {
 	FuncName: "randEmail",
 	Func: func() string {
 		return fmt.Sprintf("%s@%s.com", util.String(3), util.String(3))
 	},
+}, {
+	FuncName: "uptime",
+	Func: func() string {
+		return time.Since(uptime).String()
+	},
+}, {
+	FuncName: "uptimeSeconds",
+	Func: func() float64 {
+		return time.Since(uptime).Seconds()
+	},
 }}
+
+// WeightEnum is a weight enum
+type WeightEnum struct {
+	Weight int
+	Object interface{}
+}
+
+var uptime = time.Now()
 
 // GetAdvancedFuncs returns all the advanced functions
 func GetAdvancedFuncs() []AdvancedFunc {
