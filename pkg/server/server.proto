@@ -188,7 +188,7 @@ service Runner {
           post: "/api/v1/codeGenerators/history/generate"
           body: "*"
       };
-  }
+    }
 
     // converter
     rpc ListConverter(Empty) returns (SimpleList) {
@@ -643,4 +643,23 @@ message ProxyConfig {
   string http = 1;    // HTTP proxy URL
   string https = 2;   // HTTPS proxy URL
   string no = 3;      // Comma-separated list of hosts to exclude from proxying
+}
+
+service DataServer {
+    rpc Query(DataQuery) returns (DataQueryResult) {
+        option (google.api.http) = {
+            post: "/api/v1/data/query"
+            body: "*"
+        };
+    }
+}
+
+message DataQuery {
+    string type = 1;
+    string key = 2;
+    string sql = 3;
+}
+
+message DataQueryResult {
+    repeated Pair data = 1;
 }
