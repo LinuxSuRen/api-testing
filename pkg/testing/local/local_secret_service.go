@@ -121,6 +121,11 @@ func (s *localSecretService) UpdateSecret(ctx context.Context, in *server.Secret
 	return
 }
 
+func (s *localSecretService) Query(query map[string]string) (result map[string]string, err error) {
+	result = make(map[string]string)
+	return
+}
+
 func (s *localSecretService) getDataFilePath() string {
 	return filepath.Join(s.dataDir, "secret.yaml")
 }

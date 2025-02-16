@@ -32,6 +32,8 @@ service Loader {
     rpc GetVersion(server.Empty) returns (server.Version) {}
     rpc Verify(server.Empty) returns (server.ExtensionStatus) {}
     rpc PProf(server.PProfRequest) returns (server.PProfData) {}
+
+    rpc Query(server.DataQuery) returns (server.DataQueryResult) {}
 }
 
 message TestSuites {

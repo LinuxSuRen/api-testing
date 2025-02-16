@@ -306,6 +306,16 @@ func (g *gRPCLoader) PProf(name string) []byte {
 	return data.Data
 }
 
+func (g *gRPCLoader) Query(query map[string]string) (result map[string]string, err error) {
+	var dataResult *server.DataQueryResult
+	if dataResult, err = g.client.Query(context.Background(), &server.DataQuery{
+		Sql: query["sql"],
+	}); err == nil {
+		result = pairToMap(dataResult.Data)
+	}
+	return
+}
+
 func (g *gRPCLoader) Close() {
 	if g.conn != nil {
 		g.conn.Close()
