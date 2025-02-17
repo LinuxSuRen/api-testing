@@ -19,6 +19,7 @@ package remote
 import (
 	context "context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/logging"
@@ -308,8 +309,10 @@ func (g *gRPCLoader) PProf(name string) []byte {
 
 func (g *gRPCLoader) Query(query map[string]string) (result map[string]string, err error) {
 	var dataResult *server.DataQueryResult
+	fmt.Println("query", query)
 	if dataResult, err = g.client.Query(context.Background(), &server.DataQuery{
 		Sql: query["sql"],
+		Key: query["key"],
 	}); err == nil {
 		result = pairToMap(dataResult.Data)
 	}
