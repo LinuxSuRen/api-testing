@@ -472,6 +472,10 @@ func getBearerToken(ctx context.Context, request RequestWithAuth) (token string,
         return
     }
 
+    if request.BearerAPI, err = render.Render("bearer token request", request.BearerAPI, &request); err != nil {
+        return
+    }
+
     var data []byte
     if data, err = json.Marshal(&request); err == nil {
         client := http.DefaultClient
