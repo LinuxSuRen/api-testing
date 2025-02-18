@@ -1250,12 +1250,7 @@ func (s *server) Query(ctx context.Context, query *DataQuery) (result *DataQuery
 		"key": query.Key,
 	}); err == nil {
 		result = &DataQueryResult{
-			Data: []*Pair{
-				{
-					Key:   "data",
-					Value: fmt.Sprintf("%v", dataResult),
-				},
-			},
+			Data: mapToPair(dataResult),
 		}
 	}
 	return
