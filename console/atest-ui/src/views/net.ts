@@ -773,6 +773,21 @@ var SBOM = (callback: (d: any) => void) => {
       .then(callback)
 }
 
+var DataQuery = (query: string, callback: (d: any) => void) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+        'X-Store-Name': Cache.GetCurrentStore().name
+    },
+    body: JSON.stringify({
+        sql: query
+    })
+}
+  fetch(`/api/v1/data/query`, requestOptions)
+      .then(DefaultResponseProcess)
+      .then(callback)
+}
+
 export const API = {
   DefaultResponseProcess,
   GetVersion,
@@ -785,6 +800,6 @@ export const API = {
   FunctionsQuery,
   GetSecrets, DeleteSecret, CreateOrUpdateSecret,
   GetSuggestedAPIs,
-  ReloadMockServer, GetMockConfig, SBOM,
+  ReloadMockServer, GetMockConfig, SBOM, DataQuery,
   getToken
 }

@@ -7,6 +7,7 @@ import {
   Share,
   ArrowDown,
   Guide,
+  DataAnalysis
 } from '@element-plus/icons-vue'
 import { ref, watch } from 'vue'
 import { API } from './views/net'
@@ -17,6 +18,7 @@ import MockManager from './views/MockManager.vue'
 import StoreManager from './views/StoreManager.vue'
 import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
+import DataManager from './views/DataManager.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale: i18nLocale } = useI18n()
@@ -114,6 +116,10 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
           <el-icon><Guide /></el-icon>
           <template #title>{{ t('title.mock' )}}</template>
         </el-menu-item>
+        <el-menu-item index="data" test-id="data-menu">
+          <el-icon><DataAnalysis /></el-icon>
+          <template #title>{{ t('title.data' )}}</template>
+        </el-menu-item>
         <el-menu-item index="secret">
           <el-icon><document /></el-icon>
           <template #title>{{ t('title.secrets') }}</template>
@@ -142,6 +148,7 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
       </div>
       <TestingPanel v-if="panelName === 'testing'" @toHistoryPanel="toHistoryPanel"/>
       <TestingHistoryPanel v-else-if="panelName === 'history'" :ID="ID"/>
+      <DataManager v-else-if="panelName === 'data'" />
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
       <SecretManager v-else-if="panelName === 'secret'" />
