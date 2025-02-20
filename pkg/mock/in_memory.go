@@ -453,6 +453,7 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
         req.Header.Set(k, v)
     }
 
+    memLogger.Info("send webhook request", "api", api)
     resp, err := client.Do(req)
     if err != nil {
         err = fmt.Errorf("error when sending webhook")
