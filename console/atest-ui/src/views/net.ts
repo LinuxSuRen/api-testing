@@ -773,7 +773,7 @@ var SBOM = (callback: (d: any) => void) => {
       .then(callback)
 }
 
-var DataQuery = (query: string, callback: (d: any) => void) => {
+var DataQuery = (query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -786,6 +786,7 @@ var DataQuery = (query: string, callback: (d: any) => void) => {
   fetch(`/api/v1/data/query`, requestOptions)
       .then(DefaultResponseProcess)
       .then(callback)
+      .catch(errHandler)
 }
 
 export const API = {
