@@ -515,7 +515,7 @@ func (l *fileLoader) Close() {
 	// not support
 }
 
-func (l *fileLoader) Query(query map[string]string) (result map[string]string, err error) {
+func (l *fileLoader) Query(query map[string]string) (result map[string]string, items []map[string]string, err error) {
 	result = map[string]string{
 		"message": "not support",
 	}

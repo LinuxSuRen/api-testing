@@ -150,6 +150,6 @@ func (l *nonLoader) Close() {
 	// not support
 }
 
-func (l *nonLoader) Query(query map[string]string) (result map[string]string, err error) {
+func (l *nonLoader) Query(query map[string]string) (result map[string]string, items []map[string]string, err error) {
 	return
 }

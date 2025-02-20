@@ -306,13 +306,16 @@ func (g *gRPCLoader) PProf(name string) []byte {
 	return data.Data
 }
 
-func (g *gRPCLoader) Query(query map[string]string) (result map[string]string, err error) {
+func (g *gRPCLoader) Query(query map[string]string) (result map[string]string, items []map[string]string, err error) {
 	var dataResult *server.DataQueryResult
 	if dataResult, err = g.client.Query(g.ctx, &server.DataQuery{
 		Sql: query["sql"],
 		Key: query["key"],
 	}); err == nil {
 		result = pairToMap(dataResult.Data)
+		for _, item := range dataResult.Items {
+			items = append(items, pairToMap(item))
+		}
 	}
 	return
 }

@@ -27,7 +27,7 @@ type Loader interface {
 	Verify() (readOnly bool, err error)
 	PProf(name string) []byte
 
-	Query(query map[string]string) (result map[string]string, err error)
+	Query(query map[string]string) (result map[string]string, items []map[string]string, err error)
 }
 
 type Writer interface {

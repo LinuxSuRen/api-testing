@@ -8,9 +8,9 @@ const queryResult = ref([])
 
 const executeQuery = async () => {
   Cache.SetCurrentStore('mysql');
-  
+
     API.DataQuery(sqlQuery.value, (data) => {
-        queryResult.value = data
+        queryResult.value = data.data
     })
 }
 </script>

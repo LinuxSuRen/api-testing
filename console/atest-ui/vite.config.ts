@@ -34,31 +34,31 @@ export default defineConfig({
   server: {
     proxy: {
       '/server.Runner': {
-        target: 'http://127.0.0.1:9090',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       '/server.Mock': {
-        target: 'http://127.0.0.1:9090',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       '/mock/server': {
-        target: 'http://127.0.0.1:9090',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       '/browser': {
-        target: 'http://127.0.0.1:9090',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       '/v3': {
-        target: 'http://127.0.0.1:9090',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       '/oauth': {
-        target: 'http://127.0.0.1:9090',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       '/api': {
-        target: 'http://127.0.0.1:9090',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
     },

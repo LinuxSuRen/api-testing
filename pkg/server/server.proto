@@ -662,4 +662,5 @@ message DataQuery {
 
 message DataQueryResult {
     repeated Pair data = 1;
+    repeated Pairs items = 2;
 }

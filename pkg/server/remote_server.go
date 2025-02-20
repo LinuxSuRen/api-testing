@@ -1245,12 +1245,16 @@ func (s *server) Query(ctx context.Context, query *DataQuery) (result *DataQuery
 	loader := s.getLoader(ctx)
 	defer loader.Close()
 	var dataResult map[string]string
-	if dataResult, err = loader.Query(map[string]string{
+	var items []map[string]string
+	if dataResult, items, err = loader.Query(map[string]string{
 		"sql": query.Sql,
 		"key": query.Key,
 	}); err == nil {
 		result = &DataQueryResult{
 			Data: mapToPair(dataResult),
+		}
+		for _, item := range items {
+			result.Items = append(result.Items, mapToPair(item))
 		}
 	}
 	return

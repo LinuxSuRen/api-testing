@@ -13,6 +13,9 @@
     },
     {
       "name": "Mock"
+    },
+    {
+      "name": "DataServer"
     }
   ],
   "consumes": [
@@ -203,6 +206,38 @@
         ],
         "tags": [
           "Runner"
+        ]
+      }
+    },
+    "/api/v1/data/query": {
+      "post": {
+        "operationId": "DataServer_Query",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverDataQueryResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverDataQuery"
+            }
+          }
+        ],
+        "tags": [
+          "DataServer"
         ]
       }
     },
@@ -2780,6 +2815,39 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        }
+      }
+    },
+    "serverDataQuery": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "sql": {
+          "type": "string"
+        }
+      }
+    },
+    "serverDataQueryResult": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPairs"
           }
         }
       }
