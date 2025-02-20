@@ -45,7 +45,8 @@
         "functionQuery": "函数查询",
         "output": "输出",
         "proxy": "代理",
-        "secure": "安全"
+        "secure": "安全",
+        "data": "数据"
     },
     "tip": {
         "filter": "过滤",

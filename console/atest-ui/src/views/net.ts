@@ -773,20 +773,27 @@ var SBOM = (callback: (d: any) => void) => {
       .then(callback)
 }
 
-var DataQuery = (store: string, query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
-  const requestOptions = {
-    method: 'POST',
-    headers: {
-        'X-Store-Name': store
-    },
-    body: JSON.stringify({
-        sql: query
-    })
-}
-  fetch(`/api/v1/data/query`, requestOptions)
-      .then(DefaultResponseProcess)
-      .then(callback)
-      .catch(errHandler)
+var DataQuery = (store: string, kind: string, query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
+    const queryObj = {}
+    switch (kind) {
+        case 'atest-store-orm':
+            queryObj['sql'] = query;
+            break;
+        case 'atest-store-etcd':
+            queryObj['key'] = query;
+            break;
+    }
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'X-Store-Name': store
+        },
+        body: JSON.stringify(queryObj)
+    }
+    fetch(`/api/v1/data/query`, requestOptions)
+        .then(DefaultResponseProcess)
+        .then(callback)
+        .catch(errHandler)
 }
 
 export const API = {
