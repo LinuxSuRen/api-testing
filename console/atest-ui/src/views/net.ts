@@ -777,7 +777,7 @@ var DataQuery = (query: string, callback: (d: any) => void) => {
   const requestOptions = {
     method: 'POST',
     headers: {
-        'X-Store-Name': Cache.GetCurrentStore().name
+        'X-Store-Name': 'mysql' //Cache.GetCurrentStore().name
     },
     body: JSON.stringify({
         sql: query

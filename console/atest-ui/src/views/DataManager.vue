@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { API } from './net'
+import { Cache } from './cache'
 
 const sqlQuery = ref('')
 const queryResult = ref([])
 
 const executeQuery = async () => {
+  Cache.SetCurrentStore('mysql');
+  
     API.DataQuery(sqlQuery.value, (data) => {
         queryResult.value = data
     })
