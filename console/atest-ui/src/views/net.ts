@@ -773,11 +773,11 @@ var SBOM = (callback: (d: any) => void) => {
       .then(callback)
 }
 
-var DataQuery = (query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
+var DataQuery = (store: string, query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
   const requestOptions = {
     method: 'POST',
     headers: {
-        'X-Store-Name': 'mysql' //Cache.GetCurrentStore().name
+        'X-Store-Name': store
     },
     body: JSON.stringify({
         sql: query
