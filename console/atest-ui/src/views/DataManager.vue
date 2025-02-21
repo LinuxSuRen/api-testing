@@ -115,7 +115,7 @@ const executeQuery = async () => {
           </el-col>
           <el-col :span="18">
             <el-form-item>
-              <el-input v-model="sqlQuery" :placeholder="queryTip"></el-input>
+              <el-input v-model="sqlQuery" :placeholder="queryTip" @keyup.enter="executeQuery"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="2">

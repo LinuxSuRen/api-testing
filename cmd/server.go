@@ -102,7 +102,7 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 	flags.StringArrayVarP(&opt.mockConfig, "mock-config", "", nil, "The mock config files")
 	flags.StringVarP(&opt.mockPrefix, "mock-prefix", "", "/mock", "The mock server API prefix")
 	flags.StringVarP(&opt.extensionRegistry, "extension-registry", "", "docker.io", "The extension registry URL")
-	flags.DurationVarP(&opt.downloadTimeout, "download-timeout", "", time.Second*10, "The timeout of extension download")
+	flags.DurationVarP(&opt.downloadTimeout, "download-timeout", "", time.Minute, "The timeout of extension download")
 
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")

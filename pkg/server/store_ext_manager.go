@@ -103,7 +103,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 	} else {
 		binaryPath, err = s.execer.LookPath(name)
 		if err != nil {
-			err = fmt.Errorf("not found extension, try to download it.")
+			err = fmt.Errorf("not found extension, try to download it, error: %v", err)
 			go func() {
 				reader, dErr := s.ociDownloader.Download(name, "", "")
 				if dErr != nil {

@@ -21,6 +21,7 @@ This is an awesome API testing tool. 🚀
 * Pre and post handle with the API request
 * Run in server mode, and provide the [gRPC](pkg/server/server.proto) and HTTP endpoint
 * [VS Code extension](https://github.com/LinuxSuRen/vscode-api-testing) support
+* Simple Database query support
 * Multiple storage backends supported(Local, ORM Database, S3, Git, Etcd, etc.)
 * [HTTP API record](https://github.com/LinuxSuRen/atest-ext-collector)
 * Install in multiple use cases(CLI, Container, Native-Service, [Operator](https://github.com/LinuxSuRen/atest-operator), Helm, etc.)
