@@ -149,3 +149,7 @@ func (l *nonLoader) PProf(string) []byte {
 func (l *nonLoader) Close() {
 	// not support
 }
+
+func (l *nonLoader) Query(query map[string]string) (result map[string]string, items []map[string]string, err error) {
+	return
+}

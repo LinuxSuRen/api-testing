@@ -50,7 +50,8 @@
         "functionQuery": "Functions Query",
         "output": "Output",
         "proxy": "Proxy",
-        "secure": "Secure"
+        "secure": "Secure",
+        "data": "Data"
     },
     "tip": {
         "filter": "Filter Keyword",

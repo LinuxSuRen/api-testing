@@ -453,10 +453,15 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
         req.Header.Set(k, v)
     }
 
+    memLogger.Info("send webhook request", "api", api)
     resp, err := client.Do(req)
     if err != nil {
         err = fmt.Errorf("error when sending webhook")
     } else {
+        if resp.StatusCode != http.StatusOK {
+            memLogger.Info("unexpected status", "code", resp.StatusCode)
+        }
+
         data, _ := io.ReadAll(resp.Body)
         memLogger.V(7).Info("received from webhook", "code", resp.StatusCode, "response", string(data))
     }

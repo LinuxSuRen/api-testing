@@ -13,7 +13,7 @@ run-server: ## Run the API Testing server
 run-server: build-ui run-backend
 run-backend:
 	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist \
-		--extension-registry ghcr.io --download-timeout 90s
+		--extension-registry ghcr.io --download-timeout 10m
 
 .PHONY: run-console
 run-console: ## Run the API Testing console

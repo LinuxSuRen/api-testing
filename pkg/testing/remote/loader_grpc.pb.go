@@ -45,6 +45,7 @@ type LoaderClient interface {
 	GetVersion(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.Version, error)
 	Verify(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.ExtensionStatus, error)
 	PProf(ctx context.Context, in *server.PProfRequest, opts ...grpc.CallOption) (*server.PProfData, error)
+	Query(ctx context.Context, in *server.DataQuery, opts ...grpc.CallOption) (*server.DataQueryResult, error)
 }
 
 type loaderClient struct {
@@ -253,6 +254,15 @@ func (c *loaderClient) PProf(ctx context.Context, in *server.PProfRequest, opts 
 	return out, nil
 }
 
+func (c *loaderClient) Query(ctx context.Context, in *server.DataQuery, opts ...grpc.CallOption) (*server.DataQueryResult, error) {
+	out := new(server.DataQueryResult)
+	err := c.cc.Invoke(ctx, "/remote.Loader/Query", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoaderServer is the server API for Loader service.
 // All implementations must embed UnimplementedLoaderServer
 // for forward compatibility
@@ -279,6 +289,7 @@ type LoaderServer interface {
 	GetVersion(context.Context, *server.Empty) (*server.Version, error)
 	Verify(context.Context, *server.Empty) (*server.ExtensionStatus, error)
 	PProf(context.Context, *server.PProfRequest) (*server.PProfData, error)
+	Query(context.Context, *server.DataQuery) (*server.DataQueryResult, error)
 	mustEmbedUnimplementedLoaderServer()
 }
 
@@ -351,6 +362,9 @@ func (UnimplementedLoaderServer) Verify(context.Context, *server.Empty) (*server
 }
 func (UnimplementedLoaderServer) PProf(context.Context, *server.PProfRequest) (*server.PProfData, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PProf not implemented")
+}
+func (UnimplementedLoaderServer) Query(context.Context, *server.DataQuery) (*server.DataQueryResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
 }
 func (UnimplementedLoaderServer) mustEmbedUnimplementedLoaderServer() {}
 
@@ -761,6 +775,24 @@ func _Loader_PProf_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Loader_Query_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.DataQuery)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).Query(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/Query",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).Query(ctx, req.(*server.DataQuery))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Loader_ServiceDesc is the grpc.ServiceDesc for Loader service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -855,6 +887,10 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PProf",
 			Handler:    _Loader_PProf_Handler,
+		},
+		{
+			MethodName: "Query",
+			Handler:    _Loader_Query_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
