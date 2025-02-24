@@ -311,6 +311,26 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
     memLogger.Info("receiving mock request", "name", h.item.Name, "method", req.Method, "path", req.URL.Path,
         "encoder", h.item.Response.Encoder)
 
+    h.item.Param = mux.Vars(req)
+    if h.item.Param == nil {
+        h.item.Param = make(map[string]string)
+    }
+    h.item.Param["Host"] = req.Host
+    if h.item.Response.Header == nil {
+        h.item.Response.Header = make(map[string]string)
+    }
+    h.item.Response.Header[headerMockServer] = fmt.Sprintf("api-testing: %s", version.GetVersion())
+    for k, v := range h.item.Response.Header {
+        hv, hErr := render.Render("mock-server-header", v, &h.item)
+        if hErr != nil {
+            hv = v
+            memLogger.Error(hErr, "failed render mock-server-header", "value", v)
+        }
+
+        w.Header().Set(k, hv)
+    }
+    w.WriteHeader(util.ZeroThenDefault(h.item.Response.StatusCode, http.StatusOK))
+
     var err error
     if h.item.Response.Encoder == "base64" {
         h.item.Response.BodyData, err = base64.StdEncoding.DecodeString(h.item.Response.Body)
@@ -320,30 +340,13 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
             h.item.Response.BodyData, err = io.ReadAll(resp.Body)
         }
     } else {
-        h.item.Response.BodyData, err = render.RenderAsBytes("start-item", h.item.Response.Body, h.item)
+        if h.item.Response.BodyData, err = render.RenderAsBytes("start-item", h.item.Response.Body, h.item); err != nil {
+            fmt.Printf("failed to render body: %v", err)
+        }
     }
 
     if err == nil {
-        h.item.Param = mux.Vars(req)
-        if h.item.Param == nil {
-            h.item.Param = make(map[string]string)
-        }
-        h.item.Param["Host"] = req.Host
-        if h.item.Response.Header == nil {
-            h.item.Response.Header = make(map[string]string)
-        }
-        h.item.Response.Header[headerMockServer] = fmt.Sprintf("api-testing: %s", version.GetVersion())
         h.item.Response.Header[util.ContentLength] = fmt.Sprintf("%d", len(h.item.Response.BodyData))
-        for k, v := range h.item.Response.Header {
-            hv, hErr := render.Render("mock-server-header", v, &h.item)
-            if hErr != nil {
-                hv = v
-                memLogger.Error(hErr, "failed render mock-server-header", "value", v)
-            }
-
-            w.Header().Set(k, hv)
-        }
-        w.WriteHeader(util.ZeroThenDefault(h.item.Response.StatusCode, http.StatusOK))
     }
 
     writeResponse(w, h.item.Response.BodyData, err)
