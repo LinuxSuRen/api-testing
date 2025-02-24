@@ -58,7 +58,7 @@
     "start-server-and-test": "^2.0.0",
     "ts-jest": "^29.1.1",
     "typescript": "~5.0.4",
-    "vite": "^4.5.5",
+    "vite": "^6.1.1",
     "vitest": "^0.32.4",
     "vue-tsc": "^1.6.5"
   },
