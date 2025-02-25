@@ -18,6 +18,7 @@ package mock
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -142,7 +143,7 @@ func TestInMemoryServer(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		assert.Equal(t, "176", resp.Header.Get(util.ContentLength))
+		assert.Equal(t, "194", resp.Header.Get(util.ContentLength))
 		assert.Equal(t, "mock", resp.Header.Get("Server"))
 		assert.NotEmpty(t, resp.Header.Get(headerMockServer))
 
@@ -222,5 +223,20 @@ func TestInMemoryServer(t *testing.T) {
 		resp, err = http.Get(api + "/metrics")
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("go template support in response body", func(t *testing.T) {
+		repoName := "myRepo"
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/repos/%s/prs", api, repoName), nil)
+		assert.NoError(t, err)
+
+		var resp *http.Response
+		req.Header.Set("name", "rick")
+		resp, err = http.DefaultClient.Do(req)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		data, _ := io.ReadAll(resp.Body)
+		assert.Contains(t, string(data), repoName)
 	})
 }

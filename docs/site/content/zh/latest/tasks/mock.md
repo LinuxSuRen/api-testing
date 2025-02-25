@@ -84,6 +84,7 @@ items:
       body: |
         {
           "count": 1,
+          "repo": "{{.Param.repo}}",
           "items": [{
             "title": "fix: there is a bug on page {{ randEnum "one", "two" }}",
             "number": 123,
