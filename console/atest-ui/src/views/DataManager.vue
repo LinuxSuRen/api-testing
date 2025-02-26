@@ -46,7 +46,7 @@ const ormDataHandler = (data) => {
     const result = []
     const cols = new Set()
 
-    data.items.forEach(e => {
+    data.Rows.forEach(e => {
         const obj = {}
         e.data.forEach(item => {
             obj[item.key] = item.value
@@ -65,7 +65,7 @@ const ormDataHandler = (data) => {
 
 const keyValueDataHandler = (data) => {
     queryResult.value = []
-    data.data.forEach(e => {
+    data.Pairs.forEach(e => {
         const obj = {}
         obj['key'] = e.key
         obj['value'] = e.value

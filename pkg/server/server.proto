@@ -663,4 +663,11 @@ message DataQuery {
 message DataQueryResult {
     repeated Pair data = 1;
     repeated Pairs items = 2;
+    DataMeta meta = 3;
+}
+
+message DataMeta {
+    repeated string databases = 1;
+    repeated string tables = 2;
+    string currentDatabase = 3;
 }
