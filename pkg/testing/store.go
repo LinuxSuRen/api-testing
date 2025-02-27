@@ -26,6 +26,7 @@ package testing
 
 import (
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/util"
 	"os"
 	"path"
 	"strings"
@@ -186,6 +187,10 @@ func (s *storeFactory) UpdateStore(store Store) (err error) {
 		for i := range storeConfig.Stores {
 			item := storeConfig.Stores[i]
 			if item.Name == store.Name {
+				if store.Password == util.PasswordPlaceholder {
+					// the password is not changed
+					store.Password = storeConfig.Stores[i].Password
+				}
 				storeConfig.Stores[i] = store
 				exist = true
 				break

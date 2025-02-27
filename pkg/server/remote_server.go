@@ -1161,7 +1161,7 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 			storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
 			grpcStore.Ready = sErr == nil && storeStatus.Ready
 			grpcStore.ReadOnly = storeStatus.ReadOnly
-			grpcStore.Password = "******" // return a placeholder instead of the actual value for the security reason
+			grpcStore.Password = util.PasswordPlaceholder
 
 			reply.Data = append(reply.Data, grpcStore)
 		}
