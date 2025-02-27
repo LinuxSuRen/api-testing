@@ -127,6 +127,18 @@ func TestRender(t *testing.T) {
 		verify: func(t *testing.T, s string) {
 			assert.NotEmpty(t, s)
 		},
+	}, {
+		name: "url encode",
+		text: `{{urlEncode "hello world"}}`,
+		verify: func(t *testing.T, s string) {
+			assert.Equal(t, "hello+world", s)
+		},
+	}, {
+		name: "url decode",
+		text: `{{urlDecode "hello+world"}}`,
+		verify: func(t *testing.T, s string) {
+			assert.Equal(t, "hello world", s)
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
