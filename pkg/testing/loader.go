@@ -27,7 +27,15 @@ type Loader interface {
 	Verify() (readOnly bool, err error)
 	PProf(name string) []byte
 
-	Query(query map[string]string) (result map[string]string, items []map[string]string, err error)
+	Query(query map[string]string) (result DataResult, err error)
+}
+
+type DataResult struct {
+	Pairs           map[string]string
+	Rows            []map[string]string
+	Databases       []string
+	Tables          []string
+	CurrentDatabase string
 }
 
 type Writer interface {
