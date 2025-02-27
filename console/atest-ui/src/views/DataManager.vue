@@ -90,7 +90,7 @@ const keyValueDataHandler = (data) => {
 }
 
 const executeQuery = async () => {
-    API.DataQuery(store.value, kind.value, sqlQuery.value, (data) => {
+    API.DataQuery(store.value, kind.value, currentDatabase.value, sqlQuery.value, (data) => {
         switch (kind.value) {
             case 'atest-store-orm':
                 ormDataHandler(data)
