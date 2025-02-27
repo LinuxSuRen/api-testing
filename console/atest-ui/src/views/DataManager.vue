@@ -14,21 +14,7 @@ const databases = ref([])
 const tables = ref([])
 const currentDatabase = ref('')
 
-interface Tree {
-    label: string
-    children?: Tree[]
-}
-const tablesTree: Tree[] = []
-watch(tables, (t) => {
-    // clear tablesTree
-    tablesTree.splice(0, tablesTree.length)
-    t.forEach((i) => {
-        tablesTree.push({
-            label: i,
-        })
-    })
-    console.log(tablesTree)
-})
+const tablesTree = ref([])
 watch(store, (s) => {
     stores.value.forEach((e: Store) => {
         if (e.name === s) {
@@ -75,11 +61,19 @@ const ormDataHandler = (data) => {
 
     databases.value = data.meta.databases
     tables.value = data.meta.tables
+    currentDatabase.value = data.meta.currentDatabase
     queryResult.value = result
     columns.value = Array.from(cols).sort((a, b) => {
         if (a === 'id') return -1;
         if (b === 'id') return 1;
         return a.localeCompare(b);
+    })
+
+    tablesTree.value = []
+    tables.value.forEach((i) => {
+        tablesTree.value.push({
+            label: i,
+        })
     })
 }
 
@@ -129,7 +123,7 @@ const executeQuery = async () => {
               <el-option v-for="item in databases" :key="item" :label="item"
                          :value="item"></el-option>
           </el-select>
-          <el-tree :data="tablesTree" />
+          <el-tree :data="tablesTree" node-key="label" />
       </el-aside>
       <el-container>
           <el-header>
