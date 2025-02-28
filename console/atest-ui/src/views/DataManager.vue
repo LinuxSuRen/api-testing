@@ -13,6 +13,7 @@ const queryTip = ref('')
 const databases = ref([])
 const tables = ref([])
 const currentDatabase = ref('')
+const loadingStores = ref(true)
 
 const tablesTree = ref([])
 watch(store, (s) => {
@@ -45,13 +46,15 @@ watch(kind, (k) => {
 })
 
 API.GetStores((data) => {
-  stores.value = data.data
+    stores.value = data.data
 }, (e) => {
-  ElMessage({
-    showClose: true,
-    message: e.message,
-    type: 'error'
-  });
+    ElMessage({
+        showClose: true,
+        message: e.message,
+        type: 'error'
+    });
+}, () => {
+    loadingStores.value = false
 })
 
 const ormDataHandler = (data) => {
@@ -125,14 +128,14 @@ const executeQuery = async () => {
 
 <template>
   <div>
-    <el-container>
+    <el-container style="height: calc(100vh - 45px);">
       <el-aside>
-          <el-scrollbar height="1024px">
-              <el-select v-model="currentDatabase" placeholder="Select database" @change="queryTables">
+          <el-scrollbar>
+              <el-select v-model="currentDatabase" placeholder="Select database" @change="queryTables" filterable>
                   <el-option v-for="item in databases" :key="item" :label="item"
                              :value="item"></el-option>
               </el-select>
-              <el-tree :data="tablesTree" node-key="label" @node-click="queryDataFromTable"/>
+              <el-tree :data="tablesTree" node-key="label" @node-click="queryDataFromTable" highlight-current draggable/>
           </el-scrollbar>
       </el-aside>
       <el-container>
@@ -141,9 +144,9 @@ const executeQuery = async () => {
                   <el-row :gutter="10">
                       <el-col :span="4">
                           <el-form-item>
-                              <el-select v-model="store" placeholder="Select store">
+                              <el-select v-model="store" placeholder="Select store" filterable :loading="loadingStores">
                                   <el-option v-for="item in stores" :key="item.name" :label="item.name"
-                                             :value="item.name" :disabled="!item.ready" :kind="item.kind.name"></el-option>
+                                         :value="item.name" :disabled="!item.ready" :kind="item.kind.name"></el-option>
                               </el-select>
                           </el-form-item>
                       </el-col>
