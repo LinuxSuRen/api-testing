@@ -23,6 +23,14 @@ watch(store, (s) => {
         }
     })
 })
+const queryDataFromTable = (data) => {
+    sqlQuery.value = `select * from ${data.label} limit 10`
+    executeQuery()
+}
+const queryTables = () => {
+    sqlQuery.value = `show tables`
+    executeQuery()
+}
 watch(kind, (k) => {
     switch (k) {
         case 'atest-store-orm':
@@ -118,18 +126,20 @@ const executeQuery = async () => {
 <template>
   <div>
     <el-container>
-      <el-aside width="200px">
-          <el-select v-model="currentDatabase" placeholder="Select database">
-              <el-option v-for="item in databases" :key="item" :label="item"
-                         :value="item"></el-option>
-          </el-select>
-          <el-tree :data="tablesTree" node-key="label" />
+      <el-aside>
+          <el-scrollbar height="1024px">
+              <el-select v-model="currentDatabase" placeholder="Select database" @change="queryTables">
+                  <el-option v-for="item in databases" :key="item" :label="item"
+                             :value="item"></el-option>
+              </el-select>
+              <el-tree :data="tablesTree" node-key="label" @node-click="queryDataFromTable"/>
+          </el-scrollbar>
       </el-aside>
       <el-container>
           <el-header>
               <el-form @submit.prevent="executeQuery">
                   <el-row :gutter="10">
-                      <el-col :span="2">
+                      <el-col :span="4">
                           <el-form-item>
                               <el-select v-model="store" placeholder="Select store">
                                   <el-option v-for="item in stores" :key="item.name" :label="item.name"
@@ -137,7 +147,7 @@ const executeQuery = async () => {
                               </el-select>
                           </el-form-item>
                       </el-col>
-                      <el-col :span="18">
+                      <el-col :span="17">
                           <el-form-item>
                               <el-input v-model="sqlQuery" :placeholder="queryTip" @keyup.enter="executeQuery"></el-input>
                           </el-form-item>
