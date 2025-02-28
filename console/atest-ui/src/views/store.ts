@@ -81,6 +81,11 @@ const storeExtensions = [
     params: [],
     link: 'https://github.com/LinuxSuRen/atest-ext-store-etcd'
   },
+    {
+        name: 'atest-store-redis',
+        params: [],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-redis'
+    },
   {
     name: 'atest-store-mongodb',
     params: [{

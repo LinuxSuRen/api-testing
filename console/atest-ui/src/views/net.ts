@@ -783,6 +783,9 @@ var DataQuery = (store: string, kind: string, currentDatabase: string, query: st
         case 'atest-store-etcd':
             queryObj['key'] = query;
             break;
+        case 'atest-store-redis':
+            queryObj['key'] = query;
+            break;
     }
     const requestOptions = {
         method: 'POST',

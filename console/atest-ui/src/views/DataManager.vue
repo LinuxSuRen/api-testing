@@ -38,7 +38,7 @@ watch(kind, (k) => {
             sqlQuery.value = 'show tables'
             queryTip.value = 'Enter SQL query'
             break;
-        case 'atest-store-etcd':
+        case 'atest-store-etcd', 'atest-store-redis':
             sqlQuery.value = ''
             queryTip.value = 'Enter key'
             break;
@@ -113,6 +113,9 @@ const executeQuery = async () => {
                 ormDataHandler(data)
                 break;
             case 'atest-store-etcd':
+                keyValueDataHandler(data)
+                break;
+            case 'atest-store-redis':
                 keyValueDataHandler(data)
                 break;
             default:
