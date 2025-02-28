@@ -90,7 +90,7 @@ const ormDataHandler = (data) => {
 
 const keyValueDataHandler = (data) => {
     queryResult.value = []
-    data.Pairs.forEach(e => {
+    data.data.forEach(e => {
         const obj = {}
         obj['key'] = e.key
         obj['value'] = e.value
@@ -101,6 +101,12 @@ const keyValueDataHandler = (data) => {
 }
 
 const executeQuery = async () => {
+    switch (kind.value) {
+        case 'atest-store-etcd':
+            sqlQuery.value = '*'
+            break;
+    }
+
     API.DataQuery(store.value, kind.value, currentDatabase.value, sqlQuery.value, (data) => {
         switch (kind.value) {
             case 'atest-store-orm':
@@ -129,7 +135,7 @@ const executeQuery = async () => {
 <template>
   <div>
     <el-container style="height: calc(100vh - 45px);">
-      <el-aside>
+      <el-aside v-if="kind === 'atest-store-orm'">
           <el-scrollbar>
               <el-select v-model="currentDatabase" placeholder="Select database" @change="queryTables" filterable>
                   <el-option v-for="item in databases" :key="item" :label="item"

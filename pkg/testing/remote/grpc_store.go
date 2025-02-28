@@ -316,9 +316,12 @@ func (g *gRPCLoader) Query(query map[string]string) (result testing.DataResult, 
 		for _, item := range dataResult.Items {
 			result.Rows = append(result.Rows, pairToMap(item.Data))
 		}
-		result.Databases = dataResult.Meta.Databases
-		result.Tables = dataResult.Meta.Tables
-		result.CurrentDatabase = dataResult.Meta.CurrentDatabase
+
+		if dataResult.Meta != nil {
+			result.Databases = dataResult.Meta.Databases
+			result.Tables = dataResult.Meta.Tables
+			result.CurrentDatabase = dataResult.Meta.CurrentDatabase
+		}
 	}
 	return
 }
