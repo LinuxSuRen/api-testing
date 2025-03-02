@@ -150,6 +150,8 @@ watch(() => storeForm.kind.name, (name) => {
           value: '',
           defaultValue: p.defaultValue,
           description: p.description,
+          type: p.type,
+          enum: p.enum
         } as Pair)
       } else {
         pro[index].description = p.description
@@ -318,15 +320,21 @@ const storeExtLink = ref('')
                 <el-table-column label="Value">
                     <template #default="scope">
                       <div style="display: flex; align-items: center">
-                        <el-input v-model="scope.row.value" :placeholder="scope.row.defaultValue">
-                          <template #append v-if="scope.row.description">
-                            <el-tooltip :content="scope.row.description">
+                          <el-select v-model="scope.row.value" v-if="scope.row.enum">
+                            <el-option
+                                v-for="item in scope.row.enum"
+                                :key="item"
+                                :label="item"
+                                :value="item"
+                            />
+                          </el-select>
+                          <el-input-number v-model="scope.row.value" v-else-if="scope.row.type === 'number'"/>
+                            <el-input v-model="scope.row.value" :placeholder="scope.row.defaultValue" v-else/>
+                            <el-tooltip :content="scope.row.description" v-if="scope.row.description">
                               <el-icon>
                                 <QuestionFilled/>
                               </el-icon>
                             </el-tooltip>
-                          </template>
-                        </el-input>
                       </div>
                     </template>
                 </el-table-column>

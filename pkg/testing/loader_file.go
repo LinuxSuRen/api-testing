@@ -515,8 +515,8 @@ func (l *fileLoader) Close() {
 	// not support
 }
 
-func (l *fileLoader) Query(query map[string]string) (result map[string]string, items []map[string]string, err error) {
-	result = map[string]string{
+func (l *fileLoader) Query(query map[string]string) (result DataResult, err error) {
+	result.Pairs = map[string]string{
 		"message": "not support",
 	}
 	return

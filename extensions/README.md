@@ -1,15 +1,16 @@
 Ports in extensions:
 
-| Type | Name | Port |
-|------|------|------|
-| Store | [orm](https://github.com/LinuxSuRen/atest-ext-store-orm)  | 4071 |
-| Store | [s3](https://github.com/LinuxSuRen/atest-ext-store-s3)   | 4072 |
-| Store | [etcd](https://github.com/LinuxSuRen/atest-ext-store-etcd) | 4073 |
-| Store | [git](https://github.com/LinuxSuRen/atest-ext-store-git)  | 4074 |
-| Store | [mongodb](https://github.com/LinuxSuRen/atest-ext-store-mongodb) | 4075 |
+| Type | Name                                                                     | Port |
+|------|--------------------------------------------------------------------------|------|
+| Store | [orm](https://github.com/LinuxSuRen/atest-ext-store-orm)                 | 4071 |
+| Store | [s3](https://github.com/LinuxSuRen/atest-ext-store-s3)                   | 4072 |
+| Store | [etcd](https://github.com/LinuxSuRen/atest-ext-store-etcd)               | 4073 |
+| Store | [git](https://github.com/LinuxSuRen/atest-ext-store-git)                 | 4074 |
+| Store | [mongodb](https://github.com/LinuxSuRen/atest-ext-store-mongodb)         | 4075 |
+| Store | [redis](https://github.com/LinuxSuRen/atest-ext-store-redis)             |  |
 | Monitor | [docker-monitor](https://github.com/LinuxSuRen/atest-ext-monitor-docker) |  |
-| Agent | [collector](https://github.com/LinuxSuRen/atest-ext-collector) |  |
-| Secret | [Vault](https://github.com/LinuxSuRen/api-testing-vault-extension) | |
+| Agent | [collector](https://github.com/LinuxSuRen/atest-ext-collector)           |  |
+| Secret | [Vault](https://github.com/LinuxSuRen/api-testing-vault-extension)       | |
 
 ## Contribute a new extension
 

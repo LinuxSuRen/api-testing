@@ -28,6 +28,7 @@ import (
 	"fmt"
 	"io"
 	mathrand "math/rand"
+	"net/url"
 	"strings"
 	"text/template"
 	"time"
@@ -223,6 +224,17 @@ var advancedFuncs = []AdvancedFunc{{
 	FuncName: "uptimeSeconds",
 	Func: func() float64 {
 		return time.Since(uptime).Seconds()
+	},
+}, {
+	FuncName: "urlEncode",
+	Func: func(text string) string {
+		return url.QueryEscape(text)
+	},
+}, {
+	FuncName: "urlDecode",
+	Func: func(text string) (result string) {
+		result, _ = url.QueryUnescape(text)
+		return
 	},
 }}
 

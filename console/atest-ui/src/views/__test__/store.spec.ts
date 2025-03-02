@@ -19,7 +19,7 @@ import {SupportedExtension, SupportedExtensions} from "../store";
 describe("SupportedExtensions", () => {
     test('length check', () => {
         const extensions = SupportedExtensions()
-        expect(extensions.length).toBe(5)
+        expect(extensions.length).toBe(6)
     })
 
     for (const extension of SupportedExtensions()) {

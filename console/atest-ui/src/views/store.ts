@@ -22,75 +22,82 @@ interface Store {
 }
 
 const storeExtensions = [
-  {
-    name: 'atest-store-git',
-    params: [{
-      key: 'insecure'
-    }, {
-      key: 'timeout'
-    }, {
-      key: 'targetpath'
-    }, {
-      key: 'branch'
-    }, {
-      key: 'email',
-      description: 'See also: git config --local user.email xxx@xxx.com'
-    }, {
-      key: 'name',
-      description: 'See also: git config --local user.name xxx'
-    }],
-    link: 'https://github.com/LinuxSuRen/atest-ext-store-git'
-  },
-  {
-    name: 'atest-store-s3',
-    params: [{
-      key: 'accesskeyid'
-    }, {
-      key: 'secretaccesskey'
-    }, {
-      key: 'sessiontoken'
-    }, {
-      key: 'region'
-    }, {
-      key: 'disablessl'
-    }, {
-      key: 'forcepathstyle'
-    }, {
-      key: 'bucket'
-    }],
-    link: 'https://github.com/LinuxSuRen/atest-ext-store-s3'
-  },
-  {
-    name: 'atest-store-orm',
-    params: [{
-      key: 'driver',
-      defaultValue: 'mysql',
-      description: 'Supported: mysql, postgres, sqlite'
-    }, {
-      key: 'database',
-      defaultValue: 'atest'
-    }, {
-      key: 'historyLimit',
-      defaultValue: '',
-      description: 'Set the limit of the history record count'
-    }],
-    link: 'https://github.com/LinuxSuRen/atest-ext-store-orm'
-  },
-  {
-    name: 'atest-store-etcd',
-    params: [],
-    link: 'https://github.com/LinuxSuRen/atest-ext-store-etcd'
-  },
-  {
-    name: 'atest-store-mongodb',
-    params: [{
-      key: 'collection'
-    }, {
-      key: 'database',
-      defaultValue: 'atest'
-    }],
-    link: 'https://github.com/LinuxSuRen/atest-ext-store-mongodb'
-  }
+    {
+        name: 'atest-store-git',
+        params: [{
+            key: 'insecure'
+        }, {
+            key: 'timeout'
+        }, {
+            key: 'targetpath'
+        }, {
+            key: 'branch'
+        }, {
+            key: 'email',
+            description: 'See also: git config --local user.email xxx@xxx.com'
+        }, {
+            key: 'name',
+            description: 'See also: git config --local user.name xxx'
+        }],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-git'
+    },
+    {
+        name: 'atest-store-s3',
+        params: [{
+            key: 'accesskeyid'
+        }, {
+            key: 'secretaccesskey'
+        }, {
+            key: 'sessiontoken'
+        }, {
+            key: 'region'
+        }, {
+            key: 'disablessl'
+        }, {
+            key: 'forcepathstyle'
+        }, {
+            key: 'bucket'
+        }],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-s3'
+    },
+    {
+        name: 'atest-store-orm',
+        params: [{
+            key: 'driver',
+            defaultValue: 'mysql',
+            enum: ['mysql', 'postgres', 'sqlite', 'tdengine'],
+            description: 'Supported: mysql, postgres, sqlite, tdengine'
+        }, {
+            key: 'database',
+            defaultValue: 'atest'
+        }, {
+            key: 'historyLimit',
+            defaultValue: '',
+            // type: 'number',
+            description: 'Set the limit of the history record count'
+        }],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-orm'
+    },
+    {
+        name: 'atest-store-etcd',
+        params: [],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-etcd'
+    },
+    {
+        name: 'atest-store-redis',
+        params: [],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-redis'
+    },
+    {
+        name: 'atest-store-mongodb',
+        params: [{
+            key: 'collection'
+        }, {
+            key: 'database',
+            defaultValue: 'atest'
+        }],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-mongodb'
+    }
 ] as Store[]
 
 export function SupportedExtensions() {
