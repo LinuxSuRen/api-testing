@@ -17,6 +17,7 @@ const loadingStores = ref(true)
 
 const tablesTree = ref([])
 watch(store, (s) => {
+    kind.value = ''
     stores.value.forEach((e: Store) => {
         if (e.name === s) {
             kind.value = e.kind.name
@@ -39,6 +40,7 @@ watch(kind, (k) => {
     switch (k) {
         case 'atest-store-orm':
             queryTip.value = 'Enter SQL query'
+            executeQuery()
             break;
         case 'atest-store-etcd':
         case 'atest-store-redis':

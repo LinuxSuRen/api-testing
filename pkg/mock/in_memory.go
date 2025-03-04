@@ -28,6 +28,7 @@ import (
 	"sync"
 	"time"
 
+	jsonpatch "github.com/evanphx/json-patch"
 	"github.com/swaggest/openapi-go/openapi3"
 	"github.com/swaggest/rest/gorillamux"
 
@@ -120,7 +121,26 @@ func (s *inMemoryServer) Load() (err error) {
 			}
 			memLogger.Info("redirect to", "target", api)
 
-			targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, req.Body)
+			var requestBody []byte
+			if requestBody, err = io.ReadAll(req.Body); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+
+			if proxy.RequestAmend.BodyPatch != "" && len(requestBody) > 0 {
+				var patch jsonpatch.Patch
+				if patch, err = jsonpatch.DecodePatch([]byte(proxy.RequestAmend.BodyPatch)); err != nil {
+					return
+				}
+
+				fmt.Println("before patch:", string(requestBody))
+				if requestBody, err = patch.Apply(requestBody); err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("after patch:", string(requestBody))
+			}
+
+			targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, bytes.NewBuffer(requestBody))
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				memLogger.Error(err, "failed to create proxy request")
@@ -140,6 +160,7 @@ func (s *inMemoryServer) Load() (err error) {
 				memLogger.Error(err, "failed to read response body")
 				return
 			}
+			fmt.Println("received:", string(data))
 
 			for k, v := range resp.Header {
 				w.Header().Add(k, v[0])
