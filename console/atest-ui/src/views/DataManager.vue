@@ -35,8 +35,9 @@ const queryTables = () => {
 watch(kind, (k) => {
     switch (k) {
         case 'atest-store-orm':
-            sqlQuery.value = 'show tables'
+            sqlQuery.value = ''
             queryTip.value = 'Enter SQL query'
+            executeQuery()
             break;
         case 'atest-store-etcd', 'atest-store-redis':
             sqlQuery.value = ''
