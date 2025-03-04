@@ -24,25 +24,26 @@ watch(store, (s) => {
             return
         }
     })
+    currentDatabase.value = ''
+    sqlQuery.value = ''
+    executeQuery()
 })
 const queryDataFromTable = (data) => {
     sqlQuery.value = `select * from ${data.label} limit 10`
     executeQuery()
 }
 const queryTables = () => {
-    sqlQuery.value = `show tables`
+    sqlQuery.value = ``
     executeQuery()
 }
 watch(kind, (k) => {
     switch (k) {
         case 'atest-store-orm':
-            sqlQuery.value = ''
             queryTip.value = 'Enter SQL query'
             executeQuery()
             break;
         case 'atest-store-etcd':
         case 'atest-store-redis':
-            sqlQuery.value = ''
             queryTip.value = 'Enter key'
             break;
     }
