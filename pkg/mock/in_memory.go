@@ -120,7 +120,15 @@ func (s *inMemoryServer) Load() (err error) {
 			}
 			memLogger.Info("redirect to", "target", api)
 
-			targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, req.Body)
+			var requestBody []byte
+			if requestBody, err = io.ReadAll(req.Body); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+
+			if proxy.RequestAmend.BodyPatch != "" {
+			}
+
+			targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, bytes.NewBuffer(requestBody))
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				memLogger.Error(err, "failed to create proxy request")
