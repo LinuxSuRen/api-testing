@@ -37,3 +37,20 @@ items:
 proxies:
   - path: /api/v1/{part}
     target: http://atest.localhost:8080
+  - path: /open-apis/bot/v2/hook/{token}
+    target: https://open.feishu.cn/
+    requestAmend:
+      bodyPatch: |
+        [{
+          "op": "add",
+          "path": "/msg_type",
+          "value": "text"
+        }, {
+          "op": "add",
+          "path": "/content",
+          "value": {}
+        }, {
+          "op": "move",
+          "from": "/text",
+          "path": "/content/text"
+        }]
