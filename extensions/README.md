@@ -11,6 +11,7 @@ Ports in extensions:
 | Monitor | [docker-monitor](https://github.com/LinuxSuRen/atest-ext-monitor-docker) |  |
 | Agent | [collector](https://github.com/LinuxSuRen/atest-ext-collector)           |  |
 | Secret | [Vault](https://github.com/LinuxSuRen/api-testing-vault-extension)       | |
+| Data | [Swagger](https://github.com/LinuxSuRen/atest-ext-data-swagger) | |
 
 ## Contribute a new extension
 
