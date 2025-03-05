@@ -620,6 +620,12 @@ function GetSuggestedAPIs(name: string,
     .then(callback)
 }
 
+function GetSwaggers(callback: (d: any) => void) {
+    fetch(`/api/v1/swaggers`, {})
+        .then(DefaultResponseProcess)
+        .then(callback)
+}
+
 function ReloadMockServer(config: any) {
   const requestOptions = {
     method: 'POST',
@@ -812,7 +818,7 @@ export const API = {
   CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
   FunctionsQuery,
   GetSecrets, DeleteSecret, CreateOrUpdateSecret,
-  GetSuggestedAPIs,
+  GetSuggestedAPIs, GetSwaggers,
   ReloadMockServer, GetMockConfig, SBOM, DataQuery,
   getToken
 }

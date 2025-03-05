@@ -46,10 +46,15 @@ func NewStoreDownloader() PlatformAwareOCIDownloader {
 
 func (d *extensionDownloader) Download(name, tag, _ string) (reader io.Reader, err error) {
 	name = strings.TrimPrefix(name, fmt.Sprintf("atest-%s-", d.kind))
-	d.extFile = fmt.Sprintf("atest-%s-%s_%s_%s/atest-%s-%s", d.kind, name, d.os, d.arch, d.kind, name)
-	if d.os == "windows" {
-		d.extFile = fmt.Sprintf("%s.exe", d.extFile)
+	if d.os == "" {
+		d.extFile = fmt.Sprintf("atest-%s-%s.tar.gz", d.kind, name)
+	} else {
+		d.extFile = fmt.Sprintf("atest-%s-%s_%s_%s/atest-%s-%s", d.kind, name, d.os, d.arch, d.kind, name)
+		if d.os == "windows" {
+			d.extFile = fmt.Sprintf("%s.exe", d.extFile)
+		}
 	}
+
 	image := fmt.Sprintf("%s/atest-ext-%s-%s", d.imagePrefix, d.kind, name)
 	reader, err = d.OCIDownloader.Download(image, tag, d.extFile)
 	return
