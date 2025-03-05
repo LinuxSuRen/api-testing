@@ -45,6 +45,7 @@ type PlatformAwareOCIDownloader interface {
 	WithOS(string)
 	WithArch(string)
 	GetTargetFile() string
+	WithKind(string)
 	WithImagePrefix(string)
 }
 
