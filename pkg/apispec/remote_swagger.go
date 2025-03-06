@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func DownloadSwaggerData(output string, dw downloader.PlatformAwareOCIDownloader) (err error) {
@@ -104,6 +105,12 @@ func decompressData(dataFile string) (err error) {
 		}
 		if err != nil {
 			panic(err)
+		}
+
+		// Ensure the file path does not contain directory traversal sequences
+		if strings.Contains(header.Name, "..") {
+			fmt.Printf("Skipping entry with unsafe path: %s\n", header.Name)
+			continue
 		}
 
 		destPath := filepath.Join(filepath.Dir(dataFile), filepath.Base(header.Name))
