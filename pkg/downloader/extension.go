@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,30 +25,37 @@ import (
 	"strings"
 )
 
-type storeDownloader struct {
+type extensionDownloader struct {
 	OCIDownloader
 	os, arch    string
+	kind        string
 	extFile     string
 	imagePrefix string
 }
 
 func NewStoreDownloader() PlatformAwareOCIDownloader {
-	ociDownloader := &storeDownloader{
+	ociDownloader := &extensionDownloader{
 		OCIDownloader: NewDefaultOCIDownloader(),
 	}
 	ociDownloader.WithOS(runtime.GOOS)
 	ociDownloader.WithArch(runtime.GOARCH)
 	ociDownloader.WithImagePrefix("linuxsuren")
+	ociDownloader.WithKind("store")
 	return ociDownloader
 }
 
-func (d *storeDownloader) Download(name, tag, _ string) (reader io.Reader, err error) {
-	name = strings.TrimPrefix(name, "atest-store-")
-	d.extFile = fmt.Sprintf("atest-store-%s_%s_%s/atest-store-%s", name, d.os, d.arch, name)
-	if d.os == "windows" {
-		d.extFile = fmt.Sprintf("%s.exe", d.extFile)
+func (d *extensionDownloader) Download(name, tag, _ string) (reader io.Reader, err error) {
+	name = strings.TrimPrefix(name, fmt.Sprintf("atest-%s-", d.kind))
+	if d.os == "" {
+		d.extFile = fmt.Sprintf("atest-%s-%s.tar.gz", d.kind, name)
+	} else {
+		d.extFile = fmt.Sprintf("atest-%s-%s_%s_%s/atest-%s-%s", d.kind, name, d.os, d.arch, d.kind, name)
+		if d.os == "windows" {
+			d.extFile = fmt.Sprintf("%s.exe", d.extFile)
+		}
 	}
-	image := fmt.Sprintf("%s/atest-ext-store-%s", d.imagePrefix, name)
+
+	image := fmt.Sprintf("%s/atest-ext-%s-%s", d.imagePrefix, d.kind, name)
 	reader, err = d.OCIDownloader.Download(image, tag, d.extFile)
 	return
 }
@@ -64,21 +71,25 @@ func WriteTo(reader io.Reader, dir, file string) (err error) {
 	return
 }
 
-func (d *storeDownloader) GetTargetFile() string {
+func (d *extensionDownloader) GetTargetFile() string {
 	return d.extFile
 }
 
-func (d *storeDownloader) WithOS(os string) {
+func (d *extensionDownloader) WithOS(os string) {
 	d.os = os
 }
 
-func (d *storeDownloader) WithImagePrefix(imagePrefix string) {
+func (d *extensionDownloader) WithImagePrefix(imagePrefix string) {
 	d.imagePrefix = imagePrefix
 }
 
-func (d *storeDownloader) WithArch(arch string) {
+func (d *extensionDownloader) WithArch(arch string) {
 	d.arch = arch
 	if d.arch == "amd64" {
 		d.arch = "amd64_v1"
 	}
+}
+
+func (d *extensionDownloader) WithKind(kind string) {
+	d.kind = kind
 }

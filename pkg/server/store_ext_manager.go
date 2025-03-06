@@ -176,6 +176,8 @@ var ErrDownloadNotSupport = errors.New("no support")
 
 type nonDownloader struct{}
 
+var _ downloader.PlatformAwareOCIDownloader = &nonDownloader{}
+
 func (n *nonDownloader) WithBasicAuth(username string, password string) {
 	// Do nothing because this is an empty implementation
 }
@@ -194,6 +196,10 @@ func (n *nonDownloader) WithArch(string) {
 }
 
 func (n *nonDownloader) WithRegistry(string) {
+	// Do nothing because this is an empty implementation
+}
+
+func (n *nonDownloader) WithKind(string) {
 	// Do nothing because this is an empty implementation
 }
 

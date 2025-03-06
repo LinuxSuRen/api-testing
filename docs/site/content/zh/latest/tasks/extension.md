@@ -31,3 +31,9 @@ atest extension orm
 ```shell
 atest extension orm --registry ghcr.io --timeout 2ms
 ```
+
+想要下载其他类型的插件的话，可以使用下面的命令：
+
+```shell
+atest extension --kind data swagger
+```

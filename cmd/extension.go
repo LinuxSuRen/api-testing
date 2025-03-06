@@ -31,6 +31,7 @@ type extensionOption struct {
 	ociDownloader downloader.PlatformAwareOCIDownloader
 	output        string
 	registry      string
+	kind          string
 	tag           string
 	os            string
 	arch          string
@@ -53,6 +54,7 @@ func createExtensionCommand(ociDownloader downloader.PlatformAwareOCIDownloader)
 	flags.StringVarP(&opt.output, "output", "", ".", "The target directory")
 	flags.StringVarP(&opt.tag, "tag", "", "", "The extension image tag, try to find the latest one if this is empty")
 	flags.StringVarP(&opt.registry, "registry", "", "", "The target extension image registry, supported: docker.io, ghcr.io")
+	flags.StringVarP(&opt.kind, "kind", "", "store", "The extension kind")
 	flags.StringVarP(&opt.os, "os", "", runtime.GOOS, "The OS")
 	flags.StringVarP(&opt.arch, "arch", "", runtime.GOARCH, "The architecture")
 	flags.DurationVarP(&opt.timeout, "timeout", "", time.Minute, "The timeout of downloading")
@@ -66,6 +68,7 @@ func (o *extensionOption) runE(cmd *cobra.Command, args []string) (err error) {
 	o.ociDownloader.WithRegistry(o.registry)
 	o.ociDownloader.WithImagePrefix(o.imagePrefix)
 	o.ociDownloader.WithTimeout(o.timeout)
+	o.ociDownloader.WithKind(o.kind)
 	o.ociDownloader.WithContext(cmd.Context())
 
 	for _, arg := range args {

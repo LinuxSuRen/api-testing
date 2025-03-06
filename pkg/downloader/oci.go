@@ -45,6 +45,7 @@ type PlatformAwareOCIDownloader interface {
 	WithOS(string)
 	WithArch(string)
 	GetTargetFile() string
+	WithKind(string)
 	WithImagePrefix(string)
 }
 
@@ -71,6 +72,8 @@ func (d *defaultOCIDownloader) WithBasicAuth(username string, password string) {
 }
 
 func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Reader, err error) {
+	fmt.Println("start to download", image)
+
 	if d.registry == "" {
 		d.registry = getRegistry(image)
 	}

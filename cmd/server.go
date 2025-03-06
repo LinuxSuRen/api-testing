@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"net"
 	"net/http"
 	"os"
@@ -302,6 +303,15 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		_ = o.httpServer.Shutdown(ctx)
 	}()
 
+	go func() {
+		err := apispec.DownloadSwaggerData("", extDownloader)
+		if err != nil {
+			fmt.Println("failed to download swagger data", err)
+		} else {
+			fmt.Println("success to download swagger data")
+		}
+	}()
+
 	mux := runtime.NewServeMux(runtime.WithMetadata(server.MetadataStoreFunc),
 		runtime.WithMarshalerOption("application/json+pretty", &runtime.JSONPb{
 			MarshalOptions: protojson.MarshalOptions{
@@ -342,6 +352,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
 		mux.HandlePath(http.MethodGet, "/api/v1/sbom", service.SBomHandler)
+		mux.HandlePath(http.MethodGet, "/api/v1/swaggers", apispec.SwaggersHandler)
 
 		postRequestProxyFunc := postRequestProxy(o.skyWalking)
 		mux.HandlePath(http.MethodPost, "/browser/{app}", postRequestProxyFunc)

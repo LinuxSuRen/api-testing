@@ -4,7 +4,7 @@ import { reactive, ref, watch } from 'vue'
 import { Edit, CopyDocument, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
-import { NewSuggestedAPIsQuery, GetHTTPMethods } from './types'
+import { NewSuggestedAPIsQuery, GetHTTPMethods, SwaggerSuggestion } from './types'
 import EditButton from '../components/EditButton.vue'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
@@ -20,6 +20,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['updated'])
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name, props.name!)
+const querySwaggers = SwaggerSuggestion()
 
 const suite = ref({
   name: '',
@@ -325,7 +326,10 @@ const renameTestSuite = (name: string) => {
             </el-select>
           </td>
           <td>
-            <el-input class="mx-1" v-model="suite.spec.url" placeholder="API Spec URL"></el-input>
+              <el-autocomplete
+                  v-model="suite.spec.url"
+                  :fetch-suggestions="querySwaggers"
+              />
           </td>
         </tr>
       </table>

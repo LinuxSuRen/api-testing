@@ -18,8 +18,11 @@ package apispec
 
 import (
 	"github.com/go-openapi/spec"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -123,9 +126,23 @@ func ParseToSwagger(data []byte) (swagger *spec.Swagger, err error) {
 }
 
 func ParseURLToSwagger(swaggerURL string) (swagger *spec.Swagger, err error) {
+	if strings.HasPrefix(swaggerURL, "atest://") {
+		swaggerURL = strings.ReplaceAll(swaggerURL, "atest://", "")
+		swagger, err = ParseFileToSwagger(filepath.Join(home.GetUserDataDir(), swaggerURL))
+		return
+	}
+
 	var resp *http.Response
 	if resp, err = http.Get(swaggerURL); err == nil && resp != nil && resp.StatusCode == http.StatusOK {
 		swagger, err = ParseStreamToSwagger(resp.Body)
+	}
+	return
+}
+
+func ParseFileToSwagger(dataFile string) (swagger *spec.Swagger, err error) {
+	var data []byte
+	if data, err = os.ReadFile(dataFile); err == nil {
+		swagger, err = ParseToSwagger(data)
 	}
 	return
 }

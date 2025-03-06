@@ -102,6 +102,28 @@ export function NewSuggestedAPIsQuery(store: string, suite: string) {
     })
   }
 }
+
+interface SwaggerItem {
+    value: string
+}
+
+export function SwaggerSuggestion() {
+    return function (queryString: string, cb: (arg: any) => void) {
+        API.GetSwaggers((e) => {
+            var swaggers = [] as SwaggerItem[]
+            e.forEach((item: string) => {
+                swaggers.push({
+                    "value": `atest://${item}`
+                })
+            })
+
+            const results = queryString ? swaggers.filter((item: SwaggerItem) => {
+                return item.value.toLowerCase().indexOf(queryString.toLowerCase()) != -1
+            }) : swaggers
+            cb(results.slice(0, 10))
+        })
+    }
+}
 export function CreateFilter(queryString: string) {
   return (v: Pair) => {
     return v.value.toLowerCase().indexOf(queryString.toLowerCase()) !== -1
