@@ -2,18 +2,23 @@
 import { ref, watch } from 'vue'
 import { API } from './net'
 import { ElMessage } from 'element-plus'
+import { Codemirror } from 'vue-codemirror'
+import HistoryInput from '../components/HistoryInput.vue'
 
 const stores = ref([])
 const kind = ref('')
 const store = ref('')
 const sqlQuery = ref('')
 const queryResult = ref([])
+const queryResultAsJSON= ref('')
 const columns = ref([])
 const queryTip = ref('')
 const databases = ref([])
 const tables = ref([])
 const currentDatabase = ref('')
 const loadingStores = ref(true)
+const dataFormat = ref('table')
+const dataFormatOptions = ['table', 'json']
 
 const tablesTree = ref([])
 watch(store, (s) => {
@@ -78,6 +83,7 @@ const ormDataHandler = (data) => {
     tables.value = data.meta.tables
     currentDatabase.value = data.meta.currentDatabase
     queryResult.value = result
+    queryResultAsJSON.value = JSON.stringify(result, null, 2)
     columns.value = Array.from(cols).sort((a, b) => {
         if (a === 'id') return -1;
         if (b === 'id') return 1;
@@ -111,10 +117,13 @@ const executeQuery = async () => {
             break;
     }
 
-    API.DataQuery(store.value, kind.value, currentDatabase.value, sqlQuery.value, (data) => {
+    let success = false
+    try {
+        const data = await API.DataQueryAsync(store.value, kind.value, currentDatabase.value, sqlQuery.value);
         switch (kind.value) {
             case 'atest-store-orm':
                 ormDataHandler(data)
+                success = true
                 break;
             case 'atest-store-etcd':
                 keyValueDataHandler(data)
@@ -129,19 +138,20 @@ const executeQuery = async () => {
                     type: 'error'
                 });
         }
-    }, (e) => {
+    } catch (e: any) {
         ElMessage({
             showClose: true,
             message: e.message,
             type: 'error'
         });
-    })
+    }
+    return success
 }
 </script>
 
 <template>
   <div>
-    <el-container style="height: calc(100vh - 45px);">
+    <el-container style="height: calc(100vh - 50px);">
       <el-aside v-if="kind === 'atest-store-orm'">
           <el-scrollbar>
               <el-select v-model="currentDatabase" placeholder="Select database" @change="queryTables" filterable>
@@ -163,9 +173,9 @@ const executeQuery = async () => {
                               </el-select>
                           </el-form-item>
                       </el-col>
-                      <el-col :span="17">
+                      <el-col :span="16">
                           <el-form-item>
-                              <el-input v-model="sqlQuery" :placeholder="queryTip" @keyup.enter="executeQuery"></el-input>
+                              <HistoryInput :placeholder="queryTip" :callback="executeQuery" v-model="sqlQuery"/>
                           </el-form-item>
                       </el-col>
                       <el-col :span="2">
@@ -173,13 +183,20 @@ const executeQuery = async () => {
                               <el-button type="primary" @click="executeQuery">Execute</el-button>
                           </el-form-item>
                       </el-col>
+                      <el-col :span="2">
+                        <el-select v-model="dataFormat" placeholder="Select data format">
+                            <el-option v-for="item in dataFormatOptions" :key="item" :label="item" :value="item"></el-option>
+                        </el-select>
+                      </el-col>
                   </el-row>
               </el-form>
           </el-header>
           <el-main>
-              <el-table :data="queryResult">
-                  <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col"></el-table-column>
+              <el-table :data="queryResult" stripe v-if="dataFormat === 'table'">
+                  <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable/>
               </el-table>
+              <Codemirror v-else-if="dataFormat === 'json'"
+                v-model="queryResultAsJSON"/>
           </el-main>
       </el-container>
     </el-container>
