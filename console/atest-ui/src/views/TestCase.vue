@@ -973,7 +973,7 @@ const renameTestCase = (name: string) => {
       </div>
     </el-header>
 
-    <el-main style="padding-left: 5px;">
+    <el-main style="padding-left: 5px; min-height: 280px;">
       <el-tabs v-model="requestActiveTab">
         <el-tab-pane name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <template #label>

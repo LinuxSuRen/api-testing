@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { ca } from 'element-plus/es/locales.mjs'
 import { Cache } from './cache'
 
 async function DefaultResponseProcess(response: any) {
@@ -779,32 +780,38 @@ var SBOM = (callback: (d: any) => void) => {
       .then(callback)
 }
 
+interface QueryObject {
+  sql: string
+  key: string
+}
+var DataQueryAsync = (store: string, kind: string, currentDatabase: string, query: string) => {
+  const queryObj = {} as QueryObject;
+  switch (kind) {
+      case 'atest-store-orm':
+          queryObj['sql'] = query;
+          queryObj['key'] = currentDatabase;
+          break;
+      case 'atest-store-etcd':
+          queryObj['key'] = query;
+          break;
+      case 'atest-store-redis':
+          queryObj['key'] = query;
+          break;
+  }
+  const requestOptions = {
+      method: 'POST',
+      headers: {
+          'X-Store-Name': store,
+          'X-Database': currentDatabase
+      },
+      body: JSON.stringify(queryObj)
+  }
+  return fetch(`/api/v1/data/query`, requestOptions)
+      .then(DefaultResponseProcess)
+}
+
 var DataQuery = (store: string, kind: string, currentDatabase: string, query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
-    const queryObj = {}
-    switch (kind) {
-        case 'atest-store-orm':
-            queryObj['sql'] = query;
-            queryObj['key'] = currentDatabase;
-            break;
-        case 'atest-store-etcd':
-            queryObj['key'] = query;
-            break;
-        case 'atest-store-redis':
-            queryObj['key'] = query;
-            break;
-    }
-    const requestOptions = {
-        method: 'POST',
-        headers: {
-            'X-Store-Name': store,
-            'X-Database': currentDatabase
-        },
-        body: JSON.stringify(queryObj)
-    }
-    fetch(`/api/v1/data/query`, requestOptions)
-        .then(DefaultResponseProcess)
-        .then(callback)
-        .catch(errHandler)
+    DataQueryAsync(store, kind, currentDatabase, query).then(callback).catch(errHandler)
 }
 
 export const API = {
@@ -819,6 +826,6 @@ export const API = {
   FunctionsQuery,
   GetSecrets, DeleteSecret, CreateOrUpdateSecret,
   GetSuggestedAPIs, GetSwaggers,
-  ReloadMockServer, GetMockConfig, SBOM, DataQuery,
+  ReloadMockServer, GetMockConfig, SBOM, DataQuery, DataQueryAsync,
   getToken
 }
