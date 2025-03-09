@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { API } from './net'
+import type { Store } from './store'
+import type { Pair } from './types'
 import { ElMessage } from 'element-plus'
 import { Codemirror } from 'vue-codemirror'
 import HistoryInput from '../components/HistoryInput.vue'
 
-const stores = ref([])
+const stores = ref([] as Store[])
 const kind = ref('')
 const store = ref('')
 const sqlQuery = ref('')
-const queryResult = ref([])
+const queryResult = ref([] as any[])
 const queryResultAsJSON= ref('')
-const columns = ref([])
+const columns = ref([] as string[])
 const queryTip = ref('')
 const databases = ref([])
 const tables = ref([])
@@ -33,7 +35,15 @@ watch(store, (s) => {
     sqlQuery.value = ''
     executeQuery()
 })
-const queryDataFromTable = (data) => {
+
+interface QueryData {
+    items: any[]
+    data: any[]
+    label: string
+    meta: any
+}
+
+const queryDataFromTable = (data: QueryData) => {
     sqlQuery.value = `select * from ${data.label} limit 10`
     executeQuery()
 }
@@ -66,13 +76,13 @@ API.GetStores((data) => {
     loadingStores.value = false
 })
 
-const ormDataHandler = (data) => {
-    const result = []
+const ormDataHandler = (data: QueryData) => {
+    const result = [] as any[]
     const cols = new Set()
 
     data.items.forEach(e => {
         const obj = {}
-        e.data.forEach(item => {
+        e.data.forEach((item: Pair) => {
             obj[item.key] = item.value
             cols.add(item.key)
         })
@@ -98,12 +108,12 @@ const ormDataHandler = (data) => {
     })
 }
 
-const keyValueDataHandler = (data) => {
+const keyValueDataHandler = (data: QueryData) => {
     queryResult.value = []
     data.data.forEach(e => {
-        const obj = {}
-        obj['key'] = e.key
-        obj['value'] = e.value
+        const obj = new Map<string, string>();
+        obj.set('key', e.key)
+        obj.set('value', e.value)
         queryResult.value.push(obj)
 
         columns.value = ['key', 'value']
