@@ -1,0 +1,14 @@
+.git
+.idea
+*.png
+*.woff
+*.woff2
+*.eot
+*.ttf
+*.jpg
+*.ico
+*.svg
+./charts
+*.js
+./site/public/*
+./site/node_modules/*

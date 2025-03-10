@@ -1,0 +1,39 @@
+name: File Lint Check
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
+
+permissions:
+  contents: read
+
+jobs:
+  files-lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: ./tools/github-actions/setup-deps
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "21"
+
+      - name: Markdown Lint check
+        run: |
+          make lint.markdown
+
+      - name: Yaml Lint check
+        run: |
+          make lint.yaml
+
+      - name: Check License
+        run: |
+          make lint.checklicense
+
+      - name: Check Code Spell
+        run: |
+          make lint.codespell
