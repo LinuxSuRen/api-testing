@@ -15,12 +15,10 @@ const queryResult = ref([] as any[])
 const queryResultAsJSON= ref('')
 const columns = ref([] as string[])
 const queryTip = ref('')
-const databases = ref([])
-const tables = ref([])
-const currentDatabase = ref('')
 const loadingStores = ref(true)
 const dataFormat = ref('table')
 const dataFormatOptions = ['table', 'json']
+const queryDataMeta = ref({} as QueryDataMeta)
 
 const tablesTree = ref([])
 watch(store, (s) => {
@@ -31,20 +29,27 @@ watch(store, (s) => {
             return
         }
     })
-    currentDatabase.value = ''
+    queryDataMeta.currentDatabase = ''
     sqlQuery.value = ''
     executeQuery()
 })
+
+interface QueryDataMeta {
+    databases: string[]
+    tables: string[]
+    currentDatabase: string
+    duration: string    
+}
 
 interface QueryData {
     items: any[]
     data: any[]
     label: string
-    meta: any
+    meta: QueryDataMeta
 }
 
 const queryDataFromTable = (data: QueryData) => {
-    sqlQuery.value = `select * from ${data.label} limit 10`
+    sqlQuery.value = `select * from ${data.label} limit 100`
     executeQuery()
 }
 const queryTables = () => {
@@ -89,9 +94,7 @@ const ormDataHandler = (data: QueryData) => {
         result.push(obj)
     })
 
-    databases.value = data.meta.databases
-    tables.value = data.meta.tables
-    currentDatabase.value = data.meta.currentDatabase
+    queryDataMeta.value = data.meta
     queryResult.value = result
     queryResultAsJSON.value = JSON.stringify(result, null, 2)
     columns.value = Array.from(cols).sort((a, b) => {
@@ -101,7 +104,7 @@ const ormDataHandler = (data: QueryData) => {
     })
 
     tablesTree.value = []
-    tables.value.forEach((i) => {
+    queryDataMeta.value.tables.forEach((i) => {
         tablesTree.value.push({
             label: i,
         })
@@ -129,7 +132,7 @@ const executeQuery = async () => {
 
     let success = false
     try {
-        const data = await API.DataQueryAsync(store.value, kind.value, currentDatabase.value, sqlQuery.value);
+        const data = await API.DataQueryAsync(store.value, kind.value, queryDataMeta.value.currentDatabase, sqlQuery.value);
         switch (kind.value) {
             case 'atest-store-orm':
                 ormDataHandler(data)
@@ -164,8 +167,8 @@ const executeQuery = async () => {
     <el-container style="height: calc(100vh - 50px);">
       <el-aside v-if="kind === 'atest-store-orm'">
           <el-scrollbar>
-              <el-select v-model="currentDatabase" placeholder="Select database" @change="queryTables" filterable>
-                  <el-option v-for="item in databases" :key="item" :label="item"
+              <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database" @change="queryTables" filterable>
+                  <el-option v-for="item in queryDataMeta.databases" :key="item" :label="item"
                              :value="item"></el-option>
               </el-select>
               <el-tree :data="tablesTree" node-key="label" @node-click="queryDataFromTable" highlight-current draggable/>
@@ -202,6 +205,8 @@ const executeQuery = async () => {
               </el-form>
           </el-header>
           <el-main>
+              <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
+              <el-tag type="primary" v-if="queryDataMeta.duration">{{  queryDataMeta.duration }}</el-tag>
               <el-table :data="queryResult" stripe v-if="dataFormat === 'table'">
                   <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable/>
               </el-table>

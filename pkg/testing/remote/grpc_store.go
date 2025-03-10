@@ -321,6 +321,7 @@ func (g *gRPCLoader) Query(query map[string]string) (result testing.DataResult, 
 			result.Databases = dataResult.Meta.Databases
 			result.Tables = dataResult.Meta.Tables
 			result.CurrentDatabase = dataResult.Meta.CurrentDatabase
+			result.Duration = dataResult.Meta.Duration
 		}
 	}
 	return

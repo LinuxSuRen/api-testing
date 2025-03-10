@@ -670,4 +670,5 @@ message DataMeta {
     repeated string databases = 1;
     repeated string tables = 2;
     string currentDatabase = 3;
+    string duration = 4;
 }
