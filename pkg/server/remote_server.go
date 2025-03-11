@@ -1261,6 +1261,7 @@ func (s *server) Query(ctx context.Context, query *DataQuery) (result *DataQuery
 			CurrentDatabase: dataResult.CurrentDatabase,
 			Databases:       dataResult.Databases,
 			Tables:          dataResult.Tables,
+			Duration:        dataResult.Duration,
 		}
 	}
 	return

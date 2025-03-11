@@ -1,19 +1,24 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { API } from './net'
+import type { Store } from './store'
+import type { Pair } from './types'
 import { ElMessage } from 'element-plus'
+import { Codemirror } from 'vue-codemirror'
+import HistoryInput from '../components/HistoryInput.vue'
 
-const stores = ref([])
+const stores = ref([] as Store[])
 const kind = ref('')
 const store = ref('')
 const sqlQuery = ref('')
-const queryResult = ref([])
-const columns = ref([])
+const queryResult = ref([] as any[])
+const queryResultAsJSON= ref('')
+const columns = ref([] as string[])
 const queryTip = ref('')
-const databases = ref([])
-const tables = ref([])
-const currentDatabase = ref('')
 const loadingStores = ref(true)
+const dataFormat = ref('table')
+const dataFormatOptions = ['table', 'json']
+const queryDataMeta = ref({} as QueryDataMeta)
 
 const tablesTree = ref([])
 watch(store, (s) => {
@@ -24,12 +29,27 @@ watch(store, (s) => {
             return
         }
     })
-    currentDatabase.value = ''
+    queryDataMeta.currentDatabase = ''
     sqlQuery.value = ''
     executeQuery()
 })
-const queryDataFromTable = (data) => {
-    sqlQuery.value = `select * from ${data.label} limit 10`
+
+interface QueryDataMeta {
+    databases: string[]
+    tables: string[]
+    currentDatabase: string
+    duration: string    
+}
+
+interface QueryData {
+    items: any[]
+    data: any[]
+    label: string
+    meta: QueryDataMeta
+}
+
+const queryDataFromTable = (data: QueryData) => {
+    sqlQuery.value = `select * from ${data.label} limit 100`
     executeQuery()
 }
 const queryTables = () => {
@@ -61,23 +81,22 @@ API.GetStores((data) => {
     loadingStores.value = false
 })
 
-const ormDataHandler = (data) => {
-    const result = []
+const ormDataHandler = (data: QueryData) => {
+    const result = [] as any[]
     const cols = new Set()
 
     data.items.forEach(e => {
         const obj = {}
-        e.data.forEach(item => {
+        e.data.forEach((item: Pair) => {
             obj[item.key] = item.value
             cols.add(item.key)
         })
         result.push(obj)
     })
 
-    databases.value = data.meta.databases
-    tables.value = data.meta.tables
-    currentDatabase.value = data.meta.currentDatabase
+    queryDataMeta.value = data.meta
     queryResult.value = result
+    queryResultAsJSON.value = JSON.stringify(result, null, 2)
     columns.value = Array.from(cols).sort((a, b) => {
         if (a === 'id') return -1;
         if (b === 'id') return 1;
@@ -85,19 +104,19 @@ const ormDataHandler = (data) => {
     })
 
     tablesTree.value = []
-    tables.value.forEach((i) => {
+    queryDataMeta.value.tables.forEach((i) => {
         tablesTree.value.push({
             label: i,
         })
     })
 }
 
-const keyValueDataHandler = (data) => {
+const keyValueDataHandler = (data: QueryData) => {
     queryResult.value = []
     data.data.forEach(e => {
-        const obj = {}
-        obj['key'] = e.key
-        obj['value'] = e.value
+        const obj = new Map<string, string>();
+        obj.set('key', e.key)
+        obj.set('value', e.value)
         queryResult.value.push(obj)
 
         columns.value = ['key', 'value']
@@ -111,10 +130,13 @@ const executeQuery = async () => {
             break;
     }
 
-    API.DataQuery(store.value, kind.value, currentDatabase.value, sqlQuery.value, (data) => {
+    let success = false
+    try {
+        const data = await API.DataQueryAsync(store.value, kind.value, queryDataMeta.value.currentDatabase, sqlQuery.value);
         switch (kind.value) {
             case 'atest-store-orm':
                 ormDataHandler(data)
+                success = true
                 break;
             case 'atest-store-etcd':
                 keyValueDataHandler(data)
@@ -129,23 +151,24 @@ const executeQuery = async () => {
                     type: 'error'
                 });
         }
-    }, (e) => {
+    } catch (e: any) {
         ElMessage({
             showClose: true,
             message: e.message,
             type: 'error'
         });
-    })
+    }
+    return success
 }
 </script>
 
 <template>
   <div>
-    <el-container style="height: calc(100vh - 45px);">
+    <el-container style="height: calc(100vh - 50px);">
       <el-aside v-if="kind === 'atest-store-orm'">
           <el-scrollbar>
-              <el-select v-model="currentDatabase" placeholder="Select database" @change="queryTables" filterable>
-                  <el-option v-for="item in databases" :key="item" :label="item"
+              <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database" @change="queryTables" filterable>
+                  <el-option v-for="item in queryDataMeta.databases" :key="item" :label="item"
                              :value="item"></el-option>
               </el-select>
               <el-tree :data="tablesTree" node-key="label" @node-click="queryDataFromTable" highlight-current draggable/>
@@ -163,9 +186,9 @@ const executeQuery = async () => {
                               </el-select>
                           </el-form-item>
                       </el-col>
-                      <el-col :span="17">
+                      <el-col :span="16">
                           <el-form-item>
-                              <el-input v-model="sqlQuery" :placeholder="queryTip" @keyup.enter="executeQuery"></el-input>
+                              <HistoryInput :placeholder="queryTip" :callback="executeQuery" v-model="sqlQuery"/>
                           </el-form-item>
                       </el-col>
                       <el-col :span="2">
@@ -173,13 +196,24 @@ const executeQuery = async () => {
                               <el-button type="primary" @click="executeQuery">Execute</el-button>
                           </el-form-item>
                       </el-col>
+                      <el-col :span="2">
+                        <el-select v-model="dataFormat" placeholder="Select data format">
+                            <el-option v-for="item in dataFormatOptions" :key="item" :label="item" :value="item"></el-option>
+                        </el-select>
+                      </el-col>
                   </el-row>
               </el-form>
           </el-header>
           <el-main>
-              <el-table :data="queryResult">
-                  <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col"></el-table-column>
+              <div style="display: flex; gap: 8px;">
+                <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
+                <el-tag type="primary" v-if="queryDataMeta.duration">{{  queryDataMeta.duration }}</el-tag>
+              </div>
+              <el-table :data="queryResult" stripe v-if="dataFormat === 'table'">
+                  <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable/>
               </el-table>
+              <Codemirror v-else-if="dataFormat === 'json'"
+                v-model="queryResultAsJSON"/>
           </el-main>
       </el-container>
     </el-container>
