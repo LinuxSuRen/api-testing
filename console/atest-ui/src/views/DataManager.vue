@@ -205,8 +205,10 @@ const executeQuery = async () => {
               </el-form>
           </el-header>
           <el-main>
-              <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
-              <el-tag type="primary" v-if="queryDataMeta.duration">{{  queryDataMeta.duration }}</el-tag>
+              <div style="display: flex; gap: 8px;">
+                <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
+                <el-tag type="primary" v-if="queryDataMeta.duration">{{  queryDataMeta.duration }}</el-tag>
+              </div>
               <el-table :data="queryResult" stripe v-if="dataFormat === 'table'">
                   <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable/>
               </el-table>
