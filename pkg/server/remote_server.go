@@ -1262,6 +1262,7 @@ func (s *server) Query(ctx context.Context, query *DataQuery) (result *DataQuery
 			Databases:       dataResult.Databases,
 			Tables:          dataResult.Tables,
 			Duration:        dataResult.Duration,
+			Labels:          mapToPair(dataResult.Labels),
 		}
 	}
 	return

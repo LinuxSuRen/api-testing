@@ -29,7 +29,7 @@ watch(store, (s) => {
             return
         }
     })
-    queryDataMeta.currentDatabase = ''
+    queryDataMeta.value.currentDatabase = ''
     sqlQuery.value = ''
     executeQuery()
 })
@@ -38,7 +38,8 @@ interface QueryDataMeta {
     databases: string[]
     tables: string[]
     currentDatabase: string
-    duration: string    
+    duration: string
+    labels: Pair[]
 }
 
 interface QueryData {
@@ -208,6 +209,7 @@ const executeQuery = async () => {
               <div style="display: flex; gap: 8px;">
                 <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
                 <el-tag type="primary" v-if="queryDataMeta.duration">{{  queryDataMeta.duration }}</el-tag>
+                <el-tag type="primary" v-for="label in queryDataMeta.labels">{{  label.value }}</el-tag>
               </div>
               <el-table :data="queryResult" stripe v-if="dataFormat === 'table'">
                   <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable/>

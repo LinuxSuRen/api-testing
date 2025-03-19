@@ -2839,6 +2839,13 @@
         },
         "duration": {
           "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
         }
       }
     },
