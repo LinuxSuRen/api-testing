@@ -29,7 +29,7 @@ watch(store, (s) => {
             return
         }
     })
-    queryDataMeta.currentDatabase = ''
+    queryDataMeta.value.currentDatabase = ''
     sqlQuery.value = ''
     executeQuery()
 })
@@ -38,7 +38,8 @@ interface QueryDataMeta {
     databases: string[]
     tables: string[]
     currentDatabase: string
-    duration: string    
+    duration: string
+    labels: Pair[]
 }
 
 interface QueryData {
@@ -49,7 +50,7 @@ interface QueryData {
 }
 
 const queryDataFromTable = (data: QueryData) => {
-    sqlQuery.value = `select * from ${data.label} limit 100`
+    sqlQuery.value = `@selectTableLImit100_${data.label}`
     executeQuery()
 }
 const queryTables = () => {
@@ -83,7 +84,7 @@ API.GetStores((data) => {
 
 const ormDataHandler = (data: QueryData) => {
     const result = [] as any[]
-    const cols = new Set()
+    const cols = new Set<string>()
 
     data.items.forEach(e => {
         const obj = {}
@@ -92,6 +93,14 @@ const ormDataHandler = (data: QueryData) => {
             cols.add(item.key)
         })
         result.push(obj)
+    })
+
+    data.meta.labels = data.meta.labels.filter((item) => {
+        if (item.key === '_native_sql') {
+            sqlQuery.value = item.value
+            return false
+        }
+        return !item.key.startsWith('_')
     })
 
     queryDataMeta.value = data.meta
@@ -208,6 +217,7 @@ const executeQuery = async () => {
               <div style="display: flex; gap: 8px;">
                 <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
                 <el-tag type="primary" v-if="queryDataMeta.duration">{{  queryDataMeta.duration }}</el-tag>
+                <el-tag type="primary" v-for="label in queryDataMeta.labels">{{  label.value }}</el-tag>
               </div>
               <el-table :data="queryResult" stripe v-if="dataFormat === 'table'">
                   <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable/>
