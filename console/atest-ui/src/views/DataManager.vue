@@ -50,7 +50,7 @@ interface QueryData {
 }
 
 const queryDataFromTable = (data: QueryData) => {
-    sqlQuery.value = `select * from ${data.label} limit 100`
+    sqlQuery.value = `@selectTableLImit100_${data.label}`
     executeQuery()
 }
 const queryTables = () => {
@@ -84,7 +84,7 @@ API.GetStores((data) => {
 
 const ormDataHandler = (data: QueryData) => {
     const result = [] as any[]
-    const cols = new Set()
+    const cols = new Set<string>()
 
     data.items.forEach(e => {
         const obj = {}
@@ -93,6 +93,14 @@ const ormDataHandler = (data: QueryData) => {
             cols.add(item.key)
         })
         result.push(obj)
+    })
+
+    data.meta.labels = data.meta.labels.filter((item) => {
+        if (item.key === '_native_sql') {
+            sqlQuery.value = item.value
+            return false
+        }
+        return !item.key.startsWith('_')
     })
 
     queryDataMeta.value = data.meta
