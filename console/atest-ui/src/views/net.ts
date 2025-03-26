@@ -779,6 +779,43 @@ var SBOM = (callback: (d: any) => void) => {
       .then(callback)
 }
 
+<<<<<<< Updated upstream
+=======
+interface QueryObject {
+  sql: string
+  key: string
+}
+var DataQueryAsync = (store: string, kind: string, currentDatabase: string, query: string) => {
+  const queryObj = {} as QueryObject;
+  switch (kind) {
+      case 'atest-store-orm':
+          queryObj['sql'] = query;
+          queryObj['key'] = currentDatabase;
+          break;
+      case 'atest-store-iotdb':
+          queryObj['sql'] = query;
+          queryObj['key'] = currentDatabase;
+          break;
+      case 'atest-store-etcd':
+          queryObj['key'] = query;
+          break;
+      case 'atest-store-redis':
+          queryObj['key'] = query;
+          break;
+  }
+  const requestOptions = {
+      method: 'POST',
+      headers: {
+          'X-Store-Name': store,
+          'X-Database': currentDatabase
+      },
+      body: JSON.stringify(queryObj)
+  }
+  return fetch(`/api/v1/data/query`, requestOptions)
+      .then(DefaultResponseProcess)
+}
+
+>>>>>>> Stashed changes
 var DataQuery = (store: string, kind: string, currentDatabase: string, query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
     const queryObj = {}
     switch (kind) {

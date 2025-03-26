@@ -116,6 +116,10 @@ const executeQuery = async () => {
             case 'atest-store-orm':
                 ormDataHandler(data)
                 break;
+            case 'atest-store-iotdb':
+                ormDataHandler(data)
+                success = true
+                break;
             case 'atest-store-etcd':
                 keyValueDataHandler(data)
                 break;
