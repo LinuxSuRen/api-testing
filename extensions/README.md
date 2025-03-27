@@ -8,6 +8,7 @@ Ports in extensions:
 | Store | [git](https://github.com/LinuxSuRen/atest-ext-store-git)                 | 4074 |
 | Store | [mongodb](https://github.com/LinuxSuRen/atest-ext-store-mongodb)         | 4075 |
 | Store | [redis](https://github.com/LinuxSuRen/atest-ext-store-redis)             |  |
+| Store | [iotdb](https://github.com/LinuxSuRen/atest-ext-store-iotdb) | |
 | Monitor | [docker-monitor](https://github.com/LinuxSuRen/atest-ext-monitor-docker) |  |
 | Agent | [collector](https://github.com/LinuxSuRen/atest-ext-collector)           |  |
 | Secret | [Vault](https://github.com/LinuxSuRen/api-testing-vault-extension)       | |
@@ -20,6 +21,7 @@ Ports in extensions:
 * Finally, add the extension's name into function [SupportedExtensions](../console/atest-ui/src/views/store.ts).
 
 ## Naming conventions
+
 Please follow the following conventions if you want to add a new store extension:
 
 `store-xxx`
