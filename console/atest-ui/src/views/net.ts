@@ -815,6 +815,7 @@ var DataQueryAsync = (store: string, kind: string, currentDatabase: string, quer
 
 interface QueryObject {
     sql: string
+    key: string
 }
 
 var DataQuery = (store: string, kind: string, currentDatabase: string, query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {

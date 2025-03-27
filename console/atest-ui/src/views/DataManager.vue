@@ -111,7 +111,6 @@ const executeQuery = async () => {
             break;
     }
 
-    console.log('sqlisql' + sqlQuery.value)
     API.DataQuery(store.value, kind.value, currentDatabase.value, sqlQuery.value, (data) => {
         switch (kind.value) {
             case 'atest-store-orm':
