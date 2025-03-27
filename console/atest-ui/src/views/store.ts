@@ -84,6 +84,11 @@ const storeExtensions = [
         link: 'https://github.com/LinuxSuRen/atest-ext-store-orm'
     },
     {
+        name: 'atest-store-iotdb',
+        params: [],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-iotdb'
+    },
+    {
         name: 'atest-store-etcd',
         params: [],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-etcd'

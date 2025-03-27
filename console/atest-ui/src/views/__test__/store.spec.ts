@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import {SupportedExtension, SupportedExtensions} from "../store";
+import { SupportedExtension, SupportedExtensions } from "../store";
 
 describe("SupportedExtensions", () => {
     test('length check', () => {
         const extensions = SupportedExtensions()
-        expect(extensions.length).toBe(6)
+        expect(extensions.length).toBe(7)
     })
 
     for (const extension of SupportedExtensions()) {
