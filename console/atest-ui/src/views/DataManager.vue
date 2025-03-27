@@ -6,13 +6,14 @@ import type { Pair } from './types'
 import { ElMessage } from 'element-plus'
 import { Codemirror } from 'vue-codemirror'
 import HistoryInput from '../components/HistoryInput.vue'
+import type { Ref } from 'vue'
 
-const stores = ref([] as Store[])
+const stores: Ref<Store[]> = ref([])
 const kind = ref('')
 const store = ref('')
 const sqlQuery = ref('')
 const queryResult = ref([] as any[])
-const queryResultAsJSON  = ref('')
+const queryResultAsJSON = ref('')
 const columns = ref([] as string[])
 const queryTip = ref('')
 const loadingStores = ref(true)
@@ -63,6 +64,7 @@ const queryTables = () => {
 watch(kind, (k) => {
     switch (k) {
         case 'atest-store-orm':
+        case 'atest-store-iotdb':
             queryTip.value = 'Enter SQL query'
             executeQuery()
             break;
@@ -178,7 +180,7 @@ const executeQuery = async () => {
 <template>
     <div>
         <el-container style="height: calc(100vh - 50px);">
-            <el-aside v-if="kind === 'atest-store-orm'">
+            <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb'">
                 <el-scrollbar>
                     <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"
                         @change="queryTables" filterable>
