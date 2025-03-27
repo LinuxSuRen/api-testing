@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { ca } from 'element-plus/es/locales.mjs'
 import { Cache } from './cache'
 
 async function DefaultResponseProcess(response: any) {
@@ -813,11 +814,6 @@ var DataQueryAsync = (store: string, kind: string, currentDatabase: string, quer
         .then(DefaultResponseProcess)
 }
 
-interface QueryObject {
-    sql: string
-    key: string
-}
-
 var DataQuery = (store: string, kind: string, currentDatabase: string, query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
     const queryObj = {} as QueryObject
     switch (kind) {
@@ -862,6 +858,6 @@ export const API = {
     FunctionsQuery,
     GetSecrets, DeleteSecret, CreateOrUpdateSecret,
     GetSuggestedAPIs, GetSwaggers,
-    ReloadMockServer, GetMockConfig, SBOM, DataQuery,
+    ReloadMockServer, GetMockConfig, SBOM, DataQuery, DataQueryAsync,
     getToken
 }

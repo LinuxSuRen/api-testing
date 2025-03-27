@@ -15,9 +15,14 @@ limitations under the License.
 */
 import type { Pair } from './types'
 
-interface Store {
+export interface Store {
   name: string;
   link: string;
+  ready: boolean;
+  kind: {
+    name: string;
+    description: string;
+  };
   params: Pair[];
 }
 

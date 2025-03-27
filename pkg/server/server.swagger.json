@@ -2819,6 +2819,36 @@
         }
       }
     },
+    "serverDataMeta": {
+      "type": "object",
+      "properties": {
+        "databases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "currentDatabase": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        }
+      }
+    },
     "serverDataQuery": {
       "type": "object",
       "properties": {
@@ -2849,6 +2879,9 @@
             "type": "object",
             "$ref": "#/definitions/serverPairs"
           }
+        },
+        "meta": {
+          "$ref": "#/definitions/serverDataMeta"
         }
       }
     },

@@ -36,6 +36,8 @@ type DataResult struct {
 	Databases       []string
 	Tables          []string
 	CurrentDatabase string
+	Duration        string
+	Labels          map[string]string
 }
 
 type Writer interface {
