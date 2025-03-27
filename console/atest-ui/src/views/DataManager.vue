@@ -111,6 +111,7 @@ const executeQuery = async () => {
             break;
     }
 
+    console.log('sqlisql' + sqlQuery.value)
     API.DataQuery(store.value, kind.value, currentDatabase.value, sqlQuery.value, (data) => {
         switch (kind.value) {
             case 'atest-store-orm':
@@ -118,7 +119,6 @@ const executeQuery = async () => {
                 break;
             case 'atest-store-iotdb':
                 ormDataHandler(data)
-                success = true
                 break;
             case 'atest-store-etcd':
                 keyValueDataHandler(data)
@@ -144,48 +144,51 @@ const executeQuery = async () => {
 </script>
 
 <template>
-  <div>
-    <el-container style="height: calc(100vh - 45px);">
-      <el-aside v-if="kind === 'atest-store-orm'">
-          <el-scrollbar>
-              <el-select v-model="currentDatabase" placeholder="Select database" @change="queryTables" filterable>
-                  <el-option v-for="item in databases" :key="item" :label="item"
-                             :value="item"></el-option>
-              </el-select>
-              <el-tree :data="tablesTree" node-key="label" @node-click="queryDataFromTable" highlight-current draggable/>
-          </el-scrollbar>
-      </el-aside>
-      <el-container>
-          <el-header>
-              <el-form @submit.prevent="executeQuery">
-                  <el-row :gutter="10">
-                      <el-col :span="4">
-                          <el-form-item>
-                              <el-select v-model="store" placeholder="Select store" filterable :loading="loadingStores">
-                                  <el-option v-for="item in stores" :key="item.name" :label="item.name"
-                                         :value="item.name" :disabled="!item.ready" :kind="item.kind.name"></el-option>
-                              </el-select>
-                          </el-form-item>
-                      </el-col>
-                      <el-col :span="17">
-                          <el-form-item>
-                              <el-input v-model="sqlQuery" :placeholder="queryTip" @keyup.enter="executeQuery"></el-input>
-                          </el-form-item>
-                      </el-col>
-                      <el-col :span="2">
-                          <el-form-item>
-                              <el-button type="primary" @click="executeQuery">Execute</el-button>
-                          </el-form-item>
-                      </el-col>
-                  </el-row>
-              </el-form>
-          </el-header>
-          <el-main>
-              <el-table :data="queryResult">
-                  <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col"></el-table-column>
-              </el-table>
-          </el-main>
-      </el-container>
-    </el-container>
-  </div>
+    <div>
+        <el-container style="height: calc(100vh - 45px);">
+            <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb'">
+                <el-scrollbar>
+                    <el-select v-model="currentDatabase" placeholder="Select database" @change="queryTables" filterable>
+                        <el-option v-for="item in databases" :key="item" :label="item" :value="item"></el-option>
+                    </el-select>
+                    <el-tree :data="tablesTree" node-key="label" @node-click="queryDataFromTable" highlight-current
+                        draggable />
+                </el-scrollbar>
+            </el-aside>
+            <el-container>
+                <el-header>
+                    <el-form @submit.prevent="executeQuery">
+                        <el-row :gutter="10">
+                            <el-col :span="4">
+                                <el-form-item>
+                                    <el-select v-model="store" placeholder="Select store" filterable
+                                        :loading="loadingStores">
+                                        <el-option v-for="item in stores" :key="item.name" :label="item.name"
+                                            :value="item.name" :disabled="!item.ready"
+                                            :kind="item.kind.name"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="17">
+                                <el-form-item>
+                                    <el-input v-model="sqlQuery" :placeholder="queryTip"
+                                        @keyup.enter="executeQuery"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="2">
+                                <el-form-item>
+                                    <el-button type="primary" @click="executeQuery">Execute</el-button>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                </el-header>
+                <el-main>
+                    <el-table :data="queryResult">
+                        <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col"></el-table-column>
+                    </el-table>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
 </template>
