@@ -7,6 +7,7 @@ import { ElMessage } from 'element-plus'
 import { Codemirror } from 'vue-codemirror'
 import HistoryInput from '../components/HistoryInput.vue'
 import type { Ref } from 'vue'
+import { Refresh } from '@element-plus/icons-vue'
 
 const stores: Ref<Store[]> = ref([])
 const kind = ref('')
@@ -138,6 +139,9 @@ const keyValueDataHandler = (data: QueryData) => {
 }
 
 const executeQuery = async () => {
+    executeWithQuery(sqlQuery.value)
+}
+const executeWithQuery = async (sql: string) => {
     switch (kind.value) {
         case 'atest-store-etcd':
             sqlQuery.value = '*'
@@ -146,7 +150,7 @@ const executeQuery = async () => {
 
     let success = false
     try {
-        const data = await API.DataQueryAsync(store.value, kind.value, queryDataMeta.value.currentDatabase, sqlQuery.value);
+        const data = await API.DataQueryAsync(store.value, kind.value, queryDataMeta.value.currentDatabase, sql);
         switch (kind.value) {
             case 'atest-store-orm':
             case 'atest-store-iotdb':
@@ -184,6 +188,9 @@ const executeQuery = async () => {
                 <el-scrollbar>
                     <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"
                         @change="queryTables" filterable>
+                        <template #header>
+                            <el-button type="primary" :icon="Refresh" @click="executeWithQuery('')"></el-button>
+                        </template>
                         <el-option v-for="item in queryDataMeta.databases" :key="item" :label="item"
                             :value="item"></el-option>
                     </el-select>
