@@ -6,6 +6,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery, GetHTTPMethods, SwaggerSuggestion } from './types'
 import EditButton from '../components/EditButton.vue'
+import HistoryInput from '../components/HistoryInput.vue'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 import { API } from './net'
@@ -301,12 +302,7 @@ const renameTestSuite = (name: string) => {
       {{ t('tip.testsuite') }}<EditButton :value="suite.name" @changed="renameTestSuite"/>
 
       <el-form-item :label="t('tip.apiAddress')" prop="api">
-        <el-input
-          class="w-50 m-2"
-          v-model="suite.api"
-          placeholder="API"
-          test-id="suite-editor-api"
-        ></el-input>
+        <HistoryInput placeholder="API" v-model="suite.api" group="apiAddress" />
       </el-form-item>
       <table style="width: 100%">
         <tr>

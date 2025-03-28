@@ -7,6 +7,7 @@ import { ElMessage } from 'element-plus'
 import { Codemirror } from 'vue-codemirror'
 import HistoryInput from '../components/HistoryInput.vue'
 import type { Ref } from 'vue'
+import { Refresh, Document } from '@element-plus/icons-vue'
 
 const stores: Ref<Store[]> = ref([])
 const kind = ref('')
@@ -55,6 +56,10 @@ interface QueryData {
 
 const queryDataFromTable = (data: QueryData) => {
     sqlQuery.value = `@selectTableLImit100_${data.label}`
+    executeQuery()
+}
+const describeTable = (data: QueryData) => {
+    sqlQuery.value = `@describeTable_${data.label}`
     executeQuery()
 }
 const queryTables = () => {
@@ -138,6 +143,9 @@ const keyValueDataHandler = (data: QueryData) => {
 }
 
 const executeQuery = async () => {
+    return executeWithQuery(sqlQuery.value)
+}
+const executeWithQuery = async (sql: string) => {
     switch (kind.value) {
         case 'atest-store-etcd':
             sqlQuery.value = '*'
@@ -146,7 +154,7 @@ const executeQuery = async () => {
 
     let success = false
     try {
-        const data = await API.DataQueryAsync(store.value, kind.value, queryDataMeta.value.currentDatabase, sqlQuery.value);
+        const data = await API.DataQueryAsync(store.value, kind.value, queryDataMeta.value.currentDatabase, sql);
         switch (kind.value) {
             case 'atest-store-orm':
             case 'atest-store-iotdb':
@@ -184,11 +192,21 @@ const executeQuery = async () => {
                 <el-scrollbar>
                     <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"
                         @change="queryTables" filterable>
+                        <template #header>
+                            <el-button type="primary" :icon="Refresh" @click="executeWithQuery('')"></el-button>
+                        </template>
                         <el-option v-for="item in queryDataMeta.databases" :key="item" :label="item"
                             :value="item"></el-option>
                     </el-select>
-                    <el-tree :data="tablesTree" node-key="label" @node-click="queryDataFromTable" highlight-current
-                        draggable />
+                    <el-tree :data="tablesTree" node-key="label" highlight-current
+                        draggable>
+                        <template #default="{node, data}">
+                            <span @click="queryDataFromTable(data)">
+                                {{ node.label }} 
+                            </span>
+                            <el-icon style="margin-left: 6px;" @click="describeTable(data)" v-if="kind === 'atest-store-orm'"><Document /></el-icon>
+                        </template>
+                    </el-tree>
                 </el-scrollbar>
             </el-aside>
             <el-container>
