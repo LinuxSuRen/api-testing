@@ -139,7 +139,7 @@ const keyValueDataHandler = (data: QueryData) => {
 }
 
 const executeQuery = async () => {
-    executeWithQuery(sqlQuery.value)
+    return executeWithQuery(sqlQuery.value)
 }
 const executeWithQuery = async (sql: string) => {
     switch (kind.value) {

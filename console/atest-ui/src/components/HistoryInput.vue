@@ -28,7 +28,7 @@ const props = defineProps({
     type: Number,
     default: 10
   },
-  key: {
+  group: {
     type: String,
     default: 'history'
   },
@@ -74,7 +74,7 @@ const handleEnter = async () => {
     return;
   }
 
-  const history = JSON.parse(getStorage().getItem(props.key) || '[]')
+  const history = JSON.parse(getStorage().getItem(props.group) || '[]')
   const existingItem = history.find((item: HistoryItem) => item.value === input.value)
 
   if (existingItem) {
@@ -89,18 +89,18 @@ const handleEnter = async () => {
     history.shift()
   }
 
-  getStorage().setItem(props.key, JSON.stringify(history))
+  getStorage().setItem(props.group, JSON.stringify(history))
   suggestions.value = history
 }
 
 const loadHistory = () => {
-  suggestions.value = JSON.parse(getStorage().getItem('history') || '[]')
+  suggestions.value = JSON.parse(getStorage().getItem(props.group) || '[]')
 }
 
 const deleteHistoryItem = (item: HistoryItem) => {
-  const history = JSON.parse(getStorage().getItem(props.key) || '[]')
+  const history = JSON.parse(getStorage().getItem(props.group) || '[]')
   const updatedHistory = history.filter((historyItem: HistoryItem) => historyItem.value !== item.value)
-  getStorage().setItem(props.key, JSON.stringify(updatedHistory))
+  getStorage().setItem(props.group, JSON.stringify(updatedHistory))
   suggestions.value = updatedHistory
 }
 
