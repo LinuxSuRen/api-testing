@@ -89,6 +89,14 @@ const storeExtensions = [
         link: 'https://github.com/LinuxSuRen/atest-ext-store-iotdb'
     },
     {
+        name: 'atest-store-cassandra',
+        params: [{
+            key: 'keyspace',
+            defaultValue: ''
+        }],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-cassandra'
+    },
+    {
         name: 'atest-store-etcd',
         params: [],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-etcd'

@@ -59,7 +59,13 @@ const queryDataFromTable = (data: QueryData) => {
     executeQuery()
 }
 const describeTable = (data: QueryData) => {
-    sqlQuery.value = `@describeTable_${data.label}`
+    switch (kind.value) {
+        case 'atest-store-cassandra':
+            sqlQuery.value = `@describeTable_${queryDataMeta.value.currentDatabase}:${data.label}`
+            break
+        default:
+            sqlQuery.value = `@describeTable_${data.label}`
+    }
     executeQuery()
 }
 const queryTables = () => {
@@ -69,6 +75,7 @@ const queryTables = () => {
 watch(kind, (k) => {
     switch (k) {
         case 'atest-store-orm':
+        case 'atest-store-cassandra':
         case 'atest-store-iotdb':
             queryTip.value = 'Enter SQL query'
             executeQuery()
@@ -157,6 +164,7 @@ const executeWithQuery = async (sql: string) => {
         const data = await API.DataQueryAsync(store.value, kind.value, queryDataMeta.value.currentDatabase, sql);
         switch (kind.value) {
             case 'atest-store-orm':
+            case 'atest-store-cassandra':
             case 'atest-store-iotdb':
                 ormDataHandler(data)
                 success = true
@@ -188,7 +196,7 @@ const executeWithQuery = async (sql: string) => {
 <template>
     <div>
         <el-container style="height: calc(100vh - 50px);">
-            <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb'">
+            <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra'">
                 <el-scrollbar>
                     <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"
                         @change="queryTables" filterable>
@@ -204,7 +212,7 @@ const executeWithQuery = async (sql: string) => {
                             <span @click="queryDataFromTable(data)">
                                 {{ node.label }} 
                             </span>
-                            <el-icon style="margin-left: 6px;" @click="describeTable(data)" v-if="kind === 'atest-store-orm'"><Document /></el-icon>
+                            <el-icon style="margin-left: 6px;" @click="describeTable(data)" v-if="kind === 'atest-store-orm' || kind === 'atest-store-cassandra'"><Document /></el-icon>
                         </template>
                     </el-tree>
                 </el-scrollbar>
