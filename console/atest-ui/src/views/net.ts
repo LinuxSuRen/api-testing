@@ -788,9 +788,7 @@ var DataQueryAsync = (store: string, kind: string, currentDatabase: string, quer
     const queryObj = {} as QueryObject;
     switch (kind) {
         case 'atest-store-orm':
-            queryObj['sql'] = query;
-            queryObj['key'] = currentDatabase;
-            break;
+        case 'atest-store-cassandra':
         case 'atest-store-iotdb':
             queryObj['sql'] = query;
             queryObj['key'] = currentDatabase;
