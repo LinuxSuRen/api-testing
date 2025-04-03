@@ -30,6 +30,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/expr-lang/expr/builtin"
@@ -1155,19 +1156,29 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 		reply = &Stores{
 			Data: make([]*Store, 0),
 		}
+		wg := sync.WaitGroup{}
+		mu := sync.Mutex{}
 		for _, item := range stores {
-			grpcStore := ToGRPCStore(item)
-			if item.Disabled {
-				continue
-			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
 
-			storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
-			grpcStore.Ready = sErr == nil && storeStatus.Ready
-			grpcStore.ReadOnly = storeStatus.ReadOnly
-			grpcStore.Password = util.PasswordPlaceholder
+				grpcStore := ToGRPCStore(item)
+				if item.Disabled {
+					return
+				}
 
-			reply.Data = append(reply.Data, grpcStore)
+				storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
+				grpcStore.Ready = sErr == nil && storeStatus.Ready
+				grpcStore.ReadOnly = storeStatus.ReadOnly
+				grpcStore.Password = util.PasswordPlaceholder
+
+				mu.Lock()
+				reply.Data = append(reply.Data, grpcStore)
+				mu.Unlock()
+			}()
 		}
+		wg.Wait()
 		reply.Data = append(reply.Data, &Store{
 			Name:  "local",
 			Kind:  &StoreKind{},
