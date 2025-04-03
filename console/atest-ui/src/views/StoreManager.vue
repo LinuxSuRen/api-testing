@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { Edit, Delete, QuestionFilled, Help } from '@element-plus/icons-vue'
+import { Edit, Delete, QuestionFilled, Help, Refresh } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
 import { API } from './net'
@@ -9,6 +9,7 @@ import { UIAPI } from './net-vue'
 import { SupportedExtensions, SupportedExtension } from './store'
 import { useI18n } from 'vue-i18n'
 import { Magic } from './magicKeys'
+import Button from '../components/Button.vue'
 
 const { t } = useI18n()
 
@@ -69,7 +70,7 @@ loadStores()
 Magic.Keys(loadStores, ['Alt+KeyR'])
 
 function deleteStore(name: string) {
-  API.DeleteStore(name, (e) => {
+  API.DeleteStore(name, () => {
     ElMessage({
       message: 'Deleted.',
       type: 'success'
@@ -207,8 +208,8 @@ const storeExtLink = ref('')
 <template>
     <div>Store Manager</div>
     <div>
-        <el-button type="primary" @click="addStore" :icon="Edit">{{t('button.new')}}</el-button>
-        <el-button type="primary" @click="loadStores">{{t('button.refresh')}}</el-button>
+        <Button type="primary" @click="addStore" :icon="Edit">{{t('button.new')}}</Button>
+        <Button type="primary" @click="loadStores" :icon="Refresh">{{t('button.refresh')}}</Button>
     </div>
     <el-table :data="stores" style="width: 100%" v-loading=storesLoading>
       <el-table-column :label="t('field.name')" width="180">
@@ -254,8 +255,8 @@ const storeExtLink = ref('')
       <el-table-column :label="t('field.operations')" width="220">
         <template #default="scope">
           <div style="display: flex; align-items: center" v-if="scope.row.name !== 'local'">
-            <el-button type="primary" @click="deleteStore(scope.row.name)" :icon="Delete">{{t('button.delete')}}</el-button>
-            <el-button type="primary" @click="editStore(scope.row.name)" :icon="Edit">{{t('button.edit')}}</el-button>
+            <Button type="primary" @click="deleteStore(scope.row.name)" :icon="Delete">{{t('button.delete')}}</Button>
+            <Button type="primary" @click="editStore(scope.row.name)" :icon="Edit">{{t('button.edit')}}</Button>
           </div>
         </template>
       </el-table-column>
@@ -265,7 +266,7 @@ const storeExtLink = ref('')
       Follow <el-link href="https://linuxsuren.github.io/api-testing/#storage" target="_blank">the instructions</el-link> to configure the storage plugins.
     </div>
 
-    <el-dialog v-model="dialogVisible" :title="t('title.createStore')" width="30%" draggable>
+    <el-dialog v-model="dialogVisible" :title="t(createAction? 'title.createStore': 'title.updateStore')" width="30%" draggable>
       <template #footer>
       <span class="dialog-footer">
         <el-form
@@ -341,18 +342,18 @@ const storeExtLink = ref('')
             </el-table>
           </el-form-item>
           <el-form-item>
-            <el-button
+            <Button
               type="primary"
               @click="storeVerify(storeFormRef)"
               test-id="store-form-verify"
-              >{{t('button.verify')}}</el-button
+              >{{t('button.verify')}}</Button
             >
-            <el-button
+            <Button
               type="primary"
               @click="submitForm(storeFormRef)"
               v-loading="creatingLoading"
               test-id="store-form-submit"
-              >{{t('button.submit')}}</el-button
+              >{{t('button.submit')}}</Button
             >
           </el-form-item>
         </el-form>

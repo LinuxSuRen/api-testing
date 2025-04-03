@@ -295,13 +295,13 @@ function DeleteTestCase(testcase: TestCase,
         .then(callback).catch(emptyOrDefault(errHandle))
 }
 
-interface RunTestCaseRequest {
+export interface RunTestCaseRequest {
     suiteName: string
     name: string
     parameters: any
 }
 
-interface BatchRunTestCaseRequest {
+export interface BatchRunTestCaseRequest {
     count: number
     interval: string
     request: RunTestCaseRequest

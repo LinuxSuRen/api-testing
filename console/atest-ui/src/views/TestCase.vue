@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Edit, Delete, Search, CopyDocument } from '@element-plus/icons-vue'
+import { Edit, Delete, Search, CopyDocument, Help } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
 import type { Pair, TestResult, TestCaseWithSuite, TestCase } from './types'
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from './types'
+import Button from '../components/Button.vue'
 import { Cache } from './cache'
 import { API } from './net'
 import EditButton from '../components/EditButton.vue'
@@ -125,6 +126,7 @@ const handleTestResult = (e: any) => {
     testResult.value.bodyLength = e.body.length
     testResult.value.bodyObject = JSON.parse(e.body);
     testResult.value.originBodyObject = JSON.parse(e.body);
+    responseBodyFilter()
   }
 
     Cache.SetTestCaseResponseCache(suite + '-' + name, {
@@ -162,7 +164,7 @@ function responseBodyFilter() {
       json: testResult.value.originBodyObject,
       resultType: 'value'
     })
-    testResult.value.bodyObject = query[0]
+    testResult.value.bodyObject = query
   }
 }
 
@@ -905,16 +907,16 @@ const renameTestCase = (name: string) => {
   <el-container style="height: 100%;">
     <el-header style="padding-left: 5px;">
       <div style="margin-bottom: 5px">
-        <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
+        <Button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
           disabled v-if="Cache.GetCurrentStore().readOnly || isHistoryTestCase"
-          >{{ t('button.save') }}</el-button>
-        <el-button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
+          >{{ t('button.save') }}</Button>
+        <Button type="primary" @click="saveTestCase" :icon="Edit" v-loading="saveLoading"
           v-if="!Cache.GetCurrentStore().readOnly && !isHistoryTestCase"
-          >{{ t('button.save') }}</el-button>
-        <el-button type="danger" @click="deleteCase" :icon="Delete">{{ t('button.delete') }}</el-button>
-        <el-button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument" v-if="!isHistoryTestCase">{{ t('button.duplicate') }}</el-button>
-        <el-button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</el-button>
-        <el-button type="primary" v-if="!isHistoryTestCase && Cache.GetCurrentStore().kind.name == 'atest-store-orm'" @click="openHistoryDialog">{{ t('button.viewHistory') }}</el-button>
+          >{{ t('button.save') }}</Button>
+        <Button type="danger" @click="deleteCase" :icon="Delete">{{ t('button.delete') }}</Button>
+        <Button type="primary" @click="openDuplicateTestCaseDialog" :icon="CopyDocument" v-if="!isHistoryTestCase">{{ t('button.duplicate') }}</Button>
+        <Button type="primary" @click="openCodeDialog">{{ t('button.generateCode') }}</Button>
+        <Button type="primary" v-if="!isHistoryTestCase && Cache.GetCurrentStore().kind.name == 'atest-store-orm'" @click="openHistoryDialog">{{ t('button.viewHistory') }}</Button>
         <span v-if="isHistoryTestCase" style="margin-left: 15px;">{{ t('tip.runningAt') }}{{ HistoryTestCaseCreateTime }}</span>
         <EditButton :value="props.name" @changed="renameTestCase"/>
       </div>
@@ -1060,8 +1062,8 @@ const renameTestCase = (name: string) => {
 
         <el-tab-pane name="body">
           <span style="margin-right: 10px; padding-right: 5px;">
-            <el-button type="primary" @click="jsonFormat(4)">Beautify</el-button>
-            <el-button type="primary" @click="jsonFormat(0)">Minify</el-button>
+            <Button type="primary" @click="jsonFormat(4)">Beautify</Button>
+            <Button type="primary" @click="jsonFormat(0)">Minify</Button>
             <el-text class="mx-1">Choose the body format</el-text>
           </span>
           <template #label>
@@ -1221,8 +1223,8 @@ const renameTestCase = (name: string) => {
                 :value="item.key"
               />
             </el-select>
-            <el-button type="primary" @click="generateCode">{{ t('button.refresh') }}</el-button>
-            <el-button type="primary" @click="copyCode">{{ t('button.copy') }}</el-button>
+            <Button type="primary" @click="generateCode">{{ t('button.refresh') }}</Button>
+            <Button type="primary" @click="copyCode">{{ t('button.copy') }}</Button>
           </div>
           <Codemirror v-model="currentCodeContent"/>
         </template>
@@ -1257,24 +1259,24 @@ const renameTestCase = (name: string) => {
               </el-col>
               <el-col :span="4">
               <div style="display: flex;flex-wrap: nowrap;justify-content: flex-end;">
-                <el-button
+                <Button
                   type="primary"
                   @click="submitForm(viewHistoryRef)"
                   :loading="caseRevertLoading"
                   >{{ t('button.revert') }}
-                </el-button>
-                <el-button
+                </Button>
+                <Button
                   type="primary"
                   @click="goToHistory(viewHistoryRef)"
                   :loading="caseRevertLoading"
                   >{{ t('button.goToHistory') }}
-                </el-button>
-                <el-button
+                </Button>
+                <Button
                   type="primary"
                   @click="deleteAllHistory(viewHistoryRef)"
                   :loading="caseRevertLoading"
                   >{{ t('button.deleteAllHistory') }}
-                </el-button>
+                </Button>
               </div>
               </el-col>
             </el-row>
@@ -1322,7 +1324,7 @@ const renameTestCase = (name: string) => {
             </el-table-column>
           </el-table>
 
-          <el-button type="primary" @click="sendRequestWithParameter">{{ t('button.send') }}</el-button>
+          <Button type="primary" @click="sendRequestWithParameter">{{ t('button.send') }}</Button>
         </template>
       </el-drawer>
     </el-main>
@@ -1341,8 +1343,11 @@ const renameTestCase = (name: string) => {
         <el-tab-pane label="Body" name="body">
           <div v-if="testResult.bodyObject">
             <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
-              clearable placeholder="$.key">
+              clearable placeholder="$.data[?(@.status==='SUCCEED')]">
               <template #prepend v-if="testResult.bodyLength > 0">Body Size: {{testResult.bodyLength}}</template>
+              <template #suffix>
+                <a href="https://www.npmjs.com/package/jsonpath-plus" target="_blank"><el-icon><Help /></el-icon></a>
+              </template>
             </el-input>
             <JsonViewer :value="testResult.bodyObject" :expand-depth="5" copyable boxed sort />
           </div>
@@ -1354,7 +1359,7 @@ const renameTestCase = (name: string) => {
                 <div>Response body is too large, please download to view.</div>
               </el-col>
               <el-col :span="2">
-                <el-button type="primary" @click="downloadResponseFile">Download</el-button>
+                <Button type="primary" @click="downloadResponseFile">Download</Button>
               </el-col>
             </el-row>
           </div>
@@ -1389,7 +1394,7 @@ const renameTestCase = (name: string) => {
             New Test Case Name:<el-input v-model="targetTestCaseName" />
         </template>
         <template #footer>
-            <el-button type="primary" @click="duplicateTestCase">{{ t('button.ok') }}</el-button>
+            <Button type="primary" @click="duplicateTestCase">{{ t('button.ok') }}</Button>
         </template>
     </el-drawer>
 </template>
