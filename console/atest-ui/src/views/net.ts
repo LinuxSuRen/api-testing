@@ -794,10 +794,10 @@ var DataQueryAsync = (store: string, kind: string, currentDatabase: string, quer
             queryObj['key'] = currentDatabase;
             break;
         case 'atest-store-etcd':
-            queryObj['key'] = query;
-            break;
         case 'atest-store-redis':
+        case 'atest-store-elasticsearch':
             queryObj['key'] = query;
+            queryObj['sql'] = query;
             break;
     }
     const requestOptions = {

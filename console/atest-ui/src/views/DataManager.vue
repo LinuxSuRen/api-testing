@@ -166,6 +166,7 @@ const executeWithQuery = async (sql: string) => {
             case 'atest-store-orm':
             case 'atest-store-cassandra':
             case 'atest-store-iotdb':
+            case 'atest-store-elasticsearch':
                 ormDataHandler(data)
                 success = true
                 break;

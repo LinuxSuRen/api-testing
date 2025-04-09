@@ -115,6 +115,11 @@ const storeExtensions = [
             defaultValue: 'atest'
         }],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-mongodb'
+    },
+    {
+        name: 'atest-store-elasticsearch',
+        params: [],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-elasticsearch'
     }
 ] as Store[]
 
