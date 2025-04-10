@@ -785,21 +785,10 @@ interface QueryObject {
     key: string
 }
 var DataQueryAsync = (store: string, kind: string, currentDatabase: string, query: string) => {
-    const queryObj = {} as QueryObject;
-    switch (kind) {
-        case 'atest-store-orm':
-        case 'atest-store-cassandra':
-        case 'atest-store-iotdb':
-            queryObj['sql'] = query;
-            queryObj['key'] = currentDatabase;
-            break;
-        case 'atest-store-etcd':
-        case 'atest-store-redis':
-        case 'atest-store-elasticsearch':
-            queryObj['key'] = query;
-            queryObj['sql'] = query;
-            break;
-    }
+    const queryObj = {
+        'key': currentDatabase,
+        'sql': query,
+    } as QueryObject;
     const requestOptions = {
         method: 'POST',
         headers: {
