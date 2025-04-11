@@ -10,6 +10,7 @@ Ports in extensions:
 | Store | [redis](https://github.com/LinuxSuRen/atest-ext-store-redis)             |  |
 | Store | [iotdb](https://github.com/LinuxSuRen/atest-ext-store-iotdb) | |
 | Store | [Cassandra](https://github.com/LinuxSuRen/atest-ext-store-cassandra) | |
+| Store | [Elasticsearch](https://github.com/LinuxSuRen/atest-ext-store-elasticsearch) | |
 | Monitor | [docker-monitor](https://github.com/LinuxSuRen/atest-ext-monitor-docker) |  |
 | Agent | [collector](https://github.com/LinuxSuRen/atest-ext-collector)           |  |
 | Secret | [Vault](https://github.com/LinuxSuRen/api-testing-vault-extension)       | |

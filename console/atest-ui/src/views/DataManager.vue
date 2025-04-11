@@ -34,8 +34,17 @@ watch(store, (s) => {
             return
         }
     })
-    queryDataMeta.value.currentDatabase = ''
-    sqlQuery.value = ''
+
+    switch (kind.value) {
+        case 'atest-store-elasticsearch':
+        case 'atest-store-etcd':
+            sqlQuery.value = '*'
+            break
+        default:
+            queryDataMeta.value.currentDatabase = ''
+            sqlQuery.value = ''
+    }
+
     executeQuery()
 })
 
@@ -63,13 +72,22 @@ const describeTable = (data: QueryData) => {
         case 'atest-store-cassandra':
             sqlQuery.value = `@describeTable_${queryDataMeta.value.currentDatabase}:${data.label}`
             break
+            break
         default:
             sqlQuery.value = `@describeTable_${data.label}`
     }
     executeQuery()
 }
 const queryTables = () => {
-    sqlQuery.value = ``
+    switch (kind.value) {
+        case 'atest-store-elasticsearch':
+            if (sqlQuery.value === '') {
+                sqlQuery.value = '*'
+            }
+            break
+        default:
+            sqlQuery.value = ``
+    }
     executeQuery()
 }
 watch(kind, (k) => {
@@ -83,6 +101,9 @@ watch(kind, (k) => {
         case 'atest-store-etcd':
         case 'atest-store-redis':
             queryTip.value = 'Enter key'
+            break;
+        case 'atest-store-elasticsearch':
+            queryTip.value = 'field:value OR field:other'
             break;
     }
 })
@@ -153,12 +174,6 @@ const executeQuery = async () => {
     return executeWithQuery(sqlQuery.value)
 }
 const executeWithQuery = async (sql: string) => {
-    switch (kind.value) {
-        case 'atest-store-etcd':
-            sqlQuery.value = '*'
-            break;
-    }
-
     let success = false
     try {
         const data = await API.DataQueryAsync(store.value, kind.value, queryDataMeta.value.currentDatabase, sql);
@@ -166,6 +181,7 @@ const executeWithQuery = async (sql: string) => {
             case 'atest-store-orm':
             case 'atest-store-cassandra':
             case 'atest-store-iotdb':
+            case 'atest-store-elasticsearch':
                 ormDataHandler(data)
                 success = true
                 break;
@@ -196,7 +212,7 @@ const executeWithQuery = async (sql: string) => {
 <template>
     <div>
         <el-container style="height: calc(100vh - 50px);">
-            <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra'">
+            <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra' || kind === 'atest-store-elasticsearch'">
                 <el-scrollbar>
                     <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"
                         @change="queryTables" filterable>
