@@ -1,5 +1,5 @@
 /*
-Copyright 2023-2024 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { ca } from 'element-plus/es/locales.mjs'
 import { Cache } from './cache'
 
 async function DefaultResponseProcess(response: any) {
@@ -780,22 +779,23 @@ var SBOM = (callback: (d: any) => void) => {
         .then(callback)
 }
 
-interface QueryObject {
+export interface QueryObject {
+    store: string
     sql: string
     key: string
+    offset: number
+    limit: number
 }
-var DataQueryAsync = (store: string, kind: string, currentDatabase: string, query: string) => {
-    const queryObj = {
-        'key': currentDatabase,
-        'sql': query,
-    } as QueryObject;
+const DataQueryAsync = (query: QueryObject) => {
     const requestOptions = {
         method: 'POST',
         headers: {
-            'X-Store-Name': store,
-            'X-Database': currentDatabase
+            'X-Store-Name': query.store,
+            'X-Database': query.key,
+            'X-Offset': query.offset,
+            'X-Limit': query.limit
         },
-        body: JSON.stringify(queryObj)
+        body: JSON.stringify(query)
     }
     return fetch(`/api/v1/data/query`, requestOptions)
         .then(DefaultResponseProcess)

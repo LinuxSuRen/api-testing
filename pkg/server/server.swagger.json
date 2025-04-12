@@ -2860,6 +2860,14 @@
         },
         "sql": {
           "type": "string"
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

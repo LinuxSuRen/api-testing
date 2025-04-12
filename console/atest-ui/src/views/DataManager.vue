@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { API } from './net'
+import { API, QueryObject } from './net'
 import type { Store } from './store'
 import type { Pair } from './types'
 import { ElMessage } from 'element-plus'
@@ -13,6 +13,8 @@ const stores: Ref<Store[]> = ref([])
 const kind = ref('')
 const store = ref('')
 const sqlQuery = ref('')
+const queryOffset = ref(0)
+const queryLimit = ref(10)
 const queryResult = ref([] as any[])
 const queryResultAsJSON = ref('')
 const columns = ref([] as string[])
@@ -175,8 +177,16 @@ const executeQuery = async () => {
 }
 const executeWithQuery = async (sql: string) => {
     let success = false
+    const query = {
+        store: store.value,
+        key: queryDataMeta.value.currentDatabase,
+        sql: sql,
+        offset: queryOffset.value,
+        limit: queryLimit.value
+    } as QueryObject
+
     try {
-        const data = await API.DataQueryAsync(store.value, kind.value, queryDataMeta.value.currentDatabase, sql);
+        const data = await API.DataQueryAsync(query);
         switch (kind.value) {
             case 'atest-store-orm':
             case 'atest-store-cassandra':
@@ -207,6 +217,10 @@ const executeWithQuery = async (sql: string) => {
     }
     return success
 }
+const nextPage = () => {
+    queryOffset.value += queryLimit.value
+    executeQuery()
+}
 </script>
 
 <template>
@@ -234,7 +248,7 @@ const executeWithQuery = async (sql: string) => {
                 </el-scrollbar>
             </el-aside>
             <el-container>
-                <el-header>
+                <el-header style="height: auto">
                     <el-form @submit.prevent="executeQuery">
                         <el-row :gutter="10">
                             <el-col :span="4">
@@ -262,6 +276,21 @@ const executeWithQuery = async (sql: string) => {
                                     <el-option v-for="item in dataFormatOptions" :key="item" :label="item"
                                         :value="item"></el-option>
                                 </el-select>
+                            </el-col>
+                        </el-row>
+                        <el-row :gutter="10" v-if="kind === 'atest-store-elasticsearch'">
+                            <el-col :span="10">
+                                <el-input type="number" v-model="queryOffset">
+                                    <template #prepend>Offset</template>
+                                </el-input>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-input type="number" v-model="queryLimit">
+                                    <template #prepend>Limit</template>
+                                </el-input>
+                            </el-col>
+                            <el-col :span="2">
+                                <el-button type="primary" @click="nextPage">Next</el-button>
                             </el-col>
                         </el-row>
                     </el-form>

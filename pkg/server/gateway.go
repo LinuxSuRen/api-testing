@@ -16,7 +16,7 @@ limitations under the License.
 package server
 
 import (
-	context "context"
+	"context"
 	"net/http"
 
 	"google.golang.org/grpc/metadata"
