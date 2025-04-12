@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { API, QueryObject } from './net'
+import { API } from './net'
+import type { QueryObject } from './net'
 import type { Store } from './store'
 import type { Pair } from './types'
 import { ElMessage } from 'element-plus'
@@ -12,9 +13,11 @@ import { Refresh, Document } from '@element-plus/icons-vue'
 const stores: Ref<Store[]> = ref([])
 const kind = ref('')
 const store = ref('')
+const query = ref({
+    offset: 0,
+    limit: 10
+} as QueryObject)
 const sqlQuery = ref('')
-const queryOffset = ref(0)
-const queryLimit = ref(10)
 const queryResult = ref([] as any[])
 const queryResultAsJSON = ref('')
 const columns = ref([] as string[])
@@ -177,16 +180,12 @@ const executeQuery = async () => {
 }
 const executeWithQuery = async (sql: string) => {
     let success = false
-    const query = {
-        store: store.value,
-        key: queryDataMeta.value.currentDatabase,
-        sql: sql,
-        offset: queryOffset.value,
-        limit: queryLimit.value
-    } as QueryObject
+    query.value.store = store.value
+    query.value.key = queryDataMeta.value.currentDatabase
+    query.value.sql = sql
 
     try {
-        const data = await API.DataQueryAsync(query);
+        const data = await API.DataQueryAsync(query.value);
         switch (kind.value) {
             case 'atest-store-orm':
             case 'atest-store-cassandra':
@@ -218,7 +217,7 @@ const executeWithQuery = async (sql: string) => {
     return success
 }
 const nextPage = () => {
-    queryOffset.value += queryLimit.value
+    query.value.offset += query.value.limit
     executeQuery()
 }
 </script>
@@ -280,12 +279,12 @@ const nextPage = () => {
                         </el-row>
                         <el-row :gutter="10" v-if="kind === 'atest-store-elasticsearch'">
                             <el-col :span="10">
-                                <el-input type="number" v-model="queryOffset">
+                                <el-input type="number" v-model="query.offset">
                                     <template #prepend>Offset</template>
                                 </el-input>
                             </el-col>
                             <el-col :span="10">
-                                <el-input type="number" v-model="queryLimit">
+                                <el-input type="number" v-model="query.limit">
                                     <template #prepend>Limit</template>
                                 </el-input>
                             </el-col>

@@ -792,8 +792,8 @@ const DataQueryAsync = (query: QueryObject) => {
         headers: {
             'X-Store-Name': query.store,
             'X-Database': query.key,
-            'X-Offset': query.offset,
-            'X-Limit': query.limit
+            'X-Offset': `${query.offset}`,
+            'X-Limit': `${query.limit}`
         },
         body: JSON.stringify(query)
     }
