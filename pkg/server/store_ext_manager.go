@@ -130,7 +130,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 }
 
 func (s *storeExtManager) startPlugin(socketURL, plugin, pluginName string) (err error) {
-    if strings.Contains(socketURL, ":") {
+    if strings.Contains(socketURL, ":") && !strings.HasPrefix(socketURL, s.socketPrefix) {
         err = s.startPluginViaHTTP(socketURL, plugin, pluginName)
         return
     }
