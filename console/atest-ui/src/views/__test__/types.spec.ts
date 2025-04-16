@@ -46,7 +46,7 @@ describe('CreateFilter', () => {
 describe('GetHTTPMethods', () => {
   test('HTTP methods', () => {
     const options = GetHTTPMethods()
-    expect(options).toHaveLength(7)
+    expect(options).toHaveLength(8)
     options.forEach((item) => {
       expect(item.key).toBe(item.value)
     })

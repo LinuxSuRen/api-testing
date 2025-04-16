@@ -120,6 +120,11 @@ const storeExtensions = [
         name: 'atest-store-elasticsearch',
         params: [],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-elasticsearch'
+    },
+    {
+        name: 'atest-store-opengemini',
+        params: [],
+        link: 'https://github.com/LinuxSuRen/atest-ext-store-opengemini'
     }
 ] as Store[]
 

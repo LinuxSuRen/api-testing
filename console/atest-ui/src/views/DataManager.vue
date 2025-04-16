@@ -190,6 +190,7 @@ const executeWithQuery = async (sql: string) => {
             case 'atest-store-orm':
             case 'atest-store-cassandra':
             case 'atest-store-iotdb':
+            case 'atest-store-opengemini':
             case 'atest-store-elasticsearch':
                 ormDataHandler(data)
                 success = true
@@ -225,7 +226,7 @@ const nextPage = () => {
 <template>
     <div>
         <el-container style="height: calc(100vh - 50px);">
-            <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra' || kind === 'atest-store-elasticsearch'">
+            <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra' || kind === 'atest-store-elasticsearch' || kind === 'atest-store-opengemini'">
                 <el-scrollbar>
                     <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"
                         @change="queryTables" filterable>
