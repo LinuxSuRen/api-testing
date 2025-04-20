@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import TestCase from './TestCase.vue'
-import TestSuite from './TestSuite.vue'
 import TemplateFunctions from './TemplateFunctions.vue'
-import { reactive, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { ElTree, ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
-import { Edit, Refresh } from '@element-plus/icons-vue'
-import type { Suite } from './types'
-import { API } from './net'
+import { Refresh } from '@element-plus/icons-vue'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 

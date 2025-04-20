@@ -51,6 +51,9 @@ API.GetVersion((d) => {
 })
 
 const isCollapse = ref(true)
+watch(isCollapse, (v: boolean) => {
+  window.localStorage.setItem('button.style', v ? 'simple' : '')
+})
 const lastActiveMenu = window.localStorage.getItem('activeMenu')
 const activeMenu = ref(lastActiveMenu === '' ? 'welcome' : lastActiveMenu)
 const panelName = ref(activeMenu)
@@ -64,7 +67,7 @@ i18nLocale.value = locale.value
 
 watch(locale, (e: string) =>{
   Cache.WithLocale(e)
-  i18nLocale.value = locale
+  i18nLocale.value = e
 })
 
 const handleChangeLan = (command: string) => {

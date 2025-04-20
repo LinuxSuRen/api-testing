@@ -179,6 +179,14 @@ const executeQuery = async () => {
     return executeWithQuery(sqlQuery.value)
 }
 const executeWithQuery = async (sql: string) => {
+    switch (kind.value) {
+        case 'atest-store-etcd':
+            sqlQuery.value = '*'
+            break;
+        case '':
+            return;
+    }
+
     let success = false
     query.value.store = store.value
     query.value.key = queryDataMeta.value.currentDatabase
@@ -268,7 +276,7 @@ const nextPage = () => {
                             </el-col>
                             <el-col :span="2">
                                 <el-form-item>
-                                    <el-button type="primary" @click="executeQuery">Execute</el-button>
+                                    <el-button type="primary" @click="executeQuery" :disabled="kind === ''">Execute</el-button>
                                 </el-form-item>
                             </el-col>
                             <el-col :span="2">

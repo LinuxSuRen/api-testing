@@ -13,6 +13,7 @@ import { Magic } from './magicKeys'
 import TestSuiteCreationDialog from '../components/TestSuiteCreationDialog.vue'
 import TestSuiteImportDialog from '../components/TestSuiteImportDialog.vue'
 import LoginDialog from '../components/LoginDialog.vue'
+import Button from '../components/Button.vue'
 
 const { t } = useI18n()
 
@@ -260,13 +261,13 @@ const viewName = ref('')
       <el-main style="padding-top: 5px; padding-bottom: 5px;">
         <el-container style="height: 100%">
           <el-aside>
-            <el-button type="primary" @click="openTestSuiteCreateDialog"
+            <Button type="primary" @click="openTestSuiteCreateDialog"
               data-intro="Click here to create a new test suite"
-              test-id="open-new-suite-dialog" :icon="Edit">{{ t('button.new') }}</el-button>
-            <el-button type="primary" @click="openTestSuiteImportDialog"
+              test-id="open-new-suite-dialog" :icon="Edit">{{ t('button.new') }}</Button>
+            <Button type="primary" @click="openTestSuiteImportDialog"
               data-intro="Click here to import from Postman"
-              test-id="open-import-suite-dialog">{{ t('button.import') }}</el-button>
-            <el-button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</el-button>
+              test-id="open-import-suite-dialog">{{ t('button.import') }}</Button>
+            <Button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</Button>
             <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" style="padding: 5px;" />
 
             <el-tree

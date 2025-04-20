@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { Edit, CopyDocument, Delete } from '@element-plus/icons-vue'
+import { Edit, CopyDocument, Delete, View } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Suite, TestCase, Pair } from './types'
 import { NewSuggestedAPIsQuery, GetHTTPMethods, SwaggerSuggestion } from './types'
 import EditButton from '../components/EditButton.vue'
 import HistoryInput from '../components/HistoryInput.vue'
+import Button from '../components/Button.vue'
 import { Cache } from './cache'
 import { useI18n } from 'vue-i18n'
 import { API } from './net'
@@ -395,36 +396,36 @@ const renameTestSuite = (name: string) => {
           Share link: <el-input readonly v-model="shareLink" style="width: 80%" />
       </div>
       <div class="button-container">
-        <el-button type="primary" @click="updateTestSuiteForm(testSuiteFormRef)" v-if="!Cache.GetCurrentStore().readOnly">{{
+        <Button type="primary" @click="updateTestSuiteForm(testSuiteFormRef)" v-if="!Cache.GetCurrentStore().readOnly">{{
           t('button.save')
-        }}</el-button>
-        <el-button type="primary" @click="updateTestSuiteForm(testSuiteFormRef)" disabled v-if="Cache.GetCurrentStore().readOnly">{{
+        }}</Button>
+        <Button type="primary" @click="updateTestSuiteForm(testSuiteFormRef)" disabled v-if="Cache.GetCurrentStore().readOnly">{{
           t('button.save')
-        }}</el-button>
-        <el-button type="danger" @click="del" :icon="Delete" test-id="suite-del-but">{{
+        }}</Button>
+        <Button type="danger" @click="del" :icon="Delete" test-id="suite-del-but">{{
           t('button.delete')
-        }}</el-button>
-        <el-button type="primary" @click="convert" test-id="convert">{{
+        }}</Button>
+        <Button type="primary" @click="convert" test-id="convert">{{
           t('button.export')
-        }}</el-button>
-        <el-button
+        }}</Button>
+        <Button
           type="primary"
           @click="openDuplicateDialog"
           :icon="CopyDocument"
           test-id="duplicate"
-          >{{ t('button.duplicate') }}</el-button
+          >{{ t('button.duplicate') }}</Button
         >
-        <el-button type="primary" @click="viewYaml" test-id="view-yaml">{{
+        <Button type="primary" @click="viewYaml" :icon="View" test-id="view-yaml">{{
           t('button.viewYaml')
-        }}</el-button>
+        }}</Button>
       </div>
       <div class="button-container">
-        <el-button
+        <Button
           type="primary"
           @click="openNewTestCaseDialog"
           :icon="Edit"
           test-id="open-new-case-dialog"
-          >{{ t('button.newtestcase') }}</el-button
+          >{{ t('button.newtestcase') }}</Button
         >
       </div>
     </el-form>
@@ -479,12 +480,12 @@ const renameTestSuite = (name: string) => {
             </el-autocomplete>
           </el-form-item>
           <el-form-item>
-            <el-button
+            <Button
               type="primary"
               @click="submitTestCaseForm(testcaseFormRef)"
               v-loading="suiteCreatingLoading"
               test-id="case-form-submit"
-              >{{ t('button.submit') }}</el-button
+              >{{ t('button.submit') }}</Button
             >
           </el-form-item>
         </el-form>
@@ -499,9 +500,9 @@ const renameTestSuite = (name: string) => {
     width="40%"
     draggable
   >
-    <el-button type="primary" @click="isFullScreen = !isFullScreen" style="margin-bottom: 10px">
+    <Button type="primary" @click="isFullScreen = !isFullScreen" style="margin-bottom: 10px">
       <p>{{ isFullScreen ? t('button.cancelFullScreen') : t('button.fullScreen') }}</p>
-    </el-button>
+    </Button>
     <el-scrollbar>
       <Codemirror v-model="yamlFormat" />
     </el-scrollbar>
@@ -512,7 +513,7 @@ const renameTestSuite = (name: string) => {
       New Test Suite Name:<el-input v-model="targetSuiteDuplicateName" />
     </template>
     <template #footer>
-      <el-button type="primary" @click="duplicateTestSuite">{{ t('button.ok') }}</el-button>
+      <Button type="primary" @click="duplicateTestSuite">{{ t('button.ok') }}</Button>
     </template>
   </el-drawer>
 </template>
@@ -525,7 +526,7 @@ const renameTestSuite = (name: string) => {
   margin-bottom: 8px;
 }
 
-.button-container > .el-button + .el-button {
+.button-container > .Button + .Button {
   margin-left: 0px;
 }
 </style>
