@@ -17,8 +17,9 @@ limitations under the License.
 package remote
 
 import (
-	context "context"
+	"context"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/logging"
@@ -308,9 +309,13 @@ func (g *gRPCLoader) PProf(name string) []byte {
 
 func (g *gRPCLoader) Query(query map[string]string) (result testing.DataResult, err error) {
 	var dataResult *server.DataQueryResult
+	offset, _ := strconv.Atoi(query["offset"])
+	limit, _ := strconv.Atoi(query["limit"])
 	if dataResult, err = g.client.Query(g.ctx, &server.DataQuery{
-		Sql: query["sql"],
-		Key: query["key"],
+		Sql:    query["sql"],
+		Key:    query["key"],
+		Offset: int32(offset),
+		Limit:  int32(limit),
 	}); err == nil {
 		result.Pairs = pairToMap(dataResult.Data)
 		for _, item := range dataResult.Items {

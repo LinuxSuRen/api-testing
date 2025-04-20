@@ -1260,8 +1260,10 @@ func (s *server) Query(ctx context.Context, query *DataQuery) (result *DataQuery
 	defer loader.Close()
 	var dataResult testing.DataResult
 	if dataResult, err = loader.Query(map[string]string{
-		"sql": query.Sql,
-		"key": query.Key,
+		"sql":    query.Sql,
+		"key":    query.Key,
+		"offset": fmt.Sprintf("%d", query.Offset),
+		"limit":  fmt.Sprintf("%d", query.Limit),
 	}); err == nil {
 		result = &DataQueryResult{
 			Data: mapToPair(dataResult.Pairs),
