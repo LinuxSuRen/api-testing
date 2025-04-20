@@ -192,6 +192,11 @@ function storeVerify(formEl: FormInstance | undefined) {
   })
 }
 
+const storeDuplicate = async (formEl: FormInstance | undefined) => {
+  createAction.value = true
+  storeForm.name += '-copy'
+}
+
 function updateKeys() {
   const props = storeForm.properties
   if (props.findIndex(p => p.key === '') === -1) {
@@ -275,7 +280,7 @@ const storeExtLink = ref('')
           ref="storeFormRef"
           status-icon label-width="120px">
           <el-form-item :label="t('field.name')" prop="name">
-            <el-input v-model="storeForm.name" test-id="store-form-name" />
+            <el-input v-model="storeForm.name" test-id="store-form-name" :disabled="!createAction"/>
           </el-form-item>
           <el-form-item label="URL" prop="url">
             <el-input v-model="storeForm.url" placeholder="http://foo" test-id="store-form-url" />
@@ -348,6 +353,11 @@ const storeExtLink = ref('')
               test-id="store-form-verify"
               >{{t('button.verify')}}</Button
             >
+            <Button
+              type="primary"
+              v-if="!createAction"
+              @click="storeDuplicate(storeFormRef)"
+              >{{t('button.duplicate')}}</Button>
             <Button
               type="primary"
               @click="submitForm(storeFormRef)"
