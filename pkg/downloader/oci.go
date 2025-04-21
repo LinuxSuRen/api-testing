@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"runtime"
 	"strings"
 	"time"
 
 	"github.com/blang/semver/v4"
 	"github.com/linuxsuren/api-testing/pkg/util"
+	"github.com/linuxsuren/http-downloader/pkg/net"
 )
 
 type OCIDownloader interface {
@@ -221,27 +223,16 @@ type ImageTagList struct {
 }
 
 func (d *defaultOCIDownloader) downloadLayer(image, digest, authToken string) (reader io.Reader, err error) {
-	var req *http.Request
-	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s/v2/%s/blobs/%s", d.protocol, d.registry, image, digest), nil); err != nil {
-		return
-	}
+	layerURL := fmt.Sprintf("%s://%s/v2/%s/blobs/%s", d.protocol, d.registry, image, digest)
+	buffer := bytes.NewBuffer(nil)
 
-	req.Header.Set(util.Authorization, fmt.Sprintf("Bearer %s", authToken))
-	var resp *http.Response
-	if resp, err = d.getHTTPClient().Do(req); err != nil {
-		err = fmt.Errorf("failed to get layer from %q, error: %v", req.URL.String(), err)
-	} else {
-		progressReader := NewProgressReader(resp.Body)
-		progressReader.SetLength(resp.ContentLength)
-		progressReader.SetTitle("Fetching Layer:")
-
-		var data []byte
-		if data, err = io.ReadAll(progressReader); err != nil {
-			return
-		}
-
-		defer resp.Body.Close()
-		reader = bytes.NewBuffer(data)
+	downloader := &net.MultiThreadDownloader{}
+	downloader.WithBearerToken(authToken)
+	downloader.WithTimeout(d.timeout)
+	downloader.WithRoundTripper(d.roundTripper)
+	downloader.WithShowProgress(true)
+	if err = downloader.DownloadWithContext(d.ctx, layerURL, buffer, runtime.NumCPU()); err == nil {
+		reader = buffer
 	}
 	return
 }
