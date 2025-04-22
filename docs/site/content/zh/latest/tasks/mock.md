@@ -151,4 +151,32 @@ proxies:
 curl http://localhost:6060/mock/api/v1/projects
 ```
 
+如何希望把所有的请求都转发到某个地址，则可以使用通配符的方式：
+
+```yaml
+proxies:
+  - path: /{path:.*}
+    target: http://192.168.123.58:9200
+```
+
+## 代理多个服务
+
+```shell
+atest mock-compose bin/compose.yaml
+```
+
+执行上面的命令，会启动多个 Mock 代理服务，分别以不同的端口代理了 Elasticsearch 和 Eureka 服务：
+
+```yaml
+proxies:
+  - prefix: /
+    port: 9200
+    path: /{path:.*}
+    target: http://192.168.123.58:9200
+  - prefix: /
+    port: 17001
+    path: /{path:.*}
+    target: http://192.168.123.58:17001
+```
+
 > 更多 URL 中通配符的用法，请参考 https://github.com/gorilla/mux

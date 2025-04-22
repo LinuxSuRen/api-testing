@@ -20,7 +20,7 @@ func NewRootCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c *cob
 	c.SetOut(os.Stdout)
 	c.Version = "\n" + version.GetDetailedVersion()
 	c.AddCommand(createInitCommand(execer),
-		createRunCommand(), createSampleCmd(),
+		createRunCommand(), createSampleCmd(), createMockComposeCmd(),
 		createServerCmd(execer, httpServer), createJSONSchemaCmd(),
 		createServiceCommand(execer), createFunctionCmd(), createConvertCommand(),
 		createMockCmd(), createExtensionCommand(downloader.NewStoreDownloader()))
