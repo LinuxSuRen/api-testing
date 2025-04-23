@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -93,4 +93,25 @@ func validateAndParse(data []byte) (server *Server, err error) {
 		err = errors.Join(err, docs.Validate(data, docs.MockSchema))
 	}
 	return
+}
+
+type objectReader struct {
+	server *Server
+}
+
+func NewObjectReader(server *Server) ReaderAndWriter {
+	return &objectReader{server: server}
+}
+
+func (r *objectReader) Parse() (server *Server, err error) {
+	server = r.server
+	return
+}
+
+func (r *objectReader) GetData() []byte {
+	panic("not supported")
+}
+
+func (r *objectReader) Write(_ []byte) {
+	panic("not supported")
 }

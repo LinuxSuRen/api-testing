@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -57,6 +57,8 @@ type Webhook struct {
 }
 
 type Proxy struct {
+	Prefix       string       `yaml:"prefix" json:"prefix"`
+	Port         int          `yaml:"port" json:"port"`
 	Path         string       `yaml:"path" json:"path"`
 	Target       string       `yaml:"target" json:"target"`
 	RequestAmend RequestAmend `yaml:"requestAmend" json:"requestAmend"`
