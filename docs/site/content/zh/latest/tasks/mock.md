@@ -38,7 +38,7 @@ docker pull localhost:6060/repo/name:tag
 * 面向对象的 CRUD
 * 自定义 HTTP 服务
 
-### 面对对象
+### 面向对象
 
 ```yaml
 #!api-testing-mock
@@ -160,6 +160,16 @@ proxies:
     target: http://192.168.123.58:9200
 ```
 
+## TCP 协议代理
+
+```yaml
+proxies:
+  - protocol: tcp
+    port: 3306
+    path: /
+    target: 192.168.123.58:33060
+```
+
 ## 代理多个服务
 
 ```shell
@@ -178,6 +188,12 @@ proxies:
     port: 17001
     path: /{path:.*}
     target: http://192.168.123.58:17001
+  - protocol: tcp
+    port: 33060
+    path: /
+    target: 192.168.123.58:33060
 ```
+
+当前代理支持 HTTP 和 TCP 协议，上面的例子中代理了 MySQL 的 `33060` 端口。
 
 > 更多 URL 中通配符的用法，请参考 https://github.com/gorilla/mux
