@@ -1,5 +1,6 @@
 +++
-title = "通过 Helm 安装的方式使用 API Testing"
+title = "Helm"
+description = "通过 Helm 安装的方式使用 API Testing"
 weight = -98
 +++
 
