@@ -235,7 +235,7 @@ const nextPage = () => {
 
 <template>
     <div>
-        <el-container style="height: calc(100vh - 50px);">
+        <el-container style="height: calc(100vh - 80px);">
             <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra' || kind === 'atest-store-elasticsearch' || kind === 'atest-store-opengemini'">
                 <el-scrollbar>
                     <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"
@@ -313,7 +313,7 @@ const nextPage = () => {
                         <el-tag type="primary" v-if="queryDataMeta.duration">{{ queryDataMeta.duration }}</el-tag>
                         <el-tag type="primary" v-for="label in queryDataMeta.labels">{{ label.value }}</el-tag>
                     </div>
-                    <el-table :data="queryResult" stripe v-if="dataFormat === 'table'">
+                    <el-table :data="queryResult" stripe v-if="dataFormat === 'table'" height="calc(100vh - 200px)">
                         <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable />
                     </el-table>
                     <Codemirror v-else-if="dataFormat === 'json'" v-model="queryResultAsJSON" />
