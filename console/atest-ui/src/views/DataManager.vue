@@ -17,6 +17,7 @@ const query = ref({
     offset: 0,
     limit: 10
 } as QueryObject)
+const currentTable = ref('')
 const sqlQuery = ref('')
 const queryResult = ref([] as any[])
 const queryResultAsJSON = ref('')
@@ -70,6 +71,7 @@ interface QueryData {
 
 const queryDataFromTable = (data: QueryData) => {
     sqlQuery.value = `@selectTableLImit100_${data.label}`
+    currentTable.value = data.label
     executeQuery()
 }
 const describeTable = (data: QueryData) => {
@@ -233,7 +235,7 @@ const nextPage = () => {
 
 <template>
     <div>
-        <el-container style="height: calc(100vh - 50px);">
+        <el-container style="height: calc(100vh - 80px);">
             <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra' || kind === 'atest-store-elasticsearch' || kind === 'atest-store-opengemini'">
                 <el-scrollbar>
                     <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"
@@ -247,10 +249,12 @@ const nextPage = () => {
                     <el-tree :data="tablesTree" node-key="label" highlight-current
                         draggable>
                         <template #default="{node, data}">
-                            <span @click="queryDataFromTable(data)">
-                                {{ node.label }} 
-                            </span>
-                            <el-icon style="margin-left: 6px;" @click="describeTable(data)" v-if="kind === 'atest-store-orm' || kind === 'atest-store-cassandra'"><Document /></el-icon>
+                            <div class="space-between">
+                                <span @click="queryDataFromTable(data)">
+                                    {{ node.label }}
+                                </span>
+                                <el-icon style="margin-left: 6px;" @click="describeTable(data)" v-if="kind === 'atest-store-orm' || kind === 'atest-store-cassandra'"><Document /></el-icon>
+                            </div>
                         </template>
                     </el-tree>
                 </el-scrollbar>
@@ -258,7 +262,7 @@ const nextPage = () => {
             <el-container>
                 <el-header style="height: auto">
                     <el-form @submit.prevent="executeQuery">
-                        <el-row :gutter="10">
+                        <el-row :gutter="10" justify="center">
                             <el-col :span="4">
                                 <el-form-item>
                                     <el-select v-model="store" placeholder="Select store" filterable
@@ -309,7 +313,7 @@ const nextPage = () => {
                         <el-tag type="primary" v-if="queryDataMeta.duration">{{ queryDataMeta.duration }}</el-tag>
                         <el-tag type="primary" v-for="label in queryDataMeta.labels">{{ label.value }}</el-tag>
                     </div>
-                    <el-table :data="queryResult" stripe v-if="dataFormat === 'table'">
+                    <el-table :data="queryResult" stripe v-if="dataFormat === 'table'" height="calc(100vh - 200px)">
                         <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable />
                     </el-table>
                     <Codemirror v-else-if="dataFormat === 'json'" v-model="queryResultAsJSON" />
@@ -318,3 +322,12 @@ const nextPage = () => {
         </el-container>
     </div>
 </template>
+
+<style>
+.space-between {
+    justify-content: space-between;
+    display: flex;
+    width: 100%;
+    padding-right: 8px;
+}
+</style>
