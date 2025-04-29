@@ -134,8 +134,8 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
       </el-menu>
     </el-aside>
 
-    <el-main style="padding-top: 5px; padding-bottom: 5px;">
-      <div style="position: absolute; top: 10px; right: 20px;">
+    <el-main style="padding-top: 0px;">
+      <div class="top-menu">
         <el-col style="display: flex; align-items: center;">
           <el-tag style="font-size: 18px;">{{ t('language') }}</el-tag>
           <el-dropdown trigger="click" @command="(command: string) => handleChangeLan(command)">
