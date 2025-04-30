@@ -24,9 +24,12 @@ const queryResultAsJSON = ref('')
 const columns = ref([] as string[])
 const queryTip = ref('')
 const loadingStores = ref(true)
+const showOverflowTooltip = ref(true)
 const dataFormat = ref('table')
 const dataFormatOptions = ['table', 'json']
 const queryDataMeta = ref({} as QueryDataMeta)
+const largeContent = ref('')
+const largeContentDialogVisible = ref(false)
 
 interface TreeItem {
     label: string
@@ -140,10 +143,14 @@ const ormDataHandler = (data: QueryData) => {
         result.push(obj)
     })
 
+    columns.value = [] as string[]
     data.meta.labels = data.meta.labels.filter((item) => {
         if (item.key === '_native_sql') {
             sqlQuery.value = item.value
             return false
+        }
+        if (item.key === '_columns') {
+            columns.value = JSON.parse(item.value)
         }
         return !item.key.startsWith('_')
     })
@@ -151,11 +158,13 @@ const ormDataHandler = (data: QueryData) => {
     queryDataMeta.value = data.meta
     queryResult.value = result
     queryResultAsJSON.value = JSON.stringify(result, null, 2)
-    columns.value = Array.from(cols).sort((a, b) => {
-        if (a === 'id') return -1;
-        if (b === 'id') return 1;
-        return a.localeCompare(b);
-    })
+    if (columns.value.length == 0) {
+        columns.value = Array.from(cols).sort((a, b) => {
+            if (a === 'id') return -1;
+            if (b === 'id') return 1;
+            return a.localeCompare(b);
+        })
+    }
 
     tablesTree.value = []
     queryDataMeta.value.tables.forEach((i) => {
@@ -231,6 +240,19 @@ const nextPage = () => {
     query.value.offset += query.value.limit
     executeQuery()
 }
+const overflowChange = () => {
+    showOverflowTooltip.value = !showOverflowTooltip.value
+}
+const tryShowPrettyJSON = (row: any, column: any, cell: HTMLTableCellElement, event: Event) => {
+    const cellValue = row[column.rawColumnKey]
+    const obj = JSON.parse(cellValue)
+    if (obj) {
+        largeContent.value = JSON.stringify(obj, null, 2)
+    }
+}
+watch(largeContent, (e) => {
+    largeContentDialogVisible.value = e !== ''
+})
 </script>
 
 <template>
@@ -312,15 +334,25 @@ const nextPage = () => {
                         <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
                         <el-tag type="primary" v-if="queryDataMeta.duration">{{ queryDataMeta.duration }}</el-tag>
                         <el-tag type="primary" v-for="label in queryDataMeta.labels">{{ label.value }}</el-tag>
+                        <el-check-tag type="primary" :checked="showOverflowTooltip" @change="overflowChange" v-if="queryResult.length > 0">overflow</el-check-tag>
                     </div>
-                    <el-table :data="queryResult" stripe v-if="dataFormat === 'table'" height="calc(100vh - 200px)">
-                        <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable />
+                    <el-table :data="queryResult" stripe v-if="dataFormat === 'table'" height="calc(100vh - 200px)" @cell-dblclick="tryShowPrettyJSON">
+                        <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable :show-overflow-tooltip="showOverflowTooltip" />
                     </el-table>
                     <Codemirror v-else-if="dataFormat === 'json'" v-model="queryResultAsJSON" />
                 </el-main>
             </el-container>
         </el-container>
     </div>
+
+    <el-dialog
+        v-model="largeContentDialogVisible"
+        destroy-on-close
+        @closed="largeContent=''"
+        center
+    >
+        <Codemirror v-model="largeContent" />
+    </el-dialog>
 </template>
 
 <style>
