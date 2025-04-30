@@ -1,5 +1,6 @@
 +++
 title = "gRPC TLS verification"
+weight = 201
 +++
 
 If you want to enable gRPC TLS, you need to generate your certificates in the workspace, or you can use an absolute path

@@ -1,5 +1,6 @@
 +++
 title = "用例模板"
+weight = 100
 +++
 
 `atest` 采用 [sprig](https://masterminds.github.io/sprig/) 作为测试用例的模板引擎。通过模板函数可以生成很多随机数据：
@@ -26,6 +27,12 @@ title = "用例模板"
 
 ```
 {{ now.Format "2006-01-02T15:04:05Z07:00" }}
+```
+
+如果想要获取其他时间，则可以参考如下写法：
+
+```gotemplate
+{{(now | date_modify "2h") | date "2006-01-02T15:04:05"}}
 ```
 
 ## 环境变量
