@@ -22,14 +22,24 @@ async function DefaultResponseProcess(response: any) {
                 throw new Error("Unauthenticated")
         }
 
-        const message = await response.json().then((data: any) => data.message)
-        throw new Error(message)
-    } else {
-        const contentType = response.headers.get('Content-Type') || '';
-        if (contentType.includes('text/plain')) {
-            return response.text();
+        try {
+            const message = await response.json().then((data: any) => data.message)
+            throw new Error(message)
+        } catch {
+            const text = await response.text()
+            throw new Error(text)
         }
-        return response.json();
+    }
+
+    const contentType = response.headers.get('Content-Type') || '';
+    if (contentType.startsWith('text/plain')) {
+        return response.text();
+    }
+    try {
+        return await response.json();
+    } catch (e) {
+        // If JSON parsing fails, return as text
+        return response.text();
     }
 }
 
