@@ -25,7 +25,11 @@ async function DefaultResponseProcess(response: any) {
         const message = await response.json().then((data: any) => data.message)
         throw new Error(message)
     } else {
-        return response.json()
+        const contentType = response.headers.get('Content-Type') || '';
+        if (contentType.includes('text/plain')) {
+            return response.text();
+        }
+        return response.json();
     }
 }
 
