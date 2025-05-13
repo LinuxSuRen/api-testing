@@ -1,7 +1,7 @@
 ARG LAN_ENV=docker.io/library/golang:1.21
 
 FROM ghcr.io/linuxsuren/api-testing:master AS atest
-FROM docker.io/stedolan/jq AS jq
+FROM docker.io/demisto/jq:1.0.0.117497 AS jq
 FROM $LAN_ENV
 
 WORKDIR /workspace
