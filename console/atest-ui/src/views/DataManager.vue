@@ -25,6 +25,7 @@ const columns = ref([] as string[])
 const queryTip = ref('')
 const loadingStores = ref(true)
 const showOverflowTooltip = ref(true)
+const complexEditor = ref(false)
 const dataFormat = ref('table')
 const dataFormatOptions = ['table', 'json']
 const queryDataMeta = ref({} as QueryDataMeta)
@@ -48,8 +49,10 @@ watch(store, (s) => {
         case 'atest-store-elasticsearch':
         case 'atest-store-etcd':
             sqlQuery.value = '*'
+            complexEditor.value = false
             break
         default:
+            complexEditor.value = true
             queryDataMeta.value.currentDatabase = ''
             sqlQuery.value = ''
     }
@@ -296,7 +299,7 @@ watch(largeContent, (e) => {
                                 </el-form-item>
                             </el-col>
                             <el-col :span="16">
-                                <el-form-item>
+                                <el-form-item v-if="!complexEditor">
                                     <HistoryInput :placeholder="queryTip" :callback="executeQuery" v-model="sqlQuery" />
                                 </el-form-item>
                             </el-col>
@@ -328,6 +331,7 @@ watch(largeContent, (e) => {
                             </el-col>
                         </el-row>
                     </el-form>
+                    <Codemirror v-model="sqlQuery" v-if="complexEditor" style="height: 180px"/>
                 </el-header>
                 <el-main>
                     <div style="display: flex; gap: 8px;">
@@ -336,7 +340,7 @@ watch(largeContent, (e) => {
                         <el-tag type="primary" v-for="label in queryDataMeta.labels">{{ label.value }}</el-tag>
                         <el-check-tag type="primary" :checked="showOverflowTooltip" @change="overflowChange" v-if="queryResult.length > 0">overflow</el-check-tag>
                     </div>
-                    <el-table :data="queryResult" stripe v-if="dataFormat === 'table'" height="calc(100vh - 200px)" @cell-dblclick="tryShowPrettyJSON">
+                    <el-table :data="queryResult" stripe v-if="dataFormat === 'table'" height="calc(100vh - 380px)" @cell-dblclick="tryShowPrettyJSON">
                         <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable :show-overflow-tooltip="showOverflowTooltip" />
                     </el-table>
                     <Codemirror v-else-if="dataFormat === 'json'" v-model="queryResultAsJSON" />
