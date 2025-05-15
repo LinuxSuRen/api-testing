@@ -112,7 +112,17 @@ const parseResponseBody = (body: any) => {
   }
 }
 
-const handleTestResult = (e: any) => {
+/**
+ * Handles test result data from API response
+ *
+ * Processes the test response with proper error handling and content type detection:
+ * - For JSON responses: Parses and makes it available for filtering/display
+ * - For plain text responses: Displays as raw text without JSON parsing
+ * - For file responses: Handles as downloadable content
+ *
+ * @param e The test result data from API
+ */
+const handleTestResult = (e: any): void => {
   testResult.value = e;
 
   if (!isHistoryTestCase.value) {
@@ -125,10 +135,12 @@ const handleTestResult = (e: any) => {
   } else if(e.body !== ''){
     testResult.value.bodyLength = e.body.length
     try {
+      // Try to parse as JSON, fallback to plain text if parsing fails
       testResult.value.bodyObject = JSON.parse(e.body);
       testResult.value.originBodyObject = JSON.parse(e.body);
       responseBodyFilter()
     } catch (error) {
+      // JSON parsing failed, display as plain text
       testResult.value.bodyText = e.body;
       testResult.value.bodyObject = null;
       testResult.value.originBodyObject = null;

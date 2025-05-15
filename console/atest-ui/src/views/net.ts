@@ -15,7 +15,17 @@ limitations under the License.
 */
 import { Cache } from './cache'
 
-async function DefaultResponseProcess(response: any) {
+/**
+ * Process HTTP response with proper content type handling
+ * 
+ * This function handles both JSON and non-JSON responses:
+ * 1. For JSON responses, parses and returns the JSON object
+ * 2. For non-JSON responses (like text/plain), returns the raw text
+ * 
+ * @param response The fetch API response object
+ * @returns Parsed JSON object or raw text content
+ */
+async function DefaultResponseProcess(response: any): Promise<any> {
     if (!response.ok) {
         switch (response.status) {
             case 401:
@@ -31,14 +41,14 @@ async function DefaultResponseProcess(response: any) {
         }
     }
     
-    // 先获取响应文本
+    // Get the complete response text first
     const responseText = await response.text();
     
-    // 尝试解析为JSON，如果失败则直接返回原始文本
+    // Try parsing as JSON, fallback to raw text if failed
     try {
         return JSON.parse(responseText);
     } catch (e) {
-        // 不是有效的JSON，直接返回原始文本
+        // Not valid JSON, return the raw text directly
         return responseText;
     }
 }
