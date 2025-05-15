@@ -124,9 +124,15 @@ const handleTestResult = (e: any) => {
     isResponseFile.value = true
   } else if(e.body !== ''){
     testResult.value.bodyLength = e.body.length
-    testResult.value.bodyObject = JSON.parse(e.body);
-    testResult.value.originBodyObject = JSON.parse(e.body);
-    responseBodyFilter()
+    try {
+      testResult.value.bodyObject = JSON.parse(e.body);
+      testResult.value.originBodyObject = JSON.parse(e.body);
+      responseBodyFilter()
+    } catch (error) {
+      testResult.value.bodyText = e.body;
+      testResult.value.bodyObject = null;
+      testResult.value.originBodyObject = null;
+    }
   }
 
     Cache.SetTestCaseResponseCache(suite + '-' + name, {

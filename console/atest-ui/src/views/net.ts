@@ -30,16 +30,16 @@ async function DefaultResponseProcess(response: any) {
             throw new Error(text)
         }
     }
-
-    const contentType = response.headers.get('Content-Type') || '';
-    if (contentType.startsWith('text/plain')) {
-        return response.text();
-    }
+    
+    // 先获取响应文本
+    const responseText = await response.text();
+    
+    // 尝试解析为JSON，如果失败则直接返回原始文本
     try {
-        return await response.json();
+        return JSON.parse(responseText);
     } catch (e) {
-        // If JSON parsing fails, return as text
-        return response.text();
+        // 不是有效的JSON，直接返回原始文本
+        return responseText;
     }
 }
 
@@ -768,7 +768,12 @@ function GetTestCaseAllHistory(req: TestCase,
         .then(callback).catch(errHandle)
 }
 
-function DownloadResponseFile(testcase,
+interface ResponseFile {
+    body: string;
+    [key: string]: any;
+}
+
+function DownloadResponseFile(testcase: ResponseFile,
     callback: (d: any) => void, errHandle?: (e: any) => void | null) {
     const requestOptions = {
         method: 'POST',
