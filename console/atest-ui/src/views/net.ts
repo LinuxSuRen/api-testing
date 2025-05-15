@@ -48,7 +48,10 @@ async function DefaultResponseProcess(response: any): Promise<any> {
     try {
         return JSON.parse(responseText);
     } catch (e) {
-        // Not valid JSON, return the raw text directly
+        // This is an expected case for non-JSON responses (like text/plain)
+        // We intentionally handle this by returning the raw text
+        // No need to log as error since this is a valid content type handling
+        console.debug("Response is not JSON, handling as plain text");
         return responseText;
     }
 }

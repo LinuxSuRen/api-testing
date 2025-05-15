@@ -140,7 +140,9 @@ const handleTestResult = (e: any): void => {
       testResult.value.originBodyObject = JSON.parse(e.body);
       responseBodyFilter()
     } catch (error) {
-      // JSON parsing failed, display as plain text
+      // This is an expected case for non-JSON responses (like text/plain)
+      // We intentionally display as plain text instead of attempting JSON parsing
+      console.debug("Response body is not valid JSON, displaying as plain text:", error);
       testResult.value.bodyText = e.body;
       testResult.value.bodyObject = null;
       testResult.value.originBodyObject = null;
