@@ -15,17 +15,44 @@ limitations under the License.
 */
 import { Cache } from './cache'
 
-async function DefaultResponseProcess(response: any) {
+/**
+ * Process HTTP response with proper content type handling
+ * 
+ * This function handles both JSON and non-JSON responses:
+ * 1. For JSON responses, parses and returns the JSON object
+ * 2. For non-JSON responses (like text/plain), returns the raw text
+ * 
+ * @param response The fetch API response object
+ * @returns Parsed JSON object or raw text content
+ */
+async function DefaultResponseProcess(response: any): Promise<any> {
     if (!response.ok) {
         switch (response.status) {
             case 401:
                 throw new Error("Unauthenticated")
         }
 
-        const message = await response.json().then((data: any) => data.message)
-        throw new Error(message)
-    } else {
-        return response.json()
+        try {
+            const message = await response.json().then((data: any) => data.message)
+            throw new Error(message)
+        } catch {
+            const text = await response.text()
+            throw new Error(text)
+        }
+    }
+    
+    // Get the complete response text first
+    const responseText = await response.text();
+    
+    // Try parsing as JSON, fallback to raw text if failed
+    try {
+        return JSON.parse(responseText);
+    } catch (e) {
+        // This is an expected case for non-JSON responses (like text/plain)
+        // We intentionally handle this by returning the raw text
+        // No need to log as error since this is a valid content type handling
+        console.debug("Response is not JSON, handling as plain text");
+        return responseText;
     }
 }
 
@@ -754,7 +781,12 @@ function GetTestCaseAllHistory(req: TestCase,
         .then(callback).catch(errHandle)
 }
 
-function DownloadResponseFile(testcase,
+interface ResponseFile {
+    body: string;
+    [key: string]: any;
+}
+
+function DownloadResponseFile(testcase: ResponseFile,
     callback: (d: any) => void, errHandle?: (e: any) => void | null) {
     const requestOptions = {
         method: 'POST',
