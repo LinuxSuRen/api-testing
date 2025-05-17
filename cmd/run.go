@@ -79,10 +79,13 @@ var (
 	runLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("run")
 )
 
-func newDefaultRunOption() *runOption {
+func newDefaultRunOption(output io.Writer) *runOption {
+	if output == nil {
+		output = os.Stdout
+	}
 	return &runOption{
 		reporter:           runner.NewMemoryTestReporter(nil, ""),
-		reportWriter:       runner.NewResultWriter(os.Stdout),
+		reportWriter:       runner.NewResultWriter(output),
 		loader:             testing.NewFileLoader(),
 		githubReportOption: &runner.GithubPRCommentOption{},
 	}
@@ -97,7 +100,7 @@ func newDiscardRunOption() *runOption {
 
 // createRunCommand returns the run command
 func createRunCommand() (cmd *cobra.Command) {
-	opt := newDefaultRunOption()
+	opt := newDefaultRunOption(nil)
 	cmd = &cobra.Command{
 		Use:     "run",
 		Aliases: []string{"r"},
@@ -111,28 +114,32 @@ See also https://github.com/LinuxSuRen/api-testing/tree/master/sample`,
 
 	// set flags
 	flags := cmd.Flags()
-	flags.StringVarP(&opt.pattern, "pattern", "p", "test-suite-*.yaml",
-		"The file pattern which try to execute the test cases. Brace expansion is supported, such as: test-suite-{1,2}.yaml")
-	flags.StringVarP(&opt.level, "level", "l", "info", "Set the output log level")
-	flags.DurationVarP(&opt.duration, "duration", "", 0, "Running duration")
-	flags.DurationVarP(&opt.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
-	flags.BoolVarP(&opt.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
-	flags.StringArrayVarP(&opt.caseFilter, "case-filter", "", nil, "The filter of the test case")
-	flags.StringVarP(&opt.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus, http, grpc")
-	flags.StringVarP(&opt.reportFile, "report-file", "", "", "The file path of the report")
-	flags.BoolVarP(&opt.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
-	flags.StringVarP(&opt.reportTemplate, "report-template", "", "", "The template used to render the report")
-	flags.StringVarP(&opt.reportDest, "report-dest", "", "", "The server url where you want to send the report")
-	flags.StringVarP(&opt.swaggerURL, "swagger-url", "", "", "The URL of swagger")
-	flags.Int64VarP(&opt.thread, "thread", "", 1, "Threads of the execution")
-	flags.Int32VarP(&opt.qps, "qps", "", 5, "QPS")
-	flags.Int32VarP(&opt.burst, "burst", "", 5, "burst")
-	flags.StringVarP(&opt.monitorDocker, "monitor-docker", "", "", "The docker container name to monitor")
+	opt.addFlags(flags)
 	addGitHubReportFlags(flags, opt.githubReportOption)
 	return
 }
 
 const caseFilter = "case-filter"
+
+func (o *runOption) addFlags(flags *pflag.FlagSet) {
+	flags.StringVarP(&o.pattern, "pattern", "p", "test-suite-*.yaml",
+		"The file pattern which try to execute the test cases. Brace expansion is supported, such as: test-suite-{1,2}.yaml")
+	flags.StringVarP(&o.level, "level", "l", "info", "Set the output log level")
+	flags.DurationVarP(&o.duration, "duration", "", 0, "Running duration")
+	flags.DurationVarP(&o.requestTimeout, "request-timeout", "", time.Minute, "Timeout for per request")
+	flags.BoolVarP(&o.requestIgnoreError, "request-ignore-error", "", false, "Indicate if ignore the request error")
+	flags.StringArrayVarP(&o.caseFilter, "case-filter", "", nil, "The filter of the test case")
+	flags.StringVarP(&o.report, "report", "", "", "The type of target report. Supported: markdown, md, html, json, discard, std, prometheus, http, grpc")
+	flags.StringVarP(&o.reportFile, "report-file", "", "", "The file path of the report")
+	flags.BoolVarP(&o.reportIgnore, "report-ignore", "", false, "Indicate if ignore the report output")
+	flags.StringVarP(&o.reportTemplate, "report-template", "", "", "The template used to render the report")
+	flags.StringVarP(&o.reportDest, "report-dest", "", "", "The server url where you want to send the report")
+	flags.StringVarP(&o.swaggerURL, "swagger-url", "", "", "The URL of swagger")
+	flags.Int64VarP(&o.thread, "thread", "", 1, "Threads of the execution")
+	flags.Int32VarP(&o.qps, "qps", "", 5, "QPS")
+	flags.Int32VarP(&o.burst, "burst", "", 5, "burst")
+	flags.StringVarP(&o.monitorDocker, "monitor-docker", "", "", "The docker container name to monitor")
+}
 
 func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 	ctx := cmd.Context()
@@ -148,6 +155,9 @@ func (o *runOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 			return
 		}
 
+		defer func() {
+			_ = reportFile.Close()
+		}()
 		writer = io.MultiWriter(writer, reportFile)
 	}
 
@@ -354,7 +364,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 	suiteRunner := runner.GetTestSuiteRunner(testSuite)
 	suiteRunner.WithTestReporter(o.reporter)
 	suiteRunner.WithSecure(testSuite.Spec.Secure)
-	suiteRunner.WithOutputWriter(os.Stdout)
+	suiteRunner.WithOutputWriter(o.reportWriter.GetWriter())
 	suiteRunner.WithWriteLevel(o.level)
 	suiteRunner.WithSuite(testSuite)
 	var caseFilterObj interface{}

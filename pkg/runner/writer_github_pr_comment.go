@@ -194,6 +194,10 @@ func (w *githubPRCommentWriter) WithResourceUsage([]ResourceUsage) ReportResultW
 	return w
 }
 
+func (w *githubPRCommentWriter) GetWriter() io.Writer {
+	return nil
+}
+
 func unmarshalResponseBody(resp *http.Response, expectedCode int, obj interface{}) (err error) {
 	if resp.StatusCode != expectedCode {
 		err = fmt.Errorf("expect status code: %d, but %d", expectedCode, resp.StatusCode)

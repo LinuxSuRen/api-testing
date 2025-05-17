@@ -110,7 +110,7 @@ Test case count: 1
 			err := writer.Output(tt.results)
 			assert.Nil(t, err)
 			assert.Equal(t, tt.expect, tt.buf.String())
-
+			assert.NotNil(t, writer.GetWriter())
 			assert.NotNil(t, writer.WithResourceUsage(nil))
 		})
 	}

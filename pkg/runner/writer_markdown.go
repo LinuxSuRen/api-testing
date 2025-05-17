@@ -69,6 +69,10 @@ func (w *markdownResultWriter) WithResourceUsage(resurceUage []ResourceUsage) Re
 	return w
 }
 
+func (w *markdownResultWriter) GetWriter() io.Writer {
+	return w.writer
+}
+
 type markdownReport struct {
 	Total             int
 	Error             int

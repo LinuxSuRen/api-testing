@@ -119,7 +119,18 @@ func DefaultLogger(level LogLevel) Logger {
 // more information).
 func (l Logger) WithName(name string) Logger {
 	logLevel := l.logging.Level[APITestingLogComponent(name)]
-	logger := initZapLogger(os.Stdout, l.logging, logLevel)
+	logger := initZapLogger(io.Discard, l.logging, logLevel)
+
+	return Logger{
+		Logger:        zapr.NewLogger(logger).WithName(name),
+		logging:       l.logging,
+		sugaredLogger: logger.Sugar(),
+	}
+}
+
+func (l Logger) WithNameAndWriter(name string, writer io.Writer) Logger {
+	logLevel := l.logging.Level[APITestingLogComponent(name)]
+	logger := initZapLogger(writer, l.logging, logLevel)
 
 	return Logger{
 		Logger:        zapr.NewLogger(logger).WithName(name),
@@ -132,6 +143,7 @@ func (l Logger) WithName(name string) Logger {
 // See Info for documentation on how key/value pairs work.
 func (l Logger) WithValues(keysAndValues ...interface{}) Logger {
 	l.Logger = l.Logger.WithValues(keysAndValues...)
+	l.sugaredLogger.WithOptions()
 	return l
 }
 
