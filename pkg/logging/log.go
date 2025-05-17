@@ -118,8 +118,12 @@ func DefaultLogger(level LogLevel) Logger {
 // contain only letters, digits, and hyphens (see the package documentation for
 // more information).
 func (l Logger) WithName(name string) Logger {
+	return l.WithNameAndWriter(name, os.Stdout)
+}
+
+func (l Logger) WithNameAndWriter(name string, writer io.Writer) Logger {
 	logLevel := l.logging.Level[APITestingLogComponent(name)]
-	logger := initZapLogger(os.Stdout, l.logging, logLevel)
+	logger := initZapLogger(writer, l.logging, logLevel)
 
 	return Logger{
 		Logger:        zapr.NewLogger(logger).WithName(name),

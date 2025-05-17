@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/linuxsuren/api-testing/pkg/apispec"
@@ -117,4 +118,8 @@ func (w *grpcResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) Rep
 
 func (w *grpcResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
 	return w
+}
+
+func (w *grpcResultWriter) GetWriter() io.Writer {
+	return nil
 }

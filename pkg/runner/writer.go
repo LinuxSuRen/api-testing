@@ -16,11 +16,16 @@ limitations under the License.
 
 package runner
 
-import "github.com/linuxsuren/api-testing/pkg/apispec"
+import (
+	"io"
+
+	"github.com/linuxsuren/api-testing/pkg/apispec"
+)
 
 // ReportResultWriter is the interface of the report writer
 type ReportResultWriter interface {
 	Output([]ReportResult) error
 	WithAPICoverage(apiCoverage apispec.APICoverage) ReportResultWriter
 	WithResourceUsage([]ResourceUsage) ReportResultWriter
+	GetWriter() io.Writer
 }

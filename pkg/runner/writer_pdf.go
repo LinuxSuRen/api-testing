@@ -19,6 +19,7 @@ package runner
 import (
 	_ "embed"
 	"fmt"
+
 	"github.com/linuxsuren/api-testing/pkg/logging"
 
 	"io"
@@ -124,4 +125,8 @@ func (w *pdfResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) Repo
 
 func (w *pdfResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
 	return w
+}
+
+func (w *pdfResultWriter) GetWriter() io.Writer {
+	return w.writer
 }
