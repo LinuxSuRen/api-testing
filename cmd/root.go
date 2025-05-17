@@ -39,7 +39,8 @@ func NewRootCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c *cob
 		createRunCommand(), createSampleCmd(), createMockComposeCmd(),
 		createServerCmd(execer, httpServer), createJSONSchemaCmd(),
 		createServiceCommand(execer), createFunctionCmd(), createConvertCommand(),
-		createMockCmd(), createExtensionCommand(downloader.NewStoreDownloader()))
+		createMockCmd(), createExtensionCommand(downloader.NewStoreDownloader()),
+		createComposeRun())
 	return
 }
 

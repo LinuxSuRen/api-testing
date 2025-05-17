@@ -148,3 +148,7 @@ func (w *httpResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) Rep
 func (w *httpResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
 	return w
 }
+
+func (w *httpResultWriter) GetWriter() io.Writer {
+	return nil
+}

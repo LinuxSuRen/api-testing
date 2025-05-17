@@ -2,8 +2,9 @@ package main
 
 import (
 	_ "embed"
-	"github.com/linuxsuren/api-testing/pkg/version"
 	"os"
+
+	"github.com/linuxsuren/api-testing/pkg/version"
 
 	"github.com/linuxsuren/api-testing/cmd"
 	"github.com/linuxsuren/api-testing/pkg/server"

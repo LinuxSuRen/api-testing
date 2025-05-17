@@ -70,6 +70,10 @@ func (w *stdResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter 
 	return w
 }
 
+func (w *stdResultWriter) GetWriter() io.Writer {
+	return w.writer
+}
+
 func apiConveragePrint(result []ReportResult, apiConverage apispec.APICoverage, w io.Writer) {
 	covered, total := apiConverageCount(result, apiConverage)
 	if total > 0 {

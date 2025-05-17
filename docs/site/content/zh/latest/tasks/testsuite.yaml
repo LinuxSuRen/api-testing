@@ -1,0 +1,9 @@
+#!api-testing
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-schema.json
+name: SpringBoot
+api: |
+  {{default "http://localhost:8080" (env "SERVER")}}
+items:
+- name: health
+  request:
+    api: /health
