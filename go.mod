@@ -1,6 +1,6 @@
 module github.com/linuxsuren/api-testing
 
-go 1.22.4
+go 1.23
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
@@ -19,7 +19,7 @@ require (
 	github.com/h2non/gock v1.2.0
 	github.com/invopop/jsonschema v0.7.0
 	github.com/jhump/protoreflect v1.15.3
-	github.com/linuxsuren/go-fake-runtime v0.0.4
+	github.com/linuxsuren/go-fake-runtime v0.0.5
 	github.com/linuxsuren/go-service v0.0.0-20231225060426-efabcd3a5161
 	github.com/linuxsuren/unstructured v0.0.1
 	github.com/prometheus/client_golang v1.19.0
