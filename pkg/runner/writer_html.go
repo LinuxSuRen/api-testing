@@ -49,5 +49,9 @@ func (w *htmlResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter
 	return w
 }
 
+func (w *htmlResultWriter) GetWriter() io.Writer {
+	return nil
+}
+
 //go:embed data/html.html
 var htmlReport string

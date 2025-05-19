@@ -51,3 +51,7 @@ func (w *jsonResultWriter) WithAPICoverage(apiConverage apispec.APICoverage) Rep
 func (w *jsonResultWriter) WithResourceUsage([]ResourceUsage) ReportResultWriter {
 	return w
 }
+
+func (w *jsonResultWriter) GetWriter() io.Writer {
+	return w.writer
+}
