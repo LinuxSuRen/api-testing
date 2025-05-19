@@ -24,7 +24,7 @@ require (
 	github.com/linuxsuren/unstructured v0.0.1
 	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/common v0.50.0
-	github.com/signintech/gopdf v0.18.0
+	github.com/signintech/gopdf v0.32.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
