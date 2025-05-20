@@ -46,7 +46,7 @@
     "@vue/test-utils": "^2.4.0",
     "@vue/tsconfig": "^0.4.0",
     "cypress": "^13.1.0",
-    "eslint": "^9.18.0",
+    "eslint": "^9.27.0",
     "eslint-plugin-cypress": "^4.1.0",
     "eslint-plugin-vue": "^9.32.0",
     "fetch-mock-jest": "^1.5.1",
