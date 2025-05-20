@@ -1,6 +1,6 @@
 module github.com/linuxsuren/api-testing
 
-go 1.23
+go 1.23.0
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
@@ -8,7 +8,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/cucumber/godog v0.12.6
-	github.com/expr-lang/expr v1.15.6
+	github.com/expr-lang/expr v1.17.0
 	github.com/flopp/go-findfont v0.1.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.4.1
@@ -34,7 +34,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/oauth2 v0.22.0
-	golang.org/x/sync v0.10.0
+	golang.org/x/sync v0.12.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240123012728-ef4313101c80
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.34.2
@@ -54,7 +54,7 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/schollz/progressbar/v3 v3.13.0 // indirect
-	golang.org/x/term v0.27.0 // indirect
+	golang.org/x/term v0.30.0 // indirect
 )
 
 require (
@@ -100,10 +100,10 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/genproto v0.0.0-20240123012728-ef4313101c80 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
