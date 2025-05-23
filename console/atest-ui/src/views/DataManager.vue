@@ -48,6 +48,7 @@ watch(store, (s) => {
     switch (kind.value) {
         case 'atest-store-elasticsearch':
         case 'atest-store-etcd':
+        case 'atest-store-redis':
             sqlQuery.value = '*'
             complexEditor.value = false
             break
@@ -92,15 +93,6 @@ const describeTable = (data: QueryData) => {
     executeQuery()
 }
 const queryTables = () => {
-    switch (kind.value) {
-        case 'atest-store-elasticsearch':
-            if (sqlQuery.value === '') {
-                sqlQuery.value = '*'
-            }
-            break
-        default:
-            sqlQuery.value = ``
-    }
     executeQuery()
 }
 watch(kind, (k) => {
@@ -179,28 +171,30 @@ const ormDataHandler = (data: QueryData) => {
 
 const keyValueDataHandler = (data: QueryData) => {
     queryResult.value = []
+    columns.value = ['key', 'value']
     data.data.forEach(e => {
-        const obj = new Map<string, string>();
-        obj.set('key', e.key)
-        obj.set('value', e.value)
-        queryResult.value.push(obj)
-
-        columns.value = ['key', 'value']
+        queryResult.value.push({
+            key: e.key,
+            value: e.value
+        })
     })
 }
 
 const executeQuery = async () => {
+    switch (kind.value) {
+        case 'atest-store-elasticsearch':
+        case 'atest-store-etcd':
+        case 'atest-store-redis':
+            if (sqlQuery.value === '') {
+                sqlQuery.value = '*'
+            }
+            break
+        default:
+            sqlQuery.value = ``
+    }
     return executeWithQuery(sqlQuery.value)
 }
 const executeWithQuery = async (sql: string) => {
-    switch (kind.value) {
-        case 'atest-store-etcd':
-            sqlQuery.value = '*'
-            break;
-        case '':
-            return;
-    }
-
     let success = false
     query.value.store = store.value
     query.value.key = queryDataMeta.value.currentDatabase
@@ -218,8 +212,6 @@ const executeWithQuery = async (sql: string) => {
                 success = true
                 break;
             case 'atest-store-etcd':
-                keyValueDataHandler(data)
-                break;
             case 'atest-store-redis':
                 keyValueDataHandler(data)
                 break;
@@ -240,7 +232,7 @@ const executeWithQuery = async (sql: string) => {
     return success
 }
 const nextPage = () => {
-    query.value.offset += query.value.limit
+    query.value.offset = Number(query.value.limit) + Number(query.value.offset)
     executeQuery()
 }
 const overflowChange = () => {
@@ -315,7 +307,7 @@ watch(largeContent, (e) => {
                                 </el-select>
                             </el-col>
                         </el-row>
-                        <el-row :gutter="10" v-if="kind === 'atest-store-elasticsearch'">
+                        <el-row :gutter="10" v-if="kind === 'atest-store-elasticsearch' || kind === 'atest-store-redis'">
                             <el-col :span="10">
                                 <el-input type="number" v-model="query.offset">
                                     <template #prepend>Offset</template>
