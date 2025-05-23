@@ -32,7 +32,7 @@ import (
 )
 
 func TestConvert(t *testing.T) {
-	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"},
+	c := cmd.NewRootCmd(&fakeruntime.FakeExecer{ExpectOS: "linux"},
 		server.NewFakeHTTPServer())
 	c.SetOut(io.Discard)
 
