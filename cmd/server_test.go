@@ -80,7 +80,7 @@ func TestPrintProto(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
+			root := NewRootCmd(&fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
 			root.SetOut(buf)
 			root.SetArgs(append(tt.args, "--dry-run"))
 			err := root.Execute()
@@ -182,7 +182,7 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 
 	t.Run("download atest", func(t *testing.T) {
 		opt := &serverOption{
-			execer: fakeruntime.FakeExecer{
+			execer: &fakeruntime.FakeExecer{
 				ExpectOS:            "linux",
 				ExpectLookPathError: errors.New("fake"),
 			},
@@ -199,7 +199,7 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 
 	t.Run("download atest, failed to read", func(t *testing.T) {
 		opt := &serverOption{
-			execer: fakeruntime.FakeExecer{
+			execer: &fakeruntime.FakeExecer{
 				ExpectOS: "linux",
 			},
 		}
@@ -268,7 +268,7 @@ func TestOAuth(t *testing.T) {
 	}}
 	for i, tt := range tests {
 		buf := new(bytes.Buffer)
-		root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
+		root := NewRootCmd(&fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
 		root.SetOut(buf)
 		root.SetArgs(append(tt.args, "--dry-run"))
 		err := root.Execute()
@@ -294,7 +294,7 @@ func TestStartPlugins(t *testing.T) {
 		}
 		rootCmd.SetOut(io.Discard)
 		rootCmd.AddCommand(createServerCmd(
-			fakeruntime.FakeExecer{ExpectOS: "linux", ExpectLookPathError: errors.New("not-found")},
+			&fakeruntime.FakeExecer{ExpectOS: "linux", ExpectLookPathError: errors.New("not-found")},
 			server.NewFakeHTTPServer(),
 		))
 
@@ -310,7 +310,7 @@ func TestStartPlugins(t *testing.T) {
 		}
 		rootCmd.SetOut(io.Discard)
 		rootCmd.AddCommand(createServerCmd(
-			fakeruntime.FakeExecer{ExpectOS: "linux", ExpectLookPathError: errors.New("not-found")},
+			&fakeruntime.FakeExecer{ExpectOS: "linux", ExpectLookPathError: errors.New("not-found")},
 			httpServer,
 		))
 

@@ -26,7 +26,7 @@ import (
 )
 
 func TestCreateRunCommand(t *testing.T) {
-	execer := fakeruntime.FakeExecer{}
+	execer := &fakeruntime.FakeExecer{}
 
 	cmd := createRunCommand()
 	assert.Equal(t, "run", cmd.Use)
@@ -45,7 +45,7 @@ func TestCreateRunCommand(t *testing.T) {
 }
 
 func TestRootCmd(t *testing.T) {
-	c := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
+	c := NewRootCmd(&fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
 	assert.NotNil(t, c)
 	assert.Equal(t, "atest", c.Use)
 }

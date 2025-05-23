@@ -28,7 +28,7 @@ import (
 )
 
 func TestJSONSchemaCmd(t *testing.T) {
-	c := cmd.NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"},
+	c := cmd.NewRootCmd(&fakeruntime.FakeExecer{ExpectOS: "linux"},
 		server.NewFakeHTTPServer())
 
 	buf := new(bytes.Buffer)

@@ -1,5 +1,5 @@
 /*
-Copyright 2023-2024 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,35 +16,35 @@ limitations under the License.
 package server
 
 import (
-	"errors"
-	"testing"
-	"time"
+    "errors"
+    "testing"
+    "time"
 
-	fakeruntime "github.com/linuxsuren/go-fake-runtime"
-	"github.com/stretchr/testify/assert"
+    fakeruntime "github.com/linuxsuren/go-fake-runtime"
+    "github.com/stretchr/testify/assert"
 )
 
 func TestStoreExtManager(t *testing.T) {
-	t.Run("not found", func(t *testing.T) {
-		mgr := NewStoreExtManager(fakeruntime.FakeExecer{
-			ExpectLookPathError: errors.New("not found"),
-		})
-		err := mgr.Start("fake", "")
-		assert.Error(t, err)
-	})
+    t.Run("not found", func(t *testing.T) {
+        mgr := NewStoreExtManager(&fakeruntime.FakeExecer{
+            ExpectLookPathError: errors.New("not found"),
+        })
+        err := mgr.Start("fake", "")
+        assert.Error(t, err)
+    })
 
-	t.Run("exist executable file", func(t *testing.T) {
-		mgr := NewStoreExtManagerInstance(fakeruntime.FakeExecer{
-			ExpectLookPath: "/usr/local/bin/go",
-		})
-		err := mgr.Start("go", "")
-		assert.NoError(t, err, err)
+    t.Run("exist executable file", func(t *testing.T) {
+        mgr := NewStoreExtManagerInstance(&fakeruntime.FakeExecer{
+            ExpectLookPath: "/usr/local/bin/go",
+        })
+        err := mgr.Start("go", "")
+        assert.NoError(t, err, err)
 
-		time.Sleep(time.Microsecond * 100)
-		err = mgr.Start("go", "")
-		assert.NoError(t, err)
+        time.Sleep(time.Microsecond * 100)
+        err = mgr.Start("go", "")
+        assert.NoError(t, err)
 
-		err = mgr.StopAll()
-		assert.NoError(t, err)
-	})
+        err = mgr.StopAll()
+        assert.NoError(t, err)
+    })
 }
