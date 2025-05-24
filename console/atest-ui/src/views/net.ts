@@ -41,18 +41,22 @@ async function DefaultResponseProcess(response: any): Promise<any> {
         }
     }
     
-    // Get the complete response text first
-    const responseText = await response.text();
+    // Check if the content type is explicitly text/plain
+    const contentType = response.headers.get('Content-Type') || '';
+    if (contentType.startsWith('text/plain')) {
+        // For text/plain, directly return the text without parsing
+        return await response.text();
+    }
     
-    // Try parsing as JSON, fallback to raw text if failed
+    // For all other types, try parsing as JSON first
     try {
-        return JSON.parse(responseText);
+        return await response.json();
     } catch (e) {
-        // This is an expected case for non-JSON responses (like text/plain)
-        // We intentionally handle this by returning the raw text
-        // No need to log as error since this is a valid content type handling
-        console.debug("Response is not JSON, handling as plain text");
-        return responseText;
+        // If JSON parsing fails, get the text content as fallback
+        console.debug("Response is not JSON despite content type, handling as plain text");
+        // We have to get a clone since the body stream was already consumed
+        const clonedResponse = response.clone();
+        return await clonedResponse.text();
     }
 }
 
