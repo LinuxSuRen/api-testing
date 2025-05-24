@@ -29,34 +29,64 @@ async function DefaultResponseProcess(response: any): Promise<any> {
     if (!response.ok) {
         switch (response.status) {
             case 401:
-                throw new Error("Unauthenticated")
+                throw new Error("Unauthenticated");
+            // Potentially add other specific status code handling here
         }
 
+        // For non-OK responses, attempt to parse error details from the body
+        let errorMessage = `Request failed with status ${response.status}`;
+        const clonedResponseForErrorJson = response.clone();
         try {
-            const message = await response.json().then((data: any) => data.message)
-            throw new Error(message)
-        } catch {
-            const text = await response.text()
-            throw new Error(text)
+            const errorData = await clonedResponseForErrorJson.json();
+            errorMessage = errorData?.message || JSON.stringify(errorData);
+        } catch (jsonError: any) {
+            console.debug(
+                `Error response body (status ${response.status}) was not valid JSON. Attempting to read as text. JSON parse error:`, 
+                jsonError
+            );
+            // Body consumed by failed .json() attempt on clone, try .text() on a new clone of original response
+            const clonedResponseForErrorText = response.clone();
+            try {
+                const textData = await clonedResponseForErrorText.text();
+                if (textData) {
+                    errorMessage = textData;
+                } else {
+                    errorMessage = `Request failed with status ${response.status} (empty error body).`;
+                }
+            } catch (textError: any) {
+                console.debug(
+                    `Error response body (status ${response.status}) also failed to be read as text. Text parse error:`, 
+                    textError
+                );
+                // Fallback error message if body is entirely unreadable
+                errorMessage = `Request failed with status ${response.status} and error body was unreadable.`;
+            }
         }
+        throw new Error(errorMessage);
     }
     
-    // Check if the content type is explicitly text/plain
+    // For OK responses, handle content based on Content-Type
     const contentType = response.headers.get('Content-Type') ?? '';
     if (contentType.startsWith('text/plain')) {
-        // For text/plain, directly return the text without parsing
+        // For text/plain, directly return the text
         return await response.text();
     }
     
-    // For all other types, try parsing as JSON first
+    // For all other types (or if Content-Type is missing/unexpected), try parsing as JSON first
     try {
         return await response.json();
-    } catch (e) {
-        // If JSON parsing fails, get the text content as fallback
-        console.debug("Response is not JSON despite content type, handling as plain text");
-        // We have to get a clone since the body stream was already consumed
-        const clonedResponse = response.clone();
-        return await clonedResponse.text();
+    } catch (jsonParseError: any) {
+        // This catch block is an intentional part of the content negotiation.
+        // If the response, despite its Content-Type (or lack thereof), isn't valid JSON,
+        // we fall back to treating it as plain text. The original error is logged for debugging.
+        console.debug(
+            `Response body was not valid JSON (Content-Type: '${contentType}'). Falling back to plain text. JSON parse error:`, 
+            jsonParseError
+        );
+        // The body stream was already consumed by the failed response.json() attempt.
+        // A clone of the original response is needed to read the body as text.
+        const clonedResponseForTextFallback = response.clone();
+        return await clonedResponseForTextFallback.text();
     }
 }
 
