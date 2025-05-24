@@ -42,7 +42,7 @@ async function DefaultResponseProcess(response: any): Promise<any> {
     }
     
     // Check if the content type is explicitly text/plain
-    const contentType = response.headers.get('Content-Type') || '';
+    const contentType = response.headers.get('Content-Type') ?? '';
     if (contentType.startsWith('text/plain')) {
         // For text/plain, directly return the text without parsing
         return await response.text();
