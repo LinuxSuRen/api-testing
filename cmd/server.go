@@ -22,7 +22,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/apispec"
+	"math"
 	"net"
 	"net/http"
 	"os"
@@ -32,6 +32,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/linuxsuren/api-testing/pkg/apispec"
 
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/util/home"
@@ -336,7 +338,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}),
 			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}))
 	} else {
-		dialOption := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+		dialOption := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt))}
 		err = errors.Join(
 			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
 			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
