@@ -5,7 +5,7 @@ COPY console/atest-ui .
 RUN npm install --ignore-scripts --registry=https://registry.npmmirror.com
 RUN npm run build-only
 
-FROM docker.io/golang:1.22.4 AS builder
+FROM docker.io/golang:1.23 AS builder
 
 ARG VERSION
 ARG GOPROXY

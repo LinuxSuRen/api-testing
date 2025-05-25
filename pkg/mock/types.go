@@ -62,6 +62,7 @@ type Proxy struct {
 	Path         string       `yaml:"path" json:"path"`
 	Target       string       `yaml:"target" json:"target"`
 	RequestAmend RequestAmend `yaml:"requestAmend" json:"requestAmend"`
+	Protocol     string       `yaml:"protocol" json:"protocol"`
 }
 
 type RequestAmend struct {

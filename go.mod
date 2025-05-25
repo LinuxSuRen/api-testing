@@ -1,12 +1,12 @@
 module github.com/linuxsuren/api-testing
 
-go 1.22.4
+go 1.23
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
 	github.com/blang/semver/v4 v4.0.0
-	github.com/bufbuild/protocompile v0.6.0
+	github.com/bufbuild/protocompile v0.14.1
 	github.com/cucumber/godog v0.12.6
 	github.com/expr-lang/expr v1.15.6
 	github.com/flopp/go-findfont v0.1.0
@@ -19,12 +19,12 @@ require (
 	github.com/h2non/gock v1.2.0
 	github.com/invopop/jsonschema v0.7.0
 	github.com/jhump/protoreflect v1.15.3
-	github.com/linuxsuren/go-fake-runtime v0.0.4
+	github.com/linuxsuren/go-fake-runtime v0.0.5
 	github.com/linuxsuren/go-service v0.0.0-20231225060426-efabcd3a5161
 	github.com/linuxsuren/unstructured v0.0.1
 	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/common v0.50.0
-	github.com/signintech/gopdf v0.18.0
+	github.com/signintech/gopdf v0.32.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
@@ -37,7 +37,7 @@ require (
 	golang.org/x/sync v0.10.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240123012728-ef4313101c80
 	google.golang.org/grpc v1.62.1
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 

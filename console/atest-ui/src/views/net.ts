@@ -15,17 +15,78 @@ limitations under the License.
 */
 import { Cache } from './cache'
 
-async function DefaultResponseProcess(response: any) {
+/**
+ * Process HTTP response with proper content type handling
+ * 
+ * This function handles both JSON and non-JSON responses:
+ * 1. For JSON responses, parses and returns the JSON object
+ * 2. For non-JSON responses (like text/plain), returns the raw text
+ * 
+ * @param response The fetch API response object
+ * @returns Parsed JSON object or raw text content
+ */
+async function DefaultResponseProcess(response: any): Promise<any> {
     if (!response.ok) {
         switch (response.status) {
             case 401:
-                throw new Error("Unauthenticated")
+                throw new Error("Unauthenticated");
+            // Potentially add other specific status code handling here
         }
 
-        const message = await response.json().then((data: any) => data.message)
-        throw new Error(message)
-    } else {
-        return response.json()
+        // For non-OK responses, attempt to parse error details from the body
+        let errorMessage = `Request failed with status ${response.status}`;
+        const clonedResponseForErrorJson = response.clone();
+        try {
+            const errorData = await clonedResponseForErrorJson.json();
+            errorMessage = errorData?.message || JSON.stringify(errorData);
+        } catch (jsonError: any) {
+            console.debug(
+                `Error response body (status ${response.status}) was not valid JSON. Attempting to read as text. JSON parse error:`, 
+                jsonError
+            );
+            // Body consumed by failed .json() attempt on clone, try .text() on a new clone of original response
+            const clonedResponseForErrorText = response.clone();
+            try {
+                const textData = await clonedResponseForErrorText.text();
+                if (textData) {
+                    errorMessage = textData;
+                } else {
+                    errorMessage = `Request failed with status ${response.status} (empty error body).`;
+                }
+            } catch (textError: any) {
+                console.debug(
+                    `Error response body (status ${response.status}) also failed to be read as text. Text parse error:`, 
+                    textError
+                );
+                // Fallback error message if body is entirely unreadable
+                errorMessage = `Request failed with status ${response.status} and error body was unreadable.`;
+            }
+        }
+        throw new Error(errorMessage);
+    }
+    
+    // For OK responses, handle content based on Content-Type
+    const contentType = response.headers.get('Content-Type') ?? '';
+    if (contentType.startsWith('text/plain')) {
+        // For text/plain, directly return the text
+        return await response.text();
+    }
+    
+    // For all other types (or if Content-Type is missing/unexpected), try parsing as JSON first
+    try {
+        return await response.json();
+    } catch (jsonParseError: any) {
+        // This catch block is an intentional part of the content negotiation.
+        // If the response, despite its Content-Type (or lack thereof), isn't valid JSON,
+        // we fall back to treating it as plain text. The original error is logged for debugging.
+        console.debug(
+            `Response body was not valid JSON (Content-Type: '${contentType}'). Falling back to plain text. JSON parse error:`, 
+            jsonParseError
+        );
+        // The body stream was already consumed by the failed response.json() attempt.
+        // A clone of the original response is needed to read the body as text.
+        const clonedResponseForTextFallback = response.clone();
+        return await clonedResponseForTextFallback.text();
     }
 }
 
@@ -754,7 +815,12 @@ function GetTestCaseAllHistory(req: TestCase,
         .then(callback).catch(errHandle)
 }
 
-function DownloadResponseFile(testcase,
+interface ResponseFile {
+    body: string;
+    [key: string]: any;
+}
+
+function DownloadResponseFile(testcase: ResponseFile,
     callback: (d: any) => void, errHandle?: (e: any) => void | null) {
     const requestOptions = {
         method: 'POST',

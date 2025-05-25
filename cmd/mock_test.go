@@ -49,7 +49,7 @@ func TestMockCommand(t *testing.T) {
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			root := NewRootCmd(fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
+			root := NewRootCmd(&fakeruntime.FakeExecer{ExpectOS: "linux"}, server.NewFakeHTTPServer())
 			root.SetOut(io.Discard)
 			root.SetArgs(tc.args)
 			ctx, cancel := context.WithCancel(context.TODO())
