@@ -1386,7 +1386,7 @@ const renameTestCase = (name: string) => {
           </div>
           <div v-else>
             <Codemirror v-if="!isResponseFile" v-model="testResult.bodyText"/>
-            <img v-if="currentContentType === 'image/png'" :src="currentImageContent" style="max-width: 100%; max-height: 500px;"/>
+            <img v-if="currentContentType.startsWith('image')" :src="currentImageContent" style="max-width: 100%; max-height: 500px;"/>
             <div v-else-if="isResponseFile" style="padding-top: 10px;">
             <el-row>
               <el-col :span="10">
