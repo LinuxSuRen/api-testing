@@ -828,16 +828,10 @@ interface ResponseFile {
 function DownloadResponseFile(testcase: ResponseFile,
     callback: (d: any) => void, errHandle?: (e: any) => void | null) {
     const requestOptions = {
-        method: 'POST',
         headers: {
             'X-Store-Name': Cache.GetCurrentStore().name,
             'X-Auth': getToken()
-        },
-        body: JSON.stringify({
-            response: {
-                body: testcase.body,
-            }
-        })
+        }
     }
     fetch(`/api/v1/downloadFile/${testcase.body}`, requestOptions)
         .then(DefaultResponseProcess)

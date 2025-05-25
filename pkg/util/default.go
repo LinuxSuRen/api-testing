@@ -81,6 +81,7 @@ const (
 	XML                = "application/xml"
 	OctetStream        = "application/octet-stream"
 	Image              = "image/jpeg"
+	ImagePNG           = "image/png"
 	SVG                = "image/svg+xml"
 	Plain              = "text/plain"
 	CSS                = "text/css"

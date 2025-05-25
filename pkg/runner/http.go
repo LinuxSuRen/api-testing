@@ -257,7 +257,7 @@ func (r *simpleTestCaseRunner) RunTestCase(testcase *testing.TestCase, dataConte
 		err = errors.Join(err, jsonSchemaValidation(testcase.Expect.Schema, responseBodyData))
 	} else {
 		switch respType {
-		case util.OctetStream, util.Image:
+		case util.OctetStream, util.Image, util.ImagePNG:
 			var data []byte
 			if data, err = io.ReadAll(resp.Body); err == nil {
 				r.simpleResponse.RawBody = data
