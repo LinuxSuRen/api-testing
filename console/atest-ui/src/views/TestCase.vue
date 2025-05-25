@@ -128,11 +128,8 @@ const handleTestResult = (e: any): void => {
   if (!isHistoryTestCase.value) {
     handleTestResultError(e)
   }
-  const isFilePath = e.body.startsWith("isFilePath-")
-
-  if(isFilePath){
-    isResponseFile.value = true
-  } else if(e.body !== ''){
+  isResponseFile.value = e.body.startsWith("isFilePath-")
+  if(!isResponseFile.value && e.body !== ''){
     testResult.value.bodyLength = e.body.length
     try {
       // Try to parse as JSON, fallback to plain text if parsing fails
@@ -149,11 +146,11 @@ const handleTestResult = (e: any): void => {
     }
   }
 
-    Cache.SetTestCaseResponseCache(suite + '-' + name, {
-      body: testResult.value.bodyObject,
-      output: e.output,
-      statusCode: testResult.value.statusCode
-    } as TestCaseResponse)
+  Cache.SetTestCaseResponseCache(suite + '-' + name, {
+    body: testResult.value.bodyObject,
+    output: e.output,
+    statusCode: testResult.value.statusCode
+  } as TestCaseResponse)
 
   parameters.value = [];
 }
@@ -436,7 +433,9 @@ function downloadResponseFile(){
       } else {
         console.error('No data to download.');
       }
-    })
+    }, (e) => {
+      UIAPI.ErrorTip(e);
+    });
 }
 
 function setDefaultValues(e) {

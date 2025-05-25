@@ -74,12 +74,17 @@ const (
 	MultiPartFormData  = "multipart/form-data"
 	Form               = "application/x-www-form-urlencoded"
 	JSON               = "application/json"
+	JavaScript         = "application/javascript"
 	OCIImageIndex      = "application/vnd.oci.image.index.v1+json"
 	YAML               = "application/yaml"
 	ZIP                = "application/zip"
+	XML                = "application/xml"
 	OctetStream        = "application/octet-stream"
 	Image              = "image/jpeg"
+	SVG                = "image/svg+xml"
 	Plain              = "text/plain"
+	CSS                = "text/css"
+	HTML               = "text/html"
 	Authorization      = "Authorization"
 )
 
