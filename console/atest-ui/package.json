@@ -20,7 +20,7 @@
     "codemirror": "^5.65.17",
     "diff-match-patch": "^1.0.5",
     "element-plus": "^2.9.6",
-    "intro.js": "^7.0.1",
+    "intro.js": "^7.2.0",
     "jsonlint-mod": "^1.7.6",
     "jsonpath-plus": "^10.0.7",
     "skywalking-client-js": "^0.10.0",
