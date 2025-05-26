@@ -16,56 +16,56 @@ limitations under the License.
 package generator
 
 import (
-    "bytes"
-    _ "embed"
-    "net/http"
-    "strings"
-    "text/template"
+	"bytes"
+	_ "embed"
+	"net/http"
+	"strings"
+	"text/template"
 
-    "github.com/linuxsuren/api-testing/pkg/testing"
+	"github.com/linuxsuren/api-testing/pkg/testing"
 )
 
 type curlGenerator struct {
 }
 
 func NewCurlGenerator() CodeGenerator {
-    return &curlGenerator{}
+	return &curlGenerator{}
 }
 
 func (g *curlGenerator) Generate(testSuite *testing.TestSuite, testcase *testing.TestCase) (result string, err error) {
-    if testcase.Request.Method == "" {
-        testcase.Request.Method = http.MethodGet
-    }
+	if testcase.Request.Method == "" {
+		testcase.Request.Method = http.MethodGet
+	}
 
-    if !strings.HasSuffix(testcase.Request.API, "?") {
-        testcase.Request.API += "?"
-    }
+	if !strings.HasSuffix(testcase.Request.API, "?") {
+		testcase.Request.API += "?"
+	}
 
-    queryKeys := testcase.Request.Query.Keys()
-    for _, k := range queryKeys {
-        testcase.Request.API += k + "=" + testcase.Request.Query.GetValue(k) + "&"
-    }
+	queryKeys := testcase.Request.Query.Keys()
+	for _, k := range queryKeys {
+		testcase.Request.API += k + "=" + testcase.Request.Query.GetValue(k) + "&"
+	}
 
-    testcase.Request.API = strings.TrimSuffix(testcase.Request.API, "&")
-    testcase.Request.API = strings.TrimSuffix(testcase.Request.API, "?")
-    if err = testcase.Request.Render(nil, ""); err != nil {
-        return
-    }
+	testcase.Request.API = strings.TrimSuffix(testcase.Request.API, "&")
+	testcase.Request.API = strings.TrimSuffix(testcase.Request.API, "?")
+	if err = testcase.Request.Render(nil, ""); err != nil {
+		return
+	}
 
-    var tpl *template.Template
-    if tpl, err = template.New("curl template").Parse(curlTemplate); err == nil {
-        buf := new(bytes.Buffer)
-        if err = tpl.Execute(buf, testcase); err == nil {
-            result = strings.TrimSpace(buf.String())
+	var tpl *template.Template
+	if tpl, err = template.New("curl template").Parse(curlTemplate); err == nil {
+		buf := new(bytes.Buffer)
+		if err = tpl.Execute(buf, testcase); err == nil {
+			result = strings.TrimSpace(buf.String())
 
-            result = strings.TrimSuffix(result, " \\")
-        }
-    }
-    return
+			result = strings.TrimSuffix(result, " \\")
+		}
+	}
+	return
 }
 
 func init() {
-    RegisterCodeGenerator("curl", NewCurlGenerator())
+	RegisterCodeGenerator("curl", NewCurlGenerator())
 }
 
 //go:embed data/curl.tpl
