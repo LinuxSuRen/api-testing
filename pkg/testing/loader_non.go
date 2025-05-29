@@ -15,6 +15,10 @@ limitations under the License.
 */
 package testing
 
+import (
+	"errors"
+)
+
 // nonLoader is an empty implement for avoid too many nil check
 type nonLoader struct{}
 
@@ -151,5 +155,6 @@ func (l *nonLoader) Close() {
 }
 
 func (l *nonLoader) Query(query map[string]string) (result DataResult, err error) {
+	err = errors.New("Query functionality is not implemented for nonLoader")
 	return
 }

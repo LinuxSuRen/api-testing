@@ -37,7 +37,7 @@ export interface Suite {
 
 export interface TestResult {
   body: string
-  bodyObject: {}
+  bodyObject: {} | null
   bodyText: string
   bodyLength: number
   output: string
@@ -46,7 +46,7 @@ export interface TestResult {
   header: Pair[]
 
   // inner fields
-  originBodyObject:{}
+  originBodyObject:{} | null
 }
 
 export interface Pair {

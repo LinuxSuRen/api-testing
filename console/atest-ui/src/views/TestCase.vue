@@ -112,6 +112,9 @@ const parseResponseBody = (body: any) => {
   }
 }
 
+const currentContentType = ref('')
+const currentImageContent = ref('')
+
 /**
  * Handles test result data from API response
  *
@@ -124,15 +127,23 @@ const parseResponseBody = (body: any) => {
  */
 const handleTestResult = (e: any): void => {
   testResult.value = e;
+  currentContentType.value = e.header.find((h: Pair) => h.key.toLowerCase() === 'content-type')?.value || '';
+  if (currentContentType.value.startsWith('image/')) {
+    API.DownloadResponseFile({
+      body: e.body}, (e) => {
+        if (e && e.data) {
+          currentImageContent.value = `data:${currentContentType.value};base64,${e.data}`;
+        } else {
+          console.error('No data to display as image.');
+        }
+    });
+  }
 
   if (!isHistoryTestCase.value) {
     handleTestResultError(e)
   }
-  const isFilePath = e.body.startsWith("isFilePath-")
-
-  if(isFilePath){
-    isResponseFile.value = true
-  } else if(e.body !== ''){
+  isResponseFile.value = e.body.startsWith("isFilePath-")
+  if(!isResponseFile.value && e.body !== ''){
     testResult.value.bodyLength = e.body.length
     try {
       // Try to parse as JSON, fallback to plain text if parsing fails
@@ -149,11 +160,11 @@ const handleTestResult = (e: any): void => {
     }
   }
 
-    Cache.SetTestCaseResponseCache(suite + '-' + name, {
-      body: testResult.value.bodyObject,
-      output: e.output,
-      statusCode: testResult.value.statusCode
-    } as TestCaseResponse)
+  Cache.SetTestCaseResponseCache(suite + '-' + name, {
+    body: testResult.value.bodyObject,
+    output: e.output,
+    statusCode: testResult.value.statusCode
+  } as TestCaseResponse)
 
   parameters.value = [];
 }
@@ -436,7 +447,9 @@ function downloadResponseFile(){
       } else {
         console.error('No data to download.');
       }
-    })
+    }, (e) => {
+      UIAPI.ErrorTip(e);
+    });
 }
 
 function setDefaultValues(e) {
@@ -1373,7 +1386,8 @@ const renameTestCase = (name: string) => {
           </div>
           <div v-else>
             <Codemirror v-if="!isResponseFile" v-model="testResult.bodyText"/>
-            <div v-if="isResponseFile" style="padding-top: 10px;">
+            <img v-if="currentContentType.startsWith('image')" :src="currentImageContent" style="max-width: 100%; max-height: 500px;"/>
+            <div v-else-if="isResponseFile" style="padding-top: 10px;">
             <el-row>
               <el-col :span="10">
                 <div>Response body is too large, please download to view.</div>

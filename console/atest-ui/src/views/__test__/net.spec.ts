@@ -28,7 +28,11 @@ beforeEach(() => {
 
 describe('net', () => {
     test('GetVersion', () => {
-        fetchMock.mockResponseOnce(`{"version":"v0.0.2"}`)
+        fetchMock.mockResponseOnce(`{"version":"v0.0.2"}`, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
         API.GetVersion((d) => {
             expect(d.version).toEqual('v0.0.2')
         })

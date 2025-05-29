@@ -232,8 +232,7 @@ service Runner {
 
     rpc DownloadResponseFile(TestCase) returns (FileData) {
       option (google.api.http) = {
-          post: "/api/v1/downloadFile/{response.body}"
-          body: "*"
+          get: "/api/v1/downloadFile/{response.body}"
       };
     }
     // stores related interfaces

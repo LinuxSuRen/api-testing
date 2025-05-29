@@ -17,13 +17,13 @@ limitations under the License.
 package home
 
 import (
-    "github.com/stretchr/testify/assert"
-    "testing"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestGetUserBinDir(t *testing.T) {
-    assert.Contains(t, GetUserConfigDir(), "atest")
-    assert.Contains(t, GetUserBinDir(), "bin")
-    assert.Contains(t, GetUserDataDir(), "data")
-    assert.Contains(t, GetExtensionSocketPath("fake"), "fake.sock")
+	assert.Contains(t, GetUserConfigDir(), "atest")
+	assert.Contains(t, GetUserBinDir(), "bin")
+	assert.Contains(t, GetUserDataDir(), "data")
+	assert.Contains(t, GetExtensionSocketPath("fake"), "fake.sock")
 }

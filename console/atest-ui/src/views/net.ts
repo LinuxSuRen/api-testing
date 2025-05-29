@@ -67,7 +67,7 @@ async function DefaultResponseProcess(response: any): Promise<any> {
     
     // For OK responses, handle content based on Content-Type
     const contentType = response.headers.get('Content-Type') ?? '';
-    if (contentType.startsWith('text/plain')) {
+    if (isTextReadableExpectJSON(contentType)) {
         // For text/plain, directly return the text
         return await response.text();
     }
@@ -88,6 +88,11 @@ async function DefaultResponseProcess(response: any): Promise<any> {
         const clonedResponseForTextFallback = response.clone();
         return await clonedResponseForTextFallback.text();
     }
+}
+
+const isTextReadableExpectJSON = (contentType: string): boolean => {
+    // Check if the content type is text-based
+    return contentType.startsWith('text/') || contentType === 'application/javascript';
 }
 
 interface AppVersion {
@@ -823,16 +828,10 @@ interface ResponseFile {
 function DownloadResponseFile(testcase: ResponseFile,
     callback: (d: any) => void, errHandle?: (e: any) => void | null) {
     const requestOptions = {
-        method: 'POST',
         headers: {
             'X-Store-Name': Cache.GetCurrentStore().name,
             'X-Auth': getToken()
-        },
-        body: JSON.stringify({
-            response: {
-                body: testcase.body,
-            }
-        })
+        }
     }
     fetch(`/api/v1/downloadFile/${testcase.body}`, requestOptions)
         .then(DefaultResponseProcess)
