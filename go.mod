@@ -8,7 +8,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/cucumber/godog v0.12.6
-	github.com/expr-lang/expr v1.15.6
+	github.com/expr-lang/expr v1.17.3
 	github.com/flopp/go-findfont v0.1.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.4.1
