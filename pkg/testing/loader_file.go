@@ -18,6 +18,7 @@ package testing
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -516,8 +517,11 @@ func (l *fileLoader) Close() {
 }
 
 func (l *fileLoader) Query(query map[string]string) (result DataResult, err error) {
-	result.Pairs = map[string]string{
-		"message": "not support",
-	}
+	err = errors.New("Query functionality is not yet implemented for fileLoader")
+	return
+}
+
+func (l *fileLoader) GetRoundTripper(name string) (roundTripper http.RoundTripper, err error) {
+	err = fmt.Errorf("not support")
 	return
 }
