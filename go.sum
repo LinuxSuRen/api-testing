@@ -127,8 +127,8 @@ github.com/linuxsuren/go-service v0.0.0-20231225060426-efabcd3a5161 h1:dSL/ah6za
 github.com/linuxsuren/go-service v0.0.0-20231225060426-efabcd3a5161/go.mod h1:QX22v61PxpOfJa4Xug8qzGTbPjclDZFx2j1PlGLknJw=
 github.com/linuxsuren/http-downloader v0.0.99 h1:fEu+HkHdYeLM932c7IfmuaDJqWxVU5sIEnS/Aln8h9o=
 github.com/linuxsuren/http-downloader v0.0.99/go.mod h1:OngIAkbOJTMbd+IMRbt3TiWSizVJZvPfjdbTpl6uHLo=
-github.com/linuxsuren/oauth-hub v0.0.0-20240809060240-e78c21b5d8d4 h1:muVmKxx+JneaVgUKHqLc+As5vpgKXZAfVu6h+iyb5LQ=
-github.com/linuxsuren/oauth-hub v0.0.0-20240809060240-e78c21b5d8d4/go.mod h1:6K1L5ajpFTNO8iJSsNrxMWAigAqczI0UPfEV9NSE0nc=
+github.com/linuxsuren/oauth-hub v0.0.1 h1:5LAdX9ZlWhaM7P10rdxiXPk26eceYHRyfkFXsym6AxY=
+github.com/linuxsuren/oauth-hub v0.0.1/go.mod h1:6K1L5ajpFTNO8iJSsNrxMWAigAqczI0UPfEV9NSE0nc=
 github.com/linuxsuren/unstructured v0.0.1 h1:ilUA8MUYbR6l9ebo/YPV2bKqlf62bzQursDSE+j00iU=
 github.com/linuxsuren/unstructured v0.0.1/go.mod h1:KH6aTj+FegzGBzc1vS6mzZx3/duhTUTEVyW5sO7p4as=
 github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0=
