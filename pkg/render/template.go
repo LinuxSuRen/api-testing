@@ -189,7 +189,21 @@ var advancedFuncs = []AdvancedFunc{{
 }, {
 	FuncName: "randEnum",
 	Func: func(items ...string) string {
-		return items[mathrand.Intn(len(items))]
+		return randItem(items...)
+	},
+}, {
+	FuncName: "randEnumByStr",
+	Func: func(item string) string {
+		return randItem(strings.Split(item, ",")...)
+	},
+}, {
+	FuncName: "randEnumByJSON",
+	Func: func(item string) interface{} {
+		var items []interface{}
+		if err := json.Unmarshal([]byte(item), &items); err == nil {
+			return randItem(items...)
+		}
+		return &WeightEnum{}
 	},
 }, {
 	FuncName: "weightObject",
@@ -237,6 +251,10 @@ var advancedFuncs = []AdvancedFunc{{
 		return
 	},
 }}
+
+func randItem[T any](items ...T) T {
+	return items[mathrand.Intn(len(items))]
+}
 
 // WeightEnum is a weight enum
 type WeightEnum struct {

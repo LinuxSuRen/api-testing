@@ -94,6 +94,18 @@ func TestRender(t *testing.T) {
 			assert.Contains(t, []string{"a", "b", "c"}, s)
 		},
 	}, {
+		name: "randEnumByStr",
+		text: `{{randEnumByStr "a,b,c"}}`,
+		verify: func(t *testing.T, s string) {
+			assert.Contains(t, []string{"a", "b", "c"}, s)
+		},
+	}, {
+		name: "randEnumByJSON",
+		text: `{{(randEnumByJSON "[{\"key\":\"a\"},{\"key\":\"b\"},{\"key\":\"c\"}]").key}}`,
+		verify: func(t *testing.T, s string) {
+			assert.Contains(t, []string{"a", "b", "c"}, s)
+		},
+	}, {
 		name: "randWeightEnum",
 		text: `{{randWeightEnum (weightObject 1 "a") (weightObject 2 "b") (weightObject 3 "c")}}`,
 		verify: func(t *testing.T, s string) {
