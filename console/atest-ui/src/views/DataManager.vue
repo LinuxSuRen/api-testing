@@ -181,16 +181,16 @@ const keyValueDataHandler = (data: QueryData) => {
 }
 
 const executeQuery = async () => {
-    switch (kind.value) {
-        case 'atest-store-elasticsearch':
-        case 'atest-store-etcd':
-        case 'atest-store-redis':
-            if (sqlQuery.value === '') {
+    if (sqlQuery.value === '') {
+        switch (kind.value) {
+            case 'atest-store-elasticsearch':
+            case 'atest-store-etcd':
+            case 'atest-store-redis':
                 sqlQuery.value = '*'
-            }
-            break
-        default:
-            sqlQuery.value = ``
+                break
+            default:
+                sqlQuery.value = ''
+        }
     }
     return executeWithQuery(sqlQuery.value)
 }
