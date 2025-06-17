@@ -13,6 +13,7 @@ import en from './locales/en.json'
 import zh from './locales/zh.json'
 import ClientMonitor from 'skywalking-client-js'
 import { name, version } from '../package'
+import 'element-plus/theme-chalk/dark/css-vars.css'
 
 const app = createApp(App)
 

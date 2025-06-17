@@ -147,6 +147,8 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
               </el-dropdown-menu>
             </template>
           </el-dropdown>
+
+          <el-switch type="primary" data-intro="Switch light and dark modes" v-model="asDarkMode"/>
         </el-col>
       </div>
       <TestingPanel v-if="panelName === 'testing'" @toHistoryPanel="toHistoryPanel"/>
