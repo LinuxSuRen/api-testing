@@ -307,6 +307,14 @@ service RunnerExtension {
     }
 }
 
+service ThemeExtension {
+    rpc GetThemes(Empty) returns (SimpleList) {
+      option (google.api.http) = {
+        get: "/api/v1/themes"
+      };
+    }
+}
+
 message Suites {
   map<string, Items> data = 1;
 }
