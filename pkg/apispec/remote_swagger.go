@@ -99,7 +99,8 @@ func decompressData(dataFile string) (err error) {
 	tarReader := tar.NewReader(gzipReader)
 
 	for {
-		header, err := tarReader.Next()
+		var header *tar.Header
+		header, err = tarReader.Next()
 		if err == io.EOF {
 			break // 退出循环
 		}
@@ -113,7 +114,10 @@ func decompressData(dataFile string) (err error) {
 			continue
 		}
 
-		destPath := filepath.Join(filepath.Dir(dataFile), filepath.Base(header.Name))
+		destPath := filepath.Join(filepath.Dir(dataFile), strings.TrimPrefix(header.Name, filepath.Base(filepath.Dir(dataFile))))
+		if err = os.MkdirAll(filepath.Dir(destPath), os.ModePerm); err != nil {
+			return
+		}
 
 		switch header.Typeflag {
 		case tar.TypeReg:

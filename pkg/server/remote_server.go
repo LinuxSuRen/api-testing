@@ -66,6 +66,8 @@ var (
 type server struct {
 	UnimplementedRunnerServer
 	UnimplementedDataServerServer
+	UnimplementedThemeExtensionServer
+
 	loader             testing.Writer
 	storeWriterFactory testing.StoreWriterFactory
 	configDir          string
@@ -1284,7 +1286,32 @@ func (s *server) Query(ctx context.Context, query *DataQuery) (result *DataQuery
 	return
 }
 
-func (s *server) GetThemes(context.Context, *Empty) (result *SimpleList, err error) {
+func (s *server) GetThemes(ctx context.Context, _ *Empty) (result *SimpleList, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	result = &SimpleList{}
+	var themes []string
+	if themes, err = loader.GetThemes(); err == nil {
+		for _, theme := range themes {
+			result.Data = append(result.Data, &Pair{
+				Key:   theme,
+				Value: "",
+			})
+		}
+	}
+	return
+}
+
+func (s *server) GetTheme(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	result = &CommonResult{}
+	result.Message, err = loader.GetTheme(in.Name)
+	if err != nil {
+		result.Message = fmt.Sprintf("failed to get theme: %v", err)
+	}
 	return
 }
 

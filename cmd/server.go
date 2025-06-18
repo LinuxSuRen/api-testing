@@ -292,6 +292,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		server.RegisterRunnerServer(s, remoteServer)
 		server.RegisterMockServer(s, mockServerController)
 		server.RegisterDataServerServer(s, remoteServer.(server.DataServerServer))
+		server.RegisterThemeExtensionServer(s, remoteServer.(server.ThemeExtensionServer))
 		serverLogger.Info("gRPC server listening at", "addr", lis.Addr())
 		s.Serve(lis)
 	}()
@@ -336,6 +337,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		err = errors.Join(
 			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}),
 			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}),
+			server.RegisterThemeExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}),
 			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}))
 	} else {
 		dialOption := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -343,6 +345,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		err = errors.Join(
 			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
 			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
+			server.RegisterThemeExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
 			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption))
 	}
 

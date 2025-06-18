@@ -37,6 +37,10 @@ func GetUserDataDir() string {
 	return filepath.Join(GetUserConfigDir(), "data")
 }
 
+func GetThemeDir() string {
+	return filepath.Join(GetUserConfigDir(), "data/theme")
+}
+
 func GetExtensionSocketPath(name string) string {
 	return filepath.Join(GetUserConfigDir(), fmt.Sprintf("%s.sock", name))
 }

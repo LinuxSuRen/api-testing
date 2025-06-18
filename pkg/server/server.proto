@@ -315,7 +315,7 @@ service ThemeExtension {
     }
     rpc GetTheme(SimpleName) returns (CommonResult) {
         option (google.api.http) = {
-            get: "/api/v1/theme/{name}"
+            get: "/api/v1/themes/{name}"
         };
     }
 }

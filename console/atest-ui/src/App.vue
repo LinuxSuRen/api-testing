@@ -9,6 +9,7 @@ import {
   Guide,
   DataAnalysis
 } from '@element-plus/icons-vue'
+import { Setting } from '@element-plus/icons-vue'
 import { ref, watch } from 'vue'
 import { API } from './views/net'
 import { Cache } from './views/cache'
@@ -23,8 +24,9 @@ import { useI18n } from 'vue-i18n'
 
 const { t, locale: i18nLocale } = useI18n()
 
-import setAsDarkTheme from './theme'
+import { setAsDarkTheme, getThemes, setTheme, getTheme } from './theme'
 
+const allThemes = ref(getThemes())
 const asDarkMode = ref(Cache.GetPreference().darkTheme)
 setAsDarkTheme(asDarkMode.value)
 watch(asDarkMode, Cache.WithDarkTheme)
@@ -87,6 +89,16 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
   panelName.value = historyPanelName;
 }
 
+const settingDialogVisible = ref(false)
+watch(settingDialogVisible, (v: boolean) => {
+    if (v) {
+        allThemes.value = getThemes()
+    }
+})
+const theme = ref(getTheme())
+watch(theme, (e: string) => {
+    setTheme(e)
+})
 </script>
 
 <template>
@@ -147,7 +159,7 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-
+          <el-icon @click="settingDialogVisible=true"><Setting /></el-icon>
           <el-switch type="primary" data-intro="Switch light and dark modes" v-model="asDarkMode"/>
         </el-col>
       </div>
@@ -164,6 +176,17 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
       <a :href=appVersionLink target="_blank" rel="noopener">{{appVersion}}</a>
     </div>
   </el-container>
+
+    <el-dialog v-model="settingDialogVisible" title="Setting" width="50%" draggable destroy-on-close>
+        <el-select v-model="theme" placeholder="Select a theme">
+            <el-option
+                v-for="item in allThemes"
+                :key="item"
+                :label="item"
+                :value="item"
+            />
+        </el-select>
+    </el-dialog>
 </template>
 
 <style>
