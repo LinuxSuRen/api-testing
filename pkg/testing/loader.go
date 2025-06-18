@@ -28,8 +28,9 @@ type Loader interface {
 	PProf(name string) []byte
 
 	Query(query map[string]string) (result DataResult, err error)
+	GetThemes() ([]string, error)
+	GetTheme(string) (string, error)
 }
-
 type DataResult struct {
 	Pairs           map[string]string
 	Rows            []map[string]string

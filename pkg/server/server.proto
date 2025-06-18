@@ -313,6 +313,11 @@ service ThemeExtension {
         get: "/api/v1/themes"
       };
     }
+    rpc GetTheme(SimpleName) returns (CommonResult) {
+        option (google.api.http) = {
+            get: "/api/v1/theme/{name}"
+        };
+    }
 }
 
 message Suites {

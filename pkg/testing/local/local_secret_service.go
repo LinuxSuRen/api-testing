@@ -126,6 +126,14 @@ func (s *localSecretService) Query(query map[string]string) (result map[string]s
 	return
 }
 
+func (s *localSecretService) GetThemes() (result []string, err error) {
+	return
+}
+
+func (s *localSecretService) GetTheme(string) (result string, err error) {
+	return
+}
+
 func (s *localSecretService) getDataFilePath() string {
 	return filepath.Join(s.dataDir, "secret.yaml")
 }

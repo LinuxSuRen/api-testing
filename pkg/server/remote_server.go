@@ -1284,6 +1284,10 @@ func (s *server) Query(ctx context.Context, query *DataQuery) (result *DataQuery
 	return
 }
 
+func (s *server) GetThemes(context.Context, *Empty) (result *SimpleList, err error) {
+	return
+}
+
 // implement the mock server
 
 // Start starts the mock server

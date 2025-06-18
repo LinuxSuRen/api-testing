@@ -12,6 +12,9 @@
       "name": "RunnerExtension"
     },
     {
+      "name": "ThemeExtension"
+    },
+    {
       "name": "Mock"
     },
     {
@@ -242,7 +245,7 @@
       }
     },
     "/api/v1/downloadFile/{response.body}": {
-      "post": {
+      "get": {
         "operationId": "Runner_DownloadResponseFile",
         "responses": {
           "200": {
@@ -266,65 +269,63 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "suiteName": {
-                  "type": "string"
-                },
-                "request": {
-                  "$ref": "#/definitions/serverRequest"
-                },
-                "response": {
-                  "type": "object",
-                  "properties": {
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "header": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/definitions/serverPair"
-                      }
-                    },
-                    "bodyFieldsExpect": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/definitions/serverPair"
-                      }
-                    },
-                    "verify": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "ConditionalVerify": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/definitions/serverConditionalVerify"
-                      }
-                    },
-                    "schema": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "server": {
-                  "type": "string"
-                }
-              }
-            }
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suiteName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.method",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request.body",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "response.statusCode",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "response.verify",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "response.schema",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "server",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -2644,6 +2645,58 @@
         ],
         "tags": [
           "Runner"
+        ]
+      }
+    },
+    "/api/v1/theme/{name}": {
+      "get": {
+        "operationId": "ThemeExtension_GetTheme",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ThemeExtension"
+        ]
+      }
+    },
+    "/api/v1/themes": {
+      "get": {
+        "operationId": "ThemeExtension_GetThemes",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverSimpleList"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "ThemeExtension"
         ]
       }
     },
