@@ -898,12 +898,12 @@ var DataQuery = (store: string, kind: string, currentDatabase: string, query: st
         .catch(errHandler)
 }
 
-const GetThemes = (callback: (d: any) => void) => {
+const GetThemes = (callback: (d: any) => void | null) => {
     return fetch(`/api/v1/themes`, {})
         .then(DefaultResponseProcess).then(callback)
 }
 
-const GetTheme = (name: string, callback: (d: any) => void) => {
+const GetTheme = (name: string, callback: (d: any) => void | null) => {
     return fetch(`/api/v1/themes/${name}`, {})
         .then(DefaultResponseProcess).then(callback)
 }

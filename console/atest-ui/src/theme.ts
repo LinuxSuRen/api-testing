@@ -6,10 +6,14 @@ export function getThemes() {
     return Object.keys(themes)
 }
 
-API.GetThemes().then(data => {
-    data.data.forEach((theme) => {
+interface Theme {
+    key: string
+}
+
+API.GetThemes(data => {
+    data.data.forEach((theme: Theme) => {
         const key = theme.key
-        API.GetTheme(key).then((data: any) => {
+        API.GetTheme(key, (data: any) => {
             themes[key] = JSON.parse(data.message)
 
             const theme = getTheme()
@@ -20,7 +24,11 @@ API.GetThemes().then(data => {
     })
 })
 
-export function setTheme(theme: string) {
+export function setTheme(theme: string | null) {
+    if (!theme) {
+        return
+    }
+
     const themeObj = themes[theme]
     if (themeObj) {
         applyTheme(themeObj)

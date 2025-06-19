@@ -975,7 +975,7 @@ const renameTestCase = (name: string) => {
              </el-option>
             </el-select>
           </el-col>
-          <el-col :span="19">
+          <el-col :span="18">
             <el-autocomplete
               v-model="testCaseWithSuite.data.request.api"
               style="width: 100%"
@@ -990,7 +990,7 @@ const renameTestCase = (name: string) => {
               </template>
             </el-autocomplete>
           </el-col>
-          <el-col :span="2" style="text-align-last: right;">
+          <el-col :span="3" style="text-align-last: right;">
             <el-dropdown split-button type="primary"
               @click="sendRequest"
               v-loading="requestLoading"

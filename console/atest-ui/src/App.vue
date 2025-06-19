@@ -95,7 +95,7 @@ watch(settingDialogVisible, (v: boolean) => {
     }
 })
 const theme = ref(getTheme())
-watch(theme, (e: string) => {
+watch(theme, (e) => {
     setTheme(e)
 })
 </script>
@@ -148,18 +148,7 @@ watch(theme, (e: string) => {
     <el-main style="padding-top: 0px;">
       <div class="top-menu">
         <el-col style="display: flex; align-items: center;">
-          <el-tag style="font-size: 18px;">{{ t('language') }}</el-tag>
-          <el-dropdown trigger="click" @command="(command: string) => handleChangeLan(command)">
-            <el-icon><arrow-down /></el-icon>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="chinese">中文</el-dropdown-item>
-                <el-dropdown-item command="english">English</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <el-icon @click="settingDialogVisible=true"><Setting /></el-icon>
-          <el-switch type="primary" data-intro="Switch light and dark modes" v-model="asDarkMode"/>
+          <el-icon @click="settingDialogVisible=true" size="20"><Setting /></el-icon>
         </el-col>
       </div>
       <TestingPanel v-if="panelName === 'testing'" @toHistoryPanel="toHistoryPanel"/>
@@ -177,19 +166,52 @@ watch(theme, (e: string) => {
   </el-container>
 
     <el-dialog v-model="settingDialogVisible" :title="t('title.setting' )" width="50%" draggable destroy-on-close>
-        <el-select v-model="theme" placeholder="Select a theme">
-            <el-option
-                v-for="item in allThemes"
-                :key="item"
-                :label="item"
-                :value="item"
-            />
-        </el-select>
-        <el-icon>
-            <el-link href="https://github.com/LinuxSuRen/atest-ext-data-swagger/tree/master/data/theme" target="_blank">
-                <Help />
-            </el-link>
-        </el-icon>
+        <el-row>
+            <el-col :span="4">
+              Theme:
+            </el-col>
+            <el-col :span="18">
+              <el-select v-model="theme" placeholder="Select a theme">
+                  <el-option
+                      v-for="item in allThemes"
+                      :key="item"
+                      :label="item"
+                      :value="item"
+                  />
+              </el-select>
+              <el-icon>
+                  <el-link href="https://github.com/LinuxSuRen/atest-ext-data-swagger/tree/master/data/theme" target="_blank">
+                      <Help />
+                  </el-link>
+              </el-icon>
+            </el-col>
+        </el-row>
+
+        <el-row>
+            <el-col :span="4">
+              Language:
+            </el-col>
+            <el-col :span="18">
+              <el-tag style="font-size: 18px;">{{ t('language') }}</el-tag>
+              <el-dropdown trigger="click" @command="(command: string) => handleChangeLan(command)">
+                <el-icon><arrow-down /></el-icon>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="chinese">中文</el-dropdown-item>
+                    <el-dropdown-item command="english">English</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="4">
+              Dark Mode:
+            </el-col>
+            <el-col :span="18">
+              <el-switch type="primary" data-intro="Switch light and dark modes" v-model="asDarkMode"/>
+            </el-col>
+        </el-row>
     </el-dialog>
 </template>
 
