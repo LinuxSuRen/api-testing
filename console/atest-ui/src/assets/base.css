@@ -57,3 +57,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+html.dark body {
+  background-color: #1e1e1e;
+}
+
+html.dark .el-main {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
