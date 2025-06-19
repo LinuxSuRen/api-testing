@@ -17,6 +17,7 @@ package testing
 
 import (
 	"errors"
+	"fmt"
 )
 
 // nonLoader is an empty implement for avoid too many nil check
@@ -156,5 +157,15 @@ func (l *nonLoader) Close() {
 
 func (l *nonLoader) Query(query map[string]string) (result DataResult, err error) {
 	err = errors.New("Query functionality is not implemented for nonLoader")
+	return
+}
+
+func (l *nonLoader) GetThemes() (result []string, err error) {
+	err = fmt.Errorf("not support")
+	return
+}
+
+func (l *nonLoader) GetTheme(name string) (result string, err error) {
+	err = fmt.Errorf("not support")
 	return
 }

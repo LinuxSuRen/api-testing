@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -309,13 +309,13 @@ func (g *gRPCLoader) PProf(name string) []byte {
 
 func (g *gRPCLoader) Query(query map[string]string) (result testing.DataResult, err error) {
 	var dataResult *server.DataQueryResult
-	offset, _ := strconv.Atoi(query["offset"])
-	limit, _ := strconv.Atoi(query["limit"])
+	offset, _ := strconv.ParseInt(query["offset"], 10, 64)
+	limit, _ := strconv.ParseInt(query["limit"], 10, 64)
 	if dataResult, err = g.client.Query(g.ctx, &server.DataQuery{
 		Sql:    query["sql"],
 		Key:    query["key"],
-		Offset: int32(offset),
-		Limit:  int32(limit),
+		Offset: offset,
+		Limit:  limit,
 	}); err == nil {
 		result.Pairs = pairToMap(dataResult.Data)
 		for _, item := range dataResult.Items {
@@ -329,6 +329,26 @@ func (g *gRPCLoader) Query(query map[string]string) (result testing.DataResult, 
 			result.Duration = dataResult.Meta.Duration
 			result.Labels = pairToMap(dataResult.Meta.Labels)
 		}
+	}
+	return
+}
+
+func (g *gRPCLoader) GetThemes() (result []string, err error) {
+	var simpleList *server.SimpleList
+	if simpleList, err = g.client.GetThemes(g.ctx, &server.Empty{}); err == nil && simpleList.Data != nil {
+		for _, item := range simpleList.Data {
+			result = append(result, item.Key)
+		}
+	}
+	return
+}
+
+func (g *gRPCLoader) GetTheme(name string) (result string, err error) {
+	var themeData *server.CommonResult
+	if themeData, err = g.client.GetTheme(g.ctx, &server.SimpleName{
+		Name: name,
+	}); err == nil && themeData != nil {
+		result = themeData.Message
 	}
 	return
 }

@@ -47,7 +47,8 @@
         "output": "输出",
         "proxy": "代理",
         "secure": "安全",
-        "data": "数据"
+        "data": "数据",
+        "setting": "设置"
     },
     "tip": {
         "filter": "过滤",

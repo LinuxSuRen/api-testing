@@ -46,6 +46,8 @@ type LoaderClient interface {
 	Verify(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.ExtensionStatus, error)
 	PProf(ctx context.Context, in *server.PProfRequest, opts ...grpc.CallOption) (*server.PProfData, error)
 	Query(ctx context.Context, in *server.DataQuery, opts ...grpc.CallOption) (*server.DataQueryResult, error)
+	GetThemes(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.SimpleList, error)
+	GetTheme(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
 }
 
 type loaderClient struct {
@@ -263,6 +265,24 @@ func (c *loaderClient) Query(ctx context.Context, in *server.DataQuery, opts ...
 	return out, nil
 }
 
+func (c *loaderClient) GetThemes(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.SimpleList, error) {
+	out := new(server.SimpleList)
+	err := c.cc.Invoke(ctx, "/remote.Loader/GetThemes", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) GetTheme(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error) {
+	out := new(server.CommonResult)
+	err := c.cc.Invoke(ctx, "/remote.Loader/GetTheme", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoaderServer is the server API for Loader service.
 // All implementations must embed UnimplementedLoaderServer
 // for forward compatibility
@@ -290,6 +310,8 @@ type LoaderServer interface {
 	Verify(context.Context, *server.Empty) (*server.ExtensionStatus, error)
 	PProf(context.Context, *server.PProfRequest) (*server.PProfData, error)
 	Query(context.Context, *server.DataQuery) (*server.DataQueryResult, error)
+	GetThemes(context.Context, *server.Empty) (*server.SimpleList, error)
+	GetTheme(context.Context, *server.SimpleName) (*server.CommonResult, error)
 	mustEmbedUnimplementedLoaderServer()
 }
 
@@ -365,6 +387,12 @@ func (UnimplementedLoaderServer) PProf(context.Context, *server.PProfRequest) (*
 }
 func (UnimplementedLoaderServer) Query(context.Context, *server.DataQuery) (*server.DataQueryResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
+}
+func (UnimplementedLoaderServer) GetThemes(context.Context, *server.Empty) (*server.SimpleList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetThemes not implemented")
+}
+func (UnimplementedLoaderServer) GetTheme(context.Context, *server.SimpleName) (*server.CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTheme not implemented")
 }
 func (UnimplementedLoaderServer) mustEmbedUnimplementedLoaderServer() {}
 
@@ -793,6 +821,42 @@ func _Loader_Query_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Loader_GetThemes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetThemes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/GetThemes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetThemes(ctx, req.(*server.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_GetTheme_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetTheme(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/GetTheme",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetTheme(ctx, req.(*server.SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Loader_ServiceDesc is the grpc.ServiceDesc for Loader service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -891,6 +955,14 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Query",
 			Handler:    _Loader_Query_Handler,
+		},
+		{
+			MethodName: "GetThemes",
+			Handler:    _Loader_GetThemes_Handler,
+		},
+		{
+			MethodName: "GetTheme",
+			Handler:    _Loader_GetTheme_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

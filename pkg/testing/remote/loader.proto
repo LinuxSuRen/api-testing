@@ -34,6 +34,8 @@ service Loader {
     rpc PProf(server.PProfRequest) returns (server.PProfData) {}
 
     rpc Query(server.DataQuery) returns (server.DataQueryResult) {}
+    rpc GetThemes(server.Empty) returns (server.SimpleList) {}
+    rpc GetTheme(server.SimpleName) returns (server.CommonResult) {}
 }
 
 message TestSuites {

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {
-  Document,
-  Menu as IconMenu,
-  Histogram,
-  Location,
-  Share,
-  ArrowDown,
-  Guide,
-  DataAnalysis
+    Document,
+    Menu as IconMenu,
+    Histogram,
+    Location,
+    Share,
+    ArrowDown,
+    Guide,
+    DataAnalysis, Help, Setting
 } from '@element-plus/icons-vue'
 import { ref, watch } from 'vue'
 import { API } from './views/net'
@@ -23,8 +23,9 @@ import { useI18n } from 'vue-i18n'
 
 const { t, locale: i18nLocale } = useI18n()
 
-import setAsDarkTheme from './theme'
+import { setAsDarkTheme, getThemes, setTheme, getTheme } from './theme'
 
+const allThemes = ref(getThemes())
 const asDarkMode = ref(Cache.GetPreference().darkTheme)
 setAsDarkTheme(asDarkMode.value)
 watch(asDarkMode, Cache.WithDarkTheme)
@@ -87,6 +88,16 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
   panelName.value = historyPanelName;
 }
 
+const settingDialogVisible = ref(false)
+watch(settingDialogVisible, (v: boolean) => {
+    if (v) {
+        allThemes.value = getThemes()
+    }
+})
+const theme = ref(getTheme())
+watch(theme, (e) => {
+    setTheme(e)
+})
 </script>
 
 <template>
@@ -137,18 +148,7 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
     <el-main style="padding-top: 0px;">
       <div class="top-menu">
         <el-col style="display: flex; align-items: center;">
-          <el-tag style="font-size: 18px;">{{ t('language') }}</el-tag>
-          <el-dropdown trigger="click" @command="(command: string) => handleChangeLan(command)">
-            <el-icon><arrow-down /></el-icon>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="chinese">中文</el-dropdown-item>
-                <el-dropdown-item command="english">English</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-
-          <el-switch type="primary" data-intro="Switch light and dark modes" v-model="asDarkMode"/>
+          <el-icon @click="settingDialogVisible=true" size="20"><Setting /></el-icon>
         </el-col>
       </div>
       <TestingPanel v-if="panelName === 'testing'" @toHistoryPanel="toHistoryPanel"/>
@@ -164,6 +164,55 @@ const toHistoryPanel = ({ ID: selectID, panelName: historyPanelName }) => {
       <a :href=appVersionLink target="_blank" rel="noopener">{{appVersion}}</a>
     </div>
   </el-container>
+
+    <el-dialog v-model="settingDialogVisible" :title="t('title.setting' )" width="50%" draggable destroy-on-close>
+        <el-row>
+            <el-col :span="4">
+              Theme:
+            </el-col>
+            <el-col :span="18">
+              <el-select v-model="theme" placeholder="Select a theme">
+                  <el-option
+                      v-for="item in allThemes"
+                      :key="item"
+                      :label="item"
+                      :value="item"
+                  />
+              </el-select>
+              <el-icon>
+                  <el-link href="https://github.com/LinuxSuRen/atest-ext-data-swagger/tree/master/data/theme" target="_blank">
+                      <Help />
+                  </el-link>
+              </el-icon>
+            </el-col>
+        </el-row>
+
+        <el-row>
+            <el-col :span="4">
+              Language:
+            </el-col>
+            <el-col :span="18">
+              <el-tag style="font-size: 18px;">{{ t('language') }}</el-tag>
+              <el-dropdown trigger="click" @command="(command: string) => handleChangeLan(command)">
+                <el-icon><arrow-down /></el-icon>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="chinese">中文</el-dropdown-item>
+                    <el-dropdown-item command="english">English</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="4">
+              Dark Mode:
+            </el-col>
+            <el-col :span="18">
+              <el-switch type="primary" data-intro="Switch light and dark modes" v-model="asDarkMode"/>
+            </el-col>
+        </el-row>
+    </el-dialog>
 </template>
 
 <style>

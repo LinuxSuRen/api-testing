@@ -307,6 +307,19 @@ service RunnerExtension {
     }
 }
 
+service ThemeExtension {
+    rpc GetThemes(Empty) returns (SimpleList) {
+      option (google.api.http) = {
+        get: "/api/v1/themes"
+      };
+    }
+    rpc GetTheme(SimpleName) returns (CommonResult) {
+        option (google.api.http) = {
+            get: "/api/v1/themes/{name}"
+        };
+    }
+}
+
 message Suites {
   map<string, Items> data = 1;
 }
@@ -657,8 +670,8 @@ message DataQuery {
     string type = 1;
     string key = 2;
     string sql = 3;
-    int32 offset = 4;
-    int32 limit = 5;
+    int64 offset = 4;
+    int64 limit = 5;
 }
 
 message DataQueryResult {

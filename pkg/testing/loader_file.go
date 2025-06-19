@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"net/url"
@@ -523,5 +524,30 @@ func (l *fileLoader) Query(query map[string]string) (result DataResult, err erro
 
 func (l *fileLoader) GetRoundTripper(name string) (roundTripper http.RoundTripper, err error) {
 	err = fmt.Errorf("not support")
+	return
+}
+
+func (l *fileLoader) GetThemes() (result []string, err error) {
+	dataDir := home.GetThemeDir()
+	_ = filepath.WalkDir(dataDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() && filepath.Ext(path) == ".json" {
+			result = append(result, strings.TrimSuffix(filepath.Base(path), ".json"))
+		}
+		return nil
+	})
+	return
+}
+
+func (l *fileLoader) GetTheme(name string) (result string, err error) {
+	dataDir := home.GetThemeDir()
+	themeFile := filepath.Join(dataDir, name+".json")
+	var data []byte
+	if data, err = os.ReadFile(themeFile); err == nil {
+		result = string(data)
+	}
 	return
 }

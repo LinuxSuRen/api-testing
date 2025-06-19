@@ -898,6 +898,16 @@ var DataQuery = (store: string, kind: string, currentDatabase: string, query: st
         .catch(errHandler)
 }
 
+const GetThemes = (callback: (d: any) => void | null) => {
+    return fetch(`/api/v1/themes`, {})
+        .then(DefaultResponseProcess).then(callback)
+}
+
+const GetTheme = (name: string, callback: (d: any) => void | null) => {
+    return fetch(`/api/v1/themes/${name}`, {})
+        .then(DefaultResponseProcess).then(callback)
+}
+
 export const API = {
     DefaultResponseProcess,
     GetVersion,
@@ -911,5 +921,6 @@ export const API = {
     GetSecrets, DeleteSecret, CreateOrUpdateSecret,
     GetSuggestedAPIs, GetSwaggers,
     ReloadMockServer, GetMockConfig, SBOM, DataQuery, DataQueryAsync,
+    GetThemes, GetTheme,
     getToken
 }
