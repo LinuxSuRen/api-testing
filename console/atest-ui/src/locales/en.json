@@ -52,7 +52,8 @@
         "output": "Output",
         "proxy": "Proxy",
         "secure": "Secure",
-        "data": "Data"
+        "data": "Data",
+        "setting": "Setting"
     },
     "tip": {
         "filter": "Filter Keyword",

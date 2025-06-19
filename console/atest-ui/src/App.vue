@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import {
-  Document,
-  Menu as IconMenu,
-  Histogram,
-  Location,
-  Share,
-  ArrowDown,
-  Guide,
-  DataAnalysis
+    Document,
+    Menu as IconMenu,
+    Histogram,
+    Location,
+    Share,
+    ArrowDown,
+    Guide,
+    DataAnalysis, Help, Setting
 } from '@element-plus/icons-vue'
-import { Setting } from '@element-plus/icons-vue'
 import { ref, watch } from 'vue'
 import { API } from './views/net'
 import { Cache } from './views/cache'
@@ -177,7 +176,7 @@ watch(theme, (e: string) => {
     </div>
   </el-container>
 
-    <el-dialog v-model="settingDialogVisible" title="Setting" width="50%" draggable destroy-on-close>
+    <el-dialog v-model="settingDialogVisible" :title="t('title.setting' )" width="50%" draggable destroy-on-close>
         <el-select v-model="theme" placeholder="Select a theme">
             <el-option
                 v-for="item in allThemes"
@@ -186,6 +185,11 @@ watch(theme, (e: string) => {
                 :value="item"
             />
         </el-select>
+        <el-icon>
+            <el-link href="https://github.com/LinuxSuRen/atest-ext-data-swagger/tree/master/data/theme" target="_blank">
+                <Help />
+            </el-link>
+        </el-icon>
     </el-dialog>
 </template>
 
