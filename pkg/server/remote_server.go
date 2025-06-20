@@ -1260,9 +1260,16 @@ func (s *server) PProf(ctx context.Context, in *PProfRequest) (reply *PProfData,
 func (s *server) Query(ctx context.Context, query *DataQuery) (result *DataQueryResult, err error) {
 	loader := s.getLoader(ctx)
 	defer loader.Close()
+
+	// render the SQL query
+	var sql string
+	if sql, err = render.Render("sql render", query.Sql, nil); err != nil {
+		return nil, fmt.Errorf("failed to render SQL query: %w", err)
+	}
+
 	var dataResult testing.DataResult
 	if dataResult, err = loader.Query(map[string]string{
-		"sql":    query.Sql,
+		"sql":    sql,
 		"key":    query.Key,
 		"offset": fmt.Sprintf("%d", query.Offset),
 		"limit":  fmt.Sprintf("%d", query.Limit),
