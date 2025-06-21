@@ -2,7 +2,6 @@
 
 #app {
     margin: 0 auto;
-    padding: 1rem;
     padding-top: 40px;
     height: 100vh;
     font-weight: normal;
@@ -12,6 +11,14 @@
     position: absolute;
     top: 10px;
     right: 20px;
+}
+
+.full-height {
+    height: 100%;
+}
+
+.full-width {
+    width: 100%;
 }
 
 a,

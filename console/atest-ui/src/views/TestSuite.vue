@@ -305,7 +305,7 @@ const renameTestSuite = (name: string) => {
       <el-form-item :label="t('tip.apiAddress')" prop="api">
         <HistoryInput placeholder="API" v-model="suite.api" group="apiAddress" />
       </el-form-item>
-      <table style="width: 100%">
+      <table class="full-width">
         <tr>
           <td>
             <el-select
@@ -333,7 +333,7 @@ const renameTestSuite = (name: string) => {
 
       <el-collapse>
         <el-collapse-item :title="t('title.parameter')">
-          <el-table :data="suite.param" style="width: 100%">
+          <el-table :data="suite.param" class="full-width">
             <el-table-column :label="t('field.key')" width="180">
               <template #default="scope">
                 <el-input v-model="scope.row.key" :placeholder="t('field.key')" @change="paramChange" />

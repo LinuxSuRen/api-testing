@@ -67,7 +67,6 @@ function loadStores() {
   })
 }
 loadStores()
-Magic.Keys(loadStores, ['Alt+KeyR'])
 
 function deleteStore(name: string) {
   API.DeleteStore(name, () => {
@@ -108,7 +107,14 @@ function addStore() {
     dialogVisible.value = true
     createAction.value = true
 }
-Magic.Keys(addStore, ['Alt+KeyN'])
+
+Magic.AdvancedKeys([{
+  Keys: ['Alt+KeyE', 'ctrl+n'],
+  Func: addStore
+}, {
+  Keys: ['Alt+KeyR'],
+  Func: loadStores
+}])
 
 const rules = reactive<FormRules<Store>>({
   name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
@@ -211,10 +217,10 @@ const storeExtLink = ref('')
 </script>
 
 <template>
-    <div>Store Manager</div>
-    <div>
-        <Button type="primary" @click="addStore" :icon="Edit">{{t('button.new')}}</Button>
-        <Button type="primary" @click="loadStores" :icon="Refresh">{{t('button.refresh')}}</Button>
+    <div class="page-header">
+      <span class="page-title">{{t('title.storeManager')}}</span>
+      <Button type="primary" @click="addStore" :icon="Edit">{{t('button.new')}}</Button>
+      <Button type="primary" @click="loadStores" :icon="Refresh">{{t('button.refresh')}}</Button>
     </div>
     <el-table :data="stores" style="width: 100%" v-loading=storesLoading>
       <el-table-column :label="t('field.name')" width="180">
