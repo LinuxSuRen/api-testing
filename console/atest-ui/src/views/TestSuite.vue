@@ -131,7 +131,6 @@ const saveTestSuite = () => {
     }
   )
 }
-Magic.Keys(saveTestSuite, ['Alt+S', 'Alt+ß'])
 
 const isFullScreen = ref(false)
 const dialogVisible = ref(false)
@@ -153,7 +152,16 @@ function openNewTestCaseDialog() {
   dialogVisible.value = true
   querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.name!)
 }
-Magic.Keys(openNewTestCaseDialog, ['Alt+N', 'Alt+dead'])
+
+Magic.AdvancedKeys([{
+  Keys: ['Alt+N', 'Alt+dead'],
+  Func: openNewTestCaseDialog,
+  Description: 'Open new test case dialog',
+}, {
+  Keys: ['Alt+S', 'Alt+ß'],
+  Func: saveTestSuite,
+  Description: 'Save test suite',
+}])
 
 const submitTestCaseForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return

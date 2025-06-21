@@ -18,9 +18,13 @@ function queryFuncs() {
     })
 }
 
-Magic.Keys(() => {
-    dialogVisible.value = true
-}, ['Alt+KeyT'])
+Magic.AdvancedKeys([{
+    Keys: ['Alt+KeyT'],
+    Func: () => {
+        dialogVisible.value = true
+    },
+    Description: 'Open template functions dialog',
+}])
 </script>
 
 <template>

@@ -37,8 +37,15 @@ const AdvancedKeys = (keys: MagicKey[]) => {
     keys.push({
         Keys: ['ctrl+/'],
         Func: () => {
-            console.log('Advanced keys dialog opened')
+            const event = new CustomEvent('show-key-bindings-dialog', {
+                detail: keys.map((k) => ({
+                    keys: k.Keys.join(', '),
+                    description: k.Description ?? 'No description',
+                })),
+            })
+            window.dispatchEvent(event)
         },
+        Description: 'Show key bindings dialog',
     })
 
     keys.forEach((key: MagicKey) => {

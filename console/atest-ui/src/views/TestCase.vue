@@ -44,9 +44,6 @@ const emit = defineEmits(['updated','toHistoryPanel'])
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.suite!)
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
 watch(testResultActiveTab, Cache.WithResponseActiveTab)
-Magic.Keys(() => {
-  testResultActiveTab.value = 'output'
-}, ['Alt+KeyO'])
 
 const parameters = ref([] as Pair[])
 const requestLoading = ref(false)
@@ -59,7 +56,6 @@ const sendRequest = async () => {
     runTestCase()
   }
 }
-Magic.Keys(sendRequest, ['Alt+S', 'Alt+ß'])
 
 const runTestCaseResultHandler = (e: any) => {
   requestLoading.value = false
@@ -712,15 +708,6 @@ const deleteAllHistory = async (formEl) => {
 const options = GetHTTPMethods()
 const requestActiveTab = ref(Cache.GetPreference().requestActiveTab)
 watch(requestActiveTab, Cache.WatchRequestActiveTab)
-Magic.Keys(() => {
-  requestActiveTab.value = 'query'
-}, ['Alt+KeyQ'])
-Magic.Keys(() => {
-  requestActiveTab.value = 'header'
-}, ['Alt+KeyH'])
-Magic.Keys(() => {
-  requestActiveTab.value = 'body'
-}, ['Alt+KeyB'])
 
 function bodyFiledExpectChange() {
   const data = testCaseWithSuite.value.data.response.bodyFieldsExpect
@@ -910,7 +897,6 @@ const openDuplicateTestCaseDialog = () => {
     duplicateTestCaseDialog.value = true
     targetTestCaseName.value = props.name + '-copy'
 }
-Magic.Keys(openDuplicateTestCaseDialog, ['Alt+KeyD'])
 const duplicateTestCase = () => {
     API.DuplicateTestCase(props.suite, props.suite, props.name, targetTestCaseName.value,(d) => {
         duplicateTestCaseDialog.value = false
@@ -922,11 +908,6 @@ const duplicateTestCase = () => {
         emit('updated')
     })
 }
-Magic.Keys(() => {
-  if (duplicateTestCaseDialog.value) {
-    duplicateTestCase()
-  }
-}, ['Alt+KeyO'])
 
 const renameTestCase = (name: string) => {
   const suiteName = props.suite
@@ -934,6 +915,43 @@ const renameTestCase = (name: string) => {
     emit('updated', suiteName, name)
   })
 }
+
+Magic.AdvancedKeys([{
+  Keys: ['Alt+S', 'Alt+ß'],
+  Func: sendRequest,
+  Description: 'Send the request'
+}, {
+  Keys: ['Alt+KeyD'],
+  Func: openDuplicateTestCaseDialog,
+  Description: 'Duplicate the test case'
+}, {
+  Keys: ['Alt+KeyO'],
+  Func: () => {
+    if (duplicateTestCaseDialog.value) {
+      duplicateTestCase()
+    }
+    testResultActiveTab.value = 'output'
+  },
+  Description: 'Open the output tab'
+}, {
+  Keys: ['Alt+KeyB'],
+  Func: () => {
+    testResultActiveTab.value = 'body'
+  },
+  Description: 'Open the body tab'
+}, {
+  Keys: ['Alt+KeyH'],
+  Func: () => {
+    testResultActiveTab.value = 'header'
+  },
+  Description: 'Open the header tab'
+}, {
+  Keys: ['Alt+KeyQ'],
+  Func: () => {
+    testResultActiveTab.value = 'query'
+  },
+  Description: 'Open the query tab'
+}])
 </script>
 
 <template>

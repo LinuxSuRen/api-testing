@@ -110,10 +110,12 @@ function addStore() {
 
 Magic.AdvancedKeys([{
   Keys: ['Alt+KeyE', 'ctrl+n'],
-  Func: addStore
+  Func: addStore,
+  Description: 'Add a new store'
 }, {
   Keys: ['Alt+KeyR'],
-  Func: loadStores
+  Func: loadStores,
+  Description: 'Refresh the store list'
 }])
 
 const rules = reactive<FormRules<Store>>({

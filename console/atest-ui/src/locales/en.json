@@ -54,7 +54,8 @@
         "proxy": "Proxy",
         "secure": "Secure",
         "data": "Data",
-        "setting": "Setting"
+        "setting": "Setting",
+        "keyBindings": "Key Bindings"
     },
     "tip": {
         "filter": "Filter Keyword",
