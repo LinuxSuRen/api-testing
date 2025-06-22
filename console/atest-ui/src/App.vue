@@ -9,7 +9,7 @@ import {
     Guide,
     DataAnalysis, Help, Setting
 } from '@element-plus/icons-vue'
-import { ref, watch } from 'vue'
+import { ref, watch, getCurrentInstance} from 'vue'
 import { API } from './views/net'
 import { Cache } from './views/cache'
 import TestingPanel from './views/TestingPanel.vue'
@@ -20,8 +20,12 @@ import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
 import DataManager from './views/DataManager.vue'
 import { useI18n } from 'vue-i18n'
+import ElementPlus from 'element-plus'; 
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs' 
+import enUS from 'element-plus/dist/locale/en.mjs'   
 
 const { t, locale: i18nLocale } = useI18n()
+const app = getCurrentInstance()?.appContext.app;
 
 import { setAsDarkTheme, getThemes, setTheme, getTheme } from './theme'
 
@@ -66,19 +70,25 @@ const handleSelect = (key: string) => {
 const locale = ref(Cache.GetPreference().language)
 i18nLocale.value = locale.value
 
-watch(locale, (e: string) =>{
-  Cache.WithLocale(e)
-  i18nLocale.value = e
-})
+watch(locale, (newLocale: string) => {
+  updateLocale(newLocale);
+});
+const updateLocale = (newLocale: string) => {
+  locale.value = newLocale;
+  i18nLocale.value = newLocale;
+  Cache.WithLocale(newLocale);
 
+  const elementLocale = newLocale === 'zh-CN' ? zhCn : enUS;
+  app?.use(ElementPlus, { locale: elementLocale }); 
+};
 const handleChangeLan = (command: string) => {
   switch (command) {
     case "chinese":
-      locale.value = "zh-CN"
-      break;
+    locale.value = 'zh-CN';
+    break;
     case "english":
-      locale.value = "en-US"
-      break;
+    locale.value = 'en-US';
+    break;
   }
 };
 

@@ -21,3 +21,4 @@ console/atest-desktop/atest.exe
 console/atest-desktop/coverage
 atest-store-git
 .db
+.marscode/

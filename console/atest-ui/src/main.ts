@@ -46,8 +46,8 @@ app.config.errorHandler = (error) => {
 app.use(ElementPlus, {
   locale: lang === 'zh' ? zhCn : enUS
 })
-app.use(i18n)
 
+app.use(i18n)
 app.mount('#app')
 
 const dontShowAgain = window.location.search.indexOf('newbie') === -1;
