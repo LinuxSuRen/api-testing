@@ -75,6 +75,8 @@
         "key": "键",
         "value": "值",
         "proxy": "代理",
+        "shortcut": "快捷键",
+        "description": "描述",
         "insecure": "忽略证书验证"
     },
     "proxy": {

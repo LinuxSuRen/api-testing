@@ -9,7 +9,7 @@ import {
     Guide,
     DataAnalysis, Help, Setting
 } from '@element-plus/icons-vue'
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch } from 'vue'
 import { API } from './views/net'
 import { Cache } from './views/cache'
 import TestingPanel from './views/TestingPanel.vue'
@@ -19,6 +19,7 @@ import StoreManager from './views/StoreManager.vue'
 import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
 import DataManager from './views/DataManager.vue'
+import MagicKey from './components/MagicKey.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale: i18nLocale } = useI18n()
@@ -97,21 +98,6 @@ watch(settingDialogVisible, (v: boolean) => {
 const theme = ref(getTheme())
 watch(theme, (e) => {
     setTheme(e)
-})
-
-const keyBindingsDialogVisible = ref(false)
-const keyBindings = ref([])
-const showKeyBindingsDialog = (keys: any) => {
-  keyBindingsDialogVisible.value = true
-  keyBindings.value = keys.detail || []
-}
-
-onMounted(() => {
-  window.addEventListener('show-key-bindings-dialog', showKeyBindingsDialog)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('show-key-bindings-dialog', showKeyBindingsDialog)
 })
 </script>
 
@@ -228,17 +214,7 @@ onBeforeUnmount(() => {
         </el-row>
     </el-dialog>
 
-    <el-drawer v-model="keyBindingsDialogVisible" size="50%">
-      <template #header>
-        <h4>{{ t('title.keyBindings') }}</h4>
-      </template>
-      <template #default>
-        <el-table :data="keyBindings">
-          <el-table-column prop="keys" label="Key" />
-          <el-table-column prop="description" label="Description" />
-        </el-table>
-      </template>
-    </el-drawer>
+    <MagicKey />
 </template>
 
 <style>

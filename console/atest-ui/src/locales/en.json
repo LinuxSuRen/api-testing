@@ -80,6 +80,8 @@
         "key": "Key",
         "value": "Value",
         "proxy": "Proxy",
+        "shortcut": "Shortcut",
+        "description": "Description",
         "insecure": "Insecure"
     },
     "proxy": {
