@@ -36,7 +36,7 @@ interface MagicKey {
 const MagicKeyEventName = 'show-key-bindings-dialog'
 const AdvancedKeys = (keys: MagicKey[]) => {
     keys.push({
-        Keys: ['ctrl+/'],
+        Keys: ['Ctrl+/'],
         Func: () => {
             const event = new CustomEvent(MagicKeyEventName, {
                 detail: keys.map((k) => ({

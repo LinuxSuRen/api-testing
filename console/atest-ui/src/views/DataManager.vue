@@ -10,7 +10,10 @@ import { Codemirror } from 'vue-codemirror'
 import HistoryInput from '../components/HistoryInput.vue'
 import type { Ref } from 'vue'
 import { Refresh, Document } from '@element-plus/icons-vue'
+import { Magic } from './magicKeys'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const stores: Ref<Store[]> = ref([])
 const kind = ref('')
 const store = ref('')
@@ -259,10 +262,19 @@ const tryShowPrettyJSON = (row: any, column: any, cell: HTMLTableCellElement, ev
 watch(largeContent, (e) => {
   largeContentDialogVisible.value = e !== ''
 })
+
+Magic.AdvancedKeys([{
+  Keys: ['Ctrl+E'],
+  Func: executeQuery,
+  Description: 'Execute query'
+}])
 </script>
 
 <template>
   <div>
+    <div class="page-header">
+      <span class="page-title">{{t('title.dataManager')}}</span>
+    </div>
     <el-container style="height: calc(100vh - 80px);">
       <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra' || kind === 'atest-store-elasticsearch' || kind === 'atest-store-opengemini'">
         <el-scrollbar>

@@ -96,5 +96,6 @@ html.dark .el-main {
 }
 
 .page-header {
+  height: 32px;
   padding-bottom: var(--page-title-bottom-padding, 0px);
 }
