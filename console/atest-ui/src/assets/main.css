@@ -2,7 +2,6 @@
 
 #app {
     margin: 0 auto;
-    {{/* padding-top: 40px; */}}
     height: 100vh;
     font-weight: normal;
 }

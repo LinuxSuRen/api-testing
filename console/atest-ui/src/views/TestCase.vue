@@ -19,6 +19,10 @@ import { Codemirror } from 'vue-codemirror'
 import jsonlint from 'jsonlint-mod'
 
 import CodeMirror from 'codemirror'
+import { json, jsonLanguage } from "@codemirror/lang-json"
+import { LanguageSupport } from "@codemirror/language"
+import { CompletionContext } from "@codemirror/autocomplete"
+import type { Completion } from "@codemirror/autocomplete"
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/merge/merge.js'
 import 'codemirror/addon/merge/merge.css'
@@ -29,6 +33,36 @@ window.diff_match_patch = DiffMatchPatch;
 window.DIFF_DELETE = -1;
 window.DIFF_INSERT = 1;
 window.DIFF_EQUAL = 0;
+
+const templateFuncs = ref([] as Completion[])
+function myCompletions(context: CompletionContext) {
+  if (templateFuncs.value.length == 0) {
+    API.FunctionsQuery("", "template", (e) => {
+      if (e.data) {
+        e.data.forEach((item: any) => {
+          templateFuncs.value.push({
+            label: item.key,
+            type: "text",
+          } as Completion)
+        })
+      }
+    })
+  }
+
+  let word = context.matchBefore(/\w*/) || {
+    from: "",
+    to: ""
+  }
+  if (word.from == word.to && !context.explicit)
+    return null
+  return {
+    from: word.from,
+    options: templateFuncs.value
+  }
+}
+const jsonComplete = new LanguageSupport(jsonLanguage, jsonLanguage.data.of(
+  {autocomplete: myCompletions}
+))
 
 const { t } = useI18n()
 
@@ -1141,6 +1175,8 @@ Magic.AdvancedKeys([{
             <Codemirror v-if="bodyType === 3 || bodyType === 5 || bodyType === 6"
               @blur="jsonFormat(-1)"
               v-model="testCaseWithSuite.data.request.body"
+              style="height: var(--payload-editor-height);"
+              :extensions="[json(), jsonComplete]"
               :disabled="isHistoryTestCase"/>
             <el-table :data="testCaseWithSuite.data.request.form" style="width: 100%" v-if="bodyType === 4">
               <el-table-column label="Key" width="180">
