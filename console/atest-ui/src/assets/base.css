@@ -42,6 +42,8 @@
 
   --page-title-right-padding: 10px;
   --page-title-bottom-padding: 5px;
+
+  --sql-editor-height: 180px;
 }
 
 *,
@@ -98,4 +100,9 @@ html.dark .el-main {
 .page-header {
   height: 32px;
   padding-bottom: var(--page-title-bottom-padding, 0px);
+}
+
+.block-align-right {
+  display: flex;
+  justify-content: flex-end;
 }
