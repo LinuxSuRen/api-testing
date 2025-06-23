@@ -16,6 +16,8 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lang-sql": "github:codemirror/lang-sql",
     "@vueuse/core": "^10.11.0",
     "codemirror": "^5.65.17",
     "diff-match-patch": "^1.0.5",

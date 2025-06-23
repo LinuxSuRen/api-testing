@@ -7,6 +7,7 @@ import type { Pair } from './types'
 import { GetDataManagerPreference, SetDataManagerPreference } from './cache'
 import { ElMessage } from 'element-plus'
 import { Codemirror } from 'vue-codemirror'
+import { sql, StandardSQL } from "@codemirror/lang-sql"
 import HistoryInput from '../components/HistoryInput.vue'
 import type { Ref } from 'vue'
 import { Refresh, Document } from '@element-plus/icons-vue'
@@ -176,7 +177,9 @@ const ormDataHandler = (data: QueryData) => {
   }
 
   tablesTree.value = []
+  sqlConfig.value.schema = {}
   queryDataMeta.value.tables.forEach((i) => {
+    sqlConfig.value.schema[i] = []
     tablesTree.value.push({
       label: i,
     })
@@ -193,6 +196,13 @@ const keyValueDataHandler = (data: QueryData) => {
     })
   })
 }
+
+const sqlConfig = ref({
+  dialect: StandardSQL,
+  defaultSchema: queryDataMeta.value.currentDatabase,
+  upperCaseKeywords: true,
+  schema: {}
+})
 
 const executeQuery = async () => {
   if (sqlQuery.value === '') {
@@ -264,7 +274,7 @@ watch(largeContent, (e) => {
 })
 
 Magic.AdvancedKeys([{
-  Keys: ['Ctrl+E'],
+  Keys: ['Ctrl+E', 'Ctrl+Enter'],
   Func: executeQuery,
   Description: 'Execute query'
 }])
@@ -342,11 +352,16 @@ Magic.AdvancedKeys([{
                 </el-input>
               </el-col>
               <el-col :span="2">
-                <el-button type="primary" @click="nextPage">Next</el-button>
+                <el-button type="primary" @click="nextPage">{{ t("button.next-page") }}</el-button>
               </el-col>
             </el-row>
           </el-form>
-          <Codemirror v-model="sqlQuery" v-if="complexEditor" style="height: 180px"/>
+            <Codemirror
+            v-model="sqlQuery"
+            v-if="complexEditor"
+            style="height: var(--sql-editor-height);"
+            :extensions="[sql(sqlConfig)]"
+            />
         </el-header>
         <el-main>
           <div style="display: flex; gap: 8px;">
