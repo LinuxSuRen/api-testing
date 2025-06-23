@@ -35,6 +35,8 @@
         "updateStore": "更新存储",
         "createSecret": "创建凭据",
         "secretManager": "凭据管理",
+        "storeManager": "存储管理",
+        "dataManager": "数据管理",
         "apiRequestParameter": "API 请求参数",
         "codeGenerator": "代码生成",
         "testing": "测试",
@@ -48,7 +50,8 @@
         "proxy": "代理",
         "secure": "安全",
         "data": "数据",
-        "setting": "设置"
+        "setting": "设置",
+        "keyBindings": "按键绑定"
     },
     "tip": {
         "filter": "过滤",
@@ -73,6 +76,8 @@
         "key": "键",
         "value": "值",
         "proxy": "代理",
+        "shortcut": "快捷键",
+        "description": "描述",
         "insecure": "忽略证书验证"
     },
     "proxy": {

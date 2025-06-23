@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,34 @@ function Keys(func: (() => void) | ((k: string) => void), keys: string[]) {
     })
 }
 
+interface MagicKey {
+    Key?: string
+    Keys: string[]
+    Func: (() => void) | ((k: string) => void)
+    Description?: string
+}
+
+const MagicKeyEventName = 'show-key-bindings-dialog'
+const AdvancedKeys = (keys: MagicKey[]) => {
+    keys.push({
+        Keys: ['Ctrl+/'],
+        Func: () => {
+            const event = new CustomEvent(MagicKeyEventName, {
+                detail: keys.map((k) => ({
+                    keys: k.Keys.join(', '),
+                    description: k.Description ?? 'No description',
+                })),
+            })
+            window.dispatchEvent(event)
+        },
+        Description: 'Show key bindings dialog',
+    })
+
+    keys.forEach((key: MagicKey) => {
+        Keys(key.Func, key.Keys)
+    })
+}
+
 export const Magic = {
-    Keys
+    Keys, AdvancedKeys, MagicKeyEventName
 }

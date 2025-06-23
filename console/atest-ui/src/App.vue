@@ -19,6 +19,7 @@ import StoreManager from './views/StoreManager.vue'
 import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
 import DataManager from './views/DataManager.vue'
+import MagicKey from './components/MagicKey.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale: i18nLocale } = useI18n()
@@ -101,15 +102,14 @@ watch(theme, (e) => {
 </script>
 
 <template>
-  <el-container style="height: 100%;">
+  <el-container class="full-height">
     <el-aside width="auto" style="display: flex; flex-direction: column;">
-      <el-radio-group v-model="isCollapse">
+      <el-radio-group v-model="isCollapse" class="el-menu">
         <el-radio-button :value="false">+</el-radio-button>
         <el-radio-button :value="true">-</el-radio-button>
       </el-radio-group>
       <el-menu
-        class="el-menu-vertical"
-        style="height: 100%;"
+        class="el-menu-vertical full-height"
         :default-active="activeMenu"
         :collapse="isCollapse"
         @select="handleSelect"
@@ -145,7 +145,7 @@ watch(theme, (e) => {
       </el-menu>
     </el-aside>
 
-    <el-main style="padding-top: 0px;">
+    <el-main class="center-zone">
       <div class="top-menu">
         <el-col style="display: flex; align-items: center;">
           <el-icon @click="settingDialogVisible=true" size="20"><Setting /></el-icon>
@@ -213,10 +213,15 @@ watch(theme, (e) => {
             </el-col>
         </el-row>
     </el-dialog>
+
+    <MagicKey />
 </template>
 
 <style>
 .el-menu-vertical:not(.el-menu--collapse) {
   width: 200px;
+}
+.el-menu-vertical:is(.el-menu--collapse) {
+  width: 80px;
 }
 </style>

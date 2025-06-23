@@ -35,6 +35,8 @@
         "updateStore": "Update Store",
         "createSecret": "Create Secret",
         "secretManager": "Secret Manager",
+        "storeManager": "Store Manager",
+        "dataManager": "Data Manager",
         "protoContent": "Proto Content",
         "protoFile": "Proto File",
         "protoImport": "Proto Import",
@@ -53,7 +55,8 @@
         "proxy": "Proxy",
         "secure": "Secure",
         "data": "Data",
-        "setting": "Setting"
+        "setting": "Setting",
+        "keyBindings": "Key Bindings"
     },
     "tip": {
         "filter": "Filter Keyword",
@@ -78,6 +81,8 @@
         "key": "Key",
         "value": "Value",
         "proxy": "Proxy",
+        "shortcut": "Shortcut",
+        "description": "Description",
         "insecure": "Insecure"
     },
     "proxy": {

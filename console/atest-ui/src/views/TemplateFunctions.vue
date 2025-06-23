@@ -18,13 +18,17 @@ function queryFuncs() {
     })
 }
 
-Magic.Keys(() => {
-    dialogVisible.value = true
-}, ['Alt+KeyT'])
+Magic.AdvancedKeys([{
+    Keys: ['Alt+KeyT'],
+    Func: () => {
+        dialogVisible.value = true
+    },
+    Description: 'Open template functions dialog',
+}])
 </script>
 
 <template>
-    <el-affix position="bottom" :offset="20" style="position: absolute; bottom: 5px;" >
+    <el-affix position="bottom" :offset="20" class="tool-box">
         <el-button type="primary" @click="dialogVisible = !dialogVisible"
             data-intro="You can search your desired template functions.">{{ t('button.toolbox') }}</el-button>
     </el-affix>

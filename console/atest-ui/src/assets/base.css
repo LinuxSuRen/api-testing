@@ -19,6 +19,8 @@
   --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+
+  --center-zone-side-padding: 5px;
 }
 
 /* semantic color variables for this project */
@@ -34,6 +36,12 @@
   --color-text: var(--vt-c-text-light-1);
 
   --section-gap: 160px;
+
+  --tool-box-bottom: 5px;
+  --tool-box-position: absolute;
+
+  --page-title-right-padding: 10px;
+  --page-title-bottom-padding: 5px;
 }
 
 *,
@@ -67,3 +75,27 @@ html.dark .el-main {
   color: #fff;
 }
 
+.center-zone {
+  padding-left: var(--center-zone-side-padding) !important;
+  padding-right: var(--center-zone-side-padding) !important;
+  padding-top: 0px !important;
+}
+
+.tool-box {
+  position: var(--tool-box-position);
+  bottom: var(--tool-box-bottom);
+}
+
+.edit-button {
+  height: 32px !important;
+  margin-left: 10px;
+}
+
+.page-title {
+  padding-right: var(--page-title-right-padding);
+}
+
+.page-header {
+  height: 32px;
+  padding-bottom: var(--page-title-bottom-padding, 0px);
+}
