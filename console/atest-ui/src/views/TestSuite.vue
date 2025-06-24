@@ -131,7 +131,6 @@ const saveTestSuite = () => {
     }
   )
 }
-Magic.Keys(saveTestSuite, ['Alt+S', 'Alt+ß'])
 
 const isFullScreen = ref(false)
 const dialogVisible = ref(false)
@@ -153,7 +152,16 @@ function openNewTestCaseDialog() {
   dialogVisible.value = true
   querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.name!)
 }
-Magic.Keys(openNewTestCaseDialog, ['Alt+N', 'Alt+dead'])
+
+Magic.AdvancedKeys([{
+  Keys: ['Alt+N', 'Alt+dead'],
+  Func: openNewTestCaseDialog,
+  Description: 'Open new test case dialog',
+}, {
+  Keys: ['Alt+S', 'Alt+ß'],
+  Func: saveTestSuite,
+  Description: 'Save test suite',
+}])
 
 const submitTestCaseForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -305,9 +313,9 @@ const renameTestSuite = (name: string) => {
       <el-form-item :label="t('tip.apiAddress')" prop="api">
         <HistoryInput placeholder="API" v-model="suite.api" group="apiAddress" />
       </el-form-item>
-      <table style="width: 100%">
+      <table class="full-width">
         <tbody>
-         <tr>
+        <tr>
           <td>
             <el-select
               v-model="suite.spec.kind"
@@ -335,7 +343,7 @@ const renameTestSuite = (name: string) => {
 
       <el-collapse>
         <el-collapse-item :title="t('title.parameter')">
-          <el-table :data="suite.param" style="width: 100%">
+          <el-table :data="suite.param" class="full-width">
             <el-table-column :label="t('field.key')" width="180">
               <template #default="scope">
                 <el-input v-model="scope.row.key" :placeholder="t('field.key')" @change="paramChange" />

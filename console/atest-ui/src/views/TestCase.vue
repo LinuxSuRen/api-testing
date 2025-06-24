@@ -19,6 +19,10 @@ import { Codemirror } from 'vue-codemirror'
 import jsonlint from 'jsonlint-mod'
 
 import CodeMirror from 'codemirror'
+import { json, jsonLanguage } from "@codemirror/lang-json"
+import { LanguageSupport } from "@codemirror/language"
+import { CompletionContext } from "@codemirror/autocomplete"
+import type { Completion } from "@codemirror/autocomplete"
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/merge/merge.js'
 import 'codemirror/addon/merge/merge.css'
@@ -29,6 +33,36 @@ window.diff_match_patch = DiffMatchPatch;
 window.DIFF_DELETE = -1;
 window.DIFF_INSERT = 1;
 window.DIFF_EQUAL = 0;
+
+const templateFuncs = ref([] as Completion[])
+function myCompletions(context: CompletionContext) {
+  if (templateFuncs.value.length == 0) {
+    API.FunctionsQuery("", "template", (e) => {
+      if (e.data) {
+        e.data.forEach((item: any) => {
+          templateFuncs.value.push({
+            label: item.key,
+            type: "text",
+          } as Completion)
+        })
+      }
+    })
+  }
+
+  let word = context.matchBefore(/\w*/) || {
+    from: "",
+    to: ""
+  }
+  if (word.from == word.to && !context.explicit)
+    return null
+  return {
+    from: word.from,
+    options: templateFuncs.value
+  }
+}
+const jsonComplete = new LanguageSupport(jsonLanguage, jsonLanguage.data.of(
+  {autocomplete: myCompletions}
+))
 
 const { t } = useI18n()
 
@@ -44,9 +78,6 @@ const emit = defineEmits(['updated','toHistoryPanel'])
 let querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.suite!)
 const testResultActiveTab = ref(Cache.GetPreference().responseActiveTab)
 watch(testResultActiveTab, Cache.WithResponseActiveTab)
-Magic.Keys(() => {
-  testResultActiveTab.value = 'output'
-}, ['Alt+KeyO'])
 
 const parameters = ref([] as Pair[])
 const requestLoading = ref(false)
@@ -59,7 +90,6 @@ const sendRequest = async () => {
     runTestCase()
   }
 }
-Magic.Keys(sendRequest, ['Alt+S', 'Alt+ß'])
 
 const runTestCaseResultHandler = (e: any) => {
   requestLoading.value = false
@@ -712,15 +742,6 @@ const deleteAllHistory = async (formEl) => {
 const options = GetHTTPMethods()
 const requestActiveTab = ref(Cache.GetPreference().requestActiveTab)
 watch(requestActiveTab, Cache.WatchRequestActiveTab)
-Magic.Keys(() => {
-  requestActiveTab.value = 'query'
-}, ['Alt+KeyQ'])
-Magic.Keys(() => {
-  requestActiveTab.value = 'header'
-}, ['Alt+KeyH'])
-Magic.Keys(() => {
-  requestActiveTab.value = 'body'
-}, ['Alt+KeyB'])
 
 function bodyFiledExpectChange() {
   const data = testCaseWithSuite.value.data.response.bodyFieldsExpect
@@ -910,7 +931,6 @@ const openDuplicateTestCaseDialog = () => {
     duplicateTestCaseDialog.value = true
     targetTestCaseName.value = props.name + '-copy'
 }
-Magic.Keys(openDuplicateTestCaseDialog, ['Alt+KeyD'])
 const duplicateTestCase = () => {
     API.DuplicateTestCase(props.suite, props.suite, props.name, targetTestCaseName.value,(d) => {
         duplicateTestCaseDialog.value = false
@@ -922,11 +942,6 @@ const duplicateTestCase = () => {
         emit('updated')
     })
 }
-Magic.Keys(() => {
-  if (duplicateTestCaseDialog.value) {
-    duplicateTestCase()
-  }
-}, ['Alt+KeyO'])
 
 const renameTestCase = (name: string) => {
   const suiteName = props.suite
@@ -934,6 +949,43 @@ const renameTestCase = (name: string) => {
     emit('updated', suiteName, name)
   })
 }
+
+Magic.AdvancedKeys([{
+  Keys: ['Alt+S', 'Alt+ß'],
+  Func: sendRequest,
+  Description: 'Send the request'
+}, {
+  Keys: ['Alt+KeyD'],
+  Func: openDuplicateTestCaseDialog,
+  Description: 'Duplicate the test case'
+}, {
+  Keys: ['Alt+KeyO'],
+  Func: () => {
+    if (duplicateTestCaseDialog.value) {
+      duplicateTestCase()
+    }
+    testResultActiveTab.value = 'output'
+  },
+  Description: 'Open the output tab'
+}, {
+  Keys: ['Alt+KeyB'],
+  Func: () => {
+    testResultActiveTab.value = 'body'
+  },
+  Description: 'Open the body tab'
+}, {
+  Keys: ['Alt+KeyH'],
+  Func: () => {
+    testResultActiveTab.value = 'header'
+  },
+  Description: 'Open the header tab'
+}, {
+  Keys: ['Alt+KeyQ'],
+  Func: () => {
+    testResultActiveTab.value = 'query'
+  },
+  Description: 'Open the query tab'
+}])
 </script>
 
 <template>
@@ -1123,6 +1175,8 @@ const renameTestCase = (name: string) => {
             <Codemirror v-if="bodyType === 3 || bodyType === 5 || bodyType === 6"
               @blur="jsonFormat(-1)"
               v-model="testCaseWithSuite.data.request.body"
+              style="height: var(--payload-editor-height);"
+              :extensions="[json(), jsonComplete]"
               :disabled="isHistoryTestCase"/>
             <el-table :data="testCaseWithSuite.data.request.form" style="width: 100%" v-if="bodyType === 4">
               <el-table-column label="Key" width="180">

@@ -66,8 +66,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 </script>
 
 <template>
-    <div>{{t('title.secretManager')}}</div>
-    <div>
+    <div class="page-header">
+      <span class="page-title">{{t('title.secretManager')}}</span>
         <el-button type="primary" @click="addSecret" :icon="Edit">{{t('button.new')}}</el-button>
     </div>
     <el-table :data="secrets" style="width: 100%">
