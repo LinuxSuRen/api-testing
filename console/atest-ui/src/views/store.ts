@@ -23,12 +23,57 @@ export interface Store {
     name: string;
     description: string;
   };
+  properties: Pair[];
   params: Pair[];
+}
+
+const MySQL = "mysql";
+const Postgres = "postgres";
+const SQLite = "sqlite";
+const TDengine = "tdengine";
+const Cassandra = "cassandra";
+
+export const GetDriverName = (store: Store): string => {
+    switch (store.kind.name) {
+    case 'atest-store-orm':
+        return store.properties.find((p: Pair) => p.key === 'driver')?.value || MySQL;
+    case 'atest-store-cassandra':
+        return Cassandra;
+    }
+    return ""
+}
+
+export const Driver = {
+    MySQL, Postgres, SQLite, TDengine, Cassandra
+}
+
+const ExtensionKindGit = "atest-store-git"
+const ExtensionKindS3 = "atest-store-s3"
+const ExtensionKindORM = "atest-store-orm"
+const ExtensionKindIotDB = "atest-store-iotdb"
+const ExtensionKindCassandra = "atest-store-cassandra"
+const ExtensionKindEtcd = "atest-store-etcd"
+const ExtensionKindRedis = "atest-store-redis"
+const ExtensionKindMongoDB = "atest-store-mongodb"
+const ExtensionKindElasticsearch = "atest-store-elasticsearch"
+const ExtensionKindOpengeMini = "atest-store-opengemini"
+
+export const ExtensionKind = {
+    ExtensionKindGit,
+    ExtensionKindS3,
+    ExtensionKindORM,
+    ExtensionKindIotDB,
+    ExtensionKindCassandra,
+    ExtensionKindEtcd,
+    ExtensionKindRedis,
+    ExtensionKindMongoDB,
+    ExtensionKindElasticsearch,
+    ExtensionKindOpengeMini
 }
 
 const storeExtensions = [
     {
-        name: 'atest-store-git',
+        name: ExtensionKindGit,
         params: [{
             key: 'insecure'
         }, {
@@ -47,7 +92,7 @@ const storeExtensions = [
         link: 'https://github.com/LinuxSuRen/atest-ext-store-git'
     },
     {
-        name: 'atest-store-s3',
+        name: ExtensionKindS3,
         params: [{
             key: 'accesskeyid'
         }, {
@@ -66,11 +111,11 @@ const storeExtensions = [
         link: 'https://github.com/LinuxSuRen/atest-ext-store-s3'
     },
     {
-        name: 'atest-store-orm',
+        name: ExtensionKindORM,
         params: [{
             key: 'driver',
             defaultValue: 'mysql',
-            enum: ['mysql', 'postgres', 'sqlite', 'tdengine'],
+            enum: [MySQL, Postgres, SQLite, TDengine],
             description: 'Supported: mysql, postgres, sqlite, tdengine'
         }, {
             key: 'database',
@@ -84,12 +129,12 @@ const storeExtensions = [
         link: 'https://github.com/LinuxSuRen/atest-ext-store-orm'
     },
     {
-        name: 'atest-store-iotdb',
+        name: ExtensionKindIotDB,
         params: [],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-iotdb'
     },
     {
-        name: 'atest-store-cassandra',
+        name: ExtensionKindCassandra,
         params: [{
             key: 'keyspace',
             defaultValue: ''
@@ -97,17 +142,17 @@ const storeExtensions = [
         link: 'https://github.com/LinuxSuRen/atest-ext-store-cassandra'
     },
     {
-        name: 'atest-store-etcd',
+        name: ExtensionKindEtcd,
         params: [],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-etcd'
     },
     {
-        name: 'atest-store-redis',
+        name: ExtensionKindRedis,
         params: [],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-redis'
     },
     {
-        name: 'atest-store-mongodb',
+        name: ExtensionKindMongoDB,
         params: [{
             key: 'collection'
         }, {
@@ -117,12 +162,12 @@ const storeExtensions = [
         link: 'https://github.com/LinuxSuRen/atest-ext-store-mongodb'
     },
     {
-        name: 'atest-store-elasticsearch',
+        name: ExtensionKindElasticsearch,
         params: [],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-elasticsearch'
     },
     {
-        name: 'atest-store-opengemini',
+        name: ExtensionKindOpengeMini,
         params: [],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-opengemini'
     }
