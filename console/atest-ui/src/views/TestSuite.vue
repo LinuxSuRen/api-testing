@@ -314,6 +314,7 @@ const renameTestSuite = (name: string) => {
         <HistoryInput placeholder="API" v-model="suite.api" group="apiAddress" />
       </el-form-item>
       <table class="full-width">
+        <tbody>
         <tr>
           <td>
             <el-select
@@ -337,6 +338,7 @@ const renameTestSuite = (name: string) => {
               />
           </td>
         </tr>
+       </tbody>
       </table>
 
       <el-collapse>
