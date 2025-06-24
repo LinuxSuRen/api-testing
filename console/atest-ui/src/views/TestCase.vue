@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue'
+import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Edit, Delete, Search, CopyDocument, Help } from '@element-plus/icons-vue'
 import JsonViewer from 'vue-json-viewer'
@@ -20,9 +20,7 @@ import jsonlint from 'jsonlint-mod'
 
 import CodeMirror from 'codemirror'
 import { json, jsonLanguage } from "@codemirror/lang-json"
-import { LanguageSupport } from "@codemirror/language"
-import { CompletionContext } from "@codemirror/autocomplete"
-import type { Completion } from "@codemirror/autocomplete"
+import { NewLanguageComplete } from './languageComplete'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/merge/merge.js'
 import 'codemirror/addon/merge/merge.css'
@@ -34,36 +32,7 @@ window.DIFF_DELETE = -1;
 window.DIFF_INSERT = 1;
 window.DIFF_EQUAL = 0;
 
-const templateFuncs = ref([] as Completion[])
-function myCompletions(context: CompletionContext) {
-  if (templateFuncs.value.length == 0) {
-    API.FunctionsQuery("", "template", (e) => {
-      if (e.data) {
-        e.data.forEach((item: any) => {
-          templateFuncs.value.push({
-            label: item.key,
-            type: "text",
-          } as Completion)
-        })
-      }
-    })
-  }
-
-  let word = context.matchBefore(/\w*/) || {
-    from: "",
-    to: ""
-  }
-  if (word.from == word.to && !context.explicit)
-    return null
-  return {
-    from: word.from,
-    options: templateFuncs.value
-  }
-}
-const jsonComplete = new LanguageSupport(jsonLanguage, jsonLanguage.data.of(
-  {autocomplete: myCompletions}
-))
-
+const jsonComplete = NewLanguageComplete(jsonLanguage)
 const { t } = useI18n()
 
 const props = defineProps({

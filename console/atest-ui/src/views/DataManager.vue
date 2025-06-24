@@ -9,6 +9,7 @@ import { GetDataManagerPreference, SetDataManagerPreference } from './cache'
 import { ElMessage } from 'element-plus'
 import { Codemirror } from 'vue-codemirror'
 import { sql, StandardSQL, MySQL, PostgreSQL, Cassandra } from "@codemirror/lang-sql"
+import type { SQLConfig } from "@codemirror/lang-sql"
 import HistoryInput from '../components/HistoryInput.vue'
 import type { Ref } from 'vue'
 import { Refresh, Document } from '@element-plus/icons-vue'
@@ -153,6 +154,7 @@ API.GetStores((data) => {
   loadingStores.value = false
 })
 
+const showNativeSQL = ref(true)
 const ormDataHandler = (data: QueryData) => {
   const result = [] as any[]
   const cols = new Set<string>()
@@ -168,7 +170,7 @@ const ormDataHandler = (data: QueryData) => {
 
   columns.value = [] as string[]
   data.meta.labels = data.meta.labels.filter((item) => {
-    if (item.key === '_native_sql') {
+    if (showNativeSQL.value && item.key === '_native_sql') {
       sqlQuery.value = item.value
       return false
     }
@@ -210,15 +212,15 @@ const keyValueDataHandler = (data: QueryData) => {
     })
   })
 }
-
 const sqlConfig = ref({
   dialect: StandardSQL,
   defaultSchema: queryDataMeta.value.currentDatabase,
   upperCaseKeywords: true,
   schema: {}
-})
+} as SQLConfig)
 
 const executeQuery = async () => {
+  showNativeSQL.value = true
   if (sqlQuery.value === '') {
     switch (kind.value) {
       case ExtensionKind.ExtensionKindElasticsearch:
@@ -291,6 +293,13 @@ Magic.AdvancedKeys([{
   Keys: ['Ctrl+E', 'Ctrl+Enter'],
   Func: executeQuery,
   Description: 'Execute query'
+}, {
+  Keys: ['Ctrl+Shift+O'],
+  Func: () => {
+    showNativeSQL.value = false
+    executeWithQuery(sqlQuery.value)
+  },
+  Description: 'Execute query without showing native SQL'
 }])
 </script>
 
