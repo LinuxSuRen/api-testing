@@ -3,11 +3,13 @@ import { ref, watch } from 'vue'
 import { API } from './net'
 import type { QueryObject } from './net'
 import type { Store } from './store'
+import { Driver, GetDriverName, ExtensionKind } from './store'
 import type { Pair } from './types'
 import { GetDataManagerPreference, SetDataManagerPreference } from './cache'
 import { ElMessage } from 'element-plus'
 import { Codemirror } from 'vue-codemirror'
-import { sql, StandardSQL } from "@codemirror/lang-sql"
+import { sql, StandardSQL, MySQL, PostgreSQL, Cassandra } from "@codemirror/lang-sql"
+import type { SQLConfig } from "@codemirror/lang-sql"
 import HistoryInput from '../components/HistoryInput.vue'
 import type { Ref } from 'vue'
 import { Refresh, Document } from '@element-plus/icons-vue'
@@ -47,14 +49,27 @@ const storeChangedEvent = (s: string) => {
   stores.value.forEach((e: Store) => {
     if (e.name === s) {
       kind.value = e.kind.name
+      switch (GetDriverName(e)){
+        case Driver.MySQL:
+          sqlConfig.value.dialect = MySQL
+          break;
+        case Driver.Postgres:
+          sqlConfig.value.dialect = PostgreSQL
+          break;
+        case Driver.Cassandra:
+          sqlConfig.value.dialect = Cassandra
+          break;
+        default:
+          sqlConfig.value.dialect = StandardSQL
+      }
       return
     }
   })
 
   switch (kind.value) {
-    case 'atest-store-elasticsearch':
-    case 'atest-store-etcd':
-    case 'atest-store-redis':
+    case ExtensionKind.ExtensionKindElasticsearch:
+    case ExtensionKind.ExtensionKindEtcd:
+    case ExtensionKind.ExtensionKindRedis:
       sqlQuery.value = '*'
       complexEditor.value = false
       break
@@ -89,7 +104,7 @@ const queryDataFromTable = (data: QueryData) => {
 }
 const describeTable = (data: QueryData) => {
   switch (kind.value) {
-    case 'atest-store-cassandra':
+    case ExtensionKind.ExtensionKindCassandra:
       sqlQuery.value = `@describeTable_${queryDataMeta.value.currentDatabase}:${data.label}`
       break
     default:
@@ -102,17 +117,17 @@ const queryTables = () => {
 }
 watch(kind, (k) => {
   switch (k) {
-    case 'atest-store-orm':
-    case 'atest-store-cassandra':
-    case 'atest-store-iotdb':
+    case ExtensionKind.ExtensionKindORM:
+    case ExtensionKind.ExtensionKindCassandra:
+    case ExtensionKind.ExtensionKindIotDB:
       queryTip.value = 'Enter SQL query'
       executeQuery()
       break;
-    case 'atest-store-etcd':
-    case 'atest-store-redis':
+    case ExtensionKind.ExtensionKindEtcd:
+    case ExtensionKind.ExtensionKindRedis:
       queryTip.value = 'Enter key'
       break;
-    case 'atest-store-elasticsearch':
+    case ExtensionKind.ExtensionKindElasticsearch:
       queryTip.value = 'field:value OR field:other'
       break;
   }
@@ -139,6 +154,7 @@ API.GetStores((data) => {
   loadingStores.value = false
 })
 
+const showNativeSQL = ref(true)
 const ormDataHandler = (data: QueryData) => {
   const result = [] as any[]
   const cols = new Set<string>()
@@ -154,7 +170,7 @@ const ormDataHandler = (data: QueryData) => {
 
   columns.value = [] as string[]
   data.meta.labels = data.meta.labels.filter((item) => {
-    if (item.key === '_native_sql') {
+    if (showNativeSQL.value && item.key === '_native_sql') {
       sqlQuery.value = item.value
       return false
     }
@@ -196,20 +212,20 @@ const keyValueDataHandler = (data: QueryData) => {
     })
   })
 }
-
 const sqlConfig = ref({
   dialect: StandardSQL,
   defaultSchema: queryDataMeta.value.currentDatabase,
   upperCaseKeywords: true,
   schema: {}
-})
+} as SQLConfig)
 
 const executeQuery = async () => {
+  showNativeSQL.value = true
   if (sqlQuery.value === '') {
     switch (kind.value) {
-      case 'atest-store-elasticsearch':
-      case 'atest-store-etcd':
-      case 'atest-store-redis':
+      case ExtensionKind.ExtensionKindElasticsearch:
+      case ExtensionKind.ExtensionKindEtcd:
+      case ExtensionKind.ExtensionKindRedis:
         if (sqlQuery.value === '') {
           sqlQuery.value = '*'
         }
@@ -227,16 +243,16 @@ const executeWithQuery = async (sql: string) => {
   try {
     const data = await API.DataQueryAsync(query.value);
     switch (kind.value) {
-      case 'atest-store-orm':
-      case 'atest-store-cassandra':
-      case 'atest-store-iotdb':
-      case 'atest-store-opengemini':
-      case 'atest-store-elasticsearch':
+      case ExtensionKind.ExtensionKindORM:
+      case ExtensionKind.ExtensionKindCassandra:
+      case ExtensionKind.ExtensionKindIotDB:
+      case ExtensionKind.ExtensionKindOpengeMini:
+      case ExtensionKind.ExtensionKindElasticsearch:
         ormDataHandler(data)
         success = true
         break;
-      case 'atest-store-etcd':
-      case 'atest-store-redis':
+      case ExtensionKind.ExtensionKindEtcd:
+      case ExtensionKind.ExtensionKindRedis:
         keyValueDataHandler(data)
         break;
       default:
@@ -277,6 +293,13 @@ Magic.AdvancedKeys([{
   Keys: ['Ctrl+E', 'Ctrl+Enter'],
   Func: executeQuery,
   Description: 'Execute query'
+}, {
+  Keys: ['Ctrl+Shift+O'],
+  Func: () => {
+    showNativeSQL.value = false
+    executeWithQuery(sqlQuery.value)
+  },
+  Description: 'Execute query without showing native SQL'
 }])
 </script>
 
