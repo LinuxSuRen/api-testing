@@ -31,6 +31,7 @@ const queryResultAsJSON = ref('')
 const columns = ref([] as string[])
 const queryTip = ref('')
 const loadingStores = ref(true)
+const globalLoading = ref(false)
 const showOverflowTooltip = ref(true)
 const complexEditor = ref(false)
 const dataFormat = ref('table')
@@ -241,7 +242,10 @@ const executeWithQuery = async (sql: string) => {
   query.value.sql = sql
 
   try {
-    const data = await API.DataQueryAsync(query.value);
+    globalLoading.value = true
+    const data = await API.DataQueryAsync(query.value, () => {
+      globalLoading.value = false
+    });
     switch (kind.value) {
       case ExtensionKind.ExtensionKindORM:
       case ExtensionKind.ExtensionKindCassandra:
@@ -308,7 +312,7 @@ Magic.AdvancedKeys([{
     <div class="page-header">
       <span class="page-title">{{t('title.dataManager')}}</span>
     </div>
-    <el-container style="height: calc(100vh - 80px);">
+    <el-container style="height: calc(100vh - 80px);" v-loading="globalLoading">
       <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra' || kind === 'atest-store-elasticsearch' || kind === 'atest-store-opengemini'">
         <el-scrollbar>
           <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"

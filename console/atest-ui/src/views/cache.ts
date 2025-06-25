@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ interface DataManagerPreference {
 
 const DataManagerPreferenceKey = "data-manager-preference"
 export function GetDataManagerPreference(): DataManagerPreference {
-  const val = localStorage.getItem(DataManagerPreferenceKey)
+  const val = sessionStorage.getItem(DataManagerPreferenceKey)
   if (val && val !== '') {
     return JSON.parse(val)
   } else {
@@ -178,7 +178,7 @@ export function SetDataManagerPreference(field: string, value: string) {
     default:
       return
   }
-  localStorage.setItem(DataManagerPreferenceKey, JSON.stringify(preference))
+  sessionStorage.setItem(DataManagerPreferenceKey, JSON.stringify(preference))
   return
 }
 
