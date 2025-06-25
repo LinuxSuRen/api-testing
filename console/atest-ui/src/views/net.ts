@@ -851,7 +851,7 @@ export interface QueryObject {
     offset: number
     limit: number
 }
-const DataQueryAsync = (query: QueryObject) => {
+const DataQueryAsync = (query: QueryObject, final?: () => void | undefined | null) => {
     const requestOptions = {
         method: 'POST',
         headers: {
@@ -863,7 +863,7 @@ const DataQueryAsync = (query: QueryObject) => {
         body: JSON.stringify(query)
     }
     return fetch(`/api/v1/data/query`, requestOptions)
-        .then(DefaultResponseProcess)
+        .then(DefaultResponseProcess).finally(final)
 }
 
 var DataQuery = (store: string, kind: string, currentDatabase: string, query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
