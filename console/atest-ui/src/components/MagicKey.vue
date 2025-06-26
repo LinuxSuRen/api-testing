@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { Help } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 import { Magic } from '@/views/magicKeys'
 
@@ -24,6 +25,11 @@ onBeforeUnmount(() => {
     <el-drawer v-model="keyBindingsDialogVisible" size="50%">
       <template #header>
         <h4>{{ t('title.keyBindings') }}</h4>
+        <el-icon>
+            <el-link href="https://github.com/LinuxSuRen/atest-ext-data-swagger/tree/master/data/key-binding" target="_blank">
+                <Help />
+            </el-link>
+        </el-icon>
       </template>
       <template #default>
         <el-table :data="keyBindings">

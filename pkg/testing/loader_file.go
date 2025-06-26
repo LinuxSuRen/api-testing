@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"net/url"
@@ -29,6 +28,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/logging"
 
@@ -544,6 +545,31 @@ func (l *fileLoader) GetThemes() (result []string, err error) {
 
 func (l *fileLoader) GetTheme(name string) (result string, err error) {
 	dataDir := home.GetThemeDir()
+	themeFile := filepath.Join(dataDir, name+".json")
+	var data []byte
+	if data, err = os.ReadFile(themeFile); err == nil {
+		result = string(data)
+	}
+	return
+}
+
+func (l *fileLoader) GetBindings() (result []string, err error) {
+	dataDir := home.GetBindingDir()
+	_ = filepath.WalkDir(dataDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() && filepath.Ext(path) == ".json" {
+			result = append(result, strings.TrimSuffix(filepath.Base(path), ".json"))
+		}
+		return nil
+	})
+	return
+}
+
+func (l *fileLoader) GetBinding(name string) (result string, err error) {
+	dataDir := home.GetBindingDir()
 	themeFile := filepath.Join(dataDir, name+".json")
 	var data []byte
 	if data, err = os.ReadFile(themeFile); err == nil {

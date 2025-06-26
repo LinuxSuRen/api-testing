@@ -36,6 +36,8 @@ service Loader {
     rpc Query(server.DataQuery) returns (server.DataQueryResult) {}
     rpc GetThemes(server.Empty) returns (server.SimpleList) {}
     rpc GetTheme(server.SimpleName) returns (server.CommonResult) {}
+    rpc GetBindings(server.Empty) returns (server.SimpleList) {}
+    rpc GetBinding(server.SimpleName) returns (server.CommonResult) {}
 }
 
 message TestSuites {

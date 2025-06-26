@@ -1322,6 +1322,35 @@ func (s *server) GetTheme(ctx context.Context, in *SimpleName) (result *CommonRe
 	return
 }
 
+func (s *server) GetBindings(ctx context.Context, _ *Empty) (result *SimpleList, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	result = &SimpleList{}
+	var bindings []string
+	if bindings, err = loader.GetBindings(); err == nil {
+		for _, theme := range bindings {
+			result.Data = append(result.Data, &Pair{
+				Key:   theme,
+				Value: "",
+			})
+		}
+	}
+	return
+}
+
+func (s *server) GetBinding(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	result = &CommonResult{}
+	result.Message, err = loader.GetBinding(in.Name)
+	if err != nil {
+		result.Message = fmt.Sprintf("failed to get binding: %v", err)
+	}
+	return
+}
+
 // implement the mock server
 
 // Start starts the mock server
