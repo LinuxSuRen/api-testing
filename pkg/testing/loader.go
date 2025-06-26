@@ -30,6 +30,8 @@ type Loader interface {
 	Query(query map[string]string) (result DataResult, err error)
 	GetThemes() ([]string, error)
 	GetTheme(string) (string, error)
+	GetBindings() ([]string, error)
+	GetBinding(string) (string, error)
 }
 type DataResult struct {
 	Pairs           map[string]string

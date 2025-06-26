@@ -41,6 +41,10 @@ func GetThemeDir() string {
 	return filepath.Join(GetUserConfigDir(), "data/theme")
 }
 
+func GetBindingDir() string {
+	return filepath.Join(GetUserConfigDir(), "data/key-binding")
+}
+
 func GetExtensionSocketPath(name string) string {
 	return filepath.Join(GetUserConfigDir(), fmt.Sprintf("%s.sock", name))
 }

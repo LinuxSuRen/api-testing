@@ -16,6 +16,7 @@ limitations under the License.
 
 import { watch } from 'vue'
 import { useMagicKeys } from '@vueuse/core'
+import { API } from './net'
 
 function Keys(func: (() => void) | ((k: string) => void), keys: string[]) {
     const magicKeys = useMagicKeys()
@@ -54,6 +55,46 @@ const AdvancedKeys = (keys: MagicKey[]) => {
     })
 }
 
+interface KeyBindings {
+    name: string
+    pages: Page[]
+}
+
+interface Page {
+    name: string
+    bindings: KeyBinding[]
+}
+
+interface KeyBinding {
+    keys: string[]
+    description?: string
+    action: string
+}
+
+const LoadMagicKeys = (url: String, mapping: Map<String, Function>) => {
+    const fileName = url.substring(url.lastIndexOf('/') + 1);
+    const pageName = fileName.split(".vue")[0];
+    API.GetBinding("default", (data) => {
+        const bindings = JSON.parse(data.message) as KeyBindings;
+        bindings.pages.forEach((page: Page) => {
+            if (page.name === pageName) {
+                const keys = [] as MagicKey[]
+                page.bindings.forEach((binding: KeyBinding) => {
+                    keys.push({
+                        Keys: binding.keys,
+                        Func: () => {
+                            mapping.has(binding.action) ? mapping.get(binding.action)!() : console.warn(`No action found for ${binding.action}`);
+                        },
+                        Description: binding.description,
+                    });
+                });
+                AdvancedKeys(keys);
+                return;
+            }
+        })
+    })
+}
+
 export const Magic = {
-    Keys, AdvancedKeys, MagicKeyEventName
+    Keys, AdvancedKeys, MagicKeyEventName, LoadMagicKeys
 }

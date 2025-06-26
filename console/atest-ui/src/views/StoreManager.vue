@@ -108,15 +108,10 @@ function addStore() {
     createAction.value = true
 }
 
-Magic.AdvancedKeys([{
-  Keys: ['Alt+KeyE', 'ctrl+n'],
-  Func: addStore,
-  Description: 'Add a new store'
-}, {
-  Keys: ['Alt+KeyR'],
-  Func: loadStores,
-  Description: 'Refresh the store list'
-}])
+Magic.LoadMagicKeys(import.meta.url, {
+  "addStore": addStore,
+  "loadStores": loadStores,
+})
 
 const rules = reactive<FormRules<Store>>({
   name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
