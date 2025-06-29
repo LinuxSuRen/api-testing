@@ -169,3 +169,13 @@ func (l *nonLoader) GetTheme(name string) (result string, err error) {
 	err = fmt.Errorf("not support")
 	return
 }
+
+func (l *nonLoader) GetBindings() (result []string, err error) {
+	err = fmt.Errorf("not support")
+	return
+}
+
+func (l *nonLoader) GetBinding(name string) (result string, err error) {
+	err = fmt.Errorf("not support")
+	return
+}

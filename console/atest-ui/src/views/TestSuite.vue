@@ -153,15 +153,10 @@ function openNewTestCaseDialog() {
   querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.name!)
 }
 
-Magic.AdvancedKeys([{
-  Keys: ['Alt+N', 'Alt+dead'],
-  Func: openNewTestCaseDialog,
-  Description: 'Open new test case dialog',
-}, {
-  Keys: ['Alt+S', 'Alt+ß'],
-  Func: saveTestSuite,
-  Description: 'Save test suite',
-}])
+Magic.LoadMagicKeys(import.meta.url, {
+  "openNewTestCaseDialog": openNewTestCaseDialog,
+  "saveTestSuite": saveTestSuite,
+})
 
 const submitTestCaseForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return

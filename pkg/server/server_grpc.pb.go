@@ -2043,6 +2043,8 @@ var RunnerExtension_ServiceDesc = grpc.ServiceDesc{
 type ThemeExtensionClient interface {
 	GetThemes(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
 	GetTheme(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error)
+	GetBindings(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error)
+	GetBinding(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error)
 }
 
 type themeExtensionClient struct {
@@ -2071,12 +2073,32 @@ func (c *themeExtensionClient) GetTheme(ctx context.Context, in *SimpleName, opt
 	return out, nil
 }
 
+func (c *themeExtensionClient) GetBindings(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SimpleList, error) {
+	out := new(SimpleList)
+	err := c.cc.Invoke(ctx, "/server.ThemeExtension/GetBindings", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *themeExtensionClient) GetBinding(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.ThemeExtension/GetBinding", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ThemeExtensionServer is the server API for ThemeExtension service.
 // All implementations must embed UnimplementedThemeExtensionServer
 // for forward compatibility
 type ThemeExtensionServer interface {
 	GetThemes(context.Context, *Empty) (*SimpleList, error)
 	GetTheme(context.Context, *SimpleName) (*CommonResult, error)
+	GetBindings(context.Context, *Empty) (*SimpleList, error)
+	GetBinding(context.Context, *SimpleName) (*CommonResult, error)
 	mustEmbedUnimplementedThemeExtensionServer()
 }
 
@@ -2089,6 +2111,12 @@ func (UnimplementedThemeExtensionServer) GetThemes(context.Context, *Empty) (*Si
 }
 func (UnimplementedThemeExtensionServer) GetTheme(context.Context, *SimpleName) (*CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTheme not implemented")
+}
+func (UnimplementedThemeExtensionServer) GetBindings(context.Context, *Empty) (*SimpleList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBindings not implemented")
+}
+func (UnimplementedThemeExtensionServer) GetBinding(context.Context, *SimpleName) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBinding not implemented")
 }
 func (UnimplementedThemeExtensionServer) mustEmbedUnimplementedThemeExtensionServer() {}
 
@@ -2139,6 +2167,42 @@ func _ThemeExtension_GetTheme_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ThemeExtension_GetBindings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThemeExtensionServer).GetBindings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.ThemeExtension/GetBindings",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThemeExtensionServer).GetBindings(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ThemeExtension_GetBinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThemeExtensionServer).GetBinding(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.ThemeExtension/GetBinding",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThemeExtensionServer).GetBinding(ctx, req.(*SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ThemeExtension_ServiceDesc is the grpc.ServiceDesc for ThemeExtension service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2153,6 +2217,14 @@ var ThemeExtension_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTheme",
 			Handler:    _ThemeExtension_GetTheme_Handler,
+		},
+		{
+			MethodName: "GetBindings",
+			Handler:    _ThemeExtension_GetBindings_Handler,
+		},
+		{
+			MethodName: "GetBinding",
+			Handler:    _ThemeExtension_GetBinding_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

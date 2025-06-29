@@ -851,7 +851,7 @@ export interface QueryObject {
     offset: number
     limit: number
 }
-const DataQueryAsync = (query: QueryObject) => {
+const DataQueryAsync = (query: QueryObject, final?: () => void | undefined | null) => {
     const requestOptions = {
         method: 'POST',
         headers: {
@@ -863,7 +863,7 @@ const DataQueryAsync = (query: QueryObject) => {
         body: JSON.stringify(query)
     }
     return fetch(`/api/v1/data/query`, requestOptions)
-        .then(DefaultResponseProcess)
+        .then(DefaultResponseProcess).finally(final)
 }
 
 var DataQuery = (store: string, kind: string, currentDatabase: string, query: string, callback: (d: any) => void, errHandler: (d: any) => void) => {
@@ -908,6 +908,11 @@ const GetTheme = (name: string, callback: (d: any) => void | null) => {
         .then(DefaultResponseProcess).then(callback)
 }
 
+const GetBinding = (name: string, callback: (d: any) => void | null) => {
+    return fetch(`/api/v1/bindings/${name}`, {})
+        .then(DefaultResponseProcess).then(callback)
+}
+
 export const API = {
     DefaultResponseProcess,
     GetVersion,
@@ -921,6 +926,6 @@ export const API = {
     GetSecrets, DeleteSecret, CreateOrUpdateSecret,
     GetSuggestedAPIs, GetSwaggers,
     ReloadMockServer, GetMockConfig, SBOM, DataQuery, DataQueryAsync,
-    GetThemes, GetTheme,
+    GetThemes, GetTheme, GetBinding,
     getToken
 }

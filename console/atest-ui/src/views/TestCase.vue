@@ -919,42 +919,30 @@ const renameTestCase = (name: string) => {
   })
 }
 
-Magic.AdvancedKeys([{
-  Keys: ['Alt+S', 'Alt+ß'],
-  Func: sendRequest,
-  Description: 'Send the request'
-}, {
-  Keys: ['Alt+KeyD'],
-  Func: openDuplicateTestCaseDialog,
-  Description: 'Duplicate the test case'
-}, {
-  Keys: ['Alt+KeyO'],
-  Func: () => {
+const openOutputTab = () => {
     if (duplicateTestCaseDialog.value) {
       duplicateTestCase()
     }
     testResultActiveTab.value = 'output'
-  },
-  Description: 'Open the output tab'
-}, {
-  Keys: ['Alt+KeyB'],
-  Func: () => {
+}
+const openBodyTab = () => {
     testResultActiveTab.value = 'body'
-  },
-  Description: 'Open the body tab'
-}, {
-  Keys: ['Alt+KeyH'],
-  Func: () => {
+}
+const openHeaderTab = () => {
     testResultActiveTab.value = 'header'
-  },
-  Description: 'Open the header tab'
-}, {
-  Keys: ['Alt+KeyQ'],
-  Func: () => {
+}
+const openQueryTab = () => {
     testResultActiveTab.value = 'query'
-  },
-  Description: 'Open the query tab'
-}])
+}
+
+Magic.LoadMagicKeys(import.meta.url), {
+  "sendRequest": sendRequest,
+  "openDuplicateTestCaseDialog": openDuplicateTestCaseDialog,
+  "openOutputTab": openOutputTab,
+  "openBodyTab": openBodyTab,
+  "openHeaderTab": openHeaderTab,
+  "openQueryTab": openQueryTab
+}
 </script>
 
 <template>

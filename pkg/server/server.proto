@@ -318,6 +318,16 @@ service ThemeExtension {
             get: "/api/v1/themes/{name}"
         };
     }
+    rpc GetBindings(Empty) returns (SimpleList) {
+      option (google.api.http) = {
+        get: "/api/v1/bindings"
+      };
+    }
+    rpc GetBinding(SimpleName) returns (CommonResult) {
+        option (google.api.http) = {
+            get: "/api/v1/bindings/{name}"
+        };
+    }
 }
 
 message Suites {

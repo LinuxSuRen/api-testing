@@ -31,8 +31,10 @@ const queryResultAsJSON = ref('')
 const columns = ref([] as string[])
 const queryTip = ref('')
 const loadingStores = ref(true)
+const globalLoading = ref(false)
 const showOverflowTooltip = ref(true)
 const complexEditor = ref(false)
+const sqlEditorView = ref(null as any)
 const dataFormat = ref('table')
 const dataFormatOptions = ['table', 'json']
 const queryDataMeta = ref({} as QueryDataMeta)
@@ -241,7 +243,10 @@ const executeWithQuery = async (sql: string) => {
   query.value.sql = sql
 
   try {
-    const data = await API.DataQueryAsync(query.value);
+    globalLoading.value = true
+    const data = await API.DataQueryAsync(query.value, () => {
+      globalLoading.value = false
+    });
     switch (kind.value) {
       case ExtensionKind.ExtensionKindORM:
       case ExtensionKind.ExtensionKindCassandra:
@@ -289,18 +294,29 @@ watch(largeContent, (e) => {
   largeContentDialogVisible.value = e !== ''
 })
 
-Magic.AdvancedKeys([{
-  Keys: ['Ctrl+E', 'Ctrl+Enter'],
-  Func: executeQuery,
-  Description: 'Execute query'
-}, {
-  Keys: ['Ctrl+Shift+O'],
-  Func: () => {
+const sqlEditorReady = (editor: any) => {
+  sqlEditorView.value = editor.view
+}
+
+const executeWithSelectedQuery = () => {
+    const selectedTextObj = sqlEditorView.value.state.selection.main
+    const selectedText = sqlEditorView.value.state.sliceDoc(selectedTextObj.from, selectedTextObj.to)
+    if (selectedText !== '') {
+      showNativeSQL.value = false
+      executeWithQuery(selectedText)
+    }
+}
+
+const executeQueryWithoutShowingNativeSQL = () => {
     showNativeSQL.value = false
     executeWithQuery(sqlQuery.value)
-  },
-  Description: 'Execute query without showing native SQL'
-}])
+}
+
+Magic.LoadMagicKeys(import.meta.url, new Map([
+  ["executeQuery", executeQuery],
+  ["executeWithSelectedQuery", executeWithSelectedQuery],
+  ["executeQueryWithoutShowingNativeSQL", executeQueryWithoutShowingNativeSQL],
+]))
 </script>
 
 <template>
@@ -308,7 +324,7 @@ Magic.AdvancedKeys([{
     <div class="page-header">
       <span class="page-title">{{t('title.dataManager')}}</span>
     </div>
-    <el-container style="height: calc(100vh - 80px);">
+    <el-container style="height: calc(100vh - 80px);" v-loading="globalLoading">
       <el-aside v-if="kind === 'atest-store-orm' || kind === 'atest-store-iotdb' || kind === 'atest-store-cassandra' || kind === 'atest-store-elasticsearch' || kind === 'atest-store-opengemini'">
         <el-scrollbar>
           <el-select v-model="queryDataMeta.currentDatabase" placeholder="Select database"
@@ -380,6 +396,7 @@ Magic.AdvancedKeys([{
             </el-row>
           </el-form>
             <Codemirror
+            @ready="sqlEditorReady"
             v-model="sqlQuery"
             v-if="complexEditor"
             style="height: var(--sql-editor-height);"

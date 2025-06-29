@@ -353,6 +353,26 @@ func (g *gRPCLoader) GetTheme(name string) (result string, err error) {
 	return
 }
 
+func (g *gRPCLoader) GetBindings() (result []string, err error) {
+	var simpleList *server.SimpleList
+	if simpleList, err = g.client.GetBindings(g.ctx, &server.Empty{}); err == nil && simpleList.Data != nil {
+		for _, item := range simpleList.Data {
+			result = append(result, item.Key)
+		}
+	}
+	return
+}
+
+func (g *gRPCLoader) GetBinding(name string) (result string, err error) {
+	var themeData *server.CommonResult
+	if themeData, err = g.client.GetBinding(g.ctx, &server.SimpleName{
+		Name: name,
+	}); err == nil && themeData != nil {
+		result = themeData.Message
+	}
+	return
+}
+
 func (g *gRPCLoader) Close() {
 	if g.conn != nil {
 		g.conn.Close()
