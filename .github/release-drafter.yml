@@ -35,6 +35,8 @@ exclude-labels:
   - no-changelog
   - skip-changelog
   - invalid
+exclude-contributors:
+  - 'dependabot'
 autolabeler:
   - label: 'documentation'
     title:
