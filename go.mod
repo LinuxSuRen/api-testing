@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/common v0.50.0
 	github.com/signintech/gopdf v0.32.0
 	github.com/spf13/cobra v1.8.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggest/openapi-go v0.2.50
 	github.com/swaggest/rest v0.2.66
