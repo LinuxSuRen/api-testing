@@ -11,7 +11,7 @@ require (
 	github.com/expr-lang/expr v1.15.6
 	github.com/flopp/go-findfont v0.1.0
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-logr/logr v1.4.1
+	github.com/go-logr/logr v1.4.3
 	github.com/go-logr/zapr v1.3.0
 	github.com/go-openapi/spec v0.21.0
 	github.com/gorilla/mux v1.8.1
@@ -25,8 +25,8 @@ require (
 	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/common v0.50.0
 	github.com/signintech/gopdf v0.32.0
-	github.com/spf13/cobra v1.8.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/cobra v1.9.1
+	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggest/openapi-go v0.2.50
 	github.com/swaggest/rest v0.2.66
