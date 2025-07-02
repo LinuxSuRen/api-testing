@@ -27,7 +27,7 @@ require (
 	github.com/signintech/gopdf v0.32.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/swaggest/openapi-go v0.2.50
 	github.com/swaggest/rest v0.2.66
 	github.com/tidwall/gjson v1.18.0
