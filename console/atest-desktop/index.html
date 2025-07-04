@@ -12,6 +12,7 @@
 <div style="margin: 5px; display: flex; justify-content: center">
   <div>
     <div>Server Status</div>
+      <div id="address"></div>
       <table>
           <tr>
               <td>
@@ -30,6 +31,14 @@
               </td>
           </tr>
           <tr>
+              <td>
+                  <label for="download-timeout">Download timeout</label>
+              </td>
+              <td>
+                  <input name="download-timeout" id="download-timeout" type="text"/>
+              </td>
+          </tr>
+          <tr>
               <td>Log</td>
               <td>
                   <button type="button" id="open-log-file">Open Log File</button>
@@ -41,6 +50,7 @@
               </td>
               <td>
                   <button type="button" id="open-server-page">Open Server Page</button>
+                  <button type="button" id="open-from-browser">Open from Browser</button>
               </td>
           </tr>
       </table>
@@ -59,6 +69,15 @@ actionBut.addEventListener('click', (e) => {
             window.electronAPI.startServer()
             break;
     }
+})
+
+document.getElementById('open-from-browser').addEventListener('click', async (e) => {
+  const address = await window.electronAPI.getHomePage();
+  if (address) {
+    await window.electronAPI.openWithExternalBrowser(address);
+  } else {
+    alert('Please start the server first!');
+  }
 })
 
 const openServerBut = document.getElementById('open-server-page');
@@ -91,13 +110,20 @@ portInput.addEventListener("input", function(e) {
 
 const extensionRegistry = document.getElementById('extension-registry');
 extensionRegistry.addEventListener("input", function(e) {
-  console.log('setExtensionRegistry', extensionRegistry.value)
   window.electronAPI.setExtensionRegistry(extensionRegistry.value)
+});
+
+const downloadTimeout = document.getElementById('download-timeout');
+downloadTimeout.addEventListener("input", function(e) {
+  window.electronAPI.setDownloadTimeout(downloadTimeout.value)
 });
 
 (async function() {
   portInput.value = await window.electronAPI.getPort()
   extensionRegistry.value = await window.electronAPI.getExtensionRegistry()
+  downloadTimeout.value = await window.electronAPI.getDownloadTimeout()
+
+  document.getElementById('address').innerText = await window.electronAPI.getHomePage();
 })();
 </script>
 </body>

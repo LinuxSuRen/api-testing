@@ -44,6 +44,7 @@ func TestStoreExtManager(t *testing.T) {
 		err = mgr.Start("go", "")
 		assert.NoError(t, err)
 
+		time.Sleep(time.Microsecond * 100)
 		err = mgr.StopAll()
 		assert.NoError(t, err)
 	})

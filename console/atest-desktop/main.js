@@ -119,6 +119,7 @@ Menu.setApplicationMenu(menu)
 let serverProcess;
 let serverPort = 7788;
 let extensionRegistry = "ghcr.io";
+let downloadTimeout = "1m";
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -127,26 +128,33 @@ app.whenReady().then(() => {
   ipcMain.on('openLogDir', () => {
     shell.openExternal('file://' + server.getLogfile())
   })
+  ipcMain.handle('openWithExternalBrowser', (e, address) => {
+    shell.openExternal(address)
+  })
   ipcMain.on('startServer', startServer)
   ipcMain.on('stopServer', stopServer)
   ipcMain.on('control', (e, okCallback, errCallback) => {
     server.control(okCallback, errCallback)
   })
-  ipcMain.handle('setPort', (e, port) => {
-    console.log('setPort', port)
-    serverPort = port;
+  ipcMain.handle('getPort', () => {
+    return serverPort
   })
-  ipcMain.handle('setExtensionRegistry', (e, registry) => {
-    console.log('setExtensionRegistry', registry)
-    extensionRegistry = registry
+  ipcMain.handle('setPort', (e, port) => {
+    serverPort = port;
   })
   ipcMain.handle('getExtensionRegistry', () => {
     return extensionRegistry
   })
-  ipcMain.handle('getHomePage', server.getHomePage)
-  ipcMain.handle('getPort', () => {
-    return serverPort
+  ipcMain.handle('setExtensionRegistry', (e, registry) => {
+    extensionRegistry = registry
   })
+  ipcMain.handle('getDownloadTimeout', () => {
+    return downloadTimeout
+  })
+  ipcMain.handle('setDownloadTimeout', (e, timeout) => {
+    downloadTimeout = timeout
+  })
+  ipcMain.handle('getHomePage', server.getHomePage)
   ipcMain.handle('getHealthzUrl', server.getHealthzUrl)
 
   startServer()
@@ -195,6 +203,7 @@ const startServer = () => {
     "server",
     `--http-port=${serverPort}`,
     "--port=0",
+    `--download-timeout=${downloadTimeout}`,
     `--extension-registry=${extensionRegistry}`,
     "--local-storage", path.join(homeData, "*.yaml")
   ])
