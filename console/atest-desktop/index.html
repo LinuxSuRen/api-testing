@@ -9,19 +9,41 @@
 </head>
 <body>
 
-<div style="margin: 5px">
+<div style="margin: 5px; display: flex; justify-content: center">
   <div>
     <div>Server Status</div>
-    <button type="button" id="action">Start</button>
-    <button type="button" id="open-server-page">Open Server Page</button>
-    <div>
-      <span>Port:</span><input name="port" id="port" type="text"/>
-    </div>
-  </div>
-
-  <div>
-    <div>Log</div>
-    <button type="button" id="open-log-file">Open Log File</button>
+      <table>
+          <tr>
+              <td>
+                  <label for="port">Port</label>
+              </td>
+              <td>
+                  <input name="port" id="port" type="text"/>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <label for="extension-registry">Extension Registry</label>
+              </td>
+              <td>
+                  <input name="extension-registry" id="extension-registry" type="text"/>
+              </td>
+          </tr>
+          <tr>
+              <td>Log</td>
+              <td>
+                  <button type="button" id="open-log-file">Open Log File</button>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <button type="button" id="action">Start</button>
+              </td>
+              <td>
+                  <button type="button" id="open-server-page">Open Server Page</button>
+              </td>
+          </tr>
+      </table>
   </div>
 </div>
 
@@ -63,8 +85,10 @@ loadServerStatus()
 window.setInterval(loadServerStatus, 2000)
 
 const portInput = document.getElementById('port');
+const extensionRegistry = document.getElementById('extension-registry');
 (async function() {
   portInput.value = await window.electronAPI.getPort()
+  extensionRegistry.value = await window.electronAPI.getExtensionRegistry()
 })();
 </script>
 </body>

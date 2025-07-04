@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -117,6 +117,9 @@ menu.append(new MenuItem({
 Menu.setApplicationMenu(menu)
 
 let serverProcess;
+let serverPort;
+let setExtensionRegistry = "ghcr.io";
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -128,6 +131,15 @@ app.whenReady().then(() => {
   ipcMain.on('stopServer', stopServer)
   ipcMain.on('control', (e, okCallback, errCallback) => {
     server.control(okCallback, errCallback)
+  })
+  ipcMain.handle('setPort', (port) => {
+      serverPort = port;
+  })
+  ipcMain.handle('setExtensionRegistry', (registry) => {
+    setExtensionRegistry = registry
+  })
+  ipcMain.handle('getExtensionRegistry', () => {
+    return setExtensionRegistry
   })
   ipcMain.handle('getHomePage', server.getHomePage)
   ipcMain.handle('getPort', () => {
@@ -181,6 +193,7 @@ const startServer = () => {
     "server",
     "--http-port", server.getPort(),
     "--port=0",
+    `--extension-registry=${setExtensionRegistry}`,
     "--local-storage", path.join(homeData, "*.yaml")
   ])
   serverProcess.stdout.on('data', (data) => {
