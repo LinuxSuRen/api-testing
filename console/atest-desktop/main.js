@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -117,6 +117,10 @@ menu.append(new MenuItem({
 Menu.setApplicationMenu(menu)
 
 let serverProcess;
+let serverPort = 7788;
+let extensionRegistry = "ghcr.io";
+let downloadTimeout = "1m";
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -124,15 +128,33 @@ app.whenReady().then(() => {
   ipcMain.on('openLogDir', () => {
     shell.openExternal('file://' + server.getLogfile())
   })
+  ipcMain.handle('openWithExternalBrowser', (e, address) => {
+    shell.openExternal(address)
+  })
   ipcMain.on('startServer', startServer)
   ipcMain.on('stopServer', stopServer)
   ipcMain.on('control', (e, okCallback, errCallback) => {
     server.control(okCallback, errCallback)
   })
-  ipcMain.handle('getHomePage', server.getHomePage)
   ipcMain.handle('getPort', () => {
-    return server.getPort()
+    return serverPort
   })
+  ipcMain.handle('setPort', (e, port) => {
+    serverPort = port;
+  })
+  ipcMain.handle('getExtensionRegistry', () => {
+    return extensionRegistry
+  })
+  ipcMain.handle('setExtensionRegistry', (e, registry) => {
+    extensionRegistry = registry
+  })
+  ipcMain.handle('getDownloadTimeout', () => {
+    return downloadTimeout
+  })
+  ipcMain.handle('setDownloadTimeout', (e, timeout) => {
+    downloadTimeout = timeout
+  })
+  ipcMain.handle('getHomePage', server.getHomePage)
   ipcMain.handle('getHealthzUrl', server.getHealthzUrl)
 
   startServer()
@@ -179,8 +201,10 @@ const startServer = () => {
 
   serverProcess = spawn(atestFromHome, [
     "server",
-    "--http-port", server.getPort(),
+    `--http-port=${serverPort}`,
     "--port=0",
+    `--download-timeout=${downloadTimeout}`,
+    `--extension-registry=${extensionRegistry}`,
     "--local-storage", path.join(homeData, "*.yaml")
   ])
   serverProcess.stdout.on('data', (data) => {

@@ -31,10 +31,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   openLogDir: () => ipcRenderer.send('openLogDir'),
+  openWithExternalBrowser: (address) => ipcRenderer.invoke('openWithExternalBrowser', address),
   startServer: () => ipcRenderer.send('startServer'),
   stopServer: () => ipcRenderer.send('stopServer'),
   control: (okCallback, errCallback) => ipcRenderer.send('control', okCallback, errCallback),
   getHomePage: () => ipcRenderer.invoke('getHomePage'),
   getPort: () => ipcRenderer.invoke('getPort'),
+  setPort: (port) => ipcRenderer.invoke('setPort', port),
+  setExtensionRegistry: (registry) => ipcRenderer.invoke('setExtensionRegistry', registry),
+  getExtensionRegistry: () => ipcRenderer.invoke('getExtensionRegistry'),
+  getDownloadTimeout: () => ipcRenderer.invoke('getDownloadTimeout'),
+  setDownloadTimeout: (timeout) => ipcRenderer.invoke('setDownloadTimeout', timeout),
   getHealthzUrl: () => ipcRenderer.invoke('getHealthzUrl'),
 })

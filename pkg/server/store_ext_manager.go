@@ -160,11 +160,22 @@ func (s *storeExtManager) StopAll() error {
 	serverLogger.Info("stop", "extensions", len(s.processs))
 	for _, p := range s.processs {
 		if p != nil {
-			p.Signal(syscall.SIGTERM)
+			// Use Kill on Windows, Signal on other platforms
+			if isWindows() {
+				p.Kill()
+			} else {
+				p.Signal(syscall.SIGTERM)
+			}
 		}
 	}
 	s.stopSingal <- struct{}{}
 	return nil
+}
+
+// isWindows returns true if the program is running on Windows OS.
+func isWindows() bool {
+	return strings.Contains(strings.ToLower(os.Getenv("OS")), "windows") ||
+		(strings.Contains(strings.ToLower(os.Getenv("GOOS")), "windows"))
 }
 
 func (s *storeExtManager) WithDownloader(ociDownloader downloader.PlatformAwareOCIDownloader) {
