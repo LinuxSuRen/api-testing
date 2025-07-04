@@ -36,8 +36,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   control: (okCallback, errCallback) => ipcRenderer.send('control', okCallback, errCallback),
   getHomePage: () => ipcRenderer.invoke('getHomePage'),
   getPort: () => ipcRenderer.invoke('getPort'),
-  setPort: (port) => ipcRenderer.send('setPort', port),
-  setExtensionRegistry: (registry) => ipcRenderer.send('setExtensionRegistry', registry),
+  setPort: (port) => ipcRenderer.invoke('setPort', port),
+  setExtensionRegistry: (registry) => ipcRenderer.invoke('setExtensionRegistry', registry),
   getExtensionRegistry: () => ipcRenderer.invoke('getExtensionRegistry'),
   getHealthzUrl: () => ipcRenderer.invoke('getHealthzUrl'),
 })

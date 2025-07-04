@@ -117,8 +117,8 @@ menu.append(new MenuItem({
 Menu.setApplicationMenu(menu)
 
 let serverProcess;
-let serverPort;
-let setExtensionRegistry = "ghcr.io";
+let serverPort = 7788;
+let extensionRegistry = "ghcr.io";
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -132,18 +132,20 @@ app.whenReady().then(() => {
   ipcMain.on('control', (e, okCallback, errCallback) => {
     server.control(okCallback, errCallback)
   })
-  ipcMain.handle('setPort', (port) => {
-      serverPort = port;
+  ipcMain.handle('setPort', (e, port) => {
+    console.log('setPort', port)
+    serverPort = port;
   })
-  ipcMain.handle('setExtensionRegistry', (registry) => {
-    setExtensionRegistry = registry
+  ipcMain.handle('setExtensionRegistry', (e, registry) => {
+    console.log('setExtensionRegistry', registry)
+    extensionRegistry = registry
   })
   ipcMain.handle('getExtensionRegistry', () => {
-    return setExtensionRegistry
+    return extensionRegistry
   })
   ipcMain.handle('getHomePage', server.getHomePage)
   ipcMain.handle('getPort', () => {
-    return server.getPort()
+    return serverPort
   })
   ipcMain.handle('getHealthzUrl', server.getHealthzUrl)
 
@@ -191,9 +193,9 @@ const startServer = () => {
 
   serverProcess = spawn(atestFromHome, [
     "server",
-    "--http-port", server.getPort(),
+    `--http-port=${serverPort}`,
     "--port=0",
-    `--extension-registry=${setExtensionRegistry}`,
+    `--extension-registry=${extensionRegistry}`,
     "--local-storage", path.join(homeData, "*.yaml")
   ])
   serverProcess.stdout.on('data', (data) => {

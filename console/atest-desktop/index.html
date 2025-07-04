@@ -85,7 +85,16 @@ loadServerStatus()
 window.setInterval(loadServerStatus, 2000)
 
 const portInput = document.getElementById('port');
+portInput.addEventListener("input", function(e) {
+  window.electronAPI.setPort(portInput.value)
+});
+
 const extensionRegistry = document.getElementById('extension-registry');
+extensionRegistry.addEventListener("input", function(e) {
+  console.log('setExtensionRegistry', extensionRegistry.value)
+  window.electronAPI.setExtensionRegistry(extensionRegistry.value)
+});
+
 (async function() {
   portInput.value = await window.electronAPI.getPort()
   extensionRegistry.value = await window.electronAPI.getExtensionRegistry()
