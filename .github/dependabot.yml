@@ -13,3 +13,7 @@ updates:
     directory: "/console/atest-ui" # Location of package manifests
     schedule:
       interval: "weekly"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/console/atest-desktop" # Location of package manifests
+    schedule:
+      interval: "weekly"

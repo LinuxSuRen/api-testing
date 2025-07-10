@@ -196,8 +196,9 @@ const ormDataHandler = (data: QueryData) => {
 
   tablesTree.value = []
   sqlConfig.value.schema = {}
+  sqlConfig.value.defaultTable = currentTable.value
   queryDataMeta.value.tables.forEach((i) => {
-    sqlConfig.value.schema[i] = []
+    sqlConfig.value.schema[i] = columns.value
     tablesTree.value.push({
       label: i,
     })
