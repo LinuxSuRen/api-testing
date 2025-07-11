@@ -57,7 +57,8 @@
         "secure": "Secure",
         "data": "Data",
         "setting": "Setting",
-        "keyBindings": "Key Bindings"
+        "keyBindings": "Key Bindings",
+        "theme":"Theme"
     },
     "tip": {
         "filter": "Filter Keyword",
