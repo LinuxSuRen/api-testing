@@ -115,7 +115,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 21.x
+          node-version: 22.x
           cache: "npm"
           cache-dependency-path: console/atest-ui/package-lock.json
       - name: Build
@@ -137,7 +137,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 21.x
+          node-version: 22.x
       # for fixing Error: Cannot find module 'appdmg'
       - name: Install Python 3.11.4
         uses: actions/setup-python@v4

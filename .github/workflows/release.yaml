@@ -26,7 +26,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 21.x
+          node-version: 22.x
           cache: "npm"
           cache-dependency-path: console/atest-ui/package-lock.json
       - name: Run GoReleaser
@@ -141,7 +141,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 21.x
+          node-version: 22.x
       - name: Build Server on Windows
         if: runner.os == 'Windows'
         env:
