@@ -25,7 +25,6 @@
     "intro.js": "^7.2.0",
     "jsonlint-mod": "^1.7.6",
     "jsonpath-plus": "^10.3.0",
-    "skywalking-client-js": "^0.10.0",
     "vue": "^3.3.4",
     "vue-codemirror": "^5.1.0",
     "vue-i18n": "^11.1.2",

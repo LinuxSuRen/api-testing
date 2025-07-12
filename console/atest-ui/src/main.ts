@@ -11,7 +11,6 @@ import 'intro.js/introjs.css'
 import { setupI18n } from './i18n'
 import en from './locales/en.json'
 import zh from './locales/zh.json'
-import ClientMonitor from 'skywalking-client-js'
 import { name, version } from '../package'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 
@@ -34,13 +33,6 @@ const token = urlParams.get('access_token');
 if (token && token !== '') {
   sessionStorage.setItem('token', token)
   window.location.href='/'
-}
-
-app.config.errorHandler = (error) => {
-  ClientMonitor.reportFrameErrors({
-    service: name,
-    serviceVersion: version,
-  }, error);
 }
 
 app.use(ElementPlus, {
