@@ -53,7 +53,8 @@
         "secure": "安全",
         "data": "数据",
         "setting": "设置",
-        "keyBindings": "按键绑定"
+        "keyBindings": "按键绑定",
+        "theme": "主题"
     },
     "tip": {
         "filter": "过滤",

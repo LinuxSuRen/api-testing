@@ -51,7 +51,7 @@ items:
         <el-divider direction="vertical" />
         <el-link target="_blank" :href="link">{{ link }}</el-link> <!-- Noncompliant -->
     </div>
-    <div>
+    <div class="config">
       API Prefix:<EditButton :value="mockConfig.Prefix" @changed="prefixChanged"/>
       Port:<EditButton :value="mockConfig.Port" @changed="portChanged"/>
     </div>
@@ -63,3 +63,12 @@ items:
         </el-tabs>
     </div>
 </template>
+
+<style>
+.config {
+  margin: 6px 0; 
+  display: flex;
+  align-items: center; 
+  gap: 8px; 
+}
+</style>

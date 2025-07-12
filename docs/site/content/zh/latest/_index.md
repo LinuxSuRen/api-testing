@@ -57,7 +57,7 @@ Use "atest [command] --help" for more information about a command.
 
 如果希望对测试用例集执行性能测试的话，可以增加响应的参数：
 
-`atest run -p sample/testsuite-gitlab.yaml --duration 1m --thread 3  --report m`
+`atest run -p sample/testsuite-gitlab.yaml --duration 1m --thread 3  --report md`
 
 其中的参数 `--report` 可以指定性能测试输出报告，目前支持 Markdown 以及控制台输出。效果如下所示：
 

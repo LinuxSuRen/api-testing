@@ -317,10 +317,12 @@ const viewName = ref('')
 
     <TestSuiteCreationDialog
         :visible="dialogVisible"
+        @close="dialogVisible = false"
         @created="dialogVisible=false; loadStores()"/>
 
     <TestSuiteImportDialog
         :visible="importDialogVisible"
+        @close="importDialogVisible = false"
         @created="importDialogVisible=false; loadStores()"/>
 
     <LoginDialog
