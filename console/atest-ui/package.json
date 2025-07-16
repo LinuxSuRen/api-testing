@@ -27,7 +27,7 @@
     "jsonpath-plus": "^10.3.0",
     "vue": "^3.3.4",
     "vue-codemirror": "^5.1.0",
-    "vue-i18n": "^11.1.9",
+    "vue-i18n": "^11.1.10",
     "vue-json-viewer": "^3.0.4",
     "vue-router": "^4.2.2"
   },
@@ -41,8 +41,8 @@
     "@types/jsdom": "^21.1.1",
     "@types/node": "^22.12.0",
     "@types/node-fetch": "^2.6.4",
-    "@vitejs/plugin-vue": "^4.2.3",
-    "@vitejs/plugin-vue-jsx": "^3.0.1",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@vitejs/plugin-vue-jsx": "^5.0.1",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.3.0",
     "@vue/test-utils": "^2.4.0",
@@ -63,7 +63,7 @@
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.1.1",
     "typescript": "~5.0.4",
-    "vite": "^4.5.5",
+    "vite": "^7.0.4",
     "vitest": "^3.2.4",
     "vue-tsc": "^3.0.0"
   },
