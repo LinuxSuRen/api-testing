@@ -29,10 +29,11 @@ type Item struct {
 }
 
 type Request struct {
-	Path   string            `yaml:"path" json:"path"`
-	Method string            `yaml:"method" json:"method"`
-	Header map[string]string `yaml:"header" json:"header"`
-	Body   string            `yaml:"body" json:"body"`
+	Protocol string            `yaml:"protocol" json:"protocol"`
+	Path     string            `yaml:"path" json:"path"`
+	Method   string            `yaml:"method" json:"method"`
+	Header   map[string]string `yaml:"header" json:"header"`
+	Body     string            `yaml:"body" json:"body"`
 }
 
 type RequestWithAuth struct {
@@ -51,9 +52,10 @@ type Response struct {
 }
 
 type Webhook struct {
-	Name    string          `yaml:"name" json:"name"`
-	Timer   string          `yaml:"timer" json:"timer"`
-	Request RequestWithAuth `yaml:"request" json:"request"`
+	Name    string            `yaml:"name" json:"name"`
+	Timer   string            `yaml:"timer" json:"timer"`
+	Param   map[string]string `yaml:"param" json:"param"`
+	Request RequestWithAuth   `yaml:"request" json:"request"`
 }
 
 type Proxy struct {

@@ -24,6 +24,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -507,7 +508,20 @@ func (s *inMemoryServer) startWebhook(webhook *Webhook) (err error) {
 }
 
 func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error) {
-	client := http.DefaultClient
+	rawParams := make(map[string]string, len(wh.Param))
+	paramKeys := make([]string, 0, len(wh.Param))
+	for k, v := range wh.Param {
+		paramKeys = append(paramKeys, k)
+		rawParams[k] = v
+	}
+	sort.Strings(paramKeys)
+
+	for _, k := range paramKeys {
+		v, vErr := render.Render("mock webhook server param", wh.Param[k], wh)
+		if vErr == nil {
+			wh.Param[k] = v
+		}
+	}
 
 	var payload io.Reader
 	payload, err = render.RenderAsReader("mock webhook server payload", wh.Request.Body, wh)
@@ -515,14 +529,35 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
 		err = fmt.Errorf("error when render payload: %w", err)
 		return
 	}
+	wh.Param = rawParams
 
-	method := util.EmptyThenDefault(wh.Request.Method, http.MethodPost)
 	var api string
 	api, err = render.Render("webhook request api", wh.Request.Path, objCtx)
 	if err != nil {
 		err = fmt.Errorf("error when render api: %w, template: %s", err, wh.Request.Path)
 		return
 	}
+
+	switch wh.Request.Protocol {
+	case "syslog":
+		err = sendSyslogWebhookRequest(ctx, wh, api, payload)
+	default:
+		err = sendHTTPWebhookRequest(ctx, wh, api, payload)
+	}
+	return
+}
+
+func sendSyslogWebhookRequest(ctx context.Context, wh *Webhook, api string, payload io.Reader) (err error) {
+	var conn net.Conn
+	if conn, err = net.Dial("udp", api); err == nil {
+		_, err = io.Copy(conn, payload)
+	}
+	return
+}
+
+func sendHTTPWebhookRequest(ctx context.Context, wh *Webhook, api string, payload io.Reader) (err error) {
+	method := util.EmptyThenDefault(wh.Request.Method, http.MethodPost)
+	client := http.DefaultClient
 
 	var bearerToken string
 	bearerToken, err = getBearerToken(ctx, wh.Request)
@@ -550,7 +585,7 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
 	memLogger.Info("send webhook request", "api", api)
 	resp, err := client.Do(req)
 	if err != nil {
-		err = fmt.Errorf("error when sending webhook")
+		err = fmt.Errorf("error when sending webhook: %v", err)
 	} else {
 		if resp.StatusCode != http.StatusOK {
 			memLogger.Info("unexpected status", "code", resp.StatusCode)
