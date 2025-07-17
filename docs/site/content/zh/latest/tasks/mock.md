@@ -196,4 +196,11 @@ proxies:
 
 当前代理支持 HTTP 和 TCP 协议，上面的例子中代理了 MySQL 的 `33060` 端口。
 
+## Webhook
+
+有些场景下，需要定时向服务器发送请求，这时可以使用 Webhook。当前支持的协议包括：
+
+* HTTP
+* Syslog
+
 > 更多 URL 中通配符的用法，请参考 https://github.com/gorilla/mux

@@ -508,8 +508,6 @@ func (s *inMemoryServer) startWebhook(webhook *Webhook) (err error) {
 }
 
 func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error) {
-	client := http.DefaultClient
-
 	rawParams := make(map[string]string, len(wh.Param))
 	paramKeys := make([]string, 0, len(wh.Param))
 	for k, v := range wh.Param {
@@ -533,13 +531,33 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
 	}
 	wh.Param = rawParams
 
-	method := util.EmptyThenDefault(wh.Request.Method, http.MethodPost)
 	var api string
 	api, err = render.Render("webhook request api", wh.Request.Path, objCtx)
 	if err != nil {
 		err = fmt.Errorf("error when render api: %w, template: %s", err, wh.Request.Path)
 		return
 	}
+
+	switch wh.Request.Protocol {
+	case "syslog":
+		err = sendSyslogWebhookRequest(ctx, wh, api, payload)
+	default:
+		err = sendHTTPWebhookRequest(ctx, wh, api, payload)
+	}
+	return
+}
+
+func sendSyslogWebhookRequest(ctx context.Context, wh *Webhook, api string, payload io.Reader) (err error) {
+	var conn net.Conn
+	if conn, err = net.Dial("udp", api); err == nil {
+		_, err = io.Copy(conn, payload)
+	}
+	return
+}
+
+func sendHTTPWebhookRequest(ctx context.Context, wh *Webhook, api string, payload io.Reader) (err error) {
+	method := util.EmptyThenDefault(wh.Request.Method, http.MethodPost)
+	client := http.DefaultClient
 
 	var bearerToken string
 	bearerToken, err = getBearerToken(ctx, wh.Request)
