@@ -24,6 +24,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -510,9 +511,15 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
 	client := http.DefaultClient
 
 	rawParams := make(map[string]string, len(wh.Param))
+	paramKeys := make([]string, 0, len(wh.Param))
 	for k, v := range wh.Param {
+		paramKeys = append(paramKeys, k)
 		rawParams[k] = v
-		v, vErr := render.Render("mock webhook server param", v, wh)
+	}
+	sort.Strings(paramKeys)
+
+	for _, k := range paramKeys {
+		v, vErr := render.Render("mock webhook server param", wh.Param[k], wh)
 		if vErr == nil {
 			wh.Param[k] = v
 		}
