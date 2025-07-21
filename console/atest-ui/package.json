@@ -22,7 +22,7 @@
     "codemirror": "^5.65.17",
     "diff-match-patch": "^1.0.5",
     "element-plus": "^2.10.2",
-    "intro.js": "^7.2.0",
+    "intro.js": "^8.3.2",
     "jsonlint-mod": "^1.7.6",
     "jsonpath-plus": "^10.3.0",
     "vue": "^3.3.4",
