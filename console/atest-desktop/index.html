@@ -39,6 +39,14 @@
               </td>
           </tr>
           <tr>
+              <td>
+                  <label for="bin-location">Bin Location</label>
+              </td>
+              <td>
+                  <input name="bin-location" id="bin-location" type="text"/>
+              </td>
+          </tr>
+          <tr>
               <td>Log</td>
               <td>
                   <button type="button" id="open-log-file">Open Log File</button>
@@ -118,10 +126,16 @@ downloadTimeout.addEventListener("input", function(e) {
   window.electronAPI.setDownloadTimeout(downloadTimeout.value)
 });
 
+const binLocation = document.getElementById('bin-location');
+binLocation.addEventListener("input", function(e) {
+  window.electronAPI.setBinLocation(binLocation.value)
+});
+
 (async function() {
   portInput.value = await window.electronAPI.getPort()
   extensionRegistry.value = await window.electronAPI.getExtensionRegistry()
   downloadTimeout.value = await window.electronAPI.getDownloadTimeout()
+  binLocation.value = await window.electronAPI.getBinLocation()
 
   document.getElementById('address').innerText = await window.electronAPI.getHomePage();
 })();

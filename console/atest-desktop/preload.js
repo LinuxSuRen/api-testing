@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setExtensionRegistry: (registry) => ipcRenderer.invoke('setExtensionRegistry', registry),
   getExtensionRegistry: () => ipcRenderer.invoke('getExtensionRegistry'),
   getDownloadTimeout: () => ipcRenderer.invoke('getDownloadTimeout'),
-  setDownloadTimeout: (timeout) => ipcRenderer.invoke('setDownloadTimeout', timeout),
+  setDownloadTimeout: (e) => ipcRenderer.invoke('setDownloadTimeout', e),
+  getMainProcessLocation: () => ipcRenderer.invoke('getMainProcessLocation'),
+  setMainProcessLocation: (e) => ipcRenderer.invoke('setMainProcessLocation', e),
   getHealthzUrl: () => ipcRenderer.invoke('getHealthzUrl'),
 })

@@ -120,6 +120,7 @@ let serverProcess;
 let serverPort = 7788;
 let extensionRegistry = "ghcr.io";
 let downloadTimeout = "1m";
+let mainProcessLocation = "built-in";
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -156,6 +157,12 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('getHomePage', server.getHomePage)
   ipcMain.handle('getHealthzUrl', server.getHealthzUrl)
+    ipcMain.handle('getMainProcessLocation', () => {
+        return mainProcessLocation
+    })
+    ipcMain.handle('setMainProcessLocation', (e, location) => {
+        mainProcessLocation = location
+    })
 
   startServer()
   createWindow()
@@ -178,28 +185,21 @@ const startServer = () => {
     recursive: true
   })
 
-  // try to find the atest file first
-  const serverFile = process.platform === "win32" ? "atest.exe" : "atest"
-  const atestFromHome = path.join(homeBin, serverFile)
-  const atestFromPkg = path.join(__dirname, serverFile)
-
-  const data = fs.readFileSync(atestFromPkg)
-  log.info('start to write file with length', data.length)
-  
-  try {
-    if (process.platform === "win32") {
-      const file = fs.openSync(atestFromHome, 'w');
-      fs.writeSync(file, data, 0, data.length, 0);
-      fs.closeSync(file);
-    }else{
-      fs.writeFileSync(atestFromHome, data);
+  let atestBinPath
+    switch (mainProcessLocation) {
+      case "built-in":
+          atestBinPath = locateBinPath()
+        break;
+      case "system-path":
+        const which = require('which');
+        atestBinPath = process.platform === "win32" ? which.sync('atest.exe') : which.sync('atest')
+        break;
+      case "home-path":
+        atestBinPath = locateBinPath(false)
+        break;
     }
-  } catch (e) { 
-    log.error('Error Code:', e.code); 
-  }
-  fs.chmodSync(atestFromHome, 0o755); 
 
-  serverProcess = spawn(atestFromHome, [
+  serverProcess = spawn(atestBinPath, [
     "server",
     `--http-port=${serverPort}`,
     "--port=0",
@@ -221,6 +221,33 @@ const startServer = () => {
   })
   log.info('start atest server as pid:', serverProcess.pid)
   log.info(serverProcess.spawnargs)
+}
+
+const locateBinPath = (overwrite    = true) => {
+    // try to find the atest file first
+    const serverFile = process.platform === "win32" ? "atest.exe" : "atest"
+    const atestFromHome = path.join(homeBin, serverFile)
+    if (!overwrite) {
+        return atestFromHome
+    }
+
+    const atestFromPkg = path.join(__dirname, serverFile)
+    const data = fs.readFileSync(atestFromPkg)
+    log.info('start to write file with length', data.length)
+
+    try {
+        if (process.platform === "win32") {
+            const file = fs.openSync(atestFromHome, 'w');
+            fs.writeSync(file, data, 0, data.length, 0);
+            fs.closeSync(file);
+        }else{
+            fs.writeFileSync(atestFromHome, data);
+        }
+    } catch (e) {
+        log.error('Error Code:', e.code);
+    }
+    fs.chmodSync(atestFromHome, 0o755);
+    return atestFromHome
 }
 
 const stopServer = () => {
