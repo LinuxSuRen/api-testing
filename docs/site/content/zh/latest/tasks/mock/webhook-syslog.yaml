@@ -1,0 +1,11 @@
+webhooks:
+  - timer: 3s
+    name: syslog
+    request:
+      protocol: syslog
+      path: 192.168.123.58:5140
+      body: |
+        {
+            "level": "{{ randEnum "FATAL" "ERROR" "WARNING" "INFO" }}",
+            "message": "{{ randAlphaNum 10 }}"
+        }
