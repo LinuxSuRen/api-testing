@@ -43,7 +43,11 @@
                   <label for="bin-location">Bin Location</label>
               </td>
               <td>
-                  <input name="bin-location" id="bin-location" type="text"/>
+                  <select name="bin-location" id="bin-location">
+                      <option value="built-in">Built-in</option>
+                      <option value="system-path">System Path</option>
+                      <option value="home-path">Home Path</option>
+                  </select>
               </td>
           </tr>
           <tr>
@@ -128,14 +132,14 @@ downloadTimeout.addEventListener("input", function(e) {
 
 const binLocation = document.getElementById('bin-location');
 binLocation.addEventListener("input", function(e) {
-  window.electronAPI.setBinLocation(binLocation.value)
+  window.electronAPI.setMainProcessLocation(binLocation.value)
 });
 
 (async function() {
   portInput.value = await window.electronAPI.getPort()
   extensionRegistry.value = await window.electronAPI.getExtensionRegistry()
   downloadTimeout.value = await window.electronAPI.getDownloadTimeout()
-  binLocation.value = await window.electronAPI.getBinLocation()
+  binLocation.value = await window.electronAPI.getMainProcessLocation()
 
   document.getElementById('address').innerText = await window.electronAPI.getHomePage();
 })();
