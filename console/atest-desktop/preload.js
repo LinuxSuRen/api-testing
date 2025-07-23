@@ -27,6 +27,24 @@ window.addEventListener('DOMContentLoaded', () => {
   for (const dependency of ['chrome', 'node', 'electron']) {
     replaceText(`${dependency}-version`, process.versions[dependency])
   }
+
+  const items = document.getElementsByTagName('a')
+  for (const e of items) {
+    if (e.href === 'https://github.com/LinuxSuRen/api-testing') {
+        const openButton = document.createElement('button');
+        openButton.style = 'margin-left: 10px; margin-bottom: 5px;';
+        openButton.innerText = 'Open in Browser';
+        openButton.onclick = () => {
+            ipcRenderer.invoke('getHomePage').then((homePage) => {
+              if (homePage) {
+                ipcRenderer.invoke('openWithExternalBrowser', homePage);
+              }
+            })
+        };
+        e.parentNode.insertBefore(openButton, e.nextSibling);
+        return
+    }
+  };
 })
 
 contextBridge.exposeInMainWorld('electronAPI', {
