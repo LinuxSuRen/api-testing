@@ -48,12 +48,18 @@ const tablesTree = ref([] as TreeItem[])
 const storeChangedEvent = (s: string) => {
   kind.value = ''
   SetDataManagerPreference('currentStore', s)
+  queryDataMeta.value.currentDatabase = ""
   stores.value.forEach((e: Store) => {
     if (e.name === s) {
       kind.value = e.kind.name
       switch (GetDriverName(e)){
         case Driver.MySQL:
           sqlConfig.value.dialect = MySQL
+          e.properties.forEach((p: Pair) => {
+            if (p.key === 'database') {
+              queryDataMeta.value.currentDatabase = p.value
+            }
+          })
           break;
         case Driver.Postgres:
           sqlConfig.value.dialect = PostgreSQL
@@ -63,6 +69,18 @@ const storeChangedEvent = (s: string) => {
           break;
         default:
           sqlConfig.value.dialect = StandardSQL
+      }
+
+      switch (GetDriverName(e)){
+          case Driver.MySQL:
+          case Driver.Postgres:
+          case Driver.TDengine:
+              e.properties.forEach((p: Pair) => {
+                  if (p.key === 'database') {
+                      queryDataMeta.value.currentDatabase = p.value
+                  }
+              })
+              break;
       }
       return
     }
@@ -79,7 +97,6 @@ const storeChangedEvent = (s: string) => {
       complexEditor.value = true
   }
 
-  queryDataMeta.value.currentDatabase = GetDataManagerPreference().currentDatabase
   executeQuery()
 }
 watch(store, storeChangedEvent)
