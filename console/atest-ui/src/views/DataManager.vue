@@ -367,72 +367,74 @@ Magic.LoadMagicKeys(import.meta.url, new Map([
         </el-scrollbar>
       </el-aside>
       <el-container>
-        <el-header style="height: auto">
-          <el-form @submit.prevent="executeQuery">
-            <el-row :gutter="10" justify="center">
-              <el-col :span="4">
-                <el-form-item>
-                  <el-select v-model="store" placeholder="Select store" filterable
-                             :loading="loadingStores">
-                    <el-option v-for="item in stores" :key="item.name" :label="item.name"
-                               :value="item.name" :disabled="!item.ready"
-                               :kind="item.kind.name"></el-option>
-                  </el-select>
-                </el-form-item>
-              </el-col>
-              <el-col :span="16">
-                <el-form-item v-if="!complexEditor">
-                  <HistoryInput :placeholder="queryTip" :callback="executeQuery" v-model="sqlQuery" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="2">
-                <el-form-item>
-                  <el-button type="primary" @click="executeQuery" :disabled="kind === ''">Execute</el-button>
-                </el-form-item>
-              </el-col>
-              <el-col :span="2">
-                <el-select v-model="dataFormat" placeholder="Select data format">
-                  <el-option v-for="item in dataFormatOptions" :key="item" :label="item"
-                             :value="item"></el-option>
-                </el-select>
-              </el-col>
-            </el-row>
-            <el-row :gutter="10" v-if="kind === 'atest-store-elasticsearch' || kind === 'atest-store-redis'">
-              <el-col :span="10">
-                <el-input type="number" v-model="query.offset">
-                  <template #prepend>Offset</template>
-                </el-input>
-              </el-col>
-              <el-col :span="10">
-                <el-input type="number" v-model="query.limit">
-                  <template #prepend>Limit</template>
-                </el-input>
-              </el-col>
-              <el-col :span="2">
-                <el-button type="primary" @click="nextPage">{{ t("button.next-page") }}</el-button>
-              </el-col>
-            </el-row>
-          </el-form>
-            <Codemirror
-            @ready="sqlEditorReady"
-            v-model="sqlQuery"
-            v-if="complexEditor"
-            style="height: var(--sql-editor-height);"
-            :extensions="[sql(sqlConfig)]"
-            />
-        </el-header>
-        <el-main>
-          <div style="display: flex; gap: 8px;">
-            <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
-            <el-tag type="primary" v-if="queryDataMeta.duration">{{ queryDataMeta.duration }}</el-tag>
-            <el-tag type="primary" v-for="label in queryDataMeta.labels">{{ label.value }}</el-tag>
-            <el-check-tag type="primary" :checked="showOverflowTooltip" @change="overflowChange" v-if="queryResult.length > 0">overflow</el-check-tag>
-          </div>
-          <el-table :data="queryResult" stripe v-if="dataFormat === 'table'" height="calc(100vh - 380px)" @cell-dblclick="tryShowPrettyJSON">
-            <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable :show-overflow-tooltip="showOverflowTooltip" />
-          </el-table>
-          <Codemirror v-else-if="dataFormat === 'json'" v-model="queryResultAsJSON" />
-        </el-main>
+          <el-splitter layout="vertical">
+              <el-splitter-panel size="30%">
+                  <el-form @submit.prevent="executeQuery">
+                      <el-row :gutter="10" justify="center" style="margin-left: 0!important; margin-right: 0!important;">
+                          <el-col :span="4">
+                              <el-form-item>
+                                  <el-select v-model="store" placeholder="Select store" filterable
+                                             :loading="loadingStores">
+                                      <el-option v-for="item in stores" :key="item.name" :label="item.name"
+                                                 :value="item.name" :disabled="!item.ready"
+                                                 :kind="item.kind.name"></el-option>
+                                  </el-select>
+                              </el-form-item>
+                          </el-col>
+                          <el-col :span="16">
+                              <el-form-item v-if="!complexEditor">
+                                  <HistoryInput :placeholder="queryTip" :callback="executeQuery" v-model="sqlQuery" />
+                              </el-form-item>
+                          </el-col>
+                          <el-col :span="2">
+                              <el-form-item>
+                                  <el-button type="primary" @click="executeQuery" :disabled="kind === ''">Execute</el-button>
+                              </el-form-item>
+                          </el-col>
+                          <el-col :span="2">
+                              <el-select v-model="dataFormat" placeholder="Select data format">
+                                  <el-option v-for="item in dataFormatOptions" :key="item" :label="item"
+                                             :value="item"></el-option>
+                              </el-select>
+                          </el-col>
+                      </el-row>
+                      <el-row :gutter="10" v-if="kind === 'atest-store-elasticsearch' || kind === 'atest-store-redis'">
+                          <el-col :span="10">
+                              <el-input type="number" v-model="query.offset">
+                                  <template #prepend>Offset</template>
+                              </el-input>
+                          </el-col>
+                          <el-col :span="10">
+                              <el-input type="number" v-model="query.limit">
+                                  <template #prepend>Limit</template>
+                              </el-input>
+                          </el-col>
+                          <el-col :span="2">
+                              <el-button type="primary" @click="nextPage">{{ t("button.next-page") }}</el-button>
+                          </el-col>
+                      </el-row>
+                  </el-form>
+                  <Codemirror
+                      @ready="sqlEditorReady"
+                      v-model="sqlQuery"
+                      v-if="complexEditor"
+                      style="height: var(--sql-editor-height);"
+                      :extensions="[sql(sqlConfig)]"
+                  />
+              </el-splitter-panel>
+              <el-splitter-panel>
+                  <div style="display: flex; gap: 8px;">
+                      <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
+                      <el-tag type="primary" v-if="queryDataMeta.duration">{{ queryDataMeta.duration }}</el-tag>
+                      <el-tag type="primary" v-for="label in queryDataMeta.labels">{{ label.value }}</el-tag>
+                      <el-check-tag type="primary" :checked="showOverflowTooltip" @change="overflowChange" v-if="queryResult.length > 0">overflow</el-check-tag>
+                  </div>
+                  <el-table :data="queryResult" stripe v-if="dataFormat === 'table'" @cell-dblclick="tryShowPrettyJSON">
+                      <el-table-column v-for="col in columns" :key="col" :prop="col" :label="col" sortable :show-overflow-tooltip="showOverflowTooltip" />
+                  </el-table>
+                  <Codemirror v-else-if="dataFormat === 'json'" v-model="queryResultAsJSON" />
+              </el-splitter-panel>
+          </el-splitter>
       </el-container>
     </el-container>
   </div>
