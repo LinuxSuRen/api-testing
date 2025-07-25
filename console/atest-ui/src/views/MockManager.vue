@@ -1,22 +1,53 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Codemirror } from 'vue-codemirror';
+import * as yaml from 'js-yaml';
+import { jsonSchema } from "codemirror-json-schema";
 import { API } from './net';
 import {useI18n} from "vue-i18n";
 import EditButton from '../components/EditButton.vue'
+import mockSchema from '../assets/api-testing-mock-schema.json';
 
 const { t } = useI18n()
 
+const mockschema = ref(mockSchema as any); // Type assertion to any for JSON schema
+
 interface MockConfig {
   Config: string
+  ConfigAsJSON: string
   Prefix: string
   Port: number
 }
+
+const tabActive = ref('yaml')
 const mockConfig = ref({} as MockConfig);
+watch(mockConfig, (newValue) => {
+    if (tabActive.value === 'json') {
+        // convert JSON to YAML string
+        newValue.Config = jsonToYaml(newValue.ConfigAsJSON);
+    } else {
+        newValue.ConfigAsJSON = JSON.stringify(yaml.load(newValue.Config), null, 2);
+    }
+}, { deep: true });
+
+function jsonToYaml(jsonData: object | string): string {
+  // 如果是字符串，先解析成对象
+  const data = typeof jsonData === 'string' 
+    ? JSON.parse(jsonData) 
+    : jsonData;
+  
+  return yaml.dump(data, {
+    indent: 2,
+    skipInvalid: true,
+    noRefs: true,
+    lineWidth: -1,
+  });
+}
+
 const link = ref('')
 API.GetMockConfig((d) => {
   mockConfig.value = d
-  link.value = window.location.origin + d.Prefix + "/api.json"
+  link.value = `http://${window.location.hostname}:${d.Port}${d.Prefix}/api.json`
 })
 const prefixChanged = (p: string) => {
   mockConfig.value.Prefix = p
@@ -24,7 +55,6 @@ const prefixChanged = (p: string) => {
 const portChanged = (p: number) => {
   mockConfig.value.Port = p
 }
-const tabActive = ref('yaml')
 const insertSample = () => {
     mockConfig.value.Config = `objects:
   - name: projects
@@ -59,6 +89,10 @@ items:
         <el-tabs v-model="tabActive">
             <el-tab-pane label="YAML" name="yaml">
                 <Codemirror v-model="mockConfig.Config" />
+            </el-tab-pane>
+            <el-tab-pane label="JSON" name="json">
+                <Codemirror v-model="mockConfig.ConfigAsJSON"
+                    :extensions="[jsonSchema(mockschema)]" />
             </el-tab-pane>
         </el-tabs>
     </div>

@@ -386,7 +386,13 @@ func (s *inMemoryServer) startItem(item Item) {
 		metrics: s.metrics,
 		mu:      sync.Mutex{},
 	}
-	s.mux.HandleFunc(item.Request.Path, adHandler.handle).Methods(strings.Split(method, ",")...).Headers(headerSlices...)
+	existedRoute := s.mux.GetRoute(item.Name)
+	if existedRoute == nil {
+		s.mux.NewRoute().Name(item.Name).Methods(strings.Split(method, ",")...).Headers(headerSlices...).Path(item.Request.Path).HandlerFunc(adHandler.handle)
+	} else {
+		existedRoute.HandlerFunc(adHandler.handle)
+	}
+	// s.mux.HandleFunc(item.Request.Path, adHandler.handle).Methods(strings.Split(method, ",")...).Headers(headerSlices...)
 }
 
 type advanceHandler struct {
@@ -670,7 +676,9 @@ func (s *inMemoryServer) GetPort() string {
 
 func (s *inMemoryServer) Stop() (err error) {
 	if s.listener != nil {
-		err = s.listener.Close()
+		if err = s.listener.Close(); err != nil {
+			memLogger.Error(err, "failed to close listener")
+		}
 	} else {
 		memLogger.Info("listener is nil")
 	}
