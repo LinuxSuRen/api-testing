@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { ca } from 'element-plus/es/locales.mjs';
 import { Cache } from './cache'
 
 /**
@@ -115,6 +116,25 @@ function GetVersion(callback?: (v: AppVersion) => void) {
     fetch('/api/v1/version', requestOptions)
         .then(DefaultResponseProcess)
         .then(emptyOrDefault(callback))
+}
+
+interface CommonResult {
+    message: string
+    success: boolean
+}
+
+async function GetSchema(name: string, callback?: (v: CommonResult) => void) {
+    const requestOptions = {
+        method: 'GET',
+    }
+    if (callback) {
+        return fetch(`/api/v1/schemas/${name}`, requestOptions)
+            .then(DefaultResponseProcess)
+            .then(emptyOrDefault(callback))
+    } else {
+        return fetch(`/api/v1/schemas/${name}`, requestOptions)
+            .then(DefaultResponseProcess)
+    }
 }
 
 interface TestSuite {
@@ -915,7 +935,7 @@ const GetBinding = (name: string, callback: (d: any) => void | null) => {
 
 export const API = {
     DefaultResponseProcess,
-    GetVersion,
+    GetVersion, GetSchema,
     CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, DuplicateTestSuite, RenameTestSuite, GetTestSuiteYaml,
     CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, DuplicateTestCase, RenameTestCase, RunTestCase, BatchRunTestCase,
     GetHistoryTestCaseWithResult, DeleteHistoryTestCase, GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,

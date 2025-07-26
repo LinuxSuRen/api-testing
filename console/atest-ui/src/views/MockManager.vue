@@ -8,13 +8,18 @@ import { jsonLanguage } from "@codemirror/lang-json"
 import { API } from './net';
 import {useI18n} from "vue-i18n";
 import EditButton from '../components/EditButton.vue'
-import mockSchema from '../assets/api-testing-mock-schema.json';
 
 const { t } = useI18n()
 
-const mockschema = ref(mockSchema as any); // Type assertion to any for JSON schema
+const mockschema = ref({}); // Type assertion to any for JSON schema
 const jsonComplete = NewTemplateLangComplete(jsonLanguage)
 const headerComplete = NewHeaderLangComplete(jsonLanguage)
+
+API.GetSchema('mock').then((schema) => {
+    if (schema.success && schema.message !== '') {
+        mockschema.value = JSON.parse(schema.message);
+    }
+});
 
 interface MockConfig {
   Config: string
@@ -28,7 +33,10 @@ const mockConfig = ref({} as MockConfig);
 watch(mockConfig, (newValue) => {
     if (tabActive.value === 'json') {
         // convert JSON to YAML string
-        newValue.Config = jsonToYaml(newValue.ConfigAsJSON);
+        try {
+            newValue.Config = jsonToYaml(newValue.ConfigAsJSON);
+        } catch (e) {
+        }
     } else {
         newValue.ConfigAsJSON = JSON.stringify(yaml.load(newValue.Config), null, 2);
     }
