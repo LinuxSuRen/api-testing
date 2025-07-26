@@ -392,7 +392,6 @@ func (s *inMemoryServer) startItem(item Item) {
 	} else {
 		existedRoute.HandlerFunc(adHandler.handle)
 	}
-	// s.mux.HandleFunc(item.Request.Path, adHandler.handle).Methods(strings.Split(method, ",")...).Headers(headerSlices...)
 }
 
 type advanceHandler struct {
