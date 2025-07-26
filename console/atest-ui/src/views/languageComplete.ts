@@ -19,6 +19,28 @@ function tplFuncCompletions(context: CompletionContext) {
     })
   }
 
+  return pairCompletions(context, templateFuncs.value)
+}
+
+const headerFuncs = ref([] as Completion[])
+function headerCompletions(context: CompletionContext) {
+  if (headerFuncs.value.length == 0) {
+    API.PopularHeaders((e) => {
+      if (e.data) {
+        e.data.forEach((item: any) => {
+          headerFuncs.value.push({
+            label: item.key,
+            type: "text",
+          } as Completion)
+        })
+      }
+    })
+  }
+
+  return pairCompletions(context, headerFuncs.value)
+}
+
+function pairCompletions(context: CompletionContext, source: Completion[]) {
   let word = context.matchBefore(/\w*/) || {
     from: "",
     to: ""
@@ -27,12 +49,18 @@ function tplFuncCompletions(context: CompletionContext) {
     return null
   return {
     from: word.from,
-    options: templateFuncs.value
+    options: source
   }
 }
 
-export const NewLanguageComplete = (lang: Language) => {
+export const NewTemplateLangComplete = (lang: Language) => {
     return new LanguageSupport(lang, lang.data.of(
         {autocomplete: tplFuncCompletions}
+    ))
+}
+
+export const NewHeaderLangComplete = (lang: Language) => {
+    return new LanguageSupport(lang, lang.data.of(
+        {autocomplete: headerCompletions}
     ))
 }

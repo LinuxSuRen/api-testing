@@ -38,6 +38,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
+	"github.com/linuxsuren/api-testing/docs"
 	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/mock"
@@ -432,6 +433,19 @@ func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
 			}
 		}
 	}
+}
+
+func (s *server) GetSchema(ctx context.Context, in *SimpleQuery) (result *CommonResult, err error) {
+	result = &CommonResult{
+		Success: true,
+	}
+	switch in.Name {
+	case "core":
+		result.Message = docs.Schema
+	case "mock":
+		result.Message = docs.MockSchema
+	}
+	return
 }
 
 // GetVersion returns the version

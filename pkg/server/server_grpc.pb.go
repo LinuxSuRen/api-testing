@@ -65,6 +65,7 @@ type RunnerClient interface {
 	PopularHeaders(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Pairs, error)
 	FunctionsQuery(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Pairs, error)
 	FunctionsQueryStream(ctx context.Context, opts ...grpc.CallOption) (Runner_FunctionsQueryStreamClient, error)
+	GetSchema(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*CommonResult, error)
 	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error)
 	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
 	DownloadResponseFile(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*FileData, error)
@@ -473,6 +474,15 @@ func (x *runnerFunctionsQueryStreamClient) Recv() (*Pairs, error) {
 	return m, nil
 }
 
+func (c *runnerClient) GetSchema(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetSchema", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error) {
 	out := new(Version)
 	err := c.cc.Invoke(ctx, "/server.Runner/GetVersion", in, out, opts...)
@@ -646,6 +656,7 @@ type RunnerServer interface {
 	PopularHeaders(context.Context, *Empty) (*Pairs, error)
 	FunctionsQuery(context.Context, *SimpleQuery) (*Pairs, error)
 	FunctionsQueryStream(Runner_FunctionsQueryStreamServer) error
+	GetSchema(context.Context, *SimpleQuery) (*CommonResult, error)
 	GetVersion(context.Context, *Empty) (*Version, error)
 	Sample(context.Context, *Empty) (*HelloReply, error)
 	DownloadResponseFile(context.Context, *TestCase) (*FileData, error)
@@ -774,6 +785,9 @@ func (UnimplementedRunnerServer) FunctionsQuery(context.Context, *SimpleQuery) (
 }
 func (UnimplementedRunnerServer) FunctionsQueryStream(Runner_FunctionsQueryStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method FunctionsQueryStream not implemented")
+}
+func (UnimplementedRunnerServer) GetSchema(context.Context, *SimpleQuery) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSchema not implemented")
 }
 func (UnimplementedRunnerServer) GetVersion(context.Context, *Empty) (*Version, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
@@ -1484,6 +1498,24 @@ func (x *runnerFunctionsQueryStreamServer) Recv() (*SimpleQuery, error) {
 	return m, nil
 }
 
+func _Runner_GetSchema_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleQuery)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetSchema(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetSchema",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetSchema(ctx, req.(*SimpleQuery))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
@@ -1870,6 +1902,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FunctionsQuery",
 			Handler:    _Runner_FunctionsQuery_Handler,
+		},
+		{
+			MethodName: "GetSchema",
+			Handler:    _Runner_GetSchema_Handler,
 		},
 		{
 			MethodName: "GetVersion",

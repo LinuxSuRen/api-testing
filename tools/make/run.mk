@@ -15,6 +15,12 @@ run-backend:
 	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist \
 		--extension-registry ghcr.io --download-timeout 10m
 
+run-tls-backend:
+	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist \
+		--extension-registry ghcr.io --download-timeout 10m \
+		--tls --cert-file e2e/test.pem \
+		--key-file e2e/test.key
+
 .PHONY: run-console
 run-console: ## Run the API Testing console
 run-console:

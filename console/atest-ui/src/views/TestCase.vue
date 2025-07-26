@@ -20,7 +20,7 @@ import jsonlint from 'jsonlint-mod'
 
 import CodeMirror from 'codemirror'
 import { json, jsonLanguage } from "@codemirror/lang-json"
-import { NewLanguageComplete } from './languageComplete'
+import { NewTemplateLangComplete } from './languageComplete'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/merge/merge.js'
 import 'codemirror/addon/merge/merge.css'
@@ -32,7 +32,7 @@ window.DIFF_DELETE = -1;
 window.DIFF_INSERT = 1;
 window.DIFF_EQUAL = 0;
 
-const jsonComplete = NewLanguageComplete(jsonLanguage)
+const jsonComplete = NewTemplateLangComplete(jsonLanguage)
 const { t } = useI18n()
 
 const props = defineProps({

@@ -22,3 +22,10 @@ console/atest-desktop/coverage
 atest-store-git
 .db
 .marscode/
+e2e/test.pem
+e2e/test.csr
+e2e/test.key
+e2e/server.srl
+e2e/server.key
+e2e/server.csr
+e2e/server.crt

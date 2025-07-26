@@ -397,3 +397,4 @@ system_default = system_default_sect
 CipherString = DEFAULT:@SECLEVEL=2
 [ alt_names ]
 DNS.1 = localhost
+IP.1 = 127.0.0.1
