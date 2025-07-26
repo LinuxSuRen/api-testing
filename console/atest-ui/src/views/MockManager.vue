@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 import { Codemirror } from 'vue-codemirror';
 import yaml from 'js-yaml';
 import { jsonSchema } from "codemirror-json-schema";
-import { NewLanguageComplete } from './languageComplete'
+import { NewTemplateLangComplete, NewHeaderLangComplete } from './languageComplete'
 import { jsonLanguage } from "@codemirror/lang-json"
 import { API } from './net';
 import {useI18n} from "vue-i18n";
@@ -13,7 +13,8 @@ import mockSchema from '../assets/api-testing-mock-schema.json';
 const { t } = useI18n()
 
 const mockschema = ref(mockSchema as any); // Type assertion to any for JSON schema
-const jsonComplete = NewLanguageComplete(jsonLanguage)
+const jsonComplete = NewTemplateLangComplete(jsonLanguage)
+const headerComplete = NewHeaderLangComplete(jsonLanguage)
 
 interface MockConfig {
   Config: string
@@ -91,11 +92,11 @@ items:
         <el-tabs v-model="tabActive">
             <el-tab-pane label="YAML" name="yaml">
                 <Codemirror v-model="mockConfig.Config"
-                    :extensions="[jsonComplete]" />
+                    :extensions="[jsonComplete, headerComplete]" />
             </el-tab-pane>
             <el-tab-pane label="JSON" name="json">
                 <Codemirror v-model="mockConfig.ConfigAsJSON"
-                    :extensions="[jsonSchema(mockschema), jsonComplete]" />
+                    :extensions="[jsonSchema(mockschema), jsonComplete, headerComplete]" />
             </el-tab-pane>
         </el-tabs>
     </div>
