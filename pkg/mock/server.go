@@ -26,6 +26,7 @@ type Loadable interface {
 type DynamicServer interface {
 	Start(reader Reader, prefix string) error
 	SetupHandler(reader Reader, prefix string) (http.Handler, error)
+	WithTLS(certFile, keyFile string) DynamicServer
 	Stop() error
 	GetPort() string
 	EnableMetrics()

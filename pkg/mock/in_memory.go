@@ -47,16 +47,17 @@ var (
 )
 
 type inMemoryServer struct {
-	data       map[string][]map[string]interface{}
-	mux        *mux.Router
-	listener   net.Listener
-	port       int
-	prefix     string
-	wg         sync.WaitGroup
-	ctx        context.Context
-	cancelFunc context.CancelFunc
-	reader     Reader
-	metrics    RequestMetrics
+	data              map[string][]map[string]interface{}
+	mux               *mux.Router
+	listener          net.Listener
+	certFile, keyFile string
+	port              int
+	prefix            string
+	wg                sync.WaitGroup
+	ctx               context.Context
+	cancelFunc        context.CancelFunc
+	reader            Reader
+	metrics           RequestMetrics
 }
 
 func NewInMemoryServer(ctx context.Context, port int) DynamicServer {
@@ -80,6 +81,12 @@ func (s *inMemoryServer) SetupHandler(reader Reader, prefix string) (handler htt
 	s.metrics.AddMetricsHandler(s.mux)
 	err = s.Load()
 	return
+}
+
+func (s *inMemoryServer) WithTLS(certFile, keyFile string) DynamicServer {
+	s.certFile = certFile
+	s.keyFile = keyFile
+	return s
 }
 
 func (s *inMemoryServer) Load() (err error) {
@@ -129,9 +136,7 @@ func (s *inMemoryServer) httpProxy(proxy *Proxy) {
 			proxy.Target += "/"
 		}
 		targetPath := strings.TrimPrefix(req.URL.Path, s.prefix)
-		if strings.HasPrefix(targetPath, "/") {
-			targetPath = strings.TrimPrefix(targetPath, "/")
-		}
+		targetPath = strings.TrimPrefix(targetPath, "/")
 
 		apiRaw := fmt.Sprintf("%s%s", proxy.Target, targetPath)
 		api, err := render.Render("proxy api", apiRaw, s)
@@ -238,7 +243,14 @@ func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 	if handler, err = s.SetupHandler(reader, prefix); err == nil {
 		if s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port)); err == nil {
 			go func() {
-				err = http.Serve(s.listener, handler)
+				if s.certFile != "" && s.keyFile != "" {
+					if err = http.ServeTLS(s.listener, handler, s.certFile, s.keyFile); err != nil {
+						memLogger.Error(err, "failed to start TLS mock server")
+					}
+				} else {
+					memLogger.Info("start HTTP mock server")
+					err = http.Serve(s.listener, handler)
+				}
 			}()
 		}
 	}
