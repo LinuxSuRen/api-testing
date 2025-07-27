@@ -89,6 +89,10 @@ func (s *inMemoryServer) WithTLS(certFile, keyFile string) DynamicServer {
 	return s
 }
 
+func (s *inMemoryServer) GetTLS() (string, string) {
+	return s.certFile, s.keyFile
+}
+
 func (s *inMemoryServer) Load() (err error) {
 	var server *Server
 	if server, err = s.reader.Parse(); err != nil {

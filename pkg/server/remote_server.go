@@ -1398,7 +1398,7 @@ func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (repl
 			}
 		}
 
-		server := mock.NewInMemoryServer(ctx, int(in.GetPort()))
+		server := mock.NewInMemoryServer(ctx, int(in.GetPort())).WithTLS(dServer.GetTLS())
 		server.Start(s.mockWriter, in.Prefix)
 		s.loader = server
 	}
