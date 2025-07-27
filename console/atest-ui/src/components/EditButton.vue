@@ -40,7 +40,7 @@ const handleInputConfirm = () => {
         @keyup.enter="handleInputConfirm"
         @blur="handleInputConfirm"
       />
-      <el-button v-else class="button-new-tag" size="small edit-button" @click="showInput">
+      <el-button v-else class="button-new-tag edit-button" size="small" @click="showInput">
         {{ value }}
       </el-button>
     </span>

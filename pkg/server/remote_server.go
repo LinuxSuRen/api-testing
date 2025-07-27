@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	reflect "reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -1195,6 +1196,9 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 			}()
 		}
 		wg.Wait()
+		slices.SortFunc(reply.Data, func(a, b *Store) int {
+			return strings.Compare(a.Name, b.Name)
+		})
 		reply.Data = append(reply.Data, &Store{
 			Name:  "local",
 			Kind:  &StoreKind{},

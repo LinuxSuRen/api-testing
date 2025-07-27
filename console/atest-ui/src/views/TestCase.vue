@@ -963,7 +963,7 @@ Magic.LoadMagicKeys(import.meta.url), {
         <EditButton :value="props.name" @changed="renameTestCase"/>
       </div>
       <div>
-        <el-row justify="space-between" gutter="10">
+        <el-row justify="space-between" gutter=10>
           <el-col :span="3">
             <el-select
               v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'"
@@ -1282,7 +1282,7 @@ Magic.LoadMagicKeys(import.meta.url), {
           :rules="rules"
         >
           <el-form-item :label="t('title.history')" prop="selectedID">
-            <el-row :gutter="20">
+            <el-row :gutter=20>
               <el-col :span="20">
                 <el-select  class="m-2"
                   filterable

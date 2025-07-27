@@ -156,6 +156,12 @@ watch(sqlQuery, (sql: string) => {
 })
 
 API.GetStores((data) => {
+  data.data.forEach((e: Store) => {
+    if (e.name === 'local') {
+        data.data.splice(data.data.indexOf(e), 1)
+        return
+    }
+  })
   stores.value = data.data
 
   sqlQuery.value = GetDataManagerPreference().query
@@ -370,7 +376,7 @@ Magic.LoadMagicKeys(import.meta.url, new Map([
           <el-splitter layout="vertical">
               <el-splitter-panel size="30%">
                   <el-form @submit.prevent="executeQuery">
-                      <el-row :gutter="10" justify="center" style="margin-left: 0!important; margin-right: 0!important;">
+                      <el-row :gutter=10 justify="center" style="margin-left: 0!important; margin-right: 0!important;">
                           <el-col :span="4">
                               <el-form-item>
                                   <el-select v-model="store" placeholder="Select store" filterable
@@ -398,7 +404,7 @@ Magic.LoadMagicKeys(import.meta.url, new Map([
                               </el-select>
                           </el-col>
                       </el-row>
-                      <el-row :gutter="10" v-if="kind === 'atest-store-elasticsearch' || kind === 'atest-store-redis'">
+                      <el-row :gutter=10 v-if="kind === 'atest-store-elasticsearch' || kind === 'atest-store-redis'">
                           <el-col :span="10">
                               <el-input type="number" v-model="query.offset">
                                   <template #prepend>Offset</template>
@@ -422,7 +428,7 @@ Magic.LoadMagicKeys(import.meta.url, new Map([
                       :extensions="[sql(sqlConfig)]"
                   />
               </el-splitter-panel>
-              <el-splitter-panel>
+              <el-splitter-panel v-if="store !== ''">
                   <div style="display: flex; gap: 8px;">
                       <el-tag type="primary" v-if="queryResult.length > 0">{{ queryResult.length }} rows</el-tag>
                       <el-tag type="primary" v-if="queryDataMeta.duration">{{ queryDataMeta.duration }}</el-tag>
