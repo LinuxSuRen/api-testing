@@ -2868,6 +2868,23 @@ func local_request_Mock_GetConfig_0(ctx context.Context, marshaler runtime.Marsh
 
 }
 
+func request_Mock_LogWatch_0(ctx context.Context, marshaler runtime.Marshaler, client MockClient, req *http.Request, pathParams map[string]string) (Mock_LogWatchClient, runtime.ServerMetadata, error) {
+	var protoReq Empty
+	var metadata runtime.ServerMetadata
+
+	stream, err := client.LogWatch(ctx, &protoReq)
+	if err != nil {
+		return nil, metadata, err
+	}
+	header, err := stream.Header()
+	if err != nil {
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	return stream, metadata, nil
+
+}
+
 func request_DataServer_Query_0(ctx context.Context, marshaler runtime.Marshaler, client DataServerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DataQuery
 	var metadata runtime.ServerMetadata
@@ -4304,6 +4321,13 @@ func RegisterMockHandlerServer(ctx context.Context, mux *runtime.ServeMux, serve
 
 		forward_Mock_GetConfig_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
+	})
+
+	mux.Handle("GET", pattern_Mock_LogWatch_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
 	})
 
 	return nil
@@ -5990,6 +6014,28 @@ func RegisterMockHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 
 	})
 
+	mux.Handle("GET", pattern_Mock_LogWatch_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Mock/LogWatch", runtime.WithHTTPPathPattern("/api/v1/mock/log"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Mock_LogWatch_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Mock_LogWatch_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
@@ -5997,12 +6043,16 @@ var (
 	pattern_Mock_Reload_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "mock", "reload"}, ""))
 
 	pattern_Mock_GetConfig_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "mock", "config"}, ""))
+
+	pattern_Mock_LogWatch_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "mock", "log"}, ""))
 )
 
 var (
 	forward_Mock_Reload_0 = runtime.ForwardResponseMessage
 
 	forward_Mock_GetConfig_0 = runtime.ForwardResponseMessage
+
+	forward_Mock_LogWatch_0 = runtime.ForwardResponseStream
 )
 
 // RegisterDataServerHandlerFromEndpoint is same as RegisterDataServerHandler but

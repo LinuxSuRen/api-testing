@@ -652,6 +652,11 @@ service Mock {
       get: "/api/v1/mock/config"
     };
   }
+  rpc LogWatch(Empty) returns (stream CommonResult) {
+    option (google.api.http) = {
+      get: "/api/v1/mock/log"
+    };
+  }
 }
 
 message MockConfig {

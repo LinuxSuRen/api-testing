@@ -16,6 +16,7 @@ limitations under the License.
 package mock
 
 import (
+	"io"
 	"net/http"
 )
 
@@ -27,6 +28,7 @@ type DynamicServer interface {
 	Start(reader Reader, prefix string) error
 	SetupHandler(reader Reader, prefix string) (http.Handler, error)
 	WithTLS(certFile, keyFile string) DynamicServer
+	WithLogWriter(writer io.Writer) DynamicServer
 	GetTLS() (certFile, keyFile string)
 	Stop() error
 	GetPort() string

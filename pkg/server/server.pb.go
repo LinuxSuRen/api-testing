@@ -4328,7 +4328,7 @@ var file_pkg_server_server_proto_rawDesc = []byte{
 	0x61, 0x6d, 0x65, 0x1a, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x43, 0x6f, 0x6d,
 	0x6d, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x1f, 0x82, 0xd3, 0xe4, 0x93, 0x02,
 	0x19, 0x12, 0x17, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x62, 0x69, 0x6e, 0x64, 0x69,
-	0x6e, 0x67, 0x73, 0x2f, 0x7b, 0x6e, 0x61, 0x6d, 0x65, 0x7d, 0x32, 0xa0, 0x01, 0x0a, 0x04, 0x4d,
+	0x6e, 0x67, 0x73, 0x2f, 0x7b, 0x6e, 0x61, 0x6d, 0x65, 0x7d, 0x32, 0xed, 0x01, 0x0a, 0x04, 0x4d,
 	0x6f, 0x63, 0x6b, 0x12, 0x4b, 0x0a, 0x06, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x12, 0x2e,
 	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x4d, 0x6f, 0x63, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69,
 	0x67, 0x1a, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
@@ -4338,17 +4338,22 @@ var file_pkg_server_server_proto_rawDesc = []byte{
 	0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x73,
 	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x4d, 0x6f, 0x63, 0x6b, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
 	0x22, 0x1b, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x15, 0x12, 0x13, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76,
-	0x31, 0x2f, 0x6d, 0x6f, 0x63, 0x6b, 0x2f, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x32, 0x60, 0x0a,
-	0x0a, 0x44, 0x61, 0x74, 0x61, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x52, 0x0a, 0x05, 0x51,
-	0x75, 0x65, 0x72, 0x79, 0x12, 0x11, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x44, 0x61,
-	0x74, 0x61, 0x51, 0x75, 0x65, 0x72, 0x79, 0x1a, 0x17, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
-	0x2e, 0x44, 0x61, 0x74, 0x61, 0x51, 0x75, 0x65, 0x72, 0x79, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74,
-	0x22, 0x1d, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x17, 0x22, 0x12, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76,
-	0x31, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x2f, 0x71, 0x75, 0x65, 0x72, 0x79, 0x3a, 0x01, 0x2a, 0x42,
-	0x2e, 0x5a, 0x2c, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x69,
-	0x6e, 0x75, 0x78, 0x73, 0x75, 0x72, 0x65, 0x6e, 0x2f, 0x61, 0x70, 0x69, 0x2d, 0x74, 0x65, 0x73,
-	0x74, 0x69, 0x6e, 0x67, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x62,
-	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x31, 0x2f, 0x6d, 0x6f, 0x63, 0x6b, 0x2f, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x4b, 0x0a,
+	0x08, 0x4c, 0x6f, 0x67, 0x57, 0x61, 0x74, 0x63, 0x68, 0x12, 0x0d, 0x2e, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x14, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x18,
+	0x82, 0xd3, 0xe4, 0x93, 0x02, 0x12, 0x12, 0x10, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f,
+	0x6d, 0x6f, 0x63, 0x6b, 0x2f, 0x6c, 0x6f, 0x67, 0x30, 0x01, 0x32, 0x60, 0x0a, 0x0a, 0x44, 0x61,
+	0x74, 0x61, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x52, 0x0a, 0x05, 0x51, 0x75, 0x65, 0x72,
+	0x79, 0x12, 0x11, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x44, 0x61, 0x74, 0x61, 0x51,
+	0x75, 0x65, 0x72, 0x79, 0x1a, 0x17, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x44, 0x61,
+	0x74, 0x61, 0x51, 0x75, 0x65, 0x72, 0x79, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x1d, 0x82,
+	0xd3, 0xe4, 0x93, 0x02, 0x17, 0x22, 0x12, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x64,
+	0x61, 0x74, 0x61, 0x2f, 0x71, 0x75, 0x65, 0x72, 0x79, 0x3a, 0x01, 0x2a, 0x42, 0x2e, 0x5a, 0x2c,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x69, 0x6e, 0x75, 0x78,
+	0x73, 0x75, 0x72, 0x65, 0x6e, 0x2f, 0x61, 0x70, 0x69, 0x2d, 0x74, 0x65, 0x73, 0x74, 0x69, 0x6e,
+	0x67, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -4534,67 +4539,69 @@ var file_pkg_server_server_proto_depIdxs = []int32{
 	40,  // 105: server.ThemeExtension.GetBinding:input_type -> server.SimpleName
 	49,  // 106: server.Mock.Reload:input_type -> server.MockConfig
 	48,  // 107: server.Mock.GetConfig:input_type -> server.Empty
-	52,  // 108: server.DataServer.Query:input_type -> server.DataQuery
-	17,  // 109: server.Runner.Run:output_type -> server.TestResult
-	17,  // 110: server.Runner.RunTestSuite:output_type -> server.TestResult
-	0,   // 111: server.Runner.GetSuites:output_type -> server.Suites
-	19,  // 112: server.Runner.CreateTestSuite:output_type -> server.HelloReply
-	38,  // 113: server.Runner.ImportTestSuite:output_type -> server.CommonResult
-	7,   // 114: server.Runner.GetTestSuite:output_type -> server.TestSuite
-	19,  // 115: server.Runner.UpdateTestSuite:output_type -> server.HelloReply
-	19,  // 116: server.Runner.DeleteTestSuite:output_type -> server.HelloReply
-	19,  // 117: server.Runner.DuplicateTestSuite:output_type -> server.HelloReply
-	19,  // 118: server.Runner.RenameTestSuite:output_type -> server.HelloReply
-	20,  // 119: server.Runner.GetTestSuiteYaml:output_type -> server.YamlData
-	21,  // 120: server.Runner.ListTestCase:output_type -> server.Suite
-	30,  // 121: server.Runner.RunTestCase:output_type -> server.TestCaseResult
-	17,  // 122: server.Runner.BatchRun:output_type -> server.TestResult
-	24,  // 123: server.Runner.GetTestCase:output_type -> server.TestCase
-	19,  // 124: server.Runner.CreateTestCase:output_type -> server.HelloReply
-	19,  // 125: server.Runner.UpdateTestCase:output_type -> server.HelloReply
-	19,  // 126: server.Runner.DeleteTestCase:output_type -> server.HelloReply
-	19,  // 127: server.Runner.DuplicateTestCase:output_type -> server.HelloReply
-	19,  // 128: server.Runner.RenameTestCase:output_type -> server.HelloReply
-	23,  // 129: server.Runner.GetSuggestedAPIs:output_type -> server.TestCases
-	2,   // 130: server.Runner.GetHistorySuites:output_type -> server.HistorySuites
-	18,  // 131: server.Runner.GetHistoryTestCaseWithResult:output_type -> server.HistoryTestResult
-	25,  // 132: server.Runner.GetHistoryTestCase:output_type -> server.HistoryTestCase
-	19,  // 133: server.Runner.DeleteHistoryTestCase:output_type -> server.HelloReply
-	19,  // 134: server.Runner.DeleteAllHistoryTestCase:output_type -> server.HelloReply
-	26,  // 135: server.Runner.GetTestCaseAllHistory:output_type -> server.HistoryTestCases
-	39,  // 136: server.Runner.ListCodeGenerator:output_type -> server.SimpleList
-	38,  // 137: server.Runner.GenerateCode:output_type -> server.CommonResult
-	38,  // 138: server.Runner.HistoryGenerateCode:output_type -> server.CommonResult
-	39,  // 139: server.Runner.ListConverter:output_type -> server.SimpleList
-	38,  // 140: server.Runner.ConvertTestSuite:output_type -> server.CommonResult
-	32,  // 141: server.Runner.PopularHeaders:output_type -> server.Pairs
-	32,  // 142: server.Runner.FunctionsQuery:output_type -> server.Pairs
-	32,  // 143: server.Runner.FunctionsQueryStream:output_type -> server.Pairs
-	38,  // 144: server.Runner.GetSchema:output_type -> server.CommonResult
-	50,  // 145: server.Runner.GetVersion:output_type -> server.Version
-	19,  // 146: server.Runner.Sample:output_type -> server.HelloReply
-	47,  // 147: server.Runner.DownloadResponseFile:output_type -> server.FileData
-	36,  // 148: server.Runner.GetStoreKinds:output_type -> server.StoreKinds
-	34,  // 149: server.Runner.GetStores:output_type -> server.Stores
-	35,  // 150: server.Runner.CreateStore:output_type -> server.Store
-	35,  // 151: server.Runner.UpdateStore:output_type -> server.Store
-	35,  // 152: server.Runner.DeleteStore:output_type -> server.Store
-	44,  // 153: server.Runner.VerifyStore:output_type -> server.ExtensionStatus
-	42,  // 154: server.Runner.GetSecrets:output_type -> server.Secrets
-	38,  // 155: server.Runner.CreateSecret:output_type -> server.CommonResult
-	38,  // 156: server.Runner.DeleteSecret:output_type -> server.CommonResult
-	38,  // 157: server.Runner.UpdateSecret:output_type -> server.CommonResult
-	46,  // 158: server.Runner.PProf:output_type -> server.PProfData
-	38,  // 159: server.RunnerExtension.Run:output_type -> server.CommonResult
-	39,  // 160: server.ThemeExtension.GetThemes:output_type -> server.SimpleList
-	38,  // 161: server.ThemeExtension.GetTheme:output_type -> server.CommonResult
-	39,  // 162: server.ThemeExtension.GetBindings:output_type -> server.SimpleList
-	38,  // 163: server.ThemeExtension.GetBinding:output_type -> server.CommonResult
-	48,  // 164: server.Mock.Reload:output_type -> server.Empty
-	49,  // 165: server.Mock.GetConfig:output_type -> server.MockConfig
-	53,  // 166: server.DataServer.Query:output_type -> server.DataQueryResult
-	109, // [109:167] is the sub-list for method output_type
-	51,  // [51:109] is the sub-list for method input_type
+	48,  // 108: server.Mock.LogWatch:input_type -> server.Empty
+	52,  // 109: server.DataServer.Query:input_type -> server.DataQuery
+	17,  // 110: server.Runner.Run:output_type -> server.TestResult
+	17,  // 111: server.Runner.RunTestSuite:output_type -> server.TestResult
+	0,   // 112: server.Runner.GetSuites:output_type -> server.Suites
+	19,  // 113: server.Runner.CreateTestSuite:output_type -> server.HelloReply
+	38,  // 114: server.Runner.ImportTestSuite:output_type -> server.CommonResult
+	7,   // 115: server.Runner.GetTestSuite:output_type -> server.TestSuite
+	19,  // 116: server.Runner.UpdateTestSuite:output_type -> server.HelloReply
+	19,  // 117: server.Runner.DeleteTestSuite:output_type -> server.HelloReply
+	19,  // 118: server.Runner.DuplicateTestSuite:output_type -> server.HelloReply
+	19,  // 119: server.Runner.RenameTestSuite:output_type -> server.HelloReply
+	20,  // 120: server.Runner.GetTestSuiteYaml:output_type -> server.YamlData
+	21,  // 121: server.Runner.ListTestCase:output_type -> server.Suite
+	30,  // 122: server.Runner.RunTestCase:output_type -> server.TestCaseResult
+	17,  // 123: server.Runner.BatchRun:output_type -> server.TestResult
+	24,  // 124: server.Runner.GetTestCase:output_type -> server.TestCase
+	19,  // 125: server.Runner.CreateTestCase:output_type -> server.HelloReply
+	19,  // 126: server.Runner.UpdateTestCase:output_type -> server.HelloReply
+	19,  // 127: server.Runner.DeleteTestCase:output_type -> server.HelloReply
+	19,  // 128: server.Runner.DuplicateTestCase:output_type -> server.HelloReply
+	19,  // 129: server.Runner.RenameTestCase:output_type -> server.HelloReply
+	23,  // 130: server.Runner.GetSuggestedAPIs:output_type -> server.TestCases
+	2,   // 131: server.Runner.GetHistorySuites:output_type -> server.HistorySuites
+	18,  // 132: server.Runner.GetHistoryTestCaseWithResult:output_type -> server.HistoryTestResult
+	25,  // 133: server.Runner.GetHistoryTestCase:output_type -> server.HistoryTestCase
+	19,  // 134: server.Runner.DeleteHistoryTestCase:output_type -> server.HelloReply
+	19,  // 135: server.Runner.DeleteAllHistoryTestCase:output_type -> server.HelloReply
+	26,  // 136: server.Runner.GetTestCaseAllHistory:output_type -> server.HistoryTestCases
+	39,  // 137: server.Runner.ListCodeGenerator:output_type -> server.SimpleList
+	38,  // 138: server.Runner.GenerateCode:output_type -> server.CommonResult
+	38,  // 139: server.Runner.HistoryGenerateCode:output_type -> server.CommonResult
+	39,  // 140: server.Runner.ListConverter:output_type -> server.SimpleList
+	38,  // 141: server.Runner.ConvertTestSuite:output_type -> server.CommonResult
+	32,  // 142: server.Runner.PopularHeaders:output_type -> server.Pairs
+	32,  // 143: server.Runner.FunctionsQuery:output_type -> server.Pairs
+	32,  // 144: server.Runner.FunctionsQueryStream:output_type -> server.Pairs
+	38,  // 145: server.Runner.GetSchema:output_type -> server.CommonResult
+	50,  // 146: server.Runner.GetVersion:output_type -> server.Version
+	19,  // 147: server.Runner.Sample:output_type -> server.HelloReply
+	47,  // 148: server.Runner.DownloadResponseFile:output_type -> server.FileData
+	36,  // 149: server.Runner.GetStoreKinds:output_type -> server.StoreKinds
+	34,  // 150: server.Runner.GetStores:output_type -> server.Stores
+	35,  // 151: server.Runner.CreateStore:output_type -> server.Store
+	35,  // 152: server.Runner.UpdateStore:output_type -> server.Store
+	35,  // 153: server.Runner.DeleteStore:output_type -> server.Store
+	44,  // 154: server.Runner.VerifyStore:output_type -> server.ExtensionStatus
+	42,  // 155: server.Runner.GetSecrets:output_type -> server.Secrets
+	38,  // 156: server.Runner.CreateSecret:output_type -> server.CommonResult
+	38,  // 157: server.Runner.DeleteSecret:output_type -> server.CommonResult
+	38,  // 158: server.Runner.UpdateSecret:output_type -> server.CommonResult
+	46,  // 159: server.Runner.PProf:output_type -> server.PProfData
+	38,  // 160: server.RunnerExtension.Run:output_type -> server.CommonResult
+	39,  // 161: server.ThemeExtension.GetThemes:output_type -> server.SimpleList
+	38,  // 162: server.ThemeExtension.GetTheme:output_type -> server.CommonResult
+	39,  // 163: server.ThemeExtension.GetBindings:output_type -> server.SimpleList
+	38,  // 164: server.ThemeExtension.GetBinding:output_type -> server.CommonResult
+	48,  // 165: server.Mock.Reload:output_type -> server.Empty
+	49,  // 166: server.Mock.GetConfig:output_type -> server.MockConfig
+	38,  // 167: server.Mock.LogWatch:output_type -> server.CommonResult
+	53,  // 168: server.DataServer.Query:output_type -> server.DataQueryResult
+	110, // [110:169] is the sub-list for method output_type
+	51,  // [51:110] is the sub-list for method input_type
 	51,  // [51:51] is the sub-list for extension type_name
 	51,  // [51:51] is the sub-list for extension extendee
 	0,   // [0:51] is the sub-list for field type_name

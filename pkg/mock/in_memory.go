@@ -89,6 +89,13 @@ func (s *inMemoryServer) WithTLS(certFile, keyFile string) DynamicServer {
 	return s
 }
 
+func (s *inMemoryServer) WithLogWriter(writer io.Writer) DynamicServer {
+	if writer != nil {
+		memLogger = memLogger.WithNameAndWriter("stream", writer)
+	}
+	return s
+}
+
 func (s *inMemoryServer) GetTLS() (string, string) {
 	return s.certFile, s.keyFile
 }
@@ -268,7 +275,7 @@ func (s *inMemoryServer) EnableMetrics() {
 func (s *inMemoryServer) startObject(obj Object) {
 	// create a simple CRUD server
 	s.mux.HandleFunc("/"+obj.Name, func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("mock server received request", req.URL.Path)
+		memLogger.Info("mock server received request", "path", req.URL.Path)
 		s.metrics.RecordRequest(req.URL.Path)
 		method := req.Method
 		w.Header().Set(util.ContentType, util.JSON)

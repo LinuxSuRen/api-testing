@@ -1377,6 +1377,7 @@ type mockServerController struct {
 	mockWriter  mock.ReaderAndWriter
 	loader      mock.Loadable
 	reader      mock.Reader
+	logData     chan string
 	prefix      string
 	combinePort int
 }
@@ -1386,6 +1387,7 @@ func NewMockServerController(mockWriter mock.ReaderAndWriter, loader mock.Loadab
 		mockWriter:  mockWriter,
 		loader:      loader,
 		prefix:      "/mock/server",
+		logData:     make(chan string, 100),
 		combinePort: combinePort,
 	}
 }
@@ -1404,6 +1406,7 @@ func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (repl
 
 		server := mock.NewInMemoryServer(ctx, int(in.GetPort())).WithTLS(dServer.GetTLS())
 		server.Start(s.mockWriter, in.Prefix)
+		server.WithLogWriter(s)
 		s.loader = server
 	}
 	err = s.loader.Load()
@@ -1418,6 +1421,22 @@ func (s *mockServerController) GetConfig(ctx context.Context, in *Empty) (reply 
 		if port, pErr := strconv.ParseInt(dServer.GetPort(), 10, 32); pErr == nil {
 			reply.Port = int32(port)
 		}
+	}
+	return
+}
+func (s *mockServerController) LogWatch(e *Empty, logServer Mock_LogWatchServer) (err error) {
+	for msg := range s.logData {
+		logServer.Send(&CommonResult{
+			Success: true,
+			Message: msg,
+		})
+	}
+	return
+}
+func (s *mockServerController) Write(p []byte) (n int, err error) {
+	select {
+	case s.logData <- fmt.Sprintf("%s: %s", time.Now().Format(time.RFC3339), string(p)):
+	default:
 	}
 	return
 }

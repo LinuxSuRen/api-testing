@@ -21,6 +21,15 @@ API.GetSchema('mock').then((schema) => {
     }
 });
 
+const logOutput = ref('');
+API.GetStream((stream) => {
+    try {
+        const data = JSON.parse(stream);
+        logOutput.value += `${data.result.message}`;
+        console.log('Received schema:', logOutput.value);
+    } catch (e) {}
+});
+
 interface MockConfig {
   Config: string
   ConfigAsJSON: string
@@ -107,6 +116,14 @@ items:
                     :extensions="[jsonSchema(mockschema), jsonComplete, headerComplete]" />
             </el-tab-pane>
         </el-tabs>
+        <el-card class="log-output" shadow="hover">
+          <template #header>
+            <span>{{ t('label.logs') }}</span>
+          </template>
+          <el-scrollbar height="200px" ref="logScrollbar">
+            <pre style="white-space: pre-wrap; word-break: break-all;">{{ logOutput }}</pre>
+          </el-scrollbar>
+        </el-card>
     </div>
 </template>
 
