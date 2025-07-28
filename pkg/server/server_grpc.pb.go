@@ -65,6 +65,7 @@ type RunnerClient interface {
 	PopularHeaders(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Pairs, error)
 	FunctionsQuery(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Pairs, error)
 	FunctionsQueryStream(ctx context.Context, opts ...grpc.CallOption) (Runner_FunctionsQueryStreamClient, error)
+	GetSchema(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*CommonResult, error)
 	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error)
 	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
 	DownloadResponseFile(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*FileData, error)
@@ -473,6 +474,15 @@ func (x *runnerFunctionsQueryStreamClient) Recv() (*Pairs, error) {
 	return m, nil
 }
 
+func (c *runnerClient) GetSchema(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetSchema", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error) {
 	out := new(Version)
 	err := c.cc.Invoke(ctx, "/server.Runner/GetVersion", in, out, opts...)
@@ -646,6 +656,7 @@ type RunnerServer interface {
 	PopularHeaders(context.Context, *Empty) (*Pairs, error)
 	FunctionsQuery(context.Context, *SimpleQuery) (*Pairs, error)
 	FunctionsQueryStream(Runner_FunctionsQueryStreamServer) error
+	GetSchema(context.Context, *SimpleQuery) (*CommonResult, error)
 	GetVersion(context.Context, *Empty) (*Version, error)
 	Sample(context.Context, *Empty) (*HelloReply, error)
 	DownloadResponseFile(context.Context, *TestCase) (*FileData, error)
@@ -774,6 +785,9 @@ func (UnimplementedRunnerServer) FunctionsQuery(context.Context, *SimpleQuery) (
 }
 func (UnimplementedRunnerServer) FunctionsQueryStream(Runner_FunctionsQueryStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method FunctionsQueryStream not implemented")
+}
+func (UnimplementedRunnerServer) GetSchema(context.Context, *SimpleQuery) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSchema not implemented")
 }
 func (UnimplementedRunnerServer) GetVersion(context.Context, *Empty) (*Version, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
@@ -1484,6 +1498,24 @@ func (x *runnerFunctionsQueryStreamServer) Recv() (*SimpleQuery, error) {
 	return m, nil
 }
 
+func _Runner_GetSchema_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleQuery)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetSchema(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetSchema",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetSchema(ctx, req.(*SimpleQuery))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
@@ -1872,6 +1904,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_FunctionsQuery_Handler,
 		},
 		{
+			MethodName: "GetSchema",
+			Handler:    _Runner_GetSchema_Handler,
+		},
+		{
 			MethodName: "GetVersion",
 			Handler:    _Runner_GetVersion_Handler,
 		},
@@ -2237,6 +2273,7 @@ var ThemeExtension_ServiceDesc = grpc.ServiceDesc{
 type MockClient interface {
 	Reload(ctx context.Context, in *MockConfig, opts ...grpc.CallOption) (*Empty, error)
 	GetConfig(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MockConfig, error)
+	LogWatch(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Mock_LogWatchClient, error)
 }
 
 type mockClient struct {
@@ -2265,12 +2302,45 @@ func (c *mockClient) GetConfig(ctx context.Context, in *Empty, opts ...grpc.Call
 	return out, nil
 }
 
+func (c *mockClient) LogWatch(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Mock_LogWatchClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Mock_ServiceDesc.Streams[0], "/server.Mock/LogWatch", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &mockLogWatchClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Mock_LogWatchClient interface {
+	Recv() (*CommonResult, error)
+	grpc.ClientStream
+}
+
+type mockLogWatchClient struct {
+	grpc.ClientStream
+}
+
+func (x *mockLogWatchClient) Recv() (*CommonResult, error) {
+	m := new(CommonResult)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // MockServer is the server API for Mock service.
 // All implementations must embed UnimplementedMockServer
 // for forward compatibility
 type MockServer interface {
 	Reload(context.Context, *MockConfig) (*Empty, error)
 	GetConfig(context.Context, *Empty) (*MockConfig, error)
+	LogWatch(*Empty, Mock_LogWatchServer) error
 	mustEmbedUnimplementedMockServer()
 }
 
@@ -2283,6 +2353,9 @@ func (UnimplementedMockServer) Reload(context.Context, *MockConfig) (*Empty, err
 }
 func (UnimplementedMockServer) GetConfig(context.Context, *Empty) (*MockConfig, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
+}
+func (UnimplementedMockServer) LogWatch(*Empty, Mock_LogWatchServer) error {
+	return status.Errorf(codes.Unimplemented, "method LogWatch not implemented")
 }
 func (UnimplementedMockServer) mustEmbedUnimplementedMockServer() {}
 
@@ -2333,6 +2406,27 @@ func _Mock_GetConfig_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Mock_LogWatch_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MockServer).LogWatch(m, &mockLogWatchServer{stream})
+}
+
+type Mock_LogWatchServer interface {
+	Send(*CommonResult) error
+	grpc.ServerStream
+}
+
+type mockLogWatchServer struct {
+	grpc.ServerStream
+}
+
+func (x *mockLogWatchServer) Send(m *CommonResult) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Mock_ServiceDesc is the grpc.ServiceDesc for Mock service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2349,7 +2443,13 @@ var Mock_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Mock_GetConfig_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "LogWatch",
+			Handler:       _Mock_LogWatch_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "pkg/server/server.proto",
 }
 

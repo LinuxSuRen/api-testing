@@ -117,6 +117,25 @@ function GetVersion(callback?: (v: AppVersion) => void) {
         .then(emptyOrDefault(callback))
 }
 
+interface CommonResult {
+    message: string
+    success: boolean
+}
+
+async function GetSchema(name: string, callback?: (v: CommonResult) => void) {
+    const requestOptions = {
+        method: 'GET',
+    }
+    if (callback) {
+        return fetch(`/api/v1/schemas/${name}`, requestOptions)
+            .then(DefaultResponseProcess)
+            .then(emptyOrDefault(callback))
+    } else {
+        return fetch(`/api/v1/schemas/${name}`, requestOptions)
+            .then(DefaultResponseProcess)
+    }
+}
+
 interface TestSuite {
     store: string
     name: string
@@ -714,7 +733,38 @@ function GetMockConfig(callback: (d: any) => void) {
         .then(DefaultResponseProcess)
         .then(callback)
 }
-
+function GetStream(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+    const requestOptions = {
+        headers: {
+            'X-Auth': getToken()
+        }
+    }
+    fetch(`/api/v1/mock/log`, {
+        ...requestOptions,
+        headers: {
+            ...requestOptions.headers,
+            'Accept': 'text/event-stream'
+        }
+    })
+    .then((response: any) => {
+        if (response.ok && response.body) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            const read = () => {
+                reader.read().then(({ done, value }) => {
+                    if (done) return;
+                    const chunk = decoder.decode(value, { stream: true });
+                    callback(chunk);
+                    read();
+                });
+            };
+            read();
+        } else {
+            return DefaultResponseProcess(response);
+        }
+    })
+    .catch(emptyOrDefault(errHandle));
+}
 function getToken() {
     const token = sessionStorage.getItem('token')
     if (!token) {
@@ -915,7 +965,7 @@ const GetBinding = (name: string, callback: (d: any) => void | null) => {
 
 export const API = {
     DefaultResponseProcess,
-    GetVersion,
+    GetVersion, GetSchema,
     CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, DuplicateTestSuite, RenameTestSuite, GetTestSuiteYaml,
     CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, DuplicateTestCase, RenameTestCase, RunTestCase, BatchRunTestCase,
     GetHistoryTestCaseWithResult, DeleteHistoryTestCase, GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
@@ -925,7 +975,7 @@ export const API = {
     FunctionsQuery,
     GetSecrets, DeleteSecret, CreateOrUpdateSecret,
     GetSuggestedAPIs, GetSwaggers,
-    ReloadMockServer, GetMockConfig, SBOM, DataQuery, DataQueryAsync,
+    ReloadMockServer, GetMockConfig, GetStream, SBOM, DataQuery, DataQueryAsync,
     GetThemes, GetTheme, GetBinding,
     getToken
 }

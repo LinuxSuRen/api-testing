@@ -20,7 +20,7 @@ import jsonlint from 'jsonlint-mod'
 
 import CodeMirror from 'codemirror'
 import { json, jsonLanguage } from "@codemirror/lang-json"
-import { NewLanguageComplete } from './languageComplete'
+import { NewTemplateLangComplete } from './languageComplete'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/merge/merge.js'
 import 'codemirror/addon/merge/merge.css'
@@ -32,7 +32,7 @@ window.DIFF_DELETE = -1;
 window.DIFF_INSERT = 1;
 window.DIFF_EQUAL = 0;
 
-const jsonComplete = NewLanguageComplete(jsonLanguage)
+const jsonComplete = NewTemplateLangComplete(jsonLanguage)
 const { t } = useI18n()
 
 const props = defineProps({
@@ -963,7 +963,7 @@ Magic.LoadMagicKeys(import.meta.url), {
         <EditButton :value="props.name" @changed="renameTestCase"/>
       </div>
       <div>
-        <el-row justify="space-between" gutter="10">
+        <el-row justify="space-between" gutter=10>
           <el-col :span="3">
             <el-select
               v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'"
@@ -1282,7 +1282,7 @@ Magic.LoadMagicKeys(import.meta.url), {
           :rules="rules"
         >
           <el-form-item :label="t('title.history')" prop="selectedID">
-            <el-row :gutter="20">
+            <el-row :gutter=20>
               <el-col :span="20">
                 <el-select  class="m-2"
                   filterable

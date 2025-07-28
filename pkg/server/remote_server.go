@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	reflect "reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -38,6 +39,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
+	"github.com/linuxsuren/api-testing/docs"
 	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/mock"
@@ -432,6 +434,19 @@ func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
 			}
 		}
 	}
+}
+
+func (s *server) GetSchema(ctx context.Context, in *SimpleQuery) (result *CommonResult, err error) {
+	result = &CommonResult{
+		Success: true,
+	}
+	switch in.Name {
+	case "core":
+		result.Message = docs.Schema
+	case "mock":
+		result.Message = docs.MockSchema
+	}
+	return
 }
 
 // GetVersion returns the version
@@ -1181,6 +1196,9 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 			}()
 		}
 		wg.Wait()
+		slices.SortFunc(reply.Data, func(a, b *Store) int {
+			return strings.Compare(a.Name, b.Name)
+		})
 		reply.Data = append(reply.Data, &Store{
 			Name:  "local",
 			Kind:  &StoreKind{},
@@ -1359,6 +1377,7 @@ type mockServerController struct {
 	mockWriter  mock.ReaderAndWriter
 	loader      mock.Loadable
 	reader      mock.Reader
+	logData     chan string
 	prefix      string
 	combinePort int
 }
@@ -1368,6 +1387,7 @@ func NewMockServerController(mockWriter mock.ReaderAndWriter, loader mock.Loadab
 		mockWriter:  mockWriter,
 		loader:      loader,
 		prefix:      "/mock/server",
+		logData:     make(chan string, 100),
 		combinePort: combinePort,
 	}
 }
@@ -1384,8 +1404,9 @@ func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (repl
 			}
 		}
 
-		server := mock.NewInMemoryServer(ctx, int(in.GetPort()))
+		server := mock.NewInMemoryServer(ctx, int(in.GetPort())).WithTLS(dServer.GetTLS())
 		server.Start(s.mockWriter, in.Prefix)
+		server.WithLogWriter(s)
 		s.loader = server
 	}
 	err = s.loader.Load()
@@ -1400,6 +1421,22 @@ func (s *mockServerController) GetConfig(ctx context.Context, in *Empty) (reply 
 		if port, pErr := strconv.ParseInt(dServer.GetPort(), 10, 32); pErr == nil {
 			reply.Port = int32(port)
 		}
+	}
+	return
+}
+func (s *mockServerController) LogWatch(e *Empty, logServer Mock_LogWatchServer) (err error) {
+	for msg := range s.logData {
+		logServer.Send(&CommonResult{
+			Success: true,
+			Message: msg,
+		})
+	}
+	return
+}
+func (s *mockServerController) Write(p []byte) (n int, err error) {
+	select {
+	case s.logData <- fmt.Sprintf("%s: %s", time.Now().Format(time.RFC3339), string(p)):
+	default:
 	}
 	return
 }

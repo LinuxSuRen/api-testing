@@ -219,6 +219,11 @@ service Runner {
         get: "/api/v1/functionsQuery"
       };
     }
+    rpc GetSchema(SimpleQuery) returns (CommonResult) {
+        option (google.api.http) = {
+        get: "/api/v1/schemas/{name}"
+      };
+    }
     rpc GetVersion(Empty) returns (Version) {
       option (google.api.http) = {
         get: "/api/v1/version"
@@ -645,6 +650,11 @@ service Mock {
   rpc GetConfig(Empty) returns (MockConfig) {
     option (google.api.http) = {
       get: "/api/v1/mock/config"
+    };
+  }
+  rpc LogWatch(Empty) returns (stream CommonResult) {
+    option (google.api.http) = {
+      get: "/api/v1/mock/log"
     };
   }
 }

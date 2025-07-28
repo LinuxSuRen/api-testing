@@ -47,16 +47,17 @@ var (
 )
 
 type inMemoryServer struct {
-	data       map[string][]map[string]interface{}
-	mux        *mux.Router
-	listener   net.Listener
-	port       int
-	prefix     string
-	wg         sync.WaitGroup
-	ctx        context.Context
-	cancelFunc context.CancelFunc
-	reader     Reader
-	metrics    RequestMetrics
+	data              map[string][]map[string]interface{}
+	mux               *mux.Router
+	listener          net.Listener
+	certFile, keyFile string
+	port              int
+	prefix            string
+	wg                sync.WaitGroup
+	ctx               context.Context
+	cancelFunc        context.CancelFunc
+	reader            Reader
+	metrics           RequestMetrics
 }
 
 func NewInMemoryServer(ctx context.Context, port int) DynamicServer {
@@ -80,6 +81,23 @@ func (s *inMemoryServer) SetupHandler(reader Reader, prefix string) (handler htt
 	s.metrics.AddMetricsHandler(s.mux)
 	err = s.Load()
 	return
+}
+
+func (s *inMemoryServer) WithTLS(certFile, keyFile string) DynamicServer {
+	s.certFile = certFile
+	s.keyFile = keyFile
+	return s
+}
+
+func (s *inMemoryServer) WithLogWriter(writer io.Writer) DynamicServer {
+	if writer != nil {
+		memLogger = memLogger.WithNameAndWriter("stream", writer)
+	}
+	return s
+}
+
+func (s *inMemoryServer) GetTLS() (string, string) {
+	return s.certFile, s.keyFile
 }
 
 func (s *inMemoryServer) Load() (err error) {
@@ -129,9 +147,7 @@ func (s *inMemoryServer) httpProxy(proxy *Proxy) {
 			proxy.Target += "/"
 		}
 		targetPath := strings.TrimPrefix(req.URL.Path, s.prefix)
-		if strings.HasPrefix(targetPath, "/") {
-			targetPath = strings.TrimPrefix(targetPath, "/")
-		}
+		targetPath = strings.TrimPrefix(targetPath, "/")
 
 		apiRaw := fmt.Sprintf("%s%s", proxy.Target, targetPath)
 		api, err := render.Render("proxy api", apiRaw, s)
@@ -238,7 +254,14 @@ func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 	if handler, err = s.SetupHandler(reader, prefix); err == nil {
 		if s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port)); err == nil {
 			go func() {
-				err = http.Serve(s.listener, handler)
+				if s.certFile != "" && s.keyFile != "" {
+					if err = http.ServeTLS(s.listener, handler, s.certFile, s.keyFile); err != nil {
+						memLogger.Error(err, "failed to start TLS mock server")
+					}
+				} else {
+					memLogger.Info("start HTTP mock server")
+					err = http.Serve(s.listener, handler)
+				}
 			}()
 		}
 	}
@@ -252,7 +275,7 @@ func (s *inMemoryServer) EnableMetrics() {
 func (s *inMemoryServer) startObject(obj Object) {
 	// create a simple CRUD server
 	s.mux.HandleFunc("/"+obj.Name, func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("mock server received request", req.URL.Path)
+		memLogger.Info("mock server received request", "path", req.URL.Path)
 		s.metrics.RecordRequest(req.URL.Path)
 		method := req.Method
 		w.Header().Set(util.ContentType, util.JSON)
@@ -386,7 +409,12 @@ func (s *inMemoryServer) startItem(item Item) {
 		metrics: s.metrics,
 		mu:      sync.Mutex{},
 	}
-	s.mux.HandleFunc(item.Request.Path, adHandler.handle).Methods(strings.Split(method, ",")...).Headers(headerSlices...)
+	existedRoute := s.mux.GetRoute(item.Name)
+	if existedRoute == nil {
+		s.mux.NewRoute().Name(item.Name).Methods(strings.Split(method, ",")...).Headers(headerSlices...).Path(item.Request.Path).HandlerFunc(adHandler.handle)
+	} else {
+		existedRoute.HandlerFunc(adHandler.handle)
+	}
 }
 
 type advanceHandler struct {
@@ -670,7 +698,9 @@ func (s *inMemoryServer) GetPort() string {
 
 func (s *inMemoryServer) Stop() (err error) {
 	if s.listener != nil {
-		err = s.listener.Close()
+		if err = s.listener.Close(); err != nil {
+			memLogger.Error(err, "failed to close listener")
+		}
 	} else {
 		memLogger.Info("listener is nil")
 	}
