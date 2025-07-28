@@ -1,94 +1,194 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Mock Server Schema",
-  "type": "object",
-  "properties": {
-    "objects": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {"type": "string"},
-          "initCount": {"type": "integer"},
-          "sample": {"type": "string"}
-        },
-        "required": ["name"]
-      }
-    },
-    "items": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {"type": "string"},
-          "request": {
-            "type": "object",
-            "properties": {
-              "path": {"type": "string"},
-              "method": {"type": "string"},
-              "header": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Mock Server Schema",
+    "type": "object",
+    "properties": {
+        "objects": {
+            "type": "array",
+            "items": {
                 "type": "object",
-                "additionalProperties": {"type": "string"}
-              },
-              "body": {"type": "string"}
-            },
-            "required": ["path"]
-          },
-          "response": {
-            "type": "object",
-            "properties": {
-              "encoder": {"type": "string"},
-              "body": {"type": "string"},
-              "header": {
-                "type": "object",
-                "additionalProperties": {"type": "string"}
-              },
-              "statusCode": {"type": "integer"},
-              "bodyData": {"type": "string", "contentEncoding": "base64"}
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "initCount": {
+                        "type": "integer"
+                    },
+                    "sample": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
             }
-          },
-          "param": {
-            "type": "object",
-            "additionalProperties": {"type": "string"}
-          }
         },
-        "required": ["name", "request", "response"]
-      }
-    },
-    "proxies": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "path": {"type": "string"},
-          "target": {"type": "string"}
-        },
-        "required": ["path", "target"]
-      }
-    },
-    "webhooks": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {"type": "string"},
-          "timer": {"type": "string"},
-          "request": {
-            "type": "object",
-            "properties": {
-              "path": {"type": "string"},
-              "method": {"type": "string"},
-              "header": {
+        "items": {
+            "type": "array",
+            "items": {
                 "type": "object",
-                "additionalProperties": {"type": "string"}
-              },
-              "body": {"type": "string"}
-            },
-            "required": ["path"]
-          }
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "request": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "method": {
+                                "type": "string"
+                            },
+                            "header": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            },
+                            "body": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "path"
+                        ]
+                    },
+                    "response": {
+                        "type": "object",
+                        "properties": {
+                            "encoder": {
+                                "type": "string"
+                            },
+                            "body": {
+                                "type": "string"
+                            },
+                            "header": {
+                                "type": "object",
+                                "description": "HTTP response headers. Common headers include 'Content-Type', 'Cache-Control', 'Set-Cookie', etc.",
+                                "properties": {
+                                    "Content-Type": {
+                                        "type": "string",
+                                        "description": "The MIME type of the response body"
+                                    },
+                                    "Cache-Control": {
+                                        "type": "string",
+                                        "description": "Directives for caching mechanisms in both requests and responses"
+                                    },
+                                    "Set-Cookie": {
+                                        "type": "string",
+                                        "description": "Used to send cookies from the server to the user agent"
+                                    }
+                                },
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            },
+                            "statusCode": {
+                                "type": "integer"
+                            },
+                            "bodyData": {
+                                "type": "string",
+                                "contentEncoding": "base64"
+                            }
+                        }
+                    },
+                    "param": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "request",
+                    "response"
+                ]
+            }
         },
-        "required": ["name", "timer", "request"]
-      }
+        "proxies": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string"
+                    },
+                    "target": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "path",
+                    "target"
+                ]
+            }
+        },
+        "webhooks": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "timer": {
+                        "type": "string",
+                        "pattern": "^[0-9].*"
+                    },
+                    "request": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string"
+                            },
+                            "method": {
+                                "type": "string"
+                            },
+                            "header": {
+                                "type": "object",
+                                "description": "HTTP request headers. Common headers include 'Content-Type', 'Authorization', 'Accept', 'User-Agent', etc.",
+                                "properties": {
+                                    "Content-Type": {
+                                        "type": "string",
+                                        "description": "The MIME type of the request body"
+                                    },
+                                    "Authorization": {
+                                        "type": "string",
+                                        "description": "Authentication credentials for HTTP authentication"
+                                    },
+                                    "Accept": {
+                                        "type": "string",
+                                        "description": "Media types that are acceptable for the response"
+                                    },
+                                    "User-Agent": {
+                                        "type": "string",
+                                        "description": "Information about the user agent originating the request"
+                                    }
+                                },
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            },
+                            "body": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "path"
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "timer",
+                    "request"
+                ]
+            }
+        }
     }
-  }
 }
