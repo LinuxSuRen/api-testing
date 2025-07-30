@@ -1425,6 +1425,10 @@ func (s *mockServerController) GetConfig(ctx context.Context, in *Empty) (reply 
 	return
 }
 func (s *mockServerController) LogWatch(e *Empty, logServer Mock_LogWatchServer) (err error) {
+	logServer.Send(&CommonResult{
+		Success: true,
+		Message: "Mock server log watch started\n",
+	})
 	for msg := range s.logData {
 		logServer.Send(&CommonResult{
 			Success: true,

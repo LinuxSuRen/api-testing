@@ -26,7 +26,6 @@ API.GetStream((stream) => {
     try {
         const data = JSON.parse(stream);
         logOutput.value += `${data.result.message}`;
-        console.log('Received schema:', logOutput.value);
     } catch (e) {}
 });
 
@@ -105,26 +104,30 @@ items:
       API Prefix:<EditButton :value="mockConfig.Prefix" @changed="prefixChanged"/>
       Port:<EditButton :value="mockConfig.Port" @changed="portChanged"/>
     </div>
-    <div>
-        <el-tabs v-model="tabActive">
-            <el-tab-pane label="YAML" name="yaml">
-                <Codemirror v-model="mockConfig.Config"
-                    :extensions="[jsonComplete, headerComplete]" />
-            </el-tab-pane>
-            <el-tab-pane label="JSON" name="json">
-                <Codemirror v-model="mockConfig.ConfigAsJSON"
-                    :extensions="[jsonSchema(mockschema), jsonComplete, headerComplete]" />
-            </el-tab-pane>
-        </el-tabs>
-        <el-card class="log-output" shadow="hover">
-          <template #header>
-            <span>{{ t('label.logs') }}</span>
-          </template>
-          <el-scrollbar height="200px" ref="logScrollbar">
-            <pre style="white-space: pre-wrap; word-break: break-all;">{{ logOutput }}</pre>
-          </el-scrollbar>
-        </el-card>
-    </div>
+    <el-splitter layout="vertical" style="height: calc(100vh - 100px);">
+        <el-splitter-panel size="70%">
+            <el-tabs v-model="tabActive">
+                <el-tab-pane label="YAML" name="yaml">
+                    <Codemirror v-model="mockConfig.Config"
+                        :extensions="[jsonComplete, headerComplete]" />
+                </el-tab-pane>
+                <el-tab-pane label="JSON" name="json">
+                    <Codemirror v-model="mockConfig.ConfigAsJSON"
+                        :extensions="[jsonSchema(mockschema), jsonComplete, headerComplete]" />
+                </el-tab-pane>
+            </el-tabs>
+        </el-splitter-panel>
+        <el-splitter-panel size="30%">
+            <el-card class="log-output" shadow="hover">
+                <template #header>
+                    <span>{{ t('title.logs') }}</span>
+                </template>
+                <el-scrollbar ref="logScrollbar">
+                    <pre style="white-space: pre-wrap; word-break: break-all;">{{ logOutput }}</pre>
+                </el-scrollbar>
+            </el-card>
+        </el-splitter-panel>
+    </el-splitter>
 </template>
 
 <style>
@@ -133,5 +136,9 @@ items:
   display: flex;
   align-items: center; 
   gap: 8px; 
+}
+.log-output {
+  height: 100%;
+  overflow: auto;
 }
 </style>

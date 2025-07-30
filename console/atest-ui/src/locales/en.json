@@ -54,6 +54,7 @@
         "functionQuery": "Functions Query",
         "output": "Output",
         "proxy": "Proxy",
+        "logs": "Logs",
         "secure": "Secure",
         "data": "Data",
         "setting": "Setting",
