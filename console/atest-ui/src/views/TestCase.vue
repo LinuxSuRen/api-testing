@@ -935,14 +935,14 @@ const openQueryTab = () => {
     testResultActiveTab.value = 'query'
 }
 
-Magic.LoadMagicKeys(import.meta.url), {
-  "sendRequest": sendRequest,
-  "openDuplicateTestCaseDialog": openDuplicateTestCaseDialog,
-  "openOutputTab": openOutputTab,
-  "openBodyTab": openBodyTab,
-  "openHeaderTab": openHeaderTab,
-  "openQueryTab": openQueryTab
-}
+Magic.LoadMagicKeys('TestCase', new Map([
+  ["sendRequest", sendRequest],
+  ["openDuplicateTestCaseDialog", openDuplicateTestCaseDialog],
+  ["openOutputTab", openOutputTab],
+  ["openBodyTab", openBodyTab],
+  ["openHeaderTab", openHeaderTab],
+  ["openQueryTab", openQueryTab]
+]))
 </script>
 
 <template>

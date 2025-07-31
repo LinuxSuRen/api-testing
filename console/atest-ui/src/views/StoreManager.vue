@@ -108,10 +108,10 @@ function addStore() {
     createAction.value = true
 }
 
-Magic.LoadMagicKeys(import.meta.url, {
-  "addStore": addStore,
-  "loadStores": loadStores,
-})
+Magic.LoadMagicKeys('StoreManager', new Map([
+  ["addStore", addStore],
+  ["loadStores", loadStores],
+]))
 
 const rules = reactive<FormRules<Store>>({
   name: [{ required: true, message: 'Name is required', trigger: 'blur' }],

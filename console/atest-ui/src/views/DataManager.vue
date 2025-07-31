@@ -336,7 +336,7 @@ const executeQueryWithoutShowingNativeSQL = () => {
     executeWithQuery(sqlQuery.value)
 }
 
-Magic.LoadMagicKeys(import.meta.url, new Map([
+Magic.LoadMagicKeys('DataManager', new Map([
   ["executeQuery", executeQuery],
   ["executeWithSelectedQuery", executeWithSelectedQuery],
   ["executeQueryWithoutShowingNativeSQL", executeQueryWithoutShowingNativeSQL],
