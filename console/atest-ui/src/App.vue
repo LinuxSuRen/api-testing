@@ -29,6 +29,7 @@ const { t, locale: i18nLocale } = useI18n()
 const app = getCurrentInstance()?.appContext.app;
 
 import { setAsDarkTheme, getThemes, setTheme, getTheme } from './theme'
+import { resolve } from 'path'
 
 const allThemes = ref(getThemes())
 const asDarkMode = ref(Cache.GetPreference().darkTheme)
@@ -109,9 +110,49 @@ const theme = ref(getTheme())
 watch(theme, (e) => {
     setTheme(e)
 })
+
+
+    const loadPlugin = async (): Promise<void> => {
+      try {
+        // 动态加载CSS
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = 'http://localhost:6060/atest-store-orm-ui.css';
+        document.head.appendChild(css);
+
+        // 动态加载JS
+        await new Promise<void>((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'http://localhost:6060/my-plugin.umd.js';
+          script.onload = () => resolve();
+          script.onerror = (err) => reject(err);
+          document.head.appendChild(script);
+        });
+
+        // 类型安全的插件访问
+        const plugin = window.ATestPlugin;
+        
+        if (plugin && plugin.mount) {
+          console.log('插件加载成功');
+          plugin.mount('#plugin-container', { 
+            message: '来自宿主的消息'
+          });
+        }
+      } catch (error) {
+        console.log(`加载失败: ${(error as Error).message}`)
+      } finally {
+        console.log('插件加载完成');
+      }
+    };
+    try {
+        loadPlugin();
+    } catch (error) {
+        console.error('插件加载失败:', error);
+    }
 </script>
 
 <template>
+    <div id="plugin-container"></div>
   <el-container class="full-height">
     <el-aside width="auto" style="display: flex; flex-direction: column;">
       <el-radio-group v-model="isCollapse" class="el-menu">
