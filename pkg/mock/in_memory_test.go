@@ -24,9 +24,13 @@ import (
 	"strings"
 	"testing"
 
+	_ "embed"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
+
+//go:embed testdata/api.yaml
+var mockFile []byte
 
 func TestInMemoryServer(t *testing.T) {
 	server := NewInMemoryServer(context.Background(), 0)
@@ -165,6 +169,13 @@ func TestInMemoryServer(t *testing.T) {
 		assert.NoError(t, err)
 		data, _ := io.ReadAll(resp.Body)
 		assert.Equal(t, "hello", string(data))
+	})
+
+	t.Run("read response from file", func(t *testing.T) {
+		resp, err = http.Get(api + "/v1/readResponseFromFile")
+		assert.NoError(t, err)
+		data, _ := io.ReadAll(resp.Body)
+		assert.Equal(t, mockFile, data)
 	})
 
 	t.Run("not found config file", func(t *testing.T) {

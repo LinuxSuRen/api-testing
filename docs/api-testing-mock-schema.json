@@ -60,9 +60,17 @@
                         "type": "object",
                         "properties": {
                             "encoder": {
-                                "type": "string"
+                                "type": "string",
+                                "enum": [
+                                    "base64",
+                                    "url",
+                                    "raw"
+                                ]
                             },
                             "body": {
+                                "type": "string"
+                            },
+                            "bodyFromFile": {
                                 "type": "string"
                             },
                             "header": {

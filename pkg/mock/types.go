@@ -44,11 +44,12 @@ type RequestWithAuth struct {
 }
 
 type Response struct {
-	Encoder    string            `yaml:"encoder" json:"encoder"`
-	Body       string            `yaml:"body" json:"body"`
-	Header     map[string]string `yaml:"header" json:"header"`
-	StatusCode int               `yaml:"statusCode" json:"statusCode"`
-	BodyData   []byte
+	Encoder      string            `yaml:"encoder" json:"encoder"`
+	Body         string            `yaml:"body" json:"body"`
+	BodyFromFile string            `yaml:"bodyFromFile" json:"bodyFromFile"`
+	Header       map[string]string `yaml:"header" json:"header"`
+	StatusCode   int               `yaml:"statusCode" json:"statusCode"`
+	BodyData     []byte
 }
 
 type Webhook struct {

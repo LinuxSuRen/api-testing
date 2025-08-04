@@ -24,6 +24,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -450,6 +451,15 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set(k, hv)
 	}
 
+	if h.item.Response.BodyFromFile != "" {
+		// read from file
+		if data, readErr := os.ReadFile(h.item.Response.BodyFromFile); readErr != nil {
+			memLogger.Error(readErr, "failed to read file", "file", h.item.Response.BodyFromFile)
+		} else {
+			h.item.Response.Body = string(data)
+		}
+	}
+
 	var err error
 	if h.item.Response.Encoder == "base64" {
 		h.item.Response.BodyData, err = base64.StdEncoding.DecodeString(h.item.Response.Body)
@@ -458,9 +468,21 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
 		if resp, err = http.Get(h.item.Response.Body); err == nil {
 			h.item.Response.BodyData, err = io.ReadAll(resp.Body)
 		}
+	} else if h.item.Response.Encoder == "raw" {
+		h.item.Response.BodyData = []byte(h.item.Response.Body)
 	} else {
 		if h.item.Response.BodyData, err = render.RenderAsBytes("start-item", h.item.Response.Body, h.item); err != nil {
-			fmt.Printf("failed to render body: %v", err)
+			memLogger.Error(err, "failed to render body")
+		}
+	}
+
+	if strings.HasPrefix(h.item.Response.Header[util.ContentType], "image/") {
+		if strings.HasPrefix(string(h.item.Response.BodyData), util.ImageBase64Prefix) {
+			// decode base64 image data
+			imgData := strings.TrimPrefix(string(h.item.Response.BodyData), util.ImageBase64Prefix)
+			if h.item.Response.BodyData, err = base64.StdEncoding.DecodeString(imgData); err != nil {
+				memLogger.Error(err, "failed to decode base64 image data")
+			}
 		}
 	}
 
