@@ -102,6 +102,8 @@ items:
 curl http://localhost:6060/mock/api/v1/repos/atest/prs -v
 ```
 
+#### 编码器
+
 另外，为了满足复杂的场景，还可以对 Response Body 做特定的解码，目前支持：`base64`、`url`、`raw`：
 
 > encoder 为 `raw` 时，表示不进行处理
@@ -151,6 +153,36 @@ items:
       bodyFromFile: /tmp/baidu.html
 ```
 
+#### 条件判断
+
+对于查询类的 API，通常会接收参数，并根据参数的不同，返回相应的数据。这时候，可以用到条件判断的表达式：
+
+```yaml
+items:
+  - name: cats
+    request:
+      path: /api/v1/cats/{size}
+    response:
+      header:
+        Content-Type: application/json
+      body: |
+        {{if eq .Param.size "big"}}
+          {
+            "name": "big cat"
+          }
+        {{else if eq .Param.size "middle"}}
+          {
+            "name": "middle cat"
+          }
+        {{else if eq .Param.size "small"}}
+          {
+            "name": "small cat"
+          }
+        {{end}}
+```
+
+## 代理
+
 在实际情况中，往往是向已有系统或平台添加新的 API，此时要 Mock 所有已经存在的 API 就既没必要也需要很多工作量。因此，我们提供了一种简单的方式，即可以增加**代理**的方式把已有的 API 请求转发到实际的地址，只对新增的 API 进行 Mock 处理。如下所示：
 
 ```yaml
@@ -175,7 +207,7 @@ proxies:
     target: http://192.168.123.58:9200
 ```
 
-## TCP 协议代理
+### TCP 协议代理
 
 ```yaml
 proxies:
@@ -185,7 +217,7 @@ proxies:
     target: 192.168.123.58:33060
 ```
 
-## 代理多个服务
+### 代理多个服务
 
 ```shell
 atest mock-compose bin/compose.yaml
