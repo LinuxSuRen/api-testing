@@ -476,6 +476,16 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	if strings.HasPrefix(h.item.Response.Header[util.ContentType], "image/") {
+		if strings.HasPrefix(string(h.item.Response.BodyData), util.ImageBase64Prefix) {
+			// decode base64 image data
+			imgData := strings.TrimPrefix(string(h.item.Response.BodyData), util.ImageBase64Prefix)
+			if h.item.Response.BodyData, err = base64.StdEncoding.DecodeString(imgData); err != nil {
+				memLogger.Error(err, "failed to decode base64 image data")
+			}
+		}
+	}
+
 	if err == nil {
 		h.item.Response.Header[util.ContentLength] = fmt.Sprintf("%d", len(h.item.Response.BodyData))
 		w.Header().Set(util.ContentLength, h.item.Response.Header[util.ContentLength])

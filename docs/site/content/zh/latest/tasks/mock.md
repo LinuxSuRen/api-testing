@@ -153,6 +153,20 @@ items:
       bodyFromFile: /tmp/baidu.html
 ```
 
+通过下面的方式也可以生成图片：
+
+```yaml
+items:
+- name: image
+    request:
+      path: /v1/image
+    response:
+      header:
+        Content-Type: image/png
+      body: |
+        {{ randImage 300 300 }}
+```
+
 #### 条件判断
 
 对于查询类的 API，通常会接收参数，并根据参数的不同，返回相应的数据。这时候，可以用到条件判断的表达式：

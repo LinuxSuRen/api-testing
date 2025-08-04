@@ -56,6 +56,14 @@ items:
             "status": "success"
           }]
         }
+  - name: image
+    request:
+      path: /v1/image
+    response:
+      header:
+        Content-Type: image/png
+      body: |
+        {{ randImage 300 300 }}
 proxies:
   - path: /v1/myProjects
     target: http://localhost:{{.GetPort}}
