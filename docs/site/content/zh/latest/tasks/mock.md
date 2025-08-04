@@ -102,7 +102,9 @@ items:
 curl http://localhost:6060/mock/api/v1/repos/atest/prs -v
 ```
 
-另外，为了满足复杂的场景，还可以对 Response Body 做特定的解码，目前支持：`base64`、`url`：
+另外，为了满足复杂的场景，还可以对 Response Body 做特定的解码，目前支持：`base64`、`url`、`raw`：
+
+> encoder 为 `raw` 时，表示不进行处理
 
 ```yaml
 #!api-testing-mock
@@ -134,6 +136,19 @@ items:
     response:
       body: https://baidu.com
       encoder: url
+```
+
+如果你的响应内容比较大，或者保存在一个本地文件中，那么你可以这么写：
+
+```yaml
+#!api-testing-mock
+# yaml-language-server: $schema=https://linuxsuren.github.io/api-testing/api-testing-mock-schema.json
+items:
+  - name: baidu
+    request:
+      path: /api/v1/baidu
+    response:
+      bodyFromFile: /tmp/baidu.html
 ```
 
 在实际情况中，往往是向已有系统或平台添加新的 API，此时要 Mock 所有已经存在的 API 就既没必要也需要很多工作量。因此，我们提供了一种简单的方式，即可以增加**代理**的方式把已有的 API 请求转发到实际的地址，只对新增的 API 进行 Mock 处理。如下所示：
