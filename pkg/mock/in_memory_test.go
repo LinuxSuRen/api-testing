@@ -16,238 +16,269 @@ limitations under the License.
 package mock
 
 import (
-	"bytes"
-	"context"
-	"fmt"
-	"io"
-	"net/http"
-	"strings"
-	"testing"
+    "bytes"
+    "context"
+    "fmt"
+    "io"
+    "net/http"
+    "strings"
+    "testing"
 
-	_ "embed"
-	"github.com/linuxsuren/api-testing/pkg/util"
-	"github.com/stretchr/testify/assert"
+    _ "embed"
+    "github.com/linuxsuren/api-testing/pkg/util"
+    "github.com/stretchr/testify/assert"
 )
 
 //go:embed testdata/api.yaml
 var mockFile []byte
 
 func TestInMemoryServer(t *testing.T) {
-	server := NewInMemoryServer(context.Background(), 0)
-	server.EnableMetrics()
+    server := NewInMemoryServer(context.Background(), 0)
+    server.EnableMetrics()
 
-	err := server.Start(NewLocalFileReader("testdata/api.yaml"), "/mock")
-	assert.NoError(t, err)
-	defer func() {
-		server.Stop()
-	}()
+    err := server.Start(NewLocalFileReader("testdata/api.yaml"), "/mock")
+    assert.NoError(t, err)
+    defer func() {
+        server.Stop()
+    }()
 
-	api := "http://localhost:" + server.GetPort() + "/mock"
+    api := "http://localhost:" + server.GetPort() + "/mock"
 
-	_, err = http.Post(api+"/team", "", bytes.NewBufferString(`{
+    _, err = http.Post(api+"/team", "", bytes.NewBufferString(`{
 		"name": "test",
 		"members": []
 	}`))
-	assert.NoError(t, err)
+    assert.NoError(t, err)
 
-	var resp *http.Response
-	resp, err = http.Get(api + "/team")
-	if assert.NoError(t, err) {
-		data, err := io.ReadAll(resp.Body)
-		assert.NoError(t, err)
-		assert.Equal(t, `[{"name":"someone"},{"members":[],"name":"test"}]`, string(data))
-	}
+    var resp *http.Response
+    resp, err = http.Get(api + "/team")
+    if assert.NoError(t, err) {
+        data, err := io.ReadAll(resp.Body)
+        assert.NoError(t, err)
+        assert.Equal(t, `[{"name":"someone"},{"members":[],"name":"test"}]`, string(data))
+    }
 
-	t.Run("check the /api.json", func(t *testing.T) {
-		var resp *http.Response
-		resp, err = http.Get(api + "/api.json")
-		if assert.NoError(t, err) {
-			data, err := io.ReadAll(resp.Body)
-			assert.NoError(t, err)
-			assert.NotEmpty(t, string(data))
-		}
-	})
+    t.Run("check the /api.json", func(t *testing.T) {
+        var resp *http.Response
+        resp, err = http.Get(api + "/api.json")
+        if assert.NoError(t, err) {
+            data, err := io.ReadAll(resp.Body)
+            assert.NoError(t, err)
+            assert.NotEmpty(t, string(data))
+        }
+    })
 
-	t.Run("list with filter", func(t *testing.T) {
-		var resp *http.Response
-		resp, err = http.Get(api + "/team?name=someone")
-		if assert.NoError(t, err) {
-			data, err := io.ReadAll(resp.Body)
-			assert.NoError(t, err)
-			assert.Equal(t, `[{"name":"someone"}]`, string(data))
-		}
-	})
+    t.Run("list with filter", func(t *testing.T) {
+        var resp *http.Response
+        resp, err = http.Get(api + "/team?name=someone")
+        if assert.NoError(t, err) {
+            data, err := io.ReadAll(resp.Body)
+            assert.NoError(t, err)
+            assert.Equal(t, `[{"name":"someone"}]`, string(data))
+        }
+    })
 
-	t.Run("update object", func(t *testing.T) {
-		updateReq, err := http.NewRequest(http.MethodPut, api+"/team/test", bytes.NewBufferString(`{
+    t.Run("update object", func(t *testing.T) {
+        updateReq, err := http.NewRequest(http.MethodPut, api+"/team/test", bytes.NewBufferString(`{
 			"name": "test",
 			"members": [{
 				"name": "rick"
 			}]
 		}`))
-		assert.NoError(t, err)
-		resp, err = http.DefaultClient.Do(updateReq)
-		assert.NoError(t, err)
-	})
+        assert.NoError(t, err)
+        resp, err = http.DefaultClient.Do(updateReq)
+        assert.NoError(t, err)
+    })
 
-	t.Run("get a single object", func(t *testing.T) {
-		resp, err = http.Get(api + "/team/test")
-		assert.NoError(t, err)
+    t.Run("get a single object", func(t *testing.T) {
+        resp, err = http.Get(api + "/team/test")
+        assert.NoError(t, err)
 
-		var data []byte
-		data, err = io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+        var data []byte
+        data, err = io.ReadAll(resp.Body)
+        assert.NoError(t, err)
 
-		assert.Equal(t, `{"members":[{"name":"rick"}],"name":"test"}`, string(data))
-	})
+        assert.Equal(t, `{"members":[{"name":"rick"}],"name":"test"}`, string(data))
+    })
 
-	// delete object
-	delReq, err := http.NewRequest(http.MethodDelete, api+"/team/test", nil)
-	assert.NoError(t, err)
-	resp, err = http.DefaultClient.Do(delReq)
-	assert.NoError(t, err)
+    // delete object
+    delReq, err := http.NewRequest(http.MethodDelete, api+"/team/test", nil)
+    assert.NoError(t, err)
+    resp, err = http.DefaultClient.Do(delReq)
+    assert.NoError(t, err)
 
-	t.Run("check if deleted", func(t *testing.T) {
-		var resp *http.Response
-		resp, err = http.Get(api + "/team")
-		if assert.NoError(t, err) {
-			data, err := io.ReadAll(resp.Body)
-			assert.NoError(t, err)
-			assert.Equal(t, `[{"name":"someone"}]`, string(data))
-		}
+    t.Run("check if deleted", func(t *testing.T) {
+        var resp *http.Response
+        resp, err = http.Get(api + "/team")
+        if assert.NoError(t, err) {
+            data, err := io.ReadAll(resp.Body)
+            assert.NoError(t, err)
+            assert.Equal(t, `[{"name":"someone"}]`, string(data))
+        }
 
-		resp, err = http.Get(api + "/team/test")
-		if assert.NoError(t, err) {
-			assert.Equal(t, http.StatusNotFound, resp.StatusCode)
-		}
-	})
+        resp, err = http.Get(api + "/team/test")
+        if assert.NoError(t, err) {
+            assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+        }
+    })
 
-	t.Run("invalid request method", func(t *testing.T) {
-		delReq, err := http.NewRequest("fake", api+"/team", nil)
-		assert.NoError(t, err)
-		resp, err = http.DefaultClient.Do(delReq)
-		assert.NoError(t, err)
-		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
-	})
+    t.Run("invalid request method", func(t *testing.T) {
+        delReq, err := http.NewRequest("fake", api+"/team", nil)
+        assert.NoError(t, err)
+        resp, err = http.DefaultClient.Do(delReq)
+        assert.NoError(t, err)
+        assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
+    })
 
-	t.Run("only accept GET method in getting a single object", func(t *testing.T) {
-		wrongMethodReq, err := http.NewRequest(http.MethodPut, api+"/team", nil)
-		assert.NoError(t, err)
-		resp, err = http.DefaultClient.Do(wrongMethodReq)
-		assert.NoError(t, err)
-		assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
-	})
+    t.Run("only accept GET method in getting a single object", func(t *testing.T) {
+        wrongMethodReq, err := http.NewRequest(http.MethodPut, api+"/team", nil)
+        assert.NoError(t, err)
+        resp, err = http.DefaultClient.Do(wrongMethodReq)
+        assert.NoError(t, err)
+        assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
+    })
 
-	t.Run("mock item", func(t *testing.T) {
-		req, err := http.NewRequest(http.MethodGet, api+"/v1/repos/test/prs", nil)
-		assert.NoError(t, err)
-		req.Header.Set("name", "rick")
+    t.Run("mock item", func(t *testing.T) {
+        req, err := http.NewRequest(http.MethodGet, api+"/v1/repos/test/prs", nil)
+        assert.NoError(t, err)
+        req.Header.Set("name", "rick")
 
-		resp, err = http.DefaultClient.Do(req)
-		assert.NoError(t, err)
+        resp, err = http.DefaultClient.Do(req)
+        assert.NoError(t, err)
 
-		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		assert.Equal(t, "194", resp.Header.Get(util.ContentLength))
-		assert.Equal(t, "mock", resp.Header.Get("Server"))
-		assert.NotEmpty(t, resp.Header.Get(headerMockServer))
+        assert.Equal(t, http.StatusOK, resp.StatusCode)
+        assert.Equal(t, "194", resp.Header.Get(util.ContentLength))
+        assert.Equal(t, "mock", resp.Header.Get("Server"))
+        assert.NotEmpty(t, resp.Header.Get(headerMockServer))
 
-		data, _ := io.ReadAll(resp.Body)
-		assert.True(t, strings.Contains(string(data), `"message": "mock"`), string(data))
-	})
+        data, _ := io.ReadAll(resp.Body)
+        assert.True(t, strings.Contains(string(data), `"message": "mock"`), string(data))
+    })
 
-	t.Run("miss match header", func(t *testing.T) {
-		req, err := http.NewRequest(http.MethodGet, api+"/v1/repos/test/prs", nil)
-		assert.NoError(t, err)
+    t.Run("miss match header", func(t *testing.T) {
+        req, err := http.NewRequest(http.MethodGet, api+"/v1/repos/test/prs", nil)
+        assert.NoError(t, err)
 
-		resp, err = http.DefaultClient.Do(req)
-		assert.NoError(t, err)
-		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
-	})
+        resp, err = http.DefaultClient.Do(req)
+        assert.NoError(t, err)
+        assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+    })
 
-	t.Run("base64 encoder", func(t *testing.T) {
-		resp, err = http.Get(api + "/v1/base64")
-		assert.NoError(t, err)
-		data, _ := io.ReadAll(resp.Body)
-		assert.Equal(t, "hello", string(data))
-	})
+    t.Run("base64 encoder", func(t *testing.T) {
+        resp, err = http.Get(api + "/v1/base64")
+        assert.NoError(t, err)
+        data, _ := io.ReadAll(resp.Body)
+        assert.Equal(t, "hello", string(data))
+    })
 
-	t.Run("read response from file", func(t *testing.T) {
-		resp, err = http.Get(api + "/v1/readResponseFromFile")
-		assert.NoError(t, err)
-		data, _ := io.ReadAll(resp.Body)
-		assert.Equal(t, mockFile, data)
-	})
+    t.Run("read response from file", func(t *testing.T) {
+        resp, err = http.Get(api + "/v1/readResponseFromFile")
+        assert.NoError(t, err)
+        data, _ := io.ReadAll(resp.Body)
+        assert.Equal(t, mockFile, data)
+    })
 
-	t.Run("not found config file", func(t *testing.T) {
-		server := NewInMemoryServer(context.Background(), 0)
-		err := server.Start(NewLocalFileReader("fake"), "/")
-		assert.Error(t, err)
-	})
+    t.Run("not found config file", func(t *testing.T) {
+        server := NewInMemoryServer(context.Background(), 0)
+        err := server.Start(NewLocalFileReader("fake"), "/")
+        assert.Error(t, err)
+    })
 
-	t.Run("invalid webhook", func(t *testing.T) {
-		server := NewInMemoryServer(context.Background(), 0)
-		err := server.Start(NewInMemoryReader(`webhooks:
+    t.Run("invalid webhook", func(t *testing.T) {
+        server := NewInMemoryServer(context.Background(), 0)
+        err := server.Start(NewInMemoryReader(`webhooks:
   - timer: aa
     name: fake`), "/")
-		assert.Error(t, err)
-	})
+        assert.Error(t, err)
+    })
 
-	t.Run("missing name or timer in webhook", func(t *testing.T) {
-		server := NewInMemoryServer(context.Background(), 0)
-		err := server.Start(NewInMemoryReader(`webhooks:
+    t.Run("missing name or timer in webhook", func(t *testing.T) {
+        server := NewInMemoryServer(context.Background(), 0)
+        err := server.Start(NewInMemoryReader(`webhooks:
   - timer: 1s`), "/")
-		assert.Error(t, err)
-	})
+        assert.Error(t, err)
+    })
 
-	t.Run("invalid webhook payload", func(t *testing.T) {
-		server := NewInMemoryServer(context.Background(), 0)
-		err := server.Start(NewInMemoryReader(`webhooks:
+    t.Run("invalid webhook payload", func(t *testing.T) {
+        server := NewInMemoryServer(context.Background(), 0)
+        err := server.Start(NewInMemoryReader(`webhooks:
   - name: invalid
     timer: 1ms
     request:
       body: "{{.fake"`), "/")
-		assert.Error(t, err)
-	})
+        assert.Error(t, err)
+    })
 
-	t.Run("invalid webhook api template", func(t *testing.T) {
-		server := NewInMemoryServer(context.Background(), 0)
-		err := server.Start(NewInMemoryReader(`webhooks:
+    t.Run("invalid webhook api template", func(t *testing.T) {
+        server := NewInMemoryServer(context.Background(), 0)
+        err := server.Start(NewInMemoryReader(`webhooks:
   - name: invalid
     timer: 1ms
     request:
       body: "{}"
       path: "{{.fake"`), "/")
-		assert.NoError(t, err)
-	})
+        assert.NoError(t, err)
+    })
 
-	t.Run("proxy", func(t *testing.T) {
-		resp, err = http.Get(api + "/v1/myProjects")
-		assert.NoError(t, err)
-		assert.Equal(t, http.StatusOK, resp.StatusCode)
+    t.Run("proxy", func(t *testing.T) {
+        resp, err = http.Get(api + "/v1/myProjects")
+        assert.NoError(t, err)
+        assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-		resp, err = http.Get(api + "/v1/invalid-template")
-		assert.NoError(t, err)
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
-	})
+        resp, err = http.Get(api + "/v1/invalid-template")
+        assert.NoError(t, err)
+        assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+    })
 
-	t.Run("metrics", func(t *testing.T) {
-		resp, err = http.Get(api + "/metrics")
-		assert.NoError(t, err)
-		assert.Equal(t, http.StatusOK, resp.StatusCode)
-	})
+    t.Run("metrics", func(t *testing.T) {
+        resp, err = http.Get(api + "/metrics")
+        assert.NoError(t, err)
+        assert.Equal(t, http.StatusOK, resp.StatusCode)
+    })
 
-	t.Run("go template support in response body", func(t *testing.T) {
-		repoName := "myRepo"
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/repos/%s/prs", api, repoName), nil)
-		assert.NoError(t, err)
+    t.Run("go template support in response body", func(t *testing.T) {
+        repoName := "myRepo"
+        req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/repos/%s/prs", api, repoName), nil)
+        assert.NoError(t, err)
 
-		var resp *http.Response
-		req.Header.Set("name", "rick")
-		resp, err = http.DefaultClient.Do(req)
-		assert.NoError(t, err)
-		assert.Equal(t, http.StatusOK, resp.StatusCode)
+        var resp *http.Response
+        req.Header.Set("name", "rick")
+        resp, err = http.DefaultClient.Do(req)
+        assert.NoError(t, err)
+        assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-		data, _ := io.ReadAll(resp.Body)
-		assert.Contains(t, string(data), repoName)
-	})
+        data, _ := io.ReadAll(resp.Body)
+        assert.Contains(t, string(data), repoName)
+    })
+
+    t.Run("conditional response body", func(t *testing.T) {
+        for _, tt := range []struct {
+            name  string
+            param string
+        }{
+            {
+                name: "big",
+            },
+            {
+                name: "small",
+            },
+            {
+                name: "unknown",
+            },
+        } {
+            t.Run(tt.name, func(t *testing.T) {
+                payload := bytes.NewBufferString(fmt.Sprintf(`{"size": "%s"}`, tt.name))
+                req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/v1/books", api), payload)
+                assert.NoError(t, err)
+
+                var resp *http.Response
+                resp, err = http.DefaultClient.Do(req)
+                assert.NoError(t, err)
+                assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+                data, _ := io.ReadAll(resp.Body)
+                assert.Equal(t, fmt.Sprintf("{\n  \"name\": \"%s book\"\n}", tt.name), strings.TrimSpace(string(data)))
+            })
+        }
+    })
 }

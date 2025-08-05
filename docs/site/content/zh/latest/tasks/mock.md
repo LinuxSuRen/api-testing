@@ -195,6 +195,35 @@ items:
         {{end}}
 ```
 
+下面是一个根据请求 Payload 给出不同响应的例子：
+
+```yaml
+items:
+  - name: createBook
+    request:
+      path: /v1/books
+      method: POST
+      body: |
+        {
+          "size": "big"
+        }
+    response:
+      body: |
+        {{if eq (fromJson .Param._payload).size "big"}}
+        {
+          "name": "big book"
+        }
+        {{else if eq (fromJson .Param._payload).size "small"}}
+        {
+          "name": "small book"
+        }
+        {{else}}
+        {
+          "name": "unknown book"
+        }
+        {{end}}
+```
+
 ## 代理
 
 在实际情况中，往往是向已有系统或平台添加新的 API，此时要 Mock 所有已经存在的 API 就既没必要也需要很多工作量。因此，我们提供了一种简单的方式，即可以增加**代理**的方式把已有的 API 请求转发到实际的地址，只对新增的 API 进行 Mock 处理。如下所示：
