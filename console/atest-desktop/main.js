@@ -30,7 +30,7 @@ log.initialize();
 log.transports.file.level = getLogLevel()
 log.transports.file.resolvePathFn = () => server.getLogfile()
 if (process.platform === 'darwin') {
-    app.dock.setIcon(path.join(__dirname, "api-testing.png"))
+    app.dock.setIcon(path.join(__dirname, "assets/icons/atest.png"))
 }
 
 const windowOptions = {
