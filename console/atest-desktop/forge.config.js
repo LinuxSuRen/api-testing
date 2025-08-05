@@ -16,47 +16,38 @@ limitations under the License.
 
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
-const path = require('node:path');
 
 module.exports = {
   packagerConfig: {
-    icon: path.join(__dirname, 'api-testing.ico'),
+    icon: './assets/icons/atest',
     asar: true
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {
-        icon: 'api-testing.ico'
-      },
+      icon: './assets/icons/atest.ico'
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {
-        options: {
-          icon: 'api-testing.ico'
-        }
-      },
+      icon: './assets/icons/atest.png'
     },
     {
       name: '@electron-forge/maker-rpm',
-      config: {
-        icon: 'api-testing.ico'
-      },
+      icon: './assets/icons/atest.png'
     },
     {
       name: '@electron-forge/maker-dmg',
-      config: {
-        icon: path.join(__dirname, 'api-testing.icns')
-      }
+      icon: './assets/icons/atest.icns',
+      background: './assets/icons/atest.png',
+      format: 'ULFO'
     },
     {
       name: '@electron-forge/maker-wix',
       config: {
         language: 1033,
         manufacturer: 'API Testing Authors',
-        icon: 'api-testing.ico',
+        icon: './assets/icons/atest.ico',
         ui: {
           "enabled": true,
           "chooseDirectory": true
