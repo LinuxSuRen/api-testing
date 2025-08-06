@@ -297,6 +297,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		server.RegisterMockServer(s, mockServerController)
 		server.RegisterDataServerServer(s, remoteServer.(server.DataServerServer))
 		server.RegisterThemeExtensionServer(s, remoteServer.(server.ThemeExtensionServer))
+		server.RegisterUIExtensionServer(s, remoteServer.(server.UIExtensionServer))
 		serverLogger.Info("gRPC server listening at", "addr", lis.Addr())
 		s.Serve(lis)
 	}()
@@ -345,7 +346,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
 			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
 			server.RegisterThemeExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
-			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts))
+			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
+			server.RegisterUIExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
+		)
 	} else {
 		dialOption := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt))}
@@ -353,7 +356,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
 			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
 			server.RegisterThemeExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
-			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption))
+			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
+			server.RegisterUIExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
+		)
 	}
 
 	if err == nil {

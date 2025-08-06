@@ -312,6 +312,34 @@ service RunnerExtension {
     }
 }
 
+service UIExtension {
+    rpc GetMenus(Empty) returns (MenuList) {
+      option (google.api.http) = {
+        get: "/api/v1/extension/menus"
+      };
+    }
+    rpc GetPageOfJS(SimpleName) returns (CommonResult) {
+        option (google.api.http) = {
+            get: "/api/v1/extension/pages/{name}/js"
+        };
+    }
+    rpc GetPageOfCSS(SimpleName) returns (CommonResult) {
+        option (google.api.http) = {
+            get: "/api/v1/extension/pages/{name}/css"
+        };
+    }
+}
+
+message Menu {
+    string name = 1;
+    string index = 2;
+    string icon = 3;
+}
+
+message MenuList {
+  repeated Menu data = 1;
+}
+
 service ThemeExtension {
     rpc GetThemes(Empty) returns (SimpleList) {
       option (google.api.http) = {

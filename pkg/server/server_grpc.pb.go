@@ -2073,6 +2073,164 @@ var RunnerExtension_ServiceDesc = grpc.ServiceDesc{
 	Metadata: "pkg/server/server.proto",
 }
 
+// UIExtensionClient is the client API for UIExtension service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type UIExtensionClient interface {
+	GetMenus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MenuList, error)
+	GetPageOfJS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error)
+	GetPageOfCSS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error)
+}
+
+type uIExtensionClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewUIExtensionClient(cc grpc.ClientConnInterface) UIExtensionClient {
+	return &uIExtensionClient{cc}
+}
+
+func (c *uIExtensionClient) GetMenus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MenuList, error) {
+	out := new(MenuList)
+	err := c.cc.Invoke(ctx, "/server.UIExtension/GetMenus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *uIExtensionClient) GetPageOfJS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.UIExtension/GetPageOfJS", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *uIExtensionClient) GetPageOfCSS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.UIExtension/GetPageOfCSS", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UIExtensionServer is the server API for UIExtension service.
+// All implementations must embed UnimplementedUIExtensionServer
+// for forward compatibility
+type UIExtensionServer interface {
+	GetMenus(context.Context, *Empty) (*MenuList, error)
+	GetPageOfJS(context.Context, *SimpleName) (*CommonResult, error)
+	GetPageOfCSS(context.Context, *SimpleName) (*CommonResult, error)
+	mustEmbedUnimplementedUIExtensionServer()
+}
+
+// UnimplementedUIExtensionServer must be embedded to have forward compatible implementations.
+type UnimplementedUIExtensionServer struct {
+}
+
+func (UnimplementedUIExtensionServer) GetMenus(context.Context, *Empty) (*MenuList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMenus not implemented")
+}
+func (UnimplementedUIExtensionServer) GetPageOfJS(context.Context, *SimpleName) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfJS not implemented")
+}
+func (UnimplementedUIExtensionServer) GetPageOfCSS(context.Context, *SimpleName) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfCSS not implemented")
+}
+func (UnimplementedUIExtensionServer) mustEmbedUnimplementedUIExtensionServer() {}
+
+// UnsafeUIExtensionServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UIExtensionServer will
+// result in compilation errors.
+type UnsafeUIExtensionServer interface {
+	mustEmbedUnimplementedUIExtensionServer()
+}
+
+func RegisterUIExtensionServer(s grpc.ServiceRegistrar, srv UIExtensionServer) {
+	s.RegisterService(&UIExtension_ServiceDesc, srv)
+}
+
+func _UIExtension_GetMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UIExtensionServer).GetMenus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.UIExtension/GetMenus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UIExtensionServer).GetMenus(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UIExtension_GetPageOfJS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UIExtensionServer).GetPageOfJS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.UIExtension/GetPageOfJS",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UIExtensionServer).GetPageOfJS(ctx, req.(*SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UIExtension_GetPageOfCSS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UIExtensionServer).GetPageOfCSS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.UIExtension/GetPageOfCSS",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UIExtensionServer).GetPageOfCSS(ctx, req.(*SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// UIExtension_ServiceDesc is the grpc.ServiceDesc for UIExtension service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var UIExtension_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "server.UIExtension",
+	HandlerType: (*UIExtensionServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetMenus",
+			Handler:    _UIExtension_GetMenus_Handler,
+		},
+		{
+			MethodName: "GetPageOfJS",
+			Handler:    _UIExtension_GetPageOfJS_Handler,
+		},
+		{
+			MethodName: "GetPageOfCSS",
+			Handler:    _UIExtension_GetPageOfCSS_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/server/server.proto",
+}
+
 // ThemeExtensionClient is the client API for ThemeExtension service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.

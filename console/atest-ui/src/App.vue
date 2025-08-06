@@ -20,6 +20,7 @@ import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
 import DataManager from './views/DataManager.vue'
 import MagicKey from './components/MagicKey.vue'
+import Extension from './views/Extension.vue'
 import { useI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'; 
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs' 
@@ -111,44 +112,20 @@ watch(theme, (e) => {
     setTheme(e)
 })
 
+interface Menu {
+  name: string
+  icon: string
+  index: string
+}
 
-    const loadPlugin = async (): Promise<void> => {
-      try {
-        // 动态加载CSS
-        const css = document.createElement('link');
-        css.rel = 'stylesheet';
-        css.href = 'http://localhost:6060/atest-store-orm-ui.css';
-        document.head.appendChild(css);
-
-        // 动态加载JS
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'http://localhost:6060/my-plugin.umd.js';
-          script.onload = () => resolve();
-          script.onerror = (err) => reject(err);
-          document.head.appendChild(script);
-        });
-
-        // 类型安全的插件访问
-        const plugin = window.ATestPlugin;
-        
-        if (plugin && plugin.mount) {
-          console.log('插件加载成功');
-          plugin.mount('#plugin-container', { 
-            message: '来自宿主的消息'
-          });
-        }
-      } catch (error) {
-        console.log(`加载失败: ${(error as Error).message}`)
-      } finally {
-        console.log('插件加载完成');
-      }
-    };
-    try {
-        loadPlugin();
-    } catch (error) {
-        console.error('插件加载失败:', error);
+const extensionMenus = ref([] as Menu[]);
+API.GetMenus((menus) => {
+    if (menus.data && menus.data.length > 0) {
+        extensionMenus.value = menus.data;
+    } else {
+        console.warn('没有获取到扩展菜单')
     }
+});
 </script>
 
 <template>
@@ -193,6 +170,12 @@ watch(theme, (e) => {
           <el-icon><location /></el-icon>
           <template #title>{{ t('title.stores') }}</template>
         </el-menu-item>
+        <span v-for="menu in extensionMenus" :key="menu.index" :index="menu.index">
+            <el-menu-item :index="menu.index">
+                <el-icon><IconMenu /></el-icon>
+                <template #title>{{ menu.name }}</template>
+            </el-menu-item>
+        </span>
       </el-menu>
     </el-aside>
 
@@ -208,7 +191,11 @@ watch(theme, (e) => {
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
       <SecretManager v-else-if="panelName === 'secret'" />
-      <WelcomePage v-else />
+      <WelcomePage v-else-if="panelName === 'welcome' || panelName === ''" />
+
+      <span v-for="menu in extensionMenus" :key="menu.index" :index="menu.index">
+        <Extension v-if="panelName === 'demo'" :name="menu.name" />
+      </span>
     </el-main>
 
     <div style="position: absolute; bottom: 0px; right: 10px;">

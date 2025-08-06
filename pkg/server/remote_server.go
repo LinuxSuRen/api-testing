@@ -69,6 +69,7 @@ type server struct {
 	UnimplementedRunnerServer
 	UnimplementedDataServerServer
 	UnimplementedThemeExtensionServer
+	UnimplementedUIExtensionServer
 
 	loader             testing.Writer
 	storeWriterFactory testing.StoreWriterFactory
@@ -1365,6 +1366,48 @@ func (s *server) GetBinding(ctx context.Context, in *SimpleName) (result *Common
 	result.Message, err = loader.GetBinding(in.Name)
 	if err != nil {
 		result.Message = fmt.Sprintf("failed to get binding: %v", err)
+	}
+	return
+}
+
+func (s *server) GetMenus(ctx context.Context, in *Empty) (result *MenuList, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	result = &MenuList{
+		Data: []*Menu{{
+			Name:  "Demo",
+			Icon:  "mdi:home",
+			Index: "demo",
+		}},
+	}
+	return
+}
+
+//go:embed demo.umd.js
+var demoJS []byte
+
+//go:embed demo.css
+var demoCSS []byte
+
+func (s *server) GetPageOfJS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	result = &CommonResult{
+		Success: true,
+		Message: string(demoJS),
+	}
+	return
+}
+
+func (s *server) GetPageOfCSS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	result = &CommonResult{
+		Success: true,
+		Message: string(demoCSS),
 	}
 	return
 }
