@@ -25,7 +25,8 @@ const loadPlugin = async (): Promise<void> => {
             
             if (plugin && plugin.mount) {
                 console.log('插件加载成功');
-                plugin.mount('#plugin-container', { 
+                const container = document.getElementById("plugin-container");
+                plugin.mount(container, {
                     message: '来自宿主的消息'
                 });
             }
@@ -44,6 +45,7 @@ try {
 </script>
 
 <template>
-{{ props.name }}===
-<div id="plugin-container"></div>
+    <div id="plugin-container">
+    {{ props.name }}
+    </div>
 </template>

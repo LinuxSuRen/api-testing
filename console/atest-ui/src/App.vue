@@ -129,7 +129,6 @@ API.GetMenus((menus) => {
 </script>
 
 <template>
-    <div id="plugin-container"></div>
   <el-container class="full-height">
     <el-aside width="auto" style="display: flex; flex-direction: column;">
       <el-radio-group v-model="isCollapse" class="el-menu">

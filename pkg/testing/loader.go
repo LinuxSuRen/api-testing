@@ -17,57 +17,67 @@ package testing
 
 // Loader is an interface for test cases loader
 type Loader interface {
-	HasMore() bool
-	Load() ([]byte, error)
-	Put(string) (err error)
-	GetContext() string
-	GetCount() int
-	Reset()
+    HasMore() bool
+    Load() ([]byte, error)
+    Put(string) (err error)
+    GetContext() string
+    GetCount() int
+    Reset()
 
-	Verify() (readOnly bool, err error)
-	PProf(name string) []byte
+    Verify() (readOnly bool, err error)
+    PProf(name string) []byte
 
-	Query(query map[string]string) (result DataResult, err error)
-	GetThemes() ([]string, error)
-	GetTheme(string) (string, error)
-	GetBindings() ([]string, error)
-	GetBinding(string) (string, error)
+    Query(query map[string]string) (result DataResult, err error)
+    GetThemes() ([]string, error)
+    GetTheme(string) (string, error)
+    GetBindings() ([]string, error)
+    GetBinding(string) (string, error)
+    GetMenus() ([]*Menu, error)
+    GetPageOfJS(string) (string, error)
+    GetPageOfCSS(string) (string, error)
 }
+
+type Menu struct {
+    Name  string `json:"name"`
+    Icon  string `json:"icon"`
+    Index string `json:"index"`
+}
+
 type DataResult struct {
-	Pairs           map[string]string
-	Rows            []map[string]string
-	Databases       []string
-	Tables          []string
-	CurrentDatabase string
-	Duration        string
-	Labels          map[string]string
+    Pairs           map[string]string
+    Rows            []map[string]string
+    Databases       []string
+    Tables          []string
+    CurrentDatabase string
+    Duration        string
+    Labels          map[string]string
 }
 
 type Writer interface {
-	Loader
+    Loader
 
-	ListTestCase(suite string) (testcases []TestCase, err error)
-	GetTestCase(suite, name string) (testcase TestCase, err error)
-	CreateTestCase(suite string, testcase TestCase) (err error)
-	UpdateTestCase(suite string, testcase TestCase) (err error)
-	DeleteTestCase(suite, testcase string) (err error)
+    ListTestCase(suite string) (testcases []TestCase, err error)
+    GetTestCase(suite, name string) (testcase TestCase, err error)
+    CreateTestCase(suite string, testcase TestCase) (err error)
+    UpdateTestCase(suite string, testcase TestCase) (err error)
+    DeleteTestCase(suite, testcase string) (err error)
 
-	ListHistoryTestSuite() (suites []HistoryTestSuite, err error)
-	CreateHistoryTestCase(testcaseResult TestCaseResult, suite *TestSuite, historyHeader map[string]string) (err error)
-	GetHistoryTestCaseWithResult(id string) (historyTestCase HistoryTestResult, err error)
-	GetHistoryTestCase(id string) (historyTestCase HistoryTestCase, err error)
-	DeleteHistoryTestCase(id string) (err error)
-	DeleteAllHistoryTestCase(suite, name string) (err error)
-	RenameTestCase(suite, oldName, newName string) (err error)
-	GetTestCaseAllHistory(suite, name string) (historyTestCase []HistoryTestCase, err error)
+    ListHistoryTestSuite() (suites []HistoryTestSuite, err error)
+    CreateHistoryTestCase(testcaseResult TestCaseResult, suite *TestSuite, historyHeader map[string]string) (err error)
+    GetHistoryTestCaseWithResult(id string) (historyTestCase HistoryTestResult, err error)
+    GetHistoryTestCase(id string) (historyTestCase HistoryTestCase, err error)
+    DeleteHistoryTestCase(id string) (err error)
+    DeleteAllHistoryTestCase(suite, name string) (err error)
+    RenameTestCase(suite, oldName, newName string) (err error)
+    GetTestCaseAllHistory(suite, name string) (historyTestCase []HistoryTestCase, err error)
 
-	ListTestSuite() (suites []TestSuite, err error)
-	GetTestSuite(name string, full bool) (suite TestSuite, err error)
-	GetTestSuiteYaml(name string) (testSuiteYaml []byte, err error)
-	CreateSuite(name, api string) (err error)
-	GetSuite(name string) (*TestSuite, string, error)
-	UpdateSuite(TestSuite) (err error)
-	DeleteSuite(name string) (err error)
-	RenameTestSuite(oldName, newName string) error
-	Close()
+    ListTestSuite() (suites []TestSuite, err error)
+    GetTestSuite(name string, full bool) (suite TestSuite, err error)
+    GetTestSuiteYaml(name string) (testSuiteYaml []byte, err error)
+    CreateSuite(name, api string) (err error)
+    GetSuite(name string) (*TestSuite, string, error)
+    UpdateSuite(TestSuite) (err error)
+    DeleteSuite(name string) (err error)
+    RenameTestSuite(oldName, newName string) error
+    Close()
 }
