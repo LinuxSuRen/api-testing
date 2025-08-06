@@ -19,6 +19,7 @@ package remote
 import (
     "context"
     "errors"
+    "fmt"
     "strconv"
     "time"
 
@@ -374,8 +375,10 @@ func (g *gRPCLoader) GetBinding(name string) (result string, err error) {
 }
 
 func (g *gRPCLoader) GetMenus() (result []*testing.Menu, err error) {
+    fmt.Println("getting menus from grpc server", g.store.Kind)
+
     var menuList *server.MenuList
-    if menuList, err = g.client.GetMenus(g.ctx, &server.Empty{}); err == nil && menuList.Data != nil {
+    if menuList, err = g.client.GetMenus(g.ctx, &server.Empty{}); err == nil {
         for _, item := range menuList.Data {
             result = append(result, &testing.Menu{
                 Name:  item.Name,
@@ -384,6 +387,7 @@ func (g *gRPCLoader) GetMenus() (result []*testing.Menu, err error) {
             })
         }
     }
+    fmt.Println("get menus, error", err)
     return
 }
 

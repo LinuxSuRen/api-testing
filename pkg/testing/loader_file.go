@@ -16,579 +16,579 @@ limitations under the License.
 package testing
 
 import (
-    "bytes"
-    "encoding/json"
-    "errors"
-    "fmt"
-    "io"
-    "net/http"
-    "net/url"
-    "os"
-    "path"
-    "path/filepath"
-    "strings"
-    "sync"
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"sync"
 
-    "github.com/linuxsuren/api-testing/pkg/util/home"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 
-    "github.com/linuxsuren/api-testing/pkg/logging"
+	"github.com/linuxsuren/api-testing/pkg/logging"
 
-    "github.com/linuxsuren/api-testing/pkg/util"
+	"github.com/linuxsuren/api-testing/pkg/util"
 )
 
 var (
-    loaderLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("loader")
+	loaderLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("loader")
 )
 
 type fileLoader struct {
-    paths  []string
-    index  int
-    parent string
+	paths  []string
+	index  int
+	parent string
 
-    lock *sync.RWMutex
+	lock *sync.RWMutex
 }
 
 // NewFileLoader creates the instance of file loader
 func NewFileLoader() Loader {
-    return &fileLoader{index: -1, lock: &sync.RWMutex{}}
+	return &fileLoader{index: -1, lock: &sync.RWMutex{}}
 }
 
 func NewFileWriter(parent string) Writer {
-    return &fileLoader{index: -1, parent: parent, lock: &sync.RWMutex{}}
+	return &fileLoader{index: -1, parent: parent, lock: &sync.RWMutex{}}
 }
 
 // HasMore returns if there are more test cases
 func (l *fileLoader) HasMore() bool {
-    l.index++
-    return l.index < len(l.paths) && l.index >= 0
+	l.index++
+	return l.index < len(l.paths) && l.index >= 0
 }
 
 // Load returns the test case content
 func (l *fileLoader) Load() (data []byte, err error) {
-    targetFile := l.paths[l.index]
-    data, err = loadData(targetFile)
-    return
+	targetFile := l.paths[l.index]
+	data, err = loadData(targetFile)
+	return
 }
 
 func loadData(targetFile string) (data []byte, err error) {
-    if strings.HasPrefix(targetFile, "http://") || strings.HasPrefix(targetFile, "https://") {
-        var ok bool
-        data, ok, err = gRPCCompitableRequest(targetFile)
-        if !ok && err == nil {
-            var resp *http.Response
-            if resp, err = http.Get(targetFile); err == nil {
-                data, err = io.ReadAll(resp.Body)
-            }
-        }
-    } else {
-        data, err = os.ReadFile(targetFile)
-    }
-    return
+	if strings.HasPrefix(targetFile, "http://") || strings.HasPrefix(targetFile, "https://") {
+		var ok bool
+		data, ok, err = gRPCCompitableRequest(targetFile)
+		if !ok && err == nil {
+			var resp *http.Response
+			if resp, err = http.Get(targetFile); err == nil {
+				data, err = io.ReadAll(resp.Body)
+			}
+		}
+	} else {
+		data, err = os.ReadFile(targetFile)
+	}
+	return
 }
 
 func gRPCCompitableRequest(targetURLStr string) (data []byte, ok bool, err error) {
-    if !strings.Contains(targetURLStr, "server.Runner/ConvertTestSuite") {
-        return
-    }
+	if !strings.Contains(targetURLStr, "server.Runner/ConvertTestSuite") {
+		return
+	}
 
-    var targetURL *url.URL
-    if targetURL, err = url.Parse(targetURLStr); err != nil {
-        return
-    }
+	var targetURL *url.URL
+	if targetURL, err = url.Parse(targetURLStr); err != nil {
+		return
+	}
 
-    suite := targetURL.Query().Get("suite")
-    if suite == "" {
-        err = fmt.Errorf("suite is required")
-        return
-    }
+	suite := targetURL.Query().Get("suite")
+	if suite == "" {
+		err = fmt.Errorf("suite is required")
+		return
+	}
 
-    payload := new(bytes.Buffer)
-    payload.WriteString(fmt.Sprintf(`{"TestSuite":"%s", "Generator":"raw"}`, suite))
+	payload := new(bytes.Buffer)
+	payload.WriteString(fmt.Sprintf(`{"TestSuite":"%s", "Generator":"raw"}`, suite))
 
-    var resp *http.Response
-    if resp, err = http.Post(targetURLStr, "", payload); err == nil {
-        if data, err = io.ReadAll(resp.Body); err != nil {
-            return
-        }
+	var resp *http.Response
+	if resp, err = http.Post(targetURLStr, "", payload); err == nil {
+		if data, err = io.ReadAll(resp.Body); err != nil {
+			return
+		}
 
-        var gRPCData map[string]interface{}
-        if err = json.Unmarshal(data, &gRPCData); err == nil {
-            var obj interface{}
-            obj, ok = gRPCData["message"]
-            data = []byte(fmt.Sprintf("%v", obj))
-        }
-    }
-    return
+		var gRPCData map[string]interface{}
+		if err = json.Unmarshal(data, &gRPCData); err == nil {
+			var obj interface{}
+			obj, ok = gRPCData["message"]
+			data = []byte(fmt.Sprintf("%v", obj))
+		}
+	}
+	return
 }
 
 // Put adds the test case path
 func (l *fileLoader) Put(item string) (err error) {
-    l.lock.Lock()
-    defer l.lock.Unlock()
+	l.lock.Lock()
+	defer l.lock.Unlock()
 
-    if l.parent == "" {
-        l.parent = filepath.Dir(item)
-    }
+	if l.parent == "" {
+		l.parent = filepath.Dir(item)
+	}
 
-    if strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
-        l.paths = append(l.paths, item)
-        return
-    }
+	if strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
+		l.paths = append(l.paths, item)
+		return
+	}
 
-    for _, pattern := range util.Expand(item) {
-        var files []string
-        if files, err = filepath.Glob(pattern); err == nil {
-            l.paths = append(l.paths, files...)
-        }
-        loaderLogger.Info(pattern, "pattern", len(files))
-    }
-    return
+	for _, pattern := range util.Expand(item) {
+		var files []string
+		if files, err = filepath.Glob(pattern); err == nil {
+			l.paths = append(l.paths, files...)
+		}
+		loaderLogger.Info(pattern, "pattern", len(files))
+	}
+	return
 }
 
 // GetContext returns the context of current test case
 func (l *fileLoader) GetContext() string {
-    return filepath.Dir(l.paths[l.index])
+	return filepath.Dir(l.paths[l.index])
 }
 
 // GetCount returns the count of test cases
 func (l *fileLoader) GetCount() int {
-    return len(l.paths)
+	return len(l.paths)
 }
 
 // Reset resets the index
 func (l *fileLoader) Reset() {
-    l.index = -1
+	l.index = -1
 }
 
 func (l *fileLoader) ListTestSuite() (suites []TestSuite, err error) {
-    l.lock.RLocker().Lock()
-    defer l.lock.RUnlock()
+	l.lock.RLocker().Lock()
+	defer l.lock.RUnlock()
 
-    for _, target := range l.paths {
-        var data []byte
-        var loadErr error
-        if data, loadErr = loadData(target); loadErr != nil {
-            loaderLogger.Info("failed to load data", "error", loadErr)
-            continue
-        }
+	for _, target := range l.paths {
+		var data []byte
+		var loadErr error
+		if data, loadErr = loadData(target); loadErr != nil {
+			loaderLogger.Info("failed to load data", "error", loadErr)
+			continue
+		}
 
-        var testSuite *TestSuite
-        if testSuite, loadErr = Parse(data); loadErr != nil {
-            loaderLogger.Info("failed to parse data", "error", loadErr, "from", target)
-            continue
-        }
-        suites = append(suites, *testSuite)
-    }
-    return
+		var testSuite *TestSuite
+		if testSuite, loadErr = Parse(data); loadErr != nil {
+			loaderLogger.Info("failed to parse data", "error", loadErr, "from", target)
+			continue
+		}
+		suites = append(suites, *testSuite)
+	}
+	return
 }
 func (l *fileLoader) GetTestSuite(name string, full bool) (suite TestSuite, err error) {
-    var items []TestSuite
-    if items, err = l.ListTestSuite(); err == nil {
-        for _, item := range items {
-            if item.Name == name {
-                suite = item
-                break
-            }
-        }
-    }
-    return
+	var items []TestSuite
+	if items, err = l.ListTestSuite(); err == nil {
+		for _, item := range items {
+			if item.Name == name {
+				suite = item
+				break
+			}
+		}
+	}
+	return
 }
 
 func (l *fileLoader) CreateSuite(name, api string) (err error) {
-    if name == "" {
-        err = fmt.Errorf("name is required")
-        return
-    }
+	if name == "" {
+		err = fmt.Errorf("name is required")
+		return
+	}
 
-    var absPath string
-    var suite *TestSuite
-    if suite, absPath, err = l.GetSuite(name); err != nil {
-        return
-    }
+	var absPath string
+	var suite *TestSuite
+	if suite, absPath, err = l.GetSuite(name); err != nil {
+		return
+	}
 
-    if suite != nil {
-        err = fmt.Errorf("suite %s already exists", name)
-    } else {
-        if l.parent == "" {
-            l.parent = filepath.Dir(absPath)
-        }
+	if suite != nil {
+		err = fmt.Errorf("suite %s already exists", name)
+	} else {
+		if l.parent == "" {
+			l.parent = filepath.Dir(absPath)
+		}
 
-        if err = os.MkdirAll(l.parent, 0755); err != nil {
-            err = fmt.Errorf("failed to create %q", l.parent)
-            return
-        }
+		if err = os.MkdirAll(l.parent, 0755); err != nil {
+			err = fmt.Errorf("failed to create %q", l.parent)
+			return
+		}
 
-        newSuiteFile := path.Join(l.parent, fmt.Sprintf("%s.yaml", name))
-        if newSuiteFile, err = filepath.Abs(newSuiteFile); err == nil {
-            loaderLogger.Info("new suite file", "file", newSuiteFile)
+		newSuiteFile := path.Join(l.parent, fmt.Sprintf("%s.yaml", name))
+		if newSuiteFile, err = filepath.Abs(newSuiteFile); err == nil {
+			loaderLogger.Info("new suite file", "file", newSuiteFile)
 
-            suite := &TestSuite{
-                Name: name,
-                API:  api,
-            }
-            if err = SaveTestSuiteToFile(suite, newSuiteFile); err == nil {
-                l.Put(newSuiteFile)
-            }
-        }
-    }
-    return
+			suite := &TestSuite{
+				Name: name,
+				API:  api,
+			}
+			if err = SaveTestSuiteToFile(suite, newSuiteFile); err == nil {
+				l.Put(newSuiteFile)
+			}
+		}
+	}
+	return
 }
 
 func (l *fileLoader) GetSuite(name string) (suite *TestSuite, absPath string, err error) {
-    l.lock.RLock()
-    defer l.lock.RUnlock()
+	l.lock.RLock()
+	defer l.lock.RUnlock()
 
-    for i := range l.paths {
-        suitePath := l.paths[i]
-        if absPath, err = filepath.Abs(suitePath); err != nil {
-            return
-        }
+	for i := range l.paths {
+		suitePath := l.paths[i]
+		if absPath, err = filepath.Abs(suitePath); err != nil {
+			return
+		}
 
-        if suite, err = ParseTestSuiteFromFile(absPath); err != nil {
-            suite = nil
-            continue
-        }
+		if suite, err = ParseTestSuiteFromFile(absPath); err != nil {
+			suite = nil
+			continue
+		}
 
-        if suite.Name == name {
-            return
-        } else {
-            suite = nil
-        }
-    }
-    return
+		if suite.Name == name {
+			return
+		} else {
+			suite = nil
+		}
+	}
+	return
 }
 
 // UpdateSuite updates the suite
 func (l *fileLoader) UpdateSuite(suite TestSuite) (err error) {
-    var absPath string
-    var oldSuite *TestSuite
-    if oldSuite, absPath, err = l.GetSuite(suite.Name); err == nil {
-        suite.Items = oldSuite.Items // only update the suite info
-        err = SaveTestSuiteToFile(&suite, absPath)
-    }
-    return
+	var absPath string
+	var oldSuite *TestSuite
+	if oldSuite, absPath, err = l.GetSuite(suite.Name); err == nil {
+		suite.Items = oldSuite.Items // only update the suite info
+		err = SaveTestSuiteToFile(&suite, absPath)
+	}
+	return
 }
 
 func (l *fileLoader) DeleteSuite(name string) (err error) {
-    l.lock.Lock()
-    defer l.lock.Unlock()
+	l.lock.Lock()
+	defer l.lock.Unlock()
 
-    for i := range l.paths {
-        suitePath := l.paths[i]
-        var suite *TestSuite
-        if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
-            continue
-        }
+	for i := range l.paths {
+		suitePath := l.paths[i]
+		var suite *TestSuite
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
+			continue
+		}
 
-        if suite.Name == name {
-            err = os.Remove(suitePath)
-            l.paths = append(l.paths[:i], l.paths[i+1:]...)
-            return
-        }
-    }
+		if suite.Name == name {
+			err = os.Remove(suitePath)
+			l.paths = append(l.paths[:i], l.paths[i+1:]...)
+			return
+		}
+	}
 
-    err = fmt.Errorf("suite %s not found", name)
-    return
+	err = fmt.Errorf("suite %s not found", name)
+	return
 }
 
 func (l *fileLoader) LoadAndParse(suite string, mode string) (testcases []TestCase, testSuiteYaml []byte, err error) {
-    defer func() {
-        l.Reset()
-    }()
+	defer func() {
+		l.Reset()
+	}()
 
-    for l.HasMore() {
-        var data []byte
-        if data, err = l.Load(); err != nil {
-            continue
-        }
+	for l.HasMore() {
+		var data []byte
+		if data, err = l.Load(); err != nil {
+			continue
+		}
 
-        var testSuite *TestSuite
-        if testSuite, err = Parse(data); err != nil {
-            return
-        }
+		var testSuite *TestSuite
+		if testSuite, err = Parse(data); err != nil {
+			return
+		}
 
-        if testSuite.Name != suite {
-            continue
-        }
+		if testSuite.Name != suite {
+			continue
+		}
 
-        switch mode {
-        case "yaml":
-            testSuiteYaml = data
-        default:
-            testcases = testSuite.Items
-        }
+		switch mode {
+		case "yaml":
+			testSuiteYaml = data
+		default:
+			testcases = testSuite.Items
+		}
 
-        break
-    }
-    return
+		break
+	}
+	return
 }
 
 func (l *fileLoader) ListTestCase(suite string) (testcases []TestCase, err error) {
-    testcases, _, err = l.LoadAndParse(suite, "testcases")
-    return
+	testcases, _, err = l.LoadAndParse(suite, "testcases")
+	return
 }
 
 func (l *fileLoader) GetTestSuiteYaml(suite string) (testSuiteYaml []byte, err error) {
-    _, testSuiteYaml, err = l.LoadAndParse(suite, "yaml")
-    return
+	_, testSuiteYaml, err = l.LoadAndParse(suite, "yaml")
+	return
 }
 
 func (l *fileLoader) GetTestCase(suite, name string) (testcase TestCase, err error) {
-    var items []TestCase
-    if items, err = l.ListTestCase(suite); err == nil {
-        found := false
-        for _, item := range items {
-            if item.Name == name {
-                testcase = item
-                found = true
-                break
-            }
-        }
+	var items []TestCase
+	if items, err = l.ListTestCase(suite); err == nil {
+		found := false
+		for _, item := range items {
+			if item.Name == name {
+				testcase = item
+				found = true
+				break
+			}
+		}
 
-        if !found {
-            err = fmt.Errorf("testcase %s not found", name)
-        }
-    }
-    return
+		if !found {
+			err = fmt.Errorf("testcase %s not found", name)
+		}
+	}
+	return
 }
 
 func (l *fileLoader) CreateTestCase(suiteName string, testcase TestCase) error {
-    return l.createOrUpdate(suiteName, testcase, false)
+	return l.createOrUpdate(suiteName, testcase, false)
 }
 
 func (l *fileLoader) UpdateTestCase(suite string, testcase TestCase) error {
-    return l.createOrUpdate(suite, testcase, true)
+	return l.createOrUpdate(suite, testcase, true)
 }
 
 func (l *fileLoader) createOrUpdate(suiteName string, testcase TestCase, update bool) (err error) {
-    var suite *TestSuite
-    var suiteFilepath string
-    for i := range l.paths {
-        suitePath := l.paths[i]
-        if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
-            continue
-        }
+	var suite *TestSuite
+	var suiteFilepath string
+	for i := range l.paths {
+		suitePath := l.paths[i]
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
+			continue
+		}
 
-        if suite.Name == suiteName {
-            suiteFilepath = suitePath
-            break
-        }
-        suite = nil
-    }
+		if suite.Name == suiteName {
+			suiteFilepath = suitePath
+			break
+		}
+		suite = nil
+	}
 
-    if suite != nil {
-        found := false
-        for i := range suite.Items {
-            if suite.Items[i].Name == testcase.Name {
-                suite.Items[i] = testcase
-                found = true
-                break
-            }
-        }
+	if suite != nil {
+		found := false
+		for i := range suite.Items {
+			if suite.Items[i].Name == testcase.Name {
+				suite.Items[i] = testcase
+				found = true
+				break
+			}
+		}
 
-        if !found {
-            suite.Items = append(suite.Items, testcase)
-        } else if !update {
-            err = fmt.Errorf("test case %s already exists", testcase.Name)
-            return
-        }
-        err = SaveTestSuiteToFile(suite, suiteFilepath)
-    }
-    return
+		if !found {
+			suite.Items = append(suite.Items, testcase)
+		} else if !update {
+			err = fmt.Errorf("test case %s already exists", testcase.Name)
+			return
+		}
+		err = SaveTestSuiteToFile(suite, suiteFilepath)
+	}
+	return
 }
 func (l *fileLoader) DeleteTestCase(suiteName, testcase string) (err error) {
-    var suite *TestSuite
-    var suiteFilepath string
-    for i := range l.paths {
-        suitePath := l.paths[i]
-        if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
-            continue
-        }
+	var suite *TestSuite
+	var suiteFilepath string
+	for i := range l.paths {
+		suitePath := l.paths[i]
+		if suite, err = ParseTestSuiteFromFile(suitePath); err != nil {
+			continue
+		}
 
-        if suite.Name == suiteName {
-            suiteFilepath = suitePath
-            break
-        }
-        suite = nil
-    }
+		if suite.Name == suiteName {
+			suiteFilepath = suitePath
+			break
+		}
+		suite = nil
+	}
 
-    if suite != nil {
-        found := false
-        for i := range suite.Items {
-            if suite.Items[i].Name == testcase {
-                suite.Items = append(suite.Items[:i], suite.Items[i+1:]...)
-                found = true
-                break
-            }
-        }
+	if suite != nil {
+		found := false
+		for i := range suite.Items {
+			if suite.Items[i].Name == testcase {
+				suite.Items = append(suite.Items[:i], suite.Items[i+1:]...)
+				found = true
+				break
+			}
+		}
 
-        if !found {
-            err = fmt.Errorf("testcase %s not found", testcase)
-            return
-        }
+		if !found {
+			err = fmt.Errorf("testcase %s not found", testcase)
+			return
+		}
 
-        err = SaveTestSuiteToFile(suite, suiteFilepath)
-    }
-    return
+		err = SaveTestSuiteToFile(suite, suiteFilepath)
+	}
+	return
 }
 
 func (l *fileLoader) CreateHistoryTestCase(testcaseResult TestCaseResult, suiteName *TestSuite, historyHeader map[string]string) (err error) { // always be okay
-    return
+	return
 }
 
 func (l *fileLoader) RenameTestCase(suite, oldName, newName string) (err error) {
-    var (
-        oldCase TestCase
-        newCase TestCase
-    )
-    oldCase, err = l.GetTestCase(suite, oldName)
-    newCase, err = l.GetTestCase(suite, newName)
-    if oldCase.Name != oldName || newCase.Name == newName {
-        err = fmt.Errorf("the old or new test case name is not correct")
-        return
-    }
+	var (
+		oldCase TestCase
+		newCase TestCase
+	)
+	oldCase, err = l.GetTestCase(suite, oldName)
+	newCase, err = l.GetTestCase(suite, newName)
+	if oldCase.Name != oldName || newCase.Name == newName {
+		err = fmt.Errorf("the old or new test case name is not correct")
+		return
+	}
 
-    oldCase.Name = newName
-    if err = l.CreateTestCase(suite, oldCase); err == nil {
-        err = l.DeleteTestCase(suite, oldName)
-    }
-    return
+	oldCase.Name = newName
+	if err = l.CreateTestCase(suite, oldCase); err == nil {
+		err = l.DeleteTestCase(suite, oldName)
+	}
+	return
 }
 
 func (l *fileLoader) ListHistoryTestSuite() (suites []HistoryTestSuite, err error) {
-    return
+	return
 }
 
 func (l *fileLoader) GetHistoryTestCaseWithResult(id string) (testcase HistoryTestResult, err error) {
-    return
+	return
 }
 
 func (l *fileLoader) GetHistoryTestCase(id string) (testcase HistoryTestCase, err error) {
-    return
+	return
 }
 
 func (l *fileLoader) DeleteHistoryTestCase(id string) (err error) {
-    return
+	return
 }
 
 func (l *fileLoader) DeleteAllHistoryTestCase(suite, name string) (err error) {
-    return
+	return
 }
 
 func (l *fileLoader) GetTestCaseAllHistory(suite, name string) (historyTestCase []HistoryTestCase, err error) {
-    return
+	return
 }
 
 func (l *fileLoader) RenameTestSuite(oldName, newName string) (err error) {
-    var (
-        oldSuite *TestSuite
-        newSuite TestSuite
-    )
-    var absPath string
-    if oldSuite, absPath, err = l.GetSuite(oldName); err != nil {
-        return
-    }
+	var (
+		oldSuite *TestSuite
+		newSuite TestSuite
+	)
+	var absPath string
+	if oldSuite, absPath, err = l.GetSuite(oldName); err != nil {
+		return
+	}
 
-    newSuite, err = l.GetTestSuite(newName, false)
-    if oldSuite == nil || oldSuite.Name != oldName || newSuite.Name == newName {
-        err = fmt.Errorf("the old or new test suite name is not correct")
-        return
-    }
+	newSuite, err = l.GetTestSuite(newName, false)
+	if oldSuite == nil || oldSuite.Name != oldName || newSuite.Name == newName {
+		err = fmt.Errorf("the old or new test suite name is not correct")
+		return
+	}
 
-    oldSuite.Name = newName
-    newSuiteFile := path.Join(path.Dir(absPath), newName+".yaml")
-    if err = SaveTestSuiteToFile(oldSuite, newSuiteFile); err == nil {
-        l.Put(newSuiteFile)
-        err = l.DeleteSuite(oldName)
-    }
-    return
+	oldSuite.Name = newName
+	newSuiteFile := path.Join(path.Dir(absPath), newName+".yaml")
+	if err = SaveTestSuiteToFile(oldSuite, newSuiteFile); err == nil {
+		l.Put(newSuiteFile)
+		err = l.DeleteSuite(oldName)
+	}
+	return
 }
 
 func (l *fileLoader) Verify() (readOnly bool, err error) {
-    // always be okay
-    return
+	// always be okay
+	return
 }
 
 func (l *fileLoader) PProf(string) []byte {
-    // not support
-    return nil
+	// not support
+	return nil
 }
 
 func (l *fileLoader) Close() {
-    // not support
+	// not support
 }
 
 func (l *fileLoader) Query(query map[string]string) (result DataResult, err error) {
-    err = errors.New("Query functionality is not yet implemented for fileLoader")
-    return
+	err = errors.New("Query functionality is not yet implemented for fileLoader")
+	return
 }
 
 func (l *fileLoader) GetRoundTripper(name string) (roundTripper http.RoundTripper, err error) {
-    err = fmt.Errorf("not support")
-    return
+	err = fmt.Errorf("not support")
+	return
 }
 
 func (l *fileLoader) GetThemes() (result []string, err error) {
-    dataDir := home.GetThemeDir()
-    _ = filepath.WalkDir(dataDir, func(path string, d os.DirEntry, err error) error {
-        if err != nil {
-            return err
-        }
+	dataDir := home.GetThemeDir()
+	_ = filepath.WalkDir(dataDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 
-        if !d.IsDir() && filepath.Ext(path) == ".json" {
-            result = append(result, strings.TrimSuffix(filepath.Base(path), ".json"))
-        }
-        return nil
-    })
-    return
+		if !d.IsDir() && filepath.Ext(path) == ".json" {
+			result = append(result, strings.TrimSuffix(filepath.Base(path), ".json"))
+		}
+		return nil
+	})
+	return
 }
 
 func (l *fileLoader) GetTheme(name string) (result string, err error) {
-    dataDir := home.GetThemeDir()
-    themeFile := filepath.Join(dataDir, name+".json")
-    var data []byte
-    if data, err = os.ReadFile(themeFile); err == nil {
-        result = string(data)
-    }
-    return
+	dataDir := home.GetThemeDir()
+	themeFile := filepath.Join(dataDir, name+".json")
+	var data []byte
+	if data, err = os.ReadFile(themeFile); err == nil {
+		result = string(data)
+	}
+	return
 }
 
 func (l *fileLoader) GetBindings() (result []string, err error) {
-    dataDir := home.GetBindingDir()
-    _ = filepath.WalkDir(dataDir, func(path string, d os.DirEntry, err error) error {
-        if err != nil {
-            return err
-        }
+	dataDir := home.GetBindingDir()
+	_ = filepath.WalkDir(dataDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 
-        if !d.IsDir() && filepath.Ext(path) == ".json" {
-            result = append(result, strings.TrimSuffix(filepath.Base(path), ".json"))
-        }
-        return nil
-    })
-    return
+		if !d.IsDir() && filepath.Ext(path) == ".json" {
+			result = append(result, strings.TrimSuffix(filepath.Base(path), ".json"))
+		}
+		return nil
+	})
+	return
 }
 
 func (l *fileLoader) GetBinding(name string) (result string, err error) {
-    dataDir := home.GetBindingDir()
-    themeFile := filepath.Join(dataDir, name+".json")
-    var data []byte
-    if data, err = os.ReadFile(themeFile); err == nil {
-        result = string(data)
-    }
-    return
+	dataDir := home.GetBindingDir()
+	themeFile := filepath.Join(dataDir, name+".json")
+	var data []byte
+	if data, err = os.ReadFile(themeFile); err == nil {
+		result = string(data)
+	}
+	return
 }
 
 func (l *fileLoader) GetMenus() ([]*Menu, error) {
-    //TODO implement me
-    panic("implement me")
+	//TODO implement me
+	panic("implement me")
 }
 
 func (l *fileLoader) GetPageOfJS(s string) (string, error) {
-    //TODO implement me
-    panic("implement me")
+	//TODO implement me
+	panic("implement me")
 }
 
 func (l *fileLoader) GetPageOfCSS(s string) (string, error) {
-    //TODO implement me
-    panic("implement me")
+	//TODO implement me
+	panic("implement me")
 }

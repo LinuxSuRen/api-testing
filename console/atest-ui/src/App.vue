@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-    Document,
     Menu as IconMenu,
     Histogram,
     Location,
@@ -16,7 +15,6 @@ import TestingPanel from './views/TestingPanel.vue'
 import TestingHistoryPanel from './views/TestingHistoryPanel.vue'
 import MockManager from './views/MockManager.vue'
 import StoreManager from './views/StoreManager.vue'
-import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
 import DataManager from './views/DataManager.vue'
 import MagicKey from './components/MagicKey.vue'
@@ -158,10 +156,6 @@ API.GetMenus((menus) => {
           <el-icon><DataAnalysis /></el-icon>
           <template #title>{{ t('title.data' )}}</template>
         </el-menu-item>
-        <el-menu-item index="secret">
-          <el-icon><document /></el-icon>
-          <template #title>{{ t('title.secrets') }}</template>
-        </el-menu-item>
         <el-menu-item index="store">
           <el-icon><location /></el-icon>
           <template #title>{{ t('title.stores') }}</template>
@@ -186,11 +180,10 @@ API.GetMenus((menus) => {
       <DataManager v-else-if="panelName === 'data'" />
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
-      <SecretManager v-else-if="panelName === 'secret'" />
       <WelcomePage v-else-if="panelName === 'welcome' || panelName === ''" />
 
       <span v-for="menu in extensionMenus" :key="menu.index" :index="menu.index">
-        <Extension v-if="panelName === 'demo'" :name="menu.name" />
+        <Extension v-if="panelName === menu.index" :name="menu.name" />
       </span>
     </el-main>
 

@@ -181,6 +181,7 @@ func (l *nonLoader) GetBinding(name string) (result string, err error) {
 }
 
 func (l *nonLoader) GetMenus() ([]*Menu, error) {
+	fmt.Println("not support non-loader for getting menus")
 	return nil, fmt.Errorf("not support")
 }
 

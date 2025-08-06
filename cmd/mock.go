@@ -17,94 +17,94 @@ limitations under the License.
 package cmd
 
 import (
-    "fmt"
-    "net"
-    "os"
-    "os/signal"
-    "syscall"
+	"fmt"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
-    "github.com/linuxsuren/api-testing/pkg/mock"
-    "github.com/spf13/cobra"
+	"github.com/linuxsuren/api-testing/pkg/mock"
+	"github.com/spf13/cobra"
 )
 
 type mockOption struct {
-    port    int
-    prefix  string
-    metrics bool
-    tls     bool
-    tlsCert string
-    tlsKey  string
+	port    int
+	prefix  string
+	metrics bool
+	tls     bool
+	tlsCert string
+	tlsKey  string
 }
 
 func createMockCmd() (c *cobra.Command) {
-    opt := &mockOption{}
+	opt := &mockOption{}
 
-    c = &cobra.Command{
-        Use:   "mock",
-        Short: "Start a mock server",
-        Args:  cobra.ExactArgs(1),
-        RunE:  opt.runE,
-    }
+	c = &cobra.Command{
+		Use:   "mock",
+		Short: "Start a mock server",
+		Args:  cobra.ExactArgs(1),
+		RunE:  opt.runE,
+	}
 
-    flags := c.Flags()
-    flags.IntVarP(&opt.port, "port", "", 6060, "The mock server port")
-    flags.StringVarP(&opt.prefix, "prefix", "", "/mock", "The mock server API prefix")
-    flags.BoolVarP(&opt.metrics, "metrics", "m", true, "Enable request metrics collection")
-    flags.BoolVarP(&opt.tls, "tls", "", false, "Enable TLS mode. Set to true to enable TLS. Alow SAN certificates")
-    flags.StringVarP(&opt.tlsCert, "cert-file", "", "", "The path to the certificate file, Alow SAN certificates")
-    flags.StringVarP(&opt.tlsKey, "key-file", "", "", "The path to the key file, Alow SAN certificates")
-    return
+	flags := c.Flags()
+	flags.IntVarP(&opt.port, "port", "", 6060, "The mock server port")
+	flags.StringVarP(&opt.prefix, "prefix", "", "/mock", "The mock server API prefix")
+	flags.BoolVarP(&opt.metrics, "metrics", "m", true, "Enable request metrics collection")
+	flags.BoolVarP(&opt.tls, "tls", "", false, "Enable TLS mode. Set to true to enable TLS. Alow SAN certificates")
+	flags.StringVarP(&opt.tlsCert, "cert-file", "", "", "The path to the certificate file, Alow SAN certificates")
+	flags.StringVarP(&opt.tlsKey, "key-file", "", "", "The path to the key file, Alow SAN certificates")
+	return
 }
 
 func (o *mockOption) runE(c *cobra.Command, args []string) (err error) {
-    reader := mock.NewLocalFileReader(args[0])
-    server := mock.NewInMemoryServer(c.Context(), o.port)
-    if o.tls {
-        server.WithTLS(o.tlsCert, o.tlsKey)
-    }
-    if o.metrics {
-        server.EnableMetrics()
-    }
-    if err = server.Start(reader, o.prefix); err != nil {
-        return
-    }
+	reader := mock.NewLocalFileReader(args[0])
+	server := mock.NewInMemoryServer(c.Context(), o.port)
+	if o.tls {
+		server.WithTLS(o.tlsCert, o.tlsKey)
+	}
+	if o.metrics {
+		server.EnableMetrics()
+	}
+	if err = server.Start(reader, o.prefix); err != nil {
+		return
+	}
 
-    clean := make(chan os.Signal, 1)
-    signal.Notify(clean, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
-    printLocalIPs(c, o.port)
-    if o.metrics {
-        c.Printf("Metrics available at http://localhost:%d%s/metrics\n", o.port, o.prefix)
-    }
+	clean := make(chan os.Signal, 1)
+	signal.Notify(clean, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
+	printLocalIPs(c, o.port)
+	if o.metrics {
+		c.Printf("Metrics available at http://localhost:%d%s/metrics\n", o.port, o.prefix)
+	}
 
-    select {
-    case <-c.Context().Done():
-    case <-clean:
-    }
-    err = server.Stop()
-    return
+	select {
+	case <-c.Context().Done():
+	case <-clean:
+	}
+	err = server.Stop()
+	return
 }
 
 func printLocalIPs(c *cobra.Command, port int) {
-    if ips, err := getLocalIPs(); err == nil {
-        for _, ip := range ips {
-            c.Printf("server is available at http://%s:%d\n", ip, port)
-        }
-    }
+	if ips, err := getLocalIPs(); err == nil {
+		for _, ip := range ips {
+			c.Printf("server is available at http://%s:%d\n", ip, port)
+		}
+	}
 }
 
 func getLocalIPs() ([]string, error) {
-    var ips []string
-    addrs, err := net.InterfaceAddrs()
-    if err != nil {
-        return nil, fmt.Errorf("failed to get interface addresses: %v", err)
-    }
+	var ips []string
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get interface addresses: %v", err)
+	}
 
-    for _, addr := range addrs {
-        if ipNet, ok := addr.(*net.IPNet); ok {
-            if ipNet.IP.To4() != nil && !ipNet.IP.IsLoopback() {
-                ips = append(ips, ipNet.IP.String())
-            }
-        }
-    }
-    return ips, nil
+	for _, addr := range addrs {
+		if ipNet, ok := addr.(*net.IPNet); ok {
+			if ipNet.IP.To4() != nil && !ipNet.IP.IsLoopback() {
+				ips = append(ips, ipNet.IP.String())
+			}
+		}
+	}
+	return ips, nil
 }
