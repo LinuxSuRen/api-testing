@@ -30,7 +30,6 @@ const { t, locale: i18nLocale } = useI18n()
 const app = getCurrentInstance()?.appContext.app;
 
 import { setAsDarkTheme, getThemes, setTheme, getTheme } from './theme'
-import { resolve } from 'path'
 
 const allThemes = ref(getThemes())
 const asDarkMode = ref(Cache.GetPreference().darkTheme)
@@ -122,8 +121,6 @@ const extensionMenus = ref([] as Menu[]);
 API.GetMenus((menus) => {
     if (menus.data && menus.data.length > 0) {
         extensionMenus.value = menus.data;
-    } else {
-        console.warn('没有获取到扩展菜单')
     }
 });
 </script>
