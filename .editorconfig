@@ -7,9 +7,13 @@ root = true
 [*]
 end_of_line = lf
 insert_final_newline = true
+trim_trailing_whitespace = true
 charset = utf-8
 
 # 4 space indentation
-[*.{py,proto,go,js,ts,json,vue}]
+[*.{py,proto,js,ts,json,vue}]
 indent_style = space
 indent_size = 4
+
+[*.go]
+indent_style = tab
