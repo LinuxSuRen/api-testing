@@ -1374,21 +1374,18 @@ func (s *server) GetMenus(ctx context.Context, in *Empty) (result *MenuList, err
 	loader := s.getLoader(ctx)
 	defer loader.Close()
 
-	result = &MenuList{
-		Data: []*Menu{{
-			Name:  "Demo",
-			Icon:  "mdi:home",
-			Index: "demo",
-		}},
+	result = &MenuList{}
+	if menus, err := loader.GetMenus(); err == nil {
+		for _, menu := range menus {
+			result.Data = append(result.Data, &Menu{
+				Name:  menu.Name,
+				Icon:  menu.Icon,
+				Index: menu.Index,
+			})
+		}
 	}
 	return
 }
-
-//go:embed demo.umd.js
-var demoJS []byte
-
-//go:embed demo.css
-var demoCSS []byte
 
 func (s *server) GetPageOfJS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
 	loader := s.getLoader(ctx)
@@ -1396,7 +1393,9 @@ func (s *server) GetPageOfJS(ctx context.Context, in *SimpleName) (result *Commo
 
 	result = &CommonResult{
 		Success: true,
-		Message: string(demoJS),
+	}
+	if js, err := loader.GetPageOfJS(in.Name); err == nil {
+		result.Message = js
 	}
 	return
 }
@@ -1407,7 +1406,9 @@ func (s *server) GetPageOfCSS(ctx context.Context, in *SimpleName) (result *Comm
 
 	result = &CommonResult{
 		Success: true,
-		Message: string(demoCSS),
+	}
+	if css, err := loader.GetPageOfCSS(in.Name); err == nil {
+		result.Message = css
 	}
 	return
 }

@@ -120,6 +120,9 @@ function GetVersion(callback?: (v: AppVersion) => void) {
 const GetMenus = (callback?: (v: any) => void) => {
     const requestOptions = {
         method: 'GET',
+        headers: {
+            'X-Store-Name': 'vault'
+        },
     }
     fetch('/api/v1/extension/menus', requestOptions)
         .then(DefaultResponseProcess)
@@ -129,6 +132,9 @@ const GetMenus = (callback?: (v: any) => void) => {
 const GetPageOfJS = (name: string, callback?: (v: CommonResult) => void) => {
     const requestOptions = {
         method: 'GET',
+        headers: {
+            'X-Store-Name': 'vault'
+        },
     }
     fetch(`/api/v1/extension/pages/${name}/js`, requestOptions)
         .then(DefaultResponseProcess)
@@ -138,6 +144,9 @@ const GetPageOfJS = (name: string, callback?: (v: CommonResult) => void) => {
 const GetPageOfCSS = (name: string, callback?: (v: CommonResult) => void) => { 
     const requestOptions = {
         method: 'GET',
+        headers: {
+            'X-Store-Name': 'vault'
+        },
     }
     fetch(`/api/v1/extension/pages/${name}/css`, requestOptions)
         .then(DefaultResponseProcess)

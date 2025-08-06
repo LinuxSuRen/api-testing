@@ -373,11 +373,11 @@ func (g *gRPCLoader) GetBinding(name string) (result string, err error) {
     return
 }
 
-func (g *gRPCLoader) GetMenus() (result []*Menu, err error) {
+func (g *gRPCLoader) GetMenus() (result []*testing.Menu, err error) {
     var menuList *server.MenuList
     if menuList, err = g.client.GetMenus(g.ctx, &server.Empty{}); err == nil && menuList.Data != nil {
         for _, item := range menuList.Data {
-            result = append(result, &Menu{
+            result = append(result, &testing.Menu{
                 Name:  item.Name,
                 Icon:  item.Icon,
                 Index: item.Index,

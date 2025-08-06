@@ -179,3 +179,15 @@ func (l *nonLoader) GetBinding(name string) (result string, err error) {
 	err = fmt.Errorf("not support")
 	return
 }
+
+func (l *nonLoader) GetMenus() ([]*Menu, error) {
+	return nil, fmt.Errorf("not support")
+}
+
+func (l *nonLoader) GetPageOfJS(s string) (string, error) {
+	return "", fmt.Errorf("not support")
+}
+
+func (l *nonLoader) GetPageOfCSS(s string) (string, error) {
+	return "", fmt.Errorf("not support")
+}
