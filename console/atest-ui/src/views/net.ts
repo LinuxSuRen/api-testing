@@ -746,7 +746,7 @@ function ReloadMockServer(config: any) {
         },
         body: JSON.stringify(config)
     }
-    fetch(`/api/v1/mock/reload`, requestOptions)
+    return fetch(`/api/v1/mock/reload`, requestOptions)
         .then(DefaultResponseProcess)
 }
 

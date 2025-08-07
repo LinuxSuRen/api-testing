@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { Codemirror } from 'vue-codemirror';
+import { ElMessage } from 'element-plus'
 import yaml from 'js-yaml';
 import { jsonSchema } from "codemirror-json-schema";
 import { NewTemplateLangComplete, NewHeaderLangComplete } from './languageComplete'
@@ -34,6 +35,10 @@ interface MockConfig {
   ConfigAsJSON: string
   Prefix: string
   Port: number
+  storeKind: string
+  storeLocalFile?: string
+  storeURL?: string
+  storeRemote?: string
 }
 
 const tabActive = ref('yaml')
@@ -64,10 +69,18 @@ function jsonToYaml(jsonData: object | string): string {
 }
 
 const link = ref('')
-API.GetMockConfig((d) => {
-  mockConfig.value = d
-  link.value = `http://${window.location.hostname}:${d.Port}${d.Prefix}/api.json`
-})
+const loadConfig = () => {
+    API.GetMockConfig((d) => {
+        ElMessage({
+            showClose: true,
+            message: 'Config loaded!',
+            type: 'success'
+        });
+        mockConfig.value = d
+        link.value = `http://${window.location.hostname}:${d.Port}${d.Prefix}/api.json`
+    })
+}
+loadConfig()
 const prefixChanged = (p: string) => {
   mockConfig.value.Prefix = p
 }
@@ -96,13 +109,23 @@ items:
 <template>
     <div>
         <el-button type="primary" @click="insertSample">{{t('button.insertSample')}}</el-button>
-        <el-button type="warning" @click="API.ReloadMockServer(mockConfig)">{{t('button.reload')}}</el-button>
+        <el-button type="warning" @click="API.ReloadMockServer(mockConfig).then(() => loadConfig())">{{t('button.reload')}}</el-button>
         <el-divider direction="vertical" />
         <el-link target="_blank" :href="link">{{ link }}</el-link> <!-- Noncompliant -->
     </div>
     <div class="config">
       API Prefix:<EditButton :value="mockConfig.Prefix" @changed="prefixChanged"/>
       Port:<EditButton :value="mockConfig.Port" @changed="portChanged"/>
+      Store:
+      <el-select v-model="mockConfig.storeKind" placeholder="Select Store Kind">
+        <el-option label="Memory" value="memory"></el-option>
+        <el-option label="Local File" value="localFile"></el-option>
+        <el-option label="Remote" value="remote"></el-option>
+        <el-option label="URL" value="url"></el-option>
+      </el-select>
+      <span v-if="mockConfig.storeKind === 'localFile'">
+      File:<el-input v-model="mockConfig.storeLocalFile" placeholder="Local File Path"></el-input>
+      </span>
     </div>
     <el-splitter layout="vertical" style="height: calc(100vh - 100px);">
         <el-splitter-panel size="70%">

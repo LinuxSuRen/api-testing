@@ -1452,6 +1452,7 @@ func (s *server) GetPageOfCSS(ctx context.Context, in *SimpleName) (result *Comm
 // Start starts the mock server
 type mockServerController struct {
 	UnimplementedMockServer
+	config      *MockConfig
 	mockWriter  mock.ReaderAndWriter
 	loader      mock.Loadable
 	reader      mock.Reader
@@ -1462,6 +1463,7 @@ type mockServerController struct {
 
 func NewMockServerController(mockWriter mock.ReaderAndWriter, loader mock.Loadable, combinePort int) MockServer {
 	return &mockServerController{
+		config:      &MockConfig{},
 		mockWriter:  mockWriter,
 		loader:      loader,
 		prefix:      "/mock/server",
@@ -1471,7 +1473,17 @@ func NewMockServerController(mockWriter mock.ReaderAndWriter, loader mock.Loadab
 }
 
 func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (reply *Empty, err error) {
-	s.mockWriter.Write([]byte(in.Config))
+	switch in.StoreKind {
+	case "memory":
+		s.mockWriter = mock.NewInMemoryReader(in.Config)
+	case "localFile":
+		s.mockWriter = mock.NewLocalFileReader(in.StoreLocalFile)
+	case "remote":
+	case "url":
+	}
+	s.config = in
+
+	// s.mockWriter.Write([]byte(in.Config))
 	s.prefix = in.Prefix
 	if dServer, ok := s.loader.(mock.DynamicServer); ok && dServer.GetPort() != strconv.Itoa(int(in.GetPort())) {
 		if strconv.Itoa(s.combinePort) != dServer.GetPort() {
@@ -1488,14 +1500,20 @@ func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (repl
 		}
 		server.WithLogWriter(s)
 		s.loader = server
+	} else {
+		s.mockWriter.Parse()
 	}
 	err = s.loader.Load()
 	return
 }
 func (s *mockServerController) GetConfig(ctx context.Context, in *Empty) (reply *MockConfig, err error) {
 	reply = &MockConfig{
-		Prefix: s.prefix,
-		Config: string(s.mockWriter.GetData()),
+		Prefix:         s.prefix,
+		Config:         string(s.mockWriter.GetData()),
+		StoreKind:      s.config.StoreKind,
+		StoreLocalFile: s.config.StoreLocalFile,
+		StoreURL:       s.config.StoreURL,
+		StoreRemote:    s.config.StoreRemote,
 	}
 	if dServer, ok := s.loader.(mock.DynamicServer); ok {
 		if port, pErr := strconv.ParseInt(dServer.GetPort(), 10, 32); pErr == nil {

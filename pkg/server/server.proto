@@ -691,6 +691,10 @@ message MockConfig {
   string Prefix = 1;
   string Config = 2;
   int32 Port = 3;
+  string storeKind = 4;
+  string storeLocalFile = 5;
+  string storeURL = 6;
+  string storeRemote = 7;
 }
 
 message Version {
