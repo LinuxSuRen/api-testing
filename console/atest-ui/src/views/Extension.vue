@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { API } from './net';
 
-const props = defineProps({
-  name: String
-})
+interface Props {
+  name: string
+}
+const props = defineProps<Props>()
 
 const loadPlugin = async (): Promise<void> => {
     try {
@@ -20,32 +21,29 @@ const loadPlugin = async (): Promise<void> => {
             script.textContent = d.message;
             document.head.appendChild(script);
 
-            // 类型安全的插件访问
             const plugin = window.ATestPlugin;
             
             if (plugin && plugin.mount) {
-                console.log('插件加载成功');
+                console.log('extension load success');
                 const container = document.getElementById("plugin-container");
-                plugin.mount(container, {
-                    message: '来自宿主的消息'
-                });
+                plugin.mount(container);
             }
         });
     } catch (error) {
-        console.log(`加载失败: ${(error as Error).message}`)
+        console.log(`extension load error: ${(error as Error).message}`)
     } finally {
-        console.log('插件加载完成');
+        console.log('extension load finally');
     }
 };
 try {
     loadPlugin();
 } catch (error) {
-    console.error('插件加载失败:', error);
+    console.error('extension load error:', error);
 }
 </script>
 
 <template>
     <div id="plugin-container">
-    {{ props.name }}
+        {{ props.name }}
     </div>
 </template>

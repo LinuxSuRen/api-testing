@@ -1385,7 +1385,7 @@ func (s *server) GetBinding(ctx context.Context, in *SimpleName) (result *Common
 	return
 }
 
-func (s *server) GetMenus(ctx context.Context, in *Empty) (result *MenuList, err error) {
+func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err error) {
 	loader := s.getLoader(ctx)
 	defer loader.Close()
 
@@ -1398,6 +1398,10 @@ func (s *server) GetMenus(ctx context.Context, in *Empty) (result *MenuList, err
 	for _, loader := range loaders {
 		if menus, mErr := loader.GetMenus(); mErr == nil {
 			for _, menu := range menus {
+				if isSystemMenu(menu.Index) {
+					serverLogger.Info("skip due to conflict with system name", "menu", menu)
+					continue
+				}
 				result.Data = append(result.Data, &Menu{
 					Name:  menu.Name,
 					Icon:  menu.Icon,
@@ -1407,6 +1411,14 @@ func (s *server) GetMenus(ctx context.Context, in *Empty) (result *MenuList, err
 		}
 	}
 	return
+}
+
+func isSystemMenu(index string) bool {
+	switch index {
+	case "testing", "history", "data", "mock", "store", "welcome", "":
+		return true
+	}
+	return false
 }
 
 func (s *server) GetPageOfJS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
