@@ -117,15 +117,13 @@ items:
       API Prefix:<EditButton :value="mockConfig.Prefix" @changed="prefixChanged"/>
       Port:<EditButton :value="mockConfig.Port" @changed="portChanged"/>
       Store:
-      <el-select v-model="mockConfig.storeKind" placeholder="Select Store Kind">
+      <el-select v-model="mockConfig.storeKind" placeholder="Select Store Kind"
+                 class="m-2 select"
+                 size="default">
         <el-option label="Memory" value="memory"></el-option>
         <el-option label="Local File" value="localFile"></el-option>
-        <el-option label="Remote" value="remote"></el-option>
-        <el-option label="URL" value="url"></el-option>
       </el-select>
-      <span v-if="mockConfig.storeKind === 'localFile'">
-      File:<el-input v-model="mockConfig.storeLocalFile" placeholder="Local File Path"></el-input>
-      </span>
+      <el-input v-model="mockConfig.storeLocalFile" placeholder="Local File Path" v-if="mockConfig.storeKind === 'localFile'"></el-input>
     </div>
     <el-splitter layout="vertical" style="height: calc(100vh - 100px);">
         <el-splitter-panel size="70%">
@@ -141,12 +139,12 @@ items:
             </el-tabs>
         </el-splitter-panel>
         <el-splitter-panel size="30%">
-            <el-card class="log-output" shadow="hover">
+            <el-card shadow="hover">
                 <template #header>
                     <span>{{ t('title.logs') }}</span>
                 </template>
-                <el-scrollbar ref="logScrollbar">
-                    <pre style="white-space: pre-wrap; word-break: break-all;">{{ logOutput }}</pre>
+                <el-scrollbar>
+                    <pre style="white-space: pre-wrap; word-break: break-all;">{{logOutput}}</pre>
                 </el-scrollbar>
             </el-card>
         </el-splitter-panel>
@@ -160,8 +158,10 @@ items:
   align-items: center; 
   gap: 8px; 
 }
-.log-output {
-  height: 100%;
-  overflow: auto;
+.select {
+    width: 150px !important;
+}
+.el-input {
+    --el-input-width: 300px !important;
 }
 </style>

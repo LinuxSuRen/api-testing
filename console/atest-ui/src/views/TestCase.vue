@@ -1290,7 +1290,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
                   v-model="historyForm.selectedID"
                   default-first-option
                   placeholder="History Case"
-                  size="middle"
+                  size="default"
                   @change="handleHistoryChange"
                 >
                   <el-option
