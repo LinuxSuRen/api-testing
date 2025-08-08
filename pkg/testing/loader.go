@@ -32,7 +32,17 @@ type Loader interface {
 	GetTheme(string) (string, error)
 	GetBindings() ([]string, error)
 	GetBinding(string) (string, error)
+	GetMenus() ([]*Menu, error)
+	GetPageOfJS(string) (string, error)
+	GetPageOfCSS(string) (string, error)
 }
+
+type Menu struct {
+	Name  string `json:"name"`
+	Icon  string `json:"icon"`
+	Index string `json:"index"`
+}
+
 type DataResult struct {
 	Pairs           map[string]string
 	Rows            []map[string]string

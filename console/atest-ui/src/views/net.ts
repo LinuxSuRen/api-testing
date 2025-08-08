@@ -117,6 +117,33 @@ function GetVersion(callback?: (v: AppVersion) => void) {
         .then(emptyOrDefault(callback))
 }
 
+const GetMenus = (callback?: (v: any) => void) => {
+    const requestOptions = {
+        method: 'GET',
+    }
+    fetch('/api/v1/extension/menus', requestOptions)
+        .then(DefaultResponseProcess)
+        .then(emptyOrDefault(callback))
+}
+
+const GetPageOfJS = (name: string, callback?: (v: CommonResult) => void) => {
+    const requestOptions = {
+        method: 'GET',
+    }
+    fetch(`/api/v1/extension/pages/${name}/js`, requestOptions)
+        .then(DefaultResponseProcess)
+        .then(emptyOrDefault(callback))
+}
+
+const GetPageOfCSS = (name: string, callback?: (v: CommonResult) => void) => { 
+    const requestOptions = {
+        method: 'GET',
+    }
+    fetch(`/api/v1/extension/pages/${name}/css`, requestOptions)
+        .then(DefaultResponseProcess)
+        .then(emptyOrDefault(callback))
+}
+
 interface CommonResult {
     message: string
     success: boolean
@@ -719,7 +746,7 @@ function ReloadMockServer(config: any) {
         },
         body: JSON.stringify(config)
     }
-    fetch(`/api/v1/mock/reload`, requestOptions)
+    return fetch(`/api/v1/mock/reload`, requestOptions)
         .then(DefaultResponseProcess)
 }
 
@@ -965,7 +992,7 @@ const GetBinding = (name: string, callback: (d: any) => void | null) => {
 
 export const API = {
     DefaultResponseProcess,
-    GetVersion, GetSchema,
+    GetVersion, GetSchema, GetMenus, GetPageOfJS, GetPageOfCSS,
     CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, DuplicateTestSuite, RenameTestSuite, GetTestSuiteYaml,
     CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, DuplicateTestCase, RenameTestCase, RunTestCase, BatchRunTestCase,
     GetHistoryTestCaseWithResult, DeleteHistoryTestCase, GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,

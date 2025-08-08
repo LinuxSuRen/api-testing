@@ -79,6 +79,6 @@ install-tool: hd
 
 .PHONY: init-env
 init-env: ## Install the tools to init env [not support windows]
-init-env: hd
+init-env: hd install-tool
 	hd i cli/cli
 	gh extension install linuxsuren/gh-dev

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-    Document,
     Menu as IconMenu,
     Histogram,
     Location,
@@ -16,10 +15,10 @@ import TestingPanel from './views/TestingPanel.vue'
 import TestingHistoryPanel from './views/TestingHistoryPanel.vue'
 import MockManager from './views/MockManager.vue'
 import StoreManager from './views/StoreManager.vue'
-import SecretManager from './views/SecretManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
 import DataManager from './views/DataManager.vue'
 import MagicKey from './components/MagicKey.vue'
+import Extension from './views/Extension.vue'
 import { useI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'; 
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs' 
@@ -109,6 +108,19 @@ const theme = ref(getTheme())
 watch(theme, (e) => {
     setTheme(e)
 })
+
+interface Menu {
+  name: string
+  icon: string
+  index: string
+}
+
+const extensionMenus = ref([] as Menu[]);
+API.GetMenus((menus) => {
+    if (menus.data && menus.data.length > 0) {
+        extensionMenus.value = menus.data;
+    }
+});
 </script>
 
 <template>
@@ -144,14 +156,16 @@ watch(theme, (e) => {
           <el-icon><DataAnalysis /></el-icon>
           <template #title>{{ t('title.data' )}}</template>
         </el-menu-item>
-        <el-menu-item index="secret">
-          <el-icon><document /></el-icon>
-          <template #title>{{ t('title.secrets') }}</template>
-        </el-menu-item>
         <el-menu-item index="store">
           <el-icon><location /></el-icon>
           <template #title>{{ t('title.stores') }}</template>
         </el-menu-item>
+        <span v-for="menu in extensionMenus" :key="menu.index" :index="menu.index">
+            <el-menu-item :index="menu.index">
+                <el-icon><IconMenu /></el-icon>
+                <template #title>{{ menu.name }}</template>
+            </el-menu-item>
+        </span>
       </el-menu>
     </el-aside>
 
@@ -166,8 +180,11 @@ watch(theme, (e) => {
       <DataManager v-else-if="panelName === 'data'" />
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
-      <SecretManager v-else-if="panelName === 'secret'" />
-      <WelcomePage v-else />
+      <WelcomePage v-else-if="panelName === 'welcome' || panelName === ''" />
+
+      <span v-for="menu in extensionMenus" :key="menu.index" :index="menu.index">
+        <Extension v-if="panelName === menu.index" :name="menu.name" />
+      </span>
     </el-main>
 
     <div style="position: absolute; bottom: 0px; right: 10px;">

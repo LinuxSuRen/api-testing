@@ -19,10 +19,12 @@ package remote
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/logging"
+	"github.com/linuxsuren/api-testing/pkg/mock"
 	server "github.com/linuxsuren/api-testing/pkg/server"
 	"github.com/linuxsuren/api-testing/pkg/testing"
 
@@ -34,10 +36,11 @@ var (
 )
 
 type gRPCLoader struct {
-	store  *testing.Store
-	client LoaderClient
-	ctx    context.Context
-	conn   *grpc.ClientConn
+	store    *testing.Store
+	client   LoaderClient
+	ctx      context.Context
+	conn     *grpc.ClientConn
+	mockData []byte
 }
 
 func NewGRPCloaderFromStore() testing.StoreWriterFactory {
@@ -371,6 +374,55 @@ func (g *gRPCLoader) GetBinding(name string) (result string, err error) {
 		result = themeData.Message
 	}
 	return
+}
+
+func (g *gRPCLoader) GetMenus() (result []*testing.Menu, err error) {
+	fmt.Println("getting menus from grpc server", g.store.Kind)
+
+	var menuList *server.MenuList
+	if menuList, err = g.client.GetMenus(g.ctx, &server.Empty{}); err == nil {
+		for _, item := range menuList.Data {
+			result = append(result, &testing.Menu{
+				Name:  item.Name,
+				Icon:  item.Icon,
+				Index: item.Index,
+			})
+		}
+	}
+	fmt.Println("get menus, error", err)
+	return
+}
+
+func (g *gRPCLoader) GetPageOfJS(name string) (result string, err error) {
+	var themeData *server.CommonResult
+	if themeData, err = g.client.GetPageOfJS(g.ctx, &server.SimpleName{
+		Name: name,
+	}); err == nil && themeData != nil {
+		result = themeData.Message
+	}
+	return
+}
+
+func (g *gRPCLoader) GetPageOfCSS(name string) (result string, err error) {
+	var themeData *server.CommonResult
+	if themeData, err = g.client.GetPageOfCSS(g.ctx, &server.SimpleName{
+		Name: name,
+	}); err == nil && themeData != nil {
+		result = themeData.Message
+	}
+	return
+}
+
+func (g *gRPCLoader) Parse() (server *mock.Server, err error) {
+	return
+}
+
+func (g *gRPCLoader) GetData() []byte {
+	return g.mockData
+}
+
+func (g *gRPCLoader) Write(data []byte) {
+	g.mockData = data
 }
 
 func (g *gRPCLoader) Close() {

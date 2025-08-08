@@ -577,3 +577,18 @@ func (l *fileLoader) GetBinding(name string) (result string, err error) {
 	}
 	return
 }
+
+func (l *fileLoader) GetMenus() ([]*Menu, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *fileLoader) GetPageOfJS(s string) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (l *fileLoader) GetPageOfCSS(s string) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}

@@ -458,7 +458,7 @@ const renameTestSuite = (name: string) => {
               v-model="testCaseForm.request.method"
               class="m-2"
               placeholder="Method"
-              size="middle"
+              size="default"
               test-id="case-form-method"
             >
               <el-option
