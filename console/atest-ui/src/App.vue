@@ -153,6 +153,10 @@ API.GetMenus((menus) => {
           <el-icon><Guide /></el-icon>
           <template #title>{{ t('title.mock' )}}</template>
         </el-menu-item>
+        <el-menu-item index="data" test-id="data-menu">
+          <el-icon><DataAnalysis /></el-icon>
+          <template #title>{{ t('title.data' )}}</template>
+        </el-menu-item>
         <el-menu-item index="store">
           <el-icon><location /></el-icon>
           <template #title>{{ t('title.stores') }}</template>

@@ -1385,6 +1385,8 @@ func (s *server) GetBinding(ctx context.Context, in *SimpleName) (result *Common
 	return
 }
 
+var uiExtensionLoaders = make(map[string]testing.Writer)
+
 func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err error) {
 	loader := s.getLoader(ctx)
 	defer loader.Close()
@@ -1412,6 +1414,7 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 							Icon:  menu.Icon,
 							Index: menu.Index,
 						}
+						uiExtensionLoaders[menu.Index] = loader
 					}
 					continue
 				}
@@ -1422,6 +1425,7 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 					Icon:  menu.Icon,
 					Index: menu.Index,
 				})
+				uiExtensionLoaders[menu.Index] = loader
 			}
 		}
 	}
@@ -1441,27 +1445,31 @@ func isSystemMenu(index string) bool {
 }
 
 func (s *server) GetPageOfJS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-
-	result = &CommonResult{
-		Success: true,
-	}
-	if js, err := loader.GetPageOfJS(in.Name); err == nil {
-		result.Message = js
+	result = &CommonResult{}
+	if loader, ok := uiExtensionLoaders[in.Name]; ok {
+		if js, err := loader.GetPageOfJS(in.Name); err == nil {
+			result.Message = js
+			result.Success = true
+		} else {
+			result.Message = err.Error()
+		}
+	} else {
+		result.Message = fmt.Sprintf("not found loader for %s", in.Name)
 	}
 	return
 }
 
 func (s *server) GetPageOfCSS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-
-	result = &CommonResult{
-		Success: true,
-	}
-	if css, err := loader.GetPageOfCSS(in.Name); err == nil {
-		result.Message = css
+	result = &CommonResult{}
+	if loader, ok := uiExtensionLoaders[in.Name]; ok {
+		if js, err := loader.GetPageOfCSS(in.Name); err == nil {
+			result.Message = js
+			result.Success = true
+		} else {
+			result.Message = err.Error()
+		}
+	} else {
+		result.Message = fmt.Sprintf("not found loader for %s", in.Name)
 	}
 	return
 }

@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { API } from './net';
 
 interface Props {
   name: string
 }
 const props = defineProps<Props>()
-
+const loading = ref(true)
 const loadPlugin = async (): Promise<void> => {
     try {
         API.GetPageOfCSS(props.name, (d) => {
@@ -45,7 +46,8 @@ try {
 </script>
 
 <template>
-    <div id="plugin-container">
-        {{ props.name }}
+    <div id="plugin-container"
+        v-loading="loading"
+        :element-loading-text="props.name + ' is loading...'">
     </div>
 </template>

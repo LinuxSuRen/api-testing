@@ -389,7 +389,6 @@ func (g *gRPCLoader) GetMenus() (result []*testing.Menu, err error) {
 			})
 		}
 	}
-	fmt.Println("get menus, error", err)
 	return
 }
 
