@@ -44,14 +44,27 @@ func createFunctionCmd() (c *cobra.Command) {
 	}
 	flags := c.Flags()
 	flags.StringVarP(&opt.feature, "feature", "", "", "The feature query")
+	flags.StringVarP(&opt.extensionFile, "extension-file", "", "", "The extension file")
 	return
 }
 
 type funcPrinterOption struct {
-	feature string
+	feature       string
+	extensionFile string
 }
 
 func (o *funcPrinterOption) runE(cmd *cobra.Command, args []string) (err error) {
+	if o.extensionFile != "" {
+		var tpl *render.UserDefinedTemplates
+		if tpl, err = render.ParseUserDefinedTemplatesFromFile(o.extensionFile); err != nil {
+			return
+		}
+
+		if err = tpl.Validate(); err != nil {
+			return
+		}
+	}
+
 	if len(args) > 0 {
 		name := args[0]
 		filterAndPrint(cmd, name)

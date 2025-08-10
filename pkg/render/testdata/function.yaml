@@ -1,0 +1,7 @@
+items:
+  - name: randAge
+    render: |
+      {{ randInt 18 60 }}
+  - name: randFruit
+    render: |
+      {{ randEnum "apple" "banana" "cherry" "date" "elderberry" }}

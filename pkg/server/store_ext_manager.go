@@ -28,6 +28,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/downloader"
@@ -88,6 +89,12 @@ func NewStoreExtManagerInstance(execer fakeruntime.Execer) ExtManager {
 	ss.processCollect()
 	ss.WithDownloader(&nonDownloader{})
 	return ss
+}
+
+func (s *storeExtManager) StartPlugin(storeKind testing.StoreKind) {
+	for _, plugin := range storeKind.Dependencies {
+		s.Start(plugin, fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(plugin)))
+	}
 }
 
 func (s *storeExtManager) Start(name, socket string) (err error) {

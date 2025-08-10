@@ -26,10 +26,11 @@ package testing
 
 import (
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/util"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/util"
 
 	"gopkg.in/yaml.v3"
 )
@@ -97,9 +98,19 @@ func MapToStore(data map[string]string) (store Store) {
 
 // StoreKind represents a gRPC-based store
 type StoreKind struct {
-	Name    string
-	URL     string
-	Enabled bool
+	Name         string
+	Dependencies []string
+	URL          string
+	Params       []StoreKindParam
+	Link         string
+	Enabled      bool
+}
+
+type StoreKindParam struct {
+	Key          string
+	DefaultValue string
+	Enum         []string
+	Description  string
 }
 
 type StoreGetterAndSetter interface {

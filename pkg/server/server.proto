@@ -613,6 +613,7 @@ message StoreKind {
   string name = 1;
   string url = 2;
   bool enabled = 3;
+  repeated string dependencies = 4;
 }
 
 message CommonResult {
