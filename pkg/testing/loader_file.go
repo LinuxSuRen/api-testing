@@ -579,16 +579,16 @@ func (l *fileLoader) GetBinding(name string) (result string, err error) {
 }
 
 func (l *fileLoader) GetMenus() ([]*Menu, error) {
-	//TODO implement me
-	panic("implement me")
+	// no need to implement
+	return []*Menu{}, nil
 }
 
 func (l *fileLoader) GetPageOfJS(s string) (string, error) {
-	//TODO implement me
-	panic("implement me")
+	// no need to implement
+	return "", nil
 }
 
 func (l *fileLoader) GetPageOfCSS(s string) (string, error) {
-	//TODO implement me
-	panic("implement me")
+	// no need to implement
+	return "", nil
 }

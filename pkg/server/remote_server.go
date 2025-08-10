@@ -1395,6 +1395,7 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 		return
 	}
 
+	duplicatedMenus := make(map[string]int) // index is key, value is the slice index
 	for _, loader := range loaders {
 		if menus, mErr := loader.GetMenus(); mErr == nil {
 			for _, menu := range menus {
@@ -1402,6 +1403,20 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 					serverLogger.Info("skip due to conflict with system name", "menu", menu)
 					continue
 				}
+
+				// take the bigger version if the menu index is duplicated
+				if existingIndex, exists := duplicatedMenus[menu.Index]; exists {
+					if menu.Version > result.Data[existingIndex].Version {
+						result.Data[existingIndex] = &Menu{
+							Name:  menu.Name,
+							Icon:  menu.Icon,
+							Index: menu.Index,
+						}
+					}
+					continue
+				}
+
+				duplicatedMenus[menu.Index] = len(result.Data)
 				result.Data = append(result.Data, &Menu{
 					Name:  menu.Name,
 					Icon:  menu.Icon,
@@ -1410,12 +1425,16 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 			}
 		}
 	}
+
+	slices.SortFunc(result.Data, func(a, b *Menu) int {
+		return strings.Compare(a.Index, b.Index)
+	})
 	return
 }
 
 func isSystemMenu(index string) bool {
 	switch index {
-	case "testing", "history", "data", "mock", "store", "welcome", "":
+	case "testing", "history", "mock", "store", "welcome", "":
 		return true
 	}
 	return false

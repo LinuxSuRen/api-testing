@@ -334,6 +334,7 @@ message Menu {
     string name = 1;
     string index = 2;
     string icon = 3;
+    int32 version = 4;
 }
 
 message MenuList {
