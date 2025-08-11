@@ -18,6 +18,7 @@ package render
 import (
 	"errors"
 	"os"
+	"text/template"
 
 	"gopkg.in/yaml.v3"
 )
@@ -35,6 +36,16 @@ func (t *UserDefinedTemplates) Validate() (err error) {
 	for _, item := range t.Items {
 		_, rErr := Render(item.Name, item.Render, nil)
 		err = errors.Join(err, rErr)
+	}
+	return
+}
+
+func (t *UserDefinedTemplates) ConflictWith(funcMap template.FuncMap) (conflict error) {
+	for _, item := range t.Items {
+		if _, ok := funcMap[item.Name]; ok {
+			conflict = errors.New("conflict with existing function: " + item.Name)
+			break
+		}
 	}
 	return
 }

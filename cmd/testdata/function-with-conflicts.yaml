@@ -1,0 +1,4 @@
+items:
+  - name: randEnum
+    render: |
+      {{ randInt 18 60 }}

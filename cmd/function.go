@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/doc"
@@ -60,7 +61,7 @@ func (o *funcPrinterOption) runE(cmd *cobra.Command, args []string) (err error) 
 			return
 		}
 
-		if err = tpl.Validate(); err != nil {
+		if err = errors.Join(err, tpl.Validate(), tpl.ConflictWith(render.FuncMap())); err != nil {
 			return
 		}
 	}

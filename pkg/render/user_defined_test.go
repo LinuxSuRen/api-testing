@@ -28,4 +28,10 @@ func TestUserDefinedTemplates(t *testing.T) {
 	assert.NotNil(t, tpl)
 	err = tpl.Validate()
 	assert.NoError(t, err)
+	assert.NoError(t, tpl.ConflictWith(render.FuncMap()))
+
+	tpl, err = render.ParseUserDefinedTemplatesFromFile("testdata/function-with-conflicts.yaml")
+	assert.NoError(t, err)
+	assert.NoError(t, tpl.Validate())
+	assert.Error(t, tpl.ConflictWith(render.FuncMap()))
 }
