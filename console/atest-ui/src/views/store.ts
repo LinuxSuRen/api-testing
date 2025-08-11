@@ -179,15 +179,27 @@ const storeExtensions = [
             key: 'model_provider',
             defaultValue: 'ollama',
             enum: ['ollama', 'openai'],
-            description: 'AI model provider: ollama or openai'
+            description: 'AI model provider used in GenerateContentRequest.parameters for content generation'
         }, {
             key: 'model_name',
             defaultValue: 'llama3.2',
-            description: 'AI model name'
+            description: 'AI model name passed to GenerateContentRequest.parameters["model_name"] for specific model selection'
         }, {
             key: 'api_key',
             defaultValue: '',
-            description: 'API key for external providers (e.g., OpenAI)'
+            description: 'API key for external providers, used in GenerateContentRequest.parameters["api_key"] for authentication'
+        }, {
+            key: 'base_url',
+            defaultValue: 'http://localhost:11434',
+            description: 'Base URL for AI service, used in GenerateContentRequest.parameters["base_url"] to specify service endpoint'
+        }, {
+            key: 'temperature',
+            defaultValue: '0.7',
+            description: 'Controls randomness in AI responses (0.0-1.0), passed via GenerateContentRequest.parameters["temperature"]'
+        }, {
+            key: 'max_tokens',
+            defaultValue: '2048',
+            description: 'Maximum tokens in AI response, used in GenerateContentRequest.parameters["max_tokens"] to limit output length'
         }],
         link: 'https://github.com/LinuxSuRen/atest-ext-ai'
     }
