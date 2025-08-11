@@ -15,6 +15,7 @@ Ports in extensions:
 | Agent | [collector](https://github.com/LinuxSuRen/atest-ext-collector)           |  |
 | Secret | [Vault](https://github.com/LinuxSuRen/api-testing-vault-extension)       | |
 | Data | [Swagger](https://github.com/LinuxSuRen/atest-ext-data-swagger) | |
+| AI | [ai-extension](https://github.com/LinuxSuRen/atest-ext-ai) | 50051 |
 
 ## Contribute a new extension
 

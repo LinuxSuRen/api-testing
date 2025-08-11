@@ -330,6 +330,18 @@ service ThemeExtension {
     }
 }
 
+// AIExtension service provides AI-powered capabilities for atest.
+service AIExtension {
+    // Translates a natural language query into an SQL query, providing
+    // context and explanations for better accuracy and user trust.
+    rpc GenerateSQLFromNaturalLanguage (GenerateSQLRequest) returns (GenerateSQLResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/ai/sql/generate"
+            body: "*"
+        };
+    }
+}
+
 message Suites {
   map<string, Items> data = 1;
 }
@@ -696,4 +708,83 @@ message DataMeta {
     string currentDatabase = 3;
     string duration = 4;
     repeated Pair labels = 5;
+}
+
+// AI Extension related messages
+
+// Enum for supported database dialects to ensure type safety.
+enum DatabaseType {
+  // DATABASE_TYPE_UNSPECIFIED indicates a missing or unknown database type.
+  DATABASE_TYPE_UNSPECIFIED = 0;
+  MYSQL = 1;
+  POSTGRESQL = 2;
+  SQLITE = 3;
+}
+
+// Represents an example pair of natural language to SQL for few-shot prompting.
+message QueryExample {
+  // A natural language query example.
+  string natural_language_prompt = 1;
+  // The corresponding correct SQL query for the prompt.
+  string sql_query = 2;
+}
+
+// Request message for generating an SQL query from natural language.
+message GenerateSQLRequest {
+  // The user's query in natural language. (e.g., "show me all users from California")
+  string natural_language_input = 1;
+  // Target database dialect for SQL generation.
+  DatabaseType database_type = 2;
+  // Optional: A list of DDL statements (e.g., CREATE TABLE …) for relevant tables.
+  // Providing schemas helps the AI generate more accurate queries.
+  repeated string schemas = 3;
+  // Optional: A session identifier to maintain context across multiple requests,
+  // enabling conversational query refinement.
+  optional string session_id = 4;
+  // Optional: A list of examples to guide the AI, improving accuracy for
+  // specific or complex domains.
+  repeated QueryExample examples = 5;
+}
+
+// Response message containing the result of the SQL generation.
+message GenerateSQLResponse {
+  // The response can be one of the following types.
+  oneof result {
+    // Contains the successful SQL generation details.
+    SuccessResponse success = 1;
+    // Contains details about why the generation failed.
+    ErrorResponse error = 2;
+  }
+}
+
+// Represents a successful SQL generation.
+message SuccessResponse {
+  // The generated SQL query.
+  string sql_query = 1;
+  // An explanation of how the AI interpreted the request and generated the SQL.
+  // This builds user trust and aids in debugging.
+  optional string explanation = 2;
+  // A score between 0.0 and 1.0 indicating the AI's confidence in the generated query.
+  optional float confidence_score = 3;
+}
+
+// Enum for structured error codes.
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  // The input was invalid (e.g., empty prompt).
+  INVALID_ARGUMENT = 1;
+  // The AI model failed to translate the query.
+  TRANSLATION_FAILED = 2;
+  // The requested database type is not supported.
+  UNSUPPORTED_DATABASE = 3;
+  // An internal error occurred in the service.
+  INTERNAL_ERROR = 4;
+}
+
+// Represents a failed SQL generation attempt.
+message ErrorResponse {
+  // A structured error code for programmatic handling.
+  ErrorCode code = 1;
+  // A human-readable message describing the error.
+  string message = 2;
 }

@@ -57,6 +57,7 @@ const ExtensionKindRedis = "atest-store-redis"
 const ExtensionKindMongoDB = "atest-store-mongodb"
 const ExtensionKindElasticsearch = "atest-store-elasticsearch"
 const ExtensionKindOpengeMini = "atest-store-opengemini"
+const ExtensionKindAI = "atest-ext-ai"
 
 export const ExtensionKind = {
     ExtensionKindGit,
@@ -68,7 +69,8 @@ export const ExtensionKind = {
     ExtensionKindRedis,
     ExtensionKindMongoDB,
     ExtensionKindElasticsearch,
-    ExtensionKindOpengeMini
+    ExtensionKindOpengeMini,
+    ExtensionKindAI
 }
 
 const storeExtensions = [
@@ -170,6 +172,24 @@ const storeExtensions = [
         name: ExtensionKindOpengeMini,
         params: [],
         link: 'https://github.com/LinuxSuRen/atest-ext-store-opengemini'
+    },
+    {
+        name: ExtensionKindAI,
+        params: [{
+            key: 'model_provider',
+            defaultValue: 'ollama',
+            enum: ['ollama', 'openai'],
+            description: 'AI model provider: ollama or openai'
+        }, {
+            key: 'model_name',
+            defaultValue: 'llama3.2',
+            description: 'AI model name'
+        }, {
+            key: 'api_key',
+            defaultValue: '',
+            description: 'API key for external providers (e.g., OpenAI)'
+        }],
+        link: 'https://github.com/LinuxSuRen/atest-ext-ai'
     }
 ] as Store[]
 
