@@ -1171,8 +1171,22 @@ func (s *server) GetStoreKinds(context.Context, *Empty) (kinds *StoreKinds, err 
 				Name:    store.Name,
 				Enabled: store.Enabled,
 				Url:     store.URL,
+				Link:    store.Link,
+				Params:  convertStoreKindParams(store.Params),
 			})
 		}
+	}
+	return
+}
+
+func convertStoreKindParams(params []testing.StoreKindParam) (result []*StoreKindParam) {
+	for _, param := range params {
+		result = append(result, &StoreKindParam{
+			Key:          param.Key,
+			DefaultValue: param.DefaultValue,
+			Description:  param.Description,
+			Enum:         param.Enum,
+		})
 	}
 	return
 }

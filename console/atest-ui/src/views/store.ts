@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import type { Pair } from './types'
+import { API } from './net'
 
 export interface Store {
   name: string;
@@ -173,7 +174,8 @@ const storeExtensions = [
     }
 ] as Store[]
 
-export function SupportedExtensions() {
+export async function SupportedExtensions() {
+    API.GetStoreKinds()
     return storeExtensions
 }
 

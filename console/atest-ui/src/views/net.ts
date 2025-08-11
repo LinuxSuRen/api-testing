@@ -583,6 +583,12 @@ function PopularHeaders(callback: (d: any) => void, errHandle?: (e: any) => void
         .then(callback).catch(emptyOrDefault(errHandle))
 }
 
+const GetStoreKinds = (callback: (d: any) => void | null, errHandle?: (e: any) => void | null) => {
+    return fetch(`/api/v1/stores/kinds`, {})
+        .then(DefaultResponseProcess)
+        .then(callback).catch(emptyOrDefault(errHandle))
+}
+
 function CreateOrUpdateStore(payload: any, create: boolean,
     callback: (d: any) => void, errHandle?: (e: any) => void | null,
     toggle?: (e: boolean) => void) {
@@ -997,7 +1003,7 @@ export const API = {
     CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, DuplicateTestCase, RenameTestCase, RunTestCase, BatchRunTestCase,
     GetHistoryTestCaseWithResult, DeleteHistoryTestCase, GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
     GenerateCode, ListCodeGenerator, HistoryGenerateCode,
-    PopularHeaders,
+    PopularHeaders, GetStoreKinds,
     CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
     FunctionsQuery,
     GetSecrets, DeleteSecret, CreateOrUpdateSecret,

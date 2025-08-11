@@ -93,7 +93,7 @@ func NewStoreExtManagerInstance(execer fakeruntime.Execer) ExtManager {
 
 func (s *storeExtManager) StartPlugin(storeKind testing.StoreKind) {
 	for _, plugin := range storeKind.Dependencies {
-		s.Start(plugin, fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(plugin)))
+		s.Start(plugin.Name, fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(plugin.Name)))
 	}
 }
 

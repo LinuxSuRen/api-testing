@@ -613,7 +613,20 @@ message StoreKind {
   string name = 1;
   string url = 2;
   bool enabled = 3;
-  repeated string dependencies = 4;
+  repeated StoreKindDependency dependencies = 4;
+  string link = 5;
+  repeated StoreKindParam params = 6;
+}
+
+message StoreKindDependency {
+  string name = 1;
+}
+
+message StoreKindParam {
+    string key = 1;
+    string description = 2;
+    string defaultValue = 3;
+    repeated string enum = 4;
 }
 
 message CommonResult {
