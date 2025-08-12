@@ -583,10 +583,31 @@ function PopularHeaders(callback: (d: any) => void, errHandle?: (e: any) => void
         .then(callback).catch(emptyOrDefault(errHandle))
 }
 
-const GetStoreKinds = (callback: (d: any) => void | null, errHandle?: (e: any) => void | null) => {
+interface StoreKindParam {
+    key: string
+    defaultValue: string
+    description: string
+}
+
+interface StoreKind {
+    name: string
+    link: string
+    params: StoreKindParam[]
+}
+
+interface StoreKindsResponse {
+    data: StoreKind[]
+}
+
+const GetStoreKinds = (callback?: (d: StoreKindsResponse) => void | null, errHandle?: (e: any) => void | null) => {
+    if (callback) {
+        return fetch(`/api/v1/stores/kinds`, {})
+            .then(DefaultResponseProcess)
+            .then(callback).catch(emptyOrDefault(errHandle))
+    }
     return fetch(`/api/v1/stores/kinds`, {})
         .then(DefaultResponseProcess)
-        .then(callback).catch(emptyOrDefault(errHandle))
+        .catch(emptyOrDefault(errHandle))
 }
 
 function CreateOrUpdateStore(payload: any, create: boolean,

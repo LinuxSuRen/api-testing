@@ -1169,7 +1169,7 @@ func (s *server) GetStoreKinds(context.Context, *Empty) (kinds *StoreKinds, err 
 		for _, store := range stores {
 			kinds.Data = append(kinds.Data, &StoreKind{
 				Name:    store.Name,
-				Enabled: store.Enabled,
+				Enabled: true,
 				Url:     store.URL,
 				Link:    store.Link,
 				Params:  convertStoreKindParams(store.Params),
