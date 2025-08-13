@@ -1,5 +1,5 @@
 /*
-Copyright 2023-2024 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,6 +28,30 @@ export interface Store {
   params: Pair[];
 }
 
+const ExtensionKindGit = "atest-store-git"
+const ExtensionKindS3 = "atest-store-s3"
+const ExtensionKindORM = "atest-store-orm"
+const ExtensionKindIotDB = "atest-store-iotdb"
+const ExtensionKindCassandra = "atest-store-cassandra"
+const ExtensionKindEtcd = "atest-store-etcd"
+const ExtensionKindRedis = "atest-store-redis"
+const ExtensionKindMongoDB = "atest-store-mongodb"
+const ExtensionKindElasticsearch = "atest-store-elasticsearch"
+const ExtensionKindOpengeMini = "atest-store-opengemini"
+
+export const ExtensionKind = {
+    ExtensionKindGit,
+    ExtensionKindS3,
+    ExtensionKindORM,
+    ExtensionKindIotDB,
+    ExtensionKindCassandra,
+    ExtensionKindEtcd,
+    ExtensionKindRedis,
+    ExtensionKindMongoDB,
+    ExtensionKindElasticsearch,
+    ExtensionKindOpengeMini
+}
+
 const MySQL = "mysql";
 const Postgres = "postgres";
 const SQLite = "sqlite";
@@ -50,10 +74,13 @@ export const Driver = {
 
 export async function SupportedExtensions() {
     const kinds = await API.GetStoreKinds()
-    return kinds.data
+    if (kinds) {
+        return kinds.data
+    }
+    return []
 }
 
 export async function SupportedExtension(name: string) {
     const storeExtensions = await SupportedExtensions()
-    return storeExtensions.find(e => e.name === name)
+    return storeExtensions.find((e: Store) => e.name === name)
 }
