@@ -15,6 +15,9 @@
       "name": "ThemeExtension"
     },
     {
+      "name": "AIExtension"
+    },
+    {
       "name": "Mock"
     },
     {
@@ -28,6 +31,74 @@
     "application/json"
   ],
   "paths": {
+    "/api/v1/ai/generate": {
+      "post": {
+        "summary": "Generates content based on natural language prompts with context.\nThis is a general-purpose AI interface that can handle SQL generation,\ntest case writing, mock service creation, and other AI-powered tasks.",
+        "operationId": "AIExtension_GenerateContent",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverGenerateContentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "Request message for generating content based on natural language prompts.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverGenerateContentRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AIExtension"
+        ]
+      }
+    },
+    "/api/v1/ai/sql/generate": {
+      "post": {
+        "summary": "Legacy SQL generation endpoint for backward compatibility",
+        "operationId": "AIExtension_GenerateSQLFromNaturalLanguage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverGenerateSQLResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "Request message for generating an SQL query from natural language.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serverGenerateSQLRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AIExtension"
+        ]
+      }
+    },
     "/api/v1/batchRun": {
       "post": {
         "operationId": "Runner_BatchRun",
@@ -67,6 +138,58 @@
         ],
         "tags": [
           "Runner"
+        ]
+      }
+    },
+    "/api/v1/bindings": {
+      "get": {
+        "operationId": "ThemeExtension_GetBindings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverSimpleList"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "ThemeExtension"
+        ]
+      }
+    },
+    "/api/v1/bindings/{name}": {
+      "get": {
+        "operationId": "ThemeExtension_GetBinding",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ThemeExtension"
         ]
       }
     },
@@ -1499,15 +1622,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "Value": {
-                  "type": "string"
-                },
-                "Description": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateSecretBody"
             }
           }
         ],
@@ -1746,43 +1861,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "owner": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "url": {
-                  "type": "string"
-                },
-                "username": {
-                  "type": "string"
-                },
-                "password": {
-                  "type": "string"
-                },
-                "properties": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/serverPair"
-                  }
-                },
-                "kind": {
-                  "$ref": "#/definitions/serverStoreKind"
-                },
-                "ready": {
-                  "type": "boolean"
-                },
-                "readOnly": {
-                  "type": "boolean"
-                },
-                "disabled": {
-                  "type": "boolean"
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateStoreBody"
             }
           }
         ],
@@ -2027,25 +2106,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "api": {
-                  "type": "string"
-                },
-                "param": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/serverPair"
-                  }
-                },
-                "spec": {
-                  "$ref": "#/definitions/serverAPISpec"
-                },
-                "proxy": {
-                  "$ref": "#/definitions/serverProxyConfig"
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateTestSuiteBody"
             }
           }
         ],
@@ -2174,15 +2235,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                },
-                "targetCaseName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerDuplicateTestCaseBody"
             }
           }
         ],
@@ -2226,15 +2279,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                },
-                "targetCaseName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerRenameTestCaseBody"
             }
           }
         ],
@@ -2272,12 +2317,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerDuplicateTestSuiteBody"
             }
           }
         ],
@@ -2315,12 +2355,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerRenameTestSuiteBody"
             }
           }
         ],
@@ -2358,12 +2393,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "$ref": "#/definitions/serverTestCase"
-                }
-              }
+              "$ref": "#/definitions/RunnerCreateTestCaseBody"
             }
           }
         ],
@@ -2407,26 +2437,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "suiteName": {
-                      "type": "string"
-                    },
-                    "request": {
-                      "$ref": "#/definitions/serverRequest"
-                    },
-                    "response": {
-                      "$ref": "#/definitions/serverResponse"
-                    },
-                    "server": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateTestCaseBody"
             }
           }
         ],
@@ -2630,16 +2641,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "parameters": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/serverPair"
-                  }
-                }
-              }
+              "$ref": "#/definitions/RunnerRunTestCaseBody"
             }
           }
         ],
@@ -2648,7 +2650,29 @@
         ]
       }
     },
-    "/api/v1/theme/{name}": {
+    "/api/v1/themes": {
+      "get": {
+        "operationId": "ThemeExtension_GetThemes",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverSimpleList"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "ThemeExtension"
+        ]
+      }
+    },
+    "/api/v1/themes/{name}": {
       "get": {
         "operationId": "ThemeExtension_GetTheme",
         "responses": {
@@ -2673,28 +2697,6 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "ThemeExtension"
-        ]
-      }
-    },
-    "/api/v1/themes": {
-      "get": {
-        "operationId": "ThemeExtension_GetThemes",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverSimpleList"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
         "tags": [
           "ThemeExtension"
         ]
@@ -2757,6 +2759,157 @@
     }
   },
   "definitions": {
+    "RunnerCreateTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/serverTestCase"
+        }
+      }
+    },
+    "RunnerDuplicateTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        },
+        "targetCaseName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerDuplicateTestSuiteBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerRenameTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        },
+        "targetCaseName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerRenameTestSuiteBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerRunTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        }
+      }
+    },
+    "RunnerUpdateSecretBody": {
+      "type": "object",
+      "properties": {
+        "Value": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerUpdateStoreBody": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "kind": {
+          "$ref": "#/definitions/serverStoreKind"
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "RunnerUpdateTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "suiteName": {
+              "type": "string"
+            },
+            "request": {
+              "$ref": "#/definitions/serverRequest"
+            },
+            "response": {
+              "$ref": "#/definitions/serverResponse"
+            },
+            "server": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "RunnerUpdateTestSuiteBody": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "param": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "spec": {
+          "$ref": "#/definitions/serverAPISpec"
+        },
+        "proxy": {
+          "$ref": "#/definitions/serverProxyConfig"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -2872,6 +3025,36 @@
         }
       }
     },
+    "serverContentSuccessResponse": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "The generated content."
+        },
+        "contentType": {
+          "type": "string",
+          "description": "The type of content that was generated."
+        },
+        "explanation": {
+          "type": "string",
+          "description": "An explanation of how the AI interpreted the request and generated the content.\nThis builds user trust and aids in debugging."
+        },
+        "confidenceScore": {
+          "type": "number",
+          "format": "float",
+          "description": "A score between 0.0 and 1.0 indicating the AI's confidence in the generated content."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Additional metadata about the generation process."
+        }
+      },
+      "description": "Represents a successful content generation."
+    },
     "serverDataMeta": {
       "type": "object",
       "properties": {
@@ -2915,12 +3098,12 @@
           "type": "string"
         },
         "offset": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "limit": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -2946,8 +3129,45 @@
         }
       }
     },
+    "serverDatabaseType": {
+      "type": "string",
+      "enum": [
+        "DATABASE_TYPE_UNSPECIFIED",
+        "MYSQL",
+        "POSTGRESQL",
+        "SQLITE"
+      ],
+      "default": "DATABASE_TYPE_UNSPECIFIED",
+      "description": "Enum for supported database dialects to ensure type safety.\n\n - DATABASE_TYPE_UNSPECIFIED: DATABASE_TYPE_UNSPECIFIED indicates a missing or unknown database type."
+    },
     "serverEmpty": {
       "type": "object"
+    },
+    "serverErrorCode": {
+      "type": "string",
+      "enum": [
+        "ERROR_CODE_UNSPECIFIED",
+        "INVALID_ARGUMENT",
+        "TRANSLATION_FAILED",
+        "UNSUPPORTED_DATABASE",
+        "INTERNAL_ERROR"
+      ],
+      "default": "ERROR_CODE_UNSPECIFIED",
+      "description": "Enum for structured error codes.\n\n - INVALID_ARGUMENT: The input was invalid (e.g., empty prompt).\n - TRANSLATION_FAILED: The AI model failed to translate the query.\n - UNSUPPORTED_DATABASE: The requested database type is not supported.\n - INTERNAL_ERROR: An internal error occurred in the service."
+    },
+    "serverErrorResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/serverErrorCode",
+          "description": "A structured error code for programmatic handling."
+        },
+        "message": {
+          "type": "string",
+          "description": "A human-readable message describing the error."
+        }
+      },
+      "description": "Represents a failed SQL generation attempt."
     },
     "serverExtensionStatus": {
       "type": "object",
@@ -2980,6 +3200,99 @@
           "type": "string"
         }
       }
+    },
+    "serverGenerateContentRequest": {
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "description": "The user's prompt in natural language."
+        },
+        "contentType": {
+          "type": "string",
+          "description": "The type of content to generate (e.g., \"sql\", \"testcase\", \"mock\")."
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Context information to help with generation."
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "Optional: A session identifier to maintain context across multiple requests."
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Optional: Additional parameters specific to the content type."
+        }
+      },
+      "description": "Request message for generating content based on natural language prompts."
+    },
+    "serverGenerateContentResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "$ref": "#/definitions/serverContentSuccessResponse",
+          "description": "Contains the successful content generation details."
+        },
+        "error": {
+          "$ref": "#/definitions/serverErrorResponse",
+          "description": "Contains details about why the generation failed."
+        }
+      },
+      "description": "Response message containing the result of content generation."
+    },
+    "serverGenerateSQLRequest": {
+      "type": "object",
+      "properties": {
+        "naturalLanguageInput": {
+          "type": "string",
+          "title": "The user's query in natural language. (e.g., \"show me all users from California\")"
+        },
+        "databaseType": {
+          "$ref": "#/definitions/serverDatabaseType",
+          "description": "Target database dialect for SQL generation."
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional: A list of DDL statements (e.g., CREATE TABLE …) for relevant tables.\nProviding schemas helps the AI generate more accurate queries."
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "Optional: A session identifier to maintain context across multiple requests,\nenabling conversational query refinement."
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverQueryExample"
+          },
+          "description": "Optional: A list of examples to guide the AI, improving accuracy for\nspecific or complex domains."
+        }
+      },
+      "description": "Request message for generating an SQL query from natural language."
+    },
+    "serverGenerateSQLResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "$ref": "#/definitions/serverSuccessResponse",
+          "description": "Contains the successful SQL generation details."
+        },
+        "error": {
+          "$ref": "#/definitions/serverErrorResponse",
+          "description": "Contains details about why the generation failed."
+        }
+      },
+      "description": "Response message containing the result of the SQL generation."
     },
     "serverHelloReply": {
       "type": "object",
@@ -3207,6 +3520,20 @@
           "title": "Comma-separated list of hosts to exclude from proxying"
         }
       }
+    },
+    "serverQueryExample": {
+      "type": "object",
+      "properties": {
+        "naturalLanguagePrompt": {
+          "type": "string",
+          "description": "A natural language query example."
+        },
+        "sqlQuery": {
+          "type": "string",
+          "description": "The corresponding correct SQL query for the prompt."
+        }
+      },
+      "description": "Represents an example pair of natural language to SQL for few-shot prompting."
     },
     "serverRPC": {
       "type": "object",
@@ -3463,6 +3790,25 @@
           }
         }
       }
+    },
+    "serverSuccessResponse": {
+      "type": "object",
+      "properties": {
+        "sqlQuery": {
+          "type": "string",
+          "description": "The generated SQL query."
+        },
+        "explanation": {
+          "type": "string",
+          "description": "An explanation of how the AI interpreted the request and generated the SQL.\nThis builds user trust and aids in debugging."
+        },
+        "confidenceScore": {
+          "type": "number",
+          "format": "float",
+          "description": "A score between 0.0 and 1.0 indicating the AI's confidence in the generated query."
+        }
+      },
+      "description": "Represents a successful SQL generation."
     },
     "serverSuite": {
       "type": "object",
