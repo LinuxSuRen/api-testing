@@ -141,7 +141,7 @@ func (l *nonLoader) RenameTestSuite(oldName, newName string) (err error) {
 	return
 }
 
-func (l *nonLoader) Verify() (readOnly bool, err error) {
+func (l *nonLoader) Verify() (readOnly bool, version string, err error) {
 	// always be okay
 	return
 }

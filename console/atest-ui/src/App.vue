@@ -6,7 +6,7 @@ import {
     Share,
     ArrowDown,
     Guide,
-    DataAnalysis, Help, Setting
+    Help, Setting
 } from '@element-plus/icons-vue'
 import * as ElementPlusIcons from '@element-plus/icons-vue'
 import { ref, watch, getCurrentInstance} from 'vue'
@@ -152,16 +152,16 @@ API.GetMenus((menus) => {
           <el-icon><Guide /></el-icon>
           <template #title>{{ t('title.mock' )}}</template>
         </el-menu-item>
-        <el-menu-item index="store">
-          <el-icon><location /></el-icon>
-          <template #title>{{ t('title.stores') }}</template>
-        </el-menu-item>
         <span v-for="menu in extensionMenus" :key="menu.index" :index="menu.index">
             <el-menu-item :index="menu.index">
                 <el-icon><component :is="ElementPlusIcons[menu.icon]" /></el-icon>
                 <template #title>{{ menu.name }}</template>
             </el-menu-item>
         </span>
+        <el-menu-item index="store">
+          <el-icon><location /></el-icon>
+          <template #title>{{ t('title.stores') }}</template>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 

@@ -504,7 +504,7 @@ func (l *fileLoader) RenameTestSuite(oldName, newName string) (err error) {
 	return
 }
 
-func (l *fileLoader) Verify() (readOnly bool, err error) {
+func (l *fileLoader) Verify() (readOnly bool, version string, err error) {
 	// always be okay
 	return
 }

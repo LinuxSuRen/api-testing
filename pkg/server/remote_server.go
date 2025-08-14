@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	reflect "reflect"
 	"regexp"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -1247,10 +1248,7 @@ func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err 
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	store := ToNormalStore(in)
 
-	if store.Kind.URL == "" {
-		store.Kind.URL = fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(store.Kind.Name))
-	}
-
+	handleStore(&store)
 	if err = storeFactory.CreateStore(store); err == nil && s.storeExtMgr != nil {
 		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
 	}
@@ -1260,6 +1258,7 @@ func (s *server) UpdateStore(ctx context.Context, in *Store) (reply *Store, err 
 	reply = &Store{}
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	store := ToNormalStore(in)
+	handleStore(&store)
 	if err = storeFactory.UpdateStore(store); err == nil && s.storeExtMgr != nil {
 		// TODO need to restart extension if config was changed
 		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
@@ -1276,12 +1275,19 @@ func (s *server) VerifyStore(ctx context.Context, in *SimpleQuery) (reply *Exten
 	reply = &ExtensionStatus{}
 	var loader testing.Writer
 	if loader, err = s.getLoaderByStoreName(in.Name); err == nil && loader != nil {
-		readOnly, verifyErr := loader.Verify()
+		readOnly, version, verifyErr := loader.Verify()
 		reply.Ready = verifyErr == nil
+		reply.Version = version
 		reply.ReadOnly = readOnly
 		reply.Message = util.OKOrErrorMessage(verifyErr)
 	}
 	return
+}
+
+func handleStore(store *testing.Store) {
+	if store.Kind.URL == "" && runtime.GOOS != "windows" {
+		store.Kind.URL = fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(store.Kind.Name))
+	}
 }
 
 // secret related interfaces

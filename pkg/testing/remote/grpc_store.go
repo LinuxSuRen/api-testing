@@ -285,7 +285,7 @@ func (g *gRPCLoader) RenameTestSuite(oldName, newName string) (err error) {
 	return
 }
 
-func (g *gRPCLoader) Verify() (readOnly bool, err error) {
+func (g *gRPCLoader) Verify() (readOnly bool, version string, err error) {
 	// avoid to long to wait the response
 	ctx, cancel := context.WithTimeout(g.ctx, time.Second*5)
 	defer cancel()
@@ -293,6 +293,7 @@ func (g *gRPCLoader) Verify() (readOnly bool, err error) {
 	var result *server.ExtensionStatus
 	if result, err = g.client.Verify(ctx, &server.Empty{}); err == nil {
 		readOnly = result.ReadOnly
+		version = result.Version
 		if !result.Ready {
 			err = errors.New(result.Message)
 		}

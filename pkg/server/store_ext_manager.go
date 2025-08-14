@@ -98,13 +98,18 @@ func (s *storeExtManager) StartPlugin(storeKind testing.StoreKind) {
 }
 
 func (s *storeExtManager) Start(name, socket string) (err error) {
+	serverLogger.Info("start", "extension", name, "socket", socket)
 	if v, ok := s.extStatusMap[name]; ok && v {
 		return
 	}
+
 	platformBasedName := name
 	if s.execer.OS() == "windows" {
 		platformBasedName += ".exe"
+	} else {
+		socket = fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(name))
 	}
+
 	targetDir := home.GetUserBinDir()
 	targetBinaryFile := filepath.Join(targetDir, platformBasedName)
 
