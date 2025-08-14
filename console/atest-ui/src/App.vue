@@ -17,7 +17,6 @@ import TestingHistoryPanel from './views/TestingHistoryPanel.vue'
 import MockManager from './views/MockManager.vue'
 import StoreManager from './views/StoreManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
-import DataManager from './views/DataManager.vue'
 import MagicKey from './components/MagicKey.vue'
 import Extension from './views/Extension.vue'
 import { useI18n } from 'vue-i18n'
@@ -153,10 +152,6 @@ API.GetMenus((menus) => {
           <el-icon><Guide /></el-icon>
           <template #title>{{ t('title.mock' )}}</template>
         </el-menu-item>
-        <el-menu-item index="data" test-id="data-menu">
-          <el-icon><DataAnalysis /></el-icon>
-          <template #title>{{ t('title.data' )}}</template>
-        </el-menu-item>
         <el-menu-item index="store">
           <el-icon><location /></el-icon>
           <template #title>{{ t('title.stores') }}</template>
@@ -178,7 +173,6 @@ API.GetMenus((menus) => {
       </div>
       <TestingPanel v-if="panelName === 'testing'" @toHistoryPanel="toHistoryPanel"/>
       <TestingHistoryPanel v-else-if="panelName === 'history'" :ID="ID"/>
-      <DataManager v-else-if="panelName === 'data'" />
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
       <WelcomePage v-else-if="panelName === 'welcome' || panelName === ''" />
