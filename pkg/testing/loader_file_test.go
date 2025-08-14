@@ -56,7 +56,7 @@ func TestFileLoader(t *testing.T) {
 			}
 			tt.verify(t, loader)
 
-			readonly, err := loader.Verify()
+			readonly, _, err := loader.Verify()
 			assert.NoError(t, err)
 			assert.False(t, readonly)
 		})
