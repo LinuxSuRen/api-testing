@@ -38,9 +38,10 @@ type Loader interface {
 }
 
 type Menu struct {
-	Name  string `json:"name"`
-	Icon  string `json:"icon"`
-	Index string `json:"index"`
+	Name    string `json:"name"`
+	Icon    string `json:"icon"`
+	Index   string `json:"index"`
+	Version int32  `json:"version"`
 }
 
 type DataResult struct {

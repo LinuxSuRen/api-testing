@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { API } from './net';
 
 interface Props {
   name: string
 }
 const props = defineProps<Props>()
-
+const loading = ref(true)
 const loadPlugin = async (): Promise<void> => {
     try {
         API.GetPageOfCSS(props.name, (d) => {
             const style = document.createElement('style');
-            style.type = 'text/css';
             style.textContent = d.message;
             document.head.appendChild(style);
         });
@@ -26,7 +26,10 @@ const loadPlugin = async (): Promise<void> => {
             if (plugin && plugin.mount) {
                 console.log('extension load success');
                 const container = document.getElementById("plugin-container");
-                plugin.mount(container);
+                if (container) {
+                    container.innerHTML = ''; // Clear previous content
+                    plugin.mount(container);
+                }
             }
         });
     } catch (error) {
@@ -43,7 +46,8 @@ try {
 </script>
 
 <template>
-    <div id="plugin-container">
-        {{ props.name }}
+    <div id="plugin-container"
+        v-loading="loading"
+        :element-loading-text="props.name + ' is loading...'">
     </div>
 </template>

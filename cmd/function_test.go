@@ -29,6 +29,7 @@ func TestCreateFunctionCommand(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   []string
+		hasErr bool
 		verify func(t *testing.T, output string)
 	}{{
 		name: "normal",
@@ -61,6 +62,13 @@ func TestCreateFunctionCommand(t *testing.T) {
 			assert.Equal(t, `{{generateJSONString "name"}}
 `, output)
 		},
+	}, {
+		name:   "verify template functions with error",
+		args:   []string{"func", "--extension-file", "testdata/function-with-conflicts.yaml"},
+		hasErr: true,
+		verify: func(t *testing.T, output string) {
+			assert.Contains(t, output, "conflict with existing function")
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -69,10 +77,15 @@ func TestCreateFunctionCommand(t *testing.T) {
 
 			buf := new(bytes.Buffer)
 			c.SetOut(buf)
+			c.SetErr(buf)
 			c.SetArgs(tt.args)
 
 			err := c.Execute()
-			assert.NoError(t, err)
+			if tt.hasErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
 
 			if tt.verify != nil {
 				tt.verify(t, buf.String())

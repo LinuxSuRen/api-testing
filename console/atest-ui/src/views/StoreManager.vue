@@ -130,8 +130,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
-watch(() => storeForm.kind.name, (name) => {
-  const ext = SupportedExtension(name)
+watch(() => storeForm.kind.name, async (name) => {
+  const ext = await SupportedExtension(name)
   if (ext) {
     storeExtLink.value = ext.link
     let pro = storeForm.properties.slice()
@@ -211,6 +211,10 @@ function updateKeys() {
 }
 
 const storeExtLink = ref('')
+const extensions = ref([])
+SupportedExtensions().then(e => {
+  extensions.value = e
+})
 </script>
 
 <template>
@@ -301,7 +305,7 @@ const storeExtLink = ref('')
               class="m-2"
             >
               <el-option
-                v-for="item in SupportedExtensions()"
+                v-for="item in extensions"
                 :key="item.name"
                 :label="item.name"
                 :value="item.name"

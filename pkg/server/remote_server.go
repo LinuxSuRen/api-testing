@@ -1169,10 +1169,24 @@ func (s *server) GetStoreKinds(context.Context, *Empty) (kinds *StoreKinds, err 
 		for _, store := range stores {
 			kinds.Data = append(kinds.Data, &StoreKind{
 				Name:    store.Name,
-				Enabled: store.Enabled,
+				Enabled: true,
 				Url:     store.URL,
+				Link:    store.Link,
+				Params:  convertStoreKindParams(store.Params),
 			})
 		}
+	}
+	return
+}
+
+func convertStoreKindParams(params []testing.StoreKindParam) (result []*StoreKindParam) {
+	for _, param := range params {
+		result = append(result, &StoreKindParam{
+			Key:          param.Key,
+			DefaultValue: param.DefaultValue,
+			Description:  param.Description,
+			Enum:         param.Enum,
+		})
 	}
 	return
 }
@@ -1385,6 +1399,8 @@ func (s *server) GetBinding(ctx context.Context, in *SimpleName) (result *Common
 	return
 }
 
+var uiExtensionLoaders = make(map[string]testing.Writer)
+
 func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err error) {
 	loader := s.getLoader(ctx)
 	defer loader.Close()
@@ -1395,6 +1411,7 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 		return
 	}
 
+	duplicatedMenus := make(map[string]int) // index is key, value is the slice index
 	for _, loader := range loaders {
 		if menus, mErr := loader.GetMenus(); mErr == nil {
 			for _, menu := range menus {
@@ -1402,47 +1419,71 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 					serverLogger.Info("skip due to conflict with system name", "menu", menu)
 					continue
 				}
+
+				// take the bigger version if the menu index is duplicated
+				if existingIndex, exists := duplicatedMenus[menu.Index]; exists {
+					if menu.Version > result.Data[existingIndex].Version {
+						result.Data[existingIndex] = &Menu{
+							Name:  menu.Name,
+							Icon:  menu.Icon,
+							Index: menu.Index,
+						}
+						uiExtensionLoaders[menu.Index] = loader
+					}
+					continue
+				}
+
+				duplicatedMenus[menu.Index] = len(result.Data)
 				result.Data = append(result.Data, &Menu{
 					Name:  menu.Name,
 					Icon:  menu.Icon,
 					Index: menu.Index,
 				})
+				uiExtensionLoaders[menu.Index] = loader
 			}
 		}
 	}
+
+	slices.SortFunc(result.Data, func(a, b *Menu) int {
+		return strings.Compare(a.Index, b.Index)
+	})
 	return
 }
 
 func isSystemMenu(index string) bool {
 	switch index {
-	case "testing", "history", "data", "mock", "store", "welcome", "":
+	case "testing", "history", "mock", "store", "welcome", "":
 		return true
 	}
 	return false
 }
 
 func (s *server) GetPageOfJS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-
-	result = &CommonResult{
-		Success: true,
-	}
-	if js, err := loader.GetPageOfJS(in.Name); err == nil {
-		result.Message = js
+	result = &CommonResult{}
+	if loader, ok := uiExtensionLoaders[in.Name]; ok {
+		if js, err := loader.GetPageOfJS(in.Name); err == nil {
+			result.Message = js
+			result.Success = true
+		} else {
+			result.Message = err.Error()
+		}
+	} else {
+		result.Message = fmt.Sprintf("not found loader for %s", in.Name)
 	}
 	return
 }
 
 func (s *server) GetPageOfCSS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
-	loader := s.getLoader(ctx)
-	defer loader.Close()
-
-	result = &CommonResult{
-		Success: true,
-	}
-	if css, err := loader.GetPageOfCSS(in.Name); err == nil {
-		result.Message = css
+	result = &CommonResult{}
+	if loader, ok := uiExtensionLoaders[in.Name]; ok {
+		if js, err := loader.GetPageOfCSS(in.Name); err == nil {
+			result.Message = js
+			result.Success = true
+		} else {
+			result.Message = err.Error()
+		}
+	} else {
+		result.Message = fmt.Sprintf("not found loader for %s", in.Name)
 	}
 	return
 }
