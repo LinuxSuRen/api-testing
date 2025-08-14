@@ -19,31 +19,76 @@ Ports in extensions:
 
 ## AI Extension Interface
 
-The AI extension provides intelligent testing capabilities through gRPC interface on port 50051. It offers a unified AI interface that can handle various content generation tasks.
+This extension provides AI-powered content generation capabilities through a unified gRPC interface.
 
-### Available Services
+### Unified Interface Design
 
-#### GenerateContent (Recommended)
-A general-purpose AI interface that can handle multiple content types:
-- **SQL Generation**: Convert natural language to SQL queries
-- **Test Case Generation**: Automatically generate test cases based on API specifications
-- **Mock Service Creation**: Generate mock services and responses
-- **Test Data Generation**: Create realistic test data using AI models
-- **Result Analysis**: Intelligent analysis of test results and failure patterns
+#### `GenerateContent`
+The single, unified interface for all AI content generation tasks. This interface can handle various content types including SQL generation, test case writing, mock service creation, and more through a single endpoint.
 
 **Request Parameters:**
-- `prompt`: Natural language description of what to generate
-- `contentType`: Type of content ("sql", "testcase", "mock", "analysis")
-- `context`: Additional context information (schemas, API specs, etc.)
-- `sessionId`: Optional session ID for conversational context
-- `parameters`: AI model configuration (model_provider, model_name, api_key, etc.)
+- `prompt`: Natural language description of what you want to generate
+- `contentType`: Type of content to generate (e.g., "sql", "testcase", "mock")
+- `context`: Additional context information as key-value pairs
+- `parameters`: Additional parameters specific to the content type
 
-#### GenerateSQLFromNaturalLanguage (Legacy)
-Specific interface for SQL generation, maintained for backward compatibility.
+**Response:**
+- `success.content`: Generated content
+- `success.explanation`: Explanation of the generated content
+- `success.confidenceScore`: Confidence score (0.0 to 1.0)
+- `success.metadata`: Additional metadata about the generation
+- `error`: Error information if generation fails
+
+### Content Types and Task Identification
+
+The `contentType` parameter serves as the task identifier, allowing the system to:
+
+1. **Apply appropriate prompting strategies** for different content types
+2. **Use specialized processing logic** for each task type
+3. **Provide task-specific validation and post-processing**
+4. **Generate relevant metadata** for each content type
+
+#### Supported Content Types:
+
+1. **SQL Generation** (`contentType: "sql"`)
+   - Generates SQL queries from natural language
+   - Supports multiple database types via parameters
+   - Context can include schema information
+   - Applies SQL-specific validation and dialect adaptation
+
+2. **Test Case Generation** (`contentType: "testcase"`)
+   - Generates comprehensive test cases
+   - Context can include code specifications
+   - Uses test-specific prompting strategies
+
+3. **Mock Service Generation** (`contentType: "mock"`)
+   - Generates mock services and API responses
+   - Context can include API specifications
+   - Applies service-specific formatting
+
+4. **Generic Content** (any other `contentType`)
+   - Handles any other content generation requests
+   - Flexible prompt-based generation
+   - Extensible for future content types
+
+### Architecture Benefits
+
+**Single Interface Advantages:**
+- **Consistency**: All content generation follows the same request/response pattern
+- **Extensibility**: New content types can be added without API changes
+- **Simplicity**: Clients only need to integrate with one interface
+- **Flexibility**: Rich context and parameter support for all content types
+
+**Task Differentiation:**
+While using a single interface, the system internally routes requests to specialized handlers based on `contentType`, ensuring:
+- Appropriate AI model prompting for each task
+- Task-specific validation and processing
+- Relevant metadata and confidence scoring
+- Optimized performance for different content types
 
 ### Configuration Parameters
 
-These parameters are configured in the store extension settings and passed to the AI service:
+The following parameters can be passed via `GenerateContentRequest.parameters`:
 
 - `model_provider`: AI provider ("ollama", "openai") - used in GenerateContentRequest.parameters
 - `model_name`: Specific model name (e.g., "llama3.2", "gpt-4") - passed via parameters["model_name"]
@@ -65,6 +110,7 @@ GenerateContentRequest {
   parameters: {
     "model_provider": "ollama"
     "model_name": "llama3.2"
+    "database_type": "mysql"
   }
 }
 
@@ -76,7 +122,50 @@ GenerateContentRequest {
     "api_spec": "POST /api/users {name, email, password}"
   }
 }
+
+// Generate mock service
+GenerateContentRequest {
+  prompt: "Create a mock REST API for user management"
+  contentType: "mock"
+  context: {
+    "endpoints": "GET /users, POST /users, PUT /users/{id}, DELETE /users/{id}"
+    "response_format": "JSON"
+  }
+}
 ```
+
+### Migration Notes
+
+This version removes the legacy `GenerateSQLFromNaturalLanguage` interface in favor of the unified `GenerateContent` approach. All SQL generation should now use:
+
+```protobuf
+GenerateContentRequest {
+  prompt: "your natural language query"
+  contentType: "sql"
+  parameters: {"database_type": "mysql|postgresql|sqlite"}
+  context: {"schemas": "table definitions"}
+}
+```
+
+### Frequently Asked Questions
+
+**Q1: Do I need different interfaces for different tasks (SQL generation, test case writing, mock service creation)?**
+
+A: No, you only need the single `GenerateContent` interface. The `contentType` parameter tells the system what kind of content you want to generate, and the system internally routes your request to the appropriate specialized handler. This design provides:
+- **Task identification**: The system knows exactly what you're trying to accomplish
+- **Specialized processing**: Each content type gets optimized prompting and validation
+- **Consistent API**: You always use the same interface regardless of the task
+- **Future extensibility**: New content types can be added without changing the API
+
+**Q2: Will removing the SQL-specific interface affect other files?**
+
+A: The removal has been carefully implemented to ensure minimal impact:
+- **Protobuf files**: All generated code (Go, Python, gRPC-gateway, OpenAPI) has been updated
+- **Implementation files**: The Python gRPC server has been updated to use the new unified interface
+- **Backward compatibility**: While the old interface is removed, the same functionality is available through `GenerateContent` with `contentType: "sql"`
+- **No breaking changes**: The core functionality remains the same, just accessed through a cleaner, unified interface
+
+The migration ensures that all SQL generation capabilities are preserved while providing a more maintainable and extensible architecture.
 
 ## Contribute a new extension
 

@@ -2268,8 +2268,7 @@ var ThemeExtension_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	AIExtension_GenerateContent_FullMethodName                = "/server.AIExtension/GenerateContent"
-	AIExtension_GenerateSQLFromNaturalLanguage_FullMethodName = "/server.AIExtension/GenerateSQLFromNaturalLanguage"
+	AIExtension_GenerateContent_FullMethodName = "/server.AIExtension/GenerateContent"
 )
 
 // AIExtensionClient is the client API for AIExtension service.
@@ -2282,8 +2281,6 @@ type AIExtensionClient interface {
 	// This is a general-purpose AI interface that can handle SQL generation,
 	// test case writing, mock service creation, and other AI-powered tasks.
 	GenerateContent(ctx context.Context, in *GenerateContentRequest, opts ...grpc.CallOption) (*GenerateContentResponse, error)
-	// Legacy SQL generation endpoint for backward compatibility
-	GenerateSQLFromNaturalLanguage(ctx context.Context, in *GenerateSQLRequest, opts ...grpc.CallOption) (*GenerateSQLResponse, error)
 }
 
 type aIExtensionClient struct {
@@ -2304,16 +2301,6 @@ func (c *aIExtensionClient) GenerateContent(ctx context.Context, in *GenerateCon
 	return out, nil
 }
 
-func (c *aIExtensionClient) GenerateSQLFromNaturalLanguage(ctx context.Context, in *GenerateSQLRequest, opts ...grpc.CallOption) (*GenerateSQLResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GenerateSQLResponse)
-	err := c.cc.Invoke(ctx, AIExtension_GenerateSQLFromNaturalLanguage_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // AIExtensionServer is the server API for AIExtension service.
 // All implementations must embed UnimplementedAIExtensionServer
 // for forward compatibility.
@@ -2324,8 +2311,6 @@ type AIExtensionServer interface {
 	// This is a general-purpose AI interface that can handle SQL generation,
 	// test case writing, mock service creation, and other AI-powered tasks.
 	GenerateContent(context.Context, *GenerateContentRequest) (*GenerateContentResponse, error)
-	// Legacy SQL generation endpoint for backward compatibility
-	GenerateSQLFromNaturalLanguage(context.Context, *GenerateSQLRequest) (*GenerateSQLResponse, error)
 	mustEmbedUnimplementedAIExtensionServer()
 }
 
@@ -2338,9 +2323,6 @@ type UnimplementedAIExtensionServer struct{}
 
 func (UnimplementedAIExtensionServer) GenerateContent(context.Context, *GenerateContentRequest) (*GenerateContentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateContent not implemented")
-}
-func (UnimplementedAIExtensionServer) GenerateSQLFromNaturalLanguage(context.Context, *GenerateSQLRequest) (*GenerateSQLResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GenerateSQLFromNaturalLanguage not implemented")
 }
 func (UnimplementedAIExtensionServer) mustEmbedUnimplementedAIExtensionServer() {}
 func (UnimplementedAIExtensionServer) testEmbeddedByValue()                     {}
@@ -2381,24 +2363,6 @@ func _AIExtension_GenerateContent_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AIExtension_GenerateSQLFromNaturalLanguage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GenerateSQLRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AIExtensionServer).GenerateSQLFromNaturalLanguage(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AIExtension_GenerateSQLFromNaturalLanguage_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AIExtensionServer).GenerateSQLFromNaturalLanguage(ctx, req.(*GenerateSQLRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // AIExtension_ServiceDesc is the grpc.ServiceDesc for AIExtension service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2409,10 +2373,6 @@ var AIExtension_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateContent",
 			Handler:    _AIExtension_GenerateContent_Handler,
-		},
-		{
-			MethodName: "GenerateSQLFromNaturalLanguage",
-			Handler:    _AIExtension_GenerateSQLFromNaturalLanguage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

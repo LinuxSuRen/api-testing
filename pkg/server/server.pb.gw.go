@@ -2208,33 +2208,6 @@ func local_request_AIExtension_GenerateContent_0(ctx context.Context, marshaler 
 	return msg, metadata, err
 }
 
-func request_AIExtension_GenerateSQLFromNaturalLanguage_0(ctx context.Context, marshaler runtime.Marshaler, client AIExtensionClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq GenerateSQLRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if req.Body != nil {
-		_, _ = io.Copy(io.Discard, req.Body)
-	}
-	msg, err := client.GenerateSQLFromNaturalLanguage(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_AIExtension_GenerateSQLFromNaturalLanguage_0(ctx context.Context, marshaler runtime.Marshaler, server AIExtensionServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq GenerateSQLRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.GenerateSQLFromNaturalLanguage(ctx, &protoReq)
-	return msg, metadata, err
-}
-
 func request_Mock_Reload_0(ctx context.Context, marshaler runtime.Marshaler, client MockClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq MockConfig
@@ -3406,26 +3379,6 @@ func RegisterAIExtensionHandlerServer(ctx context.Context, mux *runtime.ServeMux
 			return
 		}
 		forward_AIExtension_GenerateContent_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodPost, pattern_AIExtension_GenerateSQLFromNaturalLanguage_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/server.AIExtension/GenerateSQLFromNaturalLanguage", runtime.WithHTTPPathPattern("/api/v1/ai/sql/generate"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_AIExtension_GenerateSQLFromNaturalLanguage_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_AIExtension_GenerateSQLFromNaturalLanguage_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -4725,34 +4678,15 @@ func RegisterAIExtensionHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		}
 		forward_AIExtension_GenerateContent_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_AIExtension_GenerateSQLFromNaturalLanguage_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/server.AIExtension/GenerateSQLFromNaturalLanguage", runtime.WithHTTPPathPattern("/api/v1/ai/sql/generate"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_AIExtension_GenerateSQLFromNaturalLanguage_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_AIExtension_GenerateSQLFromNaturalLanguage_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
 	return nil
 }
 
 var (
-	pattern_AIExtension_GenerateContent_0                = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "ai", "generate"}, ""))
-	pattern_AIExtension_GenerateSQLFromNaturalLanguage_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ai", "sql", "generate"}, ""))
+	pattern_AIExtension_GenerateContent_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "ai", "generate"}, ""))
 )
 
 var (
-	forward_AIExtension_GenerateContent_0                = runtime.ForwardResponseMessage
-	forward_AIExtension_GenerateSQLFromNaturalLanguage_0 = runtime.ForwardResponseMessage
+	forward_AIExtension_GenerateContent_0 = runtime.ForwardResponseMessage
 )
 
 // RegisterMockHandlerFromEndpoint is same as RegisterMockHandler but

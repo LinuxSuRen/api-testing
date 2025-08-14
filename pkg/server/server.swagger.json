@@ -65,40 +65,6 @@
         ]
       }
     },
-    "/api/v1/ai/sql/generate": {
-      "post": {
-        "summary": "Legacy SQL generation endpoint for backward compatibility",
-        "operationId": "AIExtension_GenerateSQLFromNaturalLanguage",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/serverGenerateSQLResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "description": "Request message for generating an SQL query from natural language.",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/serverGenerateSQLRequest"
-            }
-          }
-        ],
-        "tags": [
-          "AIExtension"
-        ]
-      }
-    },
     "/api/v1/batchRun": {
       "post": {
         "operationId": "Runner_BatchRun",
@@ -3129,17 +3095,6 @@
         }
       }
     },
-    "serverDatabaseType": {
-      "type": "string",
-      "enum": [
-        "DATABASE_TYPE_UNSPECIFIED",
-        "MYSQL",
-        "POSTGRESQL",
-        "SQLITE"
-      ],
-      "default": "DATABASE_TYPE_UNSPECIFIED",
-      "description": "Enum for supported database dialects to ensure type safety.\n\n - DATABASE_TYPE_UNSPECIFIED: DATABASE_TYPE_UNSPECIFIED indicates a missing or unknown database type."
-    },
     "serverEmpty": {
       "type": "object"
     },
@@ -3167,7 +3122,7 @@
           "description": "A human-readable message describing the error."
         }
       },
-      "description": "Represents a failed SQL generation attempt."
+      "description": "Represents a failed content generation attempt."
     },
     "serverExtensionStatus": {
       "type": "object",
@@ -3246,53 +3201,6 @@
         }
       },
       "description": "Response message containing the result of content generation."
-    },
-    "serverGenerateSQLRequest": {
-      "type": "object",
-      "properties": {
-        "naturalLanguageInput": {
-          "type": "string",
-          "title": "The user's query in natural language. (e.g., \"show me all users from California\")"
-        },
-        "databaseType": {
-          "$ref": "#/definitions/serverDatabaseType",
-          "description": "Target database dialect for SQL generation."
-        },
-        "schemas": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Optional: A list of DDL statements (e.g., CREATE TABLE …) for relevant tables.\nProviding schemas helps the AI generate more accurate queries."
-        },
-        "sessionId": {
-          "type": "string",
-          "description": "Optional: A session identifier to maintain context across multiple requests,\nenabling conversational query refinement."
-        },
-        "examples": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/serverQueryExample"
-          },
-          "description": "Optional: A list of examples to guide the AI, improving accuracy for\nspecific or complex domains."
-        }
-      },
-      "description": "Request message for generating an SQL query from natural language."
-    },
-    "serverGenerateSQLResponse": {
-      "type": "object",
-      "properties": {
-        "success": {
-          "$ref": "#/definitions/serverSuccessResponse",
-          "description": "Contains the successful SQL generation details."
-        },
-        "error": {
-          "$ref": "#/definitions/serverErrorResponse",
-          "description": "Contains details about why the generation failed."
-        }
-      },
-      "description": "Response message containing the result of the SQL generation."
     },
     "serverHelloReply": {
       "type": "object",
@@ -3520,20 +3428,6 @@
           "title": "Comma-separated list of hosts to exclude from proxying"
         }
       }
-    },
-    "serverQueryExample": {
-      "type": "object",
-      "properties": {
-        "naturalLanguagePrompt": {
-          "type": "string",
-          "description": "A natural language query example."
-        },
-        "sqlQuery": {
-          "type": "string",
-          "description": "The corresponding correct SQL query for the prompt."
-        }
-      },
-      "description": "Represents an example pair of natural language to SQL for few-shot prompting."
     },
     "serverRPC": {
       "type": "object",
@@ -3790,25 +3684,6 @@
           }
         }
       }
-    },
-    "serverSuccessResponse": {
-      "type": "object",
-      "properties": {
-        "sqlQuery": {
-          "type": "string",
-          "description": "The generated SQL query."
-        },
-        "explanation": {
-          "type": "string",
-          "description": "An explanation of how the AI interpreted the request and generated the SQL.\nThis builds user trust and aids in debugging."
-        },
-        "confidenceScore": {
-          "type": "number",
-          "format": "float",
-          "description": "A score between 0.0 and 1.0 indicating the AI's confidence in the generated query."
-        }
-      },
-      "description": "Represents a successful SQL generation."
     },
     "serverSuite": {
       "type": "object",

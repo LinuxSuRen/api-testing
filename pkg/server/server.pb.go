@@ -23,60 +23,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Enum for supported database dialects to ensure type safety.
-type DatabaseType int32
-
-const (
-	// DATABASE_TYPE_UNSPECIFIED indicates a missing or unknown database type.
-	DatabaseType_DATABASE_TYPE_UNSPECIFIED DatabaseType = 0
-	DatabaseType_MYSQL                     DatabaseType = 1
-	DatabaseType_POSTGRESQL                DatabaseType = 2
-	DatabaseType_SQLITE                    DatabaseType = 3
-)
-
-// Enum value maps for DatabaseType.
-var (
-	DatabaseType_name = map[int32]string{
-		0: "DATABASE_TYPE_UNSPECIFIED",
-		1: "MYSQL",
-		2: "POSTGRESQL",
-		3: "SQLITE",
-	}
-	DatabaseType_value = map[string]int32{
-		"DATABASE_TYPE_UNSPECIFIED": 0,
-		"MYSQL":                     1,
-		"POSTGRESQL":                2,
-		"SQLITE":                    3,
-	}
-)
-
-func (x DatabaseType) Enum() *DatabaseType {
-	p := new(DatabaseType)
-	*p = x
-	return p
-}
-
-func (x DatabaseType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (DatabaseType) Descriptor() protoreflect.EnumDescriptor {
-	return file_pkg_server_server_proto_enumTypes[0].Descriptor()
-}
-
-func (DatabaseType) Type() protoreflect.EnumType {
-	return &file_pkg_server_server_proto_enumTypes[0]
-}
-
-func (x DatabaseType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use DatabaseType.Descriptor instead.
-func (DatabaseType) EnumDescriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{0}
-}
-
 // Enum for structured error codes.
 type ErrorCode int32
 
@@ -121,11 +67,11 @@ func (x ErrorCode) String() string {
 }
 
 func (ErrorCode) Descriptor() protoreflect.EnumDescriptor {
-	return file_pkg_server_server_proto_enumTypes[1].Descriptor()
+	return file_pkg_server_server_proto_enumTypes[0].Descriptor()
 }
 
 func (ErrorCode) Type() protoreflect.EnumType {
-	return &file_pkg_server_server_proto_enumTypes[1]
+	return &file_pkg_server_server_proto_enumTypes[0]
 }
 
 func (x ErrorCode) Number() protoreflect.EnumNumber {
@@ -134,7 +80,7 @@ func (x ErrorCode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ErrorCode.Descriptor instead.
 func (ErrorCode) EnumDescriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{1}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{0}
 }
 
 type Suites struct {
@@ -3541,61 +3487,6 @@ func (x *DataMeta) GetLabels() []*Pair {
 	return nil
 }
 
-// Represents an example pair of natural language to SQL for few-shot prompting.
-type QueryExample struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// A natural language query example.
-	NaturalLanguagePrompt string `protobuf:"bytes,1,opt,name=naturalLanguagePrompt,proto3" json:"naturalLanguagePrompt,omitempty"`
-	// The corresponding correct SQL query for the prompt.
-	SqlQuery      string `protobuf:"bytes,2,opt,name=sqlQuery,proto3" json:"sqlQuery,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *QueryExample) Reset() {
-	*x = QueryExample{}
-	mi := &file_pkg_server_server_proto_msgTypes[55]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *QueryExample) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*QueryExample) ProtoMessage() {}
-
-func (x *QueryExample) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[55]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use QueryExample.ProtoReflect.Descriptor instead.
-func (*QueryExample) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{55}
-}
-
-func (x *QueryExample) GetNaturalLanguagePrompt() string {
-	if x != nil {
-		return x.NaturalLanguagePrompt
-	}
-	return ""
-}
-
-func (x *QueryExample) GetSqlQuery() string {
-	if x != nil {
-		return x.SqlQuery
-	}
-	return ""
-}
-
 // Request message for generating content based on natural language prompts.
 type GenerateContentRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -3615,7 +3506,7 @@ type GenerateContentRequest struct {
 
 func (x *GenerateContentRequest) Reset() {
 	*x = GenerateContentRequest{}
-	mi := &file_pkg_server_server_proto_msgTypes[56]
+	mi := &file_pkg_server_server_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3627,7 +3518,7 @@ func (x *GenerateContentRequest) String() string {
 func (*GenerateContentRequest) ProtoMessage() {}
 
 func (x *GenerateContentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[56]
+	mi := &file_pkg_server_server_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3640,7 +3531,7 @@ func (x *GenerateContentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateContentRequest.ProtoReflect.Descriptor instead.
 func (*GenerateContentRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{56}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *GenerateContentRequest) GetPrompt() string {
@@ -3678,91 +3569,6 @@ func (x *GenerateContentRequest) GetParameters() map[string]string {
 	return nil
 }
 
-// Request message for generating an SQL query from natural language.
-type GenerateSQLRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The user's query in natural language. (e.g., "show me all users from California")
-	NaturalLanguageInput string `protobuf:"bytes,1,opt,name=naturalLanguageInput,proto3" json:"naturalLanguageInput,omitempty"`
-	// Target database dialect for SQL generation.
-	DatabaseType DatabaseType `protobuf:"varint,2,opt,name=databaseType,proto3,enum=server.DatabaseType" json:"databaseType,omitempty"`
-	// Optional: A list of DDL statements (e.g., CREATE TABLE …) for relevant tables.
-	// Providing schemas helps the AI generate more accurate queries.
-	Schemas []string `protobuf:"bytes,3,rep,name=schemas,proto3" json:"schemas,omitempty"`
-	// Optional: A session identifier to maintain context across multiple requests,
-	// enabling conversational query refinement.
-	SessionId *string `protobuf:"bytes,4,opt,name=sessionId,proto3,oneof" json:"sessionId,omitempty"`
-	// Optional: A list of examples to guide the AI, improving accuracy for
-	// specific or complex domains.
-	Examples      []*QueryExample `protobuf:"bytes,5,rep,name=examples,proto3" json:"examples,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GenerateSQLRequest) Reset() {
-	*x = GenerateSQLRequest{}
-	mi := &file_pkg_server_server_proto_msgTypes[57]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GenerateSQLRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GenerateSQLRequest) ProtoMessage() {}
-
-func (x *GenerateSQLRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[57]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GenerateSQLRequest.ProtoReflect.Descriptor instead.
-func (*GenerateSQLRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{57}
-}
-
-func (x *GenerateSQLRequest) GetNaturalLanguageInput() string {
-	if x != nil {
-		return x.NaturalLanguageInput
-	}
-	return ""
-}
-
-func (x *GenerateSQLRequest) GetDatabaseType() DatabaseType {
-	if x != nil {
-		return x.DatabaseType
-	}
-	return DatabaseType_DATABASE_TYPE_UNSPECIFIED
-}
-
-func (x *GenerateSQLRequest) GetSchemas() []string {
-	if x != nil {
-		return x.Schemas
-	}
-	return nil
-}
-
-func (x *GenerateSQLRequest) GetSessionId() string {
-	if x != nil && x.SessionId != nil {
-		return *x.SessionId
-	}
-	return ""
-}
-
-func (x *GenerateSQLRequest) GetExamples() []*QueryExample {
-	if x != nil {
-		return x.Examples
-	}
-	return nil
-}
-
 // Response message containing the result of content generation.
 type GenerateContentResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -3779,7 +3585,7 @@ type GenerateContentResponse struct {
 
 func (x *GenerateContentResponse) Reset() {
 	*x = GenerateContentResponse{}
-	mi := &file_pkg_server_server_proto_msgTypes[58]
+	mi := &file_pkg_server_server_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3791,7 +3597,7 @@ func (x *GenerateContentResponse) String() string {
 func (*GenerateContentResponse) ProtoMessage() {}
 
 func (x *GenerateContentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[58]
+	mi := &file_pkg_server_server_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3804,7 +3610,7 @@ func (x *GenerateContentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateContentResponse.ProtoReflect.Descriptor instead.
 func (*GenerateContentResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{58}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *GenerateContentResponse) GetResult() isGenerateContentResponse_Result {
@@ -3850,93 +3656,6 @@ func (*GenerateContentResponse_Success) isGenerateContentResponse_Result() {}
 
 func (*GenerateContentResponse_Error) isGenerateContentResponse_Result() {}
 
-// Response message containing the result of the SQL generation.
-type GenerateSQLResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The response can be one of the following types.
-	//
-	// Types that are valid to be assigned to Result:
-	//
-	//	*GenerateSQLResponse_Success
-	//	*GenerateSQLResponse_Error
-	Result        isGenerateSQLResponse_Result `protobuf_oneof:"result"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GenerateSQLResponse) Reset() {
-	*x = GenerateSQLResponse{}
-	mi := &file_pkg_server_server_proto_msgTypes[59]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GenerateSQLResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GenerateSQLResponse) ProtoMessage() {}
-
-func (x *GenerateSQLResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[59]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GenerateSQLResponse.ProtoReflect.Descriptor instead.
-func (*GenerateSQLResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{59}
-}
-
-func (x *GenerateSQLResponse) GetResult() isGenerateSQLResponse_Result {
-	if x != nil {
-		return x.Result
-	}
-	return nil
-}
-
-func (x *GenerateSQLResponse) GetSuccess() *SuccessResponse {
-	if x != nil {
-		if x, ok := x.Result.(*GenerateSQLResponse_Success); ok {
-			return x.Success
-		}
-	}
-	return nil
-}
-
-func (x *GenerateSQLResponse) GetError() *ErrorResponse {
-	if x != nil {
-		if x, ok := x.Result.(*GenerateSQLResponse_Error); ok {
-			return x.Error
-		}
-	}
-	return nil
-}
-
-type isGenerateSQLResponse_Result interface {
-	isGenerateSQLResponse_Result()
-}
-
-type GenerateSQLResponse_Success struct {
-	// Contains the successful SQL generation details.
-	Success *SuccessResponse `protobuf:"bytes,1,opt,name=success,proto3,oneof"`
-}
-
-type GenerateSQLResponse_Error struct {
-	// Contains details about why the generation failed.
-	Error *ErrorResponse `protobuf:"bytes,2,opt,name=error,proto3,oneof"`
-}
-
-func (*GenerateSQLResponse_Success) isGenerateSQLResponse_Result() {}
-
-func (*GenerateSQLResponse_Error) isGenerateSQLResponse_Result() {}
-
 // Represents a successful content generation.
 type ContentSuccessResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -3957,7 +3676,7 @@ type ContentSuccessResponse struct {
 
 func (x *ContentSuccessResponse) Reset() {
 	*x = ContentSuccessResponse{}
-	mi := &file_pkg_server_server_proto_msgTypes[60]
+	mi := &file_pkg_server_server_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3969,7 +3688,7 @@ func (x *ContentSuccessResponse) String() string {
 func (*ContentSuccessResponse) ProtoMessage() {}
 
 func (x *ContentSuccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[60]
+	mi := &file_pkg_server_server_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3982,7 +3701,7 @@ func (x *ContentSuccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ContentSuccessResponse.ProtoReflect.Descriptor instead.
 func (*ContentSuccessResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{60}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *ContentSuccessResponse) GetContent() string {
@@ -4020,72 +3739,7 @@ func (x *ContentSuccessResponse) GetMetadata() map[string]string {
 	return nil
 }
 
-// Represents a successful SQL generation.
-type SuccessResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The generated SQL query.
-	SqlQuery string `protobuf:"bytes,1,opt,name=sqlQuery,proto3" json:"sqlQuery,omitempty"`
-	// An explanation of how the AI interpreted the request and generated the SQL.
-	// This builds user trust and aids in debugging.
-	Explanation *string `protobuf:"bytes,2,opt,name=explanation,proto3,oneof" json:"explanation,omitempty"`
-	// A score between 0.0 and 1.0 indicating the AI's confidence in the generated query.
-	ConfidenceScore *float32 `protobuf:"fixed32,3,opt,name=confidenceScore,proto3,oneof" json:"confidenceScore,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *SuccessResponse) Reset() {
-	*x = SuccessResponse{}
-	mi := &file_pkg_server_server_proto_msgTypes[61]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SuccessResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SuccessResponse) ProtoMessage() {}
-
-func (x *SuccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[61]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SuccessResponse.ProtoReflect.Descriptor instead.
-func (*SuccessResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{61}
-}
-
-func (x *SuccessResponse) GetSqlQuery() string {
-	if x != nil {
-		return x.SqlQuery
-	}
-	return ""
-}
-
-func (x *SuccessResponse) GetExplanation() string {
-	if x != nil && x.Explanation != nil {
-		return *x.Explanation
-	}
-	return ""
-}
-
-func (x *SuccessResponse) GetConfidenceScore() float32 {
-	if x != nil && x.ConfidenceScore != nil {
-		return *x.ConfidenceScore
-	}
-	return 0
-}
-
-// Represents a failed SQL generation attempt.
+// Represents a failed content generation attempt.
 type ErrorResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// A structured error code for programmatic handling.
@@ -4098,7 +3752,7 @@ type ErrorResponse struct {
 
 func (x *ErrorResponse) Reset() {
 	*x = ErrorResponse{}
-	mi := &file_pkg_server_server_proto_msgTypes[62]
+	mi := &file_pkg_server_server_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4110,7 +3764,7 @@ func (x *ErrorResponse) String() string {
 func (*ErrorResponse) ProtoMessage() {}
 
 func (x *ErrorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[62]
+	mi := &file_pkg_server_server_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4123,7 +3777,7 @@ func (x *ErrorResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ErrorResponse.ProtoReflect.Descriptor instead.
 func (*ErrorResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{62}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *ErrorResponse) GetCode() ErrorCode {
@@ -4414,10 +4068,7 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\x06tables\x18\x02 \x03(\tR\x06tables\x12(\n" +
 	"\x0fcurrentDatabase\x18\x03 \x01(\tR\x0fcurrentDatabase\x12\x1a\n" +
 	"\bduration\x18\x04 \x01(\tR\bduration\x12$\n" +
-	"\x06labels\x18\x05 \x03(\v2\f.server.PairR\x06labels\"`\n" +
-	"\fQueryExample\x124\n" +
-	"\x15naturalLanguagePrompt\x18\x01 \x01(\tR\x15naturalLanguagePrompt\x12\x1a\n" +
-	"\bsqlQuery\x18\x02 \x01(\tR\bsqlQuery\"\x95\x03\n" +
+	"\x06labels\x18\x05 \x03(\v2\f.server.PairR\x06labels\"\x95\x03\n" +
 	"\x16GenerateContentRequest\x12\x16\n" +
 	"\x06prompt\x18\x01 \x01(\tR\x06prompt\x12 \n" +
 	"\vcontentType\x18\x02 \x01(\tR\vcontentType\x12E\n" +
@@ -4433,21 +4084,9 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\f\n" +
 	"\n" +
-	"_sessionId\"\xff\x01\n" +
-	"\x12GenerateSQLRequest\x122\n" +
-	"\x14naturalLanguageInput\x18\x01 \x01(\tR\x14naturalLanguageInput\x128\n" +
-	"\fdatabaseType\x18\x02 \x01(\x0e2\x14.server.DatabaseTypeR\fdatabaseType\x12\x18\n" +
-	"\aschemas\x18\x03 \x03(\tR\aschemas\x12!\n" +
-	"\tsessionId\x18\x04 \x01(\tH\x00R\tsessionId\x88\x01\x01\x120\n" +
-	"\bexamples\x18\x05 \x03(\v2\x14.server.QueryExampleR\bexamplesB\f\n" +
-	"\n" +
 	"_sessionId\"\x8e\x01\n" +
 	"\x17GenerateContentResponse\x12:\n" +
 	"\asuccess\x18\x01 \x01(\v2\x1e.server.ContentSuccessResponseH\x00R\asuccess\x12-\n" +
-	"\x05error\x18\x02 \x01(\v2\x15.server.ErrorResponseH\x00R\x05errorB\b\n" +
-	"\x06result\"\x83\x01\n" +
-	"\x13GenerateSQLResponse\x123\n" +
-	"\asuccess\x18\x01 \x01(\v2\x17.server.SuccessResponseH\x00R\asuccess\x12-\n" +
 	"\x05error\x18\x02 \x01(\v2\x15.server.ErrorResponseH\x00R\x05errorB\b\n" +
 	"\x06result\"\xd5\x02\n" +
 	"\x16ContentSuccessResponse\x12\x18\n" +
@@ -4460,23 +4099,10 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x0e\n" +
 	"\f_explanationB\x12\n" +
-	"\x10_confidenceScore\"\xa7\x01\n" +
-	"\x0fSuccessResponse\x12\x1a\n" +
-	"\bsqlQuery\x18\x01 \x01(\tR\bsqlQuery\x12%\n" +
-	"\vexplanation\x18\x02 \x01(\tH\x00R\vexplanation\x88\x01\x01\x12-\n" +
-	"\x0fconfidenceScore\x18\x03 \x01(\x02H\x01R\x0fconfidenceScore\x88\x01\x01B\x0e\n" +
-	"\f_explanationB\x12\n" +
 	"\x10_confidenceScore\"P\n" +
 	"\rErrorResponse\x12%\n" +
 	"\x04code\x18\x01 \x01(\x0e2\x11.server.ErrorCodeR\x04code\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage*T\n" +
-	"\fDatabaseType\x12\x1d\n" +
-	"\x19DATABASE_TYPE_UNSPECIFIED\x10\x00\x12\t\n" +
-	"\x05MYSQL\x10\x01\x12\x0e\n" +
-	"\n" +
-	"POSTGRESQL\x10\x02\x12\n" +
-	"\n" +
-	"\x06SQLITE\x10\x03*\x83\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage*\x83\x01\n" +
 	"\tErrorCode\x12\x1a\n" +
 	"\x16ERROR_CODE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10INVALID_ARGUMENT\x10\x01\x12\x16\n" +
@@ -4542,10 +4168,9 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\bGetTheme\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/themes/{name}\x12J\n" +
 	"\vGetBindings\x12\r.server.Empty\x1a\x12.server.SimpleList\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/api/v1/bindings\x12W\n" +
 	"\n" +
-	"GetBinding\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/bindings/{name}2\x80\x02\n" +
+	"GetBinding\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/bindings/{name}2\x81\x01\n" +
 	"\vAIExtension\x12r\n" +
-	"\x0fGenerateContent\x12\x1e.server.GenerateContentRequest\x1a\x1f.server.GenerateContentResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/ai/generate\x12}\n" +
-	"\x1eGenerateSQLFromNaturalLanguage\x12\x1a.server.GenerateSQLRequest\x1a\x1b.server.GenerateSQLResponse\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/api/v1/ai/sql/generate2\xa0\x01\n" +
+	"\x0fGenerateContent\x12\x1e.server.GenerateContentRequest\x1a\x1f.server.GenerateContentResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/ai/generate2\xa0\x01\n" +
 	"\x04Mock\x12K\n" +
 	"\x06Reload\x12\x12.server.MockConfig\x1a\r.server.Empty\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/mock/reload\x12K\n" +
 	"\tGetConfig\x12\r.server.Empty\x1a\x12.server.MockConfig\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/mock/config2`\n" +
@@ -4565,267 +4190,256 @@ func file_pkg_server_server_proto_rawDescGZIP() []byte {
 	return file_pkg_server_server_proto_rawDescData
 }
 
-var file_pkg_server_server_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_pkg_server_server_proto_msgTypes = make([]protoimpl.MessageInfo, 69)
+var file_pkg_server_server_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_pkg_server_server_proto_msgTypes = make([]protoimpl.MessageInfo, 65)
 var file_pkg_server_server_proto_goTypes = []any{
-	(DatabaseType)(0),               // 0: server.DatabaseType
-	(ErrorCode)(0),                  // 1: server.ErrorCode
-	(*Suites)(nil),                  // 2: server.Suites
-	(*Items)(nil),                   // 3: server.Items
-	(*HistorySuites)(nil),           // 4: server.HistorySuites
-	(*HistoryItems)(nil),            // 5: server.HistoryItems
-	(*HistoryCaseIdentity)(nil),     // 6: server.HistoryCaseIdentity
-	(*TestCaseIdentity)(nil),        // 7: server.TestCaseIdentity
-	(*TestSuiteSource)(nil),         // 8: server.TestSuiteSource
-	(*TestSuite)(nil),               // 9: server.TestSuite
-	(*TestSuiteWithCase)(nil),       // 10: server.TestSuiteWithCase
-	(*APISpec)(nil),                 // 11: server.APISpec
-	(*Secure)(nil),                  // 12: server.Secure
-	(*RPC)(nil),                     // 13: server.RPC
-	(*TestSuiteIdentity)(nil),       // 14: server.TestSuiteIdentity
-	(*TestSuiteDuplicate)(nil),      // 15: server.TestSuiteDuplicate
-	(*TestCaseDuplicate)(nil),       // 16: server.TestCaseDuplicate
-	(*TestTask)(nil),                // 17: server.TestTask
-	(*BatchTestTask)(nil),           // 18: server.BatchTestTask
-	(*TestResult)(nil),              // 19: server.TestResult
-	(*HistoryTestResult)(nil),       // 20: server.HistoryTestResult
-	(*HelloReply)(nil),              // 21: server.HelloReply
-	(*YamlData)(nil),                // 22: server.YamlData
-	(*Suite)(nil),                   // 23: server.Suite
-	(*TestCaseWithSuite)(nil),       // 24: server.TestCaseWithSuite
-	(*TestCases)(nil),               // 25: server.TestCases
-	(*TestCase)(nil),                // 26: server.TestCase
-	(*HistoryTestCase)(nil),         // 27: server.HistoryTestCase
-	(*HistoryTestCases)(nil),        // 28: server.HistoryTestCases
-	(*Request)(nil),                 // 29: server.Request
-	(*Response)(nil),                // 30: server.Response
-	(*ConditionalVerify)(nil),       // 31: server.ConditionalVerify
-	(*TestCaseResult)(nil),          // 32: server.TestCaseResult
-	(*Pair)(nil),                    // 33: server.Pair
-	(*Pairs)(nil),                   // 34: server.Pairs
-	(*SimpleQuery)(nil),             // 35: server.SimpleQuery
-	(*Stores)(nil),                  // 36: server.Stores
-	(*Store)(nil),                   // 37: server.Store
-	(*StoreKinds)(nil),              // 38: server.StoreKinds
-	(*StoreKind)(nil),               // 39: server.StoreKind
-	(*CommonResult)(nil),            // 40: server.CommonResult
-	(*SimpleList)(nil),              // 41: server.SimpleList
-	(*SimpleName)(nil),              // 42: server.SimpleName
-	(*CodeGenerateRequest)(nil),     // 43: server.CodeGenerateRequest
-	(*Secrets)(nil),                 // 44: server.Secrets
-	(*Secret)(nil),                  // 45: server.Secret
-	(*ExtensionStatus)(nil),         // 46: server.ExtensionStatus
-	(*PProfRequest)(nil),            // 47: server.PProfRequest
-	(*PProfData)(nil),               // 48: server.PProfData
-	(*FileData)(nil),                // 49: server.FileData
-	(*Empty)(nil),                   // 50: server.Empty
-	(*MockConfig)(nil),              // 51: server.MockConfig
-	(*Version)(nil),                 // 52: server.Version
-	(*ProxyConfig)(nil),             // 53: server.ProxyConfig
-	(*DataQuery)(nil),               // 54: server.DataQuery
-	(*DataQueryResult)(nil),         // 55: server.DataQueryResult
-	(*DataMeta)(nil),                // 56: server.DataMeta
-	(*QueryExample)(nil),            // 57: server.QueryExample
-	(*GenerateContentRequest)(nil),  // 58: server.GenerateContentRequest
-	(*GenerateSQLRequest)(nil),      // 59: server.GenerateSQLRequest
-	(*GenerateContentResponse)(nil), // 60: server.GenerateContentResponse
-	(*GenerateSQLResponse)(nil),     // 61: server.GenerateSQLResponse
-	(*ContentSuccessResponse)(nil),  // 62: server.ContentSuccessResponse
-	(*SuccessResponse)(nil),         // 63: server.SuccessResponse
-	(*ErrorResponse)(nil),           // 64: server.ErrorResponse
-	nil,                             // 65: server.Suites.DataEntry
-	nil,                             // 66: server.HistorySuites.DataEntry
-	nil,                             // 67: server.TestTask.EnvEntry
-	nil,                             // 68: server.GenerateContentRequest.ContextEntry
-	nil,                             // 69: server.GenerateContentRequest.ParametersEntry
-	nil,                             // 70: server.ContentSuccessResponse.MetadataEntry
-	(*timestamppb.Timestamp)(nil),   // 71: google.protobuf.Timestamp
+	(ErrorCode)(0),                  // 0: server.ErrorCode
+	(*Suites)(nil),                  // 1: server.Suites
+	(*Items)(nil),                   // 2: server.Items
+	(*HistorySuites)(nil),           // 3: server.HistorySuites
+	(*HistoryItems)(nil),            // 4: server.HistoryItems
+	(*HistoryCaseIdentity)(nil),     // 5: server.HistoryCaseIdentity
+	(*TestCaseIdentity)(nil),        // 6: server.TestCaseIdentity
+	(*TestSuiteSource)(nil),         // 7: server.TestSuiteSource
+	(*TestSuite)(nil),               // 8: server.TestSuite
+	(*TestSuiteWithCase)(nil),       // 9: server.TestSuiteWithCase
+	(*APISpec)(nil),                 // 10: server.APISpec
+	(*Secure)(nil),                  // 11: server.Secure
+	(*RPC)(nil),                     // 12: server.RPC
+	(*TestSuiteIdentity)(nil),       // 13: server.TestSuiteIdentity
+	(*TestSuiteDuplicate)(nil),      // 14: server.TestSuiteDuplicate
+	(*TestCaseDuplicate)(nil),       // 15: server.TestCaseDuplicate
+	(*TestTask)(nil),                // 16: server.TestTask
+	(*BatchTestTask)(nil),           // 17: server.BatchTestTask
+	(*TestResult)(nil),              // 18: server.TestResult
+	(*HistoryTestResult)(nil),       // 19: server.HistoryTestResult
+	(*HelloReply)(nil),              // 20: server.HelloReply
+	(*YamlData)(nil),                // 21: server.YamlData
+	(*Suite)(nil),                   // 22: server.Suite
+	(*TestCaseWithSuite)(nil),       // 23: server.TestCaseWithSuite
+	(*TestCases)(nil),               // 24: server.TestCases
+	(*TestCase)(nil),                // 25: server.TestCase
+	(*HistoryTestCase)(nil),         // 26: server.HistoryTestCase
+	(*HistoryTestCases)(nil),        // 27: server.HistoryTestCases
+	(*Request)(nil),                 // 28: server.Request
+	(*Response)(nil),                // 29: server.Response
+	(*ConditionalVerify)(nil),       // 30: server.ConditionalVerify
+	(*TestCaseResult)(nil),          // 31: server.TestCaseResult
+	(*Pair)(nil),                    // 32: server.Pair
+	(*Pairs)(nil),                   // 33: server.Pairs
+	(*SimpleQuery)(nil),             // 34: server.SimpleQuery
+	(*Stores)(nil),                  // 35: server.Stores
+	(*Store)(nil),                   // 36: server.Store
+	(*StoreKinds)(nil),              // 37: server.StoreKinds
+	(*StoreKind)(nil),               // 38: server.StoreKind
+	(*CommonResult)(nil),            // 39: server.CommonResult
+	(*SimpleList)(nil),              // 40: server.SimpleList
+	(*SimpleName)(nil),              // 41: server.SimpleName
+	(*CodeGenerateRequest)(nil),     // 42: server.CodeGenerateRequest
+	(*Secrets)(nil),                 // 43: server.Secrets
+	(*Secret)(nil),                  // 44: server.Secret
+	(*ExtensionStatus)(nil),         // 45: server.ExtensionStatus
+	(*PProfRequest)(nil),            // 46: server.PProfRequest
+	(*PProfData)(nil),               // 47: server.PProfData
+	(*FileData)(nil),                // 48: server.FileData
+	(*Empty)(nil),                   // 49: server.Empty
+	(*MockConfig)(nil),              // 50: server.MockConfig
+	(*Version)(nil),                 // 51: server.Version
+	(*ProxyConfig)(nil),             // 52: server.ProxyConfig
+	(*DataQuery)(nil),               // 53: server.DataQuery
+	(*DataQueryResult)(nil),         // 54: server.DataQueryResult
+	(*DataMeta)(nil),                // 55: server.DataMeta
+	(*GenerateContentRequest)(nil),  // 56: server.GenerateContentRequest
+	(*GenerateContentResponse)(nil), // 57: server.GenerateContentResponse
+	(*ContentSuccessResponse)(nil),  // 58: server.ContentSuccessResponse
+	(*ErrorResponse)(nil),           // 59: server.ErrorResponse
+	nil,                             // 60: server.Suites.DataEntry
+	nil,                             // 61: server.HistorySuites.DataEntry
+	nil,                             // 62: server.TestTask.EnvEntry
+	nil,                             // 63: server.GenerateContentRequest.ContextEntry
+	nil,                             // 64: server.GenerateContentRequest.ParametersEntry
+	nil,                             // 65: server.ContentSuccessResponse.MetadataEntry
+	(*timestamppb.Timestamp)(nil),   // 66: google.protobuf.Timestamp
 }
 var file_pkg_server_server_proto_depIdxs = []int32{
-	65,  // 0: server.Suites.data:type_name -> server.Suites.DataEntry
-	66,  // 1: server.HistorySuites.data:type_name -> server.HistorySuites.DataEntry
-	6,   // 2: server.HistoryItems.data:type_name -> server.HistoryCaseIdentity
-	33,  // 3: server.TestCaseIdentity.parameters:type_name -> server.Pair
-	33,  // 4: server.TestSuite.param:type_name -> server.Pair
-	11,  // 5: server.TestSuite.spec:type_name -> server.APISpec
-	53,  // 6: server.TestSuite.proxy:type_name -> server.ProxyConfig
-	9,   // 7: server.TestSuiteWithCase.suite:type_name -> server.TestSuite
-	26,  // 8: server.TestSuiteWithCase.case:type_name -> server.TestCase
-	13,  // 9: server.APISpec.rpc:type_name -> server.RPC
-	12,  // 10: server.APISpec.secure:type_name -> server.Secure
-	67,  // 11: server.TestTask.env:type_name -> server.TestTask.EnvEntry
-	33,  // 12: server.TestTask.parameters:type_name -> server.Pair
-	33,  // 13: server.BatchTestTask.parameters:type_name -> server.Pair
-	32,  // 14: server.TestResult.testCaseResult:type_name -> server.TestCaseResult
-	32,  // 15: server.HistoryTestResult.testCaseResult:type_name -> server.TestCaseResult
-	27,  // 16: server.HistoryTestResult.data:type_name -> server.HistoryTestCase
-	71,  // 17: server.HistoryTestResult.createTime:type_name -> google.protobuf.Timestamp
-	26,  // 18: server.Suite.items:type_name -> server.TestCase
-	26,  // 19: server.TestCaseWithSuite.data:type_name -> server.TestCase
-	26,  // 20: server.TestCases.data:type_name -> server.TestCase
-	29,  // 21: server.TestCase.request:type_name -> server.Request
-	30,  // 22: server.TestCase.response:type_name -> server.Response
-	71,  // 23: server.HistoryTestCase.createTime:type_name -> google.protobuf.Timestamp
-	33,  // 24: server.HistoryTestCase.suiteParam:type_name -> server.Pair
-	11,  // 25: server.HistoryTestCase.suiteSpec:type_name -> server.APISpec
-	29,  // 26: server.HistoryTestCase.request:type_name -> server.Request
-	30,  // 27: server.HistoryTestCase.response:type_name -> server.Response
-	33,  // 28: server.HistoryTestCase.historyHeader:type_name -> server.Pair
-	27,  // 29: server.HistoryTestCases.data:type_name -> server.HistoryTestCase
-	33,  // 30: server.Request.header:type_name -> server.Pair
-	33,  // 31: server.Request.query:type_name -> server.Pair
-	33,  // 32: server.Request.cookie:type_name -> server.Pair
-	33,  // 33: server.Request.form:type_name -> server.Pair
-	33,  // 34: server.Response.header:type_name -> server.Pair
-	33,  // 35: server.Response.bodyFieldsExpect:type_name -> server.Pair
-	31,  // 36: server.Response.ConditionalVerify:type_name -> server.ConditionalVerify
-	33,  // 37: server.TestCaseResult.header:type_name -> server.Pair
-	33,  // 38: server.Pairs.data:type_name -> server.Pair
-	37,  // 39: server.Stores.data:type_name -> server.Store
-	33,  // 40: server.Store.properties:type_name -> server.Pair
-	39,  // 41: server.Store.kind:type_name -> server.StoreKind
-	39,  // 42: server.StoreKinds.data:type_name -> server.StoreKind
-	33,  // 43: server.SimpleList.data:type_name -> server.Pair
-	45,  // 44: server.Secrets.data:type_name -> server.Secret
-	33,  // 45: server.DataQueryResult.data:type_name -> server.Pair
-	34,  // 46: server.DataQueryResult.items:type_name -> server.Pairs
-	56,  // 47: server.DataQueryResult.meta:type_name -> server.DataMeta
-	33,  // 48: server.DataMeta.labels:type_name -> server.Pair
-	68,  // 49: server.GenerateContentRequest.context:type_name -> server.GenerateContentRequest.ContextEntry
-	69,  // 50: server.GenerateContentRequest.parameters:type_name -> server.GenerateContentRequest.ParametersEntry
-	0,   // 51: server.GenerateSQLRequest.databaseType:type_name -> server.DatabaseType
-	57,  // 52: server.GenerateSQLRequest.examples:type_name -> server.QueryExample
-	62,  // 53: server.GenerateContentResponse.success:type_name -> server.ContentSuccessResponse
-	64,  // 54: server.GenerateContentResponse.error:type_name -> server.ErrorResponse
-	63,  // 55: server.GenerateSQLResponse.success:type_name -> server.SuccessResponse
-	64,  // 56: server.GenerateSQLResponse.error:type_name -> server.ErrorResponse
-	70,  // 57: server.ContentSuccessResponse.metadata:type_name -> server.ContentSuccessResponse.MetadataEntry
-	1,   // 58: server.ErrorResponse.code:type_name -> server.ErrorCode
-	3,   // 59: server.Suites.DataEntry.value:type_name -> server.Items
-	5,   // 60: server.HistorySuites.DataEntry.value:type_name -> server.HistoryItems
-	17,  // 61: server.Runner.Run:input_type -> server.TestTask
-	14,  // 62: server.Runner.RunTestSuite:input_type -> server.TestSuiteIdentity
-	50,  // 63: server.Runner.GetSuites:input_type -> server.Empty
-	14,  // 64: server.Runner.CreateTestSuite:input_type -> server.TestSuiteIdentity
-	8,   // 65: server.Runner.ImportTestSuite:input_type -> server.TestSuiteSource
-	14,  // 66: server.Runner.GetTestSuite:input_type -> server.TestSuiteIdentity
-	9,   // 67: server.Runner.UpdateTestSuite:input_type -> server.TestSuite
-	14,  // 68: server.Runner.DeleteTestSuite:input_type -> server.TestSuiteIdentity
-	15,  // 69: server.Runner.DuplicateTestSuite:input_type -> server.TestSuiteDuplicate
-	15,  // 70: server.Runner.RenameTestSuite:input_type -> server.TestSuiteDuplicate
-	14,  // 71: server.Runner.GetTestSuiteYaml:input_type -> server.TestSuiteIdentity
-	14,  // 72: server.Runner.ListTestCase:input_type -> server.TestSuiteIdentity
-	7,   // 73: server.Runner.RunTestCase:input_type -> server.TestCaseIdentity
-	18,  // 74: server.Runner.BatchRun:input_type -> server.BatchTestTask
-	7,   // 75: server.Runner.GetTestCase:input_type -> server.TestCaseIdentity
-	24,  // 76: server.Runner.CreateTestCase:input_type -> server.TestCaseWithSuite
-	24,  // 77: server.Runner.UpdateTestCase:input_type -> server.TestCaseWithSuite
-	7,   // 78: server.Runner.DeleteTestCase:input_type -> server.TestCaseIdentity
-	16,  // 79: server.Runner.DuplicateTestCase:input_type -> server.TestCaseDuplicate
-	16,  // 80: server.Runner.RenameTestCase:input_type -> server.TestCaseDuplicate
-	14,  // 81: server.Runner.GetSuggestedAPIs:input_type -> server.TestSuiteIdentity
-	50,  // 82: server.Runner.GetHistorySuites:input_type -> server.Empty
-	27,  // 83: server.Runner.GetHistoryTestCaseWithResult:input_type -> server.HistoryTestCase
-	27,  // 84: server.Runner.GetHistoryTestCase:input_type -> server.HistoryTestCase
-	27,  // 85: server.Runner.DeleteHistoryTestCase:input_type -> server.HistoryTestCase
-	27,  // 86: server.Runner.DeleteAllHistoryTestCase:input_type -> server.HistoryTestCase
-	26,  // 87: server.Runner.GetTestCaseAllHistory:input_type -> server.TestCase
-	50,  // 88: server.Runner.ListCodeGenerator:input_type -> server.Empty
-	43,  // 89: server.Runner.GenerateCode:input_type -> server.CodeGenerateRequest
-	43,  // 90: server.Runner.HistoryGenerateCode:input_type -> server.CodeGenerateRequest
-	50,  // 91: server.Runner.ListConverter:input_type -> server.Empty
-	43,  // 92: server.Runner.ConvertTestSuite:input_type -> server.CodeGenerateRequest
-	50,  // 93: server.Runner.PopularHeaders:input_type -> server.Empty
-	35,  // 94: server.Runner.FunctionsQuery:input_type -> server.SimpleQuery
-	35,  // 95: server.Runner.FunctionsQueryStream:input_type -> server.SimpleQuery
-	50,  // 96: server.Runner.GetVersion:input_type -> server.Empty
-	50,  // 97: server.Runner.Sample:input_type -> server.Empty
-	26,  // 98: server.Runner.DownloadResponseFile:input_type -> server.TestCase
-	50,  // 99: server.Runner.GetStoreKinds:input_type -> server.Empty
-	50,  // 100: server.Runner.GetStores:input_type -> server.Empty
-	37,  // 101: server.Runner.CreateStore:input_type -> server.Store
-	37,  // 102: server.Runner.UpdateStore:input_type -> server.Store
-	37,  // 103: server.Runner.DeleteStore:input_type -> server.Store
-	35,  // 104: server.Runner.VerifyStore:input_type -> server.SimpleQuery
-	50,  // 105: server.Runner.GetSecrets:input_type -> server.Empty
-	45,  // 106: server.Runner.CreateSecret:input_type -> server.Secret
-	45,  // 107: server.Runner.DeleteSecret:input_type -> server.Secret
-	45,  // 108: server.Runner.UpdateSecret:input_type -> server.Secret
-	47,  // 109: server.Runner.PProf:input_type -> server.PProfRequest
-	10,  // 110: server.RunnerExtension.Run:input_type -> server.TestSuiteWithCase
-	50,  // 111: server.ThemeExtension.GetThemes:input_type -> server.Empty
-	42,  // 112: server.ThemeExtension.GetTheme:input_type -> server.SimpleName
-	50,  // 113: server.ThemeExtension.GetBindings:input_type -> server.Empty
-	42,  // 114: server.ThemeExtension.GetBinding:input_type -> server.SimpleName
-	58,  // 115: server.AIExtension.GenerateContent:input_type -> server.GenerateContentRequest
-	59,  // 116: server.AIExtension.GenerateSQLFromNaturalLanguage:input_type -> server.GenerateSQLRequest
-	51,  // 117: server.Mock.Reload:input_type -> server.MockConfig
-	50,  // 118: server.Mock.GetConfig:input_type -> server.Empty
-	54,  // 119: server.DataServer.Query:input_type -> server.DataQuery
-	19,  // 120: server.Runner.Run:output_type -> server.TestResult
-	19,  // 121: server.Runner.RunTestSuite:output_type -> server.TestResult
-	2,   // 122: server.Runner.GetSuites:output_type -> server.Suites
-	21,  // 123: server.Runner.CreateTestSuite:output_type -> server.HelloReply
-	40,  // 124: server.Runner.ImportTestSuite:output_type -> server.CommonResult
-	9,   // 125: server.Runner.GetTestSuite:output_type -> server.TestSuite
-	21,  // 126: server.Runner.UpdateTestSuite:output_type -> server.HelloReply
-	21,  // 127: server.Runner.DeleteTestSuite:output_type -> server.HelloReply
-	21,  // 128: server.Runner.DuplicateTestSuite:output_type -> server.HelloReply
-	21,  // 129: server.Runner.RenameTestSuite:output_type -> server.HelloReply
-	22,  // 130: server.Runner.GetTestSuiteYaml:output_type -> server.YamlData
-	23,  // 131: server.Runner.ListTestCase:output_type -> server.Suite
-	32,  // 132: server.Runner.RunTestCase:output_type -> server.TestCaseResult
-	19,  // 133: server.Runner.BatchRun:output_type -> server.TestResult
-	26,  // 134: server.Runner.GetTestCase:output_type -> server.TestCase
-	21,  // 135: server.Runner.CreateTestCase:output_type -> server.HelloReply
-	21,  // 136: server.Runner.UpdateTestCase:output_type -> server.HelloReply
-	21,  // 137: server.Runner.DeleteTestCase:output_type -> server.HelloReply
-	21,  // 138: server.Runner.DuplicateTestCase:output_type -> server.HelloReply
-	21,  // 139: server.Runner.RenameTestCase:output_type -> server.HelloReply
-	25,  // 140: server.Runner.GetSuggestedAPIs:output_type -> server.TestCases
-	4,   // 141: server.Runner.GetHistorySuites:output_type -> server.HistorySuites
-	20,  // 142: server.Runner.GetHistoryTestCaseWithResult:output_type -> server.HistoryTestResult
-	27,  // 143: server.Runner.GetHistoryTestCase:output_type -> server.HistoryTestCase
-	21,  // 144: server.Runner.DeleteHistoryTestCase:output_type -> server.HelloReply
-	21,  // 145: server.Runner.DeleteAllHistoryTestCase:output_type -> server.HelloReply
-	28,  // 146: server.Runner.GetTestCaseAllHistory:output_type -> server.HistoryTestCases
-	41,  // 147: server.Runner.ListCodeGenerator:output_type -> server.SimpleList
-	40,  // 148: server.Runner.GenerateCode:output_type -> server.CommonResult
-	40,  // 149: server.Runner.HistoryGenerateCode:output_type -> server.CommonResult
-	41,  // 150: server.Runner.ListConverter:output_type -> server.SimpleList
-	40,  // 151: server.Runner.ConvertTestSuite:output_type -> server.CommonResult
-	34,  // 152: server.Runner.PopularHeaders:output_type -> server.Pairs
-	34,  // 153: server.Runner.FunctionsQuery:output_type -> server.Pairs
-	34,  // 154: server.Runner.FunctionsQueryStream:output_type -> server.Pairs
-	52,  // 155: server.Runner.GetVersion:output_type -> server.Version
-	21,  // 156: server.Runner.Sample:output_type -> server.HelloReply
-	49,  // 157: server.Runner.DownloadResponseFile:output_type -> server.FileData
-	38,  // 158: server.Runner.GetStoreKinds:output_type -> server.StoreKinds
-	36,  // 159: server.Runner.GetStores:output_type -> server.Stores
-	37,  // 160: server.Runner.CreateStore:output_type -> server.Store
-	37,  // 161: server.Runner.UpdateStore:output_type -> server.Store
-	37,  // 162: server.Runner.DeleteStore:output_type -> server.Store
-	46,  // 163: server.Runner.VerifyStore:output_type -> server.ExtensionStatus
-	44,  // 164: server.Runner.GetSecrets:output_type -> server.Secrets
-	40,  // 165: server.Runner.CreateSecret:output_type -> server.CommonResult
-	40,  // 166: server.Runner.DeleteSecret:output_type -> server.CommonResult
-	40,  // 167: server.Runner.UpdateSecret:output_type -> server.CommonResult
-	48,  // 168: server.Runner.PProf:output_type -> server.PProfData
-	40,  // 169: server.RunnerExtension.Run:output_type -> server.CommonResult
-	41,  // 170: server.ThemeExtension.GetThemes:output_type -> server.SimpleList
-	40,  // 171: server.ThemeExtension.GetTheme:output_type -> server.CommonResult
-	41,  // 172: server.ThemeExtension.GetBindings:output_type -> server.SimpleList
-	40,  // 173: server.ThemeExtension.GetBinding:output_type -> server.CommonResult
-	60,  // 174: server.AIExtension.GenerateContent:output_type -> server.GenerateContentResponse
-	61,  // 175: server.AIExtension.GenerateSQLFromNaturalLanguage:output_type -> server.GenerateSQLResponse
-	50,  // 176: server.Mock.Reload:output_type -> server.Empty
-	51,  // 177: server.Mock.GetConfig:output_type -> server.MockConfig
-	55,  // 178: server.DataServer.Query:output_type -> server.DataQueryResult
-	120, // [120:179] is the sub-list for method output_type
-	61,  // [61:120] is the sub-list for method input_type
-	61,  // [61:61] is the sub-list for extension type_name
-	61,  // [61:61] is the sub-list for extension extendee
-	0,   // [0:61] is the sub-list for field type_name
+	60,  // 0: server.Suites.data:type_name -> server.Suites.DataEntry
+	61,  // 1: server.HistorySuites.data:type_name -> server.HistorySuites.DataEntry
+	5,   // 2: server.HistoryItems.data:type_name -> server.HistoryCaseIdentity
+	32,  // 3: server.TestCaseIdentity.parameters:type_name -> server.Pair
+	32,  // 4: server.TestSuite.param:type_name -> server.Pair
+	10,  // 5: server.TestSuite.spec:type_name -> server.APISpec
+	52,  // 6: server.TestSuite.proxy:type_name -> server.ProxyConfig
+	8,   // 7: server.TestSuiteWithCase.suite:type_name -> server.TestSuite
+	25,  // 8: server.TestSuiteWithCase.case:type_name -> server.TestCase
+	12,  // 9: server.APISpec.rpc:type_name -> server.RPC
+	11,  // 10: server.APISpec.secure:type_name -> server.Secure
+	62,  // 11: server.TestTask.env:type_name -> server.TestTask.EnvEntry
+	32,  // 12: server.TestTask.parameters:type_name -> server.Pair
+	32,  // 13: server.BatchTestTask.parameters:type_name -> server.Pair
+	31,  // 14: server.TestResult.testCaseResult:type_name -> server.TestCaseResult
+	31,  // 15: server.HistoryTestResult.testCaseResult:type_name -> server.TestCaseResult
+	26,  // 16: server.HistoryTestResult.data:type_name -> server.HistoryTestCase
+	66,  // 17: server.HistoryTestResult.createTime:type_name -> google.protobuf.Timestamp
+	25,  // 18: server.Suite.items:type_name -> server.TestCase
+	25,  // 19: server.TestCaseWithSuite.data:type_name -> server.TestCase
+	25,  // 20: server.TestCases.data:type_name -> server.TestCase
+	28,  // 21: server.TestCase.request:type_name -> server.Request
+	29,  // 22: server.TestCase.response:type_name -> server.Response
+	66,  // 23: server.HistoryTestCase.createTime:type_name -> google.protobuf.Timestamp
+	32,  // 24: server.HistoryTestCase.suiteParam:type_name -> server.Pair
+	10,  // 25: server.HistoryTestCase.suiteSpec:type_name -> server.APISpec
+	28,  // 26: server.HistoryTestCase.request:type_name -> server.Request
+	29,  // 27: server.HistoryTestCase.response:type_name -> server.Response
+	32,  // 28: server.HistoryTestCase.historyHeader:type_name -> server.Pair
+	26,  // 29: server.HistoryTestCases.data:type_name -> server.HistoryTestCase
+	32,  // 30: server.Request.header:type_name -> server.Pair
+	32,  // 31: server.Request.query:type_name -> server.Pair
+	32,  // 32: server.Request.cookie:type_name -> server.Pair
+	32,  // 33: server.Request.form:type_name -> server.Pair
+	32,  // 34: server.Response.header:type_name -> server.Pair
+	32,  // 35: server.Response.bodyFieldsExpect:type_name -> server.Pair
+	30,  // 36: server.Response.ConditionalVerify:type_name -> server.ConditionalVerify
+	32,  // 37: server.TestCaseResult.header:type_name -> server.Pair
+	32,  // 38: server.Pairs.data:type_name -> server.Pair
+	36,  // 39: server.Stores.data:type_name -> server.Store
+	32,  // 40: server.Store.properties:type_name -> server.Pair
+	38,  // 41: server.Store.kind:type_name -> server.StoreKind
+	38,  // 42: server.StoreKinds.data:type_name -> server.StoreKind
+	32,  // 43: server.SimpleList.data:type_name -> server.Pair
+	44,  // 44: server.Secrets.data:type_name -> server.Secret
+	32,  // 45: server.DataQueryResult.data:type_name -> server.Pair
+	33,  // 46: server.DataQueryResult.items:type_name -> server.Pairs
+	55,  // 47: server.DataQueryResult.meta:type_name -> server.DataMeta
+	32,  // 48: server.DataMeta.labels:type_name -> server.Pair
+	63,  // 49: server.GenerateContentRequest.context:type_name -> server.GenerateContentRequest.ContextEntry
+	64,  // 50: server.GenerateContentRequest.parameters:type_name -> server.GenerateContentRequest.ParametersEntry
+	58,  // 51: server.GenerateContentResponse.success:type_name -> server.ContentSuccessResponse
+	59,  // 52: server.GenerateContentResponse.error:type_name -> server.ErrorResponse
+	65,  // 53: server.ContentSuccessResponse.metadata:type_name -> server.ContentSuccessResponse.MetadataEntry
+	0,   // 54: server.ErrorResponse.code:type_name -> server.ErrorCode
+	2,   // 55: server.Suites.DataEntry.value:type_name -> server.Items
+	4,   // 56: server.HistorySuites.DataEntry.value:type_name -> server.HistoryItems
+	16,  // 57: server.Runner.Run:input_type -> server.TestTask
+	13,  // 58: server.Runner.RunTestSuite:input_type -> server.TestSuiteIdentity
+	49,  // 59: server.Runner.GetSuites:input_type -> server.Empty
+	13,  // 60: server.Runner.CreateTestSuite:input_type -> server.TestSuiteIdentity
+	7,   // 61: server.Runner.ImportTestSuite:input_type -> server.TestSuiteSource
+	13,  // 62: server.Runner.GetTestSuite:input_type -> server.TestSuiteIdentity
+	8,   // 63: server.Runner.UpdateTestSuite:input_type -> server.TestSuite
+	13,  // 64: server.Runner.DeleteTestSuite:input_type -> server.TestSuiteIdentity
+	14,  // 65: server.Runner.DuplicateTestSuite:input_type -> server.TestSuiteDuplicate
+	14,  // 66: server.Runner.RenameTestSuite:input_type -> server.TestSuiteDuplicate
+	13,  // 67: server.Runner.GetTestSuiteYaml:input_type -> server.TestSuiteIdentity
+	13,  // 68: server.Runner.ListTestCase:input_type -> server.TestSuiteIdentity
+	6,   // 69: server.Runner.RunTestCase:input_type -> server.TestCaseIdentity
+	17,  // 70: server.Runner.BatchRun:input_type -> server.BatchTestTask
+	6,   // 71: server.Runner.GetTestCase:input_type -> server.TestCaseIdentity
+	23,  // 72: server.Runner.CreateTestCase:input_type -> server.TestCaseWithSuite
+	23,  // 73: server.Runner.UpdateTestCase:input_type -> server.TestCaseWithSuite
+	6,   // 74: server.Runner.DeleteTestCase:input_type -> server.TestCaseIdentity
+	15,  // 75: server.Runner.DuplicateTestCase:input_type -> server.TestCaseDuplicate
+	15,  // 76: server.Runner.RenameTestCase:input_type -> server.TestCaseDuplicate
+	13,  // 77: server.Runner.GetSuggestedAPIs:input_type -> server.TestSuiteIdentity
+	49,  // 78: server.Runner.GetHistorySuites:input_type -> server.Empty
+	26,  // 79: server.Runner.GetHistoryTestCaseWithResult:input_type -> server.HistoryTestCase
+	26,  // 80: server.Runner.GetHistoryTestCase:input_type -> server.HistoryTestCase
+	26,  // 81: server.Runner.DeleteHistoryTestCase:input_type -> server.HistoryTestCase
+	26,  // 82: server.Runner.DeleteAllHistoryTestCase:input_type -> server.HistoryTestCase
+	25,  // 83: server.Runner.GetTestCaseAllHistory:input_type -> server.TestCase
+	49,  // 84: server.Runner.ListCodeGenerator:input_type -> server.Empty
+	42,  // 85: server.Runner.GenerateCode:input_type -> server.CodeGenerateRequest
+	42,  // 86: server.Runner.HistoryGenerateCode:input_type -> server.CodeGenerateRequest
+	49,  // 87: server.Runner.ListConverter:input_type -> server.Empty
+	42,  // 88: server.Runner.ConvertTestSuite:input_type -> server.CodeGenerateRequest
+	49,  // 89: server.Runner.PopularHeaders:input_type -> server.Empty
+	34,  // 90: server.Runner.FunctionsQuery:input_type -> server.SimpleQuery
+	34,  // 91: server.Runner.FunctionsQueryStream:input_type -> server.SimpleQuery
+	49,  // 92: server.Runner.GetVersion:input_type -> server.Empty
+	49,  // 93: server.Runner.Sample:input_type -> server.Empty
+	25,  // 94: server.Runner.DownloadResponseFile:input_type -> server.TestCase
+	49,  // 95: server.Runner.GetStoreKinds:input_type -> server.Empty
+	49,  // 96: server.Runner.GetStores:input_type -> server.Empty
+	36,  // 97: server.Runner.CreateStore:input_type -> server.Store
+	36,  // 98: server.Runner.UpdateStore:input_type -> server.Store
+	36,  // 99: server.Runner.DeleteStore:input_type -> server.Store
+	34,  // 100: server.Runner.VerifyStore:input_type -> server.SimpleQuery
+	49,  // 101: server.Runner.GetSecrets:input_type -> server.Empty
+	44,  // 102: server.Runner.CreateSecret:input_type -> server.Secret
+	44,  // 103: server.Runner.DeleteSecret:input_type -> server.Secret
+	44,  // 104: server.Runner.UpdateSecret:input_type -> server.Secret
+	46,  // 105: server.Runner.PProf:input_type -> server.PProfRequest
+	9,   // 106: server.RunnerExtension.Run:input_type -> server.TestSuiteWithCase
+	49,  // 107: server.ThemeExtension.GetThemes:input_type -> server.Empty
+	41,  // 108: server.ThemeExtension.GetTheme:input_type -> server.SimpleName
+	49,  // 109: server.ThemeExtension.GetBindings:input_type -> server.Empty
+	41,  // 110: server.ThemeExtension.GetBinding:input_type -> server.SimpleName
+	56,  // 111: server.AIExtension.GenerateContent:input_type -> server.GenerateContentRequest
+	50,  // 112: server.Mock.Reload:input_type -> server.MockConfig
+	49,  // 113: server.Mock.GetConfig:input_type -> server.Empty
+	53,  // 114: server.DataServer.Query:input_type -> server.DataQuery
+	18,  // 115: server.Runner.Run:output_type -> server.TestResult
+	18,  // 116: server.Runner.RunTestSuite:output_type -> server.TestResult
+	1,   // 117: server.Runner.GetSuites:output_type -> server.Suites
+	20,  // 118: server.Runner.CreateTestSuite:output_type -> server.HelloReply
+	39,  // 119: server.Runner.ImportTestSuite:output_type -> server.CommonResult
+	8,   // 120: server.Runner.GetTestSuite:output_type -> server.TestSuite
+	20,  // 121: server.Runner.UpdateTestSuite:output_type -> server.HelloReply
+	20,  // 122: server.Runner.DeleteTestSuite:output_type -> server.HelloReply
+	20,  // 123: server.Runner.DuplicateTestSuite:output_type -> server.HelloReply
+	20,  // 124: server.Runner.RenameTestSuite:output_type -> server.HelloReply
+	21,  // 125: server.Runner.GetTestSuiteYaml:output_type -> server.YamlData
+	22,  // 126: server.Runner.ListTestCase:output_type -> server.Suite
+	31,  // 127: server.Runner.RunTestCase:output_type -> server.TestCaseResult
+	18,  // 128: server.Runner.BatchRun:output_type -> server.TestResult
+	25,  // 129: server.Runner.GetTestCase:output_type -> server.TestCase
+	20,  // 130: server.Runner.CreateTestCase:output_type -> server.HelloReply
+	20,  // 131: server.Runner.UpdateTestCase:output_type -> server.HelloReply
+	20,  // 132: server.Runner.DeleteTestCase:output_type -> server.HelloReply
+	20,  // 133: server.Runner.DuplicateTestCase:output_type -> server.HelloReply
+	20,  // 134: server.Runner.RenameTestCase:output_type -> server.HelloReply
+	24,  // 135: server.Runner.GetSuggestedAPIs:output_type -> server.TestCases
+	3,   // 136: server.Runner.GetHistorySuites:output_type -> server.HistorySuites
+	19,  // 137: server.Runner.GetHistoryTestCaseWithResult:output_type -> server.HistoryTestResult
+	26,  // 138: server.Runner.GetHistoryTestCase:output_type -> server.HistoryTestCase
+	20,  // 139: server.Runner.DeleteHistoryTestCase:output_type -> server.HelloReply
+	20,  // 140: server.Runner.DeleteAllHistoryTestCase:output_type -> server.HelloReply
+	27,  // 141: server.Runner.GetTestCaseAllHistory:output_type -> server.HistoryTestCases
+	40,  // 142: server.Runner.ListCodeGenerator:output_type -> server.SimpleList
+	39,  // 143: server.Runner.GenerateCode:output_type -> server.CommonResult
+	39,  // 144: server.Runner.HistoryGenerateCode:output_type -> server.CommonResult
+	40,  // 145: server.Runner.ListConverter:output_type -> server.SimpleList
+	39,  // 146: server.Runner.ConvertTestSuite:output_type -> server.CommonResult
+	33,  // 147: server.Runner.PopularHeaders:output_type -> server.Pairs
+	33,  // 148: server.Runner.FunctionsQuery:output_type -> server.Pairs
+	33,  // 149: server.Runner.FunctionsQueryStream:output_type -> server.Pairs
+	51,  // 150: server.Runner.GetVersion:output_type -> server.Version
+	20,  // 151: server.Runner.Sample:output_type -> server.HelloReply
+	48,  // 152: server.Runner.DownloadResponseFile:output_type -> server.FileData
+	37,  // 153: server.Runner.GetStoreKinds:output_type -> server.StoreKinds
+	35,  // 154: server.Runner.GetStores:output_type -> server.Stores
+	36,  // 155: server.Runner.CreateStore:output_type -> server.Store
+	36,  // 156: server.Runner.UpdateStore:output_type -> server.Store
+	36,  // 157: server.Runner.DeleteStore:output_type -> server.Store
+	45,  // 158: server.Runner.VerifyStore:output_type -> server.ExtensionStatus
+	43,  // 159: server.Runner.GetSecrets:output_type -> server.Secrets
+	39,  // 160: server.Runner.CreateSecret:output_type -> server.CommonResult
+	39,  // 161: server.Runner.DeleteSecret:output_type -> server.CommonResult
+	39,  // 162: server.Runner.UpdateSecret:output_type -> server.CommonResult
+	47,  // 163: server.Runner.PProf:output_type -> server.PProfData
+	39,  // 164: server.RunnerExtension.Run:output_type -> server.CommonResult
+	40,  // 165: server.ThemeExtension.GetThemes:output_type -> server.SimpleList
+	39,  // 166: server.ThemeExtension.GetTheme:output_type -> server.CommonResult
+	40,  // 167: server.ThemeExtension.GetBindings:output_type -> server.SimpleList
+	39,  // 168: server.ThemeExtension.GetBinding:output_type -> server.CommonResult
+	57,  // 169: server.AIExtension.GenerateContent:output_type -> server.GenerateContentResponse
+	49,  // 170: server.Mock.Reload:output_type -> server.Empty
+	50,  // 171: server.Mock.GetConfig:output_type -> server.MockConfig
+	54,  // 172: server.DataServer.Query:output_type -> server.DataQueryResult
+	115, // [115:173] is the sub-list for method output_type
+	57,  // [57:115] is the sub-list for method input_type
+	57,  // [57:57] is the sub-list for extension type_name
+	57,  // [57:57] is the sub-list for extension extendee
+	0,   // [0:57] is the sub-list for field type_name
 }
 
 func init() { file_pkg_server_server_proto_init() }
@@ -4833,25 +4447,19 @@ func file_pkg_server_server_proto_init() {
 	if File_pkg_server_server_proto != nil {
 		return
 	}
-	file_pkg_server_server_proto_msgTypes[56].OneofWrappers = []any{}
-	file_pkg_server_server_proto_msgTypes[57].OneofWrappers = []any{}
-	file_pkg_server_server_proto_msgTypes[58].OneofWrappers = []any{
+	file_pkg_server_server_proto_msgTypes[55].OneofWrappers = []any{}
+	file_pkg_server_server_proto_msgTypes[56].OneofWrappers = []any{
 		(*GenerateContentResponse_Success)(nil),
 		(*GenerateContentResponse_Error)(nil),
 	}
-	file_pkg_server_server_proto_msgTypes[59].OneofWrappers = []any{
-		(*GenerateSQLResponse_Success)(nil),
-		(*GenerateSQLResponse_Error)(nil),
-	}
-	file_pkg_server_server_proto_msgTypes[60].OneofWrappers = []any{}
-	file_pkg_server_server_proto_msgTypes[61].OneofWrappers = []any{}
+	file_pkg_server_server_proto_msgTypes[57].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_server_server_proto_rawDesc), len(file_pkg_server_server_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   69,
+			NumEnums:      1,
+			NumMessages:   65,
 			NumExtensions: 0,
 			NumServices:   6,
 		},

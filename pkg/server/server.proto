@@ -341,14 +341,6 @@ service AIExtension {
             body: "*"
         };
     }
-    
-    // Legacy SQL generation endpoint for backward compatibility
-    rpc GenerateSQLFromNaturalLanguage (GenerateSQLRequest) returns (GenerateSQLResponse) {
-        option (google.api.http) = {
-            post: "/api/v1/ai/sql/generate"
-            body: "*"
-        };
-    }
 }
 
 message Suites {
@@ -721,22 +713,7 @@ message DataMeta {
 
 // AI Extension related messages
 
-// Enum for supported database dialects to ensure type safety.
-enum DatabaseType {
-  // DATABASE_TYPE_UNSPECIFIED indicates a missing or unknown database type.
-  DATABASE_TYPE_UNSPECIFIED = 0;
-  MYSQL = 1;
-  POSTGRESQL = 2;
-  SQLITE = 3;
-}
 
-// Represents an example pair of natural language to SQL for few-shot prompting.
-message QueryExample {
-  // A natural language query example.
-  string naturalLanguagePrompt = 1;
-  // The corresponding correct SQL query for the prompt.
-  string sqlQuery = 2;
-}
 
 // Request message for generating content based on natural language prompts.
 message GenerateContentRequest {
@@ -752,22 +729,9 @@ message GenerateContentRequest {
   map<string, string> parameters = 5;
 }
 
-// Request message for generating an SQL query from natural language.
-message GenerateSQLRequest {
-  // The user's query in natural language. (e.g., "show me all users from California")
-  string naturalLanguageInput = 1;
-  // Target database dialect for SQL generation.
-  DatabaseType databaseType = 2;
-  // Optional: A list of DDL statements (e.g., CREATE TABLE …) for relevant tables.
-  // Providing schemas helps the AI generate more accurate queries.
-  repeated string schemas = 3;
-  // Optional: A session identifier to maintain context across multiple requests,
-  // enabling conversational query refinement.
-  optional string sessionId = 4;
-  // Optional: A list of examples to guide the AI, improving accuracy for
-  // specific or complex domains.
-  repeated QueryExample examples = 5;
-}
+
+
+
 
 // Response message containing the result of content generation.
 message GenerateContentResponse {
@@ -780,16 +744,9 @@ message GenerateContentResponse {
   }
 }
 
-// Response message containing the result of the SQL generation.
-message GenerateSQLResponse {
-  // The response can be one of the following types.
-  oneof result {
-    // Contains the successful SQL generation details.
-    SuccessResponse success = 1;
-    // Contains details about why the generation failed.
-    ErrorResponse error = 2;
-  }
-}
+
+
+
 
 // Represents a successful content generation.
 message ContentSuccessResponse {
@@ -806,16 +763,9 @@ message ContentSuccessResponse {
   map<string, string> metadata = 5;
 }
 
-// Represents a successful SQL generation.
-message SuccessResponse {
-  // The generated SQL query.
-  string sqlQuery = 1;
-  // An explanation of how the AI interpreted the request and generated the SQL.
-  // This builds user trust and aids in debugging.
-  optional string explanation = 2;
-  // A score between 0.0 and 1.0 indicating the AI's confidence in the generated query.
-  optional float confidenceScore = 3;
-}
+
+
+
 
 // Enum for structured error codes.
 enum ErrorCode {
@@ -830,7 +780,7 @@ enum ErrorCode {
   INTERNAL_ERROR = 4;
 }
 
-// Represents a failed SQL generation attempt.
+// Represents a failed content generation attempt.
 message ErrorResponse {
   // A structured error code for programmatic handling.
   ErrorCode code = 1;
