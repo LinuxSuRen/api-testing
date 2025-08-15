@@ -264,13 +264,12 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	storeExtMgr := server.NewStoreExtManager(o.execer)
 	storeExtMgr.WithDownloader(extDownloader)
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir, o.grpcMaxRecvMsgSize)
-	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
-	if storeKindsErr != nil {
-		cmd.PrintErrf("failed to get store kinds, error: %v\n", storeKindsErr)
-	} else {
-		if runPluginErr := startPlugins(storeExtMgr, kinds); runPluginErr != nil {
+	if stores, storeErr := remoteServer.GetStores(ctx, nil); storeErr == nil {
+		if runPluginErr := startPlugins(storeExtMgr, stores); runPluginErr != nil {
 			cmd.PrintErrf("error occurred during starting plugins, error: %v\n", runPluginErr)
 		}
+	} else {
+		cmd.PrintErrf("error occurred during getting stores, error: %v\n", storeErr)
 	}
 
 	// create mock server controller
@@ -438,13 +437,14 @@ func postRequestProxy(proxy string) func(w http.ResponseWriter, r *http.Request,
 	}
 }
 
-func startPlugins(storeExtMgr server.ExtManager, kinds *server.StoreKinds) (err error) {
-	const socketPrefix = "unix://"
-
-	for _, kind := range kinds.Data {
-		if kind.Enabled && (strings.HasPrefix(kind.Url, socketPrefix) || strings.Contains(kind.Url, ":")) {
-			err = errors.Join(err, storeExtMgr.Start(kind.Name, kind.Url))
+func startPlugins(storeExtMgr server.ExtManager, stores *server.Stores) (err error) {
+	for _, store := range stores.Data {
+		if store.Disabled || store.Kind == nil {
+			continue
 		}
+
+		kind := store.Kind
+		err = errors.Join(err, storeExtMgr.Start(kind.Name, kind.Url))
 	}
 	return
 }
