@@ -616,6 +616,7 @@ message StoreKind {
   repeated StoreKindDependency dependencies = 4;
   string link = 5;
   repeated StoreKindParam params = 6;
+  repeated string categories = 7;
 }
 
 message StoreKindDependency {

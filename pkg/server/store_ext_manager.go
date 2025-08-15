@@ -98,13 +98,21 @@ func (s *storeExtManager) StartPlugin(storeKind testing.StoreKind) {
 }
 
 func (s *storeExtManager) Start(name, socket string) (err error) {
+	if name == "" {
+	}
+
+	serverLogger.Info("start", "extension", name, "socket", socket)
 	if v, ok := s.extStatusMap[name]; ok && v {
 		return
 	}
+
 	platformBasedName := name
 	if s.execer.OS() == "windows" {
 		platformBasedName += ".exe"
+	} else {
+		socket = fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(name))
 	}
+
 	targetDir := home.GetUserBinDir()
 	targetBinaryFile := filepath.Join(targetDir, platformBasedName)
 
@@ -118,13 +126,14 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 		if err != nil {
 			err = fmt.Errorf("not found extension, try to download it, error: %v", err)
 			go func() {
-				s.ociDownloader.WithKind("store")
-				s.ociDownloader.WithOS(s.execer.OS())
-				reader, dErr := s.ociDownloader.Download(name, "", "")
+				ociDownloader := downloader.NewStoreDownloader()
+				ociDownloader.WithKind("store")
+				ociDownloader.WithOS(s.execer.OS())
+				reader, dErr := ociDownloader.Download(name, "", "")
 				if dErr != nil {
 					serverLogger.Error(dErr, "failed to download extension", "name", name)
 				} else {
-					extFile := s.ociDownloader.GetTargetFile()
+					extFile := ociDownloader.GetTargetFile()
 
 					targetFile := filepath.Base(extFile)
 					if dErr = downloader.WriteTo(reader, targetDir, targetFile); dErr == nil {

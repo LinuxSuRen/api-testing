@@ -135,7 +135,7 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 		}
 	}
 
-	err = fmt.Errorf("not found %s", file)
+	err = fmt.Errorf("not found %s from %s", file, api)
 	return
 }
 

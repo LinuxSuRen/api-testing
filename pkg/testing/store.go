@@ -105,6 +105,7 @@ type StoreKind struct {
 	Params       []StoreKindParam
 	Link         string
 	Enabled      bool
+	Categories   []string
 }
 
 type StoreKindDependency struct {

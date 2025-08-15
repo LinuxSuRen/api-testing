@@ -24,7 +24,7 @@ type Loader interface {
 	GetCount() int
 	Reset()
 
-	Verify() (readOnly bool, err error)
+	Verify() (readOnly bool, version string, err error)
 	PProf(name string) []byte
 
 	Query(query map[string]string) (result DataResult, err error)

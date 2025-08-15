@@ -79,7 +79,7 @@ func TestNonLoader(t *testing.T) {
 	assert.NoError(t, loader.RenameTestCase("", "", ""))
 
 	var readonly bool
-	readonly, err = loader.Verify()
+	readonly, _, err = loader.Verify()
 	assert.NoError(t, err)
 	assert.False(t, readonly)
 	assert.Empty(t, loader.PProf(""))
