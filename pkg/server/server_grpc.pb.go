@@ -71,7 +71,7 @@ type RunnerClient interface {
 	DownloadResponseFile(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*FileData, error)
 	// stores related interfaces
 	GetStoreKinds(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*StoreKinds, error)
-	GetStores(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Stores, error)
+	GetStores(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Stores, error)
 	CreateStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error)
 	UpdateStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error)
 	DeleteStore(ctx context.Context, in *Store, opts ...grpc.CallOption) (*Store, error)
@@ -519,7 +519,7 @@ func (c *runnerClient) GetStoreKinds(ctx context.Context, in *Empty, opts ...grp
 	return out, nil
 }
 
-func (c *runnerClient) GetStores(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Stores, error) {
+func (c *runnerClient) GetStores(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Stores, error) {
 	out := new(Stores)
 	err := c.cc.Invoke(ctx, "/server.Runner/GetStores", in, out, opts...)
 	if err != nil {
@@ -662,7 +662,7 @@ type RunnerServer interface {
 	DownloadResponseFile(context.Context, *TestCase) (*FileData, error)
 	// stores related interfaces
 	GetStoreKinds(context.Context, *Empty) (*StoreKinds, error)
-	GetStores(context.Context, *Empty) (*Stores, error)
+	GetStores(context.Context, *SimpleQuery) (*Stores, error)
 	CreateStore(context.Context, *Store) (*Store, error)
 	UpdateStore(context.Context, *Store) (*Store, error)
 	DeleteStore(context.Context, *Store) (*Store, error)
@@ -801,7 +801,7 @@ func (UnimplementedRunnerServer) DownloadResponseFile(context.Context, *TestCase
 func (UnimplementedRunnerServer) GetStoreKinds(context.Context, *Empty) (*StoreKinds, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStoreKinds not implemented")
 }
-func (UnimplementedRunnerServer) GetStores(context.Context, *Empty) (*Stores, error) {
+func (UnimplementedRunnerServer) GetStores(context.Context, *SimpleQuery) (*Stores, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStores not implemented")
 }
 func (UnimplementedRunnerServer) CreateStore(context.Context, *Store) (*Store, error) {
@@ -1589,7 +1589,7 @@ func _Runner_GetStoreKinds_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _Runner_GetStores_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(SimpleQuery)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1601,7 +1601,7 @@ func _Runner_GetStores_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: "/server.Runner/GetStores",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).GetStores(ctx, req.(*Empty))
+		return srv.(RunnerServer).GetStores(ctx, req.(*SimpleQuery))
 	}
 	return interceptor(ctx, in, info, handler)
 }

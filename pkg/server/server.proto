@@ -246,7 +246,7 @@ service Runner {
         get: "/api/v1/stores/kinds"
       };
     }
-    rpc GetStores(Empty) returns (Stores) {
+    rpc GetStores(SimpleQuery) returns (Stores) {
       option (google.api.http) = {
         get: "/api/v1/stores"
       };

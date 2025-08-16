@@ -1169,13 +1169,24 @@ func (s *server) GetStoreKinds(context.Context, *Empty) (kinds *StoreKinds, err 
 		kinds = &StoreKinds{}
 		for _, store := range stores {
 			kinds.Data = append(kinds.Data, &StoreKind{
-				Name:    store.Name,
-				Enabled: true,
-				Url:     store.URL,
-				Link:    store.Link,
-				Params:  convertStoreKindParams(store.Params),
+				Name:         store.Name,
+				Enabled:      true,
+				Url:          store.URL,
+				Link:         store.Link,
+				Params:       convertStoreKindParams(store.Params),
+				Categories:   store.Categories,
+				Dependencies: convertStoreKindDependencies(store.Dependencies),
 			})
 		}
+	}
+	return
+}
+
+func convertStoreKindDependencies(dependencies []testing.StoreKindDependency) (result []*StoreKindDependency) {
+	for _, dependency := range dependencies {
+		result = append(result, &StoreKindDependency{
+			Name: dependency.Name,
+		})
 	}
 	return
 }
@@ -1192,7 +1203,7 @@ func convertStoreKindParams(params []testing.StoreKindParam) (result []*StoreKin
 	return
 }
 
-func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err error) {
+func (s *server) GetStores(ctx context.Context, in *SimpleQuery) (reply *Stores, err error) {
 	user := oauth.GetUserFromContext(ctx)
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	var stores []testing.Store
@@ -1200,6 +1211,12 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 	if user != nil {
 		owner = user.Name
 	}
+
+	var kinds *StoreKinds
+	if kinds, err = s.GetStoreKinds(ctx, &Empty{}); err != nil {
+		return
+	}
+
 	if stores, err = storeFactory.GetStoresByOwner(owner); err == nil {
 		reply = &Stores{
 			Data: make([]*Store, 0),
@@ -1207,6 +1224,23 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 		wg := sync.WaitGroup{}
 		mu := sync.Mutex{}
 		for _, item := range stores {
+			skip := false
+			for _, kind := range kinds.Data {
+				if in != nil && in.Kind != "" && !slices.Contains(kind.Categories, in.Kind) {
+					skip = true
+					break
+				}
+
+				if item.Kind.Name == kind.Name {
+					item.Kind.Categories = kind.Categories
+					item.Kind.Link = kind.Link
+					break
+				}
+			}
+			if skip {
+				continue
+			}
+
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
@@ -1231,8 +1265,10 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 			return strings.Compare(a.Name, b.Name)
 		})
 		reply.Data = append(reply.Data, &Store{
-			Name:  "local",
-			Kind:  &StoreKind{},
+			Name: "local",
+			Kind: &StoreKind{
+				Categories: []string{"store"},
+			},
 			Ready: true,
 		})
 	}

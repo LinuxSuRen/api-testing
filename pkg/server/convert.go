@@ -29,9 +29,11 @@ func ToGRPCStore(store testing.Store) (result *Store) {
 		Name:  store.Name,
 		Owner: store.Owner,
 		Kind: &StoreKind{
-			Name:    store.Kind.Name,
-			Url:     store.Kind.URL,
-			Enabled: store.Kind.Enabled,
+			Name:       store.Kind.Name,
+			Url:        store.Kind.URL,
+			Enabled:    store.Kind.Enabled,
+			Categories: store.Kind.Categories,
+			Link:       store.Kind.Link,
 		},
 		Description: store.Description,
 		Url:         store.URL,
@@ -57,8 +59,10 @@ func ToNormalStore(store *Store) (result testing.Store) {
 	}
 	if store.Kind != nil {
 		result.Kind = testing.StoreKind{
-			Name: store.Kind.Name,
-			URL:  store.Kind.Url,
+			Name:       store.Kind.Name,
+			URL:        store.Kind.Url,
+			Link:       store.Kind.Link,
+			Categories: store.Kind.Categories,
 		}
 	}
 	return
