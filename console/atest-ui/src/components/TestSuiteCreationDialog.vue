@@ -25,7 +25,7 @@ function loadStores() {
             'X-Auth': API.getToken()
         }
     }
-    fetch('/api/v1/stores', requestOptions)
+    fetch('/api/v1/stores?kind=store', requestOptions)
         .then(API.DefaultResponseProcess)
         .then(async (d) => {
             stores.value = d.data
