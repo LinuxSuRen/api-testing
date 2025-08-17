@@ -871,7 +871,7 @@ func TestStoreManager(t *testing.T) {
 		server, clean := getRemoteServerInTempDir()
 		defer clean()
 
-		reply, err := server.GetStores(ctx, &Empty{})
+		reply, err := server.GetStores(ctx, &SimpleQuery{})
 		assert.NoError(t, err)
 		if assert.Equal(t, 1, len(reply.Data)) {
 			assert.Equal(t, "local", reply.Data[0].Name)
@@ -888,7 +888,7 @@ func TestStoreManager(t *testing.T) {
 		assert.NotNil(t, reply)
 
 		var stores *Stores
-		stores, err = server.GetStores(ctx, &Empty{})
+		stores, err = server.GetStores(ctx, &SimpleQuery{})
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(stores.Data))
 	})
