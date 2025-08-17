@@ -41,20 +41,34 @@ var (
 )
 
 type fileLoader struct {
-	paths  []string
-	index  int
-	parent string
+	paths         []string
+	index         int
+	parent        string
+	userConfigDir string
 
 	lock *sync.RWMutex
 }
 
 // NewFileLoader creates the instance of file loader
 func NewFileLoader() Loader {
-	return &fileLoader{index: -1, lock: &sync.RWMutex{}}
+	return &fileLoader{
+		index:         -1,
+		lock:          &sync.RWMutex{},
+		userConfigDir: home.GetUserConfigDir(),
+	}
 }
 
 func NewFileWriter(parent string) Writer {
-	return &fileLoader{index: -1, parent: parent, lock: &sync.RWMutex{}}
+	return &fileLoader{
+		index:         -1,
+		parent:        parent,
+		lock:          &sync.RWMutex{},
+		userConfigDir: home.GetUserConfigDir(),
+	}
+}
+
+func (l *fileLoader) WithUserConfigDir(userConfigDir string) {
+	l.userConfigDir = userConfigDir
 }
 
 // HasMore returns if there are more test cases
@@ -529,7 +543,7 @@ func (l *fileLoader) GetRoundTripper(name string) (roundTripper http.RoundTrippe
 }
 
 func (l *fileLoader) GetThemes() (result []string, err error) {
-	dataDir := home.GetThemeDir()
+	dataDir := filepath.Join(l.userConfigDir, "data/theme")
 	_ = filepath.WalkDir(dataDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -544,7 +558,7 @@ func (l *fileLoader) GetThemes() (result []string, err error) {
 }
 
 func (l *fileLoader) GetTheme(name string) (result string, err error) {
-	dataDir := home.GetThemeDir()
+	dataDir := filepath.Join(l.userConfigDir, "data/theme")
 	themeFile := filepath.Join(dataDir, name+".json")
 	var data []byte
 	if data, err = os.ReadFile(themeFile); err == nil {

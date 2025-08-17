@@ -1,0 +1,8 @@
+items:
+  - name: atest-store-database
+    dependencies:
+      - name: atest-store-database
+    link: https://github.com/LinuxSuRen/atest-ext-store-database
+    params:
+      - key: database
+        defaultValue: 'atest'

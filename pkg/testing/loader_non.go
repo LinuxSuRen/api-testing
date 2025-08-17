@@ -27,6 +27,10 @@ func NewNonWriter() Writer {
 	return &nonLoader{}
 }
 
+func (l *nonLoader) WithUserConfigDir(userConfigDir string) {
+	// non-implement
+}
+
 // HasMore returns if there are more test cases
 func (l *nonLoader) HasMore() bool {
 	return false

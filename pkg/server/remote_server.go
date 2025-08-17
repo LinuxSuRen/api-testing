@@ -122,6 +122,7 @@ func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWrit
 	if secretServer == nil {
 		secretServer = &fakeSecretServer{}
 	}
+	loader.WithUserConfigDir(configDir)
 	GrpcMaxRecvMsgSize = grpcMaxRecvMsgSize
 	return &server{
 		loader:             loader,
@@ -193,7 +194,7 @@ func resetEnv(oldEnv map[string]string) {
 	}
 }
 
-func (s *server) getLoaders(ctx context.Context) (loader []testing.Writer, err error) {
+func (s *server) getLoaders() (loader []testing.Writer, err error) {
 	var stores []testing.Store
 	if stores, err = testing.NewStoreFactory(s.configDir).GetStores(); err != nil {
 		return
@@ -1449,7 +1450,7 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 
 	result = &MenuList{}
 	var loaders []testing.Writer
-	if loaders, err = s.getLoaders(ctx); err != nil {
+	if loaders, err = s.getLoaders(); err != nil {
 		return
 	}
 

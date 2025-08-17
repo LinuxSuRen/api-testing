@@ -37,10 +37,6 @@ func GetUserDataDir() string {
 	return filepath.Join(GetUserConfigDir(), "data")
 }
 
-func GetThemeDir() string {
-	return filepath.Join(GetUserConfigDir(), "data/theme")
-}
-
 func GetBindingDir() string {
 	return filepath.Join(GetUserConfigDir(), "data/key-binding")
 }
