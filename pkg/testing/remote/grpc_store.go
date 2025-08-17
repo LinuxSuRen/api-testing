@@ -62,6 +62,10 @@ func (g *gRPCLoader) NewInstance(store testing.Store) (writer testing.Writer, er
 	return
 }
 
+func (g *gRPCLoader) WithUserConfigDir(userConfigDir string) {
+	// nothing to do
+}
+
 func (g *gRPCLoader) HasMore() bool {
 	// nothing to do
 	return false
