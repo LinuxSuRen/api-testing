@@ -38,6 +38,10 @@ service Loader {
     rpc GetTheme(server.SimpleName) returns (server.CommonResult) {}
     rpc GetBindings(server.Empty) returns (server.SimpleList) {}
     rpc GetBinding(server.SimpleName) returns (server.CommonResult) {}
+
+    rpc GetMenus(server.Empty) returns (server.MenuList) {}
+    rpc GetPageOfJS(server.SimpleName) returns (server.CommonResult) {}
+    rpc GetPageOfCSS(server.SimpleName) returns (server.CommonResult) {}
 }
 
 message TestSuites {

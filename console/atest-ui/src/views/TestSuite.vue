@@ -153,10 +153,10 @@ function openNewTestCaseDialog() {
   querySuggestedAPIs = NewSuggestedAPIsQuery(Cache.GetCurrentStore().name!, props.name!)
 }
 
-Magic.LoadMagicKeys(import.meta.url, {
-  "openNewTestCaseDialog": openNewTestCaseDialog,
-  "saveTestSuite": saveTestSuite,
-})
+Magic.LoadMagicKeys('TestSuite', new Map([
+  ["openNewTestCaseDialog", openNewTestCaseDialog],
+  ["saveTestSuite", saveTestSuite],
+]))
 
 const submitTestCaseForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -458,7 +458,7 @@ const renameTestSuite = (name: string) => {
               v-model="testCaseForm.request.method"
               class="m-2"
               placeholder="Method"
-              size="middle"
+              size="default"
               test-id="case-form-method"
             >
               <el-option

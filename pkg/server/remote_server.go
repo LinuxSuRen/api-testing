@@ -28,6 +28,8 @@ import (
 	"path/filepath"
 	reflect "reflect"
 	"regexp"
+	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -38,6 +40,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
+	"github.com/linuxsuren/api-testing/docs"
 	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/mock"
@@ -67,6 +70,7 @@ type server struct {
 	UnimplementedRunnerServer
 	UnimplementedDataServerServer
 	UnimplementedThemeExtensionServer
+	UnimplementedUIExtensionServer
 
 	loader             testing.Writer
 	storeWriterFactory testing.StoreWriterFactory
@@ -189,6 +193,20 @@ func resetEnv(oldEnv map[string]string) {
 	}
 }
 
+func (s *server) getLoaders(ctx context.Context) (loader []testing.Writer, err error) {
+	var stores []testing.Store
+	if stores, err = testing.NewStoreFactory(s.configDir).GetStores(); err != nil {
+		return
+	}
+	loader = make([]testing.Writer, len(stores))
+	for i, store := range stores {
+		if loader[i], err = s.storeWriterFactory.NewInstance(store); err != nil {
+			return
+		}
+	}
+	return
+}
+
 func (s *server) getLoader(ctx context.Context) (loader testing.Writer) {
 	var ok bool
 	loader = s.loader
@@ -202,6 +220,7 @@ func (s *server) getLoader(ctx context.Context) (loader testing.Writer) {
 				return
 			}
 
+			remoteServerLogger.Info("try to get loader", "name", storeName)
 			var err error
 			if loader, err = s.getLoaderByStoreName(storeName); err != nil {
 				remoteServerLogger.Info("failed to get loader", "name", storeName, "error", err)
@@ -432,6 +451,19 @@ func (s *server) RunTestSuite(srv Runner_RunTestSuiteServer) (err error) {
 			}
 		}
 	}
+}
+
+func (s *server) GetSchema(ctx context.Context, in *SimpleQuery) (result *CommonResult, err error) {
+	result = &CommonResult{
+		Success: true,
+	}
+	switch in.Name {
+	case "core":
+		result.Message = docs.Schema
+	case "mock":
+		result.Message = docs.MockSchema
+	}
+	return
 }
 
 // GetVersion returns the version
@@ -1138,10 +1170,24 @@ func (s *server) GetStoreKinds(context.Context, *Empty) (kinds *StoreKinds, err 
 		for _, store := range stores {
 			kinds.Data = append(kinds.Data, &StoreKind{
 				Name:    store.Name,
-				Enabled: store.Enabled,
+				Enabled: true,
 				Url:     store.URL,
+				Link:    store.Link,
+				Params:  convertStoreKindParams(store.Params),
 			})
 		}
+	}
+	return
+}
+
+func convertStoreKindParams(params []testing.StoreKindParam) (result []*StoreKindParam) {
+	for _, param := range params {
+		result = append(result, &StoreKindParam{
+			Key:          param.Key,
+			DefaultValue: param.DefaultValue,
+			Description:  param.Description,
+			Enum:         param.Enum,
+		})
 	}
 	return
 }
@@ -1181,6 +1227,9 @@ func (s *server) GetStores(ctx context.Context, in *Empty) (reply *Stores, err e
 			}()
 		}
 		wg.Wait()
+		slices.SortFunc(reply.Data, func(a, b *Store) int {
+			return strings.Compare(a.Name, b.Name)
+		})
 		reply.Data = append(reply.Data, &Store{
 			Name:  "local",
 			Kind:  &StoreKind{},
@@ -1199,10 +1248,7 @@ func (s *server) CreateStore(ctx context.Context, in *Store) (reply *Store, err 
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	store := ToNormalStore(in)
 
-	if store.Kind.URL == "" {
-		store.Kind.URL = fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(store.Kind.Name))
-	}
-
+	handleStore(&store)
 	if err = storeFactory.CreateStore(store); err == nil && s.storeExtMgr != nil {
 		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
 	}
@@ -1212,6 +1258,7 @@ func (s *server) UpdateStore(ctx context.Context, in *Store) (reply *Store, err 
 	reply = &Store{}
 	storeFactory := testing.NewStoreFactory(s.configDir)
 	store := ToNormalStore(in)
+	handleStore(&store)
 	if err = storeFactory.UpdateStore(store); err == nil && s.storeExtMgr != nil {
 		// TODO need to restart extension if config was changed
 		err = s.storeExtMgr.Start(store.Kind.Name, store.Kind.URL)
@@ -1228,12 +1275,19 @@ func (s *server) VerifyStore(ctx context.Context, in *SimpleQuery) (reply *Exten
 	reply = &ExtensionStatus{}
 	var loader testing.Writer
 	if loader, err = s.getLoaderByStoreName(in.Name); err == nil && loader != nil {
-		readOnly, verifyErr := loader.Verify()
+		readOnly, version, verifyErr := loader.Verify()
 		reply.Ready = verifyErr == nil
+		reply.Version = version
 		reply.ReadOnly = readOnly
 		reply.Message = util.OKOrErrorMessage(verifyErr)
 	}
 	return
+}
+
+func handleStore(store *testing.Store) {
+	if store.Kind.URL == "" && runtime.GOOS != "windows" {
+		store.Kind.URL = fmt.Sprintf("unix://%s", home.GetExtensionSocketPath(store.Kind.Name))
+	}
 }
 
 // secret related interfaces
@@ -1351,29 +1405,132 @@ func (s *server) GetBinding(ctx context.Context, in *SimpleName) (result *Common
 	return
 }
 
+var uiExtensionLoaders = make(map[string]testing.Writer)
+
+func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err error) {
+	loader := s.getLoader(ctx)
+	defer loader.Close()
+
+	result = &MenuList{}
+	var loaders []testing.Writer
+	if loaders, err = s.getLoaders(ctx); err != nil {
+		return
+	}
+
+	duplicatedMenus := make(map[string]int) // index is key, value is the slice index
+	for _, loader := range loaders {
+		if menus, mErr := loader.GetMenus(); mErr == nil {
+			for _, menu := range menus {
+				if isSystemMenu(menu.Index) {
+					serverLogger.Info("skip due to conflict with system name", "menu", menu)
+					continue
+				}
+
+				// take the bigger version if the menu index is duplicated
+				if existingIndex, exists := duplicatedMenus[menu.Index]; exists {
+					if menu.Version > result.Data[existingIndex].Version {
+						result.Data[existingIndex] = &Menu{
+							Name:  menu.Name,
+							Icon:  menu.Icon,
+							Index: menu.Index,
+						}
+						uiExtensionLoaders[menu.Index] = loader
+					}
+					continue
+				}
+
+				duplicatedMenus[menu.Index] = len(result.Data)
+				result.Data = append(result.Data, &Menu{
+					Name:  menu.Name,
+					Icon:  menu.Icon,
+					Index: menu.Index,
+				})
+				uiExtensionLoaders[menu.Index] = loader
+			}
+		}
+	}
+
+	slices.SortFunc(result.Data, func(a, b *Menu) int {
+		return strings.Compare(a.Index, b.Index)
+	})
+	return
+}
+
+func isSystemMenu(index string) bool {
+	switch index {
+	case "testing", "history", "mock", "store", "welcome", "":
+		return true
+	}
+	return false
+}
+
+func (s *server) GetPageOfJS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
+	result = &CommonResult{}
+	if loader, ok := uiExtensionLoaders[in.Name]; ok {
+		if js, err := loader.GetPageOfJS(in.Name); err == nil {
+			result.Message = js
+			result.Success = true
+		} else {
+			result.Message = err.Error()
+		}
+	} else {
+		result.Message = fmt.Sprintf("not found loader for %s", in.Name)
+	}
+	return
+}
+
+func (s *server) GetPageOfCSS(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
+	result = &CommonResult{}
+	if loader, ok := uiExtensionLoaders[in.Name]; ok {
+		if js, err := loader.GetPageOfCSS(in.Name); err == nil {
+			result.Message = js
+			result.Success = true
+		} else {
+			result.Message = err.Error()
+		}
+	} else {
+		result.Message = fmt.Sprintf("not found loader for %s", in.Name)
+	}
+	return
+}
+
 // implement the mock server
 
 // Start starts the mock server
 type mockServerController struct {
 	UnimplementedMockServer
+	config      *MockConfig
 	mockWriter  mock.ReaderAndWriter
 	loader      mock.Loadable
 	reader      mock.Reader
+	logData     chan string
 	prefix      string
 	combinePort int
 }
 
 func NewMockServerController(mockWriter mock.ReaderAndWriter, loader mock.Loadable, combinePort int) MockServer {
 	return &mockServerController{
+		config:      &MockConfig{},
 		mockWriter:  mockWriter,
 		loader:      loader,
 		prefix:      "/mock/server",
+		logData:     make(chan string, 100),
 		combinePort: combinePort,
 	}
 }
 
 func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (reply *Empty, err error) {
-	s.mockWriter.Write([]byte(in.Config))
+	switch in.StoreKind {
+	case "memory":
+		s.mockWriter = mock.NewInMemoryReader(in.Config)
+	case "localFile":
+		s.mockWriter = mock.NewLocalFileReader(in.StoreLocalFile)
+	case "remote":
+	case "url":
+	}
+	s.config = in
+
+	// s.mockWriter.Write([]byte(in.Config))
 	s.prefix = in.Prefix
 	if dServer, ok := s.loader.(mock.DynamicServer); ok && dServer.GetPort() != strconv.Itoa(int(in.GetPort())) {
 		if strconv.Itoa(s.combinePort) != dServer.GetPort() {
@@ -1384,22 +1541,51 @@ func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (repl
 			}
 		}
 
-		server := mock.NewInMemoryServer(ctx, int(in.GetPort()))
-		server.Start(s.mockWriter, in.Prefix)
+		server := mock.NewInMemoryServer(ctx, int(in.GetPort())).WithTLS(dServer.GetTLS())
+		if err = server.Start(s.mockWriter, in.Prefix); err != nil {
+			return
+		}
+		server.WithLogWriter(s)
 		s.loader = server
+	} else {
+		s.mockWriter.Parse()
 	}
 	err = s.loader.Load()
 	return
 }
 func (s *mockServerController) GetConfig(ctx context.Context, in *Empty) (reply *MockConfig, err error) {
 	reply = &MockConfig{
-		Prefix: s.prefix,
-		Config: string(s.mockWriter.GetData()),
+		Prefix:         s.prefix,
+		Config:         string(s.mockWriter.GetData()),
+		StoreKind:      s.config.StoreKind,
+		StoreLocalFile: s.config.StoreLocalFile,
+		StoreURL:       s.config.StoreURL,
+		StoreRemote:    s.config.StoreRemote,
 	}
 	if dServer, ok := s.loader.(mock.DynamicServer); ok {
 		if port, pErr := strconv.ParseInt(dServer.GetPort(), 10, 32); pErr == nil {
 			reply.Port = int32(port)
 		}
+	}
+	return
+}
+func (s *mockServerController) LogWatch(e *Empty, logServer Mock_LogWatchServer) (err error) {
+	logServer.Send(&CommonResult{
+		Success: true,
+		Message: "Mock server log watch started\n",
+	})
+	for msg := range s.logData {
+		logServer.Send(&CommonResult{
+			Success: true,
+			Message: msg,
+		})
+	}
+	return
+}
+func (s *mockServerController) Write(p []byte) (n int, err error) {
+	select {
+	case s.logData <- fmt.Sprintf("%s: %s", time.Now().Format(time.RFC3339), string(p)):
+	default:
 	}
 	return
 }

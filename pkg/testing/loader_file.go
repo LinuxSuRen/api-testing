@@ -504,7 +504,7 @@ func (l *fileLoader) RenameTestSuite(oldName, newName string) (err error) {
 	return
 }
 
-func (l *fileLoader) Verify() (readOnly bool, err error) {
+func (l *fileLoader) Verify() (readOnly bool, version string, err error) {
 	// always be okay
 	return
 }
@@ -576,4 +576,19 @@ func (l *fileLoader) GetBinding(name string) (result string, err error) {
 		result = string(data)
 	}
 	return
+}
+
+func (l *fileLoader) GetMenus() ([]*Menu, error) {
+	// no need to implement
+	return []*Menu{}, nil
+}
+
+func (l *fileLoader) GetPageOfJS(s string) (string, error) {
+	// no need to implement
+	return "", nil
+}
+
+func (l *fileLoader) GetPageOfCSS(s string) (string, error) {
+	// no need to implement
+	return "", nil
 }

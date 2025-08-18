@@ -71,9 +71,8 @@ interface KeyBinding {
     action: string
 }
 
-const LoadMagicKeys = (url: String, mapping: Map<String, Function>) => {
-    const fileName = url.substring(url.lastIndexOf('/') + 1);
-    const pageName = fileName.split(".vue")[0];
+const LoadMagicKeys = (pageName: String, mapping: Map<String, Function>) => {
+    console.log(`Loading magic keys for page: ${pageName}`);
     API.GetBinding("default", (data) => {
         const bindings = JSON.parse(data.message) as KeyBindings;
         bindings.pages.forEach((page: Page) => {

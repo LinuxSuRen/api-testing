@@ -15,6 +15,12 @@ run-backend:
 	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist \
 		--extension-registry ghcr.io --download-timeout 10m
 
+run-tls-backend:
+	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist \
+		--extension-registry ghcr.io --download-timeout 10m \
+		--tls --cert-file e2e/test.pem \
+		--key-file e2e/test.key
+
 .PHONY: run-console
 run-console: ## Run the API Testing console
 run-console:
@@ -73,6 +79,6 @@ install-tool: hd
 
 .PHONY: init-env
 init-env: ## Install the tools to init env [not support windows]
-init-env: hd
+init-env: hd install-tool
 	hd i cli/cli
 	gh extension install linuxsuren/gh-dev

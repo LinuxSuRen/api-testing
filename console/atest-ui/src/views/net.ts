@@ -117,6 +117,52 @@ function GetVersion(callback?: (v: AppVersion) => void) {
         .then(emptyOrDefault(callback))
 }
 
+const GetMenus = (callback?: (v: any) => void) => {
+    const requestOptions = {
+        method: 'GET',
+    }
+    fetch('/api/v1/extension/menus', requestOptions)
+        .then(DefaultResponseProcess)
+        .then(emptyOrDefault(callback))
+}
+
+const GetPageOfJS = (name: string, callback?: (v: CommonResult) => void) => {
+    const requestOptions = {
+        method: 'GET',
+    }
+    fetch(`/api/v1/extension/pages/${name}/js`, requestOptions)
+        .then(DefaultResponseProcess)
+        .then(emptyOrDefault(callback))
+}
+
+const GetPageOfCSS = (name: string, callback?: (v: CommonResult) => void) => { 
+    const requestOptions = {
+        method: 'GET',
+    }
+    fetch(`/api/v1/extension/pages/${name}/css`, requestOptions)
+        .then(DefaultResponseProcess)
+        .then(emptyOrDefault(callback))
+}
+
+interface CommonResult {
+    message: string
+    success: boolean
+}
+
+async function GetSchema(name: string, callback?: (v: CommonResult) => void) {
+    const requestOptions = {
+        method: 'GET',
+    }
+    if (callback) {
+        return fetch(`/api/v1/schemas/${name}`, requestOptions)
+            .then(DefaultResponseProcess)
+            .then(emptyOrDefault(callback))
+    } else {
+        return fetch(`/api/v1/schemas/${name}`, requestOptions)
+            .then(DefaultResponseProcess)
+    }
+}
+
 interface TestSuite {
     store: string
     name: string
@@ -537,6 +583,33 @@ function PopularHeaders(callback: (d: any) => void, errHandle?: (e: any) => void
         .then(callback).catch(emptyOrDefault(errHandle))
 }
 
+interface StoreKindParam {
+    key: string
+    defaultValue: string
+    description: string
+}
+
+interface StoreKind {
+    name: string
+    link: string
+    params: StoreKindParam[]
+}
+
+interface StoreKindsResponse {
+    data: StoreKind[]
+}
+
+const GetStoreKinds = (callback?: (d: StoreKindsResponse) => void | null, errHandle?: (e: any) => void | null) => {
+    if (callback) {
+        return fetch(`/api/v1/stores/kinds`, {})
+            .then(DefaultResponseProcess)
+            .then(callback).catch(emptyOrDefault(errHandle))
+    }
+    return fetch(`/api/v1/stores/kinds`, {})
+        .then(DefaultResponseProcess)
+        .catch(emptyOrDefault(errHandle))
+}
+
 function CreateOrUpdateStore(payload: any, create: boolean,
     callback: (d: any) => void, errHandle?: (e: any) => void | null,
     toggle?: (e: boolean) => void) {
@@ -700,7 +773,7 @@ function ReloadMockServer(config: any) {
         },
         body: JSON.stringify(config)
     }
-    fetch(`/api/v1/mock/reload`, requestOptions)
+    return fetch(`/api/v1/mock/reload`, requestOptions)
         .then(DefaultResponseProcess)
 }
 
@@ -714,7 +787,38 @@ function GetMockConfig(callback: (d: any) => void) {
         .then(DefaultResponseProcess)
         .then(callback)
 }
-
+function GetStream(callback: (d: any) => void, errHandle?: (e: any) => void | null) {
+    const requestOptions = {
+        headers: {
+            'X-Auth': getToken()
+        }
+    }
+    fetch(`/api/v1/mock/log`, {
+        ...requestOptions,
+        headers: {
+            ...requestOptions.headers,
+            'Accept': 'text/event-stream'
+        }
+    })
+    .then((response: any) => {
+        if (response.ok && response.body) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            const read = () => {
+                reader.read().then(({ done, value }) => {
+                    if (done) return;
+                    const chunk = decoder.decode(value, { stream: true });
+                    callback(chunk);
+                    read();
+                });
+            };
+            read();
+        } else {
+            return DefaultResponseProcess(response);
+        }
+    })
+    .catch(emptyOrDefault(errHandle));
+}
 function getToken() {
     const token = sessionStorage.getItem('token')
     if (!token) {
@@ -915,17 +1019,17 @@ const GetBinding = (name: string, callback: (d: any) => void | null) => {
 
 export const API = {
     DefaultResponseProcess,
-    GetVersion,
+    GetVersion, GetSchema, GetMenus, GetPageOfJS, GetPageOfCSS,
     CreateTestSuite, UpdateTestSuite, ImportTestSuite, GetTestSuite, DeleteTestSuite, ConvertTestSuite, DuplicateTestSuite, RenameTestSuite, GetTestSuiteYaml,
     CreateTestCase, UpdateTestCase, GetTestCase, ListTestCase, DeleteTestCase, DuplicateTestCase, RenameTestCase, RunTestCase, BatchRunTestCase,
     GetHistoryTestCaseWithResult, DeleteHistoryTestCase, GetHistoryTestCase, GetTestCaseAllHistory, DeleteAllHistoryTestCase, DownloadResponseFile,
     GenerateCode, ListCodeGenerator, HistoryGenerateCode,
-    PopularHeaders,
+    PopularHeaders, GetStoreKinds,
     CreateOrUpdateStore, GetStores, DeleteStore, VerifyStore,
     FunctionsQuery,
     GetSecrets, DeleteSecret, CreateOrUpdateSecret,
     GetSuggestedAPIs, GetSwaggers,
-    ReloadMockServer, GetMockConfig, SBOM, DataQuery, DataQueryAsync,
+    ReloadMockServer, GetMockConfig, GetStream, SBOM, DataQuery, DataQueryAsync,
     GetThemes, GetTheme, GetBinding,
     getToken
 }

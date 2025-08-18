@@ -24,6 +24,8 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -46,16 +48,17 @@ var (
 )
 
 type inMemoryServer struct {
-	data       map[string][]map[string]interface{}
-	mux        *mux.Router
-	listener   net.Listener
-	port       int
-	prefix     string
-	wg         sync.WaitGroup
-	ctx        context.Context
-	cancelFunc context.CancelFunc
-	reader     Reader
-	metrics    RequestMetrics
+	data              map[string][]map[string]interface{}
+	mux               *mux.Router
+	listener          net.Listener
+	certFile, keyFile string
+	port              int
+	prefix            string
+	wg                sync.WaitGroup
+	ctx               context.Context
+	cancelFunc        context.CancelFunc
+	reader            Reader
+	metrics           RequestMetrics
 }
 
 func NewInMemoryServer(ctx context.Context, port int) DynamicServer {
@@ -79,6 +82,23 @@ func (s *inMemoryServer) SetupHandler(reader Reader, prefix string) (handler htt
 	s.metrics.AddMetricsHandler(s.mux)
 	err = s.Load()
 	return
+}
+
+func (s *inMemoryServer) WithTLS(certFile, keyFile string) DynamicServer {
+	s.certFile = certFile
+	s.keyFile = keyFile
+	return s
+}
+
+func (s *inMemoryServer) WithLogWriter(writer io.Writer) DynamicServer {
+	if writer != nil {
+		memLogger = memLogger.WithNameAndWriter("stream", writer)
+	}
+	return s
+}
+
+func (s *inMemoryServer) GetTLS() (string, string) {
+	return s.certFile, s.keyFile
 }
 
 func (s *inMemoryServer) Load() (err error) {
@@ -128,9 +148,7 @@ func (s *inMemoryServer) httpProxy(proxy *Proxy) {
 			proxy.Target += "/"
 		}
 		targetPath := strings.TrimPrefix(req.URL.Path, s.prefix)
-		if strings.HasPrefix(targetPath, "/") {
-			targetPath = strings.TrimPrefix(targetPath, "/")
-		}
+		targetPath = strings.TrimPrefix(targetPath, "/")
 
 		apiRaw := fmt.Sprintf("%s%s", proxy.Target, targetPath)
 		api, err := render.Render("proxy api", apiRaw, s)
@@ -237,7 +255,14 @@ func (s *inMemoryServer) Start(reader Reader, prefix string) (err error) {
 	if handler, err = s.SetupHandler(reader, prefix); err == nil {
 		if s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port)); err == nil {
 			go func() {
-				err = http.Serve(s.listener, handler)
+				if s.certFile != "" && s.keyFile != "" {
+					if err = http.ServeTLS(s.listener, handler, s.certFile, s.keyFile); err != nil {
+						memLogger.Error(err, "failed to start TLS mock server")
+					}
+				} else {
+					memLogger.Info("start HTTP mock server")
+					err = http.Serve(s.listener, handler)
+				}
 			}()
 		}
 	}
@@ -251,7 +276,7 @@ func (s *inMemoryServer) EnableMetrics() {
 func (s *inMemoryServer) startObject(obj Object) {
 	// create a simple CRUD server
 	s.mux.HandleFunc("/"+obj.Name, func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("mock server received request", req.URL.Path)
+		memLogger.Info("mock server received request", "path", req.URL.Path)
 		s.metrics.RecordRequest(req.URL.Path)
 		method := req.Method
 		w.Header().Set(util.ContentType, util.JSON)
@@ -385,7 +410,12 @@ func (s *inMemoryServer) startItem(item Item) {
 		metrics: s.metrics,
 		mu:      sync.Mutex{},
 	}
-	s.mux.HandleFunc(item.Request.Path, adHandler.handle).Methods(strings.Split(method, ",")...).Headers(headerSlices...)
+	existedRoute := s.mux.GetRoute(item.Name)
+	if existedRoute == nil {
+		s.mux.NewRoute().Name(item.Name).Methods(strings.Split(method, ",")...).Headers(headerSlices...).Path(item.Request.Path).HandlerFunc(adHandler.handle)
+	} else {
+		existedRoute.HandlerFunc(adHandler.handle)
+	}
 }
 
 type advanceHandler struct {
@@ -402,10 +432,17 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
 	memLogger.Info("receiving mock request", "name", h.item.Name, "method", req.Method, "path", req.URL.Path,
 		"encoder", h.item.Response.Encoder)
 
-	h.item.Param = mux.Vars(req)
-	if h.item.Param == nil {
-		h.item.Param = make(map[string]string)
+	h.item.Param = make(map[string]interface{})
+	for k, v := range mux.Vars(req) {
+		h.item.Param[k] = v
 	}
+	payloadBuf := bytes.Buffer{}
+	if _, copyErr := io.Copy(&payloadBuf, req.Body); copyErr != nil {
+		memLogger.Error(copyErr, "failed to read request body")
+	} else {
+		h.item.Param["_payload"] = payloadBuf.String()
+	}
+
 	h.item.Param["Host"] = req.Host
 	if h.item.Response.Header == nil {
 		h.item.Response.Header = make(map[string]string)
@@ -421,6 +458,15 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set(k, hv)
 	}
 
+	if h.item.Response.BodyFromFile != "" {
+		// read from file
+		if data, readErr := os.ReadFile(h.item.Response.BodyFromFile); readErr != nil {
+			memLogger.Error(readErr, "failed to read file", "file", h.item.Response.BodyFromFile)
+		} else {
+			h.item.Response.Body = string(data)
+		}
+	}
+
 	var err error
 	if h.item.Response.Encoder == "base64" {
 		h.item.Response.BodyData, err = base64.StdEncoding.DecodeString(h.item.Response.Body)
@@ -429,9 +475,21 @@ func (h *advanceHandler) handle(w http.ResponseWriter, req *http.Request) {
 		if resp, err = http.Get(h.item.Response.Body); err == nil {
 			h.item.Response.BodyData, err = io.ReadAll(resp.Body)
 		}
+	} else if h.item.Response.Encoder == "raw" {
+		h.item.Response.BodyData = []byte(h.item.Response.Body)
 	} else {
 		if h.item.Response.BodyData, err = render.RenderAsBytes("start-item", h.item.Response.Body, h.item); err != nil {
-			fmt.Printf("failed to render body: %v", err)
+			memLogger.Error(err, "failed to render body")
+		}
+	}
+
+	if strings.HasPrefix(h.item.Response.Header[util.ContentType], "image/") {
+		if strings.HasPrefix(string(h.item.Response.BodyData), util.ImageBase64Prefix) {
+			// decode base64 image data
+			imgData := strings.TrimPrefix(string(h.item.Response.BodyData), util.ImageBase64Prefix)
+			if h.item.Response.BodyData, err = base64.StdEncoding.DecodeString(imgData); err != nil {
+				memLogger.Error(err, "failed to decode base64 image data")
+			}
 		}
 	}
 
@@ -507,7 +565,20 @@ func (s *inMemoryServer) startWebhook(webhook *Webhook) (err error) {
 }
 
 func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error) {
-	client := http.DefaultClient
+	rawParams := make(map[string]string, len(wh.Param))
+	paramKeys := make([]string, 0, len(wh.Param))
+	for k, v := range wh.Param {
+		paramKeys = append(paramKeys, k)
+		rawParams[k] = v
+	}
+	sort.Strings(paramKeys)
+
+	for _, k := range paramKeys {
+		v, vErr := render.Render("mock webhook server param", wh.Param[k], wh)
+		if vErr == nil {
+			wh.Param[k] = v
+		}
+	}
 
 	var payload io.Reader
 	payload, err = render.RenderAsReader("mock webhook server payload", wh.Request.Body, wh)
@@ -515,14 +586,35 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
 		err = fmt.Errorf("error when render payload: %w", err)
 		return
 	}
+	wh.Param = rawParams
 
-	method := util.EmptyThenDefault(wh.Request.Method, http.MethodPost)
 	var api string
 	api, err = render.Render("webhook request api", wh.Request.Path, objCtx)
 	if err != nil {
 		err = fmt.Errorf("error when render api: %w, template: %s", err, wh.Request.Path)
 		return
 	}
+
+	switch wh.Request.Protocol {
+	case "syslog":
+		err = sendSyslogWebhookRequest(ctx, wh, api, payload)
+	default:
+		err = sendHTTPWebhookRequest(ctx, wh, api, payload)
+	}
+	return
+}
+
+func sendSyslogWebhookRequest(ctx context.Context, wh *Webhook, api string, payload io.Reader) (err error) {
+	var conn net.Conn
+	if conn, err = net.Dial("udp", api); err == nil {
+		_, err = io.Copy(conn, payload)
+	}
+	return
+}
+
+func sendHTTPWebhookRequest(ctx context.Context, wh *Webhook, api string, payload io.Reader) (err error) {
+	method := util.EmptyThenDefault(wh.Request.Method, http.MethodPost)
+	client := http.DefaultClient
 
 	var bearerToken string
 	bearerToken, err = getBearerToken(ctx, wh.Request)
@@ -550,7 +642,7 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
 	memLogger.Info("send webhook request", "api", api)
 	resp, err := client.Do(req)
 	if err != nil {
-		err = fmt.Errorf("error when sending webhook")
+		err = fmt.Errorf("error when sending webhook: %v", err)
 	} else {
 		if resp.StatusCode != http.StatusOK {
 			memLogger.Info("unexpected status", "code", resp.StatusCode)
@@ -635,7 +727,9 @@ func (s *inMemoryServer) GetPort() string {
 
 func (s *inMemoryServer) Stop() (err error) {
 	if s.listener != nil {
-		err = s.listener.Close()
+		if err = s.listener.Close(); err != nil {
+			memLogger.Error(err, "failed to close listener")
+		}
 	} else {
 		memLogger.Info("listener is nil")
 	}

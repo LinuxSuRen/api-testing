@@ -1572,6 +1572,76 @@ func request_Runner_FunctionsQueryStream_0(ctx context.Context, marshaler runtim
 	return stream, metadata, nil
 }
 
+var (
+	filter_Runner_GetSchema_0 = &utilities.DoubleArray{Encoding: map[string]int{"name": 0}, Base: []int{1, 2, 0, 0}, Check: []int{0, 1, 2, 2}}
+)
+
+func request_Runner_GetSchema_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq SimpleQuery
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_GetSchema_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.GetSchema(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_Runner_GetSchema_0(ctx context.Context, marshaler runtime.Marshaler, server RunnerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq SimpleQuery
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Runner_GetSchema_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.GetSchema(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 func request_Runner_GetVersion_0(ctx context.Context, marshaler runtime.Marshaler, client RunnerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq Empty
@@ -2061,6 +2131,128 @@ func local_request_RunnerExtension_Run_0(ctx context.Context, marshaler runtime.
 	return msg, metadata, err
 }
 
+func request_UIExtension_GetMenus_0(ctx context.Context, marshaler runtime.Marshaler, client UIExtensionClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq Empty
+	var metadata runtime.ServerMetadata
+
+	msg, err := client.GetMenus(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_UIExtension_GetMenus_0(ctx context.Context, marshaler runtime.Marshaler, server UIExtensionServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq Empty
+	var metadata runtime.ServerMetadata
+
+	msg, err := server.GetMenus(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+func request_UIExtension_GetPageOfJS_0(ctx context.Context, marshaler runtime.Marshaler, client UIExtensionClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq SimpleName
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	msg, err := client.GetPageOfJS(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_UIExtension_GetPageOfJS_0(ctx context.Context, marshaler runtime.Marshaler, server UIExtensionServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq SimpleName
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	msg, err := server.GetPageOfJS(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+func request_UIExtension_GetPageOfCSS_0(ctx context.Context, marshaler runtime.Marshaler, client UIExtensionClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq SimpleName
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	msg, err := client.GetPageOfCSS(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_UIExtension_GetPageOfCSS_0(ctx context.Context, marshaler runtime.Marshaler, server UIExtensionServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq SimpleName
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+	}
+
+	msg, err := server.GetPageOfCSS(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 func request_ThemeExtension_GetThemes_0(ctx context.Context, marshaler runtime.Marshaler, client ThemeExtensionClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq Empty
@@ -2254,6 +2446,23 @@ func local_request_Mock_GetConfig_0(ctx context.Context, marshaler runtime.Marsh
 	)
 	msg, err := server.GetConfig(ctx, &protoReq)
 	return msg, metadata, err
+}
+
+func request_Mock_LogWatch_0(ctx context.Context, marshaler runtime.Marshaler, client MockClient, req *http.Request, pathParams map[string]string) (Mock_LogWatchClient, runtime.ServerMetadata, error) {
+	var protoReq Empty
+	var metadata runtime.ServerMetadata
+
+	stream, err := client.LogWatch(ctx, &protoReq)
+	if err != nil {
+		return nil, metadata, err
+	}
+	header, err := stream.Header()
+	if err != nil {
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	return stream, metadata, nil
+
 }
 
 func request_DataServer_Query_0(ctx context.Context, marshaler runtime.Marshaler, client DataServerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -2950,7 +3159,37 @@ func RegisterRunnerHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 		return
 	})
+<<<<<<< HEAD
 	mux.Handle(http.MethodGet, pattern_Runner_GetVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+=======
+
+	mux.Handle("GET", pattern_Runner_GetSchema_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.Runner/GetSchema", runtime.WithHTTPPathPattern("/api/v1/schemas/{name}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Runner_GetSchema_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Runner_GetSchema_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_Runner_GetVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+>>>>>>> origin/master
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -3264,6 +3503,90 @@ func RegisterRunnerExtensionHandlerServer(ctx context.Context, mux *runtime.Serv
 	return nil
 }
 
+// RegisterUIExtensionHandlerServer registers the http handlers for service UIExtension to "mux".
+// UnaryRPC     :call UIExtensionServer directly.
+// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterUIExtensionHandlerFromEndpoint instead.
+func RegisterUIExtensionHandlerServer(ctx context.Context, mux *runtime.ServeMux, server UIExtensionServer) error {
+
+	mux.Handle("GET", pattern_UIExtension_GetMenus_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.UIExtension/GetMenus", runtime.WithHTTPPathPattern("/api/v1/extension/menus"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_UIExtension_GetMenus_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_UIExtension_GetMenus_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_UIExtension_GetPageOfJS_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.UIExtension/GetPageOfJS", runtime.WithHTTPPathPattern("/api/v1/extension/pages/{name}/js"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_UIExtension_GetPageOfJS_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_UIExtension_GetPageOfJS_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_UIExtension_GetPageOfCSS_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/server.UIExtension/GetPageOfCSS", runtime.WithHTTPPathPattern("/api/v1/extension/pages/{name}/css"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_UIExtension_GetPageOfCSS_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_UIExtension_GetPageOfCSS_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	return nil
+}
+
 // RegisterThemeExtensionHandlerServer registers the http handlers for service ThemeExtension to "mux".
 // UnaryRPC     :call ThemeExtensionServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -3429,6 +3752,13 @@ func RegisterMockHandlerServer(ctx context.Context, mux *runtime.ServeMux, serve
 			return
 		}
 		forward_Mock_GetConfig_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+
+	mux.Handle("GET", pattern_Mock_LogWatch_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
 	})
 
 	return nil
@@ -4095,7 +4425,34 @@ func RegisterRunnerHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		}
 		forward_Runner_FunctionsQueryStream_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 	})
+<<<<<<< HEAD
 	mux.Handle(http.MethodGet, pattern_Runner_GetVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+=======
+
+	mux.Handle("GET", pattern_Runner_GetSchema_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Runner/GetSchema", runtime.WithHTTPPathPattern("/api/v1/schemas/{name}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Runner_GetSchema_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Runner_GetSchema_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_Runner_GetVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+>>>>>>> origin/master
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -4360,6 +4717,7 @@ var (
 	pattern_Runner_GetSuggestedAPIs_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "suggestedAPIs"}, ""))
 	pattern_Runner_GetHistorySuites_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "historySuites"}, ""))
 	pattern_Runner_GetHistoryTestCaseWithResult_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "historyTestCaseWithResult", "ID"}, ""))
+<<<<<<< HEAD
 	pattern_Runner_GetHistoryTestCase_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "historyTestCase", "ID"}, ""))
 	pattern_Runner_DeleteHistoryTestCase_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "historyTestCase", "ID"}, ""))
 	pattern_Runner_DeleteAllHistoryTestCase_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "historySuites", "suiteName", "cases", "caseName"}, ""))
@@ -4386,6 +4744,62 @@ var (
 	pattern_Runner_DeleteSecret_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "secrets", "Name"}, ""))
 	pattern_Runner_UpdateSecret_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "secrets", "Name"}, ""))
 	pattern_Runner_PProf_0                        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "PProf"}, ""))
+=======
+
+	pattern_Runner_GetHistoryTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "historyTestCase", "ID"}, ""))
+
+	pattern_Runner_DeleteHistoryTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "historyTestCase", "ID"}, ""))
+
+	pattern_Runner_DeleteAllHistoryTestCase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "historySuites", "suiteName", "cases", "caseName"}, ""))
+
+	pattern_Runner_GetTestCaseAllHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "suites", "suiteName", "cases", "name"}, ""))
+
+	pattern_Runner_ListCodeGenerator_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "codeGenerators"}, ""))
+
+	pattern_Runner_GenerateCode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "codeGenerators", "generate"}, ""))
+
+	pattern_Runner_HistoryGenerateCode_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "codeGenerators", "history", "generate"}, ""))
+
+	pattern_Runner_ListConverter_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "converters"}, ""))
+
+	pattern_Runner_ConvertTestSuite_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "converters", "convert"}, ""))
+
+	pattern_Runner_PopularHeaders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "popularHeaders"}, ""))
+
+	pattern_Runner_FunctionsQuery_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "functions"}, ""))
+
+	pattern_Runner_FunctionsQueryStream_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "functionsQuery"}, ""))
+
+	pattern_Runner_GetSchema_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "schemas", "name"}, ""))
+
+	pattern_Runner_GetVersion_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "version"}, ""))
+
+	pattern_Runner_Sample_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "sample"}, ""))
+
+	pattern_Runner_DownloadResponseFile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "downloadFile", "response.body"}, ""))
+
+	pattern_Runner_GetStoreKinds_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "stores", "kinds"}, ""))
+
+	pattern_Runner_GetStores_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "stores"}, ""))
+
+	pattern_Runner_CreateStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "stores"}, ""))
+
+	pattern_Runner_UpdateStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "stores", "name"}, ""))
+
+	pattern_Runner_DeleteStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "stores", "name"}, ""))
+
+	pattern_Runner_VerifyStore_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "stores", "verify"}, ""))
+
+	pattern_Runner_GetSecrets_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "secrets"}, ""))
+
+	pattern_Runner_CreateSecret_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "secrets"}, ""))
+
+	pattern_Runner_DeleteSecret_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "secrets", "Name"}, ""))
+
+	pattern_Runner_UpdateSecret_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "secrets", "Name"}, ""))
+
+	pattern_Runner_PProf_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"server.Runner", "PProf"}, ""))
+>>>>>>> origin/master
 )
 
 var (
@@ -4412,6 +4826,7 @@ var (
 	forward_Runner_GetSuggestedAPIs_0             = runtime.ForwardResponseMessage
 	forward_Runner_GetHistorySuites_0             = runtime.ForwardResponseMessage
 	forward_Runner_GetHistoryTestCaseWithResult_0 = runtime.ForwardResponseMessage
+<<<<<<< HEAD
 	forward_Runner_GetHistoryTestCase_0           = runtime.ForwardResponseMessage
 	forward_Runner_DeleteHistoryTestCase_0        = runtime.ForwardResponseMessage
 	forward_Runner_DeleteAllHistoryTestCase_0     = runtime.ForwardResponseMessage
@@ -4438,6 +4853,62 @@ var (
 	forward_Runner_DeleteSecret_0                 = runtime.ForwardResponseMessage
 	forward_Runner_UpdateSecret_0                 = runtime.ForwardResponseMessage
 	forward_Runner_PProf_0                        = runtime.ForwardResponseMessage
+=======
+
+	forward_Runner_GetHistoryTestCase_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_DeleteHistoryTestCase_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_DeleteAllHistoryTestCase_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_GetTestCaseAllHistory_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_ListCodeGenerator_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_GenerateCode_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_HistoryGenerateCode_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_ListConverter_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_ConvertTestSuite_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_PopularHeaders_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_FunctionsQuery_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_FunctionsQueryStream_0 = runtime.ForwardResponseStream
+
+	forward_Runner_GetSchema_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_GetVersion_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_Sample_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_DownloadResponseFile_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_GetStoreKinds_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_GetStores_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_CreateStore_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_UpdateStore_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_DeleteStore_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_VerifyStore_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_GetSecrets_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_CreateSecret_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_DeleteSecret_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_UpdateSecret_0 = runtime.ForwardResponseMessage
+
+	forward_Runner_PProf_0 = runtime.ForwardResponseMessage
+>>>>>>> origin/master
 )
 
 // RegisterRunnerExtensionHandlerFromEndpoint is same as RegisterRunnerExtensionHandler but
@@ -4502,6 +4973,129 @@ var (
 
 var (
 	forward_RunnerExtension_Run_0 = runtime.ForwardResponseMessage
+)
+
+// RegisterUIExtensionHandlerFromEndpoint is same as RegisterUIExtensionHandler but
+// automatically dials to "endpoint" and closes the connection when "ctx" gets done.
+func RegisterUIExtensionHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+	conn, err := grpc.DialContext(ctx, endpoint, opts...)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			if cerr := conn.Close(); cerr != nil {
+				grpclog.Infof("Failed to close conn to %s: %v", endpoint, cerr)
+			}
+			return
+		}
+		go func() {
+			<-ctx.Done()
+			if cerr := conn.Close(); cerr != nil {
+				grpclog.Infof("Failed to close conn to %s: %v", endpoint, cerr)
+			}
+		}()
+	}()
+
+	return RegisterUIExtensionHandler(ctx, mux, conn)
+}
+
+// RegisterUIExtensionHandler registers the http handlers for service UIExtension to "mux".
+// The handlers forward requests to the grpc endpoint over "conn".
+func RegisterUIExtensionHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterUIExtensionHandlerClient(ctx, mux, NewUIExtensionClient(conn))
+}
+
+// RegisterUIExtensionHandlerClient registers the http handlers for service UIExtension
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "UIExtensionClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "UIExtensionClient"
+// doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
+// "UIExtensionClient" to call the correct interceptors.
+func RegisterUIExtensionHandlerClient(ctx context.Context, mux *runtime.ServeMux, client UIExtensionClient) error {
+
+	mux.Handle("GET", pattern_UIExtension_GetMenus_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.UIExtension/GetMenus", runtime.WithHTTPPathPattern("/api/v1/extension/menus"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_UIExtension_GetMenus_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_UIExtension_GetMenus_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_UIExtension_GetPageOfJS_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.UIExtension/GetPageOfJS", runtime.WithHTTPPathPattern("/api/v1/extension/pages/{name}/js"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_UIExtension_GetPageOfJS_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_UIExtension_GetPageOfJS_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_UIExtension_GetPageOfCSS_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.UIExtension/GetPageOfCSS", runtime.WithHTTPPathPattern("/api/v1/extension/pages/{name}/css"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_UIExtension_GetPageOfCSS_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_UIExtension_GetPageOfCSS_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	return nil
+}
+
+var (
+	pattern_UIExtension_GetMenus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "extension", "menus"}, ""))
+
+	pattern_UIExtension_GetPageOfJS_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "extension", "pages", "name", "js"}, ""))
+
+	pattern_UIExtension_GetPageOfCSS_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "extension", "pages", "name", "css"}, ""))
+)
+
+var (
+	forward_UIExtension_GetMenus_0 = runtime.ForwardResponseMessage
+
+	forward_UIExtension_GetPageOfJS_0 = runtime.ForwardResponseMessage
+
+	forward_UIExtension_GetPageOfCSS_0 = runtime.ForwardResponseMessage
 )
 
 // RegisterThemeExtensionHandlerFromEndpoint is same as RegisterThemeExtensionHandler but
@@ -4759,17 +5353,47 @@ func RegisterMockHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 		}
 		forward_Mock_GetConfig_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+<<<<<<< HEAD
+=======
+
+	mux.Handle("GET", pattern_Mock_LogWatch_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/server.Mock/LogWatch", runtime.WithHTTPPathPattern("/api/v1/mock/log"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Mock_LogWatch_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Mock_LogWatch_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+
+	})
+
+>>>>>>> origin/master
 	return nil
 }
 
 var (
 	pattern_Mock_Reload_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "mock", "reload"}, ""))
 	pattern_Mock_GetConfig_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "mock", "config"}, ""))
+
+	pattern_Mock_LogWatch_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "mock", "log"}, ""))
 )
 
 var (
 	forward_Mock_Reload_0    = runtime.ForwardResponseMessage
 	forward_Mock_GetConfig_0 = runtime.ForwardResponseMessage
+
+	forward_Mock_LogWatch_0 = runtime.ForwardResponseStream
 )
 
 // RegisterDataServerHandlerFromEndpoint is same as RegisterDataServerHandler but

@@ -141,7 +141,7 @@ func (l *nonLoader) RenameTestSuite(oldName, newName string) (err error) {
 	return
 }
 
-func (l *nonLoader) Verify() (readOnly bool, err error) {
+func (l *nonLoader) Verify() (readOnly bool, version string, err error) {
 	// always be okay
 	return
 }
@@ -178,4 +178,17 @@ func (l *nonLoader) GetBindings() (result []string, err error) {
 func (l *nonLoader) GetBinding(name string) (result string, err error) {
 	err = fmt.Errorf("not support")
 	return
+}
+
+func (l *nonLoader) GetMenus() ([]*Menu, error) {
+	fmt.Println("not support non-loader for getting menus")
+	return nil, fmt.Errorf("not support")
+}
+
+func (l *nonLoader) GetPageOfJS(s string) (string, error) {
+	return "", fmt.Errorf("not support")
+}
+
+func (l *nonLoader) GetPageOfCSS(s string) (string, error) {
+	return "", fmt.Errorf("not support")
 }

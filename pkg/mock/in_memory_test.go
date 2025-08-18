@@ -24,15 +24,27 @@ import (
 	"strings"
 	"testing"
 
+	_ "embed"
+
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
+
+//go:embed testdata/api.yaml
+var mockFile []byte
 
 func TestInMemoryServer(t *testing.T) {
 	server := NewInMemoryServer(context.Background(), 0)
 	server.EnableMetrics()
 
-	err := server.Start(NewLocalFileReader("testdata/api.yaml"), "/mock")
+	reader := NewLocalFileReader("testdata/api.yaml")
+	assert.Nil(t, reader.GetData())
+	s, err := reader.Parse()
+	assert.NoError(t, err)
+	assert.NotNil(t, s)
+	assert.NotNil(t, reader.GetData())
+
+	err = server.Start(reader, "/mock")
 	assert.NoError(t, err)
 	defer func() {
 		server.Stop()
@@ -167,6 +179,13 @@ func TestInMemoryServer(t *testing.T) {
 		assert.Equal(t, "hello", string(data))
 	})
 
+	t.Run("read response from file", func(t *testing.T) {
+		resp, err = http.Get(api + "/v1/readResponseFromFile")
+		assert.NoError(t, err)
+		data, _ := io.ReadAll(resp.Body)
+		assert.Equal(t, mockFile, data)
+	})
+
 	t.Run("not found config file", func(t *testing.T) {
 		server := NewInMemoryServer(context.Background(), 0)
 		err := server.Start(NewLocalFileReader("fake"), "/")
@@ -175,10 +194,15 @@ func TestInMemoryServer(t *testing.T) {
 
 	t.Run("invalid webhook", func(t *testing.T) {
 		server := NewInMemoryServer(context.Background(), 0)
-		err := server.Start(NewInMemoryReader(`webhooks:
+		reader := NewInMemoryReader(`webhooks:
   - timer: aa
-    name: fake`), "/")
+    name: fake`)
+		assert.NotNil(t, reader.GetData())
+		err := server.Start(reader, "/")
 		assert.Error(t, err)
+		assert.Error(t, server.Load())
+
+		reader.Write([]byte(""))
 	})
 
 	t.Run("missing name or timer in webhook", func(t *testing.T) {
@@ -238,5 +262,36 @@ func TestInMemoryServer(t *testing.T) {
 
 		data, _ := io.ReadAll(resp.Body)
 		assert.Contains(t, string(data), repoName)
+	})
+
+	t.Run("conditional response body", func(t *testing.T) {
+		for _, tt := range []struct {
+			name  string
+			param string
+		}{
+			{
+				name: "big",
+			},
+			{
+				name: "small",
+			},
+			{
+				name: "unknown",
+			},
+		} {
+			t.Run(tt.name, func(t *testing.T) {
+				payload := bytes.NewBufferString(fmt.Sprintf(`{"size": "%s"}`, tt.name))
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/v1/books", api), payload)
+				assert.NoError(t, err)
+
+				var resp *http.Response
+				resp, err = http.DefaultClient.Do(req)
+				assert.NoError(t, err)
+				assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+				data, _ := io.ReadAll(resp.Body)
+				assert.Equal(t, fmt.Sprintf("{\n  \"name\": \"%s book\"\n}", tt.name), strings.TrimSpace(string(data)))
+			})
+		}
 	})
 }

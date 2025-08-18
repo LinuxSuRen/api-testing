@@ -24,7 +24,7 @@ type Loader interface {
 	GetCount() int
 	Reset()
 
-	Verify() (readOnly bool, err error)
+	Verify() (readOnly bool, version string, err error)
 	PProf(name string) []byte
 
 	Query(query map[string]string) (result DataResult, err error)
@@ -32,7 +32,18 @@ type Loader interface {
 	GetTheme(string) (string, error)
 	GetBindings() ([]string, error)
 	GetBinding(string) (string, error)
+	GetMenus() ([]*Menu, error)
+	GetPageOfJS(string) (string, error)
+	GetPageOfCSS(string) (string, error)
 }
+
+type Menu struct {
+	Name    string `json:"name"`
+	Icon    string `json:"icon"`
+	Index   string `json:"index"`
+	Version int32  `json:"version"`
+}
+
 type DataResult struct {
 	Pairs           map[string]string
 	Rows            []map[string]string

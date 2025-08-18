@@ -39,6 +39,18 @@
               </td>
           </tr>
           <tr>
+              <td>
+                  <label for="bin-location">Bin Location</label>
+              </td>
+              <td>
+                  <select name="bin-location" id="bin-location">
+                      <option value="built-in">Built-in</option>
+                      <option value="system-path">System Path</option>
+                      <option value="home-path">Home Path</option>
+                  </select>
+              </td>
+          </tr>
+          <tr>
               <td>Log</td>
               <td>
                   <button type="button" id="open-log-file">Open Log File</button>
@@ -118,10 +130,16 @@ downloadTimeout.addEventListener("input", function(e) {
   window.electronAPI.setDownloadTimeout(downloadTimeout.value)
 });
 
+const binLocation = document.getElementById('bin-location');
+binLocation.addEventListener("input", function(e) {
+  window.electronAPI.setMainProcessLocation(binLocation.value)
+});
+
 (async function() {
   portInput.value = await window.electronAPI.getPort()
   extensionRegistry.value = await window.electronAPI.getExtensionRegistry()
   downloadTimeout.value = await window.electronAPI.getDownloadTimeout()
+  binLocation.value = await window.electronAPI.getMainProcessLocation()
 
   document.getElementById('address').innerText = await window.electronAPI.getHomePage();
 })();

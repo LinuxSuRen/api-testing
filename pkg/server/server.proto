@@ -219,6 +219,11 @@ service Runner {
         get: "/api/v1/functionsQuery"
       };
     }
+    rpc GetSchema(SimpleQuery) returns (CommonResult) {
+        option (google.api.http) = {
+        get: "/api/v1/schemas/{name}"
+      };
+    }
     rpc GetVersion(Empty) returns (Version) {
       option (google.api.http) = {
         get: "/api/v1/version"
@@ -305,6 +310,35 @@ service RunnerExtension {
         body: "*"
       };
     }
+}
+
+service UIExtension {
+    rpc GetMenus(Empty) returns (MenuList) {
+      option (google.api.http) = {
+        get: "/api/v1/extension/menus"
+      };
+    }
+    rpc GetPageOfJS(SimpleName) returns (CommonResult) {
+        option (google.api.http) = {
+            get: "/api/v1/extension/pages/{name}/js"
+        };
+    }
+    rpc GetPageOfCSS(SimpleName) returns (CommonResult) {
+        option (google.api.http) = {
+            get: "/api/v1/extension/pages/{name}/css"
+        };
+    }
+}
+
+message Menu {
+    string name = 1;
+    string index = 2;
+    string icon = 3;
+    int32 version = 4;
+}
+
+message MenuList {
+  repeated Menu data = 1;
 }
 
 service ThemeExtension {
@@ -592,6 +626,21 @@ message StoreKind {
   string name = 1;
   string url = 2;
   bool enabled = 3;
+  repeated StoreKindDependency dependencies = 4;
+  string link = 5;
+  repeated StoreKindParam params = 6;
+  repeated string categories = 7;
+}
+
+message StoreKindDependency {
+  string name = 1;
+}
+
+message StoreKindParam {
+    string key = 1;
+    string description = 2;
+    string defaultValue = 3;
+    repeated string enum = 4;
 }
 
 message CommonResult {
@@ -660,12 +709,21 @@ service Mock {
       get: "/api/v1/mock/config"
     };
   }
+  rpc LogWatch(Empty) returns (stream CommonResult) {
+    option (google.api.http) = {
+      get: "/api/v1/mock/log"
+    };
+  }
 }
 
 message MockConfig {
   string Prefix = 1;
   string Config = 2;
   int32 Port = 3;
+  string storeKind = 4;
+  string storeLocalFile = 5;
+  string storeURL = 6;
+  string storeRemote = 7;
 }
 
 message Version {

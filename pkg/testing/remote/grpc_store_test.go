@@ -109,7 +109,7 @@ func TestNewGRPCLoader(t *testing.T) {
 		assert.Error(t, err)
 
 		var readonly bool
-		readonly, err = writer.Verify()
+		readonly, _, err = writer.Verify()
 		assert.Error(t, err)
 		assert.False(t, readonly)
 	})

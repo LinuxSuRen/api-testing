@@ -375,7 +375,7 @@ const file_pkg_testing_remote_loader_proto_rawDesc = "" +
 	"\x06Config\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription2\xd7\f\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription2\xfd\r\n" +
 	"\x06Loader\x124\n" +
 	"\rListTestSuite\x12\r.server.Empty\x1a\x12.remote.TestSuites\"\x00\x125\n" +
 	"\x0fCreateTestSuite\x12\x11.remote.TestSuite\x1a\r.server.Empty\"\x00\x126\n" +
@@ -405,7 +405,10 @@ const file_pkg_testing_remote_loader_proto_rawDesc = "" +
 	"\bGetTheme\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x00\x122\n" +
 	"\vGetBindings\x12\r.server.Empty\x1a\x12.server.SimpleList\"\x00\x128\n" +
 	"\n" +
-	"GetBinding\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x002\x96\x02\n" +
+	"GetBinding\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x00\x12-\n" +
+	"\bGetMenus\x12\r.server.Empty\x1a\x10.server.MenuList\"\x00\x129\n" +
+	"\vGetPageOfJS\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x00\x12:\n" +
+	"\fGetPageOfCSS\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x002\x96\x02\n" +
 	"\rSecretService\x12-\n" +
 	"\tGetSecret\x12\x0e.server.Secret\x1a\x0e.server.Secret\"\x00\x12.\n" +
 	"\n" +
@@ -462,7 +465,8 @@ var file_pkg_testing_remote_loader_proto_goTypes = []any{
 	(*server.DataQueryResult)(nil),    // 24: server.DataQueryResult
 	(*server.SimpleList)(nil),         // 25: server.SimpleList
 	(*server.CommonResult)(nil),       // 26: server.CommonResult
-	(*server.Secrets)(nil),            // 27: server.Secrets
+	(*server.MenuList)(nil),           // 27: server.MenuList
+	(*server.Secrets)(nil),            // 28: server.Secrets
 }
 var file_pkg_testing_remote_loader_proto_depIdxs = []int32{
 	1,  // 0: remote.TestSuites.data:type_name -> remote.TestSuite
@@ -499,55 +503,61 @@ var file_pkg_testing_remote_loader_proto_depIdxs = []int32{
 	16, // 31: remote.Loader.GetTheme:input_type -> server.SimpleName
 	10, // 32: remote.Loader.GetBindings:input_type -> server.Empty
 	16, // 33: remote.Loader.GetBinding:input_type -> server.SimpleName
-	17, // 34: remote.SecretService.GetSecret:input_type -> server.Secret
-	10, // 35: remote.SecretService.GetSecrets:input_type -> server.Empty
-	17, // 36: remote.SecretService.CreateSecret:input_type -> server.Secret
-	17, // 37: remote.SecretService.DeleteSecret:input_type -> server.Secret
-	17, // 38: remote.SecretService.UpdateSecret:input_type -> server.Secret
-	10, // 39: remote.ConfigService.GetConfigs:input_type -> server.Empty
-	16, // 40: remote.ConfigService.GetConfig:input_type -> server.SimpleName
-	5,  // 41: remote.ConfigService.CreateConfig:input_type -> remote.Config
-	5,  // 42: remote.ConfigService.UpdateConfig:input_type -> remote.Config
-	16, // 43: remote.ConfigService.DeleteConfig:input_type -> server.SimpleName
-	0,  // 44: remote.Loader.ListTestSuite:output_type -> remote.TestSuites
-	10, // 45: remote.Loader.CreateTestSuite:output_type -> server.Empty
-	1,  // 46: remote.Loader.GetTestSuite:output_type -> remote.TestSuite
-	1,  // 47: remote.Loader.UpdateTestSuite:output_type -> remote.TestSuite
-	10, // 48: remote.Loader.DeleteTestSuite:output_type -> server.Empty
-	18, // 49: remote.Loader.RenameTestSuite:output_type -> server.HelloReply
-	19, // 50: remote.Loader.ListTestCases:output_type -> server.TestCases
-	10, // 51: remote.Loader.CreateTestCase:output_type -> server.Empty
-	8,  // 52: remote.Loader.GetTestCase:output_type -> server.TestCase
-	8,  // 53: remote.Loader.UpdateTestCase:output_type -> server.TestCase
-	10, // 54: remote.Loader.DeleteTestCase:output_type -> server.Empty
-	18, // 55: remote.Loader.RenameTestCase:output_type -> server.HelloReply
-	2,  // 56: remote.Loader.ListHistoryTestSuite:output_type -> remote.HistoryTestSuites
-	10, // 57: remote.Loader.CreateTestCaseHistory:output_type -> server.Empty
-	13, // 58: remote.Loader.GetHistoryTestCaseWithResult:output_type -> server.HistoryTestResult
-	9,  // 59: remote.Loader.GetHistoryTestCase:output_type -> server.HistoryTestCase
-	10, // 60: remote.Loader.DeleteHistoryTestCase:output_type -> server.Empty
-	10, // 61: remote.Loader.DeleteAllHistoryTestCase:output_type -> server.Empty
-	20, // 62: remote.Loader.GetTestCaseAllHistory:output_type -> server.HistoryTestCases
-	21, // 63: remote.Loader.GetVersion:output_type -> server.Version
-	22, // 64: remote.Loader.Verify:output_type -> server.ExtensionStatus
-	23, // 65: remote.Loader.PProf:output_type -> server.PProfData
-	24, // 66: remote.Loader.Query:output_type -> server.DataQueryResult
-	25, // 67: remote.Loader.GetThemes:output_type -> server.SimpleList
-	26, // 68: remote.Loader.GetTheme:output_type -> server.CommonResult
-	25, // 69: remote.Loader.GetBindings:output_type -> server.SimpleList
-	26, // 70: remote.Loader.GetBinding:output_type -> server.CommonResult
-	17, // 71: remote.SecretService.GetSecret:output_type -> server.Secret
-	27, // 72: remote.SecretService.GetSecrets:output_type -> server.Secrets
-	26, // 73: remote.SecretService.CreateSecret:output_type -> server.CommonResult
-	26, // 74: remote.SecretService.DeleteSecret:output_type -> server.CommonResult
-	26, // 75: remote.SecretService.UpdateSecret:output_type -> server.CommonResult
-	4,  // 76: remote.ConfigService.GetConfigs:output_type -> remote.Configs
-	5,  // 77: remote.ConfigService.GetConfig:output_type -> remote.Config
-	26, // 78: remote.ConfigService.CreateConfig:output_type -> server.CommonResult
-	26, // 79: remote.ConfigService.UpdateConfig:output_type -> server.CommonResult
-	26, // 80: remote.ConfigService.DeleteConfig:output_type -> server.CommonResult
-	44, // [44:81] is the sub-list for method output_type
-	7,  // [7:44] is the sub-list for method input_type
+	10, // 34: remote.Loader.GetMenus:input_type -> server.Empty
+	16, // 35: remote.Loader.GetPageOfJS:input_type -> server.SimpleName
+	16, // 36: remote.Loader.GetPageOfCSS:input_type -> server.SimpleName
+	17, // 37: remote.SecretService.GetSecret:input_type -> server.Secret
+	10, // 38: remote.SecretService.GetSecrets:input_type -> server.Empty
+	17, // 39: remote.SecretService.CreateSecret:input_type -> server.Secret
+	17, // 40: remote.SecretService.DeleteSecret:input_type -> server.Secret
+	17, // 41: remote.SecretService.UpdateSecret:input_type -> server.Secret
+	10, // 42: remote.ConfigService.GetConfigs:input_type -> server.Empty
+	16, // 43: remote.ConfigService.GetConfig:input_type -> server.SimpleName
+	5,  // 44: remote.ConfigService.CreateConfig:input_type -> remote.Config
+	5,  // 45: remote.ConfigService.UpdateConfig:input_type -> remote.Config
+	16, // 46: remote.ConfigService.DeleteConfig:input_type -> server.SimpleName
+	0,  // 47: remote.Loader.ListTestSuite:output_type -> remote.TestSuites
+	10, // 48: remote.Loader.CreateTestSuite:output_type -> server.Empty
+	1,  // 49: remote.Loader.GetTestSuite:output_type -> remote.TestSuite
+	1,  // 50: remote.Loader.UpdateTestSuite:output_type -> remote.TestSuite
+	10, // 51: remote.Loader.DeleteTestSuite:output_type -> server.Empty
+	18, // 52: remote.Loader.RenameTestSuite:output_type -> server.HelloReply
+	19, // 53: remote.Loader.ListTestCases:output_type -> server.TestCases
+	10, // 54: remote.Loader.CreateTestCase:output_type -> server.Empty
+	8,  // 55: remote.Loader.GetTestCase:output_type -> server.TestCase
+	8,  // 56: remote.Loader.UpdateTestCase:output_type -> server.TestCase
+	10, // 57: remote.Loader.DeleteTestCase:output_type -> server.Empty
+	18, // 58: remote.Loader.RenameTestCase:output_type -> server.HelloReply
+	2,  // 59: remote.Loader.ListHistoryTestSuite:output_type -> remote.HistoryTestSuites
+	10, // 60: remote.Loader.CreateTestCaseHistory:output_type -> server.Empty
+	13, // 61: remote.Loader.GetHistoryTestCaseWithResult:output_type -> server.HistoryTestResult
+	9,  // 62: remote.Loader.GetHistoryTestCase:output_type -> server.HistoryTestCase
+	10, // 63: remote.Loader.DeleteHistoryTestCase:output_type -> server.Empty
+	10, // 64: remote.Loader.DeleteAllHistoryTestCase:output_type -> server.Empty
+	20, // 65: remote.Loader.GetTestCaseAllHistory:output_type -> server.HistoryTestCases
+	21, // 66: remote.Loader.GetVersion:output_type -> server.Version
+	22, // 67: remote.Loader.Verify:output_type -> server.ExtensionStatus
+	23, // 68: remote.Loader.PProf:output_type -> server.PProfData
+	24, // 69: remote.Loader.Query:output_type -> server.DataQueryResult
+	25, // 70: remote.Loader.GetThemes:output_type -> server.SimpleList
+	26, // 71: remote.Loader.GetTheme:output_type -> server.CommonResult
+	25, // 72: remote.Loader.GetBindings:output_type -> server.SimpleList
+	26, // 73: remote.Loader.GetBinding:output_type -> server.CommonResult
+	27, // 74: remote.Loader.GetMenus:output_type -> server.MenuList
+	26, // 75: remote.Loader.GetPageOfJS:output_type -> server.CommonResult
+	26, // 76: remote.Loader.GetPageOfCSS:output_type -> server.CommonResult
+	17, // 77: remote.SecretService.GetSecret:output_type -> server.Secret
+	28, // 78: remote.SecretService.GetSecrets:output_type -> server.Secrets
+	26, // 79: remote.SecretService.CreateSecret:output_type -> server.CommonResult
+	26, // 80: remote.SecretService.DeleteSecret:output_type -> server.CommonResult
+	26, // 81: remote.SecretService.UpdateSecret:output_type -> server.CommonResult
+	4,  // 82: remote.ConfigService.GetConfigs:output_type -> remote.Configs
+	5,  // 83: remote.ConfigService.GetConfig:output_type -> remote.Config
+	26, // 84: remote.ConfigService.CreateConfig:output_type -> server.CommonResult
+	26, // 85: remote.ConfigService.UpdateConfig:output_type -> server.CommonResult
+	26, // 86: remote.ConfigService.DeleteConfig:output_type -> server.CommonResult
+	47, // [47:87] is the sub-list for method output_type
+	7,  // [7:47] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name

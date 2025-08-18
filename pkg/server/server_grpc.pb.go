@@ -54,6 +54,7 @@ const (
 	Runner_PopularHeaders_FullMethodName               = "/server.Runner/PopularHeaders"
 	Runner_FunctionsQuery_FullMethodName               = "/server.Runner/FunctionsQuery"
 	Runner_FunctionsQueryStream_FullMethodName         = "/server.Runner/FunctionsQueryStream"
+	Runner_GetSchema_FullMethodName                    = "/server.Runner/GetSchema"
 	Runner_GetVersion_FullMethodName                   = "/server.Runner/GetVersion"
 	Runner_Sample_FullMethodName                       = "/server.Runner/Sample"
 	Runner_DownloadResponseFile_FullMethodName         = "/server.Runner/DownloadResponseFile"
@@ -117,6 +118,7 @@ type RunnerClient interface {
 	PopularHeaders(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Pairs, error)
 	FunctionsQuery(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*Pairs, error)
 	FunctionsQueryStream(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[SimpleQuery, Pairs], error)
+	GetSchema(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*CommonResult, error)
 	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error)
 	Sample(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HelloReply, error)
 	DownloadResponseFile(ctx context.Context, in *TestCase, opts ...grpc.CallOption) (*FileData, error)
@@ -503,6 +505,16 @@ func (c *runnerClient) FunctionsQueryStream(ctx context.Context, opts ...grpc.Ca
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Runner_FunctionsQueryStreamClient = grpc.BidiStreamingClient[SimpleQuery, Pairs]
 
+func (c *runnerClient) GetSchema(ctx context.Context, in *SimpleQuery, opts ...grpc.CallOption) (*CommonResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, Runner_GetSchema_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *runnerClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Version)
@@ -690,6 +702,7 @@ type RunnerServer interface {
 	PopularHeaders(context.Context, *Empty) (*Pairs, error)
 	FunctionsQuery(context.Context, *SimpleQuery) (*Pairs, error)
 	FunctionsQueryStream(grpc.BidiStreamingServer[SimpleQuery, Pairs]) error
+	GetSchema(context.Context, *SimpleQuery) (*CommonResult, error)
 	GetVersion(context.Context, *Empty) (*Version, error)
 	Sample(context.Context, *Empty) (*HelloReply, error)
 	DownloadResponseFile(context.Context, *TestCase) (*FileData, error)
@@ -821,6 +834,9 @@ func (UnimplementedRunnerServer) FunctionsQuery(context.Context, *SimpleQuery) (
 }
 func (UnimplementedRunnerServer) FunctionsQueryStream(grpc.BidiStreamingServer[SimpleQuery, Pairs]) error {
 	return status.Errorf(codes.Unimplemented, "method FunctionsQueryStream not implemented")
+}
+func (UnimplementedRunnerServer) GetSchema(context.Context, *SimpleQuery) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSchema not implemented")
 }
 func (UnimplementedRunnerServer) GetVersion(context.Context, *Empty) (*Version, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
@@ -1482,6 +1498,24 @@ func _Runner_FunctionsQueryStream_Handler(srv interface{}, stream grpc.ServerStr
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Runner_FunctionsQueryStreamServer = grpc.BidiStreamingServer[SimpleQuery, Pairs]
 
+func _Runner_GetSchema_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleQuery)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetSchema(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Runner_GetSchema_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetSchema(ctx, req.(*SimpleQuery))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Runner_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
@@ -1870,6 +1904,10 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_FunctionsQuery_Handler,
 		},
 		{
+			MethodName: "GetSchema",
+			Handler:    _Runner_GetSchema_Handler,
+		},
+		{
 			MethodName: "GetVersion",
 			Handler:    _Runner_GetVersion_Handler,
 		},
@@ -2045,6 +2083,184 @@ var RunnerExtension_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Run",
 			Handler:    _RunnerExtension_Run_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/server/server.proto",
+}
+
+const (
+	UIExtension_GetMenus_FullMethodName     = "/server.UIExtension/GetMenus"
+	UIExtension_GetPageOfJS_FullMethodName  = "/server.UIExtension/GetPageOfJS"
+	UIExtension_GetPageOfCSS_FullMethodName = "/server.UIExtension/GetPageOfCSS"
+)
+
+// UIExtensionClient is the client API for UIExtension service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type UIExtensionClient interface {
+	GetMenus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MenuList, error)
+	GetPageOfJS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error)
+	GetPageOfCSS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error)
+}
+
+type uIExtensionClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewUIExtensionClient(cc grpc.ClientConnInterface) UIExtensionClient {
+	return &uIExtensionClient{cc}
+}
+
+func (c *uIExtensionClient) GetMenus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MenuList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MenuList)
+	err := c.cc.Invoke(ctx, UIExtension_GetMenus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *uIExtensionClient) GetPageOfJS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, UIExtension_GetPageOfJS_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *uIExtensionClient) GetPageOfCSS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, UIExtension_GetPageOfCSS_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UIExtensionServer is the server API for UIExtension service.
+// All implementations must embed UnimplementedUIExtensionServer
+// for forward compatibility.
+type UIExtensionServer interface {
+	GetMenus(context.Context, *Empty) (*MenuList, error)
+	GetPageOfJS(context.Context, *SimpleName) (*CommonResult, error)
+	GetPageOfCSS(context.Context, *SimpleName) (*CommonResult, error)
+	mustEmbedUnimplementedUIExtensionServer()
+}
+
+// UnimplementedUIExtensionServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedUIExtensionServer struct{}
+
+func (UnimplementedUIExtensionServer) GetMenus(context.Context, *Empty) (*MenuList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMenus not implemented")
+}
+func (UnimplementedUIExtensionServer) GetPageOfJS(context.Context, *SimpleName) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfJS not implemented")
+}
+func (UnimplementedUIExtensionServer) GetPageOfCSS(context.Context, *SimpleName) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfCSS not implemented")
+}
+func (UnimplementedUIExtensionServer) mustEmbedUnimplementedUIExtensionServer() {}
+func (UnimplementedUIExtensionServer) testEmbeddedByValue()                     {}
+
+// UnsafeUIExtensionServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UIExtensionServer will
+// result in compilation errors.
+type UnsafeUIExtensionServer interface {
+	mustEmbedUnimplementedUIExtensionServer()
+}
+
+func RegisterUIExtensionServer(s grpc.ServiceRegistrar, srv UIExtensionServer) {
+	// If the following call pancis, it indicates UnimplementedUIExtensionServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&UIExtension_ServiceDesc, srv)
+}
+
+func _UIExtension_GetMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UIExtensionServer).GetMenus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UIExtension_GetMenus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UIExtensionServer).GetMenus(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UIExtension_GetPageOfJS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UIExtensionServer).GetPageOfJS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UIExtension_GetPageOfJS_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UIExtensionServer).GetPageOfJS(ctx, req.(*SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UIExtension_GetPageOfCSS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UIExtensionServer).GetPageOfCSS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UIExtension_GetPageOfCSS_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UIExtensionServer).GetPageOfCSS(ctx, req.(*SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// UIExtension_ServiceDesc is the grpc.ServiceDesc for UIExtension service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var UIExtension_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "server.UIExtension",
+	HandlerType: (*UIExtensionServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetMenus",
+			Handler:    _UIExtension_GetMenus_Handler,
+		},
+		{
+			MethodName: "GetPageOfJS",
+			Handler:    _UIExtension_GetPageOfJS_Handler,
+		},
+		{
+			MethodName: "GetPageOfCSS",
+			Handler:    _UIExtension_GetPageOfCSS_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -2382,6 +2598,7 @@ var AIExtension_ServiceDesc = grpc.ServiceDesc{
 const (
 	Mock_Reload_FullMethodName    = "/server.Mock/Reload"
 	Mock_GetConfig_FullMethodName = "/server.Mock/GetConfig"
+	Mock_LogWatch_FullMethodName  = "/server.Mock/LogWatch"
 )
 
 // MockClient is the client API for Mock service.
@@ -2390,6 +2607,7 @@ const (
 type MockClient interface {
 	Reload(ctx context.Context, in *MockConfig, opts ...grpc.CallOption) (*Empty, error)
 	GetConfig(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MockConfig, error)
+	LogWatch(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[CommonResult], error)
 }
 
 type mockClient struct {
@@ -2420,12 +2638,32 @@ func (c *mockClient) GetConfig(ctx context.Context, in *Empty, opts ...grpc.Call
 	return out, nil
 }
 
+func (c *mockClient) LogWatch(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[CommonResult], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Mock_ServiceDesc.Streams[0], Mock_LogWatch_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[Empty, CommonResult]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Mock_LogWatchClient = grpc.ServerStreamingClient[CommonResult]
+
 // MockServer is the server API for Mock service.
 // All implementations must embed UnimplementedMockServer
 // for forward compatibility.
 type MockServer interface {
 	Reload(context.Context, *MockConfig) (*Empty, error)
 	GetConfig(context.Context, *Empty) (*MockConfig, error)
+	LogWatch(*Empty, grpc.ServerStreamingServer[CommonResult]) error
 	mustEmbedUnimplementedMockServer()
 }
 
@@ -2441,6 +2679,9 @@ func (UnimplementedMockServer) Reload(context.Context, *MockConfig) (*Empty, err
 }
 func (UnimplementedMockServer) GetConfig(context.Context, *Empty) (*MockConfig, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
+}
+func (UnimplementedMockServer) LogWatch(*Empty, grpc.ServerStreamingServer[CommonResult]) error {
+	return status.Errorf(codes.Unimplemented, "method LogWatch not implemented")
 }
 func (UnimplementedMockServer) mustEmbedUnimplementedMockServer() {}
 func (UnimplementedMockServer) testEmbeddedByValue()              {}
@@ -2499,6 +2740,17 @@ func _Mock_GetConfig_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Mock_LogWatch_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MockServer).LogWatch(m, &grpc.GenericServerStream[Empty, CommonResult]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Mock_LogWatchServer = grpc.ServerStreamingServer[CommonResult]
+
 // Mock_ServiceDesc is the grpc.ServiceDesc for Mock service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2515,7 +2767,13 @@ var Mock_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Mock_GetConfig_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "LogWatch",
+			Handler:       _Mock_LogWatch_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "pkg/server/server.proto",
 }
 

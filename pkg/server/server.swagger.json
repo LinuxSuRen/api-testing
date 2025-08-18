@@ -12,6 +12,9 @@
       "name": "RunnerExtension"
     },
     {
+      "name": "UIExtension"
+    },
+    {
       "name": "ThemeExtension"
     },
     {
@@ -419,6 +422,88 @@
         ],
         "tags": [
           "Runner"
+        ]
+      }
+    },
+    "/api/v1/extension/menus": {
+      "get": {
+        "operationId": "UIExtension_GetMenus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverMenuList"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UIExtension"
+        ]
+      }
+    },
+    "/api/v1/extension/pages/{name}/css": {
+      "get": {
+        "operationId": "UIExtension_GetPageOfCSS",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UIExtension"
+        ]
+      }
+    },
+    "/api/v1/extension/pages/{name}/js": {
+      "get": {
+        "operationId": "UIExtension_GetPageOfJS",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UIExtension"
         ]
       }
     },
@@ -1314,6 +1399,37 @@
         ]
       }
     },
+    "/api/v1/mock/log": {
+      "get": {
+        "operationId": "Mock_LogWatch",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/serverCommonResult"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Mock"
+        ]
+      }
+    },
     "/api/v1/mock/reload": {
       "post": {
         "operationId": "Mock_Reload",
@@ -1461,6 +1577,42 @@
             }
           }
         },
+        "tags": [
+          "Runner"
+        ]
+      }
+    },
+    "/api/v1/schemas/{name}": {
+      "get": {
+        "operationId": "Runner_GetSchema",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "tags": [
           "Runner"
         ]
@@ -3351,6 +3503,32 @@
         },
         "kind": {
           "type": "string"
+        }
+      }
+    },
+    "serverMenu": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "index": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        }
+      }
+    },
+    "serverMenuList": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverMenu"
+          }
         }
       }
     },

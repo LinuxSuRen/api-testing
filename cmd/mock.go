@@ -31,6 +31,9 @@ type mockOption struct {
 	port    int
 	prefix  string
 	metrics bool
+	tls     bool
+	tlsCert string
+	tlsKey  string
 }
 
 func createMockCmd() (c *cobra.Command) {
@@ -47,12 +50,18 @@ func createMockCmd() (c *cobra.Command) {
 	flags.IntVarP(&opt.port, "port", "", 6060, "The mock server port")
 	flags.StringVarP(&opt.prefix, "prefix", "", "/mock", "The mock server API prefix")
 	flags.BoolVarP(&opt.metrics, "metrics", "m", true, "Enable request metrics collection")
+	flags.BoolVarP(&opt.tls, "tls", "", false, "Enable TLS mode. Set to true to enable TLS. Alow SAN certificates")
+	flags.StringVarP(&opt.tlsCert, "cert-file", "", "", "The path to the certificate file, Alow SAN certificates")
+	flags.StringVarP(&opt.tlsKey, "key-file", "", "", "The path to the key file, Alow SAN certificates")
 	return
 }
 
 func (o *mockOption) runE(c *cobra.Command, args []string) (err error) {
 	reader := mock.NewLocalFileReader(args[0])
 	server := mock.NewInMemoryServer(c.Context(), o.port)
+	if o.tls {
+		server.WithTLS(o.tlsCert, o.tlsKey)
+	}
 	if o.metrics {
 		server.EnableMetrics()
 	}

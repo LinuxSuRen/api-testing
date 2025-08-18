@@ -21,13 +21,14 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/downloader"
-	"github.com/linuxsuren/api-testing/pkg/util/home"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/downloader"
+	"github.com/linuxsuren/api-testing/pkg/util/home"
 )
 
 func DownloadSwaggerData(output string, dw downloader.PlatformAwareOCIDownloader) (err error) {
@@ -105,7 +106,7 @@ func decompressData(dataFile string) (err error) {
 			break // 退出循环
 		}
 		if err != nil {
-			panic(err)
+			return
 		}
 
 		// Ensure the file path does not contain directory traversal sequences

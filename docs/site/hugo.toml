@@ -3,7 +3,7 @@ title = "API Testing"
 
 # Language settings
 contentDir = "content"
-defaultContentLanguage = "zh"
+defaultContentLanguage = "zh-cn"
 defaultContentLanguageInSubdir = false
 # Useful when translating.
 enableMissingTranslationPlaceholders = true
@@ -59,12 +59,12 @@ id = "UA-00000000-0"
 
 [languages]
 
-  [languages.zh]
+  [languages.zh-cn]
     contentDir = "content/zh"
     languageName = "中文"
     # Weight used for sorting.
     weight = 2
-  [languages.zh.params]
+  [languages.zh-cn.params]
     title = "API Testing"
     description = "开源的接口调试 & 测试工具"
 
@@ -217,22 +217,22 @@ enable = true
     desc = "Chat with other project developers"
 
   # i18n for Chinese
-  [[languages.zh.params.links.user]]
+  [[languages.zh-cn.params.links.user]]
     name = "邮件列表"
     url = "https://groups.google.com/g/api-testing-tech"
     icon = "fa fa-envelope"
     desc = "来自其他用户的讨论和帮助"
-  [[languages.zh.params.links.user]]
+  [[languages.zh-cn.params.links.user]]
     name ="推特"
     url = "https://twitter.com/apitesting"
     icon = "fab fa-twitter"
     desc = "在 Twitter 上关注我们以获取最新消息！"
-  [[languages.zh.params.links.developer]]
+  [[languages.zh-cn.params.links.developer]]
     name = "GitHub"
     url = "https://github.com/LinuxSuRen/api-testing"
     icon = "fab fa-github"
     desc = "在这里进行开发！"
-  [[languages.zh.params.links.developer]]
+  [[languages.zh-cn.params.links.developer]]
     name = "Slack"
     url = "https://apitesting.slack.com/archives/C03E6NHLESV"
     icon = "fab fa-slack"
@@ -257,23 +257,23 @@ enable = true
     url = "/latest"
 
   # i18n for Chinese
-  [[languages.zh.menu.main]]
+  [[languages.zh-cn.menu.main]]
     name = "版本发布"
     weight = -80
     url = "/releases"
-  [[languages.zh.menu.main]]
+  [[languages.zh-cn.menu.main]]
     name = "贡献"
     weight = -98
     url = "/contributions"
-  [[languages.zh.menu.main]]
+  [[languages.zh-cn.menu.main]]
     name = "关于"
     weight = -100
     url = "/about"
-  [[languages.zh.menu.main]]
+  [[languages.zh-cn.menu.main]]
     name = "新闻"
     weight = -101
     url = "/news"
-  [[languages.zh.menu.main]]
+  [[languages.zh-cn.menu.main]]
     name = "文档"
     weight = -102
     url = "/latest"
@@ -286,4 +286,3 @@ enable = true
 # [[params.versions]]
 #  version = "v0.0.1"
 #  url = "/v0.0.1"
-  

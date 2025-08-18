@@ -29,89 +29,89 @@ log.initialize();
 
 log.transports.file.level = getLogLevel()
 log.transports.file.resolvePathFn = () => server.getLogfile()
-if (process.platform === 'darwin'){
-	app.dock.setIcon(path.join(__dirname, "api-testing.png"))
+if (process.platform === 'darwin') {
+    app.dock.setIcon(path.join(__dirname, "assets/icons/atest.png"))
 }
 
 const windowOptions = {
-  width: 1024,
-  height: 600,
-  frame: true,
-  webPreferences: {
-    preload: path.join(__dirname, 'preload.js'),
-    nodeIntegration: true,
-    contextIsolation: true,
-    enableRemoteModule: true
-  },
-  icon: path.join(__dirname, '/api-testing.ico'),
+    width: 1024,
+    height: 600,
+    frame: true,
+    webPreferences: {
+        preload: path.join(__dirname, 'preload.js'),
+        nodeIntegration: true,
+        contextIsolation: true,
+        enableRemoteModule: true
+    },
+    icon: path.join(__dirname, '/api-testing.ico'),
 }
 
 const createWindow = () => {
-  var width = storage.getSync('window.width')
-  if (!isNaN(width)) {
-    windowOptions.width = width
-  }
-  var height = storage.getSync('window.height')
-  if (!isNaN(height)) {
-    windowOptions.height = height
-  }
+    var width = storage.getSync('window.width')
+    if (!isNaN(width)) {
+        windowOptions.width = width
+    }
+    var height = storage.getSync('window.height')
+    if (!isNaN(height)) {
+        windowOptions.height = height
+    }
 
-  // Create the browser window.
-  const mainWindow = new BrowserWindow(windowOptions)
+    // Create the browser window.
+    const mainWindow = new BrowserWindow(windowOptions)
 
-  if (!isNaN(serverProcess.pid)) {
-    // server process started by app
-    mainWindow.loadURL(server.getHomePage())
-  } else {
-    server.control(() => {
-      mainWindow.loadURL(server.getHomePage())
-    }, () => {
-      // and load the index.html of the app.
-      mainWindow.loadFile('index.html')
+    if (!isNaN(serverProcess.pid)) {
+        // server process started by app
+        mainWindow.loadURL(server.getHomePage())
+    } else {
+        server.control(() => {
+            mainWindow.loadURL(server.getHomePage())
+        }, () => {
+            // and load the index.html of the app.
+            mainWindow.loadFile('index.html')
+        })
+    }
+
+    mainWindow.on('resize', () => {
+        const size = mainWindow.getSize();
+        storage.set('window.width', size[0])
+        storage.set('window.height', size[1])
     })
-  }
-
-  mainWindow.on('resize', () => {
-    const size = mainWindow.getSize();
-    storage.set('window.width', size[0])
-    storage.set('window.height', size[1])
-  })
 }
 
 const menu = new Menu()
 menu.append(new MenuItem({
-  label: 'Window',
-  submenu: [{
-    label: 'Console',
-    accelerator: process.platform === 'darwin' ? 'Alt+Cmd+C' : 'Alt+Shift+C',
-    click: () => {
-      BrowserWindow.getFocusedWindow().loadFile('index.html');
-    }
-  }, {
-    label: 'Server',
-    accelerator: process.platform === 'darwin' ? 'Alt+Cmd+S' : 'Alt+Shift+S',
-    click: () => {
-      BrowserWindow.getFocusedWindow().loadURL(server.getHomePage());
-    }
-  }, {
-    label: 'Reload',
-    accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'F5',
-    click: () => {
-      BrowserWindow.getFocusedWindow().reload()
-    }
-  }, {
-    label: 'Developer Mode',
-    accelerator: process.platform === 'darwin' ? 'Alt+Cmd+D' : 'F12',
-    click: () => {
-      BrowserWindow.getFocusedWindow().webContents.openDevTools();
-    }
-  }, {
-    label: 'Quit',
-    accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Alt+Shift+Q',
-    click: () => {
-      app.quit()
-    }
-  }]
+    label: 'Window',
+    submenu: [{
+        label: 'Console',
+        accelerator: process.platform === 'darwin' ? 'Alt+Cmd+C' : 'Alt+Shift+C',
+        click: () => {
+            BrowserWindow.getFocusedWindow().loadFile('index.html');
+        }
+    }, {
+        label: 'Server',
+        accelerator: process.platform === 'darwin' ? 'Alt+Cmd+S' : 'Alt+Shift+S',
+        click: () => {
+            BrowserWindow.getFocusedWindow().loadURL(server.getHomePage());
+        }
+    }, {
+        label: 'Reload',
+        accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'F5',
+        click: () => {
+            BrowserWindow.getFocusedWindow().reload()
+        }
+    }, {
+        label: 'Developer Mode',
+        accelerator: process.platform === 'darwin' ? 'Alt+Cmd+D' : 'F12',
+        click: () => {
+            BrowserWindow.getFocusedWindow().webContents.openDevTools();
+        }
+    }, {
+        label: 'Quit',
+        accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Alt+Shift+Q',
+        click: () => {
+            app.quit()
+        }
+    }]
 }))
 
 Menu.setApplicationMenu(menu)
@@ -120,129 +120,157 @@ let serverProcess;
 let serverPort = 7788;
 let extensionRegistry = "ghcr.io";
 let downloadTimeout = "1m";
+let mainProcessLocation = "built-in";
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  ipcMain.on('openLogDir', () => {
-    shell.openExternal('file://' + server.getLogfile())
-  })
-  ipcMain.handle('openWithExternalBrowser', (e, address) => {
-    shell.openExternal(address)
-  })
-  ipcMain.on('startServer', startServer)
-  ipcMain.on('stopServer', stopServer)
-  ipcMain.on('control', (e, okCallback, errCallback) => {
-    server.control(okCallback, errCallback)
-  })
-  ipcMain.handle('getPort', () => {
-    return serverPort
-  })
-  ipcMain.handle('setPort', (e, port) => {
-    serverPort = port;
-  })
-  ipcMain.handle('getExtensionRegistry', () => {
-    return extensionRegistry
-  })
-  ipcMain.handle('setExtensionRegistry', (e, registry) => {
-    extensionRegistry = registry
-  })
-  ipcMain.handle('getDownloadTimeout', () => {
-    return downloadTimeout
-  })
-  ipcMain.handle('setDownloadTimeout', (e, timeout) => {
-    downloadTimeout = timeout
-  })
-  ipcMain.handle('getHomePage', server.getHomePage)
-  ipcMain.handle('getHealthzUrl', server.getHealthzUrl)
+    ipcMain.on('openLogDir', () => {
+        shell.openExternal('file://' + server.getLogfile())
+    })
+    ipcMain.handle('openWithExternalBrowser', (e, address) => {
+        shell.openExternal(address)
+    })
+    ipcMain.on('startServer', startServer)
+    ipcMain.on('stopServer', stopServer)
+    ipcMain.on('control', (e, okCallback, errCallback) => {
+        server.control(okCallback, errCallback)
+    })
+    ipcMain.handle('getPort', () => {
+        return serverPort
+    })
+    ipcMain.handle('setPort', (e, port) => {
+        serverPort = port;
+    })
+    ipcMain.handle('getExtensionRegistry', () => {
+        return extensionRegistry
+    })
+    ipcMain.handle('setExtensionRegistry', (e, registry) => {
+        extensionRegistry = registry
+    })
+    ipcMain.handle('getDownloadTimeout', () => {
+        return downloadTimeout
+    })
+    ipcMain.handle('setDownloadTimeout', (e, timeout) => {
+        downloadTimeout = timeout
+    })
+    ipcMain.handle('getHomePage', server.getHomePage)
+    ipcMain.handle('getHealthzUrl', server.getHealthzUrl)
+    ipcMain.handle('getMainProcessLocation', () => {
+        return mainProcessLocation
+    })
+    ipcMain.handle('setMainProcessLocation', (e, location) => {
+        mainProcessLocation = location
+    })
 
-  startServer()
-  createWindow()
+    startServer()
+    createWindow()
 
-  app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
+    app.on('activate', () => {
+        // On macOS it's common to re-create a window in the app when the
+        // dock icon is clicked and there are no other windows open.
+        if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    })
 })
 
 const startServer = () => {
-  const homeData = path.join(atestHome, 'data')
-  const homeBin = path.join(atestHome, 'bin')
+    const homeData = path.join(atestHome, 'data')
+    fs.mkdirSync(homeData, {
+        recursive: true
+    })
 
-  fs.mkdirSync(homeData, {
-    recursive: true
-  })
-  fs.mkdirSync(homeBin, {
-    recursive: true
-  })
-
-  // try to find the atest file first
-  const serverFile = process.platform === "win32" ? "atest.exe" : "atest"
-  const atestFromHome = path.join(homeBin, serverFile)
-  const atestFromPkg = path.join(__dirname, serverFile)
-
-  const data = fs.readFileSync(atestFromPkg)
-  log.info('start to write file with length', data.length)
-  
-  try {
-    if (process.platform === "win32") {
-      const file = fs.openSync(atestFromHome, 'w');
-      fs.writeSync(file, data, 0, data.length, 0);
-      fs.closeSync(file);
-    }else{
-      fs.writeFileSync(atestFromHome, data);
+    let atestBinPath
+    switch (mainProcessLocation) {
+        case "built-in":
+            atestBinPath = locateBinPath()
+            break;
+        case "system-path":
+            const which = require('which');
+            atestBinPath = process.platform === "win32" ? which.sync('atest.exe') : which.sync('atest')
+            break;
+        case "home-path":
+            atestBinPath = locateBinPath(false)
+            break;
     }
-  } catch (e) { 
-    log.error('Error Code:', e.code); 
-  }
-  fs.chmodSync(atestFromHome, 0o755); 
 
-  serverProcess = spawn(atestFromHome, [
-    "server",
-    `--http-port=${serverPort}`,
-    "--port=0",
-    `--download-timeout=${downloadTimeout}`,
-    `--extension-registry=${extensionRegistry}`,
-    "--local-storage", path.join(homeData, "*.yaml")
-  ])
-  serverProcess.stdout.on('data', (data) => {
-    log.info(data.toString())
-    if (data.toString().indexOf('Server is running') != -1) {
-      BrowserWindow.getFocusedWindow().loadURL(server.getHomePage())
+    serverProcess = spawn(atestBinPath, [
+        "server",
+        `--http-port=${serverPort}`,
+        "--port=0",
+        `--download-timeout=${downloadTimeout}`,
+        `--extension-registry=${extensionRegistry}`,
+        "--local-storage", path.join(homeData, "*.yaml")
+    ])
+    serverProcess.stdout.on('data', (data) => {
+        log.info(data.toString())
+        if (data.toString().indexOf('Server is running') != -1) {
+            BrowserWindow.getFocusedWindow().loadURL(server.getHomePage())
+        }
+    })
+    serverProcess.stderr.on('data', (data) => {
+        log.error(data.toString())
+    })
+    serverProcess.on('close', (code) => {
+        log.log(`child process exited with code ${code}`);
+    })
+    log.info('start atest server as pid:', serverProcess.pid)
+    log.info(serverProcess.spawnargs)
+}
+
+const locateBinPath = (overwrite = true) => {
+    const homeBin = path.join(atestHome, 'bin')
+
+    fs.mkdirSync(homeBin, {
+        recursive: true
+    })
+
+    // try to find the atest file first
+    const serverFile = process.platform === "win32" ? "atest.exe" : "atest"
+    const atestFromHome = path.join(homeBin, serverFile)
+    if (!overwrite) {
+        return atestFromHome
     }
-  })
-  serverProcess.stderr.on('data', (data) => {
-    log.error(data.toString())
-  })
-  serverProcess.on('close', (code) => {
-    log.log(`child process exited with code ${code}`);
-  })
-  log.info('start atest server as pid:', serverProcess.pid)
-  log.info(serverProcess.spawnargs)
+
+    const atestFromPkg = path.join(__dirname, serverFile)
+    const data = fs.readFileSync(atestFromPkg)
+    log.info('start to write file with length', data.length)
+
+    try {
+        if (process.platform === "win32") {
+            const file = fs.openSync(atestFromHome, 'w');
+            fs.writeSync(file, data, 0, data.length, 0);
+            fs.closeSync(file);
+        } else {
+            fs.writeFileSync(atestFromHome, data);
+        }
+    } catch (e) {
+        log.error('Error Code:', e.code);
+    }
+    fs.chmodSync(atestFromHome, 0o755);
+    return atestFromHome
 }
 
 const stopServer = () => {
-  if (serverProcess) {
-    serverProcess.kill()
-  }
+    if (serverProcess) {
+        serverProcess.kill()
+    }
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+    if (process.platform !== 'darwin') {
+        app.quit()
 
-    stopServer()
-  }
+        stopServer()
+    }
 })
 app.on('before-quit', stopServer)
 
 function getLogLevel() {
-  return 'info'
+    return 'info'
 }
 
 // In this file you can include the rest of your app's specific main process

@@ -83,6 +83,118 @@ func (ErrorCode) EnumDescriptor() ([]byte, []int) {
 	return file_pkg_server_server_proto_rawDescGZIP(), []int{0}
 }
 
+type Menu struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Index         string                 `protobuf:"bytes,2,opt,name=index,proto3" json:"index,omitempty"`
+	Icon          string                 `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon,omitempty"`
+	Version       int32                  `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Menu) Reset() {
+	*x = Menu{}
+	mi := &file_pkg_server_server_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Menu) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Menu) ProtoMessage() {}
+
+func (x *Menu) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_server_server_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Menu.ProtoReflect.Descriptor instead.
+func (*Menu) Descriptor() ([]byte, []int) {
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Menu) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Menu) GetIndex() string {
+	if x != nil {
+		return x.Index
+	}
+	return ""
+}
+
+func (x *Menu) GetIcon() string {
+	if x != nil {
+		return x.Icon
+	}
+	return ""
+}
+
+func (x *Menu) GetVersion() int32 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+type MenuList struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Data          []*Menu                `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MenuList) Reset() {
+	*x = MenuList{}
+	mi := &file_pkg_server_server_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MenuList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MenuList) ProtoMessage() {}
+
+func (x *MenuList) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_server_server_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MenuList.ProtoReflect.Descriptor instead.
+func (*MenuList) Descriptor() ([]byte, []int) {
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *MenuList) GetData() []*Menu {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
 type Suites struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Data          map[string]*Items      `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
@@ -92,7 +204,7 @@ type Suites struct {
 
 func (x *Suites) Reset() {
 	*x = Suites{}
-	mi := &file_pkg_server_server_proto_msgTypes[0]
+	mi := &file_pkg_server_server_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -104,7 +216,7 @@ func (x *Suites) String() string {
 func (*Suites) ProtoMessage() {}
 
 func (x *Suites) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[0]
+	mi := &file_pkg_server_server_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -117,7 +229,7 @@ func (x *Suites) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Suites.ProtoReflect.Descriptor instead.
 func (*Suites) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{0}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Suites) GetData() map[string]*Items {
@@ -137,7 +249,7 @@ type Items struct {
 
 func (x *Items) Reset() {
 	*x = Items{}
-	mi := &file_pkg_server_server_proto_msgTypes[1]
+	mi := &file_pkg_server_server_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -149,7 +261,7 @@ func (x *Items) String() string {
 func (*Items) ProtoMessage() {}
 
 func (x *Items) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[1]
+	mi := &file_pkg_server_server_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -162,7 +274,7 @@ func (x *Items) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Items.ProtoReflect.Descriptor instead.
 func (*Items) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{1}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Items) GetData() []string {
@@ -188,7 +300,7 @@ type HistorySuites struct {
 
 func (x *HistorySuites) Reset() {
 	*x = HistorySuites{}
-	mi := &file_pkg_server_server_proto_msgTypes[2]
+	mi := &file_pkg_server_server_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -200,7 +312,7 @@ func (x *HistorySuites) String() string {
 func (*HistorySuites) ProtoMessage() {}
 
 func (x *HistorySuites) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[2]
+	mi := &file_pkg_server_server_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -213,7 +325,7 @@ func (x *HistorySuites) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HistorySuites.ProtoReflect.Descriptor instead.
 func (*HistorySuites) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{2}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *HistorySuites) GetData() map[string]*HistoryItems {
@@ -232,7 +344,7 @@ type HistoryItems struct {
 
 func (x *HistoryItems) Reset() {
 	*x = HistoryItems{}
-	mi := &file_pkg_server_server_proto_msgTypes[3]
+	mi := &file_pkg_server_server_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -244,7 +356,7 @@ func (x *HistoryItems) String() string {
 func (*HistoryItems) ProtoMessage() {}
 
 func (x *HistoryItems) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[3]
+	mi := &file_pkg_server_server_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -257,7 +369,7 @@ func (x *HistoryItems) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HistoryItems.ProtoReflect.Descriptor instead.
 func (*HistoryItems) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{3}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *HistoryItems) GetData() []*HistoryCaseIdentity {
@@ -280,7 +392,7 @@ type HistoryCaseIdentity struct {
 
 func (x *HistoryCaseIdentity) Reset() {
 	*x = HistoryCaseIdentity{}
-	mi := &file_pkg_server_server_proto_msgTypes[4]
+	mi := &file_pkg_server_server_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -292,7 +404,7 @@ func (x *HistoryCaseIdentity) String() string {
 func (*HistoryCaseIdentity) ProtoMessage() {}
 
 func (x *HistoryCaseIdentity) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[4]
+	mi := &file_pkg_server_server_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -305,7 +417,7 @@ func (x *HistoryCaseIdentity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HistoryCaseIdentity.ProtoReflect.Descriptor instead.
 func (*HistoryCaseIdentity) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{4}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *HistoryCaseIdentity) GetSuite() string {
@@ -354,7 +466,7 @@ type TestCaseIdentity struct {
 
 func (x *TestCaseIdentity) Reset() {
 	*x = TestCaseIdentity{}
-	mi := &file_pkg_server_server_proto_msgTypes[5]
+	mi := &file_pkg_server_server_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -366,7 +478,7 @@ func (x *TestCaseIdentity) String() string {
 func (*TestCaseIdentity) ProtoMessage() {}
 
 func (x *TestCaseIdentity) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[5]
+	mi := &file_pkg_server_server_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -379,7 +491,7 @@ func (x *TestCaseIdentity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCaseIdentity.ProtoReflect.Descriptor instead.
 func (*TestCaseIdentity) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{5}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *TestCaseIdentity) GetSuite() string {
@@ -414,7 +526,7 @@ type TestSuiteSource struct {
 
 func (x *TestSuiteSource) Reset() {
 	*x = TestSuiteSource{}
-	mi := &file_pkg_server_server_proto_msgTypes[6]
+	mi := &file_pkg_server_server_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -426,7 +538,7 @@ func (x *TestSuiteSource) String() string {
 func (*TestSuiteSource) ProtoMessage() {}
 
 func (x *TestSuiteSource) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[6]
+	mi := &file_pkg_server_server_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -439,7 +551,7 @@ func (x *TestSuiteSource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestSuiteSource.ProtoReflect.Descriptor instead.
 func (*TestSuiteSource) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{6}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *TestSuiteSource) GetKind() string {
@@ -476,7 +588,7 @@ type TestSuite struct {
 
 func (x *TestSuite) Reset() {
 	*x = TestSuite{}
-	mi := &file_pkg_server_server_proto_msgTypes[7]
+	mi := &file_pkg_server_server_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -488,7 +600,7 @@ func (x *TestSuite) String() string {
 func (*TestSuite) ProtoMessage() {}
 
 func (x *TestSuite) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[7]
+	mi := &file_pkg_server_server_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -501,7 +613,7 @@ func (x *TestSuite) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestSuite.ProtoReflect.Descriptor instead.
 func (*TestSuite) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{7}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *TestSuite) GetName() string {
@@ -549,7 +661,7 @@ type TestSuiteWithCase struct {
 
 func (x *TestSuiteWithCase) Reset() {
 	*x = TestSuiteWithCase{}
-	mi := &file_pkg_server_server_proto_msgTypes[8]
+	mi := &file_pkg_server_server_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -561,7 +673,7 @@ func (x *TestSuiteWithCase) String() string {
 func (*TestSuiteWithCase) ProtoMessage() {}
 
 func (x *TestSuiteWithCase) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[8]
+	mi := &file_pkg_server_server_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -574,7 +686,7 @@ func (x *TestSuiteWithCase) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestSuiteWithCase.ProtoReflect.Descriptor instead.
 func (*TestSuiteWithCase) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{8}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *TestSuiteWithCase) GetSuite() *TestSuite {
@@ -603,7 +715,7 @@ type APISpec struct {
 
 func (x *APISpec) Reset() {
 	*x = APISpec{}
-	mi := &file_pkg_server_server_proto_msgTypes[9]
+	mi := &file_pkg_server_server_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -615,7 +727,7 @@ func (x *APISpec) String() string {
 func (*APISpec) ProtoMessage() {}
 
 func (x *APISpec) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[9]
+	mi := &file_pkg_server_server_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -628,7 +740,7 @@ func (x *APISpec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use APISpec.ProtoReflect.Descriptor instead.
 func (*APISpec) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{9}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *APISpec) GetKind() string {
@@ -672,7 +784,7 @@ type Secure struct {
 
 func (x *Secure) Reset() {
 	*x = Secure{}
-	mi := &file_pkg_server_server_proto_msgTypes[10]
+	mi := &file_pkg_server_server_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -684,7 +796,7 @@ func (x *Secure) String() string {
 func (*Secure) ProtoMessage() {}
 
 func (x *Secure) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[10]
+	mi := &file_pkg_server_server_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -697,7 +809,7 @@ func (x *Secure) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Secure.ProtoReflect.Descriptor instead.
 func (*Secure) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{10}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *Secure) GetInsecure() bool {
@@ -748,7 +860,7 @@ type RPC struct {
 
 func (x *RPC) Reset() {
 	*x = RPC{}
-	mi := &file_pkg_server_server_proto_msgTypes[11]
+	mi := &file_pkg_server_server_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -760,7 +872,7 @@ func (x *RPC) String() string {
 func (*RPC) ProtoMessage() {}
 
 func (x *RPC) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[11]
+	mi := &file_pkg_server_server_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -773,7 +885,7 @@ func (x *RPC) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RPC.ProtoReflect.Descriptor instead.
 func (*RPC) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{11}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *RPC) GetImport() []string {
@@ -822,7 +934,7 @@ type TestSuiteIdentity struct {
 
 func (x *TestSuiteIdentity) Reset() {
 	*x = TestSuiteIdentity{}
-	mi := &file_pkg_server_server_proto_msgTypes[12]
+	mi := &file_pkg_server_server_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -834,7 +946,7 @@ func (x *TestSuiteIdentity) String() string {
 func (*TestSuiteIdentity) ProtoMessage() {}
 
 func (x *TestSuiteIdentity) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[12]
+	mi := &file_pkg_server_server_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -847,7 +959,7 @@ func (x *TestSuiteIdentity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestSuiteIdentity.ProtoReflect.Descriptor instead.
 func (*TestSuiteIdentity) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{12}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *TestSuiteIdentity) GetName() string {
@@ -881,7 +993,7 @@ type TestSuiteDuplicate struct {
 
 func (x *TestSuiteDuplicate) Reset() {
 	*x = TestSuiteDuplicate{}
-	mi := &file_pkg_server_server_proto_msgTypes[13]
+	mi := &file_pkg_server_server_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -893,7 +1005,7 @@ func (x *TestSuiteDuplicate) String() string {
 func (*TestSuiteDuplicate) ProtoMessage() {}
 
 func (x *TestSuiteDuplicate) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[13]
+	mi := &file_pkg_server_server_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -906,7 +1018,7 @@ func (x *TestSuiteDuplicate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestSuiteDuplicate.ProtoReflect.Descriptor instead.
 func (*TestSuiteDuplicate) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{13}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *TestSuiteDuplicate) GetSourceSuiteName() string {
@@ -935,7 +1047,7 @@ type TestCaseDuplicate struct {
 
 func (x *TestCaseDuplicate) Reset() {
 	*x = TestCaseDuplicate{}
-	mi := &file_pkg_server_server_proto_msgTypes[14]
+	mi := &file_pkg_server_server_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -947,7 +1059,7 @@ func (x *TestCaseDuplicate) String() string {
 func (*TestCaseDuplicate) ProtoMessage() {}
 
 func (x *TestCaseDuplicate) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[14]
+	mi := &file_pkg_server_server_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -960,7 +1072,7 @@ func (x *TestCaseDuplicate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCaseDuplicate.ProtoReflect.Descriptor instead.
 func (*TestCaseDuplicate) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{14}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *TestCaseDuplicate) GetSourceSuiteName() string {
@@ -1005,7 +1117,7 @@ type TestTask struct {
 
 func (x *TestTask) Reset() {
 	*x = TestTask{}
-	mi := &file_pkg_server_server_proto_msgTypes[15]
+	mi := &file_pkg_server_server_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1017,7 +1129,7 @@ func (x *TestTask) String() string {
 func (*TestTask) ProtoMessage() {}
 
 func (x *TestTask) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[15]
+	mi := &file_pkg_server_server_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1030,7 +1142,7 @@ func (x *TestTask) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestTask.ProtoReflect.Descriptor instead.
 func (*TestTask) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{15}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *TestTask) GetData() string {
@@ -1088,7 +1200,7 @@ type BatchTestTask struct {
 
 func (x *BatchTestTask) Reset() {
 	*x = BatchTestTask{}
-	mi := &file_pkg_server_server_proto_msgTypes[16]
+	mi := &file_pkg_server_server_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1100,7 +1212,7 @@ func (x *BatchTestTask) String() string {
 func (*BatchTestTask) ProtoMessage() {}
 
 func (x *BatchTestTask) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[16]
+	mi := &file_pkg_server_server_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1113,7 +1225,7 @@ func (x *BatchTestTask) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchTestTask.ProtoReflect.Descriptor instead.
 func (*BatchTestTask) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{16}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *BatchTestTask) GetSuiteName() string {
@@ -1162,7 +1274,7 @@ type TestResult struct {
 
 func (x *TestResult) Reset() {
 	*x = TestResult{}
-	mi := &file_pkg_server_server_proto_msgTypes[17]
+	mi := &file_pkg_server_server_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1174,7 +1286,7 @@ func (x *TestResult) String() string {
 func (*TestResult) ProtoMessage() {}
 
 func (x *TestResult) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[17]
+	mi := &file_pkg_server_server_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1187,7 +1299,7 @@ func (x *TestResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestResult.ProtoReflect.Descriptor instead.
 func (*TestResult) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{17}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *TestResult) GetMessage() string {
@@ -1224,7 +1336,7 @@ type HistoryTestResult struct {
 
 func (x *HistoryTestResult) Reset() {
 	*x = HistoryTestResult{}
-	mi := &file_pkg_server_server_proto_msgTypes[18]
+	mi := &file_pkg_server_server_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1236,7 +1348,7 @@ func (x *HistoryTestResult) String() string {
 func (*HistoryTestResult) ProtoMessage() {}
 
 func (x *HistoryTestResult) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[18]
+	mi := &file_pkg_server_server_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1249,7 +1361,7 @@ func (x *HistoryTestResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HistoryTestResult.ProtoReflect.Descriptor instead.
 func (*HistoryTestResult) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{18}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *HistoryTestResult) GetMessage() string {
@@ -1297,7 +1409,7 @@ type HelloReply struct {
 
 func (x *HelloReply) Reset() {
 	*x = HelloReply{}
-	mi := &file_pkg_server_server_proto_msgTypes[19]
+	mi := &file_pkg_server_server_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1309,7 +1421,7 @@ func (x *HelloReply) String() string {
 func (*HelloReply) ProtoMessage() {}
 
 func (x *HelloReply) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[19]
+	mi := &file_pkg_server_server_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1322,7 +1434,7 @@ func (x *HelloReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HelloReply.ProtoReflect.Descriptor instead.
 func (*HelloReply) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{19}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *HelloReply) GetMessage() string {
@@ -1348,7 +1460,7 @@ type YamlData struct {
 
 func (x *YamlData) Reset() {
 	*x = YamlData{}
-	mi := &file_pkg_server_server_proto_msgTypes[20]
+	mi := &file_pkg_server_server_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1360,7 +1472,7 @@ func (x *YamlData) String() string {
 func (*YamlData) ProtoMessage() {}
 
 func (x *YamlData) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[20]
+	mi := &file_pkg_server_server_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1373,7 +1485,7 @@ func (x *YamlData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use YamlData.ProtoReflect.Descriptor instead.
 func (*YamlData) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{20}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *YamlData) GetData() []byte {
@@ -1394,7 +1506,7 @@ type Suite struct {
 
 func (x *Suite) Reset() {
 	*x = Suite{}
-	mi := &file_pkg_server_server_proto_msgTypes[21]
+	mi := &file_pkg_server_server_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1406,7 +1518,7 @@ func (x *Suite) String() string {
 func (*Suite) ProtoMessage() {}
 
 func (x *Suite) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[21]
+	mi := &file_pkg_server_server_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1419,7 +1531,7 @@ func (x *Suite) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Suite.ProtoReflect.Descriptor instead.
 func (*Suite) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{21}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *Suite) GetName() string {
@@ -1453,7 +1565,7 @@ type TestCaseWithSuite struct {
 
 func (x *TestCaseWithSuite) Reset() {
 	*x = TestCaseWithSuite{}
-	mi := &file_pkg_server_server_proto_msgTypes[22]
+	mi := &file_pkg_server_server_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1465,7 +1577,7 @@ func (x *TestCaseWithSuite) String() string {
 func (*TestCaseWithSuite) ProtoMessage() {}
 
 func (x *TestCaseWithSuite) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[22]
+	mi := &file_pkg_server_server_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1478,7 +1590,7 @@ func (x *TestCaseWithSuite) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCaseWithSuite.ProtoReflect.Descriptor instead.
 func (*TestCaseWithSuite) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{22}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *TestCaseWithSuite) GetSuiteName() string {
@@ -1504,7 +1616,7 @@ type TestCases struct {
 
 func (x *TestCases) Reset() {
 	*x = TestCases{}
-	mi := &file_pkg_server_server_proto_msgTypes[23]
+	mi := &file_pkg_server_server_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1516,7 +1628,7 @@ func (x *TestCases) String() string {
 func (*TestCases) ProtoMessage() {}
 
 func (x *TestCases) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[23]
+	mi := &file_pkg_server_server_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1529,7 +1641,7 @@ func (x *TestCases) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCases.ProtoReflect.Descriptor instead.
 func (*TestCases) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{23}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *TestCases) GetData() []*TestCase {
@@ -1552,7 +1664,7 @@ type TestCase struct {
 
 func (x *TestCase) Reset() {
 	*x = TestCase{}
-	mi := &file_pkg_server_server_proto_msgTypes[24]
+	mi := &file_pkg_server_server_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1564,7 +1676,7 @@ func (x *TestCase) String() string {
 func (*TestCase) ProtoMessage() {}
 
 func (x *TestCase) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[24]
+	mi := &file_pkg_server_server_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1577,7 +1689,7 @@ func (x *TestCase) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCase.ProtoReflect.Descriptor instead.
 func (*TestCase) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{24}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *TestCase) GetName() string {
@@ -1634,7 +1746,7 @@ type HistoryTestCase struct {
 
 func (x *HistoryTestCase) Reset() {
 	*x = HistoryTestCase{}
-	mi := &file_pkg_server_server_proto_msgTypes[25]
+	mi := &file_pkg_server_server_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1646,7 +1758,7 @@ func (x *HistoryTestCase) String() string {
 func (*HistoryTestCase) ProtoMessage() {}
 
 func (x *HistoryTestCase) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[25]
+	mi := &file_pkg_server_server_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1659,7 +1771,7 @@ func (x *HistoryTestCase) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HistoryTestCase.ProtoReflect.Descriptor instead.
 func (*HistoryTestCase) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{25}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *HistoryTestCase) GetCaseName() string {
@@ -1748,7 +1860,7 @@ type HistoryTestCases struct {
 
 func (x *HistoryTestCases) Reset() {
 	*x = HistoryTestCases{}
-	mi := &file_pkg_server_server_proto_msgTypes[26]
+	mi := &file_pkg_server_server_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1760,7 +1872,7 @@ func (x *HistoryTestCases) String() string {
 func (*HistoryTestCases) ProtoMessage() {}
 
 func (x *HistoryTestCases) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[26]
+	mi := &file_pkg_server_server_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1773,7 +1885,7 @@ func (x *HistoryTestCases) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HistoryTestCases.ProtoReflect.Descriptor instead.
 func (*HistoryTestCases) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{26}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *HistoryTestCases) GetData() []*HistoryTestCase {
@@ -1798,7 +1910,7 @@ type Request struct {
 
 func (x *Request) Reset() {
 	*x = Request{}
-	mi := &file_pkg_server_server_proto_msgTypes[27]
+	mi := &file_pkg_server_server_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1810,7 +1922,7 @@ func (x *Request) String() string {
 func (*Request) ProtoMessage() {}
 
 func (x *Request) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[27]
+	mi := &file_pkg_server_server_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1823,7 +1935,7 @@ func (x *Request) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Request.ProtoReflect.Descriptor instead.
 func (*Request) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{27}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *Request) GetApi() string {
@@ -1890,7 +2002,7 @@ type Response struct {
 
 func (x *Response) Reset() {
 	*x = Response{}
-	mi := &file_pkg_server_server_proto_msgTypes[28]
+	mi := &file_pkg_server_server_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1902,7 +2014,7 @@ func (x *Response) String() string {
 func (*Response) ProtoMessage() {}
 
 func (x *Response) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[28]
+	mi := &file_pkg_server_server_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1915,7 +2027,7 @@ func (x *Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Response.ProtoReflect.Descriptor instead.
 func (*Response) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{28}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *Response) GetStatusCode() int32 {
@@ -1977,7 +2089,7 @@ type ConditionalVerify struct {
 
 func (x *ConditionalVerify) Reset() {
 	*x = ConditionalVerify{}
-	mi := &file_pkg_server_server_proto_msgTypes[29]
+	mi := &file_pkg_server_server_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1989,7 +2101,7 @@ func (x *ConditionalVerify) String() string {
 func (*ConditionalVerify) ProtoMessage() {}
 
 func (x *ConditionalVerify) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[29]
+	mi := &file_pkg_server_server_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2002,7 +2114,7 @@ func (x *ConditionalVerify) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConditionalVerify.ProtoReflect.Descriptor instead.
 func (*ConditionalVerify) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{29}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ConditionalVerify) GetCondition() []string {
@@ -2033,7 +2145,7 @@ type TestCaseResult struct {
 
 func (x *TestCaseResult) Reset() {
 	*x = TestCaseResult{}
-	mi := &file_pkg_server_server_proto_msgTypes[30]
+	mi := &file_pkg_server_server_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2045,7 +2157,7 @@ func (x *TestCaseResult) String() string {
 func (*TestCaseResult) ProtoMessage() {}
 
 func (x *TestCaseResult) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[30]
+	mi := &file_pkg_server_server_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2058,7 +2170,7 @@ func (x *TestCaseResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestCaseResult.ProtoReflect.Descriptor instead.
 func (*TestCaseResult) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{30}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *TestCaseResult) GetStatusCode() int32 {
@@ -2114,7 +2226,7 @@ type Pair struct {
 
 func (x *Pair) Reset() {
 	*x = Pair{}
-	mi := &file_pkg_server_server_proto_msgTypes[31]
+	mi := &file_pkg_server_server_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2126,7 +2238,7 @@ func (x *Pair) String() string {
 func (*Pair) ProtoMessage() {}
 
 func (x *Pair) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[31]
+	mi := &file_pkg_server_server_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2139,7 +2251,7 @@ func (x *Pair) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pair.ProtoReflect.Descriptor instead.
 func (*Pair) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{31}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *Pair) GetKey() string {
@@ -2172,7 +2284,7 @@ type Pairs struct {
 
 func (x *Pairs) Reset() {
 	*x = Pairs{}
-	mi := &file_pkg_server_server_proto_msgTypes[32]
+	mi := &file_pkg_server_server_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2184,7 +2296,7 @@ func (x *Pairs) String() string {
 func (*Pairs) ProtoMessage() {}
 
 func (x *Pairs) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[32]
+	mi := &file_pkg_server_server_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2197,7 +2309,7 @@ func (x *Pairs) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pairs.ProtoReflect.Descriptor instead.
 func (*Pairs) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{32}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *Pairs) GetData() []*Pair {
@@ -2217,7 +2329,7 @@ type SimpleQuery struct {
 
 func (x *SimpleQuery) Reset() {
 	*x = SimpleQuery{}
-	mi := &file_pkg_server_server_proto_msgTypes[33]
+	mi := &file_pkg_server_server_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2229,7 +2341,7 @@ func (x *SimpleQuery) String() string {
 func (*SimpleQuery) ProtoMessage() {}
 
 func (x *SimpleQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[33]
+	mi := &file_pkg_server_server_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2242,7 +2354,7 @@ func (x *SimpleQuery) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SimpleQuery.ProtoReflect.Descriptor instead.
 func (*SimpleQuery) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{33}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *SimpleQuery) GetName() string {
@@ -2268,7 +2380,7 @@ type Stores struct {
 
 func (x *Stores) Reset() {
 	*x = Stores{}
-	mi := &file_pkg_server_server_proto_msgTypes[34]
+	mi := &file_pkg_server_server_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2280,7 +2392,7 @@ func (x *Stores) String() string {
 func (*Stores) ProtoMessage() {}
 
 func (x *Stores) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[34]
+	mi := &file_pkg_server_server_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2293,7 +2405,7 @@ func (x *Stores) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Stores.ProtoReflect.Descriptor instead.
 func (*Stores) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{34}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *Stores) GetData() []*Store {
@@ -2322,7 +2434,7 @@ type Store struct {
 
 func (x *Store) Reset() {
 	*x = Store{}
-	mi := &file_pkg_server_server_proto_msgTypes[35]
+	mi := &file_pkg_server_server_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2334,7 +2446,7 @@ func (x *Store) String() string {
 func (*Store) ProtoMessage() {}
 
 func (x *Store) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[35]
+	mi := &file_pkg_server_server_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2347,7 +2459,7 @@ func (x *Store) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Store.ProtoReflect.Descriptor instead.
 func (*Store) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{35}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *Store) GetName() string {
@@ -2436,7 +2548,7 @@ type StoreKinds struct {
 
 func (x *StoreKinds) Reset() {
 	*x = StoreKinds{}
-	mi := &file_pkg_server_server_proto_msgTypes[36]
+	mi := &file_pkg_server_server_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2448,7 +2560,7 @@ func (x *StoreKinds) String() string {
 func (*StoreKinds) ProtoMessage() {}
 
 func (x *StoreKinds) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[36]
+	mi := &file_pkg_server_server_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2461,7 +2573,7 @@ func (x *StoreKinds) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreKinds.ProtoReflect.Descriptor instead.
 func (*StoreKinds) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{36}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *StoreKinds) GetData() []*StoreKind {
@@ -2476,13 +2588,17 @@ type StoreKind struct {
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Url           string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
 	Enabled       bool                   `protobuf:"varint,3,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Dependencies  []*StoreKindDependency `protobuf:"bytes,4,rep,name=dependencies,proto3" json:"dependencies,omitempty"`
+	Link          string                 `protobuf:"bytes,5,opt,name=link,proto3" json:"link,omitempty"`
+	Params        []*StoreKindParam      `protobuf:"bytes,6,rep,name=params,proto3" json:"params,omitempty"`
+	Categories    []string               `protobuf:"bytes,7,rep,name=categories,proto3" json:"categories,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StoreKind) Reset() {
 	*x = StoreKind{}
-	mi := &file_pkg_server_server_proto_msgTypes[37]
+	mi := &file_pkg_server_server_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2494,7 +2610,7 @@ func (x *StoreKind) String() string {
 func (*StoreKind) ProtoMessage() {}
 
 func (x *StoreKind) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[37]
+	mi := &file_pkg_server_server_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2507,7 +2623,7 @@ func (x *StoreKind) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreKind.ProtoReflect.Descriptor instead.
 func (*StoreKind) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{37}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *StoreKind) GetName() string {
@@ -2531,6 +2647,146 @@ func (x *StoreKind) GetEnabled() bool {
 	return false
 }
 
+func (x *StoreKind) GetDependencies() []*StoreKindDependency {
+	if x != nil {
+		return x.Dependencies
+	}
+	return nil
+}
+
+func (x *StoreKind) GetLink() string {
+	if x != nil {
+		return x.Link
+	}
+	return ""
+}
+
+func (x *StoreKind) GetParams() []*StoreKindParam {
+	if x != nil {
+		return x.Params
+	}
+	return nil
+}
+
+func (x *StoreKind) GetCategories() []string {
+	if x != nil {
+		return x.Categories
+	}
+	return nil
+}
+
+type StoreKindDependency struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StoreKindDependency) Reset() {
+	*x = StoreKindDependency{}
+	mi := &file_pkg_server_server_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StoreKindDependency) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StoreKindDependency) ProtoMessage() {}
+
+func (x *StoreKindDependency) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_server_server_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StoreKindDependency.ProtoReflect.Descriptor instead.
+func (*StoreKindDependency) Descriptor() ([]byte, []int) {
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *StoreKindDependency) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type StoreKindParam struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	DefaultValue  string                 `protobuf:"bytes,3,opt,name=defaultValue,proto3" json:"defaultValue,omitempty"`
+	Enum          []string               `protobuf:"bytes,4,rep,name=enum,proto3" json:"enum,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StoreKindParam) Reset() {
+	*x = StoreKindParam{}
+	mi := &file_pkg_server_server_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StoreKindParam) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StoreKindParam) ProtoMessage() {}
+
+func (x *StoreKindParam) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_server_server_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StoreKindParam.ProtoReflect.Descriptor instead.
+func (*StoreKindParam) Descriptor() ([]byte, []int) {
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *StoreKindParam) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *StoreKindParam) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *StoreKindParam) GetDefaultValue() string {
+	if x != nil {
+		return x.DefaultValue
+	}
+	return ""
+}
+
+func (x *StoreKindParam) GetEnum() []string {
+	if x != nil {
+		return x.Enum
+	}
+	return nil
+}
+
 type CommonResult struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
@@ -2541,7 +2797,7 @@ type CommonResult struct {
 
 func (x *CommonResult) Reset() {
 	*x = CommonResult{}
-	mi := &file_pkg_server_server_proto_msgTypes[38]
+	mi := &file_pkg_server_server_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2553,7 +2809,7 @@ func (x *CommonResult) String() string {
 func (*CommonResult) ProtoMessage() {}
 
 func (x *CommonResult) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[38]
+	mi := &file_pkg_server_server_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2566,7 +2822,7 @@ func (x *CommonResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommonResult.ProtoReflect.Descriptor instead.
 func (*CommonResult) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{38}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *CommonResult) GetSuccess() bool {
@@ -2592,7 +2848,7 @@ type SimpleList struct {
 
 func (x *SimpleList) Reset() {
 	*x = SimpleList{}
-	mi := &file_pkg_server_server_proto_msgTypes[39]
+	mi := &file_pkg_server_server_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2604,7 +2860,7 @@ func (x *SimpleList) String() string {
 func (*SimpleList) ProtoMessage() {}
 
 func (x *SimpleList) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[39]
+	mi := &file_pkg_server_server_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2617,7 +2873,7 @@ func (x *SimpleList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SimpleList.ProtoReflect.Descriptor instead.
 func (*SimpleList) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{39}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *SimpleList) GetData() []*Pair {
@@ -2636,7 +2892,7 @@ type SimpleName struct {
 
 func (x *SimpleName) Reset() {
 	*x = SimpleName{}
-	mi := &file_pkg_server_server_proto_msgTypes[40]
+	mi := &file_pkg_server_server_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2648,7 +2904,7 @@ func (x *SimpleName) String() string {
 func (*SimpleName) ProtoMessage() {}
 
 func (x *SimpleName) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[40]
+	mi := &file_pkg_server_server_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2661,7 +2917,7 @@ func (x *SimpleName) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SimpleName.ProtoReflect.Descriptor instead.
 func (*SimpleName) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{40}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *SimpleName) GetName() string {
@@ -2683,7 +2939,7 @@ type CodeGenerateRequest struct {
 
 func (x *CodeGenerateRequest) Reset() {
 	*x = CodeGenerateRequest{}
-	mi := &file_pkg_server_server_proto_msgTypes[41]
+	mi := &file_pkg_server_server_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2695,7 +2951,7 @@ func (x *CodeGenerateRequest) String() string {
 func (*CodeGenerateRequest) ProtoMessage() {}
 
 func (x *CodeGenerateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[41]
+	mi := &file_pkg_server_server_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2708,7 +2964,7 @@ func (x *CodeGenerateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CodeGenerateRequest.ProtoReflect.Descriptor instead.
 func (*CodeGenerateRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{41}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *CodeGenerateRequest) GetTestSuite() string {
@@ -2748,7 +3004,7 @@ type Secrets struct {
 
 func (x *Secrets) Reset() {
 	*x = Secrets{}
-	mi := &file_pkg_server_server_proto_msgTypes[42]
+	mi := &file_pkg_server_server_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2760,7 +3016,7 @@ func (x *Secrets) String() string {
 func (*Secrets) ProtoMessage() {}
 
 func (x *Secrets) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[42]
+	mi := &file_pkg_server_server_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2773,7 +3029,7 @@ func (x *Secrets) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Secrets.ProtoReflect.Descriptor instead.
 func (*Secrets) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{42}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *Secrets) GetData() []*Secret {
@@ -2794,7 +3050,7 @@ type Secret struct {
 
 func (x *Secret) Reset() {
 	*x = Secret{}
-	mi := &file_pkg_server_server_proto_msgTypes[43]
+	mi := &file_pkg_server_server_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2806,7 +3062,7 @@ func (x *Secret) String() string {
 func (*Secret) ProtoMessage() {}
 
 func (x *Secret) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[43]
+	mi := &file_pkg_server_server_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2819,7 +3075,7 @@ func (x *Secret) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Secret.ProtoReflect.Descriptor instead.
 func (*Secret) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{43}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *Secret) GetName() string {
@@ -2855,7 +3111,7 @@ type ExtensionStatus struct {
 
 func (x *ExtensionStatus) Reset() {
 	*x = ExtensionStatus{}
-	mi := &file_pkg_server_server_proto_msgTypes[44]
+	mi := &file_pkg_server_server_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2867,7 +3123,7 @@ func (x *ExtensionStatus) String() string {
 func (*ExtensionStatus) ProtoMessage() {}
 
 func (x *ExtensionStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[44]
+	mi := &file_pkg_server_server_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2880,7 +3136,7 @@ func (x *ExtensionStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExtensionStatus.ProtoReflect.Descriptor instead.
 func (*ExtensionStatus) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{44}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *ExtensionStatus) GetReady() bool {
@@ -2920,7 +3176,7 @@ type PProfRequest struct {
 
 func (x *PProfRequest) Reset() {
 	*x = PProfRequest{}
-	mi := &file_pkg_server_server_proto_msgTypes[45]
+	mi := &file_pkg_server_server_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2932,7 +3188,7 @@ func (x *PProfRequest) String() string {
 func (*PProfRequest) ProtoMessage() {}
 
 func (x *PProfRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[45]
+	mi := &file_pkg_server_server_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2945,7 +3201,7 @@ func (x *PProfRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PProfRequest.ProtoReflect.Descriptor instead.
 func (*PProfRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{45}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *PProfRequest) GetName() string {
@@ -2964,7 +3220,7 @@ type PProfData struct {
 
 func (x *PProfData) Reset() {
 	*x = PProfData{}
-	mi := &file_pkg_server_server_proto_msgTypes[46]
+	mi := &file_pkg_server_server_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2976,7 +3232,7 @@ func (x *PProfData) String() string {
 func (*PProfData) ProtoMessage() {}
 
 func (x *PProfData) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[46]
+	mi := &file_pkg_server_server_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2989,7 +3245,7 @@ func (x *PProfData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PProfData.ProtoReflect.Descriptor instead.
 func (*PProfData) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{46}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *PProfData) GetData() []byte {
@@ -3010,7 +3266,7 @@ type FileData struct {
 
 func (x *FileData) Reset() {
 	*x = FileData{}
-	mi := &file_pkg_server_server_proto_msgTypes[47]
+	mi := &file_pkg_server_server_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3022,7 +3278,7 @@ func (x *FileData) String() string {
 func (*FileData) ProtoMessage() {}
 
 func (x *FileData) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[47]
+	mi := &file_pkg_server_server_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3035,7 +3291,7 @@ func (x *FileData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FileData.ProtoReflect.Descriptor instead.
 func (*FileData) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{47}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *FileData) GetData() []byte {
@@ -3067,7 +3323,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_pkg_server_server_proto_msgTypes[48]
+	mi := &file_pkg_server_server_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3079,7 +3335,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[48]
+	mi := &file_pkg_server_server_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3092,21 +3348,25 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{48}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{52}
 }
 
 type MockConfig struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Prefix        string                 `protobuf:"bytes,1,opt,name=Prefix,proto3" json:"Prefix,omitempty"`
-	Config        string                 `protobuf:"bytes,2,opt,name=Config,proto3" json:"Config,omitempty"`
-	Port          int32                  `protobuf:"varint,3,opt,name=Port,proto3" json:"Port,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Prefix         string                 `protobuf:"bytes,1,opt,name=Prefix,proto3" json:"Prefix,omitempty"`
+	Config         string                 `protobuf:"bytes,2,opt,name=Config,proto3" json:"Config,omitempty"`
+	Port           int32                  `protobuf:"varint,3,opt,name=Port,proto3" json:"Port,omitempty"`
+	StoreKind      string                 `protobuf:"bytes,4,opt,name=storeKind,proto3" json:"storeKind,omitempty"`
+	StoreLocalFile string                 `protobuf:"bytes,5,opt,name=storeLocalFile,proto3" json:"storeLocalFile,omitempty"`
+	StoreURL       string                 `protobuf:"bytes,6,opt,name=storeURL,proto3" json:"storeURL,omitempty"`
+	StoreRemote    string                 `protobuf:"bytes,7,opt,name=storeRemote,proto3" json:"storeRemote,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *MockConfig) Reset() {
 	*x = MockConfig{}
-	mi := &file_pkg_server_server_proto_msgTypes[49]
+	mi := &file_pkg_server_server_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3118,7 +3378,7 @@ func (x *MockConfig) String() string {
 func (*MockConfig) ProtoMessage() {}
 
 func (x *MockConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[49]
+	mi := &file_pkg_server_server_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3131,7 +3391,7 @@ func (x *MockConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MockConfig.ProtoReflect.Descriptor instead.
 func (*MockConfig) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{49}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *MockConfig) GetPrefix() string {
@@ -3155,6 +3415,34 @@ func (x *MockConfig) GetPort() int32 {
 	return 0
 }
 
+func (x *MockConfig) GetStoreKind() string {
+	if x != nil {
+		return x.StoreKind
+	}
+	return ""
+}
+
+func (x *MockConfig) GetStoreLocalFile() string {
+	if x != nil {
+		return x.StoreLocalFile
+	}
+	return ""
+}
+
+func (x *MockConfig) GetStoreURL() string {
+	if x != nil {
+		return x.StoreURL
+	}
+	return ""
+}
+
+func (x *MockConfig) GetStoreRemote() string {
+	if x != nil {
+		return x.StoreRemote
+	}
+	return ""
+}
+
 type Version struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Version       string                 `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
@@ -3166,7 +3454,7 @@ type Version struct {
 
 func (x *Version) Reset() {
 	*x = Version{}
-	mi := &file_pkg_server_server_proto_msgTypes[50]
+	mi := &file_pkg_server_server_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3178,7 +3466,7 @@ func (x *Version) String() string {
 func (*Version) ProtoMessage() {}
 
 func (x *Version) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[50]
+	mi := &file_pkg_server_server_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3191,7 +3479,7 @@ func (x *Version) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Version.ProtoReflect.Descriptor instead.
 func (*Version) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{50}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *Version) GetVersion() string {
@@ -3226,7 +3514,7 @@ type ProxyConfig struct {
 
 func (x *ProxyConfig) Reset() {
 	*x = ProxyConfig{}
-	mi := &file_pkg_server_server_proto_msgTypes[51]
+	mi := &file_pkg_server_server_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3238,7 +3526,7 @@ func (x *ProxyConfig) String() string {
 func (*ProxyConfig) ProtoMessage() {}
 
 func (x *ProxyConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[51]
+	mi := &file_pkg_server_server_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3251,7 +3539,7 @@ func (x *ProxyConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProxyConfig.ProtoReflect.Descriptor instead.
 func (*ProxyConfig) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{51}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *ProxyConfig) GetHttp() string {
@@ -3288,7 +3576,7 @@ type DataQuery struct {
 
 func (x *DataQuery) Reset() {
 	*x = DataQuery{}
-	mi := &file_pkg_server_server_proto_msgTypes[52]
+	mi := &file_pkg_server_server_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3300,7 +3588,7 @@ func (x *DataQuery) String() string {
 func (*DataQuery) ProtoMessage() {}
 
 func (x *DataQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[52]
+	mi := &file_pkg_server_server_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3313,7 +3601,7 @@ func (x *DataQuery) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DataQuery.ProtoReflect.Descriptor instead.
 func (*DataQuery) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{52}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *DataQuery) GetType() string {
@@ -3362,7 +3650,7 @@ type DataQueryResult struct {
 
 func (x *DataQueryResult) Reset() {
 	*x = DataQueryResult{}
-	mi := &file_pkg_server_server_proto_msgTypes[53]
+	mi := &file_pkg_server_server_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3374,7 +3662,7 @@ func (x *DataQueryResult) String() string {
 func (*DataQueryResult) ProtoMessage() {}
 
 func (x *DataQueryResult) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[53]
+	mi := &file_pkg_server_server_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3387,7 +3675,7 @@ func (x *DataQueryResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DataQueryResult.ProtoReflect.Descriptor instead.
 func (*DataQueryResult) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{53}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *DataQueryResult) GetData() []*Pair {
@@ -3424,7 +3712,7 @@ type DataMeta struct {
 
 func (x *DataMeta) Reset() {
 	*x = DataMeta{}
-	mi := &file_pkg_server_server_proto_msgTypes[54]
+	mi := &file_pkg_server_server_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3436,7 +3724,7 @@ func (x *DataMeta) String() string {
 func (*DataMeta) ProtoMessage() {}
 
 func (x *DataMeta) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[54]
+	mi := &file_pkg_server_server_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3449,7 +3737,7 @@ func (x *DataMeta) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DataMeta.ProtoReflect.Descriptor instead.
 func (*DataMeta) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{54}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *DataMeta) GetDatabases() []string {
@@ -3506,7 +3794,7 @@ type GenerateContentRequest struct {
 
 func (x *GenerateContentRequest) Reset() {
 	*x = GenerateContentRequest{}
-	mi := &file_pkg_server_server_proto_msgTypes[55]
+	mi := &file_pkg_server_server_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3518,7 +3806,7 @@ func (x *GenerateContentRequest) String() string {
 func (*GenerateContentRequest) ProtoMessage() {}
 
 func (x *GenerateContentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[55]
+	mi := &file_pkg_server_server_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3531,7 +3819,7 @@ func (x *GenerateContentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateContentRequest.ProtoReflect.Descriptor instead.
 func (*GenerateContentRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{55}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *GenerateContentRequest) GetPrompt() string {
@@ -3585,7 +3873,7 @@ type GenerateContentResponse struct {
 
 func (x *GenerateContentResponse) Reset() {
 	*x = GenerateContentResponse{}
-	mi := &file_pkg_server_server_proto_msgTypes[56]
+	mi := &file_pkg_server_server_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3597,7 +3885,7 @@ func (x *GenerateContentResponse) String() string {
 func (*GenerateContentResponse) ProtoMessage() {}
 
 func (x *GenerateContentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[56]
+	mi := &file_pkg_server_server_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3610,7 +3898,7 @@ func (x *GenerateContentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateContentResponse.ProtoReflect.Descriptor instead.
 func (*GenerateContentResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{56}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *GenerateContentResponse) GetResult() isGenerateContentResponse_Result {
@@ -3676,7 +3964,7 @@ type ContentSuccessResponse struct {
 
 func (x *ContentSuccessResponse) Reset() {
 	*x = ContentSuccessResponse{}
-	mi := &file_pkg_server_server_proto_msgTypes[57]
+	mi := &file_pkg_server_server_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3688,7 +3976,7 @@ func (x *ContentSuccessResponse) String() string {
 func (*ContentSuccessResponse) ProtoMessage() {}
 
 func (x *ContentSuccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[57]
+	mi := &file_pkg_server_server_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3701,7 +3989,7 @@ func (x *ContentSuccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ContentSuccessResponse.ProtoReflect.Descriptor instead.
 func (*ContentSuccessResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{57}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *ContentSuccessResponse) GetContent() string {
@@ -3752,7 +4040,7 @@ type ErrorResponse struct {
 
 func (x *ErrorResponse) Reset() {
 	*x = ErrorResponse{}
-	mi := &file_pkg_server_server_proto_msgTypes[58]
+	mi := &file_pkg_server_server_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3764,7 +4052,7 @@ func (x *ErrorResponse) String() string {
 func (*ErrorResponse) ProtoMessage() {}
 
 func (x *ErrorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_server_server_proto_msgTypes[58]
+	mi := &file_pkg_server_server_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3777,7 +4065,7 @@ func (x *ErrorResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ErrorResponse.ProtoReflect.Descriptor instead.
 func (*ErrorResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_server_server_proto_rawDescGZIP(), []int{58}
+	return file_pkg_server_server_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *ErrorResponse) GetCode() ErrorCode {
@@ -3798,7 +4086,14 @@ var File_pkg_server_server_proto protoreflect.FileDescriptor
 
 const file_pkg_server_server_proto_rawDesc = "" +
 	"\n" +
-	"\x17pkg/server/server.proto\x12\x06server\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\"~\n" +
+	"\x17pkg/server/server.proto\x12\x06server\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\"^\n" +
+	"\x04Menu\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05index\x18\x02 \x01(\tR\x05index\x12\x12\n" +
+	"\x04icon\x18\x03 \x01(\tR\x04icon\x12\x18\n" +
+	"\aversion\x18\x04 \x01(\x05R\aversion\",\n" +
+	"\bMenuList\x12 \n" +
+	"\x04data\x18\x01 \x03(\v2\f.server.MenuR\x04data\"~\n" +
 	"\x06Suites\x12,\n" +
 	"\x04data\x18\x01 \x03(\v2\x18.server.Suites.DataEntryR\x04data\x1aF\n" +
 	"\tDataEntry\x12\x10\n" +
@@ -4001,11 +4296,24 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\bdisabled\x18\v \x01(\bR\bdisabled\"3\n" +
 	"\n" +
 	"StoreKinds\x12%\n" +
-	"\x04data\x18\x01 \x03(\v2\x11.server.StoreKindR\x04data\"K\n" +
+	"\x04data\x18\x01 \x03(\v2\x11.server.StoreKindR\x04data\"\xf0\x01\n" +
 	"\tStoreKind\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03url\x18\x02 \x01(\tR\x03url\x12\x18\n" +
-	"\aenabled\x18\x03 \x01(\bR\aenabled\"B\n" +
+	"\aenabled\x18\x03 \x01(\bR\aenabled\x12?\n" +
+	"\fdependencies\x18\x04 \x03(\v2\x1b.server.StoreKindDependencyR\fdependencies\x12\x12\n" +
+	"\x04link\x18\x05 \x01(\tR\x04link\x12.\n" +
+	"\x06params\x18\x06 \x03(\v2\x16.server.StoreKindParamR\x06params\x12\x1e\n" +
+	"\n" +
+	"categories\x18\a \x03(\tR\n" +
+	"categories\")\n" +
+	"\x13StoreKindDependency\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"|\n" +
+	"\x0eStoreKindParam\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\"\n" +
+	"\fdefaultValue\x18\x03 \x01(\tR\fdefaultValue\x12\x12\n" +
+	"\x04enum\x18\x04 \x03(\tR\x04enum\"B\n" +
 	"\fCommonResult\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\".\n" +
@@ -4039,12 +4347,16 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12!\n" +
 	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x1a\n" +
 	"\bfilename\x18\x03 \x01(\tR\bfilename\"\a\n" +
-	"\x05Empty\"P\n" +
+	"\x05Empty\"\xd4\x01\n" +
 	"\n" +
 	"MockConfig\x12\x16\n" +
 	"\x06Prefix\x18\x01 \x01(\tR\x06Prefix\x12\x16\n" +
 	"\x06Config\x18\x02 \x01(\tR\x06Config\x12\x12\n" +
-	"\x04Port\x18\x03 \x01(\x05R\x04Port\"O\n" +
+	"\x04Port\x18\x03 \x01(\x05R\x04Port\x12\x1c\n" +
+	"\tstoreKind\x18\x04 \x01(\tR\tstoreKind\x12&\n" +
+	"\x0estoreLocalFile\x18\x05 \x01(\tR\x0estoreLocalFile\x12\x1a\n" +
+	"\bstoreURL\x18\x06 \x01(\tR\bstoreURL\x12 \n" +
+	"\vstoreRemote\x18\a \x01(\tR\vstoreRemote\"O\n" +
 	"\aVersion\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\tR\aversion\x12\x16\n" +
 	"\x06commit\x18\x02 \x01(\tR\x06commit\x12\x12\n" +
@@ -4108,7 +4420,7 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\x10INVALID_ARGUMENT\x10\x01\x12\x16\n" +
 	"\x12TRANSLATION_FAILED\x10\x02\x12\x18\n" +
 	"\x14UNSUPPORTED_DATABASE\x10\x03\x12\x12\n" +
-	"\x0eINTERNAL_ERROR\x10\x042\x9e%\n" +
+	"\x0eINTERNAL_ERROR\x10\x042\xf6%\n" +
 	"\x06Runner\x12C\n" +
 	"\x03Run\x12\x10.server.TestTask\x1a\x12.server.TestResult\"\x16\x82\xd3\xe4\x93\x02\x10:\x01*\"\v/api/v1/run\x12_\n" +
 	"\fRunTestSuite\x12\x19.server.TestSuiteIdentity\x1a\x12.server.TestResult\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/v1/run/suite(\x010\x01\x12B\n" +
@@ -4144,7 +4456,8 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\x10ConvertTestSuite\x12\x1b.server.CodeGenerateRequest\x1a\x14.server.CommonResult\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/api/v1/converters/convert\x12N\n" +
 	"\x0ePopularHeaders\x12\r.server.Empty\x1a\r.server.Pairs\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/popularHeaders\x12O\n" +
 	"\x0eFunctionsQuery\x12\x13.server.SimpleQuery\x1a\r.server.Pairs\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/functions\x12^\n" +
-	"\x14FunctionsQueryStream\x12\x13.server.SimpleQuery\x1a\r.server.Pairs\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/functionsQuery(\x010\x01\x12E\n" +
+	"\x14FunctionsQueryStream\x12\x13.server.SimpleQuery\x1a\r.server.Pairs\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/functionsQuery(\x010\x01\x12V\n" +
+	"\tGetSchema\x12\x13.server.SimpleQuery\x1a\x14.server.CommonResult\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/schemas/{name}\x12E\n" +
 	"\n" +
 	"GetVersion\x12\r.server.Empty\x1a\x0f.server.Version\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/version\x12C\n" +
 	"\x06Sample\x12\r.server.Empty\x1a\x12.server.HelloReply\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/api/v1/sample\x12h\n" +
@@ -4162,7 +4475,11 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\fUpdateSecret\x12\x0e.server.Secret\x1a\x14.server.CommonResult\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\x1a\x16/api/v1/secrets/{Name}\x122\n" +
 	"\x05PProf\x12\x14.server.PProfRequest\x1a\x11.server.PProfData\"\x002k\n" +
 	"\x0fRunnerExtension\x12X\n" +
-	"\x03Run\x12\x19.server.TestSuiteWithCase\x1a\x14.server.CommonResult\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/extension/run2\xd2\x02\n" +
+	"\x03Run\x12\x19.server.TestSuiteWithCase\x1a\x14.server.CommonResult\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/extension/run2\xa5\x02\n" +
+	"\vUIExtension\x12L\n" +
+	"\bGetMenus\x12\r.server.Empty\x1a\x10.server.MenuList\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/extension/menus\x12b\n" +
+	"\vGetPageOfJS\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\")\x82\xd3\xe4\x93\x02#\x12!/api/v1/extension/pages/{name}/js\x12d\n" +
+	"\fGetPageOfCSS\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"*\x82\xd3\xe4\x93\x02$\x12\"/api/v1/extension/pages/{name}/css2\xd2\x02\n" +
 	"\x0eThemeExtension\x12F\n" +
 	"\tGetThemes\x12\r.server.Empty\x1a\x12.server.SimpleList\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/api/v1/themes\x12S\n" +
 	"\bGetTheme\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/themes/{name}\x12J\n" +
@@ -4170,10 +4487,11 @@ const file_pkg_server_server_proto_rawDesc = "" +
 	"\n" +
 	"GetBinding\x12\x12.server.SimpleName\x1a\x14.server.CommonResult\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/bindings/{name}2\x81\x01\n" +
 	"\vAIExtension\x12r\n" +
-	"\x0fGenerateContent\x12\x1e.server.GenerateContentRequest\x1a\x1f.server.GenerateContentResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/ai/generate2\xa0\x01\n" +
+	"\x0fGenerateContent\x12\x1e.server.GenerateContentRequest\x1a\x1f.server.GenerateContentResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/ai/generate2\xed\x01\n" +
 	"\x04Mock\x12K\n" +
 	"\x06Reload\x12\x12.server.MockConfig\x1a\r.server.Empty\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/mock/reload\x12K\n" +
-	"\tGetConfig\x12\r.server.Empty\x1a\x12.server.MockConfig\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/mock/config2`\n" +
+	"\tGetConfig\x12\r.server.Empty\x1a\x12.server.MockConfig\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/mock/config\x12K\n" +
+	"\bLogWatch\x12\r.server.Empty\x1a\x14.server.CommonResult\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/api/v1/mock/log0\x012`\n" +
 	"\n" +
 	"DataServer\x12R\n" +
 	"\x05Query\x12\x11.server.DataQuery\x1a\x17.server.DataQueryResult\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/data/queryB.Z,github.com/linuxsuren/api-testing/pkg/serverb\x06proto3"
@@ -4191,255 +4509,272 @@ func file_pkg_server_server_proto_rawDescGZIP() []byte {
 }
 
 var file_pkg_server_server_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_pkg_server_server_proto_msgTypes = make([]protoimpl.MessageInfo, 65)
+var file_pkg_server_server_proto_msgTypes = make([]protoimpl.MessageInfo, 69)
 var file_pkg_server_server_proto_goTypes = []any{
 	(ErrorCode)(0),                  // 0: server.ErrorCode
-	(*Suites)(nil),                  // 1: server.Suites
-	(*Items)(nil),                   // 2: server.Items
-	(*HistorySuites)(nil),           // 3: server.HistorySuites
-	(*HistoryItems)(nil),            // 4: server.HistoryItems
-	(*HistoryCaseIdentity)(nil),     // 5: server.HistoryCaseIdentity
-	(*TestCaseIdentity)(nil),        // 6: server.TestCaseIdentity
-	(*TestSuiteSource)(nil),         // 7: server.TestSuiteSource
-	(*TestSuite)(nil),               // 8: server.TestSuite
-	(*TestSuiteWithCase)(nil),       // 9: server.TestSuiteWithCase
-	(*APISpec)(nil),                 // 10: server.APISpec
-	(*Secure)(nil),                  // 11: server.Secure
-	(*RPC)(nil),                     // 12: server.RPC
-	(*TestSuiteIdentity)(nil),       // 13: server.TestSuiteIdentity
-	(*TestSuiteDuplicate)(nil),      // 14: server.TestSuiteDuplicate
-	(*TestCaseDuplicate)(nil),       // 15: server.TestCaseDuplicate
-	(*TestTask)(nil),                // 16: server.TestTask
-	(*BatchTestTask)(nil),           // 17: server.BatchTestTask
-	(*TestResult)(nil),              // 18: server.TestResult
-	(*HistoryTestResult)(nil),       // 19: server.HistoryTestResult
-	(*HelloReply)(nil),              // 20: server.HelloReply
-	(*YamlData)(nil),                // 21: server.YamlData
-	(*Suite)(nil),                   // 22: server.Suite
-	(*TestCaseWithSuite)(nil),       // 23: server.TestCaseWithSuite
-	(*TestCases)(nil),               // 24: server.TestCases
-	(*TestCase)(nil),                // 25: server.TestCase
-	(*HistoryTestCase)(nil),         // 26: server.HistoryTestCase
-	(*HistoryTestCases)(nil),        // 27: server.HistoryTestCases
-	(*Request)(nil),                 // 28: server.Request
-	(*Response)(nil),                // 29: server.Response
-	(*ConditionalVerify)(nil),       // 30: server.ConditionalVerify
-	(*TestCaseResult)(nil),          // 31: server.TestCaseResult
-	(*Pair)(nil),                    // 32: server.Pair
-	(*Pairs)(nil),                   // 33: server.Pairs
-	(*SimpleQuery)(nil),             // 34: server.SimpleQuery
-	(*Stores)(nil),                  // 35: server.Stores
-	(*Store)(nil),                   // 36: server.Store
-	(*StoreKinds)(nil),              // 37: server.StoreKinds
-	(*StoreKind)(nil),               // 38: server.StoreKind
-	(*CommonResult)(nil),            // 39: server.CommonResult
-	(*SimpleList)(nil),              // 40: server.SimpleList
-	(*SimpleName)(nil),              // 41: server.SimpleName
-	(*CodeGenerateRequest)(nil),     // 42: server.CodeGenerateRequest
-	(*Secrets)(nil),                 // 43: server.Secrets
-	(*Secret)(nil),                  // 44: server.Secret
-	(*ExtensionStatus)(nil),         // 45: server.ExtensionStatus
-	(*PProfRequest)(nil),            // 46: server.PProfRequest
-	(*PProfData)(nil),               // 47: server.PProfData
-	(*FileData)(nil),                // 48: server.FileData
-	(*Empty)(nil),                   // 49: server.Empty
-	(*MockConfig)(nil),              // 50: server.MockConfig
-	(*Version)(nil),                 // 51: server.Version
-	(*ProxyConfig)(nil),             // 52: server.ProxyConfig
-	(*DataQuery)(nil),               // 53: server.DataQuery
-	(*DataQueryResult)(nil),         // 54: server.DataQueryResult
-	(*DataMeta)(nil),                // 55: server.DataMeta
-	(*GenerateContentRequest)(nil),  // 56: server.GenerateContentRequest
-	(*GenerateContentResponse)(nil), // 57: server.GenerateContentResponse
-	(*ContentSuccessResponse)(nil),  // 58: server.ContentSuccessResponse
-	(*ErrorResponse)(nil),           // 59: server.ErrorResponse
-	nil,                             // 60: server.Suites.DataEntry
-	nil,                             // 61: server.HistorySuites.DataEntry
-	nil,                             // 62: server.TestTask.EnvEntry
-	nil,                             // 63: server.GenerateContentRequest.ContextEntry
-	nil,                             // 64: server.GenerateContentRequest.ParametersEntry
-	nil,                             // 65: server.ContentSuccessResponse.MetadataEntry
-	(*timestamppb.Timestamp)(nil),   // 66: google.protobuf.Timestamp
+	(*Menu)(nil),                    // 1: server.Menu
+	(*MenuList)(nil),                // 2: server.MenuList
+	(*Suites)(nil),                  // 3: server.Suites
+	(*Items)(nil),                   // 4: server.Items
+	(*HistorySuites)(nil),           // 5: server.HistorySuites
+	(*HistoryItems)(nil),            // 6: server.HistoryItems
+	(*HistoryCaseIdentity)(nil),     // 7: server.HistoryCaseIdentity
+	(*TestCaseIdentity)(nil),        // 8: server.TestCaseIdentity
+	(*TestSuiteSource)(nil),         // 9: server.TestSuiteSource
+	(*TestSuite)(nil),               // 10: server.TestSuite
+	(*TestSuiteWithCase)(nil),       // 11: server.TestSuiteWithCase
+	(*APISpec)(nil),                 // 12: server.APISpec
+	(*Secure)(nil),                  // 13: server.Secure
+	(*RPC)(nil),                     // 14: server.RPC
+	(*TestSuiteIdentity)(nil),       // 15: server.TestSuiteIdentity
+	(*TestSuiteDuplicate)(nil),      // 16: server.TestSuiteDuplicate
+	(*TestCaseDuplicate)(nil),       // 17: server.TestCaseDuplicate
+	(*TestTask)(nil),                // 18: server.TestTask
+	(*BatchTestTask)(nil),           // 19: server.BatchTestTask
+	(*TestResult)(nil),              // 20: server.TestResult
+	(*HistoryTestResult)(nil),       // 21: server.HistoryTestResult
+	(*HelloReply)(nil),              // 22: server.HelloReply
+	(*YamlData)(nil),                // 23: server.YamlData
+	(*Suite)(nil),                   // 24: server.Suite
+	(*TestCaseWithSuite)(nil),       // 25: server.TestCaseWithSuite
+	(*TestCases)(nil),               // 26: server.TestCases
+	(*TestCase)(nil),                // 27: server.TestCase
+	(*HistoryTestCase)(nil),         // 28: server.HistoryTestCase
+	(*HistoryTestCases)(nil),        // 29: server.HistoryTestCases
+	(*Request)(nil),                 // 30: server.Request
+	(*Response)(nil),                // 31: server.Response
+	(*ConditionalVerify)(nil),       // 32: server.ConditionalVerify
+	(*TestCaseResult)(nil),          // 33: server.TestCaseResult
+	(*Pair)(nil),                    // 34: server.Pair
+	(*Pairs)(nil),                   // 35: server.Pairs
+	(*SimpleQuery)(nil),             // 36: server.SimpleQuery
+	(*Stores)(nil),                  // 37: server.Stores
+	(*Store)(nil),                   // 38: server.Store
+	(*StoreKinds)(nil),              // 39: server.StoreKinds
+	(*StoreKind)(nil),               // 40: server.StoreKind
+	(*StoreKindDependency)(nil),     // 41: server.StoreKindDependency
+	(*StoreKindParam)(nil),          // 42: server.StoreKindParam
+	(*CommonResult)(nil),            // 43: server.CommonResult
+	(*SimpleList)(nil),              // 44: server.SimpleList
+	(*SimpleName)(nil),              // 45: server.SimpleName
+	(*CodeGenerateRequest)(nil),     // 46: server.CodeGenerateRequest
+	(*Secrets)(nil),                 // 47: server.Secrets
+	(*Secret)(nil),                  // 48: server.Secret
+	(*ExtensionStatus)(nil),         // 49: server.ExtensionStatus
+	(*PProfRequest)(nil),            // 50: server.PProfRequest
+	(*PProfData)(nil),               // 51: server.PProfData
+	(*FileData)(nil),                // 52: server.FileData
+	(*Empty)(nil),                   // 53: server.Empty
+	(*MockConfig)(nil),              // 54: server.MockConfig
+	(*Version)(nil),                 // 55: server.Version
+	(*ProxyConfig)(nil),             // 56: server.ProxyConfig
+	(*DataQuery)(nil),               // 57: server.DataQuery
+	(*DataQueryResult)(nil),         // 58: server.DataQueryResult
+	(*DataMeta)(nil),                // 59: server.DataMeta
+	(*GenerateContentRequest)(nil),  // 60: server.GenerateContentRequest
+	(*GenerateContentResponse)(nil), // 61: server.GenerateContentResponse
+	(*ContentSuccessResponse)(nil),  // 62: server.ContentSuccessResponse
+	(*ErrorResponse)(nil),           // 63: server.ErrorResponse
+	nil,                             // 64: server.Suites.DataEntry
+	nil,                             // 65: server.HistorySuites.DataEntry
+	nil,                             // 66: server.TestTask.EnvEntry
+	nil,                             // 67: server.GenerateContentRequest.ContextEntry
+	nil,                             // 68: server.GenerateContentRequest.ParametersEntry
+	nil,                             // 69: server.ContentSuccessResponse.MetadataEntry
+	(*timestamppb.Timestamp)(nil),   // 70: google.protobuf.Timestamp
 }
 var file_pkg_server_server_proto_depIdxs = []int32{
-	60,  // 0: server.Suites.data:type_name -> server.Suites.DataEntry
-	61,  // 1: server.HistorySuites.data:type_name -> server.HistorySuites.DataEntry
-	5,   // 2: server.HistoryItems.data:type_name -> server.HistoryCaseIdentity
-	32,  // 3: server.TestCaseIdentity.parameters:type_name -> server.Pair
-	32,  // 4: server.TestSuite.param:type_name -> server.Pair
-	10,  // 5: server.TestSuite.spec:type_name -> server.APISpec
-	52,  // 6: server.TestSuite.proxy:type_name -> server.ProxyConfig
-	8,   // 7: server.TestSuiteWithCase.suite:type_name -> server.TestSuite
-	25,  // 8: server.TestSuiteWithCase.case:type_name -> server.TestCase
-	12,  // 9: server.APISpec.rpc:type_name -> server.RPC
-	11,  // 10: server.APISpec.secure:type_name -> server.Secure
-	62,  // 11: server.TestTask.env:type_name -> server.TestTask.EnvEntry
-	32,  // 12: server.TestTask.parameters:type_name -> server.Pair
-	32,  // 13: server.BatchTestTask.parameters:type_name -> server.Pair
-	31,  // 14: server.TestResult.testCaseResult:type_name -> server.TestCaseResult
-	31,  // 15: server.HistoryTestResult.testCaseResult:type_name -> server.TestCaseResult
-	26,  // 16: server.HistoryTestResult.data:type_name -> server.HistoryTestCase
-	66,  // 17: server.HistoryTestResult.createTime:type_name -> google.protobuf.Timestamp
-	25,  // 18: server.Suite.items:type_name -> server.TestCase
-	25,  // 19: server.TestCaseWithSuite.data:type_name -> server.TestCase
-	25,  // 20: server.TestCases.data:type_name -> server.TestCase
-	28,  // 21: server.TestCase.request:type_name -> server.Request
-	29,  // 22: server.TestCase.response:type_name -> server.Response
-	66,  // 23: server.HistoryTestCase.createTime:type_name -> google.protobuf.Timestamp
-	32,  // 24: server.HistoryTestCase.suiteParam:type_name -> server.Pair
-	10,  // 25: server.HistoryTestCase.suiteSpec:type_name -> server.APISpec
-	28,  // 26: server.HistoryTestCase.request:type_name -> server.Request
-	29,  // 27: server.HistoryTestCase.response:type_name -> server.Response
-	32,  // 28: server.HistoryTestCase.historyHeader:type_name -> server.Pair
-	26,  // 29: server.HistoryTestCases.data:type_name -> server.HistoryTestCase
-	32,  // 30: server.Request.header:type_name -> server.Pair
-	32,  // 31: server.Request.query:type_name -> server.Pair
-	32,  // 32: server.Request.cookie:type_name -> server.Pair
-	32,  // 33: server.Request.form:type_name -> server.Pair
-	32,  // 34: server.Response.header:type_name -> server.Pair
-	32,  // 35: server.Response.bodyFieldsExpect:type_name -> server.Pair
-	30,  // 36: server.Response.ConditionalVerify:type_name -> server.ConditionalVerify
-	32,  // 37: server.TestCaseResult.header:type_name -> server.Pair
-	32,  // 38: server.Pairs.data:type_name -> server.Pair
-	36,  // 39: server.Stores.data:type_name -> server.Store
-	32,  // 40: server.Store.properties:type_name -> server.Pair
-	38,  // 41: server.Store.kind:type_name -> server.StoreKind
-	38,  // 42: server.StoreKinds.data:type_name -> server.StoreKind
-	32,  // 43: server.SimpleList.data:type_name -> server.Pair
-	44,  // 44: server.Secrets.data:type_name -> server.Secret
-	32,  // 45: server.DataQueryResult.data:type_name -> server.Pair
-	33,  // 46: server.DataQueryResult.items:type_name -> server.Pairs
-	55,  // 47: server.DataQueryResult.meta:type_name -> server.DataMeta
-	32,  // 48: server.DataMeta.labels:type_name -> server.Pair
-	63,  // 49: server.GenerateContentRequest.context:type_name -> server.GenerateContentRequest.ContextEntry
-	64,  // 50: server.GenerateContentRequest.parameters:type_name -> server.GenerateContentRequest.ParametersEntry
-	58,  // 51: server.GenerateContentResponse.success:type_name -> server.ContentSuccessResponse
-	59,  // 52: server.GenerateContentResponse.error:type_name -> server.ErrorResponse
-	65,  // 53: server.ContentSuccessResponse.metadata:type_name -> server.ContentSuccessResponse.MetadataEntry
-	0,   // 54: server.ErrorResponse.code:type_name -> server.ErrorCode
-	2,   // 55: server.Suites.DataEntry.value:type_name -> server.Items
-	4,   // 56: server.HistorySuites.DataEntry.value:type_name -> server.HistoryItems
-	16,  // 57: server.Runner.Run:input_type -> server.TestTask
-	13,  // 58: server.Runner.RunTestSuite:input_type -> server.TestSuiteIdentity
-	49,  // 59: server.Runner.GetSuites:input_type -> server.Empty
-	13,  // 60: server.Runner.CreateTestSuite:input_type -> server.TestSuiteIdentity
-	7,   // 61: server.Runner.ImportTestSuite:input_type -> server.TestSuiteSource
-	13,  // 62: server.Runner.GetTestSuite:input_type -> server.TestSuiteIdentity
-	8,   // 63: server.Runner.UpdateTestSuite:input_type -> server.TestSuite
-	13,  // 64: server.Runner.DeleteTestSuite:input_type -> server.TestSuiteIdentity
-	14,  // 65: server.Runner.DuplicateTestSuite:input_type -> server.TestSuiteDuplicate
-	14,  // 66: server.Runner.RenameTestSuite:input_type -> server.TestSuiteDuplicate
-	13,  // 67: server.Runner.GetTestSuiteYaml:input_type -> server.TestSuiteIdentity
-	13,  // 68: server.Runner.ListTestCase:input_type -> server.TestSuiteIdentity
-	6,   // 69: server.Runner.RunTestCase:input_type -> server.TestCaseIdentity
-	17,  // 70: server.Runner.BatchRun:input_type -> server.BatchTestTask
-	6,   // 71: server.Runner.GetTestCase:input_type -> server.TestCaseIdentity
-	23,  // 72: server.Runner.CreateTestCase:input_type -> server.TestCaseWithSuite
-	23,  // 73: server.Runner.UpdateTestCase:input_type -> server.TestCaseWithSuite
-	6,   // 74: server.Runner.DeleteTestCase:input_type -> server.TestCaseIdentity
-	15,  // 75: server.Runner.DuplicateTestCase:input_type -> server.TestCaseDuplicate
-	15,  // 76: server.Runner.RenameTestCase:input_type -> server.TestCaseDuplicate
-	13,  // 77: server.Runner.GetSuggestedAPIs:input_type -> server.TestSuiteIdentity
-	49,  // 78: server.Runner.GetHistorySuites:input_type -> server.Empty
-	26,  // 79: server.Runner.GetHistoryTestCaseWithResult:input_type -> server.HistoryTestCase
-	26,  // 80: server.Runner.GetHistoryTestCase:input_type -> server.HistoryTestCase
-	26,  // 81: server.Runner.DeleteHistoryTestCase:input_type -> server.HistoryTestCase
-	26,  // 82: server.Runner.DeleteAllHistoryTestCase:input_type -> server.HistoryTestCase
-	25,  // 83: server.Runner.GetTestCaseAllHistory:input_type -> server.TestCase
-	49,  // 84: server.Runner.ListCodeGenerator:input_type -> server.Empty
-	42,  // 85: server.Runner.GenerateCode:input_type -> server.CodeGenerateRequest
-	42,  // 86: server.Runner.HistoryGenerateCode:input_type -> server.CodeGenerateRequest
-	49,  // 87: server.Runner.ListConverter:input_type -> server.Empty
-	42,  // 88: server.Runner.ConvertTestSuite:input_type -> server.CodeGenerateRequest
-	49,  // 89: server.Runner.PopularHeaders:input_type -> server.Empty
-	34,  // 90: server.Runner.FunctionsQuery:input_type -> server.SimpleQuery
-	34,  // 91: server.Runner.FunctionsQueryStream:input_type -> server.SimpleQuery
-	49,  // 92: server.Runner.GetVersion:input_type -> server.Empty
-	49,  // 93: server.Runner.Sample:input_type -> server.Empty
-	25,  // 94: server.Runner.DownloadResponseFile:input_type -> server.TestCase
-	49,  // 95: server.Runner.GetStoreKinds:input_type -> server.Empty
-	49,  // 96: server.Runner.GetStores:input_type -> server.Empty
-	36,  // 97: server.Runner.CreateStore:input_type -> server.Store
-	36,  // 98: server.Runner.UpdateStore:input_type -> server.Store
-	36,  // 99: server.Runner.DeleteStore:input_type -> server.Store
-	34,  // 100: server.Runner.VerifyStore:input_type -> server.SimpleQuery
-	49,  // 101: server.Runner.GetSecrets:input_type -> server.Empty
-	44,  // 102: server.Runner.CreateSecret:input_type -> server.Secret
-	44,  // 103: server.Runner.DeleteSecret:input_type -> server.Secret
-	44,  // 104: server.Runner.UpdateSecret:input_type -> server.Secret
-	46,  // 105: server.Runner.PProf:input_type -> server.PProfRequest
-	9,   // 106: server.RunnerExtension.Run:input_type -> server.TestSuiteWithCase
-	49,  // 107: server.ThemeExtension.GetThemes:input_type -> server.Empty
-	41,  // 108: server.ThemeExtension.GetTheme:input_type -> server.SimpleName
-	49,  // 109: server.ThemeExtension.GetBindings:input_type -> server.Empty
-	41,  // 110: server.ThemeExtension.GetBinding:input_type -> server.SimpleName
-	56,  // 111: server.AIExtension.GenerateContent:input_type -> server.GenerateContentRequest
-	50,  // 112: server.Mock.Reload:input_type -> server.MockConfig
-	49,  // 113: server.Mock.GetConfig:input_type -> server.Empty
-	53,  // 114: server.DataServer.Query:input_type -> server.DataQuery
-	18,  // 115: server.Runner.Run:output_type -> server.TestResult
-	18,  // 116: server.Runner.RunTestSuite:output_type -> server.TestResult
-	1,   // 117: server.Runner.GetSuites:output_type -> server.Suites
-	20,  // 118: server.Runner.CreateTestSuite:output_type -> server.HelloReply
-	39,  // 119: server.Runner.ImportTestSuite:output_type -> server.CommonResult
-	8,   // 120: server.Runner.GetTestSuite:output_type -> server.TestSuite
-	20,  // 121: server.Runner.UpdateTestSuite:output_type -> server.HelloReply
-	20,  // 122: server.Runner.DeleteTestSuite:output_type -> server.HelloReply
-	20,  // 123: server.Runner.DuplicateTestSuite:output_type -> server.HelloReply
-	20,  // 124: server.Runner.RenameTestSuite:output_type -> server.HelloReply
-	21,  // 125: server.Runner.GetTestSuiteYaml:output_type -> server.YamlData
-	22,  // 126: server.Runner.ListTestCase:output_type -> server.Suite
-	31,  // 127: server.Runner.RunTestCase:output_type -> server.TestCaseResult
-	18,  // 128: server.Runner.BatchRun:output_type -> server.TestResult
-	25,  // 129: server.Runner.GetTestCase:output_type -> server.TestCase
-	20,  // 130: server.Runner.CreateTestCase:output_type -> server.HelloReply
-	20,  // 131: server.Runner.UpdateTestCase:output_type -> server.HelloReply
-	20,  // 132: server.Runner.DeleteTestCase:output_type -> server.HelloReply
-	20,  // 133: server.Runner.DuplicateTestCase:output_type -> server.HelloReply
-	20,  // 134: server.Runner.RenameTestCase:output_type -> server.HelloReply
-	24,  // 135: server.Runner.GetSuggestedAPIs:output_type -> server.TestCases
-	3,   // 136: server.Runner.GetHistorySuites:output_type -> server.HistorySuites
-	19,  // 137: server.Runner.GetHistoryTestCaseWithResult:output_type -> server.HistoryTestResult
-	26,  // 138: server.Runner.GetHistoryTestCase:output_type -> server.HistoryTestCase
-	20,  // 139: server.Runner.DeleteHistoryTestCase:output_type -> server.HelloReply
-	20,  // 140: server.Runner.DeleteAllHistoryTestCase:output_type -> server.HelloReply
-	27,  // 141: server.Runner.GetTestCaseAllHistory:output_type -> server.HistoryTestCases
-	40,  // 142: server.Runner.ListCodeGenerator:output_type -> server.SimpleList
-	39,  // 143: server.Runner.GenerateCode:output_type -> server.CommonResult
-	39,  // 144: server.Runner.HistoryGenerateCode:output_type -> server.CommonResult
-	40,  // 145: server.Runner.ListConverter:output_type -> server.SimpleList
-	39,  // 146: server.Runner.ConvertTestSuite:output_type -> server.CommonResult
-	33,  // 147: server.Runner.PopularHeaders:output_type -> server.Pairs
-	33,  // 148: server.Runner.FunctionsQuery:output_type -> server.Pairs
-	33,  // 149: server.Runner.FunctionsQueryStream:output_type -> server.Pairs
-	51,  // 150: server.Runner.GetVersion:output_type -> server.Version
-	20,  // 151: server.Runner.Sample:output_type -> server.HelloReply
-	48,  // 152: server.Runner.DownloadResponseFile:output_type -> server.FileData
-	37,  // 153: server.Runner.GetStoreKinds:output_type -> server.StoreKinds
-	35,  // 154: server.Runner.GetStores:output_type -> server.Stores
-	36,  // 155: server.Runner.CreateStore:output_type -> server.Store
-	36,  // 156: server.Runner.UpdateStore:output_type -> server.Store
-	36,  // 157: server.Runner.DeleteStore:output_type -> server.Store
-	45,  // 158: server.Runner.VerifyStore:output_type -> server.ExtensionStatus
-	43,  // 159: server.Runner.GetSecrets:output_type -> server.Secrets
-	39,  // 160: server.Runner.CreateSecret:output_type -> server.CommonResult
-	39,  // 161: server.Runner.DeleteSecret:output_type -> server.CommonResult
-	39,  // 162: server.Runner.UpdateSecret:output_type -> server.CommonResult
-	47,  // 163: server.Runner.PProf:output_type -> server.PProfData
-	39,  // 164: server.RunnerExtension.Run:output_type -> server.CommonResult
-	40,  // 165: server.ThemeExtension.GetThemes:output_type -> server.SimpleList
-	39,  // 166: server.ThemeExtension.GetTheme:output_type -> server.CommonResult
-	40,  // 167: server.ThemeExtension.GetBindings:output_type -> server.SimpleList
-	39,  // 168: server.ThemeExtension.GetBinding:output_type -> server.CommonResult
-	57,  // 169: server.AIExtension.GenerateContent:output_type -> server.GenerateContentResponse
-	49,  // 170: server.Mock.Reload:output_type -> server.Empty
-	50,  // 171: server.Mock.GetConfig:output_type -> server.MockConfig
-	54,  // 172: server.DataServer.Query:output_type -> server.DataQueryResult
-	115, // [115:173] is the sub-list for method output_type
-	57,  // [57:115] is the sub-list for method input_type
-	57,  // [57:57] is the sub-list for extension type_name
-	57,  // [57:57] is the sub-list for extension extendee
-	0,   // [0:57] is the sub-list for field type_name
+	1,   // 0: server.MenuList.data:type_name -> server.Menu
+	64,  // 1: server.Suites.data:type_name -> server.Suites.DataEntry
+	65,  // 2: server.HistorySuites.data:type_name -> server.HistorySuites.DataEntry
+	7,   // 3: server.HistoryItems.data:type_name -> server.HistoryCaseIdentity
+	34,  // 4: server.TestCaseIdentity.parameters:type_name -> server.Pair
+	34,  // 5: server.TestSuite.param:type_name -> server.Pair
+	12,  // 6: server.TestSuite.spec:type_name -> server.APISpec
+	56,  // 7: server.TestSuite.proxy:type_name -> server.ProxyConfig
+	10,  // 8: server.TestSuiteWithCase.suite:type_name -> server.TestSuite
+	27,  // 9: server.TestSuiteWithCase.case:type_name -> server.TestCase
+	14,  // 10: server.APISpec.rpc:type_name -> server.RPC
+	13,  // 11: server.APISpec.secure:type_name -> server.Secure
+	66,  // 12: server.TestTask.env:type_name -> server.TestTask.EnvEntry
+	34,  // 13: server.TestTask.parameters:type_name -> server.Pair
+	34,  // 14: server.BatchTestTask.parameters:type_name -> server.Pair
+	33,  // 15: server.TestResult.testCaseResult:type_name -> server.TestCaseResult
+	33,  // 16: server.HistoryTestResult.testCaseResult:type_name -> server.TestCaseResult
+	28,  // 17: server.HistoryTestResult.data:type_name -> server.HistoryTestCase
+	70,  // 18: server.HistoryTestResult.createTime:type_name -> google.protobuf.Timestamp
+	27,  // 19: server.Suite.items:type_name -> server.TestCase
+	27,  // 20: server.TestCaseWithSuite.data:type_name -> server.TestCase
+	27,  // 21: server.TestCases.data:type_name -> server.TestCase
+	30,  // 22: server.TestCase.request:type_name -> server.Request
+	31,  // 23: server.TestCase.response:type_name -> server.Response
+	70,  // 24: server.HistoryTestCase.createTime:type_name -> google.protobuf.Timestamp
+	34,  // 25: server.HistoryTestCase.suiteParam:type_name -> server.Pair
+	12,  // 26: server.HistoryTestCase.suiteSpec:type_name -> server.APISpec
+	30,  // 27: server.HistoryTestCase.request:type_name -> server.Request
+	31,  // 28: server.HistoryTestCase.response:type_name -> server.Response
+	34,  // 29: server.HistoryTestCase.historyHeader:type_name -> server.Pair
+	28,  // 30: server.HistoryTestCases.data:type_name -> server.HistoryTestCase
+	34,  // 31: server.Request.header:type_name -> server.Pair
+	34,  // 32: server.Request.query:type_name -> server.Pair
+	34,  // 33: server.Request.cookie:type_name -> server.Pair
+	34,  // 34: server.Request.form:type_name -> server.Pair
+	34,  // 35: server.Response.header:type_name -> server.Pair
+	34,  // 36: server.Response.bodyFieldsExpect:type_name -> server.Pair
+	32,  // 37: server.Response.ConditionalVerify:type_name -> server.ConditionalVerify
+	34,  // 38: server.TestCaseResult.header:type_name -> server.Pair
+	34,  // 39: server.Pairs.data:type_name -> server.Pair
+	38,  // 40: server.Stores.data:type_name -> server.Store
+	34,  // 41: server.Store.properties:type_name -> server.Pair
+	40,  // 42: server.Store.kind:type_name -> server.StoreKind
+	40,  // 43: server.StoreKinds.data:type_name -> server.StoreKind
+	41,  // 44: server.StoreKind.dependencies:type_name -> server.StoreKindDependency
+	42,  // 45: server.StoreKind.params:type_name -> server.StoreKindParam
+	34,  // 46: server.SimpleList.data:type_name -> server.Pair
+	48,  // 47: server.Secrets.data:type_name -> server.Secret
+	34,  // 48: server.DataQueryResult.data:type_name -> server.Pair
+	35,  // 49: server.DataQueryResult.items:type_name -> server.Pairs
+	59,  // 50: server.DataQueryResult.meta:type_name -> server.DataMeta
+	34,  // 51: server.DataMeta.labels:type_name -> server.Pair
+	67,  // 52: server.GenerateContentRequest.context:type_name -> server.GenerateContentRequest.ContextEntry
+	68,  // 53: server.GenerateContentRequest.parameters:type_name -> server.GenerateContentRequest.ParametersEntry
+	62,  // 54: server.GenerateContentResponse.success:type_name -> server.ContentSuccessResponse
+	63,  // 55: server.GenerateContentResponse.error:type_name -> server.ErrorResponse
+	69,  // 56: server.ContentSuccessResponse.metadata:type_name -> server.ContentSuccessResponse.MetadataEntry
+	0,   // 57: server.ErrorResponse.code:type_name -> server.ErrorCode
+	4,   // 58: server.Suites.DataEntry.value:type_name -> server.Items
+	6,   // 59: server.HistorySuites.DataEntry.value:type_name -> server.HistoryItems
+	18,  // 60: server.Runner.Run:input_type -> server.TestTask
+	15,  // 61: server.Runner.RunTestSuite:input_type -> server.TestSuiteIdentity
+	53,  // 62: server.Runner.GetSuites:input_type -> server.Empty
+	15,  // 63: server.Runner.CreateTestSuite:input_type -> server.TestSuiteIdentity
+	9,   // 64: server.Runner.ImportTestSuite:input_type -> server.TestSuiteSource
+	15,  // 65: server.Runner.GetTestSuite:input_type -> server.TestSuiteIdentity
+	10,  // 66: server.Runner.UpdateTestSuite:input_type -> server.TestSuite
+	15,  // 67: server.Runner.DeleteTestSuite:input_type -> server.TestSuiteIdentity
+	16,  // 68: server.Runner.DuplicateTestSuite:input_type -> server.TestSuiteDuplicate
+	16,  // 69: server.Runner.RenameTestSuite:input_type -> server.TestSuiteDuplicate
+	15,  // 70: server.Runner.GetTestSuiteYaml:input_type -> server.TestSuiteIdentity
+	15,  // 71: server.Runner.ListTestCase:input_type -> server.TestSuiteIdentity
+	8,   // 72: server.Runner.RunTestCase:input_type -> server.TestCaseIdentity
+	19,  // 73: server.Runner.BatchRun:input_type -> server.BatchTestTask
+	8,   // 74: server.Runner.GetTestCase:input_type -> server.TestCaseIdentity
+	25,  // 75: server.Runner.CreateTestCase:input_type -> server.TestCaseWithSuite
+	25,  // 76: server.Runner.UpdateTestCase:input_type -> server.TestCaseWithSuite
+	8,   // 77: server.Runner.DeleteTestCase:input_type -> server.TestCaseIdentity
+	17,  // 78: server.Runner.DuplicateTestCase:input_type -> server.TestCaseDuplicate
+	17,  // 79: server.Runner.RenameTestCase:input_type -> server.TestCaseDuplicate
+	15,  // 80: server.Runner.GetSuggestedAPIs:input_type -> server.TestSuiteIdentity
+	53,  // 81: server.Runner.GetHistorySuites:input_type -> server.Empty
+	28,  // 82: server.Runner.GetHistoryTestCaseWithResult:input_type -> server.HistoryTestCase
+	28,  // 83: server.Runner.GetHistoryTestCase:input_type -> server.HistoryTestCase
+	28,  // 84: server.Runner.DeleteHistoryTestCase:input_type -> server.HistoryTestCase
+	28,  // 85: server.Runner.DeleteAllHistoryTestCase:input_type -> server.HistoryTestCase
+	27,  // 86: server.Runner.GetTestCaseAllHistory:input_type -> server.TestCase
+	53,  // 87: server.Runner.ListCodeGenerator:input_type -> server.Empty
+	46,  // 88: server.Runner.GenerateCode:input_type -> server.CodeGenerateRequest
+	46,  // 89: server.Runner.HistoryGenerateCode:input_type -> server.CodeGenerateRequest
+	53,  // 90: server.Runner.ListConverter:input_type -> server.Empty
+	46,  // 91: server.Runner.ConvertTestSuite:input_type -> server.CodeGenerateRequest
+	53,  // 92: server.Runner.PopularHeaders:input_type -> server.Empty
+	36,  // 93: server.Runner.FunctionsQuery:input_type -> server.SimpleQuery
+	36,  // 94: server.Runner.FunctionsQueryStream:input_type -> server.SimpleQuery
+	36,  // 95: server.Runner.GetSchema:input_type -> server.SimpleQuery
+	53,  // 96: server.Runner.GetVersion:input_type -> server.Empty
+	53,  // 97: server.Runner.Sample:input_type -> server.Empty
+	27,  // 98: server.Runner.DownloadResponseFile:input_type -> server.TestCase
+	53,  // 99: server.Runner.GetStoreKinds:input_type -> server.Empty
+	53,  // 100: server.Runner.GetStores:input_type -> server.Empty
+	38,  // 101: server.Runner.CreateStore:input_type -> server.Store
+	38,  // 102: server.Runner.UpdateStore:input_type -> server.Store
+	38,  // 103: server.Runner.DeleteStore:input_type -> server.Store
+	36,  // 104: server.Runner.VerifyStore:input_type -> server.SimpleQuery
+	53,  // 105: server.Runner.GetSecrets:input_type -> server.Empty
+	48,  // 106: server.Runner.CreateSecret:input_type -> server.Secret
+	48,  // 107: server.Runner.DeleteSecret:input_type -> server.Secret
+	48,  // 108: server.Runner.UpdateSecret:input_type -> server.Secret
+	50,  // 109: server.Runner.PProf:input_type -> server.PProfRequest
+	11,  // 110: server.RunnerExtension.Run:input_type -> server.TestSuiteWithCase
+	53,  // 111: server.UIExtension.GetMenus:input_type -> server.Empty
+	45,  // 112: server.UIExtension.GetPageOfJS:input_type -> server.SimpleName
+	45,  // 113: server.UIExtension.GetPageOfCSS:input_type -> server.SimpleName
+	53,  // 114: server.ThemeExtension.GetThemes:input_type -> server.Empty
+	45,  // 115: server.ThemeExtension.GetTheme:input_type -> server.SimpleName
+	53,  // 116: server.ThemeExtension.GetBindings:input_type -> server.Empty
+	45,  // 117: server.ThemeExtension.GetBinding:input_type -> server.SimpleName
+	60,  // 118: server.AIExtension.GenerateContent:input_type -> server.GenerateContentRequest
+	54,  // 119: server.Mock.Reload:input_type -> server.MockConfig
+	53,  // 120: server.Mock.GetConfig:input_type -> server.Empty
+	53,  // 121: server.Mock.LogWatch:input_type -> server.Empty
+	57,  // 122: server.DataServer.Query:input_type -> server.DataQuery
+	20,  // 123: server.Runner.Run:output_type -> server.TestResult
+	20,  // 124: server.Runner.RunTestSuite:output_type -> server.TestResult
+	3,   // 125: server.Runner.GetSuites:output_type -> server.Suites
+	22,  // 126: server.Runner.CreateTestSuite:output_type -> server.HelloReply
+	43,  // 127: server.Runner.ImportTestSuite:output_type -> server.CommonResult
+	10,  // 128: server.Runner.GetTestSuite:output_type -> server.TestSuite
+	22,  // 129: server.Runner.UpdateTestSuite:output_type -> server.HelloReply
+	22,  // 130: server.Runner.DeleteTestSuite:output_type -> server.HelloReply
+	22,  // 131: server.Runner.DuplicateTestSuite:output_type -> server.HelloReply
+	22,  // 132: server.Runner.RenameTestSuite:output_type -> server.HelloReply
+	23,  // 133: server.Runner.GetTestSuiteYaml:output_type -> server.YamlData
+	24,  // 134: server.Runner.ListTestCase:output_type -> server.Suite
+	33,  // 135: server.Runner.RunTestCase:output_type -> server.TestCaseResult
+	20,  // 136: server.Runner.BatchRun:output_type -> server.TestResult
+	27,  // 137: server.Runner.GetTestCase:output_type -> server.TestCase
+	22,  // 138: server.Runner.CreateTestCase:output_type -> server.HelloReply
+	22,  // 139: server.Runner.UpdateTestCase:output_type -> server.HelloReply
+	22,  // 140: server.Runner.DeleteTestCase:output_type -> server.HelloReply
+	22,  // 141: server.Runner.DuplicateTestCase:output_type -> server.HelloReply
+	22,  // 142: server.Runner.RenameTestCase:output_type -> server.HelloReply
+	26,  // 143: server.Runner.GetSuggestedAPIs:output_type -> server.TestCases
+	5,   // 144: server.Runner.GetHistorySuites:output_type -> server.HistorySuites
+	21,  // 145: server.Runner.GetHistoryTestCaseWithResult:output_type -> server.HistoryTestResult
+	28,  // 146: server.Runner.GetHistoryTestCase:output_type -> server.HistoryTestCase
+	22,  // 147: server.Runner.DeleteHistoryTestCase:output_type -> server.HelloReply
+	22,  // 148: server.Runner.DeleteAllHistoryTestCase:output_type -> server.HelloReply
+	29,  // 149: server.Runner.GetTestCaseAllHistory:output_type -> server.HistoryTestCases
+	44,  // 150: server.Runner.ListCodeGenerator:output_type -> server.SimpleList
+	43,  // 151: server.Runner.GenerateCode:output_type -> server.CommonResult
+	43,  // 152: server.Runner.HistoryGenerateCode:output_type -> server.CommonResult
+	44,  // 153: server.Runner.ListConverter:output_type -> server.SimpleList
+	43,  // 154: server.Runner.ConvertTestSuite:output_type -> server.CommonResult
+	35,  // 155: server.Runner.PopularHeaders:output_type -> server.Pairs
+	35,  // 156: server.Runner.FunctionsQuery:output_type -> server.Pairs
+	35,  // 157: server.Runner.FunctionsQueryStream:output_type -> server.Pairs
+	43,  // 158: server.Runner.GetSchema:output_type -> server.CommonResult
+	55,  // 159: server.Runner.GetVersion:output_type -> server.Version
+	22,  // 160: server.Runner.Sample:output_type -> server.HelloReply
+	52,  // 161: server.Runner.DownloadResponseFile:output_type -> server.FileData
+	39,  // 162: server.Runner.GetStoreKinds:output_type -> server.StoreKinds
+	37,  // 163: server.Runner.GetStores:output_type -> server.Stores
+	38,  // 164: server.Runner.CreateStore:output_type -> server.Store
+	38,  // 165: server.Runner.UpdateStore:output_type -> server.Store
+	38,  // 166: server.Runner.DeleteStore:output_type -> server.Store
+	49,  // 167: server.Runner.VerifyStore:output_type -> server.ExtensionStatus
+	47,  // 168: server.Runner.GetSecrets:output_type -> server.Secrets
+	43,  // 169: server.Runner.CreateSecret:output_type -> server.CommonResult
+	43,  // 170: server.Runner.DeleteSecret:output_type -> server.CommonResult
+	43,  // 171: server.Runner.UpdateSecret:output_type -> server.CommonResult
+	51,  // 172: server.Runner.PProf:output_type -> server.PProfData
+	43,  // 173: server.RunnerExtension.Run:output_type -> server.CommonResult
+	2,   // 174: server.UIExtension.GetMenus:output_type -> server.MenuList
+	43,  // 175: server.UIExtension.GetPageOfJS:output_type -> server.CommonResult
+	43,  // 176: server.UIExtension.GetPageOfCSS:output_type -> server.CommonResult
+	44,  // 177: server.ThemeExtension.GetThemes:output_type -> server.SimpleList
+	43,  // 178: server.ThemeExtension.GetTheme:output_type -> server.CommonResult
+	44,  // 179: server.ThemeExtension.GetBindings:output_type -> server.SimpleList
+	43,  // 180: server.ThemeExtension.GetBinding:output_type -> server.CommonResult
+	61,  // 181: server.AIExtension.GenerateContent:output_type -> server.GenerateContentResponse
+	53,  // 182: server.Mock.Reload:output_type -> server.Empty
+	54,  // 183: server.Mock.GetConfig:output_type -> server.MockConfig
+	43,  // 184: server.Mock.LogWatch:output_type -> server.CommonResult
+	58,  // 185: server.DataServer.Query:output_type -> server.DataQueryResult
+	123, // [123:186] is the sub-list for method output_type
+	60,  // [60:123] is the sub-list for method input_type
+	60,  // [60:60] is the sub-list for extension type_name
+	60,  // [60:60] is the sub-list for extension extendee
+	0,   // [0:60] is the sub-list for field type_name
 }
 
 func init() { file_pkg_server_server_proto_init() }
@@ -4447,21 +4782,21 @@ func file_pkg_server_server_proto_init() {
 	if File_pkg_server_server_proto != nil {
 		return
 	}
-	file_pkg_server_server_proto_msgTypes[55].OneofWrappers = []any{}
-	file_pkg_server_server_proto_msgTypes[56].OneofWrappers = []any{
+	file_pkg_server_server_proto_msgTypes[59].OneofWrappers = []any{}
+	file_pkg_server_server_proto_msgTypes[60].OneofWrappers = []any{
 		(*GenerateContentResponse_Success)(nil),
 		(*GenerateContentResponse_Error)(nil),
 	}
-	file_pkg_server_server_proto_msgTypes[57].OneofWrappers = []any{}
+	file_pkg_server_server_proto_msgTypes[61].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_server_server_proto_rawDesc), len(file_pkg_server_server_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   65,
+			NumMessages:   69,
 			NumExtensions: 0,
-			NumServices:   6,
+			NumServices:   7,
 		},
 		GoTypes:           file_pkg_server_server_proto_goTypes,
 		DependencyIndexes: file_pkg_server_server_proto_depIdxs,

@@ -1,5 +1,5 @@
 /*
-Copyright 2023-2024 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import type { Pair } from './types'
+import { API } from './net'
 
 export interface Store {
   name: string;
@@ -25,26 +26,6 @@ export interface Store {
   };
   properties: Pair[];
   params: Pair[];
-}
-
-const MySQL = "mysql";
-const Postgres = "postgres";
-const SQLite = "sqlite";
-const TDengine = "tdengine";
-const Cassandra = "cassandra";
-
-export const GetDriverName = (store: Store): string => {
-    switch (store.kind.name) {
-    case 'atest-store-orm':
-        return store.properties.find((p: Pair) => p.key === 'driver')?.value || MySQL;
-    case 'atest-store-cassandra':
-        return Cassandra;
-    }
-    return ""
-}
-
-export const Driver = {
-    MySQL, Postgres, SQLite, TDengine, Cassandra
 }
 
 const ExtensionKindGit = "atest-store-git"
@@ -71,6 +52,22 @@ export const ExtensionKind = {
     ExtensionKindElasticsearch,
     ExtensionKindOpengeMini,
     ExtensionKindAI
+}
+
+const MySQL = "mysql";
+const Postgres = "postgres";
+const SQLite = "sqlite";
+const TDengine = "tdengine";
+const Cassandra = "cassandra";
+
+export const GetDriverName = (store: Store): string => {
+    switch (store.kind.name) {
+    case 'atest-store-orm':
+        return store.properties.find((p: Pair) => p.key === 'driver')?.value || MySQL;
+    case 'atest-store-cassandra':
+        return Cassandra;
+    }
+    return ""
 }
 
 const storeExtensions = [
@@ -203,12 +200,21 @@ const storeExtensions = [
         }],
         link: 'https://github.com/LinuxSuRen/atest-ext-ai'
     }
-] as Store[]
+]
 
-export function SupportedExtensions() {
-    return storeExtensions
+export const Driver = {
+    MySQL, Postgres, SQLite, TDengine, Cassandra
 }
 
-export function SupportedExtension(name: string) {
-    return storeExtensions.find(e => e.name === name)
+export async function SupportedExtensions() {
+    const kinds = await API.GetStoreKinds()
+    if (kinds) {
+        return kinds.data
+    }
+    return []
+}
+
+export async function SupportedExtension(name: string) {
+    const storeExtensions = await SupportedExtensions()
+    return storeExtensions.find((e: Store) => e.name === name)
 }

@@ -18,6 +18,7 @@ package docs
 import (
 	_ "embed"
 	"fmt"
+
 	yamlconv "github.com/ghodss/yaml"
 	"github.com/xeipuuv/gojsonschema"
 )

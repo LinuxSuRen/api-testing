@@ -26,17 +26,19 @@ package testing
 
 import (
 	"fmt"
-	"github.com/linuxsuren/api-testing/pkg/util"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/linuxsuren/api-testing/pkg/util"
 
 	"gopkg.in/yaml.v3"
 )
 
 type StoreConfig struct {
-	Stores  []Store     `yaml:"stores"`
-	Plugins []StoreKind `yaml:"plugins"`
+	Stores     []Store     `yaml:"stores"`
+	Plugins    []StoreKind `yaml:"plugins"`
+	Extensions []StoreKind `yaml:"items"`
 }
 
 type Store struct {
@@ -97,9 +99,24 @@ func MapToStore(data map[string]string) (store Store) {
 
 // StoreKind represents a gRPC-based store
 type StoreKind struct {
-	Name    string
-	URL     string
-	Enabled bool
+	Name         string
+	Dependencies []StoreKindDependency
+	URL          string
+	Params       []StoreKindParam
+	Link         string
+	Enabled      bool
+	Categories   []string
+}
+
+type StoreKindDependency struct {
+	Name string
+}
+
+type StoreKindParam struct {
+	Key          string
+	DefaultValue string
+	Enum         []string
+	Description  string
 }
 
 type StoreGetterAndSetter interface {
@@ -258,9 +275,13 @@ func (s *storeFactory) save(storeConfig *StoreConfig) (err error) {
 }
 
 func (s *storeFactory) GetStoreKinds() (kinds []StoreKind, err error) {
-	var storeConfig *StoreConfig
-	if storeConfig, err = s.getStoreConfig(); err == nil {
-		kinds = storeConfig.Plugins
+	storeConfig := &StoreConfig{}
+
+	var data []byte
+	if data, err = os.ReadFile(path.Join(s.configDir, "data", "core", "extension.yaml")); err == nil {
+		if err = yaml.Unmarshal(data, storeConfig); err == nil {
+			kinds = storeConfig.Extensions
+		}
 	}
 	return
 }

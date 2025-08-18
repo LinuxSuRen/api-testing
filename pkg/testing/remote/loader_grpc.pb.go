@@ -47,6 +47,9 @@ const (
 	Loader_GetTheme_FullMethodName                     = "/remote.Loader/GetTheme"
 	Loader_GetBindings_FullMethodName                  = "/remote.Loader/GetBindings"
 	Loader_GetBinding_FullMethodName                   = "/remote.Loader/GetBinding"
+	Loader_GetMenus_FullMethodName                     = "/remote.Loader/GetMenus"
+	Loader_GetPageOfJS_FullMethodName                  = "/remote.Loader/GetPageOfJS"
+	Loader_GetPageOfCSS_FullMethodName                 = "/remote.Loader/GetPageOfCSS"
 )
 
 // LoaderClient is the client API for Loader service.
@@ -80,6 +83,9 @@ type LoaderClient interface {
 	GetTheme(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
 	GetBindings(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.SimpleList, error)
 	GetBinding(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
+	GetMenus(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.MenuList, error)
+	GetPageOfJS(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
+	GetPageOfCSS(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
 }
 
 type loaderClient struct {
@@ -360,6 +366,36 @@ func (c *loaderClient) GetBinding(ctx context.Context, in *server.SimpleName, op
 	return out, nil
 }
 
+func (c *loaderClient) GetMenus(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.MenuList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(server.MenuList)
+	err := c.cc.Invoke(ctx, Loader_GetMenus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) GetPageOfJS(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(server.CommonResult)
+	err := c.cc.Invoke(ctx, Loader_GetPageOfJS_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loaderClient) GetPageOfCSS(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(server.CommonResult)
+	err := c.cc.Invoke(ctx, Loader_GetPageOfCSS_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoaderServer is the server API for Loader service.
 // All implementations must embed UnimplementedLoaderServer
 // for forward compatibility.
@@ -391,6 +427,9 @@ type LoaderServer interface {
 	GetTheme(context.Context, *server.SimpleName) (*server.CommonResult, error)
 	GetBindings(context.Context, *server.Empty) (*server.SimpleList, error)
 	GetBinding(context.Context, *server.SimpleName) (*server.CommonResult, error)
+	GetMenus(context.Context, *server.Empty) (*server.MenuList, error)
+	GetPageOfJS(context.Context, *server.SimpleName) (*server.CommonResult, error)
+	GetPageOfCSS(context.Context, *server.SimpleName) (*server.CommonResult, error)
 	mustEmbedUnimplementedLoaderServer()
 }
 
@@ -481,6 +520,15 @@ func (UnimplementedLoaderServer) GetBindings(context.Context, *server.Empty) (*s
 }
 func (UnimplementedLoaderServer) GetBinding(context.Context, *server.SimpleName) (*server.CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBinding not implemented")
+}
+func (UnimplementedLoaderServer) GetMenus(context.Context, *server.Empty) (*server.MenuList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMenus not implemented")
+}
+func (UnimplementedLoaderServer) GetPageOfJS(context.Context, *server.SimpleName) (*server.CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfJS not implemented")
+}
+func (UnimplementedLoaderServer) GetPageOfCSS(context.Context, *server.SimpleName) (*server.CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfCSS not implemented")
 }
 func (UnimplementedLoaderServer) mustEmbedUnimplementedLoaderServer() {}
 func (UnimplementedLoaderServer) testEmbeddedByValue()                {}
@@ -989,6 +1037,60 @@ func _Loader_GetBinding_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Loader_GetMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetMenus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Loader_GetMenus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetMenus(ctx, req.(*server.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_GetPageOfJS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetPageOfJS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Loader_GetPageOfJS_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetPageOfJS(ctx, req.(*server.SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Loader_GetPageOfCSS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetPageOfCSS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Loader_GetPageOfCSS_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetPageOfCSS(ctx, req.(*server.SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Loader_ServiceDesc is the grpc.ServiceDesc for Loader service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1103,6 +1205,18 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetBinding",
 			Handler:    _Loader_GetBinding_Handler,
+		},
+		{
+			MethodName: "GetMenus",
+			Handler:    _Loader_GetMenus_Handler,
+		},
+		{
+			MethodName: "GetPageOfJS",
+			Handler:    _Loader_GetPageOfJS_Handler,
+		},
+		{
+			MethodName: "GetPageOfCSS",
+			Handler:    _Loader_GetPageOfCSS_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

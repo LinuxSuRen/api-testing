@@ -1,30 +1,92 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Codemirror } from 'vue-codemirror';
+import { ElMessage } from 'element-plus'
+import yaml from 'js-yaml';
+import { jsonSchema } from "codemirror-json-schema";
+import { NewTemplateLangComplete, NewHeaderLangComplete } from './languageComplete'
+import { jsonLanguage } from "@codemirror/lang-json"
 import { API } from './net';
 import {useI18n} from "vue-i18n";
 import EditButton from '../components/EditButton.vue'
 
 const { t } = useI18n()
 
+const mockschema = ref({}); // Type assertion to any for JSON schema
+const jsonComplete = NewTemplateLangComplete(jsonLanguage)
+const headerComplete = NewHeaderLangComplete(jsonLanguage)
+
+API.GetSchema('mock').then((schema) => {
+    if (schema.success && schema.message !== '') {
+        mockschema.value = JSON.parse(schema.message);
+    }
+});
+
+const logOutput = ref('');
+API.GetStream((stream) => {
+    try {
+        const data = JSON.parse(stream);
+        logOutput.value += `${data.result.message}`;
+    } catch (e) {}
+});
+
 interface MockConfig {
   Config: string
+  ConfigAsJSON: string
   Prefix: string
   Port: number
+  storeKind: string
+  storeLocalFile?: string
+  storeURL?: string
+  storeRemote?: string
 }
+
+const tabActive = ref('yaml')
 const mockConfig = ref({} as MockConfig);
+watch(mockConfig, (newValue) => {
+    if (tabActive.value === 'json') {
+        // convert JSON to YAML string
+        try {
+            newValue.Config = jsonToYaml(newValue.ConfigAsJSON);
+        } catch (e) {
+        }
+    } else {
+        newValue.ConfigAsJSON = JSON.stringify(yaml.load(newValue.Config), null, 2);
+    }
+}, { deep: true });
+
+function jsonToYaml(jsonData: object | string): string {
+  const data = typeof jsonData === 'string' 
+    ? JSON.parse(jsonData) 
+    : jsonData;
+  
+  return yaml.dump(data, {
+    indent: 2,
+    skipInvalid: true,
+    noRefs: true,
+    lineWidth: -1,
+  });
+}
+
 const link = ref('')
-API.GetMockConfig((d) => {
-  mockConfig.value = d
-  link.value = window.location.origin + d.Prefix + "/api.json"
-})
+const loadConfig = () => {
+    API.GetMockConfig((d) => {
+        ElMessage({
+            showClose: true,
+            message: 'Config loaded!',
+            type: 'success'
+        });
+        mockConfig.value = d
+        link.value = `http://${window.location.hostname}:${d.Port}${d.Prefix}/api.json`
+    })
+}
+loadConfig()
 const prefixChanged = (p: string) => {
   mockConfig.value.Prefix = p
 }
 const portChanged = (p: number) => {
   mockConfig.value.Port = p
 }
-const tabActive = ref('yaml')
 const insertSample = () => {
     mockConfig.value.Config = `objects:
   - name: projects
@@ -47,21 +109,46 @@ items:
 <template>
     <div>
         <el-button type="primary" @click="insertSample">{{t('button.insertSample')}}</el-button>
-        <el-button type="warning" @click="API.ReloadMockServer(mockConfig)">{{t('button.reload')}}</el-button>
+        <el-button type="warning" @click="API.ReloadMockServer(mockConfig).then(() => loadConfig())">{{t('button.reload')}}</el-button>
         <el-divider direction="vertical" />
         <el-link target="_blank" :href="link">{{ link }}</el-link> <!-- Noncompliant -->
     </div>
     <div class="config">
       API Prefix:<EditButton :value="mockConfig.Prefix" @changed="prefixChanged"/>
       Port:<EditButton :value="mockConfig.Port" @changed="portChanged"/>
+      Store:
+      <el-select v-model="mockConfig.storeKind" placeholder="Select Store Kind"
+                 class="m-2 select"
+                 size="default">
+        <el-option label="Memory" value="memory"></el-option>
+        <el-option label="Local File" value="localFile"></el-option>
+      </el-select>
+      <el-input v-model="mockConfig.storeLocalFile" placeholder="Local File Path" v-if="mockConfig.storeKind === 'localFile'"></el-input>
     </div>
-    <div>
-        <el-tabs v-model="tabActive">
-            <el-tab-pane label="YAML" name="yaml">
-                <Codemirror v-model="mockConfig.Config" />
-            </el-tab-pane>
-        </el-tabs>
-    </div>
+    <el-splitter layout="vertical" style="height: calc(100vh - 100px);">
+        <el-splitter-panel size="70%">
+            <el-tabs v-model="tabActive">
+                <el-tab-pane label="YAML" name="yaml">
+                    <Codemirror v-model="mockConfig.Config"
+                        :extensions="[jsonComplete, headerComplete]" />
+                </el-tab-pane>
+                <el-tab-pane label="JSON" name="json">
+                    <Codemirror v-model="mockConfig.ConfigAsJSON"
+                        :extensions="[jsonSchema(mockschema), jsonComplete, headerComplete]" />
+                </el-tab-pane>
+            </el-tabs>
+        </el-splitter-panel>
+        <el-splitter-panel size="30%">
+            <el-card shadow="hover">
+                <template #header>
+                    <span>{{ t('title.logs') }}</span>
+                </template>
+                <el-scrollbar>
+                    <pre style="white-space: pre-wrap; word-break: break-all;">{{logOutput}}</pre>
+                </el-scrollbar>
+            </el-card>
+        </el-splitter-panel>
+    </el-splitter>
 </template>
 
 <style>
@@ -70,5 +157,11 @@ items:
   display: flex;
   align-items: center; 
   gap: 8px; 
+}
+.select {
+    width: 150px !important;
+}
+.el-input {
+    --el-input-width: 300px !important;
 }
 </style>

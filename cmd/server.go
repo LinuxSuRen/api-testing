@@ -109,8 +109,8 @@ func createServerCmd(execer fakeruntime.Execer, httpServer server.HTTPServer) (c
 
 	// gc related flags
 	flags.IntVarP(&opt.gcPercent, "gc-percent", "", 100, "The GC percent of Go")
-	//grpc_tls
-	flags.BoolVarP(&opt.tls, "tls-grpc", "", false, "Enable TLS mode. Set to true to enable TLS. Alow SAN certificates")
+
+	flags.BoolVarP(&opt.tls, "tls", "", false, "Enable TLS mode. Set to true to enable TLS. Alow SAN certificates")
 	flags.StringVarP(&opt.tlsCert, "cert-file", "", "", "The path to the certificate file, Alow SAN certificates")
 	flags.StringVarP(&opt.tlsKey, "key-file", "", "", "The path to the key file, Alow SAN certificates")
 
@@ -124,8 +124,12 @@ type serverOption struct {
 	httpServer server.HTTPServer
 	execer     fakeruntime.Execer
 
-	port              int
-	httpPort          int
+	port     int
+	httpPort int
+	tls      bool
+	tlsCert  string
+	tlsKey   string
+
 	printProto        bool
 	localStorage      []string
 	consolePath       string
@@ -148,17 +152,12 @@ type serverOption struct {
 	mockConfig []string
 	mockPrefix string
 
-	gcPercent int
-
-	dryRun bool
-
+	gcPercent          int
+	dryRun             bool
 	grpcMaxRecvMsgSize int
 
 	// inner fields, not as command flags
 	provider oauth.OAuthProvider
-	tls      bool
-	tlsCert  string
-	tlsKey   string
 }
 
 func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
@@ -190,6 +189,7 @@ func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 
 		grpcOpts = append(grpcOpts, atestoauth.NewAuthInterceptor(o.oauthGroup))
 	}
+
 	if o.tls {
 		if o.tlsCert != "" && o.tlsKey != "" {
 			creds, err := credentials.NewServerTLSFromFile(o.tlsCert, o.tlsKey)
@@ -197,8 +197,12 @@ func (o *serverOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 				return fmt.Errorf("failed to load credentials: %v", err)
 			}
 			grpcOpts = append(grpcOpts, grpc.Creds(creds))
+		} else {
+			err = fmt.Errorf("both --cert-file and --key-file flags are required when --tls is enabled")
+			return
 		}
 	}
+
 	if o.dryRun {
 		o.gRPCServer = &fakeGRPCServer{}
 	} else {
@@ -260,13 +264,12 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	storeExtMgr := server.NewStoreExtManager(o.execer)
 	storeExtMgr.WithDownloader(extDownloader)
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir, o.grpcMaxRecvMsgSize)
-	kinds, storeKindsErr := remoteServer.GetStoreKinds(ctx, nil)
-	if storeKindsErr != nil {
-		cmd.PrintErrf("failed to get store kinds, error: %v\n", storeKindsErr)
-	} else {
-		if runPluginErr := startPlugins(storeExtMgr, kinds); runPluginErr != nil {
+	if stores, storeErr := remoteServer.GetStores(ctx, nil); storeErr == nil {
+		if runPluginErr := startPlugins(storeExtMgr, stores); runPluginErr != nil {
 			cmd.PrintErrf("error occurred during starting plugins, error: %v\n", runPluginErr)
 		}
+	} else {
+		cmd.PrintErrf("error occurred during getting stores, error: %v\n", storeErr)
 	}
 
 	// create mock server controller
@@ -278,7 +281,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mockWriter = mock.NewInMemoryReader("")
 	}
 
-	dynamicMockServer := mock.NewInMemoryServer(cmd.Context(), 0)
+	dynamicMockServer := mock.NewInMemoryServer(cmd.Context(), 0).WithTLS(o.tlsCert, o.tlsKey)
 	mockServerController := server.NewMockServerController(mockWriter, dynamicMockServer, o.httpPort)
 
 	clean := make(chan os.Signal, 1)
@@ -293,6 +296,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		server.RegisterMockServer(s, mockServerController)
 		server.RegisterDataServerServer(s, remoteServer.(server.DataServerServer))
 		server.RegisterThemeExtensionServer(s, remoteServer.(server.ThemeExtensionServer))
+		server.RegisterUIExtensionServer(s, remoteServer.(server.UIExtensionServer))
 		serverLogger.Info("gRPC server listening at", "addr", lis.Addr())
 		s.Serve(lis)
 	}()
@@ -330,15 +334,20 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	gRPCServerAddr := fmt.Sprintf("127.0.0.1:%s", gRPCServerPort)
 
 	if o.tls {
-		creds, err := credentials.NewClientTLSFromFile(o.tlsCert, "localhost")
+		var creds credentials.TransportCredentials
+		creds, err = credentials.NewClientTLSFromFile(o.tlsCert, "127.0.0.1")
 		if err != nil {
 			return fmt.Errorf("failed to load credentials: %v", err)
 		}
+
+		opts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
 		err = errors.Join(
-			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}),
-			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}),
-			server.RegisterThemeExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}),
-			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}))
+			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
+			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
+			server.RegisterThemeExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
+			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
+			server.RegisterUIExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, opts),
+		)
 	} else {
 		dialOption := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt))}
@@ -346,7 +355,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			server.RegisterRunnerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
 			server.RegisterMockHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
 			server.RegisterThemeExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
-			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption))
+			server.RegisterDataServerHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
+			server.RegisterUIExtensionHandlerFromEndpoint(ctx, mux, gRPCServerAddr, dialOption),
+		)
 	}
 
 	if err == nil {
@@ -426,13 +437,14 @@ func postRequestProxy(proxy string) func(w http.ResponseWriter, r *http.Request,
 	}
 }
 
-func startPlugins(storeExtMgr server.ExtManager, kinds *server.StoreKinds) (err error) {
-	const socketPrefix = "unix://"
-
-	for _, kind := range kinds.Data {
-		if kind.Enabled && (strings.HasPrefix(kind.Url, socketPrefix) || strings.Contains(kind.Url, ":")) {
-			err = errors.Join(err, storeExtMgr.Start(kind.Name, kind.Url))
+func startPlugins(storeExtMgr server.ExtManager, stores *server.Stores) (err error) {
+	for _, store := range stores.Data {
+		if store.Disabled || store.Kind == nil {
+			continue
 		}
+
+		kind := store.Kind
+		err = errors.Join(err, storeExtMgr.Start(kind.Name, kind.Url))
 	}
 	return
 }
