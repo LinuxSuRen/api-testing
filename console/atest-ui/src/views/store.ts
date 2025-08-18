@@ -63,7 +63,13 @@ const Cassandra = "cassandra";
 export const GetDriverName = (store: Store): string => {
     switch (store.kind.name) {
     case 'atest-store-orm':
-        return store.properties.find((p: Pair) => p.key === 'driver')?.value || MySQL;
+        const properties = store.properties as Pair[];
+        for (let i = 0; i < properties.length; i++) {
+            if (properties[i].key === 'driver') {
+                return properties[i].value || MySQL;
+            }
+        }
+        return MySQL;
     case 'atest-store-cassandra':
         return Cassandra;
     }
