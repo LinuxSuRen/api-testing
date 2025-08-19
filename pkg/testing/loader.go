@@ -23,6 +23,7 @@ type Loader interface {
 	GetContext() string
 	GetCount() int
 	Reset()
+	WithUserConfigDir(string)
 
 	Verify() (readOnly bool, version string, err error)
 	PProf(name string) []byte

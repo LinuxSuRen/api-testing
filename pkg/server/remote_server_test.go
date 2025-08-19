@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2024-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -871,7 +872,7 @@ func TestStoreManager(t *testing.T) {
 		server, clean := getRemoteServerInTempDir()
 		defer clean()
 
-		reply, err := server.GetStores(ctx, &Empty{})
+		reply, err := server.GetStores(ctx, &SimpleQuery{})
 		assert.NoError(t, err)
 		if assert.Equal(t, 1, len(reply.Data)) {
 			assert.Equal(t, "local", reply.Data[0].Name)
@@ -888,7 +889,7 @@ func TestStoreManager(t *testing.T) {
 		assert.NotNil(t, reply)
 
 		var stores *Stores
-		stores, err = server.GetStores(ctx, &Empty{})
+		stores, err = server.GetStores(ctx, &SimpleQuery{})
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(stores.Data))
 	})
@@ -950,9 +951,20 @@ func TestRemoteRunnerAdapter(t *testing.T) {
 	assert.Error(t, err)
 }
 
+//go:embed testdata/extension.yaml
+var extensionConfig []byte
+
 func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 	dir, _ := os.MkdirTemp(os.TempDir(), "remote-server-test")
 	call = func() { os.RemoveAll(dir) }
+
+	corePath := filepath.Join(dir, "data", "core")
+	os.MkdirAll(corePath, 0755)
+	os.WriteFile(filepath.Join(corePath, "extension.yaml"), extensionConfig, 0755)
+
+	themePath := filepath.Join(dir, "data", "theme")
+	os.MkdirAll(themePath, 0755)
+	os.WriteFile(filepath.Join(themePath, "simple.json"), []byte(simplePostman), 0755)
 
 	writer := atest.NewFileWriter(dir)
 	server = NewRemoteServer(writer, newLocalloaderFromStore(), nil, nil, dir, 1024*1024*4)
@@ -1038,4 +1050,33 @@ func (s *fakeServerStream) RecvMsg(m interface{}) error {
 	}
 
 	return nil
+}
+
+func TestGetStoreKinds(t *testing.T) {
+	server, clean := getRemoteServerInTempDir()
+	defer clean()
+
+	reply, err := server.GetStoreKinds(context.Background(), &Empty{})
+	assert.NoError(t, err)
+
+	assert.Equal(t, 1, len(reply.Data))
+}
+
+func TestGetThemes(t *testing.T) {
+	server, clean := getRemoteServerInTempDir()
+	defer clean()
+
+	themeServer, ok := server.(ThemeExtensionServer)
+	assert.True(t, ok)
+
+	reply, err := themeServer.GetThemes(context.Background(), &Empty{})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(reply.Data))
+
+	var theme *CommonResult
+	theme, err = themeServer.GetTheme(context.Background(), &SimpleName{
+		Name: "simple",
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, theme)
 }
