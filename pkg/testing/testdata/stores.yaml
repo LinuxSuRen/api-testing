@@ -3,8 +3,12 @@ stores:
       owner: ""
       kind:
         name: database
+        dependencies: []
         url: localhost:7071
+        params: []
+        link: ""
         enabled: true
+        categories: []
       description: ""
       url: localhost:4000
       username: root
@@ -17,8 +21,12 @@ stores:
       owner: rick
       kind:
         name: ""
+        dependencies: []
         url: ""
+        params: []
+        link: ""
         enabled: false
+        categories: []
       description: ""
       url: ""
       username: ""
@@ -28,5 +36,10 @@ stores:
       properties: {}
 plugins:
     - name: database
+      dependencies: []
       url: localhost:7071
+      params: []
+      link: ""
       enabled: true
+      categories: []
+items: []

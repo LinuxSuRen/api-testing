@@ -53,6 +53,7 @@ type LoaderClient interface {
 	GetMenus(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.MenuList, error)
 	GetPageOfJS(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
 	GetPageOfCSS(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
+	GetPageOfStatic(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
 }
 
 type loaderClient struct {
@@ -333,6 +334,15 @@ func (c *loaderClient) GetPageOfCSS(ctx context.Context, in *server.SimpleName, 
 	return out, nil
 }
 
+func (c *loaderClient) GetPageOfStatic(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error) {
+	out := new(server.CommonResult)
+	err := c.cc.Invoke(ctx, "/remote.Loader/GetPageOfStatic", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoaderServer is the server API for Loader service.
 // All implementations must embed UnimplementedLoaderServer
 // for forward compatibility
@@ -367,6 +377,7 @@ type LoaderServer interface {
 	GetMenus(context.Context, *server.Empty) (*server.MenuList, error)
 	GetPageOfJS(context.Context, *server.SimpleName) (*server.CommonResult, error)
 	GetPageOfCSS(context.Context, *server.SimpleName) (*server.CommonResult, error)
+	GetPageOfStatic(context.Context, *server.SimpleName) (*server.CommonResult, error)
 	mustEmbedUnimplementedLoaderServer()
 }
 
@@ -463,6 +474,9 @@ func (UnimplementedLoaderServer) GetPageOfJS(context.Context, *server.SimpleName
 }
 func (UnimplementedLoaderServer) GetPageOfCSS(context.Context, *server.SimpleName) (*server.CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfCSS not implemented")
+}
+func (UnimplementedLoaderServer) GetPageOfStatic(context.Context, *server.SimpleName) (*server.CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfStatic not implemented")
 }
 func (UnimplementedLoaderServer) mustEmbedUnimplementedLoaderServer() {}
 
@@ -1017,6 +1031,24 @@ func _Loader_GetPageOfCSS_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Loader_GetPageOfStatic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(server.SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoaderServer).GetPageOfStatic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/remote.Loader/GetPageOfStatic",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoaderServer).GetPageOfStatic(ctx, req.(*server.SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Loader_ServiceDesc is the grpc.ServiceDesc for Loader service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1143,6 +1175,10 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPageOfCSS",
 			Handler:    _Loader_GetPageOfCSS_Handler,
+		},
+		{
+			MethodName: "GetPageOfStatic",
+			Handler:    _Loader_GetPageOfStatic_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

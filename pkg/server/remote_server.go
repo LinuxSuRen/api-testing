@@ -1531,6 +1531,22 @@ func (s *server) GetPageOfCSS(ctx context.Context, in *SimpleName) (result *Comm
 	return
 }
 
+func (s *server) GetPageOfStatic(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
+	result = &CommonResult{}
+	extName := ctx.Value("X-Extension-Name")
+	if loader, ok := uiExtensionLoaders[extName.(string)]; ok {
+		if js, err := loader.GetPageOfStatic(in.Name); err == nil {
+			result.Message = js
+			result.Success = true
+		} else {
+			result.Message = err.Error()
+		}
+	} else {
+		result.Message = fmt.Sprintf("not found loader for %s", in.Name)
+	}
+	return
+}
+
 // implement the mock server
 
 // Start starts the mock server

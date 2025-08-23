@@ -42,6 +42,7 @@ service Loader {
     rpc GetMenus(server.Empty) returns (server.MenuList) {}
     rpc GetPageOfJS(server.SimpleName) returns (server.CommonResult) {}
     rpc GetPageOfCSS(server.SimpleName) returns (server.CommonResult) {}
+    rpc GetPageOfStatic(server.SimpleName) returns (server.CommonResult) {}
 }
 
 message TestSuites {
