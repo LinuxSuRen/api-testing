@@ -1,5 +1,5 @@
 /*
-Copyright 2023-2024 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -143,6 +143,15 @@ func TestFrontEndHandlerWithLocation(t *testing.T) {
 		resp := newFakeResponseWriter()
 		handler(resp, req, map[string]string{})
 		assert.Equal(t, "ok", resp.GetBody().String())
+	})
+
+	t.Run("swagger", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, "/swagger.json", nil)
+		assert.NoError(t, err)
+
+		resp := newFakeResponseWriter()
+		handler(resp, req, map[string]string{})
+		assert.Equal(t, string(server.SwaggerJSON), resp.GetBody().String())
 	})
 
 	t.Run("pprof", func(t *testing.T) {
@@ -336,6 +345,24 @@ func TestStartPlugins(t *testing.T) {
 		if assert.NoError(t, err) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 		}
+	})
+}
+
+func TestDataFromExtension(t *testing.T) {
+	opt := &serverOption{}
+
+	handler := opt.dataFromExtension(server.UnimplementedUIExtensionServer{})
+	t.Run("not found", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, "/data/fake", nil)
+		req.Header.Set("X-Extension-Fake", "fake")
+		req.Header.Set("Content-Type", "application/json")
+		assert.NoError(t, err)
+
+		resp := newFakeResponseWriter()
+		handler(resp, req, map[string]string{
+			"data": "fake",
+		})
+		assert.Contains(t, resp.GetBody().String(), "not implemented")
 	})
 }
 

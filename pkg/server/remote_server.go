@@ -1,5 +1,5 @@
 /*
-Copyright 2023-2024 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -1405,9 +1405,12 @@ func (s *server) GetTheme(ctx context.Context, in *SimpleName) (result *CommonRe
 	loader := s.getLoader(ctx)
 	defer loader.Close()
 
-	result = &CommonResult{}
+	result = &CommonResult{
+		Success: true,
+	}
 	result.Message, err = loader.GetTheme(in.Name)
 	if err != nil {
+		result.Success = false
 		result.Message = fmt.Sprintf("failed to get theme: %v", err)
 	}
 	return
@@ -1434,9 +1437,12 @@ func (s *server) GetBinding(ctx context.Context, in *SimpleName) (result *Common
 	loader := s.getLoader(ctx)
 	defer loader.Close()
 
-	result = &CommonResult{}
+	result = &CommonResult{
+		Success: true,
+	}
 	result.Message, err = loader.GetBinding(in.Name)
 	if err != nil {
+		result.Success = false
 		result.Message = fmt.Sprintf("failed to get binding: %v", err)
 	}
 	return
@@ -1591,9 +1597,12 @@ func (s *mockServerController) Reload(ctx context.Context, in *MockConfig) (repl
 	case "memory":
 		s.mockWriter = mock.NewInMemoryReader(in.Config)
 	case "localFile":
+		if in.StoreLocalFile == "" {
+			return nil, errors.New("StoreLocalFile is required")
+		}
 		s.mockWriter = mock.NewLocalFileReader(in.StoreLocalFile)
-	case "remote":
-	case "url":
+	default:
+		return nil, fmt.Errorf("unsupported store kind: %s", in.StoreKind)
 	}
 	s.config = in
 
