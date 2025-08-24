@@ -196,3 +196,7 @@ func (l *nonLoader) GetPageOfJS(s string) (string, error) {
 func (l *nonLoader) GetPageOfCSS(s string) (string, error) {
 	return "", fmt.Errorf("not support")
 }
+
+func (l *nonLoader) GetPageOfStatic(s string) (string, error) {
+	return "", fmt.Errorf("not support")
+}

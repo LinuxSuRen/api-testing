@@ -1,0 +1,5 @@
+objects:
+  - name: user
+    fields:
+      - name: username
+        kind: string

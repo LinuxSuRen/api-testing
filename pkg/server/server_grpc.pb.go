@@ -2080,6 +2080,7 @@ type UIExtensionClient interface {
 	GetMenus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MenuList, error)
 	GetPageOfJS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error)
 	GetPageOfCSS(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error)
+	GetPageOfStatic(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error)
 }
 
 type uIExtensionClient struct {
@@ -2117,6 +2118,15 @@ func (c *uIExtensionClient) GetPageOfCSS(ctx context.Context, in *SimpleName, op
 	return out, nil
 }
 
+func (c *uIExtensionClient) GetPageOfStatic(ctx context.Context, in *SimpleName, opts ...grpc.CallOption) (*CommonResult, error) {
+	out := new(CommonResult)
+	err := c.cc.Invoke(ctx, "/server.UIExtension/GetPageOfStatic", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UIExtensionServer is the server API for UIExtension service.
 // All implementations must embed UnimplementedUIExtensionServer
 // for forward compatibility
@@ -2124,6 +2134,7 @@ type UIExtensionServer interface {
 	GetMenus(context.Context, *Empty) (*MenuList, error)
 	GetPageOfJS(context.Context, *SimpleName) (*CommonResult, error)
 	GetPageOfCSS(context.Context, *SimpleName) (*CommonResult, error)
+	GetPageOfStatic(context.Context, *SimpleName) (*CommonResult, error)
 	mustEmbedUnimplementedUIExtensionServer()
 }
 
@@ -2139,6 +2150,9 @@ func (UnimplementedUIExtensionServer) GetPageOfJS(context.Context, *SimpleName) 
 }
 func (UnimplementedUIExtensionServer) GetPageOfCSS(context.Context, *SimpleName) (*CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfCSS not implemented")
+}
+func (UnimplementedUIExtensionServer) GetPageOfStatic(context.Context, *SimpleName) (*CommonResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfStatic not implemented")
 }
 func (UnimplementedUIExtensionServer) mustEmbedUnimplementedUIExtensionServer() {}
 
@@ -2207,6 +2221,24 @@ func _UIExtension_GetPageOfCSS_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UIExtension_GetPageOfStatic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UIExtensionServer).GetPageOfStatic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.UIExtension/GetPageOfStatic",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UIExtensionServer).GetPageOfStatic(ctx, req.(*SimpleName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UIExtension_ServiceDesc is the grpc.ServiceDesc for UIExtension service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2225,6 +2257,10 @@ var UIExtension_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPageOfCSS",
 			Handler:    _UIExtension_GetPageOfCSS_Handler,
+		},
+		{
+			MethodName: "GetPageOfStatic",
+			Handler:    _UIExtension_GetPageOfStatic_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

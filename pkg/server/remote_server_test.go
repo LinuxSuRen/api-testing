@@ -31,6 +31,7 @@ import (
 	_ "embed"
 
 	"github.com/h2non/gock"
+	"github.com/linuxsuren/api-testing/pkg/mock"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/linuxsuren/api-testing/sample"
@@ -966,6 +967,10 @@ func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 	os.MkdirAll(themePath, 0755)
 	os.WriteFile(filepath.Join(themePath, "simple.json"), []byte(simplePostman), 0755)
 
+	bindinPath := filepath.Join(dir, "data", "key-binding")
+	os.MkdirAll(bindinPath, 0755)
+	os.WriteFile(filepath.Join(bindinPath, "default.json"), binding, 0755)
+
 	writer := atest.NewFileWriter(dir)
 	server = NewRemoteServer(writer, newLocalloaderFromStore(), nil, nil, dir, 1024*1024*4)
 	return
@@ -991,6 +996,9 @@ var simpleTestCase string
 
 //go:embed testdata/postman.json
 var simplePostman string
+
+//go:embed testdata/keybinding.json
+var binding []byte
 
 const urlFoo = "http://foo"
 
@@ -1079,4 +1087,113 @@ func TestGetThemes(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, theme)
+
+	theme, err = themeServer.GetTheme(context.Background(), &SimpleName{
+		Name: "not-exist",
+	})
+	assert.Error(t, err)
+	assert.False(t, theme.Success)
+}
+
+func TestKeybinding(t *testing.T) {
+	server, clean := getRemoteServerInTempDir()
+	defer clean()
+
+	themeServer, ok := server.(ThemeExtensionServer)
+	assert.True(t, ok)
+
+	reply, err := themeServer.GetBindings(context.Background(), &Empty{})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(reply.Data))
+
+	var theme *CommonResult
+	theme, err = themeServer.GetBinding(context.Background(), &SimpleName{
+		Name: "default",
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, theme)
+
+	theme, err = themeServer.GetBinding(context.Background(), &SimpleName{
+		Name: "not-exist",
+	})
+	assert.Error(t, err)
+	assert.False(t, theme.Success)
+}
+
+func TestMockServer(t *testing.T) {
+	loader := mock.NewInMemoryServer(context.Background(), 0)
+	loader.SetupHandler(mock.NewInMemoryReader(""), "/")
+	mockServer := NewMockServerController(nil, loader, 0)
+
+	t.Run("reload as unsupported kind", func(t *testing.T) {
+		_, err := mockServer.Reload(context.Background(), &MockConfig{})
+		assert.Error(t, err)
+	})
+
+	t.Run("reload as memory kind", func(t *testing.T) {
+		_, err := mockServer.Reload(context.Background(), &MockConfig{
+			StoreKind: "memory",
+		})
+		assert.NoError(t, err)
+	})
+
+	t.Run("reload as localFile kind, but file is empty", func(t *testing.T) {
+		_, err := mockServer.Reload(context.Background(), &MockConfig{
+			StoreKind: "localFile",
+		})
+		assert.Error(t, err)
+	})
+
+	t.Run("reload as localFile kind, invalid file", func(t *testing.T) {
+		_, err := mockServer.Reload(context.Background(), &MockConfig{
+			StoreKind:      "localFile",
+			StoreLocalFile: "testdata/simple.yaml",
+		})
+		assert.Error(t, err)
+	})
+
+	t.Run("reload as localFile kind", func(t *testing.T) {
+		_, err := mockServer.Reload(context.Background(), &MockConfig{
+			StoreKind:      "localFile",
+			StoreLocalFile: "testdata/simple_mock.yaml",
+		})
+		assert.NoError(t, err)
+
+		config, err := mockServer.GetConfig(context.Background(), &Empty{})
+		assert.NoError(t, err)
+		assert.Equal(t, "localFile", config.StoreKind)
+	})
+}
+
+func TestUIExtension(t *testing.T) {
+	server, clean := getRemoteServerInTempDir()
+	defer clean()
+
+	uiServer, ok := server.(UIExtensionServer)
+	assert.True(t, ok)
+	assert.NotNil(t, uiServer)
+
+	ctx := context.Background()
+	menuList, err := uiServer.GetMenus(ctx, &Empty{})
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(menuList.Data))
+
+	result, _ := uiServer.GetPageOfJS(ctx, &SimpleName{Name: "name"})
+	assert.False(t, result.Success)
+
+	result, _ = uiServer.GetPageOfCSS(ctx, &SimpleName{Name: "name"})
+	assert.False(t, result.Success)
+
+	result, _ = uiServer.GetPageOfStatic(ctx, &SimpleName{Name: "name"})
+	assert.False(t, result.Success)
+
+	result, _ = uiServer.GetPageOfStatic(
+		context.WithValue(ctx, "X-Extension-Name", "fake"),
+		&SimpleName{Name: "name"})
+	assert.False(t, result.Success)
+
+	result, _ = uiServer.GetPageOfStatic(
+		context.WithValue(ctx, "X-Extension-Name", []string{"fake"}),
+		&SimpleName{Name: "name"})
+	assert.False(t, result.Success)
 }

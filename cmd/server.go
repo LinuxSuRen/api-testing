@@ -366,6 +366,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/healthz", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/favicon.ico", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/swagger.json", frontEndHandlerWithLocation(o.consolePath))
+		mux.HandlePath(http.MethodGet, "/data/{data}", o.dataFromExtension(remoteServer.(server.UIExtensionServer)))
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
 		mux.HandlePath(http.MethodGet, "/api/v1/sbom", service.SBomHandler)
@@ -529,6 +530,27 @@ func debugHandler(mux *runtime.ServeMux, remoteServer server.RunnerServer) {
 			pprof.Index(w, r)
 		}
 	})
+}
+
+func (o *serverOption) dataFromExtension(extServer server.UIExtensionServer) func(w http.ResponseWriter,
+	r *http.Request, pathParams map[string]string) {
+	return func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		ctx := r.Context()
+		for k, v := range r.Header {
+			if !strings.HasPrefix(k, "X-Extension-") {
+				continue
+			}
+			ctx = context.WithValue(ctx, k, v)
+		}
+		result, err := extServer.GetPageOfStatic(ctx, &server.SimpleName{
+			Name: pathParams["data"],
+		})
+		if err == nil {
+			w.Write([]byte(result.GetMessage()))
+		} else {
+			w.Write([]byte(err.Error()))
+		}
+	}
 }
 
 func (o *serverOption) getAtestBinary(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
