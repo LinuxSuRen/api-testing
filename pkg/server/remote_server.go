@@ -1533,8 +1533,22 @@ func (s *server) GetPageOfCSS(ctx context.Context, in *SimpleName) (result *Comm
 
 func (s *server) GetPageOfStatic(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
 	result = &CommonResult{}
-	extName := ctx.Value("X-Extension-Name")
-	if loader, ok := uiExtensionLoaders[extName.(string)]; ok {
+	extNameInter := ctx.Value("X-Extension-Name")
+	if extNameInter == nil {
+		result.Message = "X-Extension-Name is required"
+		result.Success = false
+		return
+	}
+
+	var extName string
+	switch v := extNameInter.(type) {
+	case []string:
+		extName = v[0]
+	case string:
+		extName = v
+	}
+
+	if loader, ok := uiExtensionLoaders[extName]; ok {
 		if js, err := loader.GetPageOfStatic(in.Name); err == nil {
 			result.Message = js
 			result.Success = true
@@ -1542,7 +1556,7 @@ func (s *server) GetPageOfStatic(ctx context.Context, in *SimpleName) (result *C
 			result.Message = err.Error()
 		}
 	} else {
-		result.Message = fmt.Sprintf("not found loader for %s", in.Name)
+		result.Message = fmt.Sprintf("not found loader for %s", extName)
 	}
 	return
 }

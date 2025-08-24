@@ -542,9 +542,14 @@ func (o *serverOption) dataFromExtension(extServer server.UIExtensionServer) fun
 			}
 			ctx = context.WithValue(ctx, k, v)
 		}
-		extServer.GetPageOfStatic(ctx, &server.SimpleName{
+		result, err := extServer.GetPageOfStatic(ctx, &server.SimpleName{
 			Name: pathParams["data"],
 		})
+		if err == nil {
+			w.Write([]byte(result.GetMessage()))
+		} else {
+			w.Write([]byte(err.Error()))
+		}
 	}
 }
 
