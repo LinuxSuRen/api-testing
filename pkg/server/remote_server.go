@@ -1423,9 +1423,9 @@ func (s *server) GetBindings(ctx context.Context, _ *Empty) (result *SimpleList,
 	result = &SimpleList{}
 	var bindings []string
 	if bindings, err = loader.GetBindings(); err == nil {
-		for _, theme := range bindings {
+		for _, binding := range bindings {
 			result.Data = append(result.Data, &Pair{
-				Key:   theme,
+				Key:   binding,
 				Value: "",
 			})
 		}

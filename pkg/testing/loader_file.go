@@ -568,7 +568,7 @@ func (l *fileLoader) GetTheme(name string) (result string, err error) {
 }
 
 func (l *fileLoader) GetBindings() (result []string, err error) {
-	dataDir := home.GetBindingDir()
+	dataDir := filepath.Join(l.userConfigDir, "data/key-binding")
 	_ = filepath.WalkDir(dataDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -583,7 +583,7 @@ func (l *fileLoader) GetBindings() (result []string, err error) {
 }
 
 func (l *fileLoader) GetBinding(name string) (result string, err error) {
-	dataDir := home.GetBindingDir()
+	dataDir := filepath.Join(l.userConfigDir, "data/key-binding")
 	themeFile := filepath.Join(dataDir, name+".json")
 	var data []byte
 	if data, err = os.ReadFile(themeFile); err == nil {
