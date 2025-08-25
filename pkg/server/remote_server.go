@@ -76,6 +76,7 @@ type server struct {
 	storeWriterFactory testing.StoreWriterFactory
 	configDir          string
 	storeExtMgr        ExtManager
+	aiManager          *AIManager
 
 	secretServer SecretServiceServer
 
@@ -124,14 +125,24 @@ func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWrit
 	}
 	loader.WithUserConfigDir(configDir)
 	GrpcMaxRecvMsgSize = grpcMaxRecvMsgSize
+	
+	// Initialize AI Manager
+	aiManager := NewAIManager()
+	
 	return &server{
 		loader:             loader,
 		storeWriterFactory: storeWriterFactory,
 		configDir:          configDir,
 		secretServer:       secretServer,
 		storeExtMgr:        storeExtMgr,
+		aiManager:          aiManager,
 		grpcMaxRecvMsgSize: grpcMaxRecvMsgSize,
 	}
+}
+
+// GetAIManager returns the AI manager instance
+func (s *server) GetAIManager() *AIManager {
+	return s.aiManager
 }
 
 func withDefaultValue(old, defVal any) any {
@@ -1455,12 +1466,23 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 	defer loader.Close()
 
 	result = &MenuList{}
+	
+	// Add AI Assistant system menu
+	result.Data = append(result.Data, &Menu{
+		Name:  "AI Assistant",
+		Icon:  "ChatDotRound",
+		Index: "ai-assistant",
+	})
+	
 	var loaders []testing.Writer
 	if loaders, err = s.getLoaders(); err != nil {
 		return
 	}
 
 	duplicatedMenus := make(map[string]int) // index is key, value is the slice index
+	// Initialize with AI Assistant menu
+	duplicatedMenus["ai-assistant"] = 0
+	
 	for _, loader := range loaders {
 		if menus, mErr := loader.GetMenus(); mErr == nil {
 			for _, menu := range menus {
@@ -1501,7 +1523,7 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 
 func isSystemMenu(index string) bool {
 	switch index {
-	case "testing", "history", "mock", "store", "welcome", "":
+	case "testing", "history", "mock", "store", "welcome", "ai-assistant", "":
 		return true
 	}
 	return false

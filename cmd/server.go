@@ -304,7 +304,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	go func() {
 		<-clean
 		serverLogger.Info("stopping the extensions")
-		storeExtMgr.StopAll()
+		storeExtMgr.StopAll() // This will stop all plugins including AI plugin
+
 		serverLogger.Info("stopping the server")
 		_ = lis.Close()
 		_ = o.httpServer.Shutdown(ctx)
