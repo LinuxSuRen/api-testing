@@ -17,6 +17,7 @@ import TestingHistoryPanel from './views/TestingHistoryPanel.vue'
 import MockManager from './views/MockManager.vue'
 import StoreManager from './views/StoreManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
+import AIAssistant from './views/AIAssistant.vue'
 import MagicKey from './components/MagicKey.vue'
 import Extension from './views/Extension.vue'
 import { useI18n } from 'vue-i18n'
@@ -175,6 +176,7 @@ API.GetMenus((menus) => {
       <TestingHistoryPanel v-else-if="panelName === 'history'" :ID="ID"/>
       <MockManager v-else-if="panelName === 'mock'" />
       <StoreManager v-else-if="panelName === 'store'" />
+      <AIAssistant v-else-if="panelName === 'ai-assistant'" />
       <WelcomePage v-else-if="panelName === 'welcome' || panelName === ''" />
 
       <span v-for="menu in extensionMenus" :key="menu.index" :index="menu.index">
