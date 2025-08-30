@@ -3,3 +3,17 @@ items:
     dependencies:
       - name: atest-store-database
     link: https://github.com/LinuxSuRen/atest-ext-store-database
+  - name: atest-ext-ai
+    dependencies:
+      - name: atest-ext-ai
+    link: https://github.com/LinuxSuRen/atest-ext-ai
+    categories:
+      - ai
+      - assistant
+    params:
+      - key: model_provider
+        defaultValue: 'openai'
+      - key: api_endpoint
+        defaultValue: 'https://api.openai.com/v1'
+      - key: timeout
+        defaultValue: '30s'

@@ -760,3 +760,52 @@ message DataMeta {
     string duration = 4;
     repeated Pair labels = 5;
 }
+
+// AI Service for natural language processing
+service AIService {
+    rpc ConvertNLToSQL(AIRequest) returns (AIResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/ai/nl-to-sql"
+            body: "*"
+        };
+    }
+    
+    rpc GenerateTestCase(AIRequest) returns (AIResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/ai/generate-testcase"
+            body: "*"
+        };
+    }
+    
+    rpc OptimizeQuery(AIRequest) returns (AIResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/ai/optimize-query"
+            body: "*"
+        };
+    }
+    
+    rpc HealthCheck(Empty) returns (AIHealthResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/ai/health"
+        };
+    }
+}
+
+message AIRequest {
+    string input = 1;
+    string context = 2;
+    repeated Pair parameters = 3;
+}
+
+message AIResponse {
+    bool success = 1;
+    string result = 2;
+    string error = 3;
+    repeated Pair metadata = 4;
+}
+
+message AIHealthResponse {
+    bool healthy = 1;
+    string status = 2;
+    string version = 3;
+}
