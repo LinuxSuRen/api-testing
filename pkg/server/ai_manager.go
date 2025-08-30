@@ -174,10 +174,10 @@ func (m *AIManager) getFallbackResponse(requestType, input string) *AIResponse {
 			Success: true,
 			Result:  "SELECT * FROM users WHERE status = 'active' ORDER BY created_at DESC LIMIT 10; -- Fallback response",
 			Error:   "",
-			Meta: map[string]interface{}{
-				"fallback": true,
-				"reason":   "AI plugin not available",
-				"input":    input,
+			Metadata: []*Pair{
+				{Key: "fallback", Value: "true"},
+				{Key: "reason", Value: "AI plugin not available"},
+				{Key: "input", Value: input},
 			},
 		}
 	case "generate_test_case":
@@ -185,10 +185,10 @@ func (m *AIManager) getFallbackResponse(requestType, input string) *AIResponse {
 			Success: true,
 			Result:  `{"name": "Test API Endpoint", "method": "GET", "url": "/api/test", "expected_status": 200}`,
 			Error:   "",
-			Meta: map[string]interface{}{
-				"fallback": true,
-				"reason":   "AI plugin not available",
-				"input":    input,
+			Metadata: []*Pair{
+				{Key: "fallback", Value: "true"},
+				{Key: "reason", Value: "AI plugin not available"},
+				{Key: "input", Value: input},
 			},
 		}
 	case "optimize_query":
@@ -196,10 +196,10 @@ func (m *AIManager) getFallbackResponse(requestType, input string) *AIResponse {
 			Success: true,
 			Result:  input + " -- Query optimization not available (fallback mode)",
 			Error:   "",
-			Meta: map[string]interface{}{
-				"fallback": true,
-				"reason":   "AI plugin not available",
-				"input":    input,
+			Metadata: []*Pair{
+				{Key: "fallback", Value: "true"},
+				{Key: "reason", Value: "AI plugin not available"},
+				{Key: "input", Value: input},
 			},
 		}
 	default:
@@ -207,10 +207,10 @@ func (m *AIManager) getFallbackResponse(requestType, input string) *AIResponse {
 			Success: false,
 			Result:  "",
 			Error:   "Unknown request type",
-			Meta: map[string]interface{}{
-				"fallback": true,
-				"reason":   "Unknown request type",
-				"input":    input,
+			Metadata: []*Pair{
+				{Key: "fallback", Value: "true"},
+				{Key: "reason", Value: "Unknown request type"},
+				{Key: "input", Value: input},
 			},
 		}
 	}

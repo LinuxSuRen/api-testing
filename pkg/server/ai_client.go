@@ -17,20 +17,8 @@ type AIClient struct {
 	conn   *grpc.ClientConn
 }
 
-// AIRequest represents the request structure for AI operations
-type AIRequest struct {
-	Type    string                 `json:"type"`    // "nl_to_sql", "generate_test_case", etc.
-	Input   string                 `json:"input"`   // Natural language input
-	Context map[string]interface{} `json:"context"` // Additional context data
-}
-
-// AIResponse represents the response structure from AI operations
-type AIResponse struct {
-	Success bool                   `json:"success"`
-	Result  string                 `json:"result"` // Generated SQL, test case, etc.
-	Error   string                 `json:"error"`  // Error message if any
-	Meta    map[string]interface{} `json:"meta"`   // Additional metadata
-}
+// Note: AIRequest and AIResponse types are now defined in server.pb.go
+// We use the protobuf-generated types instead of custom definitions
 
 // NewAIClient creates a new AI plugin client
 func NewAIClient(address string) (*AIClient, error) {
@@ -59,13 +47,19 @@ func (c *AIClient) Close() error {
 
 // ConvertNLToSQL converts natural language to SQL using the AI plugin
 func (c *AIClient) ConvertNLToSQL(ctx context.Context, naturalLanguage string, schema map[string]interface{}) (*AIResponse, error) {
-	// Prepare AI request
-	request := AIRequest{
-		Type:  "nl_to_sql",
-		Input: naturalLanguage,
-		Context: map[string]interface{}{
-			"schema": schema,
-		},
+	// Serialize schema to JSON string for protobuf Context field
+	schemaJSON, err := json.Marshal(map[string]interface{}{
+		"type":   "nl_to_sql",
+		"schema": schema,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal schema: %w", err)
+	}
+
+	// Prepare AI request using protobuf types
+	request := &AIRequest{
+		Input:   naturalLanguage,
+		Context: string(schemaJSON),
 	}
 
 	return c.executeAIRequest(ctx, request)
@@ -73,13 +67,19 @@ func (c *AIClient) ConvertNLToSQL(ctx context.Context, naturalLanguage string, s
 
 // GenerateTestCase generates test cases using the AI plugin
 func (c *AIClient) GenerateTestCase(ctx context.Context, apiSpec string, requirements string) (*AIResponse, error) {
-	// Prepare AI request
-	request := AIRequest{
-		Type:  "generate_test_case",
-		Input: requirements,
-		Context: map[string]interface{}{
-			"api_spec": apiSpec,
-		},
+	// Serialize context to JSON string for protobuf Context field
+	contextJSON, err := json.Marshal(map[string]interface{}{
+		"type":     "generate_test_case",
+		"api_spec": apiSpec,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal context: %w", err)
+	}
+
+	// Prepare AI request using protobuf types
+	request := &AIRequest{
+		Input:   requirements,
+		Context: string(contextJSON),
 	}
 
 	return c.executeAIRequest(ctx, request)
@@ -87,24 +87,40 @@ func (c *AIClient) GenerateTestCase(ctx context.Context, apiSpec string, require
 
 // OptimizeQuery optimizes SQL queries using the AI plugin
 func (c *AIClient) OptimizeQuery(ctx context.Context, sqlQuery string, performance map[string]interface{}) (*AIResponse, error) {
-	// Prepare AI request
-	request := AIRequest{
-		Type:  "optimize_query",
-		Input: sqlQuery,
-		Context: map[string]interface{}{
-			"performance_data": performance,
-		},
+	// Serialize context to JSON string for protobuf Context field
+	contextJSON, err := json.Marshal(map[string]interface{}{
+		"type":             "optimize_query",
+		"performance_data": performance,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal context: %w", err)
+	}
+
+	// Prepare AI request using protobuf types
+	request := &AIRequest{
+		Input:   sqlQuery,
+		Context: string(contextJSON),
 	}
 
 	return c.executeAIRequest(ctx, request)
 }
 
 // executeAIRequest executes an AI request through the gRPC client
-func (c *AIClient) executeAIRequest(ctx context.Context, request AIRequest) (*AIResponse, error) {
+func (c *AIClient) executeAIRequest(ctx context.Context, request *AIRequest) (*AIResponse, error) {
 	// Serialize the AI request to JSON
 	requestData, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal AI request: %w", err)
+	}
+
+	// Parse the context to get the request type
+	var contextData map[string]interface{}
+	if err := json.Unmarshal([]byte(request.Context), &contextData); err != nil {
+		return nil, fmt.Errorf("failed to parse request context: %w", err)
+	}
+	requestType, _ := contextData["type"].(string)
+	if requestType == "" {
+		requestType = "ai-request"
 	}
 
 	// Create the TestSuiteWithCase structure for gRPC communication
@@ -118,7 +134,7 @@ func (c *AIClient) executeAIRequest(ctx context.Context, request AIRequest) (*AI
 			},
 		},
 		Case: &TestCase{
-			Name: request.Type,
+			Name: requestType,
 		},
 	}
 
@@ -162,10 +178,16 @@ func (c *AIClient) executeAIRequest(ctx context.Context, request AIRequest) (*AI
 // HealthCheck checks if the AI plugin is healthy and responsive
 func (c *AIClient) HealthCheck(ctx context.Context) error {
 	// Create a simple health check request
-	request := AIRequest{
-		Type:    "health_check",
+	contextJSON, err := json.Marshal(map[string]interface{}{
+		"type": "health_check",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to marshal health check context: %w", err)
+	}
+
+	request := &AIRequest{
 		Input:   "ping",
-		Context: map[string]interface{}{},
+		Context: string(contextJSON),
 	}
 
 	response, err := c.executeAIRequest(ctx, request)
