@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { reactive, ref } from 'vue'
-import type { Suite } from '@/views/types'
 import { API } from '@/views/net'
 import { ElMessage } from 'element-plus'
+import type { ImportSource } from '@/views/net'
 import type { FormInstance, FormRules } from 'element-plus'
 
 const { t } = useI18n()
@@ -16,14 +16,16 @@ const importSuiteFormRef = ref<FormInstance>()
 const importSuiteForm = reactive({
     url: '',
     store: '',
-    kind: ''
-})
+    kind: '',
+    data: ''
+} as ImportSource)
 
-const importSuiteFormRules = reactive<FormRules<Suite>>({
+const importSuiteFormRules = reactive<FormRules<ImportSource>>({
     url: [
-        { required: true, message: 'URL is required', trigger: 'blur' },
+        { required: importSuiteForm.kind !== 'native-inline', message: 'URL is required', trigger: 'blur' },
         { type: 'url', message: 'Should be a valid URL value', trigger: 'blur' }
     ],
+    data: [{ required: importSuiteForm.kind === 'native-inline', message: 'Data is required', trigger: 'blur' }],
     store: [{ required: true, message: 'Location is required', trigger: 'blur' }],
     kind: [{ required: true, message: 'Kind is required', trigger: 'blur' }]
 })
@@ -32,6 +34,9 @@ const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
     if (!formEl) return
     await formEl.validate((valid: boolean) => {
         if (valid) {
+            if (importSuiteForm.kind === 'native-inline') {
+                importSuiteForm.kind = 'native'
+            }
             API.ImportTestSuite(importSuiteForm, () => {
                 emit('created')
                 formEl.resetFields()
@@ -69,12 +74,16 @@ const importSourceKinds = [{
     "name": "Native",
     "value": "native",
     "description": "http://your-server/api/v1/suites/xxx/yaml?x-store-name=xxx"
+}, {
+    "name": "Native-Inline",
+    "value": "native-inline",
+    "description": "Native test suite content in YAML format"
 }]
-const placeholderOfImportURL = ref("")
+const importSourceDesc = ref("")
 const kindChanged = (e) => {
     importSourceKinds.forEach(k => {
         if (k.value === e) {
-            placeholderOfImportURL.value = k.description
+            importSourceDesc.value = k.description
         }
     });
 }
@@ -117,8 +126,15 @@ const kindChanged = (e) => {
                     />
                 </el-select>
             </el-form-item>
-            <el-form-item label="URL" prop="url">
-                <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api" :placeholder="placeholderOfImportURL" />
+            <el-form-item label="Data" prop="data" v-if="importSuiteForm.kind === 'native-inline'">
+                <el-input v-model="importSuiteForm.data"
+                    class="full-width" type="textarea"
+                    :placeholder="importSourceDesc" />
+            </el-form-item>
+            <el-form-item label="URL" prop="url" v-else>
+                <el-input v-model="importSuiteForm.url" test-id="suite-import-form-api"
+                    class="full-width"
+                    :placeholder="importSourceDesc" />
             </el-form-item>
             <el-form-item>
                 <el-button
@@ -130,3 +146,9 @@ const kindChanged = (e) => {
         </el-form>
     </el-dialog>
 </template>
+
+<style scoped>
+.full-width {
+    width: 100%;
+}
+</style>
