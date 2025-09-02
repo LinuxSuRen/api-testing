@@ -178,6 +178,16 @@ func (s *inMemoryServer) httpProxy(proxy *Proxy) {
 			fmt.Println("after patch:", string(requestBody))
 		}
 
+		if proxy.Echo {
+			fmt.Println("Original request header:")
+			for k, v := range req.Header {
+				fmt.Println(k, ":", v)
+			}
+			fmt.Println("Original request path:", req.URL)
+			fmt.Println("Original request payload:")
+			fmt.Println(string(requestBody))
+		}
+
 		targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, bytes.NewBuffer(requestBody))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -206,6 +216,12 @@ func (s *inMemoryServer) httpProxy(proxy *Proxy) {
 		for k, v := range resp.Header {
 			w.Header().Add(k, v[0])
 		}
+
+		if proxy.Echo {
+			fmt.Println("Original response payload:")
+			fmt.Println(string(data))
+		}
+
 		w.Write(data)
 	})
 }
