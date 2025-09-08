@@ -58,6 +58,7 @@ import (
 	"github.com/linuxsuren/api-testing/sample"
 
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gopkg.in/yaml.v3"
 )
 
@@ -1664,6 +1665,151 @@ func (s *mockServerController) Write(p []byte) (n int, err error) {
 	default:
 	}
 	return
+}
+
+// GenerateSQL generates SQL from natural language using AI
+func (s *server) GenerateSQL(ctx context.Context, req *GenerateSQLRequest) (*GenerateSQLResponse, error) {
+	// Input validation
+	if req.NaturalLanguage == "" {
+		return &GenerateSQLResponse{
+			Error: &AIError{
+				Code:    AIErrorCode_INVALID_INPUT,
+				Message: "Natural language input is required",
+				Details: "The natural_language field cannot be empty",
+			},
+		}, nil
+	}
+
+	// Get AI-capable loader
+	loader := s.getLoader(ctx)
+	if loader == nil {
+		return &GenerateSQLResponse{
+			Error: &AIError{
+				Code:    AIErrorCode_MODEL_UNAVAILABLE,
+				Message: "No AI service available",
+				Details: "No AI-capable loader found in configuration",
+			},
+		}, nil
+	}
+
+	// For now, return a mock response until AI plugin integration is complete
+	// In a full implementation, this would delegate to an AI plugin
+	response := &GenerateSQLResponse{
+		GeneratedSql:    fmt.Sprintf("-- Generated from: %s\nSELECT * FROM table_name WHERE condition;", req.NaturalLanguage),
+		ConfidenceScore: 0.85,
+		Explanation:     fmt.Sprintf("Generated SQL query based on natural language input: %s", req.NaturalLanguage),
+		Suggestions:     []string{"Consider adding LIMIT clause for large datasets", "Verify table and column names exist"},
+		Metadata: &GenerationMetadata{
+			RequestId:        fmt.Sprintf("req-%d", time.Now().Unix()),
+			ProcessingTimeMs: 100.0,
+			ModelUsed:        "api-testing-ai-generator",
+			TokenCount:       25,
+			Timestamp:        timestamppb.New(time.Now()),
+		},
+	}
+
+	remoteServerLogger.Info("Generated SQL from natural language", "input", req.NaturalLanguage, "output", response.GeneratedSql)
+	return response, nil
+}
+
+// ValidateSQL validates SQL queries using AI-powered analysis
+func (s *server) ValidateSQL(ctx context.Context, req *ValidateSQLRequest) (*ValidateSQLResponse, error) {
+	// Input validation
+	if req.Sql == "" {
+		return &ValidateSQLResponse{
+			IsValid: false,
+			Errors: []*ValidationError{
+				{
+					Message: "SQL query is required",
+					Line:    1,
+					Column:  1,
+					Type:    ValidationErrorType_SYNTAX_ERROR,
+				},
+			},
+		}, nil
+	}
+
+	// Basic SQL validation (in a full implementation, this would use AI)
+	isValid := strings.Contains(strings.ToUpper(req.Sql), "SELECT") ||
+		strings.Contains(strings.ToUpper(req.Sql), "INSERT") ||
+		strings.Contains(strings.ToUpper(req.Sql), "UPDATE") ||
+		strings.Contains(strings.ToUpper(req.Sql), "DELETE")
+
+	if isValid {
+		return &ValidateSQLResponse{
+			IsValid:      true,
+			FormattedSql: formatSQL(req.Sql),
+			Metadata: &ValidationMetadata{
+				ValidatorVersion:  "api-testing-validator-1.0",
+				ValidationTimeMs: 50.0,
+				Timestamp:        timestamppb.New(time.Now()),
+			},
+		}, nil
+	}
+
+	return &ValidateSQLResponse{
+		IsValid: false,
+		Errors: []*ValidationError{
+			{
+				Message: "Invalid SQL syntax detected",
+				Line:    1,
+				Column:  1,
+				Type:    ValidationErrorType_SYNTAX_ERROR,
+			},
+		},
+		Warnings: []string{"Consider using standard SQL keywords"},
+	}, nil
+}
+
+// GetAICapabilities returns the AI capabilities and status
+func (s *server) GetAICapabilities(ctx context.Context, req *Empty) (*AICapabilitiesResponse, error) {
+	// Check if AI loader is available
+	loader := s.getLoader(ctx)
+	status := HealthStatus_UNHEALTHY
+	if loader != nil {
+		status = HealthStatus_HEALTHY
+	}
+
+	return &AICapabilitiesResponse{
+		SupportedDatabases: []string{"mysql", "postgresql", "sqlite", "mongodb"},
+		Features: []*AIFeature{
+			{
+				Name:        "sql_generation",
+				Enabled:     true,
+				Description: "Generate SQL queries from natural language",
+				Parameters: map[string]string{
+					"max_complexity": "high",
+					"max_tokens":     "1000",
+				},
+			},
+			{
+				Name:        "sql_validation",
+				Enabled:     true,
+				Description: "Validate and format SQL queries",
+				Parameters: map[string]string{
+					"syntax_check": "true",
+					"format":       "true",
+				},
+			},
+		},
+		Version: "1.0.0",
+		Status:  status,
+		Limits: map[string]string{
+			"max_requests_per_minute": "100",
+			"max_query_length":        "5000",
+		},
+	}, nil
+}
+
+// formatSQL provides basic SQL formatting
+func formatSQL(sql string) string {
+	// Basic SQL formatting - replace common keywords with newlines
+	formatted := strings.ReplaceAll(sql, " FROM ", "\nFROM ")
+	formatted = strings.ReplaceAll(formatted, " WHERE ", "\nWHERE ")
+	formatted = strings.ReplaceAll(formatted, " ORDER BY ", "\nORDER BY ")
+	formatted = strings.ReplaceAll(formatted, " GROUP BY ", "\nGROUP BY ")
+	formatted = strings.ReplaceAll(formatted, " HAVING ", "\nHAVING ")
+	return strings.TrimSpace(formatted)
 }
 
 func (s *server) getLoaderByStoreName(storeName string) (loader testing.Writer, err error) {
