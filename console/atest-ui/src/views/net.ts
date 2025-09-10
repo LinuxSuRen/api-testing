@@ -1017,6 +1017,70 @@ const GetBinding = (name: string, callback: (d: any) => void | null) => {
         .then(DefaultResponseProcess).then(callback)
 }
 
+// AI Plugin Management API functions
+export interface AIPluginInfo {
+    name: string
+    version: string
+    description: string
+    capabilities: string[]
+    socketPath: string
+    metadata: Record<string, string>
+}
+
+export interface AIPluginHealth {
+    name: string
+    status: string // online, offline, error, processing
+    lastCheckAt: string
+    responseTime: number
+    errorMessage?: string
+    metrics?: Record<string, string>
+}
+
+const DiscoverAIPlugins = (callback: (d: AIPluginInfo[]) => void, errHandler?: (d: any) => void) => {
+    return fetch('/api/v1/ai/plugins/discover', {})
+        .then(DefaultResponseProcess)
+        .then(callback)
+        .catch(errHandler || (() => {}))
+}
+
+const CheckAIPluginHealth = (name: string, callback: (d: AIPluginHealth) => void, errHandler?: (d: any) => void) => {
+    return fetch(`/api/v1/ai/plugins/${name}/health`, {})
+        .then(DefaultResponseProcess)
+        .then(callback)
+        .catch(errHandler || (() => {}))
+}
+
+const GetAllAIPluginHealth = (callback: (d: Record<string, AIPluginHealth>) => void, errHandler?: (d: any) => void) => {
+    return fetch('/api/v1/ai/plugins/health', {})
+        .then(DefaultResponseProcess)
+        .then(callback)
+        .catch(errHandler || (() => {}))
+}
+
+const RegisterAIPlugin = (pluginInfo: AIPluginInfo, callback: (d: any) => void, errHandler?: (d: any) => void) => {
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(pluginInfo)
+    }
+    return fetch('/api/v1/ai/plugins/register', requestOptions)
+        .then(DefaultResponseProcess)
+        .then(callback)
+        .catch(errHandler || (() => {}))
+}
+
+const UnregisterAIPlugin = (name: string, callback: (d: any) => void, errHandler?: (d: any) => void) => {
+    const requestOptions = {
+        method: 'DELETE'
+    }
+    return fetch(`/api/v1/ai/plugins/${name}`, requestOptions)
+        .then(DefaultResponseProcess)
+        .then(callback)
+        .catch(errHandler || (() => {}))
+}
+
 export const API = {
     DefaultResponseProcess,
     GetVersion, GetSchema, GetMenus, GetPageOfJS, GetPageOfCSS,
@@ -1031,5 +1095,7 @@ export const API = {
     GetSuggestedAPIs, GetSwaggers,
     ReloadMockServer, GetMockConfig, GetStream, SBOM, DataQuery, DataQueryAsync,
     GetThemes, GetTheme, GetBinding,
+    // AI Plugin Management
+    DiscoverAIPlugins, CheckAIPluginHealth, GetAllAIPluginHealth, RegisterAIPlugin, UnregisterAIPlugin,
     getToken
 }
