@@ -16,9 +16,8 @@ limitations under the License.
 
 import { NewSuggestedAPIsQuery, CreateFilter, GetHTTPMethods, FlattenObject } from '../types'
 import type { Pair } from '../types'
-import fetchMock from "jest-fetch-mock";
-
-fetchMock.enableMocks();
+import { fetchMock } from '../../test-setup'
+import { vi } from 'vitest'
 
 describe('NewSuggestedAPIsQuery', () => {
   test('empty data', () => {

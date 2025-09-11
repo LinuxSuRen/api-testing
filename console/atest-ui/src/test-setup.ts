@@ -112,3 +112,53 @@ config.global.stubs = {
 config.global.mocks = {
   $t: (key: string) => key
 }
+
+// Setup fetch mock for Vitest
+import { vi } from 'vitest'
+
+// Create a fetch mock with jest-fetch-mock compatible methods
+const createFetchMock = () => {
+  const mockFn = vi.fn()
+  
+  // Set default implementation to return a successful Response
+  mockFn.mockResolvedValue(
+    new Response(JSON.stringify({}), {
+      status: 200,
+      statusText: 'OK',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  )
+  
+  // Add compatible methods
+  mockFn.mockResponseOnce = (body: string, init?: ResponseInit) => {
+    mockFn.mockResolvedValueOnce(
+      new Response(body, {
+        status: init?.status || 200,
+        statusText: init?.statusText || 'OK',
+        headers: init?.headers || { 'Content-Type': 'application/json' }
+      })
+    )
+    return mockFn
+  }
+  
+  mockFn.mockResponse = (body: string, init?: ResponseInit) => {
+    mockFn.mockResolvedValue(
+      new Response(body, {
+        status: init?.status || 200,
+        statusText: init?.statusText || 'OK',
+        headers: init?.headers || { 'Content-Type': 'application/json' }
+      })
+    )
+    return mockFn
+  }
+  
+  return mockFn
+}
+
+const fetchMock = createFetchMock()
+
+// Setup global fetch mock
+global.fetch = fetchMock
+
+// Export utilities for tests
+export { fetchMock }

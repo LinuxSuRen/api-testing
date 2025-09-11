@@ -17,13 +17,13 @@ limitations under the License.
 import {API} from '../net'
 import { type TestCase } from '../net'
 import { SetupStorage } from './common'
-import fetchMock from "jest-fetch-mock";
+import { fetchMock } from '../../test-setup'
+import { vi } from 'vitest'
 
-fetchMock.enableMocks();
 SetupStorage()
 
 beforeEach(() => {
-    fetchMock.resetMocks();
+    fetchMock.mockClear();
 });
 
 describe('net', () => {
