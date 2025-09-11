@@ -51,9 +51,6 @@ const (
 	Loader_GetPageOfJS_FullMethodName                  = "/remote.Loader/GetPageOfJS"
 	Loader_GetPageOfCSS_FullMethodName                 = "/remote.Loader/GetPageOfCSS"
 	Loader_GetPageOfStatic_FullMethodName              = "/remote.Loader/GetPageOfStatic"
-	Loader_GenerateSQL_FullMethodName                  = "/remote.Loader/GenerateSQL"
-	Loader_ValidateSQL_FullMethodName                  = "/remote.Loader/ValidateSQL"
-	Loader_GetAICapabilities_FullMethodName            = "/remote.Loader/GetAICapabilities"
 )
 
 // LoaderClient is the client API for Loader service.
@@ -91,10 +88,6 @@ type LoaderClient interface {
 	GetPageOfJS(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
 	GetPageOfCSS(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
 	GetPageOfStatic(ctx context.Context, in *server.SimpleName, opts ...grpc.CallOption) (*server.CommonResult, error)
-	// AI plugin communication methods
-	GenerateSQL(ctx context.Context, in *server.GenerateSQLRequest, opts ...grpc.CallOption) (*server.GenerateSQLResponse, error)
-	ValidateSQL(ctx context.Context, in *server.ValidateSQLRequest, opts ...grpc.CallOption) (*server.ValidateSQLResponse, error)
-	GetAICapabilities(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.AICapabilitiesResponse, error)
 }
 
 type loaderClient struct {
@@ -415,36 +408,6 @@ func (c *loaderClient) GetPageOfStatic(ctx context.Context, in *server.SimpleNam
 	return out, nil
 }
 
-func (c *loaderClient) GenerateSQL(ctx context.Context, in *server.GenerateSQLRequest, opts ...grpc.CallOption) (*server.GenerateSQLResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(server.GenerateSQLResponse)
-	err := c.cc.Invoke(ctx, Loader_GenerateSQL_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *loaderClient) ValidateSQL(ctx context.Context, in *server.ValidateSQLRequest, opts ...grpc.CallOption) (*server.ValidateSQLResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(server.ValidateSQLResponse)
-	err := c.cc.Invoke(ctx, Loader_ValidateSQL_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *loaderClient) GetAICapabilities(ctx context.Context, in *server.Empty, opts ...grpc.CallOption) (*server.AICapabilitiesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(server.AICapabilitiesResponse)
-	err := c.cc.Invoke(ctx, Loader_GetAICapabilities_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // LoaderServer is the server API for Loader service.
 // All implementations must embed UnimplementedLoaderServer
 // for forward compatibility.
@@ -480,10 +443,6 @@ type LoaderServer interface {
 	GetPageOfJS(context.Context, *server.SimpleName) (*server.CommonResult, error)
 	GetPageOfCSS(context.Context, *server.SimpleName) (*server.CommonResult, error)
 	GetPageOfStatic(context.Context, *server.SimpleName) (*server.CommonResult, error)
-	// AI plugin communication methods
-	GenerateSQL(context.Context, *server.GenerateSQLRequest) (*server.GenerateSQLResponse, error)
-	ValidateSQL(context.Context, *server.ValidateSQLRequest) (*server.ValidateSQLResponse, error)
-	GetAICapabilities(context.Context, *server.Empty) (*server.AICapabilitiesResponse, error)
 	mustEmbedUnimplementedLoaderServer()
 }
 
@@ -586,15 +545,6 @@ func (UnimplementedLoaderServer) GetPageOfCSS(context.Context, *server.SimpleNam
 }
 func (UnimplementedLoaderServer) GetPageOfStatic(context.Context, *server.SimpleName) (*server.CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPageOfStatic not implemented")
-}
-func (UnimplementedLoaderServer) GenerateSQL(context.Context, *server.GenerateSQLRequest) (*server.GenerateSQLResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GenerateSQL not implemented")
-}
-func (UnimplementedLoaderServer) ValidateSQL(context.Context, *server.ValidateSQLRequest) (*server.ValidateSQLResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateSQL not implemented")
-}
-func (UnimplementedLoaderServer) GetAICapabilities(context.Context, *server.Empty) (*server.AICapabilitiesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAICapabilities not implemented")
 }
 func (UnimplementedLoaderServer) mustEmbedUnimplementedLoaderServer() {}
 func (UnimplementedLoaderServer) testEmbeddedByValue()                {}
@@ -1175,60 +1125,6 @@ func _Loader_GetPageOfStatic_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Loader_GenerateSQL_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(server.GenerateSQLRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LoaderServer).GenerateSQL(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Loader_GenerateSQL_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LoaderServer).GenerateSQL(ctx, req.(*server.GenerateSQLRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Loader_ValidateSQL_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(server.ValidateSQLRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LoaderServer).ValidateSQL(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Loader_ValidateSQL_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LoaderServer).ValidateSQL(ctx, req.(*server.ValidateSQLRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Loader_GetAICapabilities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(server.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LoaderServer).GetAICapabilities(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Loader_GetAICapabilities_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LoaderServer).GetAICapabilities(ctx, req.(*server.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Loader_ServiceDesc is the grpc.ServiceDesc for Loader service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1359,18 +1255,6 @@ var Loader_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPageOfStatic",
 			Handler:    _Loader_GetPageOfStatic_Handler,
-		},
-		{
-			MethodName: "GenerateSQL",
-			Handler:    _Loader_GenerateSQL_Handler,
-		},
-		{
-			MethodName: "ValidateSQL",
-			Handler:    _Loader_ValidateSQL_Handler,
-		},
-		{
-			MethodName: "GetAICapabilities",
-			Handler:    _Loader_GetAICapabilities_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

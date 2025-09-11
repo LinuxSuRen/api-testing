@@ -470,6 +470,36 @@
         ]
       }
     },
+    "/api/v1/extension/pages/{name}/static": {
+      "get": {
+        "operationId": "UIExtension_GetPageOfStatic",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverCommonResult"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UIExtension"
+        ]
+      }
+    },
     "/api/v1/extension/run": {
       "post": {
         "operationId": "RunnerExtension_Run",
@@ -1703,15 +1733,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "Value": {
-                  "type": "string"
-                },
-                "Description": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateSecretBody"
             }
           }
         ],
@@ -1737,6 +1759,20 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "tags": [
           "Runner"
         ]
@@ -1900,6 +1936,22 @@
             "type": "boolean"
           },
           {
+            "name": "kind.link",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "kind.categories",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
             "name": "ready",
             "in": "query",
             "required": false,
@@ -1950,43 +2002,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "owner": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "url": {
-                  "type": "string"
-                },
-                "username": {
-                  "type": "string"
-                },
-                "password": {
-                  "type": "string"
-                },
-                "properties": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/serverPair"
-                  }
-                },
-                "kind": {
-                  "$ref": "#/definitions/serverStoreKind"
-                },
-                "ready": {
-                  "type": "boolean"
-                },
-                "readOnly": {
-                  "type": "boolean"
-                },
-                "disabled": {
-                  "type": "boolean"
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateStoreBody"
             }
           }
         ],
@@ -2231,25 +2247,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "api": {
-                  "type": "string"
-                },
-                "param": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/serverPair"
-                  }
-                },
-                "spec": {
-                  "$ref": "#/definitions/serverAPISpec"
-                },
-                "proxy": {
-                  "$ref": "#/definitions/serverProxyConfig"
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateTestSuiteBody"
             }
           }
         ],
@@ -2378,15 +2376,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                },
-                "targetCaseName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerDuplicateTestCaseBody"
             }
           }
         ],
@@ -2430,15 +2420,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                },
-                "targetCaseName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerRenameTestCaseBody"
             }
           }
         ],
@@ -2476,12 +2458,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerDuplicateTestSuiteBody"
             }
           }
         ],
@@ -2519,12 +2496,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "targetSuiteName": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/RunnerRenameTestSuiteBody"
             }
           }
         ],
@@ -2562,12 +2534,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "$ref": "#/definitions/serverTestCase"
-                }
-              }
+              "$ref": "#/definitions/RunnerCreateTestCaseBody"
             }
           }
         ],
@@ -2611,26 +2578,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "suiteName": {
-                      "type": "string"
-                    },
-                    "request": {
-                      "$ref": "#/definitions/serverRequest"
-                    },
-                    "response": {
-                      "$ref": "#/definitions/serverResponse"
-                    },
-                    "server": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
+              "$ref": "#/definitions/RunnerUpdateTestCaseBody"
             }
           }
         ],
@@ -2834,16 +2782,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "parameters": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/serverPair"
-                  }
-                }
-              }
+              "$ref": "#/definitions/RunnerRunTestCaseBody"
             }
           }
         ],
@@ -2961,6 +2900,157 @@
     }
   },
   "definitions": {
+    "RunnerCreateTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/serverTestCase"
+        }
+      }
+    },
+    "RunnerDuplicateTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        },
+        "targetCaseName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerDuplicateTestSuiteBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerRenameTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        },
+        "targetCaseName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerRenameTestSuiteBody": {
+      "type": "object",
+      "properties": {
+        "targetSuiteName": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerRunTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        }
+      }
+    },
+    "RunnerUpdateSecretBody": {
+      "type": "object",
+      "properties": {
+        "Value": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        }
+      }
+    },
+    "RunnerUpdateStoreBody": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "kind": {
+          "$ref": "#/definitions/serverStoreKind"
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "RunnerUpdateTestCaseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "suiteName": {
+              "type": "string"
+            },
+            "request": {
+              "$ref": "#/definitions/serverRequest"
+            },
+            "response": {
+              "$ref": "#/definitions/serverResponse"
+            },
+            "server": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "RunnerUpdateTestSuiteBody": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "param": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverPair"
+          }
+        },
+        "spec": {
+          "$ref": "#/definitions/serverAPISpec"
+        },
+        "proxy": {
+          "$ref": "#/definitions/serverProxyConfig"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -3348,6 +3438,10 @@
         },
         "icon": {
           "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -3375,6 +3469,18 @@
         "Port": {
           "type": "integer",
           "format": "int32"
+        },
+        "storeKind": {
+          "type": "string"
+        },
+        "storeLocalFile": {
+          "type": "string"
+        },
+        "storeURL": {
+          "type": "string"
+        },
+        "storeRemote": {
+          "type": "string"
         }
       }
     },
@@ -3667,6 +3773,57 @@
         },
         "enabled": {
           "type": "boolean"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverStoreKindDependency"
+          }
+        },
+        "link": {
+          "type": "string"
+        },
+        "params": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/serverStoreKindParam"
+          }
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "serverStoreKindDependency": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "serverStoreKindParam": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "defaultValue": {
+          "type": "string"
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

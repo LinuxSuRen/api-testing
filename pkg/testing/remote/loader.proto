@@ -43,11 +43,6 @@ service Loader {
     rpc GetPageOfJS(server.SimpleName) returns (server.CommonResult) {}
     rpc GetPageOfCSS(server.SimpleName) returns (server.CommonResult) {}
     rpc GetPageOfStatic(server.SimpleName) returns (server.CommonResult) {}
-    
-    // AI plugin communication methods
-    rpc GenerateSQL(server.GenerateSQLRequest) returns (server.GenerateSQLResponse) {}
-    rpc ValidateSQL(server.ValidateSQLRequest) returns (server.ValidateSQLResponse) {}
-    rpc GetAICapabilities(server.Empty) returns (server.AICapabilitiesResponse) {}
 }
 
 message TestSuites {

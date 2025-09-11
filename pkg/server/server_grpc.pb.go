@@ -68,9 +68,6 @@ const (
 	Runner_CreateSecret_FullMethodName                 = "/server.Runner/CreateSecret"
 	Runner_DeleteSecret_FullMethodName                 = "/server.Runner/DeleteSecret"
 	Runner_UpdateSecret_FullMethodName                 = "/server.Runner/UpdateSecret"
-	Runner_GenerateSQL_FullMethodName                  = "/server.Runner/GenerateSQL"
-	Runner_GetAICapabilities_FullMethodName            = "/server.Runner/GetAICapabilities"
-	Runner_ValidateSQL_FullMethodName                  = "/server.Runner/ValidateSQL"
 	Runner_PProf_FullMethodName                        = "/server.Runner/PProf"
 )
 
@@ -137,10 +134,6 @@ type RunnerClient interface {
 	CreateSecret(ctx context.Context, in *Secret, opts ...grpc.CallOption) (*CommonResult, error)
 	DeleteSecret(ctx context.Context, in *Secret, opts ...grpc.CallOption) (*CommonResult, error)
 	UpdateSecret(ctx context.Context, in *Secret, opts ...grpc.CallOption) (*CommonResult, error)
-	// AI SQL Generation
-	GenerateSQL(ctx context.Context, in *GenerateSQLRequest, opts ...grpc.CallOption) (*GenerateSQLResponse, error)
-	GetAICapabilities(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*AICapabilitiesResponse, error)
-	ValidateSQL(ctx context.Context, in *ValidateSQLRequest, opts ...grpc.CallOption) (*ValidateSQLResponse, error)
 	// extension
 	PProf(ctx context.Context, in *PProfRequest, opts ...grpc.CallOption) (*PProfData, error)
 }
@@ -652,36 +645,6 @@ func (c *runnerClient) UpdateSecret(ctx context.Context, in *Secret, opts ...grp
 	return out, nil
 }
 
-func (c *runnerClient) GenerateSQL(ctx context.Context, in *GenerateSQLRequest, opts ...grpc.CallOption) (*GenerateSQLResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GenerateSQLResponse)
-	err := c.cc.Invoke(ctx, Runner_GenerateSQL_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runnerClient) GetAICapabilities(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*AICapabilitiesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AICapabilitiesResponse)
-	err := c.cc.Invoke(ctx, Runner_GetAICapabilities_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runnerClient) ValidateSQL(ctx context.Context, in *ValidateSQLRequest, opts ...grpc.CallOption) (*ValidateSQLResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateSQLResponse)
-	err := c.cc.Invoke(ctx, Runner_ValidateSQL_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *runnerClient) PProf(ctx context.Context, in *PProfRequest, opts ...grpc.CallOption) (*PProfData, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PProfData)
@@ -755,10 +718,6 @@ type RunnerServer interface {
 	CreateSecret(context.Context, *Secret) (*CommonResult, error)
 	DeleteSecret(context.Context, *Secret) (*CommonResult, error)
 	UpdateSecret(context.Context, *Secret) (*CommonResult, error)
-	// AI SQL Generation
-	GenerateSQL(context.Context, *GenerateSQLRequest) (*GenerateSQLResponse, error)
-	GetAICapabilities(context.Context, *Empty) (*AICapabilitiesResponse, error)
-	ValidateSQL(context.Context, *ValidateSQLRequest) (*ValidateSQLResponse, error)
 	// extension
 	PProf(context.Context, *PProfRequest) (*PProfData, error)
 	mustEmbedUnimplementedRunnerServer()
@@ -917,15 +876,6 @@ func (UnimplementedRunnerServer) DeleteSecret(context.Context, *Secret) (*Common
 }
 func (UnimplementedRunnerServer) UpdateSecret(context.Context, *Secret) (*CommonResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateSecret not implemented")
-}
-func (UnimplementedRunnerServer) GenerateSQL(context.Context, *GenerateSQLRequest) (*GenerateSQLResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GenerateSQL not implemented")
-}
-func (UnimplementedRunnerServer) GetAICapabilities(context.Context, *Empty) (*AICapabilitiesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAICapabilities not implemented")
-}
-func (UnimplementedRunnerServer) ValidateSQL(context.Context, *ValidateSQLRequest) (*ValidateSQLResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateSQL not implemented")
 }
 func (UnimplementedRunnerServer) PProf(context.Context, *PProfRequest) (*PProfData, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PProf not implemented")
@@ -1800,60 +1750,6 @@ func _Runner_UpdateSecret_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Runner_GenerateSQL_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GenerateSQLRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).GenerateSQL(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Runner_GenerateSQL_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).GenerateSQL(ctx, req.(*GenerateSQLRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runner_GetAICapabilities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).GetAICapabilities(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Runner_GetAICapabilities_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).GetAICapabilities(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runner_ValidateSQL_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateSQLRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).ValidateSQL(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Runner_ValidateSQL_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).ValidateSQL(ctx, req.(*ValidateSQLRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Runner_PProf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PProfRequest)
 	if err := dec(in); err != nil {
@@ -2062,18 +1958,6 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateSecret",
 			Handler:    _Runner_UpdateSecret_Handler,
-		},
-		{
-			MethodName: "GenerateSQL",
-			Handler:    _Runner_GenerateSQL_Handler,
-		},
-		{
-			MethodName: "GetAICapabilities",
-			Handler:    _Runner_GetAICapabilities_Handler,
-		},
-		{
-			MethodName: "ValidateSQL",
-			Handler:    _Runner_ValidateSQL_Handler,
 		},
 		{
 			MethodName: "PProf",

@@ -299,27 +299,6 @@ service Runner {
       };
     }
 
-    // AI SQL Generation
-    rpc GenerateSQL(GenerateSQLRequest) returns (GenerateSQLResponse) {
-        option (google.api.http) = {
-            post: "/api/v1/ai/sql:generate"
-            body: "*"
-        };
-    }
-    
-    rpc GetAICapabilities(Empty) returns (AICapabilitiesResponse) {
-        option (google.api.http) = {
-            get: "/api/v1/ai/capabilities"
-        };
-    }
-    
-    rpc ValidateSQL(ValidateSQLRequest) returns (ValidateSQLResponse) {
-        option (google.api.http) = {
-            post: "/api/v1/ai/sql:validate"
-            body: "*"
-        };
-    }
-
     // extension
     rpc PProf(PProfRequest) returns (PProfData) {}
 }
@@ -766,22 +745,12 @@ message DataQuery {
     string sql = 3;
     int64 offset = 4;
     int64 limit = 5;
-    
-    // AI extensions starting from field 10
-    string natural_language = 10;
-    string database_type = 11;
-    bool explain_query = 12;
-    map<string, string> ai_context = 13;
-    reserved 14 to 20;
 }
 
 message DataQueryResult {
     repeated Pair data = 1;
     repeated Pairs items = 2;
     DataMeta meta = 3;
-    
-    // AI result information
-    AIProcessingInfo ai_info = 10;
 }
 
 message DataMeta {
@@ -792,123 +761,3 @@ message DataMeta {
     repeated Pair labels = 5;
 }
 
-// AI-specific message definitions
-message GenerateSQLRequest {
-    string natural_language = 1;
-    DatabaseTarget database_target = 2;
-    GenerationOptions options = 3;
-    map<string, string> context = 4;
-    reserved 5 to 10;
-}
-
-message GenerateSQLResponse {
-    string generated_sql = 1;
-    float confidence_score = 2;
-    string explanation = 3;
-    repeated string suggestions = 4;
-    AIError error = 5;
-    GenerationMetadata metadata = 6;
-}
-
-message ValidateSQLRequest {
-    string sql = 1;
-    string database_type = 2;
-    map<string, string> context = 3;
-}
-
-message ValidateSQLResponse {
-    bool is_valid = 1;
-    repeated ValidationError errors = 2;
-    repeated string warnings = 3;
-    string formatted_sql = 4;
-    ValidationMetadata metadata = 5;
-}
-
-message AICapabilitiesResponse {
-    repeated string supported_databases = 1;
-    repeated AIFeature features = 2;
-    string version = 3;
-    HealthStatus status = 4;
-    map<string, string> limits = 5;
-}
-
-message DatabaseTarget {
-    string type = 1; // mysql, postgresql, sqlite, etc.
-    string version = 2;
-    repeated string schemas = 3;
-    map<string, string> metadata = 4;
-}
-
-message GenerationOptions {
-    bool include_explanation = 1;
-    bool format_output = 2;
-    int32 max_suggestions = 3;
-    float confidence_threshold = 4;
-    bool enable_optimization = 5;
-}
-
-message AIProcessingInfo {
-    string request_id = 1;
-    float processing_time_ms = 2;
-    string model_used = 3;
-    float confidence_score = 4;
-    repeated string debug_info = 5;
-}
-
-message GenerationMetadata {
-    string request_id = 1;
-    float processing_time_ms = 2;
-    string model_used = 3;
-    int32 token_count = 4;
-    google.protobuf.Timestamp timestamp = 5;
-}
-
-message ValidationError {
-    string message = 1;
-    int32 line = 2;
-    int32 column = 3;
-    ValidationErrorType type = 4;
-}
-
-message ValidationMetadata {
-    string validator_version = 1;
-    float validation_time_ms = 2;
-    google.protobuf.Timestamp timestamp = 3;
-}
-
-message AIFeature {
-    string name = 1;
-    bool enabled = 2;
-    string description = 3;
-    map<string, string> parameters = 4;
-}
-
-message AIError {
-    AIErrorCode code = 1;
-    string message = 2;
-    string details = 3;
-}
-
-enum ValidationErrorType {
-    VALIDATION_ERROR_TYPE_UNSPECIFIED = 0;
-    SYNTAX_ERROR = 1;
-    SEMANTIC_ERROR = 2;
-    PERFORMANCE_WARNING = 3;
-    SECURITY_WARNING = 4;
-}
-
-enum HealthStatus {
-    HEALTH_STATUS_UNSPECIFIED = 0;
-    HEALTHY = 1;
-    DEGRADED = 2;
-    UNHEALTHY = 3;
-}
-
-enum AIErrorCode {
-    AI_ERROR_CODE_UNSPECIFIED = 0;
-    INVALID_INPUT = 1;
-    MODEL_UNAVAILABLE = 2;
-    RATE_LIMITED = 3;
-    PROCESSING_ERROR = 4;
-    CONFIGURATION_ERROR = 5;
-}
