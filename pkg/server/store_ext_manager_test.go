@@ -28,7 +28,7 @@ func TestStoreExtManager(t *testing.T) {
 	t.Run("not found", func(t *testing.T) {
 		mgr := NewStoreExtManagerInstance(&fakeruntime.FakeExecer{
 			ExpectLookPathError: errors.New("not found"),
-		})
+		}, "../testing/testdata")
 		err := mgr.Start("fake", "")
 		assert.Error(t, err)
 	})
@@ -36,7 +36,7 @@ func TestStoreExtManager(t *testing.T) {
 	t.Run("exist executable file", func(t *testing.T) {
 		mgr := NewStoreExtManagerInstance(&fakeruntime.FakeExecer{
 			ExpectLookPath: "/usr/local/bin/go",
-		})
+		}, "../testing/testdata")
 		err := mgr.Start("go", "")
 		assert.NoError(t, err, err)
 
@@ -53,7 +53,7 @@ func TestStoreExtManager(t *testing.T) {
 func TestUnifiedPluginManagement(t *testing.T) {
 	mgr := NewStoreExtManagerInstance(&fakeruntime.FakeExecer{
 		ExpectLookPath: "/usr/local/bin/go",
-	})
+	}, "../testing/testdata")
 
 	t.Run("discover AI plugins via category filter", func(t *testing.T) {
 		// Test AI plugin discovery using the new unified method

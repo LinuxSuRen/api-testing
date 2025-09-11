@@ -261,7 +261,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 	extDownloader := downloader.NewStoreDownloader()
 	extDownloader.WithRegistry(o.extensionRegistry)
 	extDownloader.WithTimeout(o.downloadTimeout)
-	storeExtMgr := server.NewStoreExtManager(o.execer)
+	storeExtMgr := server.NewStoreExtManager(o.execer, o.configDir)
 	storeExtMgr.WithDownloader(extDownloader)
 	remoteServer := server.NewRemoteServer(loader, remote.NewGRPCloaderFromStore(), secretServer, storeExtMgr, o.configDir, o.grpcMaxRecvMsgSize)
 	if stores, storeErr := remoteServer.GetStores(ctx, nil); storeErr == nil {

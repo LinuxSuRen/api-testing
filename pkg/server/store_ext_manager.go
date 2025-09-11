@@ -73,11 +73,12 @@ type storeExtManager struct {
 	processChan          chan fakeruntime.Process
 	stopSingal           chan struct{}
 	lock                 *sync.RWMutex
+	configDir            string
 }
 
 var ss *storeExtManager
 
-func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
+func NewStoreExtManager(execer fakeruntime.Execer, configDir string) ExtManager {
 	if ss == nil {
 		ss = &storeExtManager{
 			processChan: make(chan fakeruntime.Process),
@@ -85,6 +86,7 @@ func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
 			lock:        &sync.RWMutex{},
 		}
 		ss.execer = execer
+		ss.configDir = configDir
 		ss.socketPrefix = "unix://"
 		ss.extStatusMap = map[string]bool{}
 		ss.processCollect()
@@ -93,13 +95,14 @@ func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
 	return ss
 }
 
-func NewStoreExtManagerInstance(execer fakeruntime.Execer) ExtManager {
+func NewStoreExtManagerInstance(execer fakeruntime.Execer, configDir string) ExtManager {
 	ss = &storeExtManager{
 		processChan: make(chan fakeruntime.Process),
 		stopSingal:  make(chan struct{}, 1),
 		lock:        &sync.RWMutex{},
 	}
 	ss.execer = execer
+	ss.configDir = configDir
 	ss.socketPrefix = "unix://"
 	ss.extStatusMap = map[string]bool{}
 	ss.processCollect()
@@ -271,12 +274,10 @@ func (n *nonDownloader) GetTargetFile() string {
 
 // GetPluginsByCategory returns plugins filtered by category (e.g., "ai")
 func (s *storeExtManager) GetPluginsByCategory(category string) ([]testing.StoreKind, error) {
-	storeFactory := testing.NewStoreFactory("") // Use default config directory
+	storeFactory := testing.NewStoreFactory(s.configDir)
 	allStoreKinds, err := storeFactory.GetStoreKinds()
 	if err != nil {
-		// In test environment or when extension.yaml doesn't exist, return empty list gracefully
-		serverLogger.Info("failed to get store kinds, returning empty list", "error", err.Error())
-		return []testing.StoreKind{}, nil
+		return nil, fmt.Errorf("failed to get store kinds: %w", err)
 	}
 	
 	var filteredKinds []testing.StoreKind
