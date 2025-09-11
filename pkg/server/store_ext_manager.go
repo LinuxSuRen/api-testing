@@ -41,46 +41,26 @@ var (
 	serverLogger = logging.DefaultLogger(logging.LogLevelInfo).WithName("server")
 )
 
-// AIPluginInfo represents information about an AI plugin
-type AIPluginInfo struct {
-	Name         string            `json:"name"`
-	Version      string            `json:"version"`
-	Description  string            `json:"description"`
-	Capabilities []string          `json:"capabilities"`
-	SocketPath   string            `json:"socketPath"`
-	Metadata     map[string]string `json:"metadata"`
-}
-
-// AIPluginHealth represents the health status of an AI plugin
-type AIPluginHealth struct {
+// PluginHealth represents the health status of any plugin (including AI plugins)
+type PluginHealth struct {
 	Name         string            `json:"name"`
 	Status       string            `json:"status"` // online, offline, error, processing
 	LastCheckAt  time.Time         `json:"lastCheckAt"`
-	ResponseTime time.Duration     `json:"responseTime"`
+	ResponseTime int64             `json:"responseTime"`
 	ErrorMessage string            `json:"errorMessage,omitempty"`
 	Metrics      map[string]string `json:"metrics,omitempty"`
 }
 
-// ExtManager handles general extension management (start, stop, download)
+// ExtManager handles all plugin management (including AI plugins)
 type ExtManager interface {
 	Start(name, socket string) (err error)
 	StopAll() (err error)
 	WithDownloader(downloader.PlatformAwareOCIDownloader)
-}
-
-// AIPluginManager handles AI-specific plugin management
-type AIPluginManager interface {
-	DiscoverAIPlugins() ([]AIPluginInfo, error)
-	CheckAIPluginHealth(name string) (*AIPluginHealth, error)
-	GetAllAIPluginHealth() (map[string]*AIPluginHealth, error)
-	RegisterAIPlugin(info AIPluginInfo) error
-	UnregisterAIPlugin(name string) error
-}
-
-// CompositeManager combines both extension and AI plugin management
-type CompositeManager interface {
-	ExtManager
-	AIPluginManager
+	
+	// New unified methods for all plugin types (including AI)
+	GetPluginsByCategory(category string) ([]testing.StoreKind, error)
+	CheckPluginHealth(name string) (*PluginHealth, error)         
+	GetAllPluginHealth() (map[string]*PluginHealth, error)
 }
 
 type storeExtManager struct {
@@ -93,59 +73,37 @@ type storeExtManager struct {
 	processChan          chan fakeruntime.Process
 	stopSingal           chan struct{}
 	lock                 *sync.RWMutex
-	// AI Plugin Management
-	aiPluginRegistry   map[string]AIPluginInfo    `json:"aiPluginRegistry"`
-	aiPluginHealthMap  map[string]*AIPluginHealth `json:"aiPluginHealthMap"`
-	healthCheckTicker  *time.Ticker               `json:"-"`
-	healthCheckCtx     context.Context            `json:"-"`
-	healthCheckCancel  context.CancelFunc         `json:"-"`
 }
 
 var ss *storeExtManager
 
-func NewStoreExtManager(execer fakeruntime.Execer) CompositeManager {
+func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
 	if ss == nil {
-		ctx, cancel := context.WithCancel(context.Background())
 		ss = &storeExtManager{
 			processChan: make(chan fakeruntime.Process),
 			stopSingal:  make(chan struct{}, 1),
 			lock:        &sync.RWMutex{},
-			// AI Plugin Management initialization
-			aiPluginRegistry:  make(map[string]AIPluginInfo),
-			aiPluginHealthMap: make(map[string]*AIPluginHealth),
-			healthCheckCtx:    ctx,
-			healthCheckCancel: cancel,
 		}
 		ss.execer = execer
 		ss.socketPrefix = "unix://"
 		ss.extStatusMap = map[string]bool{}
 		ss.processCollect()
 		ss.WithDownloader(&nonDownloader{})
-		// Start AI plugin health monitoring
-		ss.startAIHealthMonitoring()
 	}
 	return ss
 }
 
-func NewStoreExtManagerInstance(execer fakeruntime.Execer) CompositeManager {
-	ctx, cancel := context.WithCancel(context.Background())
+func NewStoreExtManagerInstance(execer fakeruntime.Execer) ExtManager {
 	ss = &storeExtManager{
 		processChan: make(chan fakeruntime.Process),
 		stopSingal:  make(chan struct{}, 1),
 		lock:        &sync.RWMutex{},
-		// AI Plugin Management initialization
-		aiPluginRegistry:  make(map[string]AIPluginInfo),
-		aiPluginHealthMap: make(map[string]*AIPluginHealth),
-		healthCheckCtx:    ctx,
-		healthCheckCancel: cancel,
 	}
 	ss.execer = execer
 	ss.socketPrefix = "unix://"
 	ss.extStatusMap = map[string]bool{}
 	ss.processCollect()
 	ss.WithDownloader(&nonDownloader{})
-	// Start AI plugin health monitoring
-	ss.startAIHealthMonitoring()
 	return ss
 }
 
@@ -311,214 +269,81 @@ func (n *nonDownloader) GetTargetFile() string {
 	return ""
 }
 
-// AI Plugin Management Implementation
-
-// startAIHealthMonitoring starts the periodic health check for AI plugins
-func (s *storeExtManager) startAIHealthMonitoring() {
-	s.healthCheckTicker = time.NewTicker(30 * time.Second) // Health check every 30 seconds
-	
-	go func() {
-		for {
-			select {
-			case <-s.healthCheckCtx.Done():
-				s.healthCheckTicker.Stop()
-				return
-			case <-s.healthCheckTicker.C:
-				s.performHealthCheck()
-			}
-		}
-	}()
-}
-
-// performHealthCheck performs health checks on all registered AI plugins
-func (s *storeExtManager) performHealthCheck() {
-	s.lock.RLock()
-	plugins := make(map[string]AIPluginInfo)
-	for name, info := range s.aiPluginRegistry {
-		plugins[name] = info
-	}
-	s.lock.RUnlock()
-
-	for name, info := range plugins {
-		health, err := s.checkSingleAIPlugin(info)
-		if err != nil {
-			serverLogger.Error(err, "Failed to check AI plugin health", "plugin", name)
-			health = &AIPluginHealth{
-				Name:         name,
-				Status:       "error",
-				LastCheckAt:  time.Now(),
-				ErrorMessage: err.Error(),
-			}
-		}
-
-		s.lock.Lock()
-		s.aiPluginHealthMap[name] = health
-		s.lock.Unlock()
-	}
-}
-
-// checkSingleAIPlugin performs health check on a single AI plugin
-func (s *storeExtManager) checkSingleAIPlugin(info AIPluginInfo) (*AIPluginHealth, error) {
-	startTime := time.Now()
-	
-	// For now, we'll simulate a health check by checking if the socket file exists
-	// In a real implementation, this would make a gRPC health check call
-	_, err := os.Stat(strings.TrimPrefix(info.SocketPath, "unix://"))
-	
-	responseTime := time.Since(startTime)
-	
-	health := &AIPluginHealth{
-		Name:         info.Name,
-		LastCheckAt:  time.Now(),
-		ResponseTime: responseTime,
-		Metrics: map[string]string{
-			"version":     info.Version,
-			"socket_path": info.SocketPath,
-		},
-	}
-
+// GetPluginsByCategory returns plugins filtered by category (e.g., "ai")
+func (s *storeExtManager) GetPluginsByCategory(category string) ([]testing.StoreKind, error) {
+	storeFactory := testing.NewStoreFactory("") // Use default config directory
+	allStoreKinds, err := storeFactory.GetStoreKinds()
 	if err != nil {
-		if os.IsNotExist(err) {
-			health.Status = "offline"
-			health.ErrorMessage = "Plugin socket not found"
-		} else {
-			health.Status = "error"
-			health.ErrorMessage = err.Error()
+		// In test environment or when extension.yaml doesn't exist, return empty list gracefully
+		serverLogger.Info("failed to get store kinds, returning empty list", "error", err.Error())
+		return []testing.StoreKind{}, nil
+	}
+	
+	var filteredKinds []testing.StoreKind
+	for _, storeKind := range allStoreKinds {
+		for _, cat := range storeKind.Categories {
+			if cat == category {
+				filteredKinds = append(filteredKinds, storeKind)
+				break
+			}
 		}
-	} else {
+	}
+	
+	return filteredKinds, nil
+}
+
+// CheckPluginHealth checks the health of a specific plugin
+func (s *storeExtManager) CheckPluginHealth(name string) (*PluginHealth, error) {
+	// For now, simulate health check by checking if plugin is in our status map
+	s.lock.RLock()
+	isRunning, exists := s.extStatusMap[name]
+	s.lock.RUnlock()
+	
+	health := &PluginHealth{
+		Name:        name,
+		LastCheckAt: time.Now(),
+		Metrics:     make(map[string]string),
+	}
+	
+	if exists && isRunning {
 		health.Status = "online"
-		health.ErrorMessage = ""
+		health.ResponseTime = 100 // Simulate response time in ms
+	} else {
+		health.Status = "offline"
+		health.ErrorMessage = "Plugin not running"
 	}
-
-	return health, nil
-}
-
-// DiscoverAIPlugins discovers AI-capable plugins in the system
-func (s *storeExtManager) DiscoverAIPlugins() ([]AIPluginInfo, error) {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-	
-	var plugins []AIPluginInfo
-	for _, info := range s.aiPluginRegistry {
-		plugins = append(plugins, info)
-	}
-	
-	return plugins, nil
-}
-
-// CheckAIPluginHealth checks the health of a specific AI plugin
-func (s *storeExtManager) CheckAIPluginHealth(name string) (*AIPluginHealth, error) {
-	s.lock.RLock()
-	info, exists := s.aiPluginRegistry[name]
-	s.lock.RUnlock()
-	
-	if !exists {
-		return nil, fmt.Errorf("AI plugin %s not found", name)
-	}
-	
-	health, err := s.checkSingleAIPlugin(info)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check health for AI plugin %s: %w", name, err)
-	}
-	
-	// Update the health cache
-	s.lock.Lock()
-	s.aiPluginHealthMap[name] = health
-	s.lock.Unlock()
 	
 	return health, nil
 }
 
-// GetAllAIPluginHealth returns the health status of all AI plugins
-func (s *storeExtManager) GetAllAIPluginHealth() (map[string]*AIPluginHealth, error) {
+// GetAllPluginHealth returns health status for all plugins
+func (s *storeExtManager) GetAllPluginHealth() (map[string]*PluginHealth, error) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	
-	// Return a copy to avoid concurrent access issues
-	healthMap := make(map[string]*AIPluginHealth)
-	for name, health := range s.aiPluginHealthMap {
-		// Create a copy of the health struct
-		healthCopy := &AIPluginHealth{
-			Name:         health.Name,
-			Status:       health.Status,
-			LastCheckAt:  health.LastCheckAt,
-			ResponseTime: health.ResponseTime,
-			ErrorMessage: health.ErrorMessage,
-			Metrics:      make(map[string]string),
+	healthMap := make(map[string]*PluginHealth)
+	for pluginName, isRunning := range s.extStatusMap {
+		health := &PluginHealth{
+			Name:        pluginName,
+			LastCheckAt: time.Now(),
+			Metrics:     make(map[string]string),
 		}
 		
-		// Copy metrics map
-		for k, v := range health.Metrics {
-			healthCopy.Metrics[k] = v
+		if isRunning {
+			health.Status = "online"
+			health.ResponseTime = 100
+		} else {
+			health.Status = "offline"
+			health.ErrorMessage = "Plugin not running"
 		}
 		
-		healthMap[name] = healthCopy
+		healthMap[pluginName] = health
 	}
 	
 	return healthMap, nil
 }
 
-// RegisterAIPlugin registers a new AI plugin with the system
-func (s *storeExtManager) RegisterAIPlugin(info AIPluginInfo) error {
-	if info.Name == "" {
-		return fmt.Errorf("plugin name cannot be empty")
-	}
-	
-	if info.SocketPath == "" {
-		return fmt.Errorf("plugin socket path cannot be empty")
-	}
-	
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	
-	// Check if plugin is already registered
-	if _, exists := s.aiPluginRegistry[info.Name]; exists {
-		serverLogger.Info("AI plugin already registered, updating info", "plugin", info.Name)
-	}
-	
-	s.aiPluginRegistry[info.Name] = info
-	
-	// Initialize health status
-	s.aiPluginHealthMap[info.Name] = &AIPluginHealth{
-		Name:        info.Name,
-		Status:      "unknown",
-		LastCheckAt: time.Now(),
-		Metrics: map[string]string{
-			"version":     info.Version,
-			"socket_path": info.SocketPath,
-		},
-	}
-	
-	serverLogger.Info("AI plugin registered successfully", "plugin", info.Name, "version", info.Version)
-	
-	return nil
-}
-
-// UnregisterAIPlugin removes an AI plugin from the system
-func (s *storeExtManager) UnregisterAIPlugin(name string) error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	
-	if _, exists := s.aiPluginRegistry[name]; !exists {
-		return fmt.Errorf("AI plugin %s not found", name)
-	}
-	
-	delete(s.aiPluginRegistry, name)
-	delete(s.aiPluginHealthMap, name)
-	
-	serverLogger.Info("AI plugin unregistered successfully", "plugin", name)
-	
-	return nil
-}
-
-// StopAll enhanced to also clean up AI plugin monitoring
 func (s *storeExtManager) StopAll() error {
-	// Stop AI health monitoring
-	if s.healthCheckCancel != nil {
-		s.healthCheckCancel()
-	}
-	
-	// Original StopAll implementation
 	serverLogger.Info("stop", "extensions", len(s.processs))
 	for _, p := range s.processs {
 		if p != nil {

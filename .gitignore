@@ -31,3 +31,5 @@ e2e/server.csr
 e2e/server.crt
 
 atest
+
+*.md
