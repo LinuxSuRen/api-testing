@@ -438,7 +438,7 @@ func postRequestProxy(proxy string) func(w http.ResponseWriter, r *http.Request,
 	}
 }
 
-func startPlugins(storeExtMgr server.ExtManager, stores *server.Stores) (err error) {
+func startPlugins(storeExtMgr server.CompositeManager, stores *server.Stores) (err error) {
 	for _, store := range stores.Data {
 		if store.Disabled || store.Kind == nil {
 			continue

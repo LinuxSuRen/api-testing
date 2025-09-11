@@ -26,7 +26,7 @@ import (
 
 func TestStoreExtManager(t *testing.T) {
 	t.Run("not found", func(t *testing.T) {
-		mgr := NewStoreExtManager(&fakeruntime.FakeExecer{
+		mgr := NewStoreExtManagerInstance(&fakeruntime.FakeExecer{
 			ExpectLookPathError: errors.New("not found"),
 		})
 		err := mgr.Start("fake", "")

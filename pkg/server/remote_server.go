@@ -76,7 +76,7 @@ type server struct {
 	loader             testing.Writer
 	storeWriterFactory testing.StoreWriterFactory
 	configDir          string
-	storeExtMgr        ExtManager
+	storeExtMgr        CompositeManager
 
 	secretServer SecretServiceServer
 
@@ -119,7 +119,7 @@ func (f *fakeSecretServer) UpdateSecret(ctx context.Context, in *Secret) (reply 
 }
 
 // NewRemoteServer creates a remote server instance
-func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, secretServer SecretServiceServer, storeExtMgr ExtManager, configDir string, grpcMaxRecvMsgSize int) RunnerServer {
+func NewRemoteServer(loader testing.Writer, storeWriterFactory testing.StoreWriterFactory, secretServer SecretServiceServer, storeExtMgr CompositeManager, configDir string, grpcMaxRecvMsgSize int) RunnerServer {
 	if secretServer == nil {
 		secretServer = &fakeSecretServer{}
 	}

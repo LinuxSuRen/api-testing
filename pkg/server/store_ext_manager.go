@@ -61,16 +61,26 @@ type AIPluginHealth struct {
 	Metrics      map[string]string `json:"metrics,omitempty"`
 }
 
+// ExtManager handles general extension management (start, stop, download)
 type ExtManager interface {
 	Start(name, socket string) (err error)
 	StopAll() (err error)
 	WithDownloader(downloader.PlatformAwareOCIDownloader)
-	// AI Plugin Management
+}
+
+// AIPluginManager handles AI-specific plugin management
+type AIPluginManager interface {
 	DiscoverAIPlugins() ([]AIPluginInfo, error)
 	CheckAIPluginHealth(name string) (*AIPluginHealth, error)
 	GetAllAIPluginHealth() (map[string]*AIPluginHealth, error)
 	RegisterAIPlugin(info AIPluginInfo) error
 	UnregisterAIPlugin(name string) error
+}
+
+// CompositeManager combines both extension and AI plugin management
+type CompositeManager interface {
+	ExtManager
+	AIPluginManager
 }
 
 type storeExtManager struct {
@@ -93,7 +103,7 @@ type storeExtManager struct {
 
 var ss *storeExtManager
 
-func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
+func NewStoreExtManager(execer fakeruntime.Execer) CompositeManager {
 	if ss == nil {
 		ctx, cancel := context.WithCancel(context.Background())
 		ss = &storeExtManager{
@@ -117,7 +127,7 @@ func NewStoreExtManager(execer fakeruntime.Execer) ExtManager {
 	return ss
 }
 
-func NewStoreExtManagerInstance(execer fakeruntime.Execer) ExtManager {
+func NewStoreExtManagerInstance(execer fakeruntime.Execer) CompositeManager {
 	ctx, cancel := context.WithCancel(context.Background())
 	ss = &storeExtManager{
 		processChan: make(chan fakeruntime.Process),
