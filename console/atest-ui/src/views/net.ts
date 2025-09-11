@@ -1097,5 +1097,7 @@ export const API = {
     GetThemes, GetTheme, GetBinding,
     // AI Plugin Management
     DiscoverAIPlugins, CheckAIPluginHealth, GetAllAIPluginHealth, RegisterAIPlugin, UnregisterAIPlugin,
+    // AI Plugin Types
+    AIPluginInfo, AIPluginHealth,
     getToken
 }

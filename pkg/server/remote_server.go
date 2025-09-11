@@ -1350,14 +1350,7 @@ func (s *server) PProf(ctx context.Context, in *PProfRequest) (reply *PProfData,
 	return
 }
 func (s *server) Query(ctx context.Context, query *DataQuery) (result *DataQueryResult, err error) {
-	// Check if this is an AI query and route accordingly
-	aiRouter := NewAIQueryRouter(nil) // Pass nil for now as we don't need server interface
-	if aiRouter.IsAIQuery(query) {
-		remoteServerLogger.Info("Processing AI query", "type", query.Type, "natural_language", query.NaturalLanguage)
-		return aiRouter.RouteAIQuery(ctx, query)
-	}
-
-	// Handle traditional SQL queries
+	// Handle SQL queries
 	loader := s.getLoader(ctx)
 	defer loader.Close()
 

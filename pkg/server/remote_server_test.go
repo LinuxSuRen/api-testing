@@ -841,7 +841,7 @@ func TestFunctionsQueryStream(t *testing.T) {
 		Inputs: []any{&SimpleQuery{Name: "randNumeric"}, &SimpleQuery{Name: "randnumer"}},
 		Outpus: []any{},
 	}
-	err := server.FunctionsQueryStream(&runnerFunctionsQueryStreamServer{fakess})
+	err := server.FunctionsQueryStream(fakess)
 	t.Run("match outputs length", func(t *testing.T) {
 		if assert.NoError(t, err) {
 			assert.Equal(t, 2, len(fakess.Outpus))
@@ -1058,6 +1058,18 @@ func (s *fakeServerStream) RecvMsg(m interface{}) error {
 	}
 
 	return nil
+}
+
+func (s *fakeServerStream) Recv() (*SimpleQuery, error) {
+	var query SimpleQuery
+	if err := s.RecvMsg(&query); err != nil {
+		return nil, err
+	}
+	return &query, nil
+}
+
+func (s *fakeServerStream) Send(pairs *Pairs) error {
+	return s.SendMsg(pairs)
 }
 
 func TestGetStoreKinds(t *testing.T) {

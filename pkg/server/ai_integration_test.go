@@ -17,10 +17,7 @@ limitations under the License.
 package server
 
 import (
-	"context"
 	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
