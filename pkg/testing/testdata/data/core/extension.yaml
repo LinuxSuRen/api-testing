@@ -5,10 +5,10 @@ items:
     link: https://github.com/LinuxSuRen/atest-ext-store-database
     categories:
       - database
-  - name: openai-gpt4
+  - name: atest-ext-ai
     dependencies:
-      - name: openai-gpt4
-    link: https://github.com/LinuxSuRen/atest-ext-ai-openai
+      - name: atest-ext-ai
+    link: https://github.com/LinuxSuRen/atest-ext-ai
     categories:
       - ai
     params:
@@ -18,22 +18,9 @@ items:
       - key: capabilities
         defaultValue: "sql-generation,code-analysis"
         description: "AI capabilities"
-  - name: claude-ai
+  - name: atest-ext-web
     dependencies:
-      - name: claude-ai
-    link: https://github.com/LinuxSuRen/atest-ext-ai-claude
-    categories:
-      - ai
-    params:
-      - key: version
-        defaultValue: "1.0.0"
-        description: "Plugin version"
-      - key: capabilities
-        defaultValue: "natural-language,text-analysis"
-        description: "AI capabilities"
-  - name: web-scraper
-    dependencies:
-      - name: web-scraper
-    link: https://github.com/LinuxSuRen/atest-ext-web-scraper
+      - name: atest-ext-web
+    link: https://github.com/LinuxSuRen/atest-ext-store-database
     categories:
       - web
