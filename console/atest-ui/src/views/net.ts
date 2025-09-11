@@ -15,6 +15,17 @@ limitations under the License.
 */
 import { Cache } from './cache'
 
+// AI Plugin Management Types - defined early to avoid hoisting issues
+export type AIPluginInfo = {
+    name: string
+    version: string
+    description: string
+    capabilities: string[]
+    socketPath: string
+    metadata: Record<string, string>
+}
+
+
 /**
  * Process HTTP response with proper content type handling
  * 
@@ -1018,16 +1029,8 @@ const GetBinding = (name: string, callback: (d: any) => void | null) => {
 }
 
 // AI Plugin Management API functions
-export interface AIPluginInfo {
-    name: string
-    version: string
-    description: string
-    capabilities: string[]
-    socketPath: string
-    metadata: Record<string, string>
-}
 
-export interface AIPluginHealth {
+export type AIPluginHealth = {
     name: string
     status: string // online, offline, error, processing
     lastCheckAt: string
@@ -1097,7 +1100,5 @@ export const API = {
     GetThemes, GetTheme, GetBinding,
     // AI Plugin Management
     DiscoverAIPlugins, CheckAIPluginHealth, GetAllAIPluginHealth, RegisterAIPlugin, UnregisterAIPlugin,
-    // AI Plugin Types
-    AIPluginInfo, AIPluginHealth,
     getToken
 }
