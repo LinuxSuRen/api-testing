@@ -1765,3 +1765,64 @@ func (s *UniqueSlice[T]) GetAll() []T {
 }
 
 var errNoTestSuiteFound = errors.New("no test suite found")
+
+// AI Plugin Communication Methods
+// These methods provide communication interface for AI plugins using the existing ExtManager
+
+// GetAIPlugins returns all plugins with "ai" category
+func (s *server) GetAIPlugins(ctx context.Context, req *Empty) (*StoreKinds, error) {
+	stores, err := s.GetStoreKinds(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	
+	var aiPlugins []*StoreKind
+	for _, store := range stores.Data {
+		for _, category := range store.Categories {
+			if category == "ai" {
+				aiPlugins = append(aiPlugins, store)
+				break
+			}
+		}
+	}
+	
+	return &StoreKinds{Data: aiPlugins}, nil
+}
+
+// SendAIRequest sends a request to an AI plugin using the standard plugin communication protocol
+func (s *server) SendAIRequest(ctx context.Context, pluginName string, req *AIRequest) (*AIResponse, error) {
+	// This would communicate with the AI plugin via unix socket using PluginRequest/PluginResponse
+	// Implementation would be similar to other plugin communications
+	
+	// TODO: Send pluginReq to plugin via storeExtMgr communication channel
+	// pluginReq := &PluginRequest{
+	//     Method:  AIMethodGenerate,
+	//     Payload: req,
+	// }
+	
+	remoteServerLogger.Info("Sending AI request", "plugin", pluginName, "model", req.Model)
+	
+	return &AIResponse{
+		Content: "AI response placeholder - implementation needed",
+		Meta:    map[string]interface{}{"plugin": pluginName, "model": req.Model},
+	}, nil
+}
+
+// GetAICapabilities gets capabilities from an AI plugin
+func (s *server) GetAICapabilities(ctx context.Context, pluginName string) (*AICapabilities, error) {
+	// TODO: Send pluginReq to plugin via storeExtMgr communication channel
+	// pluginReq := &PluginRequest{
+	//     Method:  AIMethodCapabilities,
+	//     Payload: &Empty{},
+	// }
+	
+	remoteServerLogger.Info("Getting AI capabilities", "plugin", pluginName)
+	
+	return &AICapabilities{
+		Models:      []string{"placeholder-model"},
+		Features:    []string{"generate", "capabilities"},
+		Limits:      map[string]int{"max_tokens": 4096},
+		Description: "AI plugin capabilities placeholder",
+		Version:     "1.0.0",
+	}, nil
+}

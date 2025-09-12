@@ -3,3 +3,19 @@ items:
     dependencies:
       - name: atest-store-database
     link: https://github.com/LinuxSuRen/atest-ext-store-database
+  - name: atest-ai-openai
+    dependencies:
+      - name: atest-ai-openai
+    link: https://github.com/LinuxSuRen/atest-ext-ai-openai
+    categories: ["ai"]
+    params:
+      - key: api_key
+        description: OpenAI API Key
+        defaultValue: ""
+      - key: model
+        description: OpenAI Model
+        defaultValue: "gpt-4"
+        enum: ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo"]
+      - key: temperature
+        description: Sampling temperature
+        defaultValue: "0.7"
