@@ -446,14 +446,6 @@ func startPlugins(storeExtMgr server.ExtManager, stores *server.Stores) (err err
 
 		kind := store.Kind
 		err = errors.Join(err, storeExtMgr.Start(kind.Name, kind.Url))
-		
-		// Start AI plugins if this store kind has AI category
-		for _, category := range kind.Categories {
-			if category == "ai" {
-				serverLogger.Info("Starting AI plugin", "name", kind.Name, "categories", kind.Categories)
-				break
-			}
-		}
 	}
 	return
 }
