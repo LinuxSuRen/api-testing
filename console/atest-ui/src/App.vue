@@ -6,13 +6,7 @@ import {
     Share,
     ArrowDown,
     Guide,
-    Help, Setting,
-    ChatLineSquare,
-    Loading,
-    CircleCheck,
-    CircleClose,
-    Warning,
-    QuestionFilled
+    Help, Setting
 } from '@element-plus/icons-vue'
 import * as ElementPlusIcons from '@element-plus/icons-vue'
 import { ref, watch, getCurrentInstance} from 'vue'
@@ -25,8 +19,6 @@ import StoreManager from './views/StoreManager.vue'
 import WelcomePage from './views/WelcomePage.vue'
 import MagicKey from './components/MagicKey.vue'
 import Extension from './views/Extension.vue'
-import AIStatusIndicator from './components/AIStatusIndicator.vue'
-import AITriggerButton from './components/AITriggerButton.vue'
 import { useI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'; 
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs' 
@@ -176,7 +168,6 @@ API.GetMenus((menus) => {
     <el-main class="center-zone">
       <div class="top-menu">
         <el-col style="display: flex; align-items: center;">
-          <AIStatusIndicator />
           <el-icon @click="settingDialogVisible=true" size="20"><Setting /></el-icon>
         </el-col>
       </div>
@@ -246,7 +237,6 @@ API.GetMenus((menus) => {
     </el-dialog>
 
     <MagicKey />
-    <AITriggerButton />
 </template>
 
 <style>
