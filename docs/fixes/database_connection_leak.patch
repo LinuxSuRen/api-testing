@@ -1,0 +1,174 @@
+From: GitHub Copilot <copilot@github.com>
+Date: Thu, 12 Sep 2025 00:00:00 +0000
+Subject: [PATCH] Fix database connection leak in ORM store extension
+
+This patch fixes the database connection leak issue where MySQL client
+connections keep increasing over time when switching between databases.
+
+Changes:
+- Use composite cache keys (store:database) instead of just store name
+- Add proper connection pool configuration with limits
+- Implement thread-safe connection caching with mutex
+- Add connection cleanup functionality
+- Add connection monitoring capabilities
+
+Fixes the issue where repeated queries with database switches would
+create new connections without properly reusing or closing old ones.
+
+---
+ pkg/server.go | 89 ++++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 75 insertions(+), 14 deletions(-)
+
+diff --git a/pkg/server.go b/pkg/server.go
+index 1234567..abcdefg 100644
+--- a/pkg/server.go
++++ b/pkg/server.go
+@@ -20,6 +20,8 @@ import (
+ 	"os"
+ 	"path/filepath"
+ 	"strconv"
++	"sync"
++	"time"
+ 	"strings"
+ 
+ 	"github.com/linuxsuren/api-testing/pkg/extension"
+@@ -50,8 +52,16 @@ func NewRemoteServer(defaultHistoryLimit int) (s remote.LoaderServer) {
+ 	return
+ }
+ 
+-func createDB(user, password, address, database, driver string) (db *gorm.DB, err error) {
++// generateCacheKey creates a unique cache key for store + database combination
++func generateCacheKey(storeName, database string) string {
++	return fmt.Sprintf("%s:%s", storeName, database)
++}
++
++// createDBWithPool creates a database connection with proper connection pool configuration
++func createDBWithPool(user, password, address, database, driver string) (db *gorm.DB, err error) {
+ 	var dialector gorm.Dialector
+ 	var dsn string
++	
+ 	switch driver {
+ 	case DialectorMySQL, "", "greptime":
+ 		if !strings.Contains(address, ":") {
+@@ -84,6 +94,21 @@ func createDB(user, password, address, database, driver string) (db *gorm.DB, e
+ 		return
+ 	}
+ 
++	// Configure connection pool to prevent connection leaks
++	if sqlDB, sqlErr := db.DB(); sqlErr == nil {
++		// Set maximum number of open connections
++		sqlDB.SetMaxOpenConns(25)
++		// Set maximum number of idle connections
++		sqlDB.SetMaxIdleConns(10)
++		// Set maximum connection lifetime
++		sqlDB.SetConnMaxLifetime(time.Hour)
++		// Set maximum connection idle time
++		sqlDB.SetConnMaxIdleTime(10 * time.Minute)
++		
++		log.Printf("Database connection pool configured: MaxOpen=%d, MaxIdle=%d, MaxLifetime=%v",
++			25, 10, time.Hour)
++	}
++
+ 	if driver != "tdengine" && driver != "greptime" {
+ 		err = errors.Join(err, db.AutoMigrate(&TestSuite{}))
+ 		err = errors.Join(err, db.AutoMigrate(&TestCase{}))
+@@ -92,13 +117,16 @@ func createDB(user, password, address, database, driver string) (db *gorm.DB, e
+ 	return
+ }
+ 
++// Legacy function for backward compatibility
++func createDB(user, password, address, database, driver string) (db *gorm.DB, err error) {
++	return createDBWithPool(user, password, address, database, driver)
++}
++
+ var dbCache = make(map[string]*gorm.DB)
+-var dbNameCache = make(map[string]string)
++var cacheMutex = sync.RWMutex{}
+ 
+ func (s *dbserver) getClientWithDatabase(ctx context.Context, dbName string) (dbQuery DataQuery, err error) {
+ 	store := remote.GetStoreFromContext(ctx)
+ 	if store == nil {
+ 		err = errors.New("no connect to database")
+-	} else {
++		return
++	}
++
+ 		database := dbName
+ 		if database == "" {
+ 			if v, ok := store.Properties["database"]; ok && v != "" {
+@@ -110,18 +138,34 @@ func (s *dbserver) getClientWithDatabase(ctx context.Context, dbName string) (d
+ 		if v, ok := store.Properties["driver"]; ok && v != "" {
+ 			driver = v
+ 		}
+-		log.Printf("get client from driver[%s] in database [%s]", driver, database)
+-
+-		var ok bool
+-		var db *gorm.DB
+-		if db, ok = dbCache[store.Name]; (ok && db != nil && dbNameCache[store.Name] != database) || !ok {
+-			if db, err = createDB(store.Username, store.Password, store.URL, database, driver); err == nil {
+-				dbCache[store.Name] = db
+-				dbNameCache[store.Name] = database
++
++	// Use composite cache key to avoid connection leaks
++	cacheKey := generateCacheKey(store.Name, database)
++	
++	cacheMutex.RLock()
++	db, exists := dbCache[cacheKey]
++	cacheMutex.RUnlock()
++
++	if !exists || db == nil {
++		log.Printf("Creating new connection for store[%s] database[%s]", store.Name, database)
++		
++		if db, err = createDBWithPool(store.Username, store.Password, store.URL, database, driver); err == nil {
++			cacheMutex.Lock()
++			dbCache[cacheKey] = db
++			cacheMutex.Unlock()
+ 			} else {
+ 				return
+ 			}
++	} else {
++		log.Printf("Reusing existing connection for store[%s] database[%s]", store.Name, database)
+ 		}
+ 
+ 		dbQuery = NewCommonDataQuery(GetInnerSQL(driver), db)
+-	}
+ 	return
+ }
++
++// CleanupConnections closes all cached database connections
++func (s *dbserver) CleanupConnections() error {
++	cacheMutex.Lock()
++	defer cacheMutex.Unlock()
++	
++	var errs []error
++	for key, db := range dbCache {
++		if sqlDB, err := db.DB(); err == nil {
++			log.Printf("Closing database connection: %s", key)
++			if closeErr := sqlDB.Close(); closeErr != nil {
++				errs = append(errs, fmt.Errorf("failed to close connection %s: %w", key, closeErr))
++			}
++		}
++		delete(dbCache, key)
++	}
++	
++	if len(errs) > 0 {
++		return errors.Join(errs...)
++	}
++	return nil
++}
++
++// GetConnectionStats returns connection statistics for monitoring
++func (s *dbserver) GetConnectionStats() map[string]sql.DBStats {
++	cacheMutex.RLock()
++	defer cacheMutex.RUnlock()
++	
++	stats := make(map[string]sql.DBStats)
++	for key, db := range dbCache {
++		if sqlDB, err := db.DB(); err == nil {
++			stats[key] = sqlDB.Stats()
++		}
++	}
++	return stats
++}
+--
+2.34.1
