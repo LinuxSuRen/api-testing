@@ -106,11 +106,10 @@ func TestConnectionPoolConfiguration(t *testing.T) {
 	tests := []struct {
 		name           string
 		maxConnections int
-		expectError    bool
 	}{
-		{"Normal pool size", 10, false},
-		{"Large pool size", 100, false},
-		{"Small pool size", 1, false},
+		{"Normal pool size", 10},
+		{"Large pool size", 100},
+		{"Small pool size", 1},
 	}
 
 	for _, tt := range tests {
@@ -123,14 +122,10 @@ func TestConnectionPoolConfiguration(t *testing.T) {
 				assert.NoError(t, err, "Should not error within connection limit")
 			}
 			
-			// Try to exceed the limit
+			// Try to exceed the limit - should always error
 			err := mockStore.SimulateConnection("testdb")
-			if tt.expectError {
-				assert.Error(t, err, "Should error when exceeding connection limit")
-			} else {
-				// For our mock, we expect error when exceeding limit
-				assert.Error(t, err, "Should error when exceeding connection limit")
-			}
+			assert.Error(t, err, "Should error when exceeding connection limit")
+			assert.Equal(t, ErrTooManyConnections, err, "Should return specific error type")
 		})
 	}
 }
