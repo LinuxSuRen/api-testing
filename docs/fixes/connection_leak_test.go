@@ -6,6 +6,7 @@ package fixes
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 
 // MockORMStore represents a mock implementation for testing connection leak fixes
 type MockORMStore struct {
+	mu                sync.RWMutex
 	activeConnections map[string]int
 	maxConnections    int
 }
@@ -33,11 +35,15 @@ func NewMockORMStore(maxConnections int) *MockORMStore {
 
 // GetActiveConnections returns the number of active connections for a database
 func (m *MockORMStore) GetActiveConnections(database string) int {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	return m.activeConnections[database]
 }
 
 // SimulateConnection simulates creating a connection to a database
 func (m *MockORMStore) SimulateConnection(database string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	if m.activeConnections[database] >= m.maxConnections {
 		return ErrTooManyConnections
 	}
@@ -47,6 +53,8 @@ func (m *MockORMStore) SimulateConnection(database string) error {
 
 // SimulateDisconnection simulates closing a connection
 func (m *MockORMStore) SimulateDisconnection(database string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	if m.activeConnections[database] > 0 {
 		m.activeConnections[database]--
 	}
@@ -163,7 +171,13 @@ func TestConcurrentDatabaseAccess(t *testing.T) {
 	
 	// Worker 1: Access db1 repeatedly
 	go func() {
-		defer func() { done <- true }()
+		defer func() { 
+			// Ensure we always send to done channel to prevent test hanging
+			select {
+			case done <- true:
+			default:
+			}
+		}()
 		for {
 			select {
 			case <-ctx.Done():
@@ -181,7 +195,13 @@ func TestConcurrentDatabaseAccess(t *testing.T) {
 	
 	// Worker 2: Access db2 repeatedly  
 	go func() {
-		defer func() { done <- true }()
+		defer func() { 
+			// Ensure we always send to done channel to prevent test hanging
+			select {
+			case done <- true:
+			default:
+			}
+		}()
 		for {
 			select {
 			case <-ctx.Done():
@@ -201,9 +221,15 @@ func TestConcurrentDatabaseAccess(t *testing.T) {
 	time.Sleep(time.Millisecond * 100)
 	cancel()
 	
-	// Wait for workers to finish
-	<-done
-	<-done
+	// Wait for workers to finish with timeout protection
+	for i := 0; i < 2; i++ {
+		select {
+		case <-done:
+			// Worker finished
+		case <-time.After(5 * time.Second):
+			t.Fatal("Test timed out waiting for workers to finish")
+		}
+	}
 	
 	// Verify no connections are leaked
 	db1Count := mockStore.GetActiveConnections("db1")
