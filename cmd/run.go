@@ -403,11 +403,11 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 			o.limiter.Accept()
 
 			ctxWithTimeout, cancel := context.WithTimeout(ctx, o.requestTimeout)
-			defer cancel()
 			ctxWithTimeout = context.WithValue(ctxWithTimeout, runner.ContextKey("").ParentDir(), loader.GetContext())
 
 			output, err = suiteRunner.RunTestCase(&testCase, dataContext, ctxWithTimeout)
 			if err = util.ErrorWrap(err, "failed to run '%s', %v", testCase.Name, err); err != nil {
+				cancel() // Cancel context before handling error
 				if o.requestIgnoreError {
 					errs = append(errs, err)
 				} else {
@@ -419,10 +419,12 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 			reverseRunner.WithTestReporter(runner.NewDiscardTestReporter())
 			if _, err = reverseRunner.RunTestCase(
 				&testCase, dataContext, ctxWithTimeout); err != nil {
+				cancel() // Cancel context before returning error
 				err = fmt.Errorf("got error in reverse test: %w", err)
 				return
 			}
 			suiteRunner.WithTestReporter(o.reporter)
+			cancel() // Cancel context after successful completion
 		}
 		dataContext[testCase.Name] = output
 	}
