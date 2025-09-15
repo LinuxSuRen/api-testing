@@ -83,6 +83,9 @@ type RunnerClient interface {
 	UpdateSecret(ctx context.Context, in *Secret, opts ...grpc.CallOption) (*CommonResult, error)
 	// extension
 	PProf(ctx context.Context, in *PProfRequest, opts ...grpc.CallOption) (*PProfData, error)
+	// AI plugin methods
+	CallAI(ctx context.Context, in *AIRequest, opts ...grpc.CallOption) (*AIResponse, error)
+	GetAICapabilities(ctx context.Context, in *AICapabilitiesRequest, opts ...grpc.CallOption) (*AICapabilitiesResponse, error)
 }
 
 type runnerClient struct {
@@ -609,6 +612,24 @@ func (c *runnerClient) PProf(ctx context.Context, in *PProfRequest, opts ...grpc
 	return out, nil
 }
 
+func (c *runnerClient) CallAI(ctx context.Context, in *AIRequest, opts ...grpc.CallOption) (*AIResponse, error) {
+	out := new(AIResponse)
+	err := c.cc.Invoke(ctx, "/server.Runner/CallAI", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runnerClient) GetAICapabilities(ctx context.Context, in *AICapabilitiesRequest, opts ...grpc.CallOption) (*AICapabilitiesResponse, error) {
+	out := new(AICapabilitiesResponse)
+	err := c.cc.Invoke(ctx, "/server.Runner/GetAICapabilities", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RunnerServer is the server API for Runner service.
 // All implementations must embed UnimplementedRunnerServer
 // for forward compatibility
@@ -674,6 +695,9 @@ type RunnerServer interface {
 	UpdateSecret(context.Context, *Secret) (*CommonResult, error)
 	// extension
 	PProf(context.Context, *PProfRequest) (*PProfData, error)
+	// AI plugin methods
+	CallAI(context.Context, *AIRequest) (*AIResponse, error)
+	GetAICapabilities(context.Context, *AICapabilitiesRequest) (*AICapabilitiesResponse, error)
 	mustEmbedUnimplementedRunnerServer()
 }
 
@@ -830,6 +854,12 @@ func (UnimplementedRunnerServer) UpdateSecret(context.Context, *Secret) (*Common
 }
 func (UnimplementedRunnerServer) PProf(context.Context, *PProfRequest) (*PProfData, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PProf not implemented")
+}
+func (UnimplementedRunnerServer) CallAI(context.Context, *AIRequest) (*AIResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CallAI not implemented")
+}
+func (UnimplementedRunnerServer) GetAICapabilities(context.Context, *AICapabilitiesRequest) (*AICapabilitiesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAICapabilities not implemented")
 }
 func (UnimplementedRunnerServer) mustEmbedUnimplementedRunnerServer() {}
 
@@ -1768,6 +1798,42 @@ func _Runner_PProf_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runner_CallAI_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AIRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).CallAI(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/CallAI",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).CallAI(ctx, req.(*AIRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runner_GetAICapabilities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AICapabilitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunnerServer).GetAICapabilities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.Runner/GetAICapabilities",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunnerServer).GetAICapabilities(ctx, req.(*AICapabilitiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Runner_ServiceDesc is the grpc.ServiceDesc for Runner service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1962,6 +2028,14 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PProf",
 			Handler:    _Runner_PProf_Handler,
+		},
+		{
+			MethodName: "CallAI",
+			Handler:    _Runner_CallAI_Handler,
+		},
+		{
+			MethodName: "GetAICapabilities",
+			Handler:    _Runner_GetAICapabilities_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

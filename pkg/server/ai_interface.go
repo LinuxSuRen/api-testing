@@ -16,43 +16,85 @@ limitations under the License.
 
 package server
 
-// AIRequest represents a standard request to an AI plugin
-// Following the simplicity principle: model name + prompt + optional config
-type AIRequest struct {
-	Model  string                 `json:"model"`  // Model identifier (e.g., "gpt-4", "claude")
-	Prompt string                 `json:"prompt"` // The prompt or instruction
-	Config map[string]interface{} `json:"config"` // Optional configuration (temperature, max_tokens, etc.)
-}
-
-// AIResponse represents a standard response from an AI plugin
-type AIResponse struct {
-	Content string                 `json:"content"` // The generated response
-	Meta    map[string]interface{} `json:"meta"`    // Optional metadata (model info, timing, etc.)
-}
-
-// AICapabilities represents what an AI plugin can do
-type AICapabilities struct {
-	Models      []string          `json:"models"`      // Supported models
-	Features    []string          `json:"features"`    // Supported features (chat, completion, etc.)
-	Limits      map[string]int    `json:"limits"`      // Limits (max_tokens, rate_limit, etc.)
-	Description string            `json:"description"` // Plugin description
-	Version     string            `json:"version"`     // Plugin version
-}
+// AI Plugin Communication Interface Standards
+// AI plugins use the existing testing.Loader.Query(map[string]string) interface
 
 // Standard AI plugin communication methods
 const (
-	AIMethodGenerate      = "ai.generate"      // Generate content from prompt
-	AIMethodCapabilities  = "ai.capabilities"  // Get plugin capabilities
+	AIMethodGenerate     = "ai.generate"     // Generate content from prompt
+	AIMethodCapabilities = "ai.capabilities" // Get plugin capabilities
 )
 
-// Standard plugin communication message format
-type PluginRequest struct {
-	Method  string      `json:"method"`  // Method name
-	Payload interface{} `json:"payload"` // Request payload
-}
+// AI Plugin Query Parameter Standards
+// AI plugins are called using loader.Query(query map[string]string) with these parameters:
 
-type PluginResponse struct {
-	Success bool        `json:"success"` // Whether request succeeded
-	Data    interface{} `json:"data"`    // Response data
-	Error   string      `json:"error"`   // Error message if failed
-}
+// For ai.generate:
+//   - "method": "ai.generate"
+//   - "model":  model identifier (e.g., "gpt-4", "claude")
+//   - "prompt": the prompt or instruction
+//   - "config": optional JSON configuration string (e.g., `{"temperature": 0.7, "max_tokens": 1000}`)
+
+// For ai.capabilities:
+//   - "method": "ai.capabilities"
+
+// AI Plugin Response Standards
+// AI plugins return response through testing.DataResult.Pairs with these keys:
+
+// For successful ai.generate:
+//   - "content": the generated content
+//   - "meta":    optional JSON metadata string (model info, timing, etc.)
+//   - "success": "true"
+
+// For successful ai.capabilities:
+//   - "capabilities": JSON string containing plugin capabilities
+//   - "models":       JSON array of supported models (fallback if capabilities not available)
+//   - "features":     JSON array of supported features (fallback)
+//   - "description":  plugin description (fallback)
+//   - "version":      plugin version (fallback)
+//   - "success":      "true"
+
+// For errors:
+//   - "error":   error message
+//   - "success": "false"
+
+// Plugin Discovery
+// AI plugins are identified by having "ai" in their categories field:
+//   categories: ["ai"]
+
+// Usage Examples:
+//
+// Get AI plugins:
+//   stores, err := server.GetStores(ctx, &SimpleQuery{Kind: "ai"})
+//
+// Call AI plugin:
+//   loader, err := server.getLoaderByStoreName("my-ai-plugin")
+//   result, err := loader.Query(map[string]string{
+//       "method": "ai.generate",
+//       "model":  "gpt-4",
+//       "prompt": "Hello world",
+//       "config": `{"temperature": 0.7}`,
+//   })
+//   content := result.Pairs["content"]
+
+// Documentation structures (for reference only, actual types are generated from proto)
+// See server.proto for the actual message definitions:
+//
+// AIRequest fields:
+//   - plugin_name: AI plugin name
+//   - model: Model identifier (e.g., "gpt-4", "claude")
+//   - prompt: The prompt or instruction
+//   - config: JSON configuration string (optional)
+//
+// AIResponse fields:
+//   - content: Generated content
+//   - meta: JSON metadata string (optional)
+//   - success: Whether the call succeeded
+//   - error: Error message if failed
+//
+// AICapabilitiesResponse fields:
+//   - models: Supported models
+//   - features: Supported features
+//   - description: Plugin description
+//   - version: Plugin version
+//   - success: Whether the call succeeded
+//   - error: Error message if failed

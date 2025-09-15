@@ -1766,63 +1766,146 @@ func (s *UniqueSlice[T]) GetAll() []T {
 
 var errNoTestSuiteFound = errors.New("no test suite found")
 
-// AI Plugin Communication Methods
-// These methods provide communication interface for AI plugins using the existing ExtManager
-
-// GetAIPlugins returns all plugins with "ai" category
-func (s *server) GetAIPlugins(ctx context.Context, req *Empty) (*StoreKinds, error) {
-	stores, err := s.GetStoreKinds(ctx, req)
-	if err != nil {
-		return nil, err
+// CallAI calls an AI plugin to generate content
+func (s *server) CallAI(ctx context.Context, req *AIRequest) (*AIResponse, error) {
+	if req.GetPluginName() == "" {
+		return &AIResponse{
+			Success: false,
+			Error:   "plugin_name is required",
+		}, nil
 	}
-	
-	var aiPlugins []*StoreKind
-	for _, store := range stores.Data {
-		for _, category := range store.Categories {
-			if category == "ai" {
-				aiPlugins = append(aiPlugins, store)
-				break
-			}
+
+	// Get the loader for the AI plugin
+	loader, err := s.getLoaderByStoreName(req.GetPluginName())
+	if err != nil {
+		return &AIResponse{
+			Success: false,
+			Error:   fmt.Sprintf("failed to get AI plugin '%s': %v", req.GetPluginName(), err),
+		}, nil
+	}
+	defer loader.Close()
+
+	// Prepare query parameters
+	query := map[string]string{
+		"method": AIMethodGenerate,
+		"model":  req.GetModel(),
+		"prompt": req.GetPrompt(),
+	}
+
+	// Add config (always include, even if empty)
+	query["config"] = req.GetConfig()
+
+	// Call the plugin using the Query interface
+	result, err := loader.Query(query)
+	if err != nil {
+		return &AIResponse{
+			Success: false,
+			Error:   fmt.Sprintf("AI plugin call failed: %v", err),
+		}, nil
+	}
+
+	// Extract response from result
+	response := &AIResponse{
+		Success: true,
+	}
+
+	// Get content from result
+	if content, ok := result.Pairs["content"]; ok {
+		response.Content = content
+	}
+
+	// Get metadata if available
+	if meta, ok := result.Pairs["meta"]; ok {
+		response.Meta = meta
+	}
+
+	// Check for errors from plugin
+	if errorMsg, ok := result.Pairs["error"]; ok && errorMsg != "" {
+		response.Success = false
+		response.Error = errorMsg
+	}
+
+	// Check success flag from plugin
+	if success, ok := result.Pairs["success"]; ok && success == "false" {
+		response.Success = false
+		if response.Error == "" {
+			response.Error = "AI plugin returned failure status"
 		}
 	}
-	
-	return &StoreKinds{Data: aiPlugins}, nil
+
+	remoteServerLogger.Info("AI plugin called",
+		"plugin", req.GetPluginName(),
+		"model", req.GetModel(),
+		"success", response.GetSuccess())
+
+	return response, nil
 }
 
-// SendAIRequest sends a request to an AI plugin using the standard plugin communication protocol
-func (s *server) SendAIRequest(ctx context.Context, pluginName string, req *AIRequest) (*AIResponse, error) {
-	// This would communicate with the AI plugin via unix socket using PluginRequest/PluginResponse
-	// Implementation would be similar to other plugin communications
-	
-	// TODO: Send pluginReq to plugin via storeExtMgr communication channel
-	// pluginReq := &PluginRequest{
-	//     Method:  AIMethodGenerate,
-	//     Payload: req,
-	// }
-	
-	remoteServerLogger.Info("Sending AI request", "plugin", pluginName, "model", req.Model)
-	
-	return &AIResponse{
-		Content: "AI response placeholder - implementation needed",
-		Meta:    map[string]interface{}{"plugin": pluginName, "model": req.Model},
-	}, nil
-}
+// GetAICapabilities gets the capabilities of an AI plugin
+func (s *server) GetAICapabilities(ctx context.Context, req *AICapabilitiesRequest) (*AICapabilitiesResponse, error) {
+	if req.GetPluginName() == "" {
+		return &AICapabilitiesResponse{
+			Success: false,
+			Error:   "plugin_name is required",
+		}, nil
+	}
 
-// GetAICapabilities gets capabilities from an AI plugin
-func (s *server) GetAICapabilities(ctx context.Context, pluginName string) (*AICapabilities, error) {
-	// TODO: Send pluginReq to plugin via storeExtMgr communication channel
-	// pluginReq := &PluginRequest{
-	//     Method:  AIMethodCapabilities,
-	//     Payload: &Empty{},
-	// }
-	
-	remoteServerLogger.Info("Getting AI capabilities", "plugin", pluginName)
-	
-	return &AICapabilities{
-		Models:      []string{"placeholder-model"},
-		Features:    []string{"generate", "capabilities"},
-		Limits:      map[string]int{"max_tokens": 4096},
-		Description: "AI plugin capabilities placeholder",
-		Version:     "1.0.0",
-	}, nil
+	// Get the loader for the AI plugin
+	loader, err := s.getLoaderByStoreName(req.GetPluginName())
+	if err != nil {
+		return &AICapabilitiesResponse{
+			Success: false,
+			Error:   fmt.Sprintf("failed to get AI plugin '%s': %v", req.GetPluginName(), err),
+		}, nil
+	}
+	defer loader.Close()
+
+	// Query for capabilities
+	query := map[string]string{
+		"method": AIMethodCapabilities,
+	}
+
+	result, err := loader.Query(query)
+	if err != nil {
+		return &AICapabilitiesResponse{
+			Success: false,
+			Error:   fmt.Sprintf("failed to get capabilities: %v", err),
+		}, nil
+	}
+
+	// Build response from result
+	response := &AICapabilitiesResponse{
+		Success: true,
+	}
+
+	// Parse capabilities from result
+	if models, ok := result.Pairs["models"]; ok {
+		// Try to parse as JSON array first
+		response.Models = strings.Split(models, ",")
+	}
+
+	if features, ok := result.Pairs["features"]; ok {
+		response.Features = strings.Split(features, ",")
+	}
+
+	if description, ok := result.Pairs["description"]; ok {
+		response.Description = description
+	}
+
+	if version, ok := result.Pairs["version"]; ok {
+		response.Version = version
+	}
+
+	// Check for errors
+	if errorMsg, ok := result.Pairs["error"]; ok && errorMsg != "" {
+		response.Success = false
+		response.Error = errorMsg
+	}
+
+	remoteServerLogger.Info("AI plugin capabilities retrieved",
+		"plugin", req.GetPluginName(),
+		"models", len(response.GetModels()),
+		"features", len(response.GetFeatures()))
+
+	return response, nil
 }
