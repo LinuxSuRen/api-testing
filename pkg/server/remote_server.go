@@ -1791,7 +1791,7 @@ func (s *server) CallAI(ctx context.Context, req *AIRequest) (*AIResponse, error
 		"model":  req.GetModel(),
 		"prompt": req.GetPrompt(),
 	}
-	
+
 	// Add config if provided
 	if req.GetConfig() != "" {
 		query["config"] = req.GetConfig()
@@ -1810,23 +1810,23 @@ func (s *server) CallAI(ctx context.Context, req *AIRequest) (*AIResponse, error
 	response := &AIResponse{
 		Success: true,
 	}
-	
+
 	// Get content from result
 	if content, ok := result.Pairs["content"]; ok {
 		response.Content = content
 	}
-	
+
 	// Get metadata if available
 	if meta, ok := result.Pairs["meta"]; ok {
 		response.Meta = meta
 	}
-	
+
 	// Check for errors from plugin
 	if errorMsg, ok := result.Pairs["error"]; ok && errorMsg != "" {
 		response.Success = false
 		response.Error = errorMsg
 	}
-	
+
 	// Check success flag from plugin
 	if success, ok := result.Pairs["success"]; ok && success == "false" {
 		response.Success = false
@@ -1835,8 +1835,8 @@ func (s *server) CallAI(ctx context.Context, req *AIRequest) (*AIResponse, error
 		}
 	}
 
-	remoteServerLogger.Info("AI plugin called", 
-		"plugin", req.GetPluginName(), 
+	remoteServerLogger.Info("AI plugin called",
+		"plugin", req.GetPluginName(),
 		"model", req.GetModel(),
 		"success", response.GetSuccess())
 
@@ -1885,19 +1885,19 @@ func (s *server) GetAICapabilities(ctx context.Context, req *AICapabilitiesReque
 		// Try to parse as JSON array first
 		response.Models = strings.Split(models, ",")
 	}
-	
+
 	if features, ok := result.Pairs["features"]; ok {
 		response.Features = strings.Split(features, ",")
 	}
-	
+
 	if description, ok := result.Pairs["description"]; ok {
 		response.Description = description
 	}
-	
+
 	if version, ok := result.Pairs["version"]; ok {
 		response.Version = version
 	}
-	
+
 	// Check for errors
 	if errorMsg, ok := result.Pairs["error"]; ok && errorMsg != "" {
 		response.Success = false
@@ -1911,4 +1911,3 @@ func (s *server) GetAICapabilities(ctx context.Context, req *AICapabilitiesReque
 
 	return response, nil
 }
-
