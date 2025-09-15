@@ -1792,10 +1792,8 @@ func (s *server) CallAI(ctx context.Context, req *AIRequest) (*AIResponse, error
 		"prompt": req.GetPrompt(),
 	}
 
-	// Add config if provided
-	if req.GetConfig() != "" {
-		query["config"] = req.GetConfig()
-	}
+	// Add config (always include, even if empty)
+	query["config"] = req.GetConfig()
 
 	// Call the plugin using the Query interface
 	result, err := loader.Query(query)
