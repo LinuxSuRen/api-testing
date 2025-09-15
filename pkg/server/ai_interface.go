@@ -1,5 +1,5 @@
 /*
-Copyright 2024 API Testing Authors.
+Copyright 2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ const (
 
 // For ai.generate:
 //   - "method": "ai.generate"
-//   - "model":  model identifier (e.g., "gpt-4", "claude")  
+//   - "model":  model identifier (e.g., "gpt-4", "claude")
 //   - "prompt": the prompt or instruction
 //   - "config": optional JSON configuration string (e.g., `{"temperature": 0.7, "max_tokens": 1000}`)
 
@@ -70,7 +70,7 @@ const (
 //   loader, err := server.getLoaderByStoreName("my-ai-plugin")
 //   result, err := loader.Query(map[string]string{
 //       "method": "ai.generate",
-//       "model":  "gpt-4", 
+//       "model":  "gpt-4",
 //       "prompt": "Hello world",
 //       "config": `{"temperature": 0.7}`,
 //   })
