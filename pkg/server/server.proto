@@ -301,6 +301,20 @@ service Runner {
 
     // extension
     rpc PProf(PProfRequest) returns (PProfData) {}
+    
+    // AI plugin methods
+    rpc CallAI(AIRequest) returns (AIResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/ai/generate"
+            body: "*"
+        };
+    }
+    
+    rpc GetAICapabilities(AICapabilitiesRequest) returns (AICapabilitiesResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/ai/capabilities/{plugin_name}"
+        };
+    }
 }
 
 service RunnerExtension {
@@ -759,4 +773,32 @@ message DataMeta {
     string currentDatabase = 3;
     string duration = 4;
     repeated Pair labels = 5;
+}
+
+// AI plugin messages
+message AIRequest {
+    string plugin_name = 1;  // AI plugin name
+    string model = 2;        // Model identifier
+    string prompt = 3;       // The prompt or instruction
+    string config = 4;       // JSON configuration (optional)
+}
+
+message AIResponse {
+    string content = 1;      // Generated content
+    string meta = 2;         // JSON metadata (optional)
+    bool success = 3;        // Whether the call succeeded
+    string error = 4;        // Error message if failed
+}
+
+message AICapabilitiesRequest {
+    string plugin_name = 1;  // AI plugin name
+}
+
+message AICapabilitiesResponse {
+    repeated string models = 1;     // Supported models
+    repeated string features = 2;   // Supported features
+    string description = 3;          // Plugin description
+    string version = 4;              // Plugin version
+    bool success = 5;                // Whether the call succeeded
+    string error = 6;                // Error message if failed
 }

@@ -29,11 +29,12 @@ type Item struct {
 }
 
 type Request struct {
-	Protocol string            `yaml:"protocol" json:"protocol"`
-	Path     string            `yaml:"path" json:"path"`
-	Method   string            `yaml:"method" json:"method"`
-	Header   map[string]string `yaml:"header" json:"header"`
-	Body     string            `yaml:"body" json:"body"`
+	Protocol     string            `yaml:"protocol" json:"protocol"`
+	Path         string            `yaml:"path" json:"path"`
+	Method       string            `yaml:"method" json:"method"`
+	Header       map[string]string `yaml:"header" json:"header"`
+	Body         string            `yaml:"body" json:"body"`
+	BodyFromFile string            `yaml:"bodyFromFile" json:"bodyFromFile"`
 }
 
 type RequestWithAuth struct {

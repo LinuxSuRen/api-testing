@@ -402,7 +402,8 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 		default:
 			o.limiter.Accept()
 
-			ctxWithTimeout, _ := context.WithTimeout(ctx, o.requestTimeout)
+			ctxWithTimeout, cancel := context.WithTimeout(ctx, o.requestTimeout)
+			defer cancel() // Ensure context is always cancelled when leaving this scope
 			ctxWithTimeout = context.WithValue(ctxWithTimeout, runner.ContextKey("").ParentDir(), loader.GetContext())
 
 			output, err = suiteRunner.RunTestCase(&testCase, dataContext, ctxWithTimeout)
