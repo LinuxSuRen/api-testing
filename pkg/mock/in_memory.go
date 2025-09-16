@@ -580,6 +580,15 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
 		}
 	}
 
+	if wh.Request.BodyFromFile != "" {
+		if data, readErr := os.ReadFile(wh.Request.BodyFromFile); readErr != nil {
+			memLogger.Error(readErr, "failed to read file", "file", wh.Request.BodyFromFile)
+			return
+		} else {
+			wh.Request.Body = string(data)
+		}
+	}
+
 	var payload io.Reader
 	payload, err = render.RenderAsReader("mock webhook server payload", wh.Request.Body, wh)
 	if err != nil {
