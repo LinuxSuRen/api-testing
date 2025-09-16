@@ -178,6 +178,16 @@ func (s *inMemoryServer) httpProxy(proxy *Proxy) {
 			fmt.Println("after patch:", string(requestBody))
 		}
 
+		if proxy.Echo {
+			fmt.Println("Original request header:")
+			for k, v := range req.Header {
+				fmt.Println(k, ":", v)
+			}
+			fmt.Println("Original request path:", req.URL)
+			fmt.Println("Original request payload:")
+			fmt.Println(string(requestBody))
+		}
+
 		targetReq, err := http.NewRequestWithContext(req.Context(), req.Method, api, bytes.NewBuffer(requestBody))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -206,6 +216,12 @@ func (s *inMemoryServer) httpProxy(proxy *Proxy) {
 		for k, v := range resp.Header {
 			w.Header().Add(k, v[0])
 		}
+
+		if proxy.Echo {
+			fmt.Println("Original response payload:")
+			fmt.Println(string(data))
+		}
+
 		w.Write(data)
 	})
 }
@@ -577,6 +593,15 @@ func runWebhook(ctx context.Context, objCtx interface{}, wh *Webhook) (err error
 		v, vErr := render.Render("mock webhook server param", wh.Param[k], wh)
 		if vErr == nil {
 			wh.Param[k] = v
+		}
+	}
+
+	if wh.Request.BodyFromFile != "" {
+		if data, readErr := os.ReadFile(wh.Request.BodyFromFile); readErr != nil {
+			memLogger.Error(readErr, "failed to read file", "file", wh.Request.BodyFromFile)
+			return
+		} else {
+			wh.Request.Body = string(data)
 		}
 	}
 

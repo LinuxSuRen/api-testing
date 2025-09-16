@@ -234,7 +234,10 @@ items:
 proxies:
   - path: /api/v1/{part}
     target: http://atest.localhost:8080
+    echo: true
 ```
+
+当 echo 的值为 true 时，会把收到的请求以及响应打印出来，方便观察数据。
 
 当我们发起如下的请求时，实际请求的地址为 `http://atest.localhost:8080/api/v1/projects`
 
@@ -292,5 +295,17 @@ proxies:
 
 * HTTP
 * Syslog
+
+```yaml
+webhooks:
+  - timer: 3s
+    name: shakeHands
+    request:
+      method: POST
+      path: http://192.168.1.123:8080/api/v1
+      header:
+        Content-Type: application/json
+      bodyFromFile: demo.json
+```
 
 > 更多 URL 中通配符的用法，请参考 https://github.com/gorilla/mux
