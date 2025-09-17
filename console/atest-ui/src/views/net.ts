@@ -190,10 +190,11 @@ function CreateTestSuite(suite: TestSuite,
         .then(callback).catch(emptyOrDefault(errHandle))
 }
 
-interface ImportSource {
+export interface ImportSource {
     store: string
     url: string
     kind: string
+    data: string
 }
 
 function UpdateTestSuite(suite: any,
