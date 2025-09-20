@@ -71,6 +71,13 @@ module.exports = {
 
     </Product>`
           );
+
+          // Ensure INSTALLDIR is properly defined in the existing ProgramFilesFolder
+          msiCreator.wixTemplate = msiCreator.wixTemplate.replace(
+            '<Directory Id="ProgramFilesFolder">',
+            `<Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLDIR" Name="API Testing" />`
+          );
         }
       }
     }

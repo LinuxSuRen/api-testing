@@ -6,7 +6,30 @@ stores:
       url: xxx
       readonly: false
       disabled: false
+    - name: ai
+      kind:
+        name: atest-ext-ai
+        enabled: true
+      url: ""
+      readonly: false
+      disabled: false
+      properties:
+        - key: "provider"
+          description: "AI provider (local, openai, claude)"
+          defaultValue: "local"
+        - key: "model"
+          description: "AI model name"
+          defaultValue: "codellama"
+        - key: "endpoint"
+          description: "AI service endpoint"
+          defaultValue: "http://localhost:11434"
 plugins:
     - name: atest-store-git
       url: unix:///tmp/atest-store-git.sock
       enabled: true
+    - name: atest-ext-ai
+      url: unix:///tmp/atest-ext-ai.sock
+      enabled: true
+      description: "AI Extension Plugin for intelligent SQL generation and execution"
+      version: "latest"
+      registry: "ghcr.io/linuxsuren/atest-ext-ai"

@@ -38,6 +38,7 @@ const ExtensionKindRedis = "atest-store-redis"
 const ExtensionKindMongoDB = "atest-store-mongodb"
 const ExtensionKindElasticsearch = "atest-store-elasticsearch"
 const ExtensionKindOpengeMini = "atest-store-opengemini"
+const ExtensionKindAI = "atest-ext-ai"
 
 export const ExtensionKind = {
     ExtensionKindGit,
@@ -49,7 +50,8 @@ export const ExtensionKind = {
     ExtensionKindRedis,
     ExtensionKindMongoDB,
     ExtensionKindElasticsearch,
-    ExtensionKindOpengeMini
+    ExtensionKindOpengeMini,
+    ExtensionKindAI
 }
 
 const MySQL = "mysql";
