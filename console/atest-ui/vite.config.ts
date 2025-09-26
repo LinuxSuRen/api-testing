@@ -20,7 +20,7 @@ export default defineConfig({
     vue({
       template: {
         compilerOptions: {
-          nodeTransforms: true ? [removeDataTestAttrs] : [],
+          nodeTransforms: process.env.NODE_ENV === 'production' ? [removeDataTestAttrs] : [],
         },
       },
     }),
@@ -34,7 +34,12 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: () => 'everything'
+        // Enable automatic chunk splitting for better performance
+        manualChunks: {
+          vue: ['vue'],
+          'element-plus': ['element-plus'],
+          vendor: ['@vueuse/core', 'vue-router', 'vue-i18n']
+        }
       }
     }
   },

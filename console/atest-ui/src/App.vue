@@ -178,7 +178,7 @@ API.GetMenus((menus) => {
       <WelcomePage v-else-if="panelName === 'welcome' || panelName === ''" />
 
       <span v-for="menu in extensionMenus" :key="menu.index" :index="menu.index">
-        <Extension v-if="panelName === menu.index" :name="menu.name" />
+        <Extension v-if="panelName === menu.index" :name="menu.index" />
       </span>
     </el-main>
 
