@@ -10,7 +10,7 @@ stores:
       kind:
         name: atest-ext-ai
         enabled: true
-      url: ""
+      url: "unix:///tmp/atest-ext-ai.sock"
       readonly: false
       disabled: false
       properties:

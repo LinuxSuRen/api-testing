@@ -5,12 +5,28 @@
 include tools/make/env.mk
 
 ATEST_UI = console/atest-ui
+AI_PLUGIN_DIR := $(or $(AI_PLUGIN_SOURCE),../atest-ext-ai)
 
 ##@ Local runs & init env
 
+.PHONY: build-ai-plugin
+build-ai-plugin:
+	@if [ -n "$(AI_PLUGIN_BINARY_URL)" ]; then \
+		echo "📥 Downloading AI plugin binary from $(AI_PLUGIN_BINARY_URL)..."; \
+		mkdir -p bin; \
+		curl -L "$(AI_PLUGIN_BINARY_URL)" | tar xz -C bin/ --strip-components=1; \
+		echo "✅ AI plugin binary downloaded"; \
+	elif [ -d "$(AI_PLUGIN_DIR)" ]; then \
+		echo "🔨 Building AI plugin from source..."; \
+		cd $(AI_PLUGIN_DIR) && make build; \
+		echo "✅ AI plugin built from source"; \
+	else \
+		echo "⚠️  AI plugin directory not found, skipping"; \
+	fi
+
 .PHONY: run-server
 run-server: ## Run the API Testing server
-run-server: build-ui run-backend
+run-server: build-ui build-ai-plugin run-backend
 run-backend:
 	go run . server --local-storage 'bin/*.yaml' --console-path ${ATEST_UI}/dist \
 		--extension-registry ghcr.io --download-timeout 10m
