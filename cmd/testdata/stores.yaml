@@ -1,35 +1,92 @@
 stores:
-    - name: git
-      kind:
-        name: atest-store-git
-        enabled: true
-      url: xxx
-      readonly: false
-      disabled: false
-    - name: ai
-      kind:
-        name: atest-ext-ai
-        enabled: true
+  - name: git
+    kind:
+      name: atest-store-git
+      dependencies: []
+      url: "unix:///tmp/atest-store-git.sock"
+      params: []
+      link: ""
+      enabled: true
+      categories: []
+    description: ""
+    url: xxx
+    username: ""
+    password: ""
+    readonly: false
+    disabled: false
+    properties: {}
+  - name: ai
+    kind:
+      name: atest-ext-ai
+      dependencies: []  # 无依赖
       url: "unix:///tmp/atest-ext-ai.sock"
-      readonly: false
-      disabled: false
-      properties:
+      params:
         - key: "provider"
-          description: "AI provider (local, openai, claude)"
-          defaultValue: "local"
-        - key: "model"
-          description: "AI model name (auto-detected from available models)"
-          defaultValue: ""
+          description: "AI provider (ollama, openai, deepseek)"
+          defaultValue: "ollama"
         - key: "endpoint"
-          description: "AI service endpoint"
+          description: "AI service endpoint URL"
           defaultValue: "http://localhost:11434"
+        - key: "api_key"
+          description: "API key for OpenAI/Deepseek providers"
+          defaultValue: ""
+        - key: "model"
+          description: "AI model name (auto-discovered for ollama)"
+          defaultValue: ""
+        - key: "max_tokens"
+          description: "Maximum tokens for AI generation"
+          defaultValue: "4096"
+        - key: "temperature"
+          description: "Generation temperature (0.0-2.0)"
+          defaultValue: "0.7"
+        - key: "timeout"
+          description: "Request timeout duration"
+          defaultValue: "30s"
+      link: "https://github.com/LinuxSuRen/atest-ext-ai"
+      enabled: true
+      categories: ["ai", "sql-generation"]
+    description: "AI Extension Plugin for natural language to SQL conversion"
+    url: "unix:///tmp/atest-ext-ai.sock"
+    username: ""
+    password: ""
+    readonly: false
+    disabled: false
+    properties:
+      provider: "ollama"
+      endpoint: "http://localhost:11434"
+      api_key: ""
+      model: ""
+      max_tokens: "4096"
+      temperature: "0.7"
+      timeout: "30s"
+
 plugins:
-    - name: atest-store-git
-      url: unix:///tmp/atest-store-git.sock
-      enabled: true
-    - name: atest-ext-ai
-      url: unix:///tmp/atest-ext-ai.sock
-      enabled: true
-      description: "AI Extension Plugin for intelligent SQL generation and execution"
-      version: "latest"
-      registry: "ghcr.io/linuxsuren/atest-ext-ai"
+  - name: atest-store-git
+    dependencies: []
+    url: "unix:///tmp/atest-store-git.sock"
+    params: []
+    link: ""
+    enabled: true
+    categories: []
+  - name: atest-ext-ai
+    dependencies: []
+    url: "unix:///tmp/atest-ext-ai.sock"
+    params:
+       - key: "provider"
+         description: "AI provider (ollama, openai, deepseek)"
+         defaultValue: "ollama"
+       - key: "endpoint"
+         description: "AI service endpoint"
+         defaultValue: "http://localhost:11434"
+       - key: "api_key"
+         description: "API key for external AI services"
+         defaultValue: ""
+       - key: "model"
+         description: "AI model name (auto-discovered for ollama)"
+         defaultValue: ""
+    link: "https://github.com/LinuxSuRen/atest-ext-ai"
+    enabled: true
+    categories: ["ai", "sql-generation"]
+    description: "AI Extension Plugin for natural language to SQL conversion"
+    version: "v0.1.0"
+    registry: "ghcr.io/linuxsuren/atest-ext-ai"
