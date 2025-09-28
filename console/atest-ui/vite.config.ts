@@ -34,12 +34,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Enable automatic chunk splitting for better performance
-        manualChunks: {
-          vue: ['vue'],
-          'element-plus': ['element-plus'],
-          vendor: ['@vueuse/core', 'vue-router', 'vue-i18n']
-        }
+        manualChunks: () => 'everything'
       }
     }
   },
