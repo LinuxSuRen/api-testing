@@ -94,7 +94,6 @@
         "subtitle": "自然语言转SQL查询生成器",
         "settings": {
             "title": "设置",
-            "language": "语言",
             "provider": "提供者",
             "endpoint": "端点",
             "model": "模型",
@@ -149,7 +148,8 @@
             "configSaveFailed": "本地保存成功，后端同步失败",
             "connectionSuccess": "连接成功！",
             "connectionFailed": "连接失败",
-            "generating": "生成SQL中..."
+            "generating": "生成SQL中...",
+            "copiedSuccess": "已复制到剪贴板"
         }
     },
     "httpCode": {

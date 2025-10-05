@@ -98,7 +98,6 @@
         "subtitle": "Natural language to SQL query generator",
         "settings": {
             "title": "Settings",
-            "language": "Language",
             "provider": "Provider",
             "endpoint": "Endpoint",
             "model": "Model",
@@ -153,7 +152,8 @@
             "configSaveFailed": "Saved locally, backend sync failed",
             "connectionSuccess": "Connection successful!",
             "connectionFailed": "Connection failed",
-            "generating": "Generating SQL..."
+            "generating": "Generating SQL...",
+            "copiedSuccess": "Copied to clipboard"
         }
     },
     "//see http spec": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
