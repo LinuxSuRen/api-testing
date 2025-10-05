@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { API } from './net';
+import { useI18n } from 'vue-i18n'
+import { API } from './net'
+import { Cache } from './cache'
 
 interface Props {
   name: string
 }
 const props = defineProps<Props>()
 const loading = ref(true)
+
+// Prepare i18n for plugin context
+const { t, locale } = useI18n()
 const loadPlugin = async (): Promise<void> => {
     try {
         API.GetPageOfCSS(props.name, (d) => {
@@ -21,16 +26,41 @@ const loadPlugin = async (): Promise<void> => {
             script.textContent = d.message;
             document.head.appendChild(script);
 
-            const plugin = window.ATestPlugin;
-            
-            if (plugin && plugin.mount) {
-                console.log('extension load success');
-                const container = document.getElementById("plugin-container");
-                if (container) {
-                    container.innerHTML = ''; // Clear previous content
-                    plugin.mount(container);
+            // Implement retry mechanism with exponential backoff and context handover
+            const checkPluginLoad = (retries = 0, maxRetries = 10) => {
+                const globalScope = globalThis as {
+                    ATestPlugin?: { mount?: (el: Element, context?: unknown) => void }
+                };
+                const plugin = globalScope.ATestPlugin;
+
+                if (plugin && typeof plugin.mount === 'function') {
+                    console.log('extension load success');
+                    const container = document.getElementById('plugin-container');
+                    if (container) {
+                        container.innerHTML = '';
+
+                        const context = {
+                            i18n: { t, locale },
+                            API,
+                            Cache
+                        };
+
+                        try {
+                            plugin.mount(container, context);
+                        } catch (error) {
+                            console.error('extension mount error:', error);
+                        }
+                    }
+                    loading.value = false;
+                } else if (retries < maxRetries) {
+                    const delay = 50 + retries * 50;
+                    setTimeout(() => checkPluginLoad(retries + 1, maxRetries), delay);
+                } else {
+                    loading.value = false;
                 }
-            }
+            };
+
+            checkPluginLoad();
         });
     } catch (error) {
         console.log(`extension load error: ${(error as Error).message}`)
