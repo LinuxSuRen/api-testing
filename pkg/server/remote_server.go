@@ -1225,6 +1225,9 @@ func (s *server) GetStores(ctx context.Context, in *SimpleQuery) (reply *Stores,
 		wg := sync.WaitGroup{}
 		mu := sync.Mutex{}
 		for _, item := range stores {
+			// Auto-fill socket URL if empty
+			handleStore(&item)
+
 			skip := false
 			for _, kind := range kinds.Data {
 				if in != nil && in.Kind != "" && !slices.Contains(kind.Categories, in.Kind) {
@@ -1670,6 +1673,8 @@ func (s *server) getLoaderByStoreName(storeName string) (loader testing.Writer, 
 	var store *testing.Store
 	store, err = testing.NewStoreFactory(s.configDir).GetStore(storeName)
 	if err == nil && store != nil {
+		// Auto-fill socket URL if empty
+		handleStore(store)
 		loader, err = s.storeWriterFactory.NewInstance(*store)
 		if err != nil {
 			err = fmt.Errorf("failed to new grpc loader from store %s, err: %v", store.Name, err)
