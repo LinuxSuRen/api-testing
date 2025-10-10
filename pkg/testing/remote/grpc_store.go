@@ -485,8 +485,12 @@ func (g *gRPCLoader) handleAIQuery(query map[string]string) (testing.DataResult,
 	return g.convertAIResponse(dataResult), nil
 }
 
-// encodeAIGenerateParams encodes AI generation parameters into SQL field
+// encodeAIGenerateParams filters and encodes AI generation parameters into JSON string.
+// This function intentionally creates a new map to exclude the "method" field from the query,
+// as "method" is used for routing decisions and should not be forwarded to AI plugins.
+// Only the actual AI parameters (model, prompt, config) are encoded and sent via the SQL field.
 func (g *gRPCLoader) encodeAIGenerateParams(query map[string]string) string {
+	// Extract only AI-specific parameters, excluding the routing field "method"
 	params := map[string]string{
 		"model":  query["model"],
 		"prompt": query["prompt"],
