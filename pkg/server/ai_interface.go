@@ -32,7 +32,7 @@ const (
 //   - "method": "ai.generate"
 //   - "model":  model identifier (e.g., "gpt-4", "claude")
 //   - "prompt": the prompt or instruction
-//   - "config": optional JSON configuration string (e.g., `{"temperature": 0.7, "max_tokens": 1000}`)
+//   - "config": optional JSON configuration string (e.g., `{"max_tokens": 1000}`)
 
 // For ai.capabilities:
 //   - "method": "ai.capabilities"
@@ -72,7 +72,7 @@ const (
 //       "method": "ai.generate",
 //       "model":  "gpt-4",
 //       "prompt": "Hello world",
-//       "config": `{"temperature": 0.7}`,
+//       "config": `{"max_tokens": 1000}`,
 //   })
 //   content := result.Pairs["content"]
 

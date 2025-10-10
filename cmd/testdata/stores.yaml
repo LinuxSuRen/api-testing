@@ -36,9 +36,6 @@ stores:
         - key: "max_tokens"
           description: "Maximum tokens for AI generation"
           defaultValue: "4096"
-        - key: "temperature"
-          description: "Generation temperature (0.0-2.0)"
-          defaultValue: "0.7"
         - key: "timeout"
           description: "Request timeout duration"
           defaultValue: "30s"
@@ -57,7 +54,6 @@ stores:
       api_key: ""
       model: ""
       max_tokens: "4096"
-      temperature: "0.7"
       timeout: "30s"
 
 plugins:
