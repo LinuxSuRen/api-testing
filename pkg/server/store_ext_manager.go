@@ -192,6 +192,17 @@ func (s *storeExtManager) StopAll() error {
 			}
 		}
 	}
+
+	// Clean up socket files
+	s.lock.RLock()
+	filesToRemove := make([]string, len(s.filesNeedToBeRemoved))
+	copy(filesToRemove, s.filesNeedToBeRemoved)
+	s.lock.RUnlock()
+
+	for _, file := range filesToRemove {
+		_ = os.RemoveAll(file)
+	}
+
 	s.stopSingal <- struct{}{}
 	return nil
 }
