@@ -25,7 +25,8 @@ const loadPlugin = async (): Promise<void> => {
 
             // Implement retry mechanism with exponential backoff
             const checkPluginLoad = (retries = 0, maxRetries = 10) => {
-                const plugin = (window as any).ATestPlugin;
+                const globalScope = globalThis as { ATestPlugin?: { mount?: (el: Element) => void } };
+                const plugin = globalScope.ATestPlugin;
 
                 if (plugin && plugin.mount) {
                     const container = document.getElementById("plugin-container");
@@ -50,13 +51,14 @@ const loadPlugin = async (): Promise<void> => {
         });
     } catch (error) {
         loading.value = false; // Set loading to false on error
+        console.error('Failed to load extension assets', error);
     }
 };
-try {
-    loadPlugin();
-} catch (error) {
-    // Handle error silently, loading state will indicate failure
-}
+
+loadPlugin().catch((error) => {
+    loading.value = false;
+    console.error('Failed to initialize extension plugin', error);
+});
 </script>
 
 <template>
