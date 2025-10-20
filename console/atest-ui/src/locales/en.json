@@ -93,69 +93,6 @@
         "https": "HTTPS Proxy",
         "no": "No Proxy"
     },
-    "ai": {
-        "title": "AI Assistant",
-        "subtitle": "Natural language to SQL query generator",
-        "settings": {
-            "title": "Settings",
-            "provider": "Provider",
-            "endpoint": "Endpoint",
-            "model": "Model",
-            "apiKey": "API Key",
-            "temperature": "Temperature",
-            "maxTokens": "Max Tokens",
-            "advanced": "Advanced Settings",
-            "localServices": "Local Services",
-            "cloudServices": "Cloud Services"
-        },
-        "button": {
-            "generate": "Generate",
-            "save": "Save",
-            "reset": "Reset",
-            "refresh": "Refresh",
-            "testConnection": "Test Connection",
-            "configure": "Configure",
-            "close": "Close"
-        },
-        "status": {
-            "connected": "Connected",
-            "disconnected": "Disconnected",
-            "connecting": "Connecting..."
-        },
-        "input": {
-            "placeholder": "Enter your query in natural language..."
-        },
-        "option": {
-            "includeExplanation": "Include explanation"
-        },
-        "welcome": {
-            "title": "Welcome to AI Assistant",
-            "message": "Configure your AI provider to get started",
-            "noModels": "No AI models found"
-        },
-        "provider": {
-            "ollama": {
-                "name": "Ollama",
-                "description": "Local AI, privacy-first"
-            },
-            "openai": {
-                "name": "OpenAI",
-                "description": "GPT-4 and more"
-            },
-            "deepseek": {
-                "name": "DeepSeek",
-                "description": "Powerful reasoning AI"
-            }
-        },
-        "message": {
-            "configSaved": "Configuration saved successfully",
-            "configSaveFailed": "Saved locally, backend sync failed",
-            "connectionSuccess": "Connection successful!",
-            "connectionFailed": "Connection failed",
-            "generating": "Generating SQL...",
-            "copiedSuccess": "Copied to clipboard"
-        }
-    },
     "//see http spec": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
     "httpCode": {
         "200": "200 OK",

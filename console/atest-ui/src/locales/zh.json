@@ -89,69 +89,6 @@
         "https": "HTTPS 代理",
         "no": "跳过代理"
     },
-    "ai": {
-        "title": "AI 助手",
-        "subtitle": "自然语言转SQL查询生成器",
-        "settings": {
-            "title": "设置",
-            "provider": "提供者",
-            "endpoint": "端点",
-            "model": "模型",
-            "apiKey": "API密钥",
-            "temperature": "温度",
-            "maxTokens": "最大令牌数",
-            "advanced": "高级设置",
-            "localServices": "本地服务",
-            "cloudServices": "云服务"
-        },
-        "button": {
-            "generate": "生成",
-            "save": "保存",
-            "reset": "重置",
-            "refresh": "刷新",
-            "testConnection": "测试连接",
-            "configure": "配置",
-            "close": "关闭"
-        },
-        "status": {
-            "connected": "已连接",
-            "disconnected": "已断开",
-            "connecting": "连接中..."
-        },
-        "input": {
-            "placeholder": "用自然语言输入您的查询..."
-        },
-        "option": {
-            "includeExplanation": "包含解释"
-        },
-        "welcome": {
-            "title": "欢迎使用AI助手",
-            "message": "配置您的AI提供者以开始使用",
-            "noModels": "未检测到AI模型"
-        },
-        "provider": {
-            "ollama": {
-                "name": "Ollama",
-                "description": "本地AI，隐私优先"
-            },
-            "openai": {
-                "name": "OpenAI",
-                "description": "GPT-4等模型"
-            },
-            "deepseek": {
-                "name": "DeepSeek",
-                "description": "强大的推理AI"
-            }
-        },
-        "message": {
-            "configSaved": "配置保存成功",
-            "configSaveFailed": "本地保存成功，后端同步失败",
-            "connectionSuccess": "连接成功！",
-            "connectionFailed": "连接失败",
-            "generating": "生成SQL中...",
-            "copiedSuccess": "已复制到剪贴板"
-        }
-    },
     "httpCode": {
         "200": "200 成功",
         "201": "201 已创建",
