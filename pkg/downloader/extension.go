@@ -50,16 +50,7 @@ func NewStoreDownloader(opts ...ExtensionDownloaderOption) PlatformAwareOCIDownl
 }
 
 func (d *ExtensionDownloader) Download(name, tag, _ string) (reader io.Reader, err error) {
-	name = strings.TrimPrefix(name, fmt.Sprintf("atest-%s-", d.kind))
-	if d.os == "" {
-		d.extFile = fmt.Sprintf("atest-%s-%s.tar.gz", d.kind, name)
-	} else {
-		d.extFile = fmt.Sprintf("atest-%s-%s_%s_%s/atest-%s-%s", d.kind, name, d.os, d.arch, d.kind, name)
-		if d.os == "windows" {
-			d.extFile = fmt.Sprintf("%s.exe", d.extFile)
-		}
-	}
-
+	d.extFile = d.GetTargetFile(name)
 	image := fmt.Sprintf("%s/atest-ext-%s-%s", d.imagePrefix, d.kind, name)
 	reader, err = d.OCIDownloader.Download(image, tag, d.extFile)
 	return
@@ -76,8 +67,44 @@ func WriteTo(reader io.Reader, dir, file string) (err error) {
 	return
 }
 
-func (d *ExtensionDownloader) GetTargetFile() string {
+func (d *ExtensionDownloader) GetTargetFile(name string) string {
+	name = strings.TrimPrefix(name, fmt.Sprintf("atest-%s-", d.kind))
+	if d.os == "" {
+		d.extFile = fmt.Sprintf("atest-%s-%s.tar.gz", d.kind, name)
+	} else {
+		d.extFile = fmt.Sprintf("atest-%s-%s_%s_%s/atest-%s-%s", d.kind, name, d.os, d.arch, d.kind, name)
+		if d.os == "windows" {
+			d.extFile = fmt.Sprintf("%s.exe", d.extFile)
+		}
+	}
 	return d.extFile
+}
+
+func WithOS(os string) ExtensionDownloaderOption {
+	return func(d *ExtensionDownloader) {
+		d.os = os
+	}
+}
+
+func WithArch(arch string) ExtensionDownloaderOption {
+	return func(d *ExtensionDownloader) {
+		d.arch = arch
+		if d.arch == "amd64" {
+			d.arch = "amd64_v1"
+		}
+	}
+}
+
+func WithImagePrefix(imagePrefix string) ExtensionDownloaderOption {
+	return func(d *ExtensionDownloader) {
+		d.imagePrefix = imagePrefix
+	}
+}
+
+func WithKind(kind string) ExtensionDownloaderOption {
+	return func(d *ExtensionDownloader) {
+		d.kind = kind
+	}
 }
 
 func (d *ExtensionDownloader) WithOS(os string) {

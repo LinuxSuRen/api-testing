@@ -133,7 +133,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 				if dErr != nil {
 					serverLogger.Error(dErr, "failed to download extension", "name", name)
 				} else {
-					extFile := ociDownloader.GetTargetFile()
+					extFile := ociDownloader.GetTargetFile(name)
 
 					targetFile := filepath.Base(extFile)
 					if dErr = downloader.WriteTo(reader, targetDir, targetFile); dErr == nil {
@@ -264,6 +264,10 @@ func (d *nonDownloader) WithInsecure(bool) {
 func (d *nonDownloader) WithTimeout(time.Duration)   {}
 func (d *nonDownloader) WithContext(context.Context) {}
 
-func (n *nonDownloader) GetTargetFile() string {
+func (n *nonDownloader) GetTargetFile(string) string {
 	return ""
+}
+
+func (n *nonDownloader) WithOptions(opts ...downloader.OICDownloaderOption) {
+	// Do nothing because this is an empty implementation
 }

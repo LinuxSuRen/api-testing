@@ -40,6 +40,7 @@ type OCIDownloader interface {
 	WithTimeout(time.Duration)
 	WithContext(context.Context)
 	Download(image, tag, file string) (reader io.Reader, err error)
+	WithOptions(opts ...OICDownloaderOption)
 }
 
 type OICDownloaderOption func(*DefaultOCIDownloader)
@@ -48,7 +49,7 @@ type PlatformAwareOCIDownloader interface {
 	OCIDownloader
 	WithOS(string)
 	WithArch(string)
-	GetTargetFile() string
+	GetTargetFile(string) string
 	WithKind(string)
 	WithImagePrefix(string)
 }
@@ -149,8 +150,19 @@ func (d *DefaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 		}
 	}
 
-	err = fmt.Errorf("not found %s from %s", file, api)
+	err = NotFoundError{
+		Item:     file,
+		Resource: api,
+	}
 	return
+}
+
+type NotFoundError struct {
+	Item, Resource string
+}
+
+func (e NotFoundError) Error() string {
+	return fmt.Sprintf("not found %s from %s", e.Item, e.Resource)
 }
 
 func (d *DefaultOCIDownloader) WithRegistry(registry string) {
@@ -191,6 +203,12 @@ func WithRoundTripper(rt http.RoundTripper) OICDownloaderOption {
 	}
 }
 
+func WithSkipLayer(skipFunc func(layer *Layer) bool) OICDownloaderOption {
+	return func(d *DefaultOCIDownloader) {
+		d.skipLayer = skipFunc
+	}
+}
+
 func (d *DefaultOCIDownloader) WithInsecure(insecure bool) {
 	if insecure {
 		d.protocol = "http"
@@ -209,6 +227,12 @@ func (d *DefaultOCIDownloader) WithContext(ctx context.Context) {
 
 func (d *DefaultOCIDownloader) WithRoundTripper(rt http.RoundTripper) {
 	d.roundTripper = rt
+}
+
+func (d *DefaultOCIDownloader) WithOptions(opts ...OICDownloaderOption) {
+	for _, opt := range opts {
+		opt(d)
+	}
 }
 
 // getLatestTag returns the latest artifact tag
@@ -362,9 +386,9 @@ type RegistryAuth struct {
 }
 
 type Manifest struct {
-	Config      map[string]string `json:"config"`
-	Layers      []Layer           `json:"layers"`
-	Annotations map[string]string `json:"annotations"`
+	Config      map[string]interface{} `json:"config"`
+	Layers      []Layer                `json:"layers"`
+	Annotations map[string]string      `json:"annotations"`
 }
 
 type Layer struct {
