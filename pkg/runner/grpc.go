@@ -1,5 +1,5 @@
 /*
-Copyright 2023 API Testing Authors.
+Copyright 2023-2025 API Testing Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -503,7 +503,7 @@ func getByReflect(ctx context.Context, r *gRPCTestCaseRunner, fullName protorefl
 	_ = cli.CloseSend()
 
 	if resp := resp.GetErrorResponse(); resp != nil {
-		return nil, fmt.Errorf(resp.GetErrorMessage())
+		return nil, fmt.Errorf("%s", resp.GetErrorMessage())
 	}
 
 	fdresp := resp.GetFileDescriptorResponse()
@@ -685,7 +685,7 @@ func payloadFieldsVerify(md protoreflect.MethodDescriptor, caseName string, expe
 		}
 
 		if msg != "" {
-			return fmt.Errorf(msg)
+			return fmt.Errorf("%s", msg)
 		}
 		return nil
 	}
