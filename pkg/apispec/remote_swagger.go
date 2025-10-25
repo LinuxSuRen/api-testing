@@ -69,7 +69,7 @@ func DownloadSwaggerData(output string, dw downloader.PlatformAwareOCIDownloader
 		return
 	}
 
-	fmt.Println("start to save", targetFileAbsPath)
+	fmt.Println("start to save", targetFile)
 	if err = downloader.WriteTo(reader, output, targetFile); err == nil {
 		err = decompressData(targetFileAbsPath)
 	}
