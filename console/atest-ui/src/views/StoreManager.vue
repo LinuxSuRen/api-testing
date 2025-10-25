@@ -255,12 +255,16 @@ SupportedExtensions().then(e => {
           <div style="display: flex; align-items: center">
             <el-text class="mx-1"
             type="success"
-            v-if="scope.row.ready"
+            v-if="scope.row.ready && !scope.row.disabled"
             >Ready</el-text>
             <el-text class="mx-1"
             type="warning"
-            v-if="!scope.row.ready"
+            v-if="!scope.row.ready && !scope.row.disabled"
             >Not Ready</el-text>
+            <el-text class="mx-1"
+            type="danger"
+            v-if="scope.row.disabled"
+            >Disabled</el-text>
           </div>
         </template>
       </el-table-column>

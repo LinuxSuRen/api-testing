@@ -40,18 +40,21 @@ type OCIDownloader interface {
 	WithTimeout(time.Duration)
 	WithContext(context.Context)
 	Download(image, tag, file string) (reader io.Reader, err error)
+	WithOptions(opts ...OICDownloaderOption)
 }
+
+type OICDownloaderOption func(*DefaultOCIDownloader)
 
 type PlatformAwareOCIDownloader interface {
 	OCIDownloader
 	WithOS(string)
 	WithArch(string)
-	GetTargetFile() string
+	GetTargetFile(string) string
 	WithKind(string)
 	WithImagePrefix(string)
 }
 
-type defaultOCIDownloader struct {
+type DefaultOCIDownloader struct {
 	ctx          context.Context
 	timeout      time.Duration
 	serviceURL   string
@@ -59,21 +62,33 @@ type defaultOCIDownloader struct {
 	rawImage     string
 	protocol     string
 	roundTripper http.RoundTripper
+	skipLayer    func(layer *Layer) bool
 }
 
-func NewDefaultOCIDownloader() OCIDownloader {
-	return &defaultOCIDownloader{
+func NewDefaultOCIDownloader(opts ...OICDownloaderOption) OCIDownloader {
+	downloader := &DefaultOCIDownloader{
 		protocol: "https",
 		timeout:  time.Minute,
 		ctx:      context.Background(),
 	}
+
+	for _, opt := range opts {
+		opt(downloader)
+	}
+
+	if downloader.skipLayer == nil {
+		downloader.skipLayer = func(layer *Layer) bool {
+			return false
+		}
+	}
+	return downloader
 }
 
-func (d *defaultOCIDownloader) WithBasicAuth(username string, password string) {
+func (d *DefaultOCIDownloader) WithBasicAuth(username string, password string) {
 	fmt.Println("not support yet")
 }
 
-func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Reader, err error) {
+func (d *DefaultOCIDownloader) Download(image, tag, file string) (reader io.Reader, err error) {
 	fmt.Println("start to download", image)
 
 	if d.registry == "" {
@@ -128,22 +143,73 @@ func (d *defaultOCIDownloader) Download(image, tag, file string) (reader io.Read
 		}
 
 		for _, layer := range manifest.Layers {
-			if v, ok := layer.Annotations["org.opencontainers.image.title"]; ok && v == file {
+			if v, ok := layer.Annotations["org.opencontainers.image.title"]; ok && v == file && !d.skipLayer(&layer) {
 				reader, err = d.downloadLayer(d.rawImage, layer.Digest, authStr)
 				return
 			}
 		}
 	}
 
-	err = fmt.Errorf("not found %s from %s", file, api)
+	err = NotFoundError{
+		Item:     file,
+		Resource: api,
+	}
 	return
 }
 
-func (d *defaultOCIDownloader) WithRegistry(registry string) {
+type NotFoundError struct {
+	Item, Resource string
+}
+
+func (e NotFoundError) Error() string {
+	return fmt.Sprintf("not found %s from %s", e.Item, e.Resource)
+}
+
+func (d *DefaultOCIDownloader) WithRegistry(registry string) {
 	d.registry = registry
 }
 
-func (d *defaultOCIDownloader) WithInsecure(insecure bool) {
+func WithRegistry(registry string) OICDownloaderOption {
+	return func(d *DefaultOCIDownloader) {
+		d.registry = registry
+	}
+}
+
+func WithInsecure(insecure bool) OICDownloaderOption {
+	return func(d *DefaultOCIDownloader) {
+		if insecure {
+			d.protocol = "http"
+		} else {
+			d.protocol = "https"
+		}
+	}
+}
+
+func WithTimeout(timeout time.Duration) OICDownloaderOption {
+	return func(d *DefaultOCIDownloader) {
+		d.timeout = timeout
+	}
+}
+
+func WithContext(ctx context.Context) OICDownloaderOption {
+	return func(d *DefaultOCIDownloader) {
+		d.ctx = ctx
+	}
+}
+
+func WithRoundTripper(rt http.RoundTripper) OICDownloaderOption {
+	return func(d *DefaultOCIDownloader) {
+		d.roundTripper = rt
+	}
+}
+
+func WithSkipLayer(skipFunc func(layer *Layer) bool) OICDownloaderOption {
+	return func(d *DefaultOCIDownloader) {
+		d.skipLayer = skipFunc
+	}
+}
+
+func (d *DefaultOCIDownloader) WithInsecure(insecure bool) {
 	if insecure {
 		d.protocol = "http"
 	} else {
@@ -151,21 +217,27 @@ func (d *defaultOCIDownloader) WithInsecure(insecure bool) {
 	}
 }
 
-func (d *defaultOCIDownloader) WithTimeout(timeout time.Duration) {
+func (d *DefaultOCIDownloader) WithTimeout(timeout time.Duration) {
 	d.timeout = timeout
 }
 
-func (d *defaultOCIDownloader) WithContext(ctx context.Context) {
+func (d *DefaultOCIDownloader) WithContext(ctx context.Context) {
 	d.ctx = ctx
 }
 
-func (d *defaultOCIDownloader) WithRoundTripper(rt http.RoundTripper) {
+func (d *DefaultOCIDownloader) WithRoundTripper(rt http.RoundTripper) {
 	d.roundTripper = rt
+}
+
+func (d *DefaultOCIDownloader) WithOptions(opts ...OICDownloaderOption) {
+	for _, opt := range opts {
+		opt(d)
+	}
 }
 
 // getLatestTag returns the latest artifact tag
 // we assume the artifact tags do not have the prefix `v`
-func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string, err error) {
+func (d *DefaultOCIDownloader) getLatestTag(image, authToken string) (tag string, err error) {
 	var req *http.Request
 	if req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s/v2/%s/tags/list", d.protocol, d.registry, image), nil); err != nil {
 		return
@@ -209,7 +281,7 @@ func (d *defaultOCIDownloader) getLatestTag(image, authToken string) (tag string
 	return
 }
 
-func (d *defaultOCIDownloader) getHTTPClient() (client *http.Client) {
+func (d *DefaultOCIDownloader) getHTTPClient() (client *http.Client) {
 	client = &http.Client{
 		Timeout:   d.timeout,
 		Transport: d.roundTripper,
@@ -222,7 +294,7 @@ type ImageTagList struct {
 	Tags []string `json:"tags"`
 }
 
-func (d *defaultOCIDownloader) downloadLayer(image, digest, authToken string) (reader io.Reader, err error) {
+func (d *DefaultOCIDownloader) downloadLayer(image, digest, authToken string) (reader io.Reader, err error) {
 	layerURL := fmt.Sprintf("%s://%s/v2/%s/blobs/%s", d.protocol, d.registry, image, digest)
 	buffer := bytes.NewBuffer(nil)
 
@@ -281,7 +353,7 @@ const (
 	HeaderWWWAuthenticate = "www-authenticate"
 )
 
-func (d *defaultOCIDownloader) auth(image string) (authToken string, err error) {
+func (d *DefaultOCIDownloader) auth(image string) (authToken string, err error) {
 	var authURL string
 	if authURL, d.serviceURL, err = detectAuthURL(d.protocol, fmt.Sprintf("%s/%s", d.registry, d.rawImage)); err != nil {
 		return
@@ -314,7 +386,9 @@ type RegistryAuth struct {
 }
 
 type Manifest struct {
-	Layers []Layer `json:"layers"`
+	Config      map[string]interface{} `json:"config"`
+	Layers      []Layer                `json:"layers"`
+	Annotations map[string]string      `json:"annotations"`
 }
 
 type Layer struct {

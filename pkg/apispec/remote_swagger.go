@@ -19,7 +19,9 @@ package apispec
 import (
 	"archive/tar"
 	"compress/gzip"
+	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -34,13 +36,7 @@ import (
 func DownloadSwaggerData(output string, dw downloader.PlatformAwareOCIDownloader) (err error) {
 	dw.WithKind("data")
 	dw.WithOS("")
-
-	var reader io.Reader
-	if reader, err = dw.Download("swagger", "", ""); err != nil {
-		return
-	}
-
-	extFile := dw.GetTargetFile()
+	extFile := dw.GetTargetFile("swagger")
 
 	if output == "" {
 		output = home.GetUserDataDir()
@@ -50,9 +46,32 @@ func DownloadSwaggerData(output string, dw downloader.PlatformAwareOCIDownloader
 	}
 
 	targetFile := filepath.Base(extFile)
-	fmt.Println("start to save", filepath.Join(output, targetFile))
+	targetFileAbsPath := filepath.Join(output, targetFile)
+
+	skip := false
+	dw.WithOptions(downloader.WithSkipLayer(func(layer *downloader.Layer) bool {
+		f, err := os.Open(targetFileAbsPath)
+		if err == nil {
+			h := sha256.New()
+			if _, err = io.Copy(h, f); err == nil {
+				skip = fmt.Sprintf("sha256:%x", h.Sum(nil)) == layer.Digest
+			}
+		}
+		return skip
+	}))
+
+	var reader io.Reader
+	if reader, err = dw.Download("swagger", "", ""); err != nil {
+		if errors.As(err, &downloader.NotFoundError{}) && skip {
+			err = nil
+			fmt.Println("swagger data is up-to-date, skip downloading")
+		}
+		return
+	}
+
+	fmt.Println("start to save", targetFile)
 	if err = downloader.WriteTo(reader, output, targetFile); err == nil {
-		err = decompressData(filepath.Join(output, targetFile))
+		err = decompressData(targetFileAbsPath)
 	}
 	return
 }

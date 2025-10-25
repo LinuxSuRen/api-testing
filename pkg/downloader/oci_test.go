@@ -98,7 +98,7 @@ func TestDownload(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, "fake", string(data))
 
-			assert.NotEmpty(t, d.GetTargetFile())
+			assert.NotEmpty(t, d.GetTargetFile("git"))
 
 			t.Run("not found", func(t *testing.T) {
 				_, err = d.Download("orm", "", "")

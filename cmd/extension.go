@@ -79,7 +79,7 @@ func (o *extensionOption) runE(cmd *cobra.Command, args []string) (err error) {
 			err = fmt.Errorf("cannot find %s", arg)
 			return
 		}
-		extFile := o.ociDownloader.GetTargetFile()
+		extFile := o.ociDownloader.GetTargetFile(arg)
 		cmd.Println("found target file", extFile)
 
 		targetFile := filepath.Base(extFile)
