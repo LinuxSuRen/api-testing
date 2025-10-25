@@ -39,6 +39,7 @@ proxies:
     target: http://atest.localhost:8080
   - path: /open-apis/bot/v2/hook/{token}
     target: https://open.feishu.cn/
+    echo: true
     requestAmend:
       bodyPatch: |
         [{

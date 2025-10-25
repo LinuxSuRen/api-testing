@@ -1247,14 +1247,14 @@ func (s *server) GetStores(ctx context.Context, in *SimpleQuery) (reply *Stores,
 				defer wg.Done()
 
 				grpcStore := ToGRPCStore(item)
-				if item.Disabled {
-					return
-				}
-
-				storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
-				grpcStore.Ready = sErr == nil && storeStatus.Ready
-				grpcStore.ReadOnly = storeStatus.ReadOnly
 				grpcStore.Password = util.PasswordPlaceholder
+				grpcStore.Ready = false
+
+				if !item.Disabled {
+					storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
+					grpcStore.Ready = sErr == nil && storeStatus.Ready
+					grpcStore.ReadOnly = storeStatus.ReadOnly
+				}
 
 				mu.Lock()
 				reply.Data = append(reply.Data, grpcStore)
@@ -1765,3 +1765,147 @@ func (s *UniqueSlice[T]) GetAll() []T {
 }
 
 var errNoTestSuiteFound = errors.New("no test suite found")
+
+// CallAI calls an AI plugin to generate content
+func (s *server) CallAI(ctx context.Context, req *AIRequest) (*AIResponse, error) {
+	if req.GetPluginName() == "" {
+		return &AIResponse{
+			Success: false,
+			Error:   "plugin_name is required",
+		}, nil
+	}
+
+	// Get the loader for the AI plugin
+	loader, err := s.getLoaderByStoreName(req.GetPluginName())
+	if err != nil {
+		return &AIResponse{
+			Success: false,
+			Error:   fmt.Sprintf("failed to get AI plugin '%s': %v", req.GetPluginName(), err),
+		}, nil
+	}
+	defer loader.Close()
+
+	// Prepare query parameters
+	query := map[string]string{
+		"method": AIMethodGenerate,
+		"model":  req.GetModel(),
+		"prompt": req.GetPrompt(),
+	}
+
+	// Add config (always include, even if empty)
+	query["config"] = req.GetConfig()
+
+	// Call the plugin using the Query interface
+	result, err := loader.Query(query)
+	if err != nil {
+		return &AIResponse{
+			Success: false,
+			Error:   fmt.Sprintf("AI plugin call failed: %v", err),
+		}, nil
+	}
+
+	// Extract response from result
+	response := &AIResponse{
+		Success: true,
+	}
+
+	// Get content from result
+	if content, ok := result.Pairs["content"]; ok {
+		response.Content = content
+	}
+
+	// Get metadata if available
+	if meta, ok := result.Pairs["meta"]; ok {
+		response.Meta = meta
+	}
+
+	// Check for errors from plugin
+	if errorMsg, ok := result.Pairs["error"]; ok && errorMsg != "" {
+		response.Success = false
+		response.Error = errorMsg
+	}
+
+	// Check success flag from plugin
+	if success, ok := result.Pairs["success"]; ok && success == "false" {
+		response.Success = false
+		if response.Error == "" {
+			response.Error = "AI plugin returned failure status"
+		}
+	}
+
+	remoteServerLogger.Info("AI plugin called",
+		"plugin", req.GetPluginName(),
+		"model", req.GetModel(),
+		"success", response.GetSuccess())
+
+	return response, nil
+}
+
+// GetAICapabilities gets the capabilities of an AI plugin
+func (s *server) GetAICapabilities(ctx context.Context, req *AICapabilitiesRequest) (*AICapabilitiesResponse, error) {
+	if req.GetPluginName() == "" {
+		return &AICapabilitiesResponse{
+			Success: false,
+			Error:   "plugin_name is required",
+		}, nil
+	}
+
+	// Get the loader for the AI plugin
+	loader, err := s.getLoaderByStoreName(req.GetPluginName())
+	if err != nil {
+		return &AICapabilitiesResponse{
+			Success: false,
+			Error:   fmt.Sprintf("failed to get AI plugin '%s': %v", req.GetPluginName(), err),
+		}, nil
+	}
+	defer loader.Close()
+
+	// Query for capabilities
+	query := map[string]string{
+		"method": AIMethodCapabilities,
+	}
+
+	result, err := loader.Query(query)
+	if err != nil {
+		return &AICapabilitiesResponse{
+			Success: false,
+			Error:   fmt.Sprintf("failed to get capabilities: %v", err),
+		}, nil
+	}
+
+	// Build response from result
+	response := &AICapabilitiesResponse{
+		Success: true,
+	}
+
+	// Parse capabilities from result
+	if models, ok := result.Pairs["models"]; ok {
+		// Try to parse as JSON array first
+		response.Models = strings.Split(models, ",")
+	}
+
+	if features, ok := result.Pairs["features"]; ok {
+		response.Features = strings.Split(features, ",")
+	}
+
+	if description, ok := result.Pairs["description"]; ok {
+		response.Description = description
+	}
+
+	if version, ok := result.Pairs["version"]; ok {
+		response.Version = version
+	}
+
+	// Check for errors
+	if errorMsg, ok := result.Pairs["error"]; ok && errorMsg != "" {
+		response.Success = false
+		response.Error = errorMsg
+	}
+
+	remoteServerLogger.Info("AI plugin capabilities retrieved",
+		"plugin", req.GetPluginName(),
+		"models", len(response.GetModels()),
+		"features", len(response.GetFeatures()))
+
+	return response, nil
+}
