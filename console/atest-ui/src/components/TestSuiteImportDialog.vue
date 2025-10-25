@@ -34,14 +34,11 @@ const importSuiteFormSubmit = async (formEl: FormInstance | undefined) => {
     if (!formEl) return
     await formEl.validate((valid: boolean) => {
         if (valid) {
-            if (importSuiteForm.kind === 'native-inline') {
-                importSuiteForm.kind = 'native'
-            }
             API.ImportTestSuite(importSuiteForm, () => {
                 emit('created')
                 formEl.resetFields()
             }, (e) => {
-                ElMessage.error(e)
+                ElMessage.error(e.message)
             })
         }
     })
