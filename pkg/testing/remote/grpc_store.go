@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/testing"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
@@ -51,7 +53,10 @@ func (g *gRPCLoader) NewInstance(store testing.Store) (writer testing.Writer, er
 	address := store.Kind.URL
 
 	var conn *grpc.ClientConn
-	if conn, err = grpc.Dial(address, grpc.WithInsecure()); err == nil {
+
+	dialOption := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt))}
+	if conn, err = grpc.Dial(address, dialOption...); err == nil {
 		writer = &gRPCLoader{
 			store:  &store,
 			ctx:    WithStoreContext(context.Background(), &store),
