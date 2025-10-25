@@ -25,7 +25,7 @@ import (
 	"strings"
 )
 
-type extensionDownloader struct {
+type ExtensionDownloader struct {
 	OCIDownloader
 	os, arch    string
 	kind        string
@@ -33,18 +33,23 @@ type extensionDownloader struct {
 	imagePrefix string
 }
 
-func NewStoreDownloader() PlatformAwareOCIDownloader {
-	ociDownloader := &extensionDownloader{
+type ExtensionDownloaderOption func(*ExtensionDownloader)
+
+func NewStoreDownloader(opts ...ExtensionDownloaderOption) PlatformAwareOCIDownloader {
+	ociDownloader := &ExtensionDownloader{
 		OCIDownloader: NewDefaultOCIDownloader(),
 	}
 	ociDownloader.WithOS(runtime.GOOS)
 	ociDownloader.WithArch(runtime.GOARCH)
 	ociDownloader.WithImagePrefix("linuxsuren")
 	ociDownloader.WithKind("store")
+	for _, opt := range opts {
+		opt(ociDownloader)
+	}
 	return ociDownloader
 }
 
-func (d *extensionDownloader) Download(name, tag, _ string) (reader io.Reader, err error) {
+func (d *ExtensionDownloader) Download(name, tag, _ string) (reader io.Reader, err error) {
 	name = strings.TrimPrefix(name, fmt.Sprintf("atest-%s-", d.kind))
 	if d.os == "" {
 		d.extFile = fmt.Sprintf("atest-%s-%s.tar.gz", d.kind, name)
@@ -71,25 +76,25 @@ func WriteTo(reader io.Reader, dir, file string) (err error) {
 	return
 }
 
-func (d *extensionDownloader) GetTargetFile() string {
+func (d *ExtensionDownloader) GetTargetFile() string {
 	return d.extFile
 }
 
-func (d *extensionDownloader) WithOS(os string) {
+func (d *ExtensionDownloader) WithOS(os string) {
 	d.os = os
 }
 
-func (d *extensionDownloader) WithImagePrefix(imagePrefix string) {
+func (d *ExtensionDownloader) WithImagePrefix(imagePrefix string) {
 	d.imagePrefix = imagePrefix
 }
 
-func (d *extensionDownloader) WithArch(arch string) {
+func (d *ExtensionDownloader) WithArch(arch string) {
 	d.arch = arch
 	if d.arch == "amd64" {
 		d.arch = "amd64_v1"
 	}
 }
 
-func (d *extensionDownloader) WithKind(kind string) {
+func (d *ExtensionDownloader) WithKind(kind string) {
 	d.kind = kind
 }

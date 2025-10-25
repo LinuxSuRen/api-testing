@@ -1247,14 +1247,14 @@ func (s *server) GetStores(ctx context.Context, in *SimpleQuery) (reply *Stores,
 				defer wg.Done()
 
 				grpcStore := ToGRPCStore(item)
-				if item.Disabled {
-					return
-				}
-
-				storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
-				grpcStore.Ready = sErr == nil && storeStatus.Ready
-				grpcStore.ReadOnly = storeStatus.ReadOnly
 				grpcStore.Password = util.PasswordPlaceholder
+				grpcStore.Ready = false
+
+				if !item.Disabled {
+					storeStatus, sErr := s.VerifyStore(ctx, &SimpleQuery{Name: item.Name})
+					grpcStore.Ready = sErr == nil && storeStatus.Ready
+					grpcStore.ReadOnly = storeStatus.ReadOnly
+				}
 
 				mu.Lock()
 				reply.Data = append(reply.Data, grpcStore)
