@@ -559,7 +559,7 @@ func (s *server) ImportTestSuite(ctx context.Context, in *TestSuiteSource) (resu
 	switch in.Kind {
 	case "postman":
 		dataImporter = generator.NewPostmanImporter()
-	case "native", "":
+	case "native", "native-inline", "":
 		dataImporter = generator.NewNativeImporter()
 	default:
 		result.Success = false

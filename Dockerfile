@@ -5,7 +5,7 @@ COPY console/atest-ui .
 RUN npm install --ignore-scripts --registry=https://registry.npmmirror.com
 RUN npm run build-only
 
-FROM docker.io/golang:1.23 AS builder
+FROM docker.io/golang:1.24 AS builder
 
 ARG VERSION
 ARG GOPROXY
@@ -39,7 +39,7 @@ LABEL "com.github.actions.name"="API testing"
 LABEL "com.github.actions.description"="API testing"
 LABEL "com.github.actions.icon"="home"
 LABEL "com.github.actions.color"="red"
-LABEL org.opencontainers.image.description "This is an API testing tool that supports HTTP, gRPC, and GraphQL." 
+LABEL org.opencontainers.image.description "This is an API testing tool that supports HTTP, gRPC, and GraphQL."
 
 LABEL "repository"="https://github.com/linuxsuren/api-testing"
 LABEL "homepage"="https://github.com/linuxsuren/api-testing"
@@ -53,6 +53,6 @@ COPY --from=builder /workspace/README.md /README.md
 
 # required for atest-store-git
 RUN apk add curl openssh-client bash openssl
-    
+
 EXPOSE 8080
 CMD ["atest", "server", "--local-storage=/var/data/api-testing/*.yaml"]
