@@ -11,7 +11,7 @@
         "publish": "electron-forge publish"
     },
     "engines": {
-        "node": "22.12.0"
+        "node": ">=22.12.0"
     },
     "author": "linuxsuren",
     "license": "ISC",

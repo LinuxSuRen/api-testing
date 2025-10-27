@@ -52,33 +52,6 @@ module.exports = {
           "enabled": true,
           "chooseDirectory": true
         },
-        beforeCreate: (msiCreator) => {
-          // Add installation directory to system PATH
-          msiCreator.wixTemplate = msiCreator.wixTemplate.replace(
-            '</Product>',
-            `    <Property Id="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
-    <CustomAction Id="AddToPath" Property="PATH" Value="[INSTALLDIR]" Execute="immediate" />
-    <CustomAction Id="RemoveFromPath" Property="PATH" Value="[INSTALLDIR]" Execute="immediate" />
-
-    <InstallExecuteSequence>
-      <Custom Action="AddToPath" After="InstallFiles">NOT Installed</Custom>
-      <Custom Action="RemoveFromPath" Before="RemoveFiles">REMOVE="ALL"</Custom>
-    </InstallExecuteSequence>
-
-    <Component Id="PathComponent" Guid="*" Directory="INSTALLDIR">
-      <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="yes" />
-    </Component>
-
-    </Product>`
-          );
-
-          // Ensure INSTALLDIR is properly defined in the existing ProgramFilesFolder
-          msiCreator.wixTemplate = msiCreator.wixTemplate.replace(
-            '<Directory Id="ProgramFilesFolder">',
-            `<Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLDIR" Name="API Testing" />`
-          );
-        }
       }
     }
   ],
