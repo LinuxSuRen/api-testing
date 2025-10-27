@@ -53,6 +53,13 @@ module.exports = {
           "chooseDirectory": true
         },
         beforeCreate: (msiCreator) => {
+            // Ensure INSTALLDIR is properly defined in the existing ProgramFilesFolder
+            msiCreator.wixTemplate = msiCreator.wixTemplate.replace(
+                '<Directory Id="ProgramFilesFolder">',
+                `<Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLDIR" Name="API Testing" />`
+            );
+
           // Add installation directory to system PATH
           msiCreator.wixTemplate = msiCreator.wixTemplate.replace(
             '</Product>',
@@ -70,13 +77,6 @@ module.exports = {
     </Component>
 
     </Product>`
-          );
-
-          // Ensure INSTALLDIR is properly defined in the existing ProgramFilesFolder
-          msiCreator.wixTemplate = msiCreator.wixTemplate.replace(
-            '<Directory Id="ProgramFilesFolder">',
-            `<Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLDIR" Name="API Testing" />`
           );
         }
       }
