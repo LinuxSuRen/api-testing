@@ -327,12 +327,19 @@ func (g *gRPCLoader) Query(query map[string]string) (result testing.DataResult, 
 	var dataResult *server.DataQueryResult
 	offset, _ := strconv.ParseInt(query["offset"], 10, 64)
 	limit, _ := strconv.ParseInt(query["limit"], 10, 64)
+	queryType := query["type"]
+	queryKey := query["key"]
 	if dataResult, err = g.client.Query(g.ctx, &server.DataQuery{
+		Type:   queryType,
 		Sql:    query["sql"],
-		Key:    query["key"],
+		Key:    queryKey,
 		Offset: offset,
 		Limit:  limit,
 	}); err == nil {
+		if strings.EqualFold(queryType, "ai") || strings.EqualFold(queryKey, "generate") {
+			return g.convertAIResponse(dataResult), nil
+		}
+
 		result.Pairs = pairToMap(dataResult.Data)
 		for _, item := range dataResult.Items {
 			result.Rows = append(result.Rows, pairToMap(item.Data))
@@ -485,9 +492,16 @@ func (g *gRPCLoader) handleAIQuery(query map[string]string) (testing.DataResult,
 	return g.convertAIResponse(dataResult), nil
 }
 
-// encodeAIGenerateParams encodes the original query parameters into JSON.
+// encodeAIGenerateParams filters and encodes AI generation parameters into JSON string.
+// This function intentionally excludes routing fields (like "method") and only propagates
+// the actual AI request payload that the plugin understands.
 func (g *gRPCLoader) encodeAIGenerateParams(query map[string]string) string {
-	data, _ := json.Marshal(query)
+	params := map[string]string{
+		"model":  query["model"],
+		"prompt": query["prompt"],
+		"config": query["config"],
+	}
+	data, _ := json.Marshal(params)
 	return string(data)
 }
 

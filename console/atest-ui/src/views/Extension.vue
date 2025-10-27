@@ -1,11 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { API } from './net';
+import { Cache } from './cache';
 
 interface Props {
   name: string
 }
 const props = defineProps<Props>()
+const { t, locale } = useI18n()
+
+interface PluginAppContext {
+  i18n: {
+    t: (key: string) => string
+    locale: Ref<string>
+  }
+  API: typeof API
+  Cache: typeof Cache
+}
+
+const pluginContext: PluginAppContext = {
+  i18n: { t, locale },
+  API,
+  Cache
+}
+
 const loading = ref(true)
 const loadPlugin = async (): Promise<void> => {
     try {
@@ -25,14 +44,14 @@ const loadPlugin = async (): Promise<void> => {
 
             // Implement retry mechanism with exponential backoff
             const checkPluginLoad = (retries = 0, maxRetries = 10) => {
-                const globalScope = globalThis as { ATestPlugin?: { mount?: (el: Element) => void } };
+                const globalScope = globalThis as { ATestPlugin?: { mount?: (el: Element, context: PluginAppContext) => void } };
                 const plugin = globalScope.ATestPlugin;
 
                 if (plugin && plugin.mount) {
                     const container = document.getElementById("plugin-container");
                     if (container) {
                         container.innerHTML = ''; // Clear previous content
-                        plugin.mount(container);
+                        plugin.mount(container, pluginContext);
                         loading.value = false;
                     } else {
                         loading.value = false;
