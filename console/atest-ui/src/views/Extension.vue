@@ -1,29 +1,15 @@
 <script setup lang="ts">
-import { ref, type Ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { API } from './net';
-import { Cache } from './cache';
+import { API } from './net'
 
 interface Props {
   name: string
 }
 const props = defineProps<Props>()
-const { t, locale } = useI18n()
+const { locale } = useI18n()
 
-interface PluginAppContext {
-  i18n: {
-    t: (key: string) => string
-    locale: Ref<string>
-  }
-  API: typeof API
-  Cache: typeof Cache
-}
-
-const pluginContext: PluginAppContext = {
-  i18n: { t, locale },
-  API,
-  Cache
-}
+let pluginInstance: { setLocale?: (value: string) => void } | undefined
 
 const loading = ref(true)
 const loadPlugin = async (): Promise<void> => {
@@ -44,14 +30,16 @@ const loadPlugin = async (): Promise<void> => {
 
             // Implement retry mechanism with exponential backoff
             const checkPluginLoad = (retries = 0, maxRetries = 10) => {
-                const globalScope = globalThis as { ATestPlugin?: { mount?: (el: Element, context: PluginAppContext) => void } };
+                const globalScope = globalThis as { ATestPlugin?: { mount?: (el: Element) => void, setLocale?: (value: string) => void } };
                 const plugin = globalScope.ATestPlugin;
 
                 if (plugin && plugin.mount) {
                     const container = document.getElementById("plugin-container");
                     if (container) {
                         container.innerHTML = ''; // Clear previous content
-                        plugin.mount(container, pluginContext);
+                        plugin.mount(container);
+                        plugin.setLocale?.(locale.value);
+                        pluginInstance = plugin;
                         loading.value = false;
                     } else {
                         loading.value = false;
@@ -77,6 +65,11 @@ const loadPlugin = async (): Promise<void> => {
 loadPlugin().catch((error) => {
     loading.value = false;
     console.error('Failed to initialize extension plugin', error);
+});
+
+watch(locale, (value) => {
+    const normalized = value ?? 'en';
+    pluginInstance?.setLocale?.(normalized);
 });
 </script>
 
