@@ -20,7 +20,7 @@ export default defineConfig({
     vue({
       template: {
         compilerOptions: {
-          nodeTransforms: true ? [removeDataTestAttrs] : [],
+          nodeTransforms: process.env.NODE_ENV === 'production' ? [removeDataTestAttrs] : [],
         },
       },
     }),

@@ -41,8 +41,8 @@ const appVersion = ref('')
 const appVersionLink = ref('https://github.com/LinuxSuRen/api-testing')
 API.GetVersion((d) => {
   appVersion.value = d.version
-  const version = d.version.match('^v\\d*.\\d*.\\d*')
-  const dirtyVersion = d.version.match('^v\\d*.\\d*.\\d*-\\d*-g')
+  const version = d.version.match(String.raw`^v\d*.\d*.\d*`)
+  const dirtyVersion = d.version.match(String.raw`^v\d*.\d*.\d*-\d*-g`)
 
   if (!version && !dirtyVersion) {
     return
@@ -55,16 +55,18 @@ API.GetVersion((d) => {
   }
 })
 
+const hasLocalStorage = typeof globalThis !== 'undefined' && 'localStorage' in globalThis
+const storage = hasLocalStorage ? globalThis.localStorage : undefined
 const isCollapse = ref(true)
 watch(isCollapse, (v: boolean) => {
-  window.localStorage.setItem('button.style', v ? 'simple' : '')
+  storage?.setItem('button.style', v ? 'simple' : '')
 })
-const lastActiveMenu = window.localStorage.getItem('activeMenu')
+const lastActiveMenu = storage?.getItem('activeMenu') ?? 'welcome'
 const activeMenu = ref(lastActiveMenu === '' ? 'welcome' : lastActiveMenu)
 const panelName = ref(activeMenu)
 const handleSelect = (key: string) => {
   panelName.value = key
-  window.localStorage.setItem('activeMenu', key)
+  storage?.setItem('activeMenu', key)
 }
 
 const locale = ref(Cache.GetPreference().language)
@@ -178,7 +180,7 @@ API.GetMenus((menus) => {
       <WelcomePage v-else-if="panelName === 'welcome' || panelName === ''" />
 
       <span v-for="menu in extensionMenus" :key="menu.index" :index="menu.index">
-        <Extension v-if="panelName === menu.index" :name="menu.name" />
+        <Extension v-if="panelName === menu.index" :name="menu.index" />
       </span>
     </el-main>
 

@@ -18,10 +18,12 @@ package remote
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/linuxsuren/api-testing/pkg/logging"
@@ -321,15 +323,28 @@ func (g *gRPCLoader) PProf(name string) []byte {
 }
 
 func (g *gRPCLoader) Query(query map[string]string) (result testing.DataResult, err error) {
+	// Detect AI method calls
+	if method := query["method"]; strings.HasPrefix(method, "ai.") {
+		return g.handleAIQuery(query)
+	}
+
+	// Original standard query logic
 	var dataResult *server.DataQueryResult
 	offset, _ := strconv.ParseInt(query["offset"], 10, 64)
 	limit, _ := strconv.ParseInt(query["limit"], 10, 64)
+	queryType := query["type"]
+	queryKey := query["key"]
 	if dataResult, err = g.client.Query(g.ctx, &server.DataQuery{
+		Type:   queryType,
 		Sql:    query["sql"],
-		Key:    query["key"],
+		Key:    queryKey,
 		Offset: offset,
 		Limit:  limit,
 	}); err == nil {
+		if strings.EqualFold(queryType, "ai") || strings.EqualFold(queryKey, "generate") {
+			return g.convertAIResponse(dataResult), nil
+		}
+
 		result.Pairs = pairToMap(dataResult.Data)
 		for _, item := range dataResult.Items {
 			result.Rows = append(result.Rows, pairToMap(item.Data))
@@ -448,4 +463,68 @@ func (g *gRPCLoader) Close() {
 	if g.conn != nil {
 		g.conn.Close()
 	}
+}
+
+// handleAIQuery handles AI-specific queries
+func (g *gRPCLoader) handleAIQuery(query map[string]string) (testing.DataResult, error) {
+	method := query["method"]
+
+	var dataQuery *server.DataQuery
+	switch method {
+	case "ai.generate":
+		dataQuery = &server.DataQuery{
+			Type: "ai",
+			Key:  "generate",
+			Sql:  g.encodeAIGenerateParams(query),
+		}
+	case "ai.capabilities":
+		dataQuery = &server.DataQuery{
+			Type: "ai",
+			Key:  "capabilities",
+			Sql:  "", // No additional parameters needed
+		}
+	default:
+		return testing.DataResult{}, fmt.Errorf("unsupported AI method: %s", method)
+	}
+
+	// Call existing gRPC Query
+	dataResult, err := g.client.Query(g.ctx, dataQuery)
+	if err != nil {
+		return testing.DataResult{}, err
+	}
+
+	// Convert response to testing.DataResult format
+	return g.convertAIResponse(dataResult), nil
+}
+
+// encodeAIGenerateParams filters and encodes AI generation parameters into JSON string.
+// This function intentionally excludes routing fields (like "method") and only propagates
+// the actual AI request payload that the plugin understands.
+func (g *gRPCLoader) encodeAIGenerateParams(query map[string]string) string {
+	params := map[string]string{
+		"model":  query["model"],
+		"prompt": query["prompt"],
+		"config": query["config"],
+	}
+	data, _ := json.Marshal(params)
+	return string(data)
+}
+
+// convertAIResponse converts AI response to standard format
+func (g *gRPCLoader) convertAIResponse(dataResult *server.DataQueryResult) testing.DataResult {
+	result := testing.DataResult{
+		Pairs: pairToMap(dataResult.Data),
+	}
+
+	// Map AI-specific response fields
+	if content := result.Pairs["generated_sql"]; content != "" {
+		result.Pairs["content"] = content // Follow AI interface standard
+	}
+	if result.Pairs["error"] != "" {
+		result.Pairs["success"] = "false"
+	} else {
+		result.Pairs["success"] = "true"
+	}
+
+	return result
 }
