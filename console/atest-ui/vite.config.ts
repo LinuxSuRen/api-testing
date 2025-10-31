@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 
@@ -15,7 +15,9 @@ function removeDataTestAttrs(node) {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({mode}) => {
+    const env = loadEnv(mode, './');
+    return {
   plugins: [
     vue({
       template: {
@@ -41,37 +43,37 @@ export default defineConfig({
   server: {
     proxy: {
       '/server.Runner': {
-        target: 'http://127.0.0.1:8080',
+        target: env.VITE_API_URL,
         changeOrigin: true,
       },
       '/server.Mock': {
-        target: 'http://127.0.0.1:8080',
+        target: env.VITE_API_URL,
         changeOrigin: true,
       },
       '/mock/server': {
-        target: 'http://127.0.0.1:8080',
+        target: env.VITE_API_URL,
         changeOrigin: true,
       },
       '/browser': {
-        target: 'http://127.0.0.1:8080',
+        target: env.VITE_API_URL,
         changeOrigin: true,
       },
       '/v3': {
-        target: 'http://127.0.0.1:8080',
+        target: env.VITE_API_URL,
         changeOrigin: true,
       },
       '/oauth': {
-        target: 'http://127.0.0.1:8080',
+        target: env.VITE_API_URL,
         changeOrigin: true,
       },
       '/api': {
-        target: 'http://127.0.0.1:8080',
+        target: env.VITE_API_URL,
         changeOrigin: true,
       },
       '/data': {
-        target: 'http://127.0.0.1:8080',
+        target: env.VITE_API_URL,
         changeOrigin: true,
       },
     },
   },
-})
+}});
