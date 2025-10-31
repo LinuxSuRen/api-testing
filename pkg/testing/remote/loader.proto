@@ -43,6 +43,7 @@ service Loader {
     rpc GetPageOfJS(server.SimpleName) returns (server.CommonResult) {}
     rpc GetPageOfCSS(server.SimpleName) returns (server.CommonResult) {}
     rpc GetPageOfStatic(server.SimpleName) returns (server.CommonResult) {}
+    rpc ServerProxy(ServerProxyRequest) returns (ServerProxyResponse) {}
 }
 
 message TestSuites {

@@ -367,6 +367,9 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/favicon.ico", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/swagger.json", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/data/{data}", o.dataFromExtension(remoteServer.(server.UIExtensionServer)))
+		mux.HandlePath(http.MethodGet, "/extensionProxy/{*}", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+			fmt.Println(pathParams)
+		})
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
 		mux.HandlePath(http.MethodGet, "/api/v1/sbom", service.SBomHandler)

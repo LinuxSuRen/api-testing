@@ -301,7 +301,7 @@ service Runner {
 
     // extension
     rpc PProf(PProfRequest) returns (PProfData) {}
-    
+
     // AI plugin methods
     rpc CallAI(AIRequest) returns (AIResponse) {
         option (google.api.http) = {
@@ -309,7 +309,7 @@ service Runner {
             body: "*"
         };
     }
-    
+
     rpc GetAICapabilities(AICapabilitiesRequest) returns (AICapabilitiesResponse) {
         option (google.api.http) = {
             get: "/api/v1/ai/capabilities/{plugin_name}"
@@ -347,6 +347,13 @@ service UIExtension {
             get: "/api/v1/extension/pages/{name}/static"
         };
     }
+    rpc ServerProxy(ServerProxyRequest) returns (ServerProxyResponse) {}
+}
+
+message ServerProxyRequest {
+}
+
+message ServerProxyResponse {
 }
 
 message Menu {
