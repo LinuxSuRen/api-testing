@@ -37,6 +37,7 @@ type Loader interface {
 	GetPageOfJS(string) (string, error)
 	GetPageOfCSS(string) (string, error)
 	GetPageOfStatic(string) (string, error)
+	GetPageOfServer(string) (string, error)
 }
 
 type Menu struct {

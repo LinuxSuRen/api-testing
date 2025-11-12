@@ -447,6 +447,16 @@ func (g *gRPCLoader) GetPageOfStatic(name string) (result string, err error) {
 	return
 }
 
+func (g *gRPCLoader) GetPageOfServer(name string) (result string, err error) {
+	var data *server.CommonResult
+	if data, err = g.client.GetPageOfServer(g.ctx, &server.SimpleName{
+		Name: name,
+	}); err == nil && data != nil {
+		result = data.Message
+	}
+	return
+}
+
 func (g *gRPCLoader) Parse() (server *mock.Server, err error) {
 	return
 }

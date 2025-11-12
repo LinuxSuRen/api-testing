@@ -367,6 +367,63 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/favicon.ico", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/swagger.json", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/data/{data}", o.dataFromExtension(remoteServer.(server.UIExtensionServer)))
+		mux.HandlePath(http.MethodPost, "/extensionProxy/{extension}", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+			extServer := remoteServer.(server.UIExtensionServer)
+
+			ctx := r.Context()
+			for k, v := range r.Header {
+				if !strings.HasPrefix(k, "X-Extension-") {
+					continue
+				}
+				ctx = context.WithValue(ctx, k, v)
+			}
+
+			resp, err := extServer.GetPageOfServer(ctx, &server.SimpleName{Name: pathParams["extension"]})
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			if !resp.Success {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Println("redirect to", resp.Message)
+			req, err := http.NewRequestWithContext(ctx, http.MethodPost, resp.Message, r.Body)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			req.Header = r.Header
+
+			rsp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			defer rsp.Body.Close()
+			for k, v := range rsp.Header {
+				w.Header().Add(k, v[0])
+			}
+
+			flusher, ok := w.(http.Flusher)
+			if !ok {
+				http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+				return
+			}
+
+			data := make([]byte, 1024)
+			var count int
+			for {
+				count, err = rsp.Body.Read(data)
+				if count == -1 || count == 0 || err != nil {
+					fmt.Println("failed to read response body", err)
+					break
+				}
+				w.Write(data[:count])
+				flusher.Flush()
+			}
+		})
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
 		mux.HandlePath(http.MethodGet, "/api/v1/sbom", service.SBomHandler)

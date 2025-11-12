@@ -611,3 +611,8 @@ func (l *fileLoader) GetPageOfStatic(s string) (string, error) {
 	// no need to implement
 	return "", nil
 }
+
+func (l *fileLoader) GetPageOfServer(s string) (string, error) {
+	// no need to implement
+	return "", nil
+}

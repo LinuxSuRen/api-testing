@@ -1492,6 +1492,7 @@ func (s *server) GetMenus(ctx context.Context, _ *Empty) (result *MenuList, err 
 					Index: menu.Index,
 				})
 				uiExtensionLoaders[menu.Index] = loader
+				fmt.Println("menu", menu.Index)
 			}
 		}
 	}
@@ -1566,6 +1567,21 @@ func (s *server) GetPageOfStatic(ctx context.Context, in *SimpleName) (result *C
 		}
 	} else {
 		result.Message = fmt.Sprintf("not found loader for %s", extName)
+	}
+	return
+}
+
+func (s *server) GetPageOfServer(ctx context.Context, in *SimpleName) (result *CommonResult, err error) {
+	result = &CommonResult{}
+	if loader, ok := uiExtensionLoaders[in.Name]; ok {
+		if js, err := loader.GetPageOfServer(in.Name); err == nil {
+			result.Message = js
+			result.Success = true
+		} else {
+			result.Message = err.Error()
+		}
+	} else {
+		result.Message = fmt.Sprintf("not found loader for %s", in.Name)
 	}
 	return
 }
