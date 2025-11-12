@@ -354,12 +354,6 @@ service UIExtension {
     }
 }
 
-message ServerProxyRequest {
-}
-
-message ServerProxyResponse {
-}
-
 message Menu {
     string name = 1;
     string index = 2;

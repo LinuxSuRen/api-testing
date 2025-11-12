@@ -367,10 +367,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/favicon.ico", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/swagger.json", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/data/{data}", o.dataFromExtension(remoteServer.(server.UIExtensionServer)))
-		mux.HandlePath(http.MethodPost, "/extensionProxy/{extension}/{path}", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-			fmt.Println(pathParams)
+		mux.HandlePath(http.MethodPost, "/extensionProxy/{extension}", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 			extServer := remoteServer.(server.UIExtensionServer)
-			fmt.Println(extServer)
 
 			ctx := r.Context()
 			for k, v := range r.Header {
@@ -385,26 +383,24 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 				fmt.Println(err)
 				return
 			}
-			fmt.Println(resp)
 			if !resp.Success {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
+			fmt.Println("redirect to", resp.Message)
 			req, err := http.NewRequestWithContext(ctx, http.MethodPost, resp.Message, r.Body)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 			req.Header = r.Header
-			fmt.Println("request url", req.URL)
 
 			rsp, err := http.DefaultClient.Do(req)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
-			fmt.Println("response status", rsp.Status)
 			defer rsp.Body.Close()
 			for k, v := range rsp.Header {
 				w.Header().Add(k, v[0])
@@ -416,21 +412,16 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 				return
 			}
 
-			fmt.Println("start to read response body", rsp.Header)
 			data := make([]byte, 1024)
 			var count int
 			for {
 				count, err = rsp.Body.Read(data)
-				if count == -1 || err != nil {
+				if count == -1 || count == 0 || err != nil {
 					fmt.Println("failed to read response body", err)
-					break
-				}
-				if count == 0 {
 					break
 				}
 				w.Write(data[:count])
 				flusher.Flush()
-				fmt.Print(string(data[:count]))
 			}
 		})
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
