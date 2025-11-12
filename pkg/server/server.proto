@@ -347,7 +347,11 @@ service UIExtension {
             get: "/api/v1/extension/pages/{name}/static"
         };
     }
-    rpc ServerProxy(ServerProxyRequest) returns (ServerProxyResponse) {}
+    rpc GetPageOfServer(SimpleName) returns (CommonResult) {
+        option (google.api.http) = {
+            get: "/api/v1/extension/pages/{name}/server"
+        };
+    }
 }
 
 message ServerProxyRequest {
