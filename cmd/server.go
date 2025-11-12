@@ -367,8 +367,25 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/favicon.ico", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/swagger.json", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/data/{data}", o.dataFromExtension(remoteServer.(server.UIExtensionServer)))
-		mux.HandlePath(http.MethodGet, "/extensionProxy/{*}", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		mux.HandlePath(http.MethodGet, "/extensionProxy/{extension}/{path}", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 			fmt.Println(pathParams)
+			extServer := remoteServer.(server.UIExtensionServer)
+			fmt.Println(extServer)
+
+			ctx := r.Context()
+			for k, v := range r.Header {
+				if !strings.HasPrefix(k, "X-Extension-") {
+					continue
+				}
+				ctx = context.WithValue(ctx, k, v)
+			}
+
+			resp, err := extServer.GetPageOfServer(ctx, &server.SimpleName{Name: pathParams["extension"]})
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println(resp)
 		})
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
