@@ -367,7 +367,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 		mux.HandlePath(http.MethodGet, "/favicon.ico", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/swagger.json", frontEndHandlerWithLocation(o.consolePath))
 		mux.HandlePath(http.MethodGet, "/data/{data}", o.dataFromExtension(remoteServer.(server.UIExtensionServer)))
-		mux.HandlePath(http.MethodPost, "/extensionProxy/{extension}", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+
+		proxyHandler := func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 			extServer := remoteServer.(server.UIExtensionServer)
 
 			ctx := r.Context()
@@ -388,8 +389,8 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 				return
 			}
 
-			fmt.Println("redirect to", resp.Message)
-			req, err := http.NewRequestWithContext(ctx, http.MethodPost, resp.Message, r.Body)
+			fmt.Println("redirect to", resp.Message, "method", r.Method)
+			req, err := http.NewRequestWithContext(ctx, r.Method, resp.Message, r.Body)
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -416,14 +417,19 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 			var count int
 			for {
 				count, err = rsp.Body.Read(data)
-				if count == -1 || count == 0 || err != nil {
+				if count == -1 || count == 0 || (err != nil && count <= 0) {
 					fmt.Println("failed to read response body", err)
+					w.WriteHeader(http.StatusInternalServerError)
+					flusher.Flush()
 					break
 				}
 				w.Write(data[:count])
 				flusher.Flush()
 			}
-		})
+		}
+		mux.HandlePath(http.MethodPost, "/extensionProxy/{extension}", proxyHandler)
+		mux.HandlePath(http.MethodGet, "/extensionProxy/{extension}", proxyHandler)
+		mux.HandlePath(http.MethodDelete, "/extensionProxy/{extension}", proxyHandler)
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
 		mux.HandlePath(http.MethodGet, "/api/v1/sbom", service.SBomHandler)
