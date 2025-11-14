@@ -56,6 +56,7 @@ import (
 	fakeruntime "github.com/linuxsuren/go-fake-runtime"
 	"github.com/linuxsuren/oauth-hub"
 
+	"github.com/gorilla/websocket"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -379,6 +380,7 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 				ctx = context.WithValue(ctx, k, v)
 			}
 
+			endpoint := pathParams["endpoint"]
 			resp, err := extServer.GetPageOfServer(ctx, &server.SimpleName{Name: pathParams["extension"]})
 			if err != nil {
 				fmt.Println(err)
@@ -389,8 +391,18 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 				return
 			}
 
-			fmt.Println("redirect to", resp.Message, "method", r.Method)
-			req, err := http.NewRequestWithContext(ctx, r.Method, resp.Message, r.Body)
+			api := resp.Message + "/" + endpoint
+
+			// Check if this is a WebSocket request
+			if isWebSocketRequest(r) {
+				api = strings.ReplaceAll(api, "http://", "ws://")
+				fmt.Println("WebSocket request detected", api)
+				handleWebSocketProxy(w, r, api)
+				return
+			}
+
+			fmt.Println("redirect to", api, "method", r.Method)
+			req, err := http.NewRequestWithContext(ctx, r.Method, api, r.Body)
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -427,9 +439,10 @@ func (o *serverOption) runE(cmd *cobra.Command, args []string) (err error) {
 				flusher.Flush()
 			}
 		}
-		mux.HandlePath(http.MethodPost, "/extensionProxy/{extension}", proxyHandler)
-		mux.HandlePath(http.MethodGet, "/extensionProxy/{extension}", proxyHandler)
-		mux.HandlePath(http.MethodDelete, "/extensionProxy/{extension}", proxyHandler)
+		mux.HandlePath(http.MethodPost, "/extensionProxy/{extension}/{endpoint}", proxyHandler)
+		mux.HandlePath(http.MethodGet, "/extensionProxy/{extension}/{endpoint}", proxyHandler)
+		mux.HandlePath(http.MethodDelete, "/extensionProxy/{extension}/{endpoint}", proxyHandler)
+		mux.HandlePath(http.MethodPost, "/extensionProxy/{extension}/{endpoint}", proxyHandler)
 		mux.HandlePath(http.MethodGet, "/get", o.getAtestBinary)
 		mux.HandlePath(http.MethodPost, "/runner/{suite}/{case}", service.WebRunnerHandler)
 		mux.HandlePath(http.MethodGet, "/api/v1/sbom", service.SBomHandler)
@@ -658,6 +671,84 @@ func (s *fakeGRPCServer) Serve(net.Listener) error {
 // RegisterService is a fake method
 func (s *fakeGRPCServer) RegisterService(desc *grpc.ServiceDesc, impl interface{}) {
 	// Do nothing due to this is a fake method
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true // Allow connections from any origin
+	},
+}
+
+func isWebSocketRequest(r *http.Request) bool {
+	return strings.ToLower(r.Header.Get("Connection")) == "upgrade" && strings.ToLower(r.Header.Get("Upgrade")) == "websocket"
+}
+
+func handleWebSocketProxy(w http.ResponseWriter, r *http.Request, targetURL string) {
+	// Upgrade the connection
+	clientConn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("Failed to upgrade connection:", err)
+		return
+	}
+	defer clientConn.Close()
+
+	// Create a WebSocket connection to the target server
+	// Clone headers to avoid duplicate headers issue
+	headers := make(http.Header)
+	for k, v := range r.Header {
+		// Skip headers that will be set by the WebSocket dialer
+		if k == "Upgrade" || k == "Connection" || k == "Sec-Websocket-Key" || 
+		   k == "Sec-Websocket-Version" || k == "Sec-Websocket-Extensions" || 
+		   k == "Sec-Websocket-Protocol" {
+			continue
+		}
+		headers[k] = v
+	}
+
+	targetConn, _, err := websocket.DefaultDialer.Dial(targetURL, headers)
+	if err != nil {
+		fmt.Println("Failed to connect to target:", err)
+		return
+	}
+	defer targetConn.Close()
+
+	// Proxy messages between client and target
+	errChan := make(chan error, 2)
+
+	// Client to target
+	go func() {
+		for {
+			messageType, message, err := clientConn.ReadMessage()
+			if err != nil {
+				errChan <- err
+				return
+			}
+
+			if err := targetConn.WriteMessage(messageType, message); err != nil {
+				errChan <- err
+				return
+			}
+		}
+	}()
+
+	// Target to client
+	go func() {
+		for {
+			messageType, message, err := targetConn.ReadMessage()
+			if err != nil {
+				errChan <- err
+				return
+			}
+
+			if err := clientConn.WriteMessage(messageType, message); err != nil {
+				errChan <- err
+				return
+			}
+		}
+	}()
+
+	// Wait for an error to occur
+	<-errChan
 }
 
 //go:embed data/index.js
