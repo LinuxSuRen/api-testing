@@ -50,6 +50,7 @@ func NewStoreDownloader(opts ...ExtensionDownloaderOption) PlatformAwareOCIDownl
 }
 
 func (d *ExtensionDownloader) Download(name, tag, _ string) (reader io.Reader, err error) {
+	name = strings.TrimPrefix(name, "atest-store-")
 	d.extFile = d.GetTargetFile(name)
 	image := fmt.Sprintf("%s/atest-ext-%s-%s", d.imagePrefix, d.kind, name)
 	reader, err = d.OCIDownloader.Download(image, tag, d.extFile)
