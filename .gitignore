@@ -29,3 +29,4 @@ e2e/server.srl
 e2e/server.key
 e2e/server.csr
 e2e/server.crt
+api-testing
