@@ -126,7 +126,7 @@ func (s *storeExtManager) Start(name, socket string) (err error) {
 		if err != nil {
 			err = fmt.Errorf("not found extension, try to download it, error: %v", err)
 			go func() {
-				ociDownloader := downloader.NewStoreDownloader()
+				ociDownloader := s.ociDownloader
 				ociDownloader.WithKind("store")
 				ociDownloader.WithOS(s.execer.OS())
 				reader, dErr := ociDownloader.Download(name, "", "")
