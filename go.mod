@@ -22,7 +22,7 @@ require (
 	github.com/invopop/jsonschema v0.7.0
 	github.com/jhump/protoreflect v1.15.3
 	github.com/linuxsuren/go-fake-runtime v0.0.5
-	github.com/linuxsuren/go-service v0.0.1
+	github.com/linuxsuren/go-service v0.0.2-0.20251117091849-c58edc8748d9
 	github.com/linuxsuren/unstructured v0.0.1
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/common v0.67.2

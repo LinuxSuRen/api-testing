@@ -32,6 +32,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const modeDockerInSystemService = "docker-in-system"
+
 func createServiceCommand(execer fakeruntime.Execer) (c *cobra.Command) {
 	opt := &serviceOption{
 		Execer: execer,
@@ -58,18 +60,19 @@ DaoCloud: docker.m.daocloud.io/linuxsuren/api-testing`,
 	flags := c.Flags()
 	flags.StringVarP(&opt.scriptPath, "script-path", "", "", "The service script file path")
 	flags.StringVarP(&opt.mode, "mode", "m", "",
-		fmt.Sprintf("Availeble values: %v", service.ServiceModeOS.All()))
+		fmt.Sprintf("Availeble values: %v", append(service.ServiceModeOS.All(), modeDockerInSystemService)))
 	flags.StringVarP(&opt.image, "image", "", defaultImage, "The image of the service which as a container")
 	flags.StringVarP(&opt.pull, "pull", "", "always", `Pull image before creating ("always"|"missing"|"never")`)
 	flags.StringVarP(&opt.version, "version", "", version.GetVersion(), "The version of the service image")
 	flags.StringVarP(&opt.LocalStorage, "local-storage", "", "/var/data/atest",
 		"The local storage path which will be mounted into the container")
+	flags.IntVarP(&opt.port, "port", "", 8080, "The port of the service")
 	flags.StringVarP(&opt.SecretServer, "secret-server", "", "", "The secret server URL")
 	flags.StringVarP(&opt.SkyWalking, "skywalking", "", "", "Push the browser tracing data to the Apache SkyWalking URL")
 	return
 }
 
-const defaultImage = "linuxsuren.docker.scarf.sh/linuxsuren/api-testing"
+const defaultImage = "ghcr.io/linuxsuren/api-testing"
 
 type serviceOption struct {
 	action     string
@@ -80,6 +83,7 @@ type serviceOption struct {
 	fakeruntime.Execer
 	mode string
 	pull string
+	port int
 
 	SecretServer string
 	SkyWalking   string
@@ -91,18 +95,41 @@ func (o *serviceOption) preRunE(c *cobra.Command, args []string) (err error) {
 	o.stdOut = c.OutOrStdout()
 	o.action = args[0]
 
+	serviceCommand := "atest"
+	serviceArgs := []string{"server", "--extension-registry=ghcr.io"}
+	if o.mode == modeDockerInSystemService {
+		if o.Execer.OS() == "windows" {
+			serviceCommand = "run"
+			serviceArgs = []string{"atest", "server", "--extension-registry=ghcr.io"}
+			o.mode = "docker"
+		} else {
+			serviceCommand = "docker"
+			serviceArgs = []string{"run", "-v=atest:/root/.config/atest", "-v=atest-ssh:/root/.ssh",
+				fmt.Sprintf("-p=%d:8080", o.port), "--pull", o.pull, fmt.Sprintf("%s:%s", o.image, o.version),
+				"atest", "server", "--extension-registry=ghcr.io"}
+			o.mode = string(service.ServiceModeOS)
+		}
+	}
+	if strings.Contains(o.version, "unknown") {
+		o.version = ""
+	}
+
 	if o.service, err = service.GetAvailableService(service.ServiceMode(o.mode),
 		service.ContainerOption{
-			Image:  o.action,
-			Pull:   o.pull,
-			Tag:    o.version,
-			Writer: c.OutOrStdout(),
+			Image:   o.image,
+			Pull:    o.pull,
+			Tag:     o.version,
+			Writer:  c.OutOrStdout(),
+			Volumes: map[string]string{"atest": "/root/.config/atest"},
+			Ports:   map[int]int{o.port: 8080},
+			Restart: "always",
+			Name:    "atest",
 		}, service.CommonService{
 			ID:          "atest",
 			Name:        "atest",
 			Description: "API Testing Server",
-			Command:     "atest",
-			Args:        []string{"server"},
+			Command:     serviceCommand,
+			Args:        serviceArgs,
 			Execer:      o.Execer,
 		}); err != nil {
 		return
