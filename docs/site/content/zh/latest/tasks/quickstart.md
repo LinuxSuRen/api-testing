@@ -13,6 +13,7 @@ description: 只需几个简单的步骤即可开始使用 API Testing。
 ```shell
 atest run -p test-suite.yaml --case-filter sbom
 ```
+
 ## JSON Schema
 
 您可以访问下面 `atest` 的 JSON Schema 来了解测试用例的编写规范：
