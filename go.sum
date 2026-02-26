@@ -133,6 +133,8 @@ github.com/linuxsuren/go-fake-runtime v0.0.5 h1:x1qvuGMfly3L4BTwx6Hq5oUcuf/1u0kS
 github.com/linuxsuren/go-fake-runtime v0.0.5/go.mod h1:hlE6bZp76N3YPDsKi5YKOf1XmcJy4rvf8EtkTLYRYLw=
 github.com/linuxsuren/go-service v0.0.2-0.20251117091849-c58edc8748d9 h1:w5prP6ROOxInPV38KL+0laf7ZDIHlidBerhrphHqWHU=
 github.com/linuxsuren/go-service v0.0.2-0.20251117091849-c58edc8748d9/go.mod h1:QX22v61PxpOfJa4Xug8qzGTbPjclDZFx2j1PlGLknJw=
+github.com/linuxsuren/go-service v0.0.2 h1:4pq+LEXs1/V6qBCVW749PZbaXSQb3dyz/VR+xsdf95o=
+github.com/linuxsuren/go-service v0.0.2/go.mod h1:QX22v61PxpOfJa4Xug8qzGTbPjclDZFx2j1PlGLknJw=
 github.com/linuxsuren/http-downloader v0.0.99 h1:fEu+HkHdYeLM932c7IfmuaDJqWxVU5sIEnS/Aln8h9o=
 github.com/linuxsuren/http-downloader v0.0.99/go.mod h1:OngIAkbOJTMbd+IMRbt3TiWSizVJZvPfjdbTpl6uHLo=
 github.com/linuxsuren/oauth-hub v0.0.1 h1:5LAdX9ZlWhaM7P10rdxiXPk26eceYHRyfkFXsym6AxY=
