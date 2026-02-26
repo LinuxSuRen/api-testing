@@ -18,11 +18,17 @@ package runner_test
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/linuxsuren/api-testing/pkg/apispec"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/stretchr/testify/assert"
+)
+
+const (
+	winLineEnd = "\r\n"
+	unixLineEnd = "\n"
 )
 
 func TestMarkdownWriter(t *testing.T) {
@@ -51,12 +57,15 @@ func TestMarkdownWriter(t *testing.T) {
 		writer.WithAPICoverage(nil)
 		err := writer.Output(createSlice(sample, 2))
 		assert.Nil(t, err)
+		// Normalize line endings for Windows compatibility
+		actual := buf.String()
+		actual = normalizeLineEndings(actual)
 		assert.Equal(t, `There are 2 test cases, failed count 0:
 
 | Name | Average | Max | Min | Count | Error |
 |---|---|---|---|---|---|
 | api | 3ns | 4ns | 2ns | 3 | 0 |
-| api | 3ns | 4ns | 2ns | 3 | 0 |`, buf.String())
+| api | 3ns | 4ns | 2ns | 3 | 0 |`, actual)
 	})
 
 	t.Run("long", func(t *testing.T) {
@@ -65,6 +74,7 @@ func TestMarkdownWriter(t *testing.T) {
 		writer.WithAPICoverage(nil)
 		err := writer.Output(createSlice(sample, 8))
 		assert.Nil(t, err)
+		actual := normalizeLineEndings(buf.String())
 		assert.Equal(t, `There are 8 test cases, failed count 0:
 
 <details>
@@ -80,7 +90,7 @@ func TestMarkdownWriter(t *testing.T) {
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |
-</details>`, buf.String())
+</details>`, actual)
 	})
 
 	t.Run("long, there are error cases", func(t *testing.T) {
@@ -89,6 +99,7 @@ func TestMarkdownWriter(t *testing.T) {
 		writer.WithAPICoverage(nil)
 		err := writer.Output(append(createSlice(sample, 8), errSample))
 		assert.Nil(t, err)
+		actual := normalizeLineEndings(buf.String())
 		assert.Equal(t, `There are 9 test cases, failed count 1:
 
 | Name | Average | Max | Min | Count | Error |
@@ -109,7 +120,7 @@ func TestMarkdownWriter(t *testing.T) {
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | foo | 3ns | 4ns | 2ns | 3 | 1 |
-</details>`, buf.String())
+</details>`, actual)
 	})
 
 	t.Run("with resource usage", func(t *testing.T) {
@@ -122,6 +133,7 @@ func TestMarkdownWriter(t *testing.T) {
 		}})
 		err := writer.Output(createSlice(sample, 2))
 		assert.Nil(t, err)
+		actual := normalizeLineEndings(buf.String())
 		assert.Equal(t, `There are 2 test cases, failed count 0:
 
 | Name | Average | Max | Min | Count | Error |
@@ -131,7 +143,7 @@ func TestMarkdownWriter(t *testing.T) {
 
 Resource usage:
 * CPU: 1
-* Memory: 1`, buf.String())
+* Memory: 1`, actual)
 	})
 
 	t.Run("have error message", func(t *testing.T) {
@@ -142,6 +154,7 @@ Resource usage:
 		result.LastErrorMessage = "error happend"
 		err := writer.Output(createSlice(result, 2))
 		assert.Nil(t, err)
+		actual := normalizeLineEndings(buf.String())
 		assert.Equal(t, `There are 2 test cases, failed count 0:
 
 | Name | Average | Max | Min | Count | Error |
@@ -153,7 +166,7 @@ Resource usage:
   <summary><b>See the error message</b></summary>
 * error happend
 * error happend
-</details>`, buf.String())
+</details>`, actual)
 	})
 
 	t.Run("with api converage", func(t *testing.T) {
@@ -164,6 +177,7 @@ Resource usage:
 		}}))
 		err := writer.Output(createSlice(sample, 2))
 		assert.Nil(t, err)
+		actual := normalizeLineEndings(buf.String())
 		assert.Equal(t, `There are 2 test cases, failed count 0:
 
 | Name | Average | Max | Min | Count | Error |
@@ -171,8 +185,12 @@ Resource usage:
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 | api | 3ns | 4ns | 2ns | 3 | 0 |
 
-API Coverage: 1/1`, buf.String())
+API Coverage: 1/1`, actual)
 	})
+}
+
+func normalizeLineEndings(s string) string {
+	return strings.ReplaceAll(s, winLineEnd, unixLineEnd)
 }
 
 func createSlice(sample runner.ReportResult, count int) (result []runner.ReportResult) {

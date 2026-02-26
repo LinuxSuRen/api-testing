@@ -27,11 +27,11 @@ import (
 	"time"
 
 	"github.com/h2non/gock"
-	"github.com/linuxsuren/api-testing/pkg/limit"
 	atest "github.com/linuxsuren/api-testing/pkg/testing"
 	"github.com/linuxsuren/api-testing/pkg/util"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/time/rate"
 )
 
 func TestRunSuite(t *testing.T) {
@@ -71,7 +71,7 @@ func TestRunSuite(t *testing.T) {
 			ctx := getDefaultContext()
 			opt := newDiscardRunOption()
 			opt.requestTimeout = 30 * time.Second
-			opt.limiter = limit.NewDefaultRateLimiter(0, 0)
+			opt.limiter = rate.NewLimiter(rate.Limit(0), 0)
 			stopSingal := make(chan struct{}, 1)
 
 			loader := atest.NewFileLoader()
