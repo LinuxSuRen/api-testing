@@ -1,7 +1,7 @@
 ARG LAN_ENV=docker.io/library/golang:1.21
 
 FROM ghcr.io/linuxsuren/api-testing:master AS atest
-FROM ghcr.io/linuxsuren/hd:v0.0.42 as downloader
+FROM ghcr.io/linuxsuren/hd:v0.0.42 AS downloader
 RUN hd install jq
 FROM $LAN_ENV
 
