@@ -21,6 +21,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/expr-lang/expr"
@@ -144,16 +146,16 @@ func TestFunctions(t *testing.T) {
 		expr: `command("echo 1")`,
 		verify: func(t *testing.T, result any, resultErr error) {
 			assert.NoError(t, resultErr)
-			assert.Equal(t, "1\n", result)
+			assert.Equal(t, "1", strings.TrimSpace(result.(string)))
 		},
 	}, {
 		name: "writeFile",
-		expr: fmt.Sprintf(`writeFile("%s", "hello")`, tmpFile.Name()),
+		expr: fmt.Sprintf(`writeFile("%s", "hello")`, filepath.ToSlash(tmpFile.Name())),
 		verify: func(t *testing.T, result any, resultErr error) {
 			assert.NoError(t, resultErr)
 
 			data, err := io.ReadAll(tmpFile)
-			assert.NoError(t, err)
+			assert.NoError(t, err, "failed to read file: %v", err)
 			assert.Equal(t, "hello", string(data))
 		},
 	}}
@@ -166,7 +168,7 @@ func TestFunctions(t *testing.T) {
 				assert.Error(t, err, "%q %d", tt.name, i)
 				return
 			}
-			if !assert.NotNil(t, program, "%q %d", tt.name, i) {
+			if !assert.NotNil(t, program, "%q, index: %d, expr: %s: error: %v", tt.name, i, tt.expr, err) {
 				return
 			}
 

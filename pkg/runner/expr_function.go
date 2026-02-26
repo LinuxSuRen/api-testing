@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"runtime"
 	"time"
 
 	"github.com/expr-lang/expr"
@@ -140,8 +141,18 @@ func init() {
 		{
 			Name: "command",
 			Func: func(params ...interface{}) (res any, err error) {
+				if len(params) < 1 {
+					err = fmt.Errorf("the command param is required")
+					return
+				}
+
+				shParams := []string{"sh", "-c"}
+				if runtime.GOOS == "windows" {
+					shParams = []string{"cmd", "/c"}
+				}
+
 				var output []byte
-				output, err = exec.Command("sh", "-c", params[0].(string)).CombinedOutput()
+				output, err = exec.Command(shParams[0], shParams[1], params[0].(string)).CombinedOutput()
 				if output != nil {
 					res = string(output)
 				}

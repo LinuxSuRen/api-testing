@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"golang.org/x/time/rate"
 	"io"
 	"net/http"
 	"os"
@@ -32,7 +33,6 @@ import (
 	"github.com/linuxsuren/api-testing/pkg/util/home"
 
 	"github.com/linuxsuren/api-testing/pkg/apispec"
-	"github.com/linuxsuren/api-testing/pkg/limit"
 	"github.com/linuxsuren/api-testing/pkg/logging"
 	"github.com/linuxsuren/api-testing/pkg/runner"
 	"github.com/linuxsuren/api-testing/pkg/runner/monitor"
@@ -55,8 +55,8 @@ type runOption struct {
 	thread             int64
 	context            context.Context
 	qps                int32
-	burst              int32
-	limiter            limit.RateLimiter
+	burst              int
+	limiter            *rate.Limiter
 	startTime          time.Time
 	reporter           runner.TestReporter
 	reportFile         string
@@ -137,7 +137,7 @@ func (o *runOption) addFlags(flags *pflag.FlagSet) {
 	flags.StringVarP(&o.swaggerURL, "swagger-url", "", "", "The URL of swagger")
 	flags.Int64VarP(&o.thread, "thread", "", 1, "Threads of the execution")
 	flags.Int32VarP(&o.qps, "qps", "", 5, "QPS")
-	flags.Int32VarP(&o.burst, "burst", "", 5, "burst")
+	flags.IntVarP(&o.burst, "burst", "", 5, "burst")
 	flags.StringVarP(&o.monitorDocker, "monitor-docker", "", "", "The docker container name to monitor")
 }
 
@@ -256,10 +256,9 @@ func (o *runOption) startMonitor() (err error) {
 
 func (o *runOption) runE(cmd *cobra.Command, args []string) (err error) {
 	o.startTime = time.Now()
-	o.limiter = limit.NewDefaultRateLimiter(o.qps, o.burst)
+	o.limiter = rate.NewLimiter(rate.Limit(o.qps), o.burst)
 	defer func() {
 		cmd.Printf("Consumed: %s\n", time.Since(o.startTime).String())
-		o.limiter.Stop()
 	}()
 
 	if err = o.loader.Put(o.pattern); err != nil {
@@ -400,7 +399,7 @@ func (o *runOption) runSuite(loader testing.Loader, dataContext map[string]inter
 		case <-stopSingal:
 			return
 		default:
-			o.limiter.Accept()
+			o.limiter.Allow()
 
 			ctxWithTimeout, cancel := context.WithTimeout(ctx, o.requestTimeout)
 			defer cancel() // Ensure context is always cancelled when leaving this scope

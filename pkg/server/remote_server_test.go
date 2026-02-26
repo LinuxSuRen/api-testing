@@ -507,6 +507,9 @@ func TestDuplicate(t *testing.T) {
 			SourceSuiteName: "simple",
 			TargetSuiteName: "simple2",
 		})
+		defer func() {
+			_ = os.RemoveAll("simple2.yaml")
+		}()
 		assert.NoError(t, err)
 
 		// find the new test suite
