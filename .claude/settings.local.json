@@ -4,7 +4,8 @@
       "Bash(go test:*)",
       "Bash(go doc:*)",
       "WebSearch",
-      "Bash(go env:*)"
+      "Bash(go env:*)",
+      "Bash(docker pull:*)"
     ]
   }
 }

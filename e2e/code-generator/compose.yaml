@@ -13,7 +13,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - LAN_ENV=docker.io/library/openjdk:23
+        - LAN_ENV=docker.io/library/eclipse-temurin:25
     command:
       - /workspace/entrypoint.sh
       - java
@@ -49,7 +49,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - LAN_ENV=docker.io/library/openjdk:23
+        - LAN_ENV=docker.io/library/eclipse-temurin:25
     command:
       - /workspace/entrypoint.sh
       - curl
