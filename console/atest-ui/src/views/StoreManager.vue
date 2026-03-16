@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { Edit, Delete, QuestionFilled, Help, Refresh } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Pair } from './types'
@@ -13,21 +13,23 @@ import Button from '../components/Button.vue'
 
 const { t } = useI18n()
 
-const emptyStore = function() {
+const emptyStore = function () {
   return {
     name: '',
     url: '',
     username: '',
     password: '',
     kind: {
-        name: '',
-        url: ''
+      name: '',
+      url: ''
     },
-    properties: [{
+    properties: [
+      {
         key: '',
         value: '',
-        description: '',
-    }],
+        description: ''
+      }
+    ],
     disabled: false,
     readonly: false
   } as Store
@@ -56,62 +58,88 @@ interface Store {
 }
 
 const storesLoading = ref(false)
+const filterText = ref('')
+const filteredStores = computed(() => {
+  if (!filterText.value) return stores.value
+  const search = filterText.value.toLowerCase()
+  return stores.value.filter(
+    (store) =>
+      store.name.toLowerCase().includes(search) ||
+      store.url.toLowerCase().includes(search) ||
+      store.username.toLowerCase().includes(search) ||
+      store.owner.toLowerCase().includes(search) ||
+      store.kind.name.toLowerCase().includes(search) ||
+      store.kind.url.toLowerCase().includes(search)
+  )
+})
+
 function loadStores() {
   storesLoading.value = true
-  API.GetStores((e) => {
-    stores.value = e.data
-  }, (e) => {
-    ElMessage.error('Oops, ' + e)
-  }, () => {
-    storesLoading.value = false
-  })
+  API.GetStores(
+    (e) => {
+      stores.value = e.data
+    },
+    (e) => {
+      ElMessage.error('Oops, ' + e)
+    },
+    () => {
+      storesLoading.value = false
+    }
+  )
 }
 loadStores()
 
 function deleteStore(name: string) {
-  API.DeleteStore(name, () => {
-    ElMessage({
-      message: 'Deleted.',
-      type: 'success'
-    })
-    loadStores()
-  }, (e) => {
-    ElMessage.error('Oops, ' + e)
-  })
+  API.DeleteStore(
+    name,
+    () => {
+      ElMessage({
+        message: 'Deleted.',
+        type: 'success'
+      })
+      loadStores()
+    },
+    (e) => {
+      ElMessage.error('Oops, ' + e)
+    }
+  )
 }
 
 function editStore(name: string) {
-    dialogVisible.value = true
-    stores.value.forEach((e: Store) => {
-        if (e.name === name) {
-            setStoreForm(e)
-            return
-        }
-    })
-    createAction.value = false
+  dialogVisible.value = true
+  stores.value.forEach((e: Store) => {
+    if (e.name === name) {
+      setStoreForm(e)
+      return
+    }
+  })
+  createAction.value = false
 }
 
 function setStoreForm(store: Store) {
-    storeForm.name = store.name
-    storeForm.url = store.url
-    storeForm.username = store.username
-    storeForm.password = store.password
-    storeForm.kind = store.kind
-    storeForm.disabled = store.disabled
-    storeForm.readonly = store.readonly
-    storeForm.properties = store.properties
+  storeForm.name = store.name
+  storeForm.url = store.url
+  storeForm.username = store.username
+  storeForm.password = store.password
+  storeForm.kind = store.kind
+  storeForm.disabled = store.disabled
+  storeForm.readonly = store.readonly
+  storeForm.properties = store.properties
 }
 
 function addStore() {
-    setStoreForm(emptyStore())
-    dialogVisible.value = true
-    createAction.value = true
+  setStoreForm(emptyStore())
+  dialogVisible.value = true
+  createAction.value = true
 }
 
-Magic.LoadMagicKeys('StoreManager', new Map([
-  ["addStore", addStore],
-  ["loadStores", loadStores],
-]))
+Magic.LoadMagicKeys(
+  'StoreManager',
+  new Map([
+    ['addStore', addStore],
+    ['loadStores', loadStores]
+  ])
+)
 
 const rules = reactive<FormRules<Store>>({
   name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
@@ -121,55 +149,63 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid: boolean) => {
     if (valid) {
-      UIAPI.CreateOrUpdateStore(storeForm, createAction.value, () => {
+      UIAPI.CreateOrUpdateStore(
+        storeForm,
+        createAction.value,
+        () => {
           loadStores()
           dialogVisible.value = false
           formEl.resetFields()
-      }, creatingLoading)
+        },
+        creatingLoading
+      )
     }
   })
 }
 
-watch(() => storeForm.kind.name, async (name) => {
-  const ext = await SupportedExtension(name)
-  if (ext) {
-    storeExtLink.value = ext.link
-    let pro = storeForm.properties.slice()
+watch(
+  () => storeForm.kind.name,
+  async (name) => {
+    const ext = await SupportedExtension(name)
+    if (ext) {
+      storeExtLink.value = ext.link
+      let pro = storeForm.properties.slice()
 
-    for (var i = 0; i < pro.length;) {
-      // remove it if the value or key is empty
-      if (pro[i].key === '' || pro[i].value === '') {
-        pro.splice(i, 1)
-      } else {
-        i++
+      for (var i = 0; i < pro.length; ) {
+        // remove it if the value or key is empty
+        if (pro[i].key === '' || pro[i].value === '') {
+          pro.splice(i, 1)
+        } else {
+          i++
+        }
       }
+
+      // add extension related params
+      ext.params.forEach((p) => {
+        const index = pro.findIndex((e) => e.key === p.key)
+        if (index === -1) {
+          pro.push({
+            key: p.key,
+            value: '',
+            defaultValue: p.defaultValue,
+            description: p.description,
+            type: p.type,
+            enum: p.enum
+          } as Pair)
+        } else {
+          pro[index].description = p.description
+        }
+      })
+
+      // make sure there is always a empty pair for letting users input
+      pro.push({
+        key: '',
+        value: ''
+      } as Pair)
+      storeForm.properties = pro
     }
-
-    // add extension related params
-    ext.params.forEach(p => {
-      const index = pro.findIndex(e => e.key === p.key)
-      if (index === -1) {
-        pro.push({
-          key: p.key,
-          value: '',
-          defaultValue: p.defaultValue,
-          description: p.description,
-          type: p.type,
-          enum: p.enum
-        } as Pair)
-      } else {
-        pro[index].description = p.description
-      }
-    })
-
-    // make sure there is always a empty pair for letting users input
-    pro.push({
-      key: '',
-      value: ''
-    } as Pair)
-    storeForm.properties = pro
   }
-})
+)
 watch(storeForm, (e) => {
   if (e.kind.name === '') {
     if (e.url.startsWith('https://github.com') || e.url.startsWith('https://gitee.com')) {
@@ -180,19 +216,23 @@ watch(storeForm, (e) => {
 
 function storeVerify(formEl: FormInstance | undefined) {
   if (!formEl) return
-  
-  API.VerifyStore(storeForm.name, (e) => {
-    if (e.ready) {
-      ElMessage({
-        message: 'Verified!',
-        type: 'success'
-      })
-    } else {
+
+  API.VerifyStore(
+    storeForm.name,
+    (e) => {
+      if (e.ready) {
+        ElMessage({
+          message: 'Verified!',
+          type: 'success'
+        })
+      } else {
+        ElMessage.error(e.message)
+      }
+    },
+    (e) => {
       ElMessage.error(e.message)
     }
-  }, (e) => {
-    ElMessage.error(e.message)
-  })
+  )
 }
 
 const storeDuplicate = async (formEl: FormInstance | undefined) => {
@@ -202,7 +242,7 @@ const storeDuplicate = async (formEl: FormInstance | undefined) => {
 
 function updateKeys() {
   const props = storeForm.properties
-  if (props.findIndex(p => p.key === '') === -1) {
+  if (props.findIndex((p) => p.key === '') === -1) {
     storeForm.properties.push({
       key: '',
       value: ''
@@ -212,86 +252,106 @@ function updateKeys() {
 
 const storeExtLink = ref('')
 const extensions = ref([])
-SupportedExtensions().then(e => {
+SupportedExtensions().then((e) => {
   extensions.value = e
 })
 </script>
 
 <template>
-    <div class="page-header">
-      <span class="page-title">{{t('title.storeManager')}}</span>
-      <Button type="primary" @click="addStore" :icon="Edit">{{t('button.new')}}</Button>
-      <Button type="primary" @click="loadStores" :icon="Refresh">{{t('button.refresh')}}</Button>
-    </div>
-    <el-table :data="stores" style="width: 100%" v-loading=storesLoading>
-      <el-table-column :label="t('field.name')" width="180">
-        <template #default="scope">
-          {{ scope.row.name }}
-        </template>
-      </el-table-column>
-      <el-table-column label="URL">
-        <template #default="scope">
-          <div style="display: flex; align-items: center">
-            {{ scope.row.url }}
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('field.plugin')">
-        <template #default="scope">
-          <div style="display: flex; align-items: center">
-            {{ scope.row.kind.name }}
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="Socket">
-        <template #default="scope">
-          <div style="display: flex; align-items: center">
-            {{ scope.row.kind.url }}
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('field.status')" width="100">
-        <template #default="scope">
-          <div style="display: flex; align-items: center">
-            <el-text class="mx-1"
-            type="success"
-            v-if="scope.row.ready && !scope.row.disabled"
-            >Ready</el-text>
-            <el-text class="mx-1"
-            type="warning"
-            v-if="!scope.row.ready && !scope.row.disabled"
-            >Not Ready</el-text>
-            <el-text class="mx-1"
-            type="danger"
-            v-if="scope.row.disabled"
-            >Disabled</el-text>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('field.operations')" width="220">
-        <template #default="scope">
-          <div style="display: flex; align-items: center" v-if="scope.row.name !== 'local'">
-            <Button type="primary" @click="deleteStore(scope.row.name)" :icon="Delete">{{t('button.delete')}}</Button>
-            <Button type="primary" @click="editStore(scope.row.name)" :icon="Edit">{{t('button.edit')}}</Button>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
+  <div class="page-header">
+    <span class="page-title">{{ t('title.storeManager') }}</span>
+    <Button type="primary" @click="addStore" :icon="Edit">{{ t('button.new') }}</Button>
+    <Button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</Button>
+  </div>
+  <el-input
+    v-model="filterText"
+    :placeholder="t('tip.filter')"
+    test-id="search"
+    style="padding: 5px; margin-bottom: 10px; width: 300px"
+  />
+  <el-table :data="filteredStores" style="width: 100%" v-loading="storesLoading">
+    <el-table-column :label="t('field.name')" width="180">
+      <template #default="scope">
+        {{ scope.row.name }}
+      </template>
+    </el-table-column>
+    <el-table-column label="URL">
+      <template #default="scope">
+        <div style="display: flex; align-items: center">
+          {{ scope.row.url }}
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column :label="t('field.plugin')">
+      <template #default="scope">
+        <div style="display: flex; align-items: center">
+          {{ scope.row.kind.name }}
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column label="Socket">
+      <template #default="scope">
+        <div style="display: flex; align-items: center">
+          {{ scope.row.kind.url }}
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column :label="t('field.status')" width="100">
+      <template #default="scope">
+        <div style="display: flex; align-items: center">
+          <el-text class="mx-1" type="success" v-if="scope.row.ready && !scope.row.disabled"
+            >Ready</el-text
+          >
+          <el-text class="mx-1" type="warning" v-if="!scope.row.ready && !scope.row.disabled"
+            >Not Ready</el-text
+          >
+          <el-text class="mx-1" type="danger" v-if="scope.row.disabled">Disabled</el-text>
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column :label="t('field.operations')" width="220">
+      <template #default="scope">
+        <div style="display: flex; align-items: center" v-if="scope.row.name !== 'local'">
+          <Button type="primary" @click="deleteStore(scope.row.name)" :icon="Delete">{{
+            t('button.delete')
+          }}</Button>
+          <Button type="primary" @click="editStore(scope.row.name)" :icon="Edit">{{
+            t('button.edit')
+          }}</Button>
+        </div>
+      </template>
+    </el-table-column>
+  </el-table>
 
-    <div style="margin-top: 20px; margin-bottom: 20px; position: absolute; bottom: 0px;">
-      Follow <el-link href="https://linuxsuren.github.io/api-testing/#storage" target="_blank">the instructions</el-link> to configure the storage plugins.
-    </div>
+  <div style="margin-top: 20px; margin-bottom: 20px; position: absolute; bottom: 0px">
+    Follow
+    <el-link href="https://linuxsuren.github.io/api-testing/#storage" target="_blank"
+      >the instructions</el-link
+    >
+    to configure the storage plugins.
+  </div>
 
-    <el-dialog v-model="dialogVisible" :title="t(createAction? 'title.createStore': 'title.updateStore')" width="30%" draggable>
-      <template #footer>
+  <el-dialog
+    v-model="dialogVisible"
+    :title="t(createAction ? 'title.createStore' : 'title.updateStore')"
+    width="30%"
+    draggable
+  >
+    <template #footer>
       <span class="dialog-footer">
         <el-form
           :rules="rules"
           :model="storeForm"
           ref="storeFormRef"
-          status-icon label-width="120px">
+          status-icon
+          label-width="120px"
+        >
           <el-form-item :label="t('field.name')" prop="name">
-            <el-input v-model="storeForm.name" test-id="store-form-name" :disabled="!createAction"/>
+            <el-input
+              v-model="storeForm.name"
+              test-id="store-form-name"
+              :disabled="!createAction"
+            />
           </el-form-item>
           <el-form-item label="URL" prop="url">
             <el-input v-model="storeForm.url" placeholder="http://foo" test-id="store-form-url" />
@@ -303,11 +363,7 @@ SupportedExtensions().then(e => {
             <el-input v-model="storeForm.password" type="password" test-id="store-form-password" />
           </el-form-item>
           <el-form-item :label="t('field.pluginName')" prop="pluginName">
-            <el-select
-              v-model="storeForm.kind.name"
-              test-id="store-form-plugin-name"
-              class="m-2"
-            >
+            <el-select v-model="storeForm.kind.name" test-id="store-form-plugin-name" class="m-2">
               <el-option
                 v-for="item in extensions"
                 :key="item.name"
@@ -329,52 +385,54 @@ SupportedExtensions().then(e => {
           </el-form-item>
           <el-form-item :label="t('field.properties')" prop="properties">
             <el-table :data="storeForm.properties" style="width: 100%">
-                <el-table-column label="Key" width="180">
-                    <template #default="scope">
-                        <el-input v-model="scope.row.key" placeholder="Key" @change="updateKeys"/>
-                    </template>
-                </el-table-column>
-                <el-table-column label="Value">
-                    <template #default="scope">
-                      <div style="display: flex; align-items: center">
-                          <el-select v-model="scope.row.value" v-if="scope.row.enum">
-                            <el-option
-                                v-for="item in scope.row.enum"
-                                :key="item"
-                                :label="item"
-                                :value="item"
-                            />
-                          </el-select>
-                          <el-input-number v-model="scope.row.value" v-else-if="scope.row.type === 'number'"/>
-                            <el-input v-model="scope.row.value" :placeholder="scope.row.defaultValue" v-else/>
-                            <el-tooltip :content="scope.row.description" v-if="scope.row.description">
-                              <el-icon>
-                                <QuestionFilled/>
-                              </el-icon>
-                            </el-tooltip>
-                      </div>
-                    </template>
-                </el-table-column>
+              <el-table-column label="Key" width="180">
+                <template #default="scope">
+                  <el-input v-model="scope.row.key" placeholder="Key" @change="updateKeys" />
+                </template>
+              </el-table-column>
+              <el-table-column label="Value">
+                <template #default="scope">
+                  <div style="display: flex; align-items: center">
+                    <el-select v-model="scope.row.value" v-if="scope.row.enum">
+                      <el-option
+                        v-for="item in scope.row.enum"
+                        :key="item"
+                        :label="item"
+                        :value="item"
+                      />
+                    </el-select>
+                    <el-input-number
+                      v-model="scope.row.value"
+                      v-else-if="scope.row.type === 'number'"
+                    />
+                    <el-input
+                      v-model="scope.row.value"
+                      :placeholder="scope.row.defaultValue"
+                      v-else
+                    />
+                    <el-tooltip :content="scope.row.description" v-if="scope.row.description">
+                      <el-icon>
+                        <QuestionFilled />
+                      </el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
+              </el-table-column>
             </el-table>
           </el-form-item>
           <el-form-item>
-            <Button
-              type="primary"
-              @click="storeVerify(storeFormRef)"
-              test-id="store-form-verify"
-              >{{t('button.verify')}}</Button
-            >
-            <Button
-              type="primary"
-              v-if="!createAction"
-              @click="storeDuplicate(storeFormRef)"
-              >{{t('button.duplicate')}}</Button>
+            <Button type="primary" @click="storeVerify(storeFormRef)" test-id="store-form-verify">{{
+              t('button.verify')
+            }}</Button>
+            <Button type="primary" v-if="!createAction" @click="storeDuplicate(storeFormRef)">{{
+              t('button.duplicate')
+            }}</Button>
             <Button
               type="primary"
               @click="submitForm(storeFormRef)"
               v-loading="creatingLoading"
               test-id="store-form-submit"
-              >{{t('button.submit')}}</Button
+              >{{ t('button.submit') }}</Button
             >
           </el-form-item>
         </el-form>
