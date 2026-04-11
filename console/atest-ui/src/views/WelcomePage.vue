@@ -17,26 +17,26 @@ API.SBOM((d) => {
 </script>
 
 <template>
-    <div class="container">
-        <el-card class="welcome-card">
+    <div class="w-full max-w-[1200px] mx-auto p-[20px] box-border max-[768px]:p-[15px] max-[480px]:p-[10px]">
+        <el-card class="mb-[20px]">
             <template #header>
-                <div class="card-header">
+                <div class="flex justify-between items-center flex-wrap gap-[10px] max-[768px]:flex-col max-[768px]:items-start">
                     <span>Welcome to atest</span>
                 </div>
             </template>
             
-            <div class="welcome-content">
+            <div class="p-[10px] max-[480px]:p-[5px]">
                 <p>Use atest to improve your code quality!</p>
-                <p class="guide-text">Please read the following guide if this is your first time using atest:</p>
+                <p class="my-[15px] text-[#606266]">Please read the following guide if this is your first time using atest:</p>
                 
-                <el-steps direction="vertical" :active="3" class="guide-steps">
+                <el-steps direction="vertical" :active="3" class="my-[20px] max-[768px]:my-[15px]">
                     <el-step title="Create a store" description="Create a store for saving the data" />
                     <el-step title="Create test suite" description="Create a test suite on the left panel" />
                     <el-step title="Create test case" description="Select a suite, then create the test case" />
                 </el-steps>
                 
-                <div class="document-link">
-                    <el-link type="primary" href="https://linuxsuren.github.io/api-testing/" target="_blank" :icon="Document" class="doc-link">
+                <div class="mt-[20px] text-center">
+                    <el-link type="primary" href="https://linuxsuren.github.io/api-testing/" target="_blank" :icon="Document" class="text-[16px]">
                         View official documentation
                     </el-link>
                 </div>
@@ -45,21 +45,21 @@ API.SBOM((d) => {
 
         <el-divider border-style="dashed" />
 
-        <div class="dependency-section">
-            <el-row :gutter=20>
+        <div class="mt-[30px]">
+            <el-row :gutter="20">
                 <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                    <el-card class="dependency-card">
+                    <el-card class="h-full mb-[20px] max-[480px]:mb-[15px]">
                         <template #header>
-                            <div class="card-header">
+                            <div class="flex justify-between items-center flex-wrap gap-[10px] max-[768px]:flex-col max-[768px]:items-start">
                                 <span>Golang Dependencies</span>
                                 <el-tag type="info" size="small">{{ Object.keys(sbomItems.go || {}).length }} packages</el-tag>
                             </div>
                         </template>
                         <el-scrollbar :height="scrollbarHeight" always>
-                            <ul class="dependency-list">
-                                <li v-for="(k, v) in sbomItems.go" :key="v" class="dependency-item">
-                                    <span class="package-name">{{ v }}</span>
-                                    <el-tag size="small" class="version-tag">{{ k }}</el-tag>
+                            <ul class="list-none p-0 m-0">
+                                <li v-for="(k, v) in sbomItems.go" :key="v" class="py-[8px] px-[12px] max-[768px]:py-[10px] max-[768px]:px-0 border-b border-[#ebeef5] last:border-b-0 flex justify-between items-center flex-wrap gap-[5px] max-[768px]:flex-col max-[768px]:items-start">
+                                    <span class="font-mono text-[#409eff] [word-break:break-word]">{{ v }}</span>
+                                    <el-tag size="small" class="ml-[10px] max-[768px]:ml-0 max-[768px]:mt-[5px] font-mono">{{ k }}</el-tag>
                                 </li>
                             </ul>
                         </el-scrollbar>
@@ -67,9 +67,9 @@ API.SBOM((d) => {
                 </el-col>
                 
                 <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                    <el-card class="dependency-card">
+                    <el-card class="h-full mb-[20px] max-[480px]:mb-[15px]">
                         <template #header>
-                            <div class="card-header">
+                            <div class="flex justify-between items-center flex-wrap gap-[10px] max-[768px]:flex-col max-[768px]:items-start">
                                 <span>JavaScript Dependencies</span>
                                 <el-tag type="info" size="small">
                                     {{ Object.keys(sbomItems.js?.dependencies || {}).length + Object.keys(sbomItems.js?.devDependencies || {}).length }} packages
@@ -79,20 +79,20 @@ API.SBOM((d) => {
                         <el-tabs type="border-card">
                             <el-tab-pane label="Dependencies">
                                 <el-scrollbar :height="scrollbarHeight - 50" always>
-                                    <ul class="dependency-list">
-                                        <li v-for="(k, v) in sbomItems.js?.dependencies" :key="v" class="dependency-item">
-                                            <span class="package-name">{{ v }}</span>
-                                            <el-tag size="small" class="version-tag">{{ k }}</el-tag>
+                                    <ul class="list-none p-0 m-0">
+                                        <li v-for="(k, v) in sbomItems.js?.dependencies" :key="v" class="py-[8px] px-[12px] max-[768px]:py-[10px] max-[768px]:px-0 border-b border-[#ebeef5] last:border-b-0 flex justify-between items-center flex-wrap gap-[5px] max-[768px]:flex-col max-[768px]:items-start">
+                                            <span class="font-mono text-[#409eff] [word-break:break-word]">{{ v }}</span>
+                                            <el-tag size="small" class="ml-[10px] max-[768px]:ml-0 max-[768px]:mt-[5px] font-mono">{{ k }}</el-tag>
                                         </li>
                                     </ul>
                                 </el-scrollbar>
                             </el-tab-pane>
                             <el-tab-pane label="Dev Dependencies">
                                 <el-scrollbar :height="scrollbarHeight - 50" always>
-                                    <ul class="dependency-list">
-                                        <li v-for="(k, v) in sbomItems.js?.devDependencies" :key="v" class="dependency-item">
-                                            <span class="package-name">{{ v }}</span>
-                                            <el-tag size="small" class="version-tag">{{ k }}</el-tag>
+                                    <ul class="list-none p-0 m-0">
+                                        <li v-for="(k, v) in sbomItems.js?.devDependencies" :key="v" class="py-[8px] px-[12px] max-[768px]:py-[10px] max-[768px]:px-0 border-b border-[#ebeef5] last:border-b-0 flex justify-between items-center flex-wrap gap-[5px] max-[768px]:flex-col max-[768px]:items-start">
+                                            <span class="font-mono text-[#409eff] [word-break:break-word]">{{ v }}</span>
+                                            <el-tag size="small" class="ml-[10px] max-[768px]:ml-0 max-[768px]:mt-[5px] font-mono">{{ k }}</el-tag>
                                         </li>
                                     </ul>
                                 </el-scrollbar>
@@ -105,130 +105,7 @@ API.SBOM((d) => {
     </div>
 </template>
 
-<style scoped>
-.container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    box-sizing: border-box;
-}
 
-.welcome-card {
-    margin-bottom: 20px;
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.welcome-content {
-    padding: 10px;
-}
-
-.guide-text {
-    margin: 15px 0;
-    color: #606266;
-}
-
-.guide-steps {
-    margin: 20px 0;
-}
-
-.document-link {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.doc-link {
-    font-size: 16px;
-}
-
-.dependency-section {
-    margin-top: 30px;
-}
-
-.dependency-card {
-    height: 100%;
-    margin-bottom: 20px;
-}
-
-.dependency-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.dependency-item {
-    padding: 8px 12px;
-    border-bottom: 1px solid #ebeef5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.dependency-item:last-child {
-    border-bottom: none;
-}
-
-.package-name {
-    font-family: monospace;
-    color: #409eff;
-    word-break: break-word;
-}
-
-.version-tag {
-    margin-left: 10px;
-    font-family: monospace;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .container {
-        padding: 15px;
-    }
-    
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .guide-steps {
-        margin: 15px 0;
-    }
-    
-    .dependency-item {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 10px 0;
-    }
-    
-    .version-tag {
-        margin-left: 0;
-        margin-top: 5px;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 10px;
-    }
-    
-    .welcome-content {
-        padding: 5px;
-    }
-    
-    .dependency-card {
-        margin-bottom: 15px;
-    }
-}
-</style>
 
 <script lang="ts">
 export default {
