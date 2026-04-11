@@ -9,6 +9,10 @@
         "save": "保存",
         "delete": "删除",
         "send": "发送",
+        "beautify": "格式化",
+        "minify": "压缩",
+        "download": "下载",
+        "batchSend": "批量发送",
         "copy": "拷贝",
         "ok": "确定",
         "next-page": "下一页",
@@ -55,14 +59,18 @@
         "data": "数据",
         "setting": "设置",
         "keyBindings": "按键绑定",
-        "theme": "主题"
+        "theme": "主题",
+        "newTestCaseName": "新测试用例名称"
     },
     "tip": {
         "filter": "过滤",
         "noParameter": "无参数",
         "testsuite": "测试集：",
         "apiAddress": "API 地址：",
-        "runningAt": "运行于："
+        "runningAt": "运行于：",
+        "chooseBodyFormat": "选择请求体格式",
+        "responseBodyTooLarge": "响应体过大，请下载后查看。",
+        "bodySize": "请求体大小"
     },
     "field": {
         "name": "名称",
@@ -82,7 +90,19 @@
         "proxy": "代理",
         "shortcut": "快捷键",
         "description": "描述",
-        "insecure": "忽略证书验证"
+        "insecure": "忽略证书验证",
+        "query": "查询参数",
+        "header": "请求头",
+        "cookie": "Cookie",
+        "body": "请求体",
+        "expected": "预期结果",
+        "statusCode": "状态码",
+        "expectedHeaders": "预期响应头",
+        "bodyFieldExpect": "请求体字段预期",
+        "verify": "验证",
+        "schema": "Schema",
+        "method": "方法",
+        "filename": "文件名"
     },
     "proxy": {
         "http": "HTTP 代理",
