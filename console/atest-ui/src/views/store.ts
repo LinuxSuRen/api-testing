@@ -35,9 +35,11 @@ const ExtensionKindIotDB = "atest-store-iotdb"
 const ExtensionKindCassandra = "atest-store-cassandra"
 const ExtensionKindEtcd = "atest-store-etcd"
 const ExtensionKindRedis = "atest-store-redis"
+const ExtensionKindMQTT = "atest-store-mqtt"
 const ExtensionKindMongoDB = "atest-store-mongodb"
 const ExtensionKindElasticsearch = "atest-store-elasticsearch"
 const ExtensionKindOpengeMini = "atest-store-opengemini"
+const ExtensionKindROS2 = "atest-store-ros2"
 const ExtensionKindAI = "atest-ext-ai"
 
 export const ExtensionKind = {
@@ -48,9 +50,11 @@ export const ExtensionKind = {
     ExtensionKindCassandra,
     ExtensionKindEtcd,
     ExtensionKindRedis,
+    ExtensionKindMQTT,
     ExtensionKindMongoDB,
     ExtensionKindElasticsearch,
     ExtensionKindOpengeMini,
+    ExtensionKindROS2,
     ExtensionKindAI
 }
 
