@@ -9,6 +9,10 @@
         "save": "Save",
         "delete": "Delete",
         "send": "Send",
+        "beautify": "Beautify",
+        "minify": "Minify",
+        "download": "Download",
+        "batchSend": "Batch Send",
         "copy": "Copy",
         "ok": "OK",
         "next-page": "Next",
@@ -59,14 +63,18 @@
         "data": "Data",
         "setting": "Setting",
         "keyBindings": "Key Bindings",
-        "theme":"Theme"
+        "theme":"Theme",
+        "newTestCaseName": "New Test Case Name"
     },
     "tip": {
         "filter": "Filter Keyword",
         "noParameter": "No Parameter",
         "testsuite": "Test Suite:",
         "apiAddress": "API Address:",
-        "runningAt": "Running At:"
+        "runningAt": "Running At:",
+        "chooseBodyFormat": "Choose the body format",
+        "responseBodyTooLarge": "Response body is too large, please download to view.",
+        "bodySize": "Body Size"
     },
     "field": {
         "name": "Name",
@@ -86,7 +94,19 @@
         "proxy": "Proxy",
         "shortcut": "Shortcut",
         "description": "Description",
-        "insecure": "Insecure"
+        "insecure": "Insecure",
+        "query": "Query",
+        "header": "Header",
+        "cookie": "Cookie",
+        "body": "Body",
+        "expected": "Expected",
+        "statusCode": "Status Code",
+        "expectedHeaders": "Expected Headers",
+        "bodyFieldExpect": "Body Field Expect",
+        "verify": "Verify",
+        "schema": "Schema",
+        "method": "Method",
+        "filename": "Filename"
     },
     "proxy": {
         "http": "HTTP Proxy",
