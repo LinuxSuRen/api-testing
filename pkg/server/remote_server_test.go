@@ -883,6 +883,17 @@ func TestStoreManager(t *testing.T) {
 		}
 	})
 
+	t.Run("GetStores without extension config", func(t *testing.T) {
+		server, clean := getRemoteServerInTempDirWithoutExtensions()
+		defer clean()
+
+		reply, err := server.GetStores(ctx, &SimpleQuery{})
+		assert.NoError(t, err)
+		if assert.Equal(t, 1, len(reply.Data)) {
+			assert.Equal(t, "local", reply.Data[0].Name)
+		}
+	})
+
 	t.Run("CreateStore", func(t *testing.T) {
 		server, clean := getRemoteServerInTempDir()
 		defer clean()
@@ -965,6 +976,23 @@ func getRemoteServerInTempDir() (server RunnerServer, call func()) {
 	corePath := filepath.Join(dir, "data", "core")
 	os.MkdirAll(corePath, 0755)
 	os.WriteFile(filepath.Join(corePath, "extension.yaml"), extensionConfig, 0755)
+
+	themePath := filepath.Join(dir, "data", "theme")
+	os.MkdirAll(themePath, 0755)
+	os.WriteFile(filepath.Join(themePath, "simple.json"), []byte(simplePostman), 0755)
+
+	bindinPath := filepath.Join(dir, "data", "key-binding")
+	os.MkdirAll(bindinPath, 0755)
+	os.WriteFile(filepath.Join(bindinPath, "default.json"), binding, 0755)
+
+	writer := atest.NewFileWriter(dir)
+	server = NewRemoteServer(writer, newLocalloaderFromStore(), nil, nil, dir, 1024*1024*4)
+	return
+}
+
+func getRemoteServerInTempDirWithoutExtensions() (server RunnerServer, call func()) {
+	dir, _ := os.MkdirTemp(os.TempDir(), "remote-server-no-extension")
+	call = func() { os.RemoveAll(dir) }
 
 	themePath := filepath.Join(dir, "data", "theme")
 	os.MkdirAll(themePath, 0755)
@@ -1071,6 +1099,15 @@ func TestGetStoreKinds(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, 1, len(reply.Data))
+}
+
+func TestGetStoreKindsWithoutExtensionConfig(t *testing.T) {
+	server, clean := getRemoteServerInTempDirWithoutExtensions()
+	defer clean()
+
+	reply, err := server.GetStoreKinds(context.Background(), &Empty{})
+	assert.NoError(t, err)
+	assert.Empty(t, reply.Data)
 }
 
 func TestGetThemes(t *testing.T) {

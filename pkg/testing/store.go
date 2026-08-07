@@ -278,10 +278,15 @@ func (s *storeFactory) GetStoreKinds() (kinds []StoreKind, err error) {
 	storeConfig := &StoreConfig{}
 
 	var data []byte
-	if data, err = os.ReadFile(path.Join(s.configDir, "data", "core", "extension.yaml")); err == nil {
-		if err = yaml.Unmarshal(data, storeConfig); err == nil {
-			kinds = storeConfig.Extensions
+	if data, err = os.ReadFile(path.Join(s.configDir, "data", "core", "extension.yaml")); err != nil {
+		if os.IsNotExist(err) {
+			err = nil
 		}
+		return
+	}
+
+	if err = yaml.Unmarshal(data, storeConfig); err == nil {
+		kinds = storeConfig.Extensions
 	}
 	return
 }
