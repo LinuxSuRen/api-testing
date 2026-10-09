@@ -18,6 +18,7 @@ package testing
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,6 +47,35 @@ func TestStoreFactory(t *testing.T) {
 	t.Run("GetStoreKinds", func(t *testing.T) {
 		_, err := factory.GetStoreKinds()
 		assert.NoError(t, err)
+	})
+
+	t.Run("GetStoreKinds when extension config missing", func(t *testing.T) {
+		dir, err := os.MkdirTemp(os.TempDir(), "store-kind-missing")
+		assert.NoError(t, err)
+		defer os.RemoveAll(dir)
+
+		factory := NewStoreFactory(dir)
+		kinds, err := factory.GetStoreKinds()
+		assert.NoError(t, err)
+		assert.Empty(t, kinds)
+	})
+
+	t.Run("GetStoreKinds when extension config invalid", func(t *testing.T) {
+		dir, err := os.MkdirTemp(os.TempDir(), "store-kind-invalid")
+		assert.NoError(t, err)
+		defer os.RemoveAll(dir)
+
+		coreDir := filepath.Join(dir, "data", "core")
+		err = os.MkdirAll(coreDir, 0755)
+		assert.NoError(t, err)
+
+		err = os.WriteFile(filepath.Join(coreDir, "extension.yaml"), []byte("items: ["), 0644)
+		assert.NoError(t, err)
+
+		factory := NewStoreFactory(dir)
+		kinds, err := factory.GetStoreKinds()
+		assert.Error(t, err)
+		assert.Nil(t, kinds)
 	})
 
 	t.Run("GetStore", func(t *testing.T) {
