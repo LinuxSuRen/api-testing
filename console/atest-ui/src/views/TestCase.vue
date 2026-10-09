@@ -969,7 +969,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
               v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'"
               v-model="testCaseWithSuite.data.request.method"
               class="m-2"
-              placeholder="Method"
+              :placeholder="t('field.method')"
               size="default"
               test-id="case-editor-method"
               :disabled="isHistoryTestCase"
@@ -1008,7 +1008,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="openParameterDialog">{{ t('button.sendWithParam') }}</el-dropdown-item>
-                  <el-dropdown-item @click="openBatchRunDialog">Batch Send</el-dropdown-item>
+                  <el-dropdown-item @click="openBatchRunDialog">{{ t('button.batchSend') }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -1022,7 +1022,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
         <el-tab-pane name="query" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <template #label>
             <el-badge :value="testCaseWithSuite.data.request.query.length - 1"
-              :hidden="testCaseWithSuite.data.request.query.length <=1 " class="item">Query</el-badge>
+              :hidden="testCaseWithSuite.data.request.query.length <=1 " class="item">{{ t('field.query') }}</el-badge>
           </template>
           <el-table :data="testCaseWithSuite.data.request.query" style="width: 100%">
             <el-table-column label="Key" width="180">
@@ -1048,7 +1048,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
         <el-tab-pane name="header">
           <template #label>
             <el-badge :value="testCaseWithSuite.data.request.header.length - 1"
-              :hidden="testCaseWithSuite.data.request.header.length <= 1" class="item">Header</el-badge>
+              :hidden="testCaseWithSuite.data.request.header.length <= 1" class="item">{{ t('field.header') }}</el-badge>
           </template>
           <el-table :data="testCaseWithSuite.data.request.header" style="width: 100%">
             <el-table-column label="Key" width="180">
@@ -1081,7 +1081,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
         <el-tab-pane name="cookie">
           <template #label>
             <el-badge :value="testCaseWithSuite.data.request.cookie.length - 1"
-              :hidden="testCaseWithSuite.data.request.cookie.length <= 1" class="item">Cookie</el-badge>
+              :hidden="testCaseWithSuite.data.request.cookie.length <= 1" class="item">{{ t('field.cookie') }}</el-badge>
           </template>
           <el-table :data="testCaseWithSuite.data.request.cookie" style="width: 100%">
             <el-table-column label="Key">
@@ -1104,12 +1104,12 @@ Magic.LoadMagicKeys('TestCase', new Map([
 
         <el-tab-pane name="body">
           <span style="margin-right: 10px; padding-right: 5px;">
-            <Button type="primary" @click="jsonFormat(4)">Beautify</Button>
-            <Button type="primary" @click="jsonFormat(0)">Minify</Button>
-            <el-text class="mx-1">Choose the body format</el-text>
+            <Button type="primary" @click="jsonFormat(4)">{{ t('button.beautify') }}</Button>
+            <Button type="primary" @click="jsonFormat(0)">{{ t('button.minify') }}</Button>
+            <el-text class="mx-1" style="margin-left: 16px;">{{ t('tip.chooseBodyFormat') }}</el-text>
           </span>
           <template #label>
-            <el-badge :is-dot="testCaseWithSuite.data.request.body !== ''" class="item">Body</el-badge>
+            <el-badge :is-dot="testCaseWithSuite.data.request.body !== ''" class="item">{{ t('field.body') }}</el-badge>
           </template>
           <el-radio-group v-model="bodyType" @change="bodyTypeChange">
             <el-radio :value="1">none</el-radio>
@@ -1123,7 +1123,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
           <div style="flex-grow: 1;">
             <div v-if="bodyType === 6">
               <el-row>
-                <el-col :span="4">Filename:</el-col>
+                <el-col :span="4">{{ t('field.filename') }}:</el-col>
                 <el-col :span="20">
                   <el-input v-model="testCaseWithSuite.data.request.filepath" placeholder="file=sample.txt" @change="filepathChange" />
                 </el-col>
@@ -1155,10 +1155,10 @@ Magic.LoadMagicKeys('TestCase', new Map([
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="Expected" name="expected" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+        <el-tab-pane :label="t('field.expected')" name="expected" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <el-row>
             <el-col :span="4">
-              Status Code:
+              {{ t('field.statusCode') }}:
             </el-col>
             <el-col :span="20">
               <el-input
@@ -1186,7 +1186,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
           </el-row>
         </el-tab-pane>
 
-        <el-tab-pane label="Expected Headers" name="expected-headers" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+        <el-tab-pane :label="t('field.expectedHeaders')" name="expected-headers" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <el-table :data="testCaseWithSuite.data.response.header" style="width: 100%">
             <el-table-column label="Key" width="180">
               <template #default="scope">
@@ -1208,7 +1208,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
           </el-table>
         </el-tab-pane>
 
-        <el-tab-pane label="BodyFiledExpect" name="bodyFieldExpect" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+        <el-tab-pane :label="t('field.bodyFieldExpect')" name="bodyFieldExpect" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <el-table :data="testCaseWithSuite.data.response.bodyFieldsExpect" style="width: 100%">
             <el-table-column label="Key" width="180">
               <template #default="scope">
@@ -1232,13 +1232,13 @@ Magic.LoadMagicKeys('TestCase', new Map([
           </el-table>
         </el-tab-pane>
 
-        <el-tab-pane label="Verify" name="verify" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+        <el-tab-pane :label="t('field.verify')" name="verify" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <div v-for="verify in testCaseWithSuite.data.response.verify" :key="verify">
             <el-input :value="verify" :readonly="isHistoryTestCase"/>
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="Schema" name="schema" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
+        <el-tab-pane :label="t('field.schema')" name="schema" v-if="props.kindName !== 'tRPC' && props.kindName !== 'gRPC'">
           <el-input
             v-model="testCaseWithSuite.data.response.schema"
             :autosize="{ minRows: 4, maxRows: 20 }"
@@ -1384,11 +1384,11 @@ Magic.LoadMagicKeys('TestCase', new Map([
 
           <Codemirror v-model="testResult.output"/>
         </el-tab-pane>
-        <el-tab-pane label="Body" name="body">
+        <el-tab-pane :label="t('field.body')" name="body">
           <div v-if="testResult.bodyObject">
             <el-input :prefix-icon="Search" @change="responseBodyFilter" v-model="responseBodyFilterText"
               clearable placeholder="$.data[?(@.status==='SUCCEED')]">
-              <template #prepend v-if="testResult.bodyLength > 0">Body Size: {{testResult.bodyLength}}</template>
+              <template #prepend v-if="testResult.bodyLength > 0">{{ t('tip.bodySize') }}: {{testResult.bodyLength}}</template>
               <template #suffix>
                 <a href="https://www.npmjs.com/package/jsonpath-plus" target="_blank"><el-icon><Help /></el-icon></a>
               </template>
@@ -1401,10 +1401,10 @@ Magic.LoadMagicKeys('TestCase', new Map([
             <div v-else-if="isResponseFile" style="padding-top: 10px;">
             <el-row>
               <el-col :span="10">
-                <div>Response body is too large, please download to view.</div>
+                <div>{{ t('tip.responseBodyTooLarge') }}</div>
               </el-col>
               <el-col :span="2">
-                <Button type="primary" @click="downloadResponseFile">Download</Button>
+                <Button type="primary" @click="downloadResponseFile">{{ t('button.download') }}</Button>
               </el-col>
             </el-row>
           </div>
@@ -1413,7 +1413,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
         <el-tab-pane name="response-header">
           <template #label>
             <el-badge :value="testResult.header.length" 
-              :hidden="testResult.header.length === 0" class="item">Header</el-badge>
+              :hidden="testResult.header.length === 0" class="item">{{ t('field.header') }}</el-badge>
           </template>
           <el-table :data="testResult.header" style="width: 100%">
             <el-table-column label="Key" width="200">
@@ -1436,7 +1436,7 @@ Magic.LoadMagicKeys('TestCase', new Map([
 
     <el-drawer v-model="duplicateTestCaseDialog">
         <template #default>
-            New Test Case Name:<el-input v-model="targetTestCaseName" />
+            {{ t('title.newTestCaseName') }}:<el-input v-model="targetTestCaseName" />
         </template>
         <template #footer>
             <Button type="primary" @click="duplicateTestCase">{{ t('button.ok') }}</Button>
