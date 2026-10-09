@@ -2,6 +2,7 @@
 import TestCase from './TestCase.vue'
 import TemplateFunctions from './TemplateFunctions.vue'
 import { ref, watch } from 'vue'
+import { API } from './net'
 import { ElTree, ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
 import { Cache } from './cache'
@@ -231,13 +232,13 @@ const viewName = ref('')
 </script>
 
 <template>
-  <div class="common-layout" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
-    <el-container style="height: 100%">
-      <el-main style="padding-top: 5px; padding-bottom: 5px;">
-        <el-container style="height: 100%">
+  <div class="h-full" data-title="Welcome!" data-intro="Welcome to use api-testing! 👋">
+    <el-container class="h-[100%]">
+      <el-main class="pt-[5px] pb-[5px]">
+        <el-container class="h-[100%]">
           <el-aside>
             <el-button type="primary" @click="loadStores" :icon="Refresh">{{ t('button.refresh') }}</el-button>
-            <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" style="padding: 5px;" />
+            <el-input v-model="filterText" :placeholder="t('tip.filter')" test-id="search" class="p-[5px]" />
             <el-tree
               v-loading="storesLoading"
               :data=treeData
@@ -254,9 +255,9 @@ const viewName = ref('')
             <TemplateFunctions />
           </el-aside>
 
-          <el-main style="padding-top: 0px; padding-right: 0px; padding-bottom: 0px;">
+          <el-main class="pt-[0px] pr-[0px] pb-[0px]">
             <TestCase v-if="viewName === 'testcase'" :suite="testSuite" :kindName="testKind" :name="testCaseName"
-              :historySuiteName="historySuiteName" :historyCaseID="historyCaseID" @updated="loadStores" style="height: 100%;"
+              :historySuiteName="historySuiteName" :historyCaseID="historyCaseID" @updated="loadStores" class="h-[100%]"
               data-intro="This is the test case editor. You can edit the test case here." />
           </el-main>
         </el-container>
@@ -265,77 +266,4 @@ const viewName = ref('')
   </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
 
-.common-layout {
-  height: 100%;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-
-.demo-tabs>.el-tabs__content {
-  padding: 32px;
-  color: #6b778c;
-  font-size: 32px;
-  font-weight: 600;
-}
-</style>
